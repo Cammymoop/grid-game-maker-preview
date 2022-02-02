@@ -16,6 +16,9 @@ func facing_vector(what_facing) -> Vector2:
 	print_debug("bad facing")
 	return Vector2(0, 0)
 
+func facing_rotation(what_facing) -> float:
+	return (what_facing * PI) / 2.0
+
 func direction_to_facing(direction: String) -> int:
 	match direction:
 		"up":

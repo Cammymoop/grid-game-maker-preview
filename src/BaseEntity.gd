@@ -17,11 +17,13 @@ var tile_position = Vector2(0, 0)
 var next_tile_pos = Vector2(0, 0)
 
 var entity_index = 0
+var entity_name = null
 
 var active = false
 
 func _ready() -> void:
 	tile_position = MapManager.world_to_tile_position(global_position)
+	entity_name = EntityManager.get_entity_name(entity_index)
 
 func set_active(new_active) -> void:
 	active = new_active
@@ -59,22 +61,32 @@ func finish_move() -> void:
 	if tile_position != next_tile_pos:
 		print("???")
 	moving = false
+	MapManager.finish_move(self, tile_position)
 
-func start_move(move_facing) -> void:
+func start_move(move_facing) -> bool:
+	if moving:
+		print_debug("Tried to start move when already moving")
+		return false
 	set_facing(move_facing)
 	if actual_move_speed > 0:
 		next_tile_pos = tile_position + Utility.facing_vector(move_facing)
-		if MapManager.can_move_to(self, next_tile_pos):
+		var not_stopped = MapManager.attempt_move(self, next_tile_pos)
+		if not_stopped:
 			moving = true
 			steps_remaining = steps_per_tile
+			return true
 		else:
 			next_tile_pos = tile_position
+			return false
+	return false
 
 func set_controller(new_controller) -> void:
 	controller = new_controller
 
 func set_facing(new_facing):
 	facing = new_facing
+	if "no_rotation" in EntityManager.entity_defs[entity_index]:
+		return
 	match facing:
 		0:
 			sprite.rotation = 0
@@ -91,11 +103,18 @@ func set_intended_move_speed(intended) -> void:
 	steps_per_tile = max(1, round(fps / intended))
 	actual_move_speed = MapManager.tile_width / float(steps_per_tile)
 
+func set_real_speed(new_steps_per_tile) -> void:
+	steps_per_tile = new_steps_per_tile
+	actual_move_speed = MapManager.tile_width / float(steps_per_tile)
+
 func can_i_move(facing) -> bool:
 	var my_pos = tile_position if not moving else next_tile_pos
 	var target_pos = my_pos + Utility.facing_vector(facing)
 	
 	return MapManager.can_move_to(self, target_pos)
+
+func die() -> void:
+	EntityManager.remove_entity(self)
 
 func can_i_move_relative(relative_direction) -> bool:
 	return can_i_move(Utility.resolve_relative_direction(relative_direction, facing))

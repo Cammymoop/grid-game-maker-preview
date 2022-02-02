@@ -1,3 +1,26 @@
-[gd_scene format=2]
+[gd_scene load_steps=4 format=2]
+
+[ext_resource path="res://assets/img/cursor.png" type="Texture" id=1]
+[ext_resource path="res://src/MapEditor.gd" type="Script" id=2]
+[ext_resource path="res://assets/img/entityTiles.png" type="Texture" id=4]
 
 [node name="Test" type="Node2D" groups=["World"]]
+
+[node name="MapEditor" type="Node2D" parent="."]
+pause_mode = 2
+visible = false
+z_index = 10
+script = ExtResource( 2 )
+
+[node name="Cursor" type="Sprite" parent="MapEditor"]
+texture = ExtResource( 1 )
+centered = false
+offset = Vector2( -2, -2 )
+
+[node name="EntityPreview" type="Sprite" parent="MapEditor/Cursor"]
+visible = false
+self_modulate = Color( 1, 1, 1, 0.388235 )
+position = Vector2( 16, 16 )
+texture = ExtResource( 4 )
+region_enabled = true
+region_rect = Rect2( 0, 0, 32, 32 )

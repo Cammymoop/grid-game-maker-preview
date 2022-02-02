@@ -17,8 +17,6 @@ func _ready() -> void:
 		textures.append(img)
 		tiles_per_row.append(int(img.get_width() / MapManager.tile_width))
 	
-	yield(get_tree(), "idle_frame")
-	print_debug("emitting signal")
 	emit_signal("textures_loaded")
 	im_ready = true
 

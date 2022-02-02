@@ -3,11 +3,12 @@ extends Node
 var started = false
 
 func level_start():
-	MapManager.create_default_layer()
-	MapManager.auto_setup_layers()
-	EntityManager.create_default_player()
-	EntityManager.create_default_box()
-	EntityManager.create_default_bouncer()
+	MapManager.create_empty_layer()
+	EntityManager.create_defaults()
+
+func load_random_level():
+	MapManager.create_random_layer()
+	EntityManager.create_randoms()
 
 func _process(_delta):
 	if not started:
@@ -20,4 +21,10 @@ func _process(_delta):
 	
 	if Input.is_action_just_pressed("refresh"):
 		get_tree().reload_current_scene()
+		call_deferred("load_random_level")
+	elif Input.is_action_just_pressed("editor_new_map"):
+		get_tree().reload_current_scene()
 		call_deferred("level_start")
+	
+	if Input.is_action_just_pressed("editor_start"):
+		Utility.get_world().get_node("MapEditor").enable_edit_mode(true)

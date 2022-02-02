@@ -1,6 +1,7 @@
 extends Node
 
 var move_mode = "direction"
+var multi_try = false
 
 func get_move():
 	var input_dir = "none"
