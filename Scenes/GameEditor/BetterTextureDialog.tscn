@@ -1,0 +1,124 @@
+[gd_scene load_steps=7 format=2]
+
+[ext_resource path="res://assets/img/tiles.png" type="Texture" id=1]
+[ext_resource path="res://src/GameEditor/TilePicker.gd" type="Script" id=2]
+[ext_resource path="res://src/GameEditor/BetterTextureDialog.gd" type="Script" id=3]
+
+[sub_resource type="StyleBoxFlat" id=1]
+bg_color = Color( 0.443137, 0.443137, 0.470588, 1 )
+border_width_left = 2
+border_width_top = 1
+border_width_right = 2
+border_width_bottom = 1
+border_color = Color( 0.443137, 0.443137, 0.470588, 1 )
+corner_radius_top_left = 1
+corner_radius_top_right = 1
+corner_radius_bottom_right = 1
+corner_radius_bottom_left = 1
+
+[sub_resource type="AtlasTexture" id=2]
+atlas = ExtResource( 1 )
+region = Rect2( 0, 0, 32, 32 )
+
+[sub_resource type="StyleBoxFlat" id=3]
+draw_center = false
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color( 0, 0, 0, 1 )
+expand_margin_left = 2.0
+expand_margin_right = 2.0
+expand_margin_top = 2.0
+expand_margin_bottom = 2.0
+shadow_size = 5
+
+[node name="BetterTextureDialog" type="ConfirmationDialog"]
+visible = true
+margin_right = 500.0
+margin_bottom = 226.0
+popup_exclusive = true
+window_title = "Set Texture"
+script = ExtResource( 3 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
+margin_left = 8.0
+margin_top = 8.0
+margin_right = 492.0
+margin_bottom = 190.0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="HBoxContainer2" type="HBoxContainer" parent="VBoxContainer"]
+margin_right = 484.0
+margin_bottom = 24.0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Label" type="Label" parent="VBoxContainer/HBoxContainer2"]
+margin_top = 5.0
+margin_right = 52.0
+margin_bottom = 19.0
+size_flags_stretch_ratio = 0.4
+text = "Texture:"
+align = 2
+
+[node name="TextureSelector" type="MenuButton" parent="VBoxContainer/HBoxContainer2"]
+margin_left = 56.0
+margin_right = 484.0
+margin_bottom = 24.0
+rect_min_size = Vector2( 0, 24 )
+size_flags_horizontal = 3
+text = "tiles.png"
+flat = false
+
+[node name="HSeparator" type="HSeparator" parent="VBoxContainer"]
+margin_top = 28.0
+margin_right = 484.0
+margin_bottom = 32.0
+custom_styles/separator = SubResource( 1 )
+
+[node name="Label2" type="Label" parent="VBoxContainer"]
+margin_top = 36.0
+margin_right = 484.0
+margin_bottom = 50.0
+text = "Tile:"
+align = 1
+
+[node name="TilePicker" type="TextureRect" parent="VBoxContainer"]
+margin_left = 98.0
+margin_top = 54.0
+margin_right = 386.0
+margin_bottom = 182.0
+mouse_filter = 0
+mouse_default_cursor_shape = 2
+size_flags_horizontal = 4
+texture = ExtResource( 1 )
+stretch_mode = 4
+script = ExtResource( 2 )
+
+[node name="HighlightedTile" type="TextureRect" parent="VBoxContainer/TilePicker"]
+mouse_filter = 2
+texture = SubResource( 2 )
+stretch_mode = 3
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Cursor" type="Panel" parent="VBoxContainer/TilePicker"]
+margin_right = 32.0
+margin_bottom = 32.0
+mouse_filter = 2
+custom_styles/panel = SubResource( 3 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[connection signal="mouse_entered" from="VBoxContainer/TilePicker" to="VBoxContainer/TilePicker" method="_on_TilePicker_mouse_entered"]
+[connection signal="mouse_exited" from="VBoxContainer/TilePicker" to="VBoxContainer/TilePicker" method="_on_TilePicker_mouse_exited"]
+[connection signal="resized" from="VBoxContainer/TilePicker" to="." method="_on_TilePicker_resized"]

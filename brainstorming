@@ -1,0 +1,40 @@
+
+
+Puzzle engine redux in godot
+
+lua scripts for every element?
+  a lot of elements can be done with just a list of properties so ideally not everything needs a script
+  what about gdscript? that should work fine, but people do know lua a lot better probably
+  nah, scripting shouldn't be necessary for most elements, so gdscript is perfectly fine
+  
+signals should help a lot
+
+fixed number of layers?
+  could make editing levels simpler, otherwise no  need
+
+definitely fixed update step
+  possibly 30fps and 60fps versions
+
+build the editor into the game
+  Also would be nice to be able to import from tiled but that could get really complicated
+
+
+
+Next up:
+ - Edit Game Properties (name, camera type, etc)
+ - Saving/Loading game configs
+ - Saving/Loading level state and levels in general
+ - Make other entity static properties editable
+    Some sort of static property ui api to tell the editor which properties can be edited
+ - Make Controllers editable and configurable
+ - Discrete Mode: entities move on discrete intervals or wait for the turn to advance
+ - allow list of conditionals per event
+ - Tile rotation and get the facing for things like you_move or you_turn
+
+More condtions and actions:
+ - i_have_property
+ - tile_has_name
+ - entity_has_name
+
+ - move_with_speed
+ - 

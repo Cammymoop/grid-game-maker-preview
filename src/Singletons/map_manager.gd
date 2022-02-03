@@ -60,6 +60,7 @@ var tile_defs = {
 		"properties": {},
 	},
 }
+onready var loaded_tile_defs = tile_defs
 
 var tile_index_map = {}
 
@@ -75,11 +76,16 @@ func _ready() -> void:
 	
 	im_ready = true
 
+func refresh_definition():
+	create_tileset()
+	find_blocking()
+
 func create_random_layer():
 	create_empty_layer()
 	layers[0].random_init()
 
 func create_empty_layer():
+	print('creating layer')
 	var map_layer = map_layer_template.instance()
 	Utility.get_world().add_child(map_layer)
 	auto_setup_layers()
@@ -102,11 +108,27 @@ func create_tileset():
 	
 	tileset = new_tileset
 
+func update_index_map() -> void:
+	tile_index_map = {}
+	for tile_index in tile_defs:
+		var tname = tile_defs[tile_index]['name']
+		if tname in tile_index_map:
+			print_debug("WARNING: tile name already in use: " + tname)
+		tile_index_map[tname] = tile_index
+
+func get_tile_texture(tile_index) -> Texture:
+	return TextureManager.get_texture(tile_defs[tile_index]['texture'])
+func get_tile_texture_rect(tile_index) -> Rect2:
+	return TextureManager.get_index_rect(tile_defs[tile_index]['texture'], tile_defs[tile_index]['tex_index'])
+
 func get_all_tile_indexes() -> Array:
 	return tile_defs.keys()
 
 func get_tile_index(tile_name) -> int:
 	return tile_index_map[tile_name]
+
+func tile_name_exists(tile_name) -> bool:
+	return tile_name in tile_index_map
 
 func get_tile_name(tile_index) -> String:
 	return tile_defs[tile_index]['name']
@@ -133,6 +155,34 @@ func clear_all_at(tile_position) -> void:
 func replace_tiles_at(tile_position, new_tile) -> void:
 	clear_all_at(tile_position)
 	layers[0].set_cellv(tile_position, new_tile)
+
+func get_tile_definition(tile_index):
+	return tile_defs[tile_index]
+
+func update_tile_definition(tile_index, definition) -> void:
+	if not tile_index in tile_defs:
+		print("ERROR tried to update non-existing tile: " + str(tile_index))
+		return
+	tile_defs[tile_index] = definition
+	update_index_map()
+
+func new_tile(definition) -> int:
+	var try_index = 0
+	while try_index in tile_defs:
+		try_index += 1
+	tile_defs[try_index] = definition
+	update_index_map()
+	return try_index
+
+func add_new_tile_definition(definition) -> int:
+	var index = 0
+	while index in tile_defs:
+		index += 1
+	tile_defs[index] = definition
+	return index
+
+func remove_tile_definition(tile_index) -> void:
+	tile_defs.erase(tile_index)
 
 func get_tile_property_at(tile_position, property_name):
 	var property_val = null

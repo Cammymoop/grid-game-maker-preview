@@ -1,0 +1,60 @@
+[gd_scene load_steps=7 format=2]
+
+[ext_resource path="res://assets/img/tiles.png" type="Texture" id=1]
+[ext_resource path="res://src/GameEditor/TileEntityButton.gd" type="Script" id=2]
+
+[sub_resource type="StyleBoxFlat" id=2]
+bg_color = Color( 0, 0, 0, 0.5 )
+
+[sub_resource type="StyleBoxFlat" id=4]
+bg_color = Color( 0.49, 0.49, 0.49, 0.75 )
+
+[sub_resource type="StyleBoxFlat" id=3]
+bg_color = Color( 0, 0, 0, 0.25 )
+
+[sub_resource type="AtlasTexture" id=1]
+atlas = ExtResource( 1 )
+region = Rect2( 0, 64, 32, 32 )
+
+[node name="TileEntityDisplay" type="Button"]
+margin_right = 60.0
+margin_bottom = 60.0
+rect_min_size = Vector2( 60, 60 )
+rect_clip_content = true
+mouse_default_cursor_shape = 2
+custom_styles/hover = SubResource( 2 )
+custom_styles/pressed = SubResource( 4 )
+custom_styles/normal = SubResource( 3 )
+script = ExtResource( 2 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="VBox" type="VBoxContainer" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+rect_min_size = Vector2( 60, 60 )
+mouse_filter = 2
+alignment = 1
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="TileName" type="Label" parent="VBox"]
+margin_top = 5.0
+margin_right = 60.0
+margin_bottom = 19.0
+text = "floor"
+align = 1
+
+[node name="TileImage" type="TextureRect" parent="VBox"]
+margin_left = 14.0
+margin_top = 23.0
+margin_right = 46.0
+margin_bottom = 55.0
+mouse_filter = 2
+size_flags_horizontal = 4
+texture = SubResource( 1 )
+
+[connection signal="pressed" from="." to="." method="_on_TileDisplay_pressed"]

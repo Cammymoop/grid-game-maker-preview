@@ -24,10 +24,9 @@ func enable_entity_place(on):
 	$Cursor/EntityPreview.visible = on
 
 func _process(delta):
+	if Input.is_action_just_pressed("editor_start"):
+		enable_edit_mode(not edit_mode)
 	if not edit_mode:
-		return
-	if Input.is_action_just_pressed("editor_resume"):
-		enable_edit_mode(false)
 		return
 	
 	var iup = Input.is_action_just_pressed("move_up")

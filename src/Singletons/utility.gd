@@ -35,7 +35,12 @@ func direction_to_facing(direction: String) -> int:
 	print_stack()
 	return -1
 
-func resolve_relative_direction(relative_direction, facing) -> String:
+func is_absolute_direction(direction: String) -> bool:
+	return direction == "up" or direction == "down" or direction == "left" or direction == "right"
+
+func resolve_relative_direction(relative_direction, facing: int) -> int:
+	if is_absolute_direction(relative_direction):
+		return direction_to_facing(relative_direction)
 	match relative_direction:
 		"forward":
 			pass
@@ -52,7 +57,9 @@ func resolve_relative_direction(relative_direction, facing) -> String:
 			if facing > 3:
 				facing -= 4
 	return facing
-	
+
+func ucfirst(string:String) -> String:
+	return string[0].to_upper() + string.substr(1)
 
 func random_int_range(start: int, end_exclusive: int):
 	return start + floor(randf() * (end_exclusive - start))
@@ -67,3 +74,24 @@ func get_world() -> Node2D:
 		return f[0]
 	print_debug("Error could not find world")
 	return null
+
+func atlas_texture_from_texture_index(texture_index, sub_index):
+	var atlas_tex: = AtlasTexture.new()
+	
+	atlas_tex.atlas = TextureManager.get_texture(texture_index)
+	atlas_tex.region = TextureManager.get_index_rect(texture_index, sub_index)
+	return atlas_tex
+
+func atlas_texture_from_tile_index(tile_index):
+	var atlas_tex: = AtlasTexture.new()
+	
+	atlas_tex.atlas = MapManager.get_tile_texture(tile_index)
+	atlas_tex.region = MapManager.get_tile_texture_rect(tile_index)
+	return atlas_tex
+
+func atlas_texture_from_entity_index(entity_index):
+	var atlas_tex: = AtlasTexture.new()
+	
+	atlas_tex.atlas = EntityManager.get_entity_texture(entity_index)
+	atlas_tex.region = EntityManager.get_entity_texture_rect(entity_index)
+	return atlas_tex

@@ -73,14 +73,25 @@ func do_action(action_data, owning_entity, target_entity, tile_position):
 		"move", "you_move":
 			var mover = owning_entity if a == "move" else target_entity
 			if mover.moving:
-				return false
+				continue
 			var move_facing = -1
 			if split_action[1] == "target":
-				move_facing = Utility.resolve_relative_direction(split_action[1], target_entity.facing)
+				move_facing = Utility.resolve_relative_direction(split_action[2], target_entity.facing)
 			else:
 				move_facing = Utility.resolve_relative_direction(split_action[1], owning_entity.facing)
 			mover.start_move(move_facing)
 		"replace_tile":
 			MapManager.replace_tiles_at(tile_position, MapManager.get_tile_index(split_action[1]))
+		"turn", "you_turn":
+			var ent = owning_entity if a == "turn" else target_entity
+			if ent.moving:
+				continue
+			var new_facing = -1
+			if split_action[1] == "target":
+				new_facing = Utility.resolve_relative_direction(split_action[2], target_entity.facing)
+			else:
+				new_facing = Utility.resolve_relative_direction(split_action[1], owning_entity.facing)
+			if new_facing > -1:
+				ent.set_facing(new_facing)
 		_:
 			print_debug("Unrecognized action: " + a)

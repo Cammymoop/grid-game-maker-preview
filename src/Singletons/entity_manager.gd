@@ -60,6 +60,7 @@ var entity_defs = {
 		},
 	},
 }
+onready var loaded_entity_defs = entity_defs
 
 var entity_index_map = {}
 
@@ -75,8 +76,29 @@ func _ready():
 	
 	im_ready = true
 
+func refresh_definition():
+	create_index_map()
+
 func refresh_entity_list():
 	entity_list = get_tree().get_nodes_in_group("_entity_")
+
+func clear_entity_list():
+	entity_list = []
+
+func update_entity_definition(entity_index, entity_definition):
+	if not entity_index in entity_defs:
+		print("ERROR tried to update non-existing entity: " + str(entity_index))
+		return
+	entity_defs[entity_index] = entity_definition
+	refresh_definition()
+
+func new_entity(definition) -> int:
+	var try_index = 0
+	while try_index in entity_defs:
+		try_index += 1
+	entity_defs[try_index] = definition
+	refresh_definition()
+	return try_index
 
 func create_defaults() -> void:
 	create_default_player()
@@ -235,6 +257,9 @@ func get_entity_property(entity, property_name):
 		return null
 	return props[property_name]
 
+func get_entity_definition(entity_index) -> Dictionary:
+	return entity_defs[entity_index]
+
 func remove_entity(entity) -> void:
 	entity_list.remove(entity_list.find(entity))
 	entity.set_active(false)
@@ -245,6 +270,9 @@ func get_all_entity_indexes() -> Array:
 
 func get_entity_index(entity_name) -> int:
 	return entity_index_map[entity_name]
+
+func entity_name_exists(entity_name) -> bool:
+	return entity_name in entity_index_map
 
 func get_entity_name(entity_index) -> String:
 	return entity_defs[entity_index]['name']
