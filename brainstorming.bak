@@ -21,19 +21,52 @@ build the editor into the game
 
 
 Next up:
- - Edit Game Properties (name, camera type, etc)
- - Saving/Loading game configs
- - Saving/Loading level state and levels in general
- - Make other entity static properties editable
-    Some sort of static property ui api to tell the editor which properties can be edited
- - Discrete Mode: entities move on discrete intervals or wait for the turn to advance
- - allow list of conditionals per event
+ - Saving/Loading levels
+   - Saving and restoring level state at play-time for checkpoint behavior
+ 
+ - Edit Game Properties (name, camera type, etc) *(game name)
+    - Actually make camera
+	- variable tile size
  - Tile rotation and get the facing for things like you_move or you_turn
+ - Make other entity static properties editable *(controller and speed)
+    - Some sort of static property ui api to tell the editor which properties can be edited
+ - Make Controllers editable and configurable *(Editable)
+
+ - Make image handling UI
+    - add images into user_data
+	- define images used by game
+ 
+ - Discrete Mode: entities move on discrete intervals or wait for the turn to advance
+ 
+ - Adding sound files, playing sounds (add some builtin sfx)
+ - Playing music (added, and builtin)
+ 
+ - Better level editor controls:
+	- mouse support
+    - copy tile
+	- repeatable place tile
+	- multiselect
+	- paste
+	- fill
+ - Actual UI for editing conditionals
+ 
+ - Saving/Loading game configs *
+ - Gamepad controls *
+ - allow list of conditionals per event *
+ - event name dropdown for new prop dialog *
+ 
+ - Conditional validation (check keys, and value type)
 
 More condtions and actions:
- - i_have_property
- - tile_has_name
- - entity_has_name
+ - i_have_property *
+ - tile_has_name *
+ - entity_has_name *
 
  - move_with_speed
- - 
+ - set_property *
+ - unset_property *
+ 
+ - find_replace_tiles (from tile, to tile) *
+ - find_swap_tiles (tile a, tile b, tile c...) *
+ - fill_tile_rectangle (relative_x, relative_y, width, height, to_tile) *
+ - fill_tile_rectangle_absolute (x, y, width, height, to_tile) *

@@ -79,8 +79,6 @@ func _process(delta):
 		else:
 			var entities_here = EntityManager.get_entities_at(cursor_tile_pos)
 			for e in entities_here:
-				if e.moving and e.next_tile_position != cursor_tile_pos:
-					continue
 				if e.entity_index == current_entity_index:
 					EntityManager.remove_entity(e)
 			EntityManager.create_entity(current_entity_index, cursor_tile_pos, current_entity_facing)
@@ -102,7 +100,7 @@ func _process(delta):
 			enable_entity_place(true)
 		else:
 			var all_entities = EntityManager.get_all_entity_indexes()
-			var i = all_entities.find(current_entity_index) + 1
+			var i = all_entities.find(current_entity_index) - 1
 			if i >= len(all_entities):
 				i = 0
 			current_entity_index = all_entities[i]
@@ -112,6 +110,4 @@ func _process(delta):
 	if Input.is_action_just_pressed("editor_clear_entities"):
 		var entities_here = EntityManager.get_entities_at(cursor_tile_pos)
 		for e in entities_here:
-			if e.moving and e.next_tile_position != cursor_tile_pos:
-				continue
 			EntityManager.remove_entity(e)

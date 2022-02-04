@@ -21,6 +21,8 @@ func set_texture(texture_index):
 	selected_texture = texture_index
 	
 	find_node("TilePicker").set_texture(texture_index)
+	var tex_selector = find_node("TextureSelector")
+	tex_selector.text = tex_selector.get_popup().get_item_text(texture_index)
 
 func get_selected_texture() -> int:
 	return selected_texture

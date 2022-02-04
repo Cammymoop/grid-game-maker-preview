@@ -6,6 +6,11 @@ var cur_scene = null
 var one_by_size = Vector2(0, 0)
 var two_by_size = Vector2(0, 0)
 
+var cur_game_name: = "Basic"
+
+var checkpoint_save = {}
+var suspend_save = {}
+
 var scenes: = {
 	"Menu": "res://Scenes/Menu.tscn",
 	"Loading": "res://Scenes/Loading.tscn",
@@ -18,6 +23,41 @@ func _ready():
 	update_display_size()
 	FilesManager.init_folders()
 
+func get_game_name() -> String:
+	return cur_game_name
+
+func set_game_name(new_name: String) -> void:
+	cur_game_name = new_name
+
+func get_serialized_play_state() -> Dictionary:
+	if cur_scene != "Play":
+		print("Can't serialize play state, not in play scene")
+		return {}
+	
+	var s_map = MapManager.serialize()
+	var s_ent = EntityManager.serialize()
+	return {"game_name": cur_game_name, "map": s_map, "entities": s_ent}
+
+func load_serialized_play_state(serialized_state: Dictionary) -> void:
+	if cur_scene != "Play":
+		print("Can't deserialize play state, not in play scene")
+		return
+	
+	get_tree().paused = true
+	
+	yield(get_tree(), "idle_frame")
+	yield(get_tree(), "idle_frame")
+	MapManager.deserialize(serialized_state['map'])
+	EntityManager.deserialize(serialized_state['entities'])
+	
+	get_tree().paused = false
+
+func save_checkpoint() -> void:
+	checkpoint_save = get_serialized_play_state()
+
+func load_checkpoint() -> void:
+	load_serialized_play_state(checkpoint_save)
+
 func update_display_size() -> void:
 	var vp = get_viewport()
 	one_by_size = vp.size
@@ -26,12 +66,16 @@ func update_display_size() -> void:
 		vp.set_size_override(true, two_by_size)
 
 func level_start():
-	MapManager.create_empty_layer()
+	MapManager.create_plain_layer()
 	EntityManager.create_defaults()
+	
+	save_checkpoint()
 
 func load_random_level():
 	MapManager.create_random_layer()
 	EntityManager.create_randoms()
+	
+	save_checkpoint()
 
 func change_scene(new_scene: String):
 	if not new_scene in scenes:

@@ -11,8 +11,28 @@ var tile_entity_mode = "tile"
 var the_min_size: = Vector2(0, 0)
 var the_index = 0
 
-var the_definition = {}
+var the_definition: = {}
 
+func _ready():
+	var controller_list = find_node("EditController").get_popup()
+	for controller in EntityManager.get_all_controllers():
+		controller_list.add_item(controller)
+	
+	controller_list.connect("index_pressed", self, "set_controller")
+
+func set_controller(list_index) -> void:
+	if tile_entity_mode != "entity":
+		return
+	
+	var controller_button = find_node("EditController")
+	var controller_list:PopupMenu = controller_button.get_popup()
+	var controller = controller_list.get_item_text(list_index)
+	if controller != "None":
+		the_definition['controller'] = controller
+	else:
+		the_definition.erase('controller')
+	
+	controller_button.text = controller
 
 func load_entity_info(ti):
 	set_tile_entity_mode("entity")
@@ -20,6 +40,17 @@ func load_entity_info(ti):
 	the_definition = EntityManager.get_entity_definition(ti)
 	
 	find_node("NameInput").text = EntityManager.get_entity_name(the_index)
+	if "intended_move_speed" in the_definition:
+		find_node("EditMoveSpeed").value = the_definition['intended_move_speed']
+	else:
+		find_node("EditMoveSpeed").value = 0
+	
+	var controller_select = find_node("EditController")
+	var text = "None"
+	if "controller" in the_definition:
+		text = the_definition['controller']
+	controller_select.text = text
+	
 	load_common()
 
 func load_tile_info(ti):
@@ -39,6 +70,13 @@ func load_common():
 func set_tile_entity_mode(te: String) -> void:
 	tile_entity_mode = te
 	window_title = "Edit " + Utility.ucfirst(te)
+	
+	if tile_entity_mode == "entity":
+		find_node("Controller").visible = true
+		find_node("MoveSpeed").visible = true
+	else:
+		find_node("Controller").visible = false
+		find_node("MoveSpeed").visible = false
 
 
 func show_property_list() -> void:
@@ -47,10 +85,10 @@ func show_property_list() -> void:
 	prop_list.clear()
 	for p in the_definition["properties"]:
 		var val = the_definition["properties"][p]
-		if typeof(val) != TYPE_DICTIONARY:
-			prop_list.add_item(p + ": " + str(val))
-		else:
+		if typeof(val) in [TYPE_DICTIONARY, TYPE_ARRAY]:
 			prop_list.add_item(p + ": " + "{CONDITIONAL}")
+		else:
+			prop_list.add_item(p + ": " + str(val))
 	
 	if prop_list.get_item_count() > 0:
 		prop_list.rect_min_size.x = 300
@@ -176,7 +214,7 @@ func update_property_to(prop_key, update_property_popup):
 	var value:String = update_property_popup.find_node("SetValue").text
 	var new_value
 	var parsed = JSON.parse(value)
-	if parsed.error == OK and typeof(parsed.result) == TYPE_DICTIONARY:
+	if parsed.error == OK and typeof(parsed.result) in [TYPE_DICTIONARY, TYPE_ARRAY]:
 		new_value = parsed.result
 	else:
 		value = value.strip_edges()
@@ -205,7 +243,7 @@ func _on_PropertyList_item_activated(index):
 	var prop_key = prop_list.get_item_text(index).split(':')[0]
 	
 	var current_val = the_definition["properties"][prop_key]
-	if typeof(current_val) == TYPE_DICTIONARY:
+	if typeof(current_val) in [TYPE_DICTIONARY, TYPE_ARRAY]:
 		current_val = JSON.print(current_val, "  ")
 	else:
 		current_val = str(current_val)
@@ -220,3 +258,9 @@ func _on_PropertyList_item_activated(index):
 	update_property_popup.connect("popup_hide", self, "remove_alert", [update_property_popup])
 	update_property_popup.popup_centered()
 
+
+
+func _on_EditMoveSpeed_value_changed(value):
+	if tile_entity_mode != "entity":
+		return
+	the_definition['intended_move_speed'] = value

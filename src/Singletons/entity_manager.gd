@@ -52,9 +52,9 @@ var entity_defs = {
 		"name": "rotate_box",
 		"texture": 1,
 		"tex_index": 13,
-		"no_rotation": true,
 		"properties": {
 			"pusher": true,
+			"no_rotation": true,
 			"blocks": {"condition": "has_no_property pusher"},
 			"move_onto": {"condition": "be_pushed turn_right"},
 		},
@@ -77,12 +77,30 @@ func _ready():
 	im_ready = true
 
 func refresh_definition():
+	fix_string_keys()
 	create_index_map()
+
+func fix_string_keys():
+	var old_definition = entity_defs
+	entity_defs = {}
+	for key in old_definition:
+		var intk = int(key)
+		entity_defs[intk] = old_definition[key]
+		if "texture" in entity_defs[intk]:
+			entity_defs[intk]["texture"] = int(entity_defs[intk]["texture"])
+		if "tex_index" in entity_defs[intk]:
+			entity_defs[intk]["tex_index"] = int(entity_defs[intk]["tex_index"])
 
 func refresh_entity_list():
 	entity_list = get_tree().get_nodes_in_group("_entity_")
 
 func clear_entity_list():
+	for entity in entity_list:
+		if not entity:
+			continue
+		entity.remove_from_group("_entity_")
+		entity.set_active(false)
+		entity.queue_free()
 	entity_list = []
 
 func update_entity_definition(entity_index, entity_definition):
@@ -91,6 +109,9 @@ func update_entity_definition(entity_index, entity_definition):
 		return
 	entity_defs[entity_index] = entity_definition
 	refresh_definition()
+
+func get_all_controllers() -> Array:
+	return controller_templates.keys()
 
 func new_entity(definition) -> int:
 	var try_index = 0
@@ -132,6 +153,9 @@ func get_entity_texture(entity_index):
 func get_entity_texture_rect(entity_index):
 	return TextureManager.get_index_rect(entity_defs[entity_index]['texture'], entity_defs[entity_index]['tex_index'])
 
+func get_new_controller(controller_name):
+	return controller_templates[controller_name].instance()
+
 func create_entity(entity_index, tile_position, facing=0, activate=true) -> void:
 	var entity_info = entity_defs[entity_index]
 	
@@ -141,16 +165,13 @@ func create_entity(entity_index, tile_position, facing=0, activate=true) -> void
 	if "controller" in entity_info:
 		if entity_info["controller"] in controller_templates:
 			var controller = controller_templates[entity_info["controller"]].instance()
+			entity.controller_name = entity_info['controller']
 			entity.add_child(controller)
 			entity.set_controller(controller)
 	entity.entity_index = entity_index
 	entity.position = Vector2(MapManager.tile_width * tile_position.x, MapManager.tile_width * tile_position.y)
 	Utility.get_world().add_child(entity)
-	
-	var sprite = entity.get_node("Sprite")
-	sprite.texture = TextureManager.get_texture(entity_info['texture'])
-	
-	sprite.region_rect = TextureManager.get_index_rect(entity_info['texture'], entity_info['tex_index'])
+	setup_entity_texture(entity)
 	
 	entity.set_facing(facing)
 	
@@ -162,12 +183,45 @@ func create_entity(entity_index, tile_position, facing=0, activate=true) -> void
 		entity.set_active(true)
 	refresh_entity_list()
 
-func get_entities_at(tile_position, exclude_entity=null) -> Array:
+func restore_entity(serialized_entity, refresh=true) -> void:
+	var entity = entity_template.instance()
+	
+	Utility.get_world().add_child(entity)
+	entity.deserialize(serialized_entity)
+	setup_entity_texture(entity)
+	
+	if refresh:
+		refresh_entity_list()
+
+func setup_entity_texture(entity) -> void:
+	var texture_index = entity_defs[entity.entity_index]['texture']
+	var texture_sub_index = entity_defs[entity.entity_index]['tex_index']
+	var sprite = entity.get_node("Sprite")
+	sprite.texture = TextureManager.get_texture(texture_index)
+	sprite.region_rect = TextureManager.get_index_rect(texture_index, texture_sub_index)
+
+func serialize() -> Dictionary:
+	var serialized_entities = []
+	for e in entity_list:
+		serialized_entities.append(e.serialize())
+	
+	return {"entity_list": serialized_entities}
+
+func deserialize(data: Dictionary) -> void:
+	clear_entity_list()
+	for entity_data in data["entity_list"]:
+		restore_entity(entity_data)
+	refresh_entity_list()
+
+func get_entities_at(tile_position, exclude_entity=null, include_moving_away=false) -> Array:
 	var entities_here = []
 	for e in entity_list:
 		if e == exclude_entity:
 			continue
-		if e.tile_position == tile_position or e.next_tile_pos == tile_position:
+		if e.moving:
+			if e.next_tile_pos == tile_position or (include_moving_away and e.tile_position == tile_position):
+				entities_here.append(e)
+		elif e.tile_position == tile_position:
 			entities_here.append(e)
 	return entities_here
 
@@ -207,66 +261,86 @@ func preload_controller_templates() -> void:
 func finish_move(moving_entity, tile_position) -> void:
 	var entities_here = get_entities_at(tile_position, moving_entity)
 	for e in entities_here:
-		var i_finish_move_onto = get_entity_property(moving_entity, "i_finish_move_onto")
-		if typeof(i_finish_move_onto) == TYPE_DICTIONARY:
-			ConditionalFunctions.resolve_conditional("i_finish_move_onto", i_finish_move_onto, moving_entity, e, tile_position)
-		var finish_move_onto = get_entity_property(e, "finish_move_onto")
-		if typeof(finish_move_onto) == TYPE_DICTIONARY:
-			ConditionalFunctions.resolve_conditional("finish_move_onto", finish_move_onto, e, moving_entity, tile_position)
+		var ifmot: = get_entity_property(moving_entity, "i_finish_move_onto")
+		if ifmot and ifmot.is_conditional():
+			ifmot.resolve(moving_entity, e, tile_position)
+		var fmot: = get_entity_property(e, "finish_move_onto")
+		if fmot and fmot.is_conditional():
+			fmot.resolve(e, moving_entity, tile_position)
+
 
 func attempt_move(moving_entity, tile_position) -> bool:
 	var entities_here = get_entities_at(tile_position, moving_entity)
 	for e in entities_here:
-		var move_onto = get_entity_property(e, "move_onto")
-		if move_onto == null:
-			var blocks = get_entity_property(e, "blocks")
+		var move_onto: = get_entity_property(e, "move_onto")
+		
+		if move_onto:
+			if move_onto.is_conditional():
+				if move_onto.resolve(e, moving_entity, tile_position):
+					continue
+				else:
+					return false
+			elif not move_onto.get_value():
+				return false
+		else:
+			var blocks: = get_entity_property(e, "blocks")
 			if blocks:
-				if typeof(blocks) == TYPE_DICTIONARY:
-					var allow = not ConditionalFunctions.resolve_conditional("blocks", blocks, e, moving_entity, tile_position)
-					if allow:
+				if blocks.is_conditional():
+					if not blocks.resolve(e, moving_entity, tile_position):
 						continue
+					return false
+				elif blocks.get_value():
 					return false
 				else:
 					continue
 			else:
 				continue
-		if not move_onto:
-			return false
 		
-		if typeof(move_onto) == TYPE_DICTIONARY:
-			var allow = ConditionalFunctions.resolve_conditional("move_onto", move_onto, e, moving_entity, tile_position)
-			if allow:
-				continue
-			return false
 	return true
 
 func can_move_to(moving_entity, tile_position) -> bool:
 	var entities_here = get_entities_at(tile_position, moving_entity)
 	for e in entities_here:
-		var blocks = get_entity_property(e, "blocks")
+		var blocks: = get_entity_property(e, "blocks")
 		if blocks:
-			if typeof(blocks) == TYPE_DICTIONARY:
-				return not ConditionalFunctions.resolve_conditional("blocks", blocks, e, moving_entity, tile_position)
+			if blocks.is_conditional():
+				if blocks.resolve(e, moving_entity, tile_position):
+					return false
 			else:
-				return true
+				if blocks.get_value():
+					return false
 	return true
 
-func get_entity_property(entity, property_name):
-	var props = entity_defs[entity.entity_index]["properties"]
-	if not property_name in props:
-		return null
-	return props[property_name]
+func set_entity_property(entity, property_name, property_value) -> void:
+	entity.set_local_property(property_name, property_value)
+
+func get_entity_property(entity, property_name) -> Property:
+	var value = null
+	if not entity.has_local_property(property_name):
+		var def_props = entity_defs[entity.entity_index]["properties"]
+		if not property_name in def_props:
+			return null
+		value = def_props[property_name]
+	else:
+		value = entity.get_local_property(property_name)
+	var property = Property.new()
+	property.set_value(value)
+	property.set_name(property_name)
+	return property
 
 func get_entity_definition(entity_index) -> Dictionary:
 	return entity_defs[entity_index]
 
 func remove_entity(entity) -> void:
 	entity_list.remove(entity_list.find(entity))
+	entity.remove_from_group("_entity_")
 	entity.set_active(false)
 	entity.call_deferred("queue_free")
 
 func get_all_entity_indexes() -> Array:
-	return entity_defs.keys()
+	var keys = entity_defs.keys()
+	keys.sort()
+	return keys
 
 func get_entity_index(entity_name) -> int:
 	return entity_index_map[entity_name]

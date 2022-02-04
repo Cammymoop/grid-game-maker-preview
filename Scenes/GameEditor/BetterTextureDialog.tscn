@@ -34,7 +34,6 @@ expand_margin_bottom = 2.0
 shadow_size = 5
 
 [node name="BetterTextureDialog" type="ConfirmationDialog"]
-visible = true
 margin_right = 500.0
 margin_bottom = 226.0
 popup_exclusive = true
