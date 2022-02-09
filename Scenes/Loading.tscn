@@ -1,4 +1,6 @@
-[gd_scene format=2]
+[gd_scene load_steps=2 format=2]
+
+[ext_resource path="res://assets/font/large_font.tres" type="DynamicFont" id=1]
 
 [node name="Loading" type="Control"]
 anchor_right = 1.0
@@ -10,24 +12,36 @@ __meta__ = {
 [node name="MarginContainer" type="MarginContainer" parent="."]
 anchor_right = 1.0
 anchor_bottom = 1.0
-custom_constants/margin_right = 20
-custom_constants/margin_top = 20
-custom_constants/margin_left = 20
-custom_constants/margin_bottom = 20
+custom_constants/margin_right = 50
+custom_constants/margin_top = 50
+custom_constants/margin_left = 50
+custom_constants/margin_bottom = 50
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
 [node name="UIRoot" type="PanelContainer" parent="MarginContainer"]
-margin_left = 20.0
-margin_top = 20.0
-margin_right = 748.0
-margin_bottom = 748.0
+margin_left = 284.0
+margin_top = 349.0
+margin_right = 483.0
+margin_bottom = 418.0
+size_flags_horizontal = 4
+size_flags_vertical = 4
 
 [node name="Label" type="Label" parent="MarginContainer/UIRoot"]
 margin_left = 7.0
-margin_top = 357.0
-margin_right = 721.0
-margin_bottom = 371.0
+margin_top = 7.0
+margin_right = 192.0
+margin_bottom = 62.0
+custom_fonts/font = ExtResource( 1 )
 text = "Loading..."
 align = 1
+
+[node name="BGColor" type="ColorRect" parent="."]
+show_behind_parent = true
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color( 0.0901961, 0.0901961, 0.168627, 1 )
+__meta__ = {
+"_edit_use_anchors_": false
+}

@@ -1,15 +1,16 @@
 extends TileMap
 
 func single_init(tile_index):
-	var width = 12
-	var height = 12
+	var width = GameManager.game_view.x
+	var height = GameManager.game_view.y
+	print(GameManager.game_view)
 	for i in range(width):
 		for j in range(height):
 			set_cell(i, j, tile_index)
 
 func random_init():
-	var width = 12
-	var height = 12
+	var width = GameManager.game_view.x
+	var height = GameManager.game_view.y
 	
 	var random_tiles = ['floor', 'floor', 'floor', 'floor2', 'greenery', 'water', 'wall']
 	var random_ti = []

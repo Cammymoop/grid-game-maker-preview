@@ -61,8 +61,11 @@ func resolve_relative_direction(relative_direction, facing: int) -> int:
 func ucfirst(string:String) -> String:
 	return string[0].to_upper() + string.substr(1)
 
-func random_int_range(start: int, end_exclusive: int):
-	return start + floor(randf() * (end_exclusive - start))
+func random_int_range(start: int, end_exclusive: int) -> int:
+	return start + int(floor(randf() * (end_exclusive - start)))
+
+func random_sign() -> int:
+	return int(floor(randf() * 2)) * 2 - 1
 
 func random_list_element(list):
 	var index = random_int_range(0, len(list))

@@ -24,6 +24,8 @@ var active = false
 
 var local_properties = {}
 
+var instance_index = 0
+
 func _ready() -> void:
 	tile_position = MapManager.world_to_tile_position(global_position)
 	next_tile_pos = tile_position
@@ -166,9 +168,9 @@ func set_real_speed(new_steps_per_tile) -> void:
 	else:
 		actual_move_speed = MapManager.tile_width / float(steps_per_tile)
 
-func can_i_move(facing) -> bool:
+func can_i_move(at_facing) -> bool:
 	var my_pos = tile_position if not moving else next_tile_pos
-	var target_pos = my_pos + Utility.facing_vector(facing)
+	var target_pos = my_pos + Utility.facing_vector(at_facing)
 	
 	return MapManager.can_move_to(self, target_pos)
 

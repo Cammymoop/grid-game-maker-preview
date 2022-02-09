@@ -23,6 +23,20 @@ func save_json(json_string, directory, file_name) -> void:
 	f.store_string(json_string)
 	f.close()
 
+func get_default_game() -> String:
+	var f = File.new()
+	if f.open("user://default_game", File.READ) == OK:
+		var ret = f.get_as_text().strip_edges()
+		f.close()
+		return ret
+	return ""
+
+func save_default_game(game_name) -> void:
+	var f = File.new()
+	if f.open("user://default_game", File.WRITE) == OK:
+		f.store_string(game_name)
+		f.close()
+
 func save_game_info(game_info) -> void:
 	var serialized = JSON.print(game_info)
 	save_json(serialized, "games", game_file_name(game_info['game_name']))
@@ -32,11 +46,20 @@ func game_file_name(game_name) -> String:
 	file_name.replace(' ', '_')
 	return file_name
 
+func game_definition_exists(game_name) -> bool:
+	var file_name = game_file_name(game_name) + ".json"
+	var dir = Directory.new()
+	if dir.open("user://games/") == OK:
+		return dir.file_exists(file_name)
+	print_debug("Could not open games directory")
+	return false
+
 func get_game_definition(game_name) -> Dictionary:
 	var file_name = game_file_name(game_name) + ".json"
 	var f = File.new()
 	if f.open("user://games/" + file_name, File.READ) == OK:
 		var parsed = JSON.parse(f.get_as_text())
+		f.close()
 		if parsed.error == OK:
 			return parsed.result
 	print_debug("Error loading game: " + game_name)

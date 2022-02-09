@@ -98,7 +98,8 @@ func fix_string_keys():
 
 func clear_layers():
 	for l in layers:
-		l.queue_free()
+		if is_instance_valid(l):
+			l.queue_free()
 	layers = []
 
 func auto_setup_layers():
@@ -111,6 +112,7 @@ func create_random_layer():
 	layers[0].random_init()
 
 func create_plain_layer():
+	clear_layers()
 	var map_layer = create_empty_layer()
 	map_layer.single_init(get_tile_index("floor"))
 

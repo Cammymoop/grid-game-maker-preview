@@ -1,4 +1,4 @@
-[gd_scene load_steps=10 format=2]
+[gd_scene load_steps=14 format=2]
 
 [ext_resource path="res://assets/img/plus.png" type="Texture" id=1]
 [ext_resource path="res://assets/img/tiles.png" type="Texture" id=2]
@@ -7,6 +7,12 @@
 [ext_resource path="res://assets/img/minus.png" type="Texture" id=5]
 [ext_resource path="res://src/GameEditor/GameDefinitionEditor.gd" type="Script" id=6]
 [ext_resource path="res://assets/DefaultTheme.tres" type="Theme" id=7]
+[ext_resource path="res://Scenes/BGEffects.tscn" type="PackedScene" id=8]
+[ext_resource path="res://assets/font/medium_font.tres" type="DynamicFont" id=9]
+[ext_resource path="res://src/GameEditor/UIRoot.gd" type="Script" id=10]
+
+[sub_resource type="Theme" id=3]
+default_font = ExtResource( 9 )
 
 [sub_resource type="StyleBoxFlat" id=1]
 bg_color = Color( 0.184314, 0.164706, 0.243137, 1 )
@@ -36,24 +42,25 @@ __meta__ = {
 anchor_right = 1.0
 anchor_bottom = 1.0
 custom_constants/margin_right = 20
-custom_constants/margin_top = 20
+custom_constants/margin_top = 35
 custom_constants/margin_left = 20
-custom_constants/margin_bottom = 20
+custom_constants/margin_bottom = 35
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
 [node name="UIRoot" type="PanelContainer" parent="MarginContainer"]
 margin_left = 20.0
-margin_top = 20.0
+margin_top = 35.0
 margin_right = 748.0
-margin_bottom = 748.0
+margin_bottom = 733.0
+script = ExtResource( 10 )
 
 [node name="TabContainer" type="TabContainer" parent="MarginContainer/UIRoot"]
 margin_left = 7.0
 margin_top = 7.0
 margin_right = 721.0
-margin_bottom = 721.0
+margin_bottom = 691.0
 
 [node name="Game" type="VBoxContainer" parent="MarginContainer/UIRoot/TabContainer"]
 anchor_right = 1.0
@@ -66,7 +73,7 @@ script = ExtResource( 6 )
 
 [node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/UIRoot/TabContainer/Game"]
 margin_right = 706.0
-margin_bottom = 616.0
+margin_bottom = 586.0
 size_flags_vertical = 3
 
 [node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/UIRoot/TabContainer/Game/VBoxContainer"]
@@ -91,33 +98,93 @@ margin_right = 706.0
 margin_bottom = 32.0
 size_flags_horizontal = 3
 
-[node name="HBoxContainer5" type="HBoxContainer" parent="MarginContainer/UIRoot/TabContainer/Game"]
-margin_top = 620.0
+[node name="HBoxContainer2" type="HBoxContainer" parent="MarginContainer/UIRoot/TabContainer/Game/VBoxContainer"]
+margin_top = 36.0
 margin_right = 706.0
-margin_bottom = 670.0
+margin_bottom = 68.0
+
+[node name="Label" type="Label" parent="MarginContainer/UIRoot/TabContainer/Game/VBoxContainer/HBoxContainer2"]
+margin_top = 5.0
+margin_right = 628.0
+margin_bottom = 27.0
+size_flags_horizontal = 3
+text = "Game Camera Size (In Tiles) Width:"
+align = 2
+
+[node name="SetWindowWidth" type="SpinBox" parent="MarginContainer/UIRoot/TabContainer/Game/VBoxContainer/HBoxContainer2"]
+margin_left = 632.0
+margin_right = 706.0
+margin_bottom = 32.0
+min_value = 2.0
+value = 12.0
+
+[node name="HBoxContainer3" type="HBoxContainer" parent="MarginContainer/UIRoot/TabContainer/Game/VBoxContainer"]
+margin_top = 72.0
+margin_right = 706.0
+margin_bottom = 104.0
+
+[node name="Label" type="Label" parent="MarginContainer/UIRoot/TabContainer/Game/VBoxContainer/HBoxContainer3"]
+margin_top = 5.0
+margin_right = 628.0
+margin_bottom = 27.0
+size_flags_horizontal = 3
+text = "Height:"
+align = 2
+
+[node name="SetWindowHeight" type="SpinBox" parent="MarginContainer/UIRoot/TabContainer/Game/VBoxContainer/HBoxContainer3"]
+margin_left = 632.0
+margin_right = 706.0
+margin_bottom = 32.0
+min_value = 2.0
+value = 12.0
+
+[node name="HBoxContainer4" type="HBoxContainer" parent="MarginContainer/UIRoot/TabContainer/Game/VBoxContainer"]
+margin_top = 108.0
+margin_right = 706.0
+margin_bottom = 136.0
+alignment = 2
+
+[node name="UpdateWindow" type="Button" parent="MarginContainer/UIRoot/TabContainer/Game/VBoxContainer/HBoxContainer4"]
+margin_left = 583.0
+margin_right = 706.0
+margin_bottom = 28.0
+text = "Update Window"
+
+[node name="HBoxContainer5" type="HBoxContainer" parent="MarginContainer/UIRoot/TabContainer/Game"]
+margin_top = 590.0
+margin_right = 706.0
+margin_bottom = 640.0
+theme = SubResource( 3 )
 custom_constants/separation = 24
 alignment = 1
 
 [node name="SaveButton" type="Button" parent="MarginContainer/UIRoot/TabContainer/Game/HBoxContainer5"]
-margin_left = 241.0
-margin_right = 341.0
+margin_left = 89.0
+margin_right = 189.0
 margin_bottom = 50.0
 rect_min_size = Vector2( 100, 50 )
 text = "Save"
 
 [node name="LoadButton" type="Button" parent="MarginContainer/UIRoot/TabContainer/Game/HBoxContainer5"]
-margin_left = 365.0
-margin_right = 465.0
+margin_left = 213.0
+margin_right = 313.0
 margin_bottom = 50.0
 rect_min_size = Vector2( 100, 50 )
 text = "Load"
+
+[node name="SetDefault" type="Button" parent="MarginContainer/UIRoot/TabContainer/Game/HBoxContainer5"]
+margin_left = 337.0
+margin_right = 617.0
+margin_bottom = 50.0
+rect_min_size = Vector2( 280, 50 )
+text = "Set As Default Game"
 
 [node name="Tiles" type="VBoxContainer" parent="MarginContainer/UIRoot/TabContainer"]
 visible = false
 anchor_right = 1.0
 anchor_bottom = 1.0
 margin_left = 4.0
-margin_top = 32.0
+margin_top = 40.0
 margin_right = -4.0
 margin_bottom = -4.0
 size_flags_horizontal = 3
@@ -171,7 +238,7 @@ visible = false
 anchor_right = 1.0
 anchor_bottom = 1.0
 margin_left = 4.0
-margin_top = 32.0
+margin_top = 40.0
 margin_right = -4.0
 margin_bottom = -4.0
 size_flags_horizontal = 3
@@ -226,7 +293,7 @@ visible = false
 anchor_right = 1.0
 anchor_bottom = 1.0
 margin_left = 4.0
-margin_top = 32.0
+margin_top = 40.0
 margin_right = -4.0
 margin_bottom = -4.0
 
@@ -300,7 +367,7 @@ margin_left = 606.0
 margin_right = 680.0
 margin_bottom = 24.0
 max_value = 12.0
-step = 0.5
+step = 0.1
 
 [node name="Controller" type="HBoxContainer" parent="MarginContainer/UIRoot/TileEntityEditorWindow/PanelContainer/VBoxContainer"]
 margin_top = 68.0
@@ -411,9 +478,28 @@ margin_bottom = 50.0
 rect_min_size = Vector2( 100, 50 )
 text = "Cancel"
 
+[node name="BackButton" type="Button" parent="MarginContainer/UIRoot"]
+margin_left = 676.0
+margin_top = 7.0
+margin_right = 721.0
+margin_bottom = 35.0
+size_flags_horizontal = 8
+size_flags_vertical = 0
+text = "Back"
+
+[node name="BGEffects" parent="." instance=ExtResource( 8 )]
+
+[node name="Effects" parent="BGEffects/CanvasLayer2" index="0"]
+size_factor = 0.5
+max_brightness = 0.3
+
 [connection signal="text_changed" from="MarginContainer/UIRoot/TabContainer/Game/VBoxContainer/HBoxContainer/NameInput" to="MarginContainer/UIRoot/TabContainer/Game" method="_on_NameInput_text_changed"]
+[connection signal="value_changed" from="MarginContainer/UIRoot/TabContainer/Game/VBoxContainer/HBoxContainer2/SetWindowWidth" to="MarginContainer/UIRoot/TabContainer/Game" method="_on_SetWindowWidth_value_changed"]
+[connection signal="value_changed" from="MarginContainer/UIRoot/TabContainer/Game/VBoxContainer/HBoxContainer3/SetWindowHeight" to="MarginContainer/UIRoot/TabContainer/Game" method="_on_SetWindowHeight_value_changed"]
+[connection signal="pressed" from="MarginContainer/UIRoot/TabContainer/Game/VBoxContainer/HBoxContainer4/UpdateWindow" to="MarginContainer/UIRoot/TabContainer/Game" method="_on_UpdateWindow_pressed"]
 [connection signal="pressed" from="MarginContainer/UIRoot/TabContainer/Game/HBoxContainer5/SaveButton" to="MarginContainer/UIRoot/TabContainer/Game" method="_on_SaveButton_pressed"]
 [connection signal="pressed" from="MarginContainer/UIRoot/TabContainer/Game/HBoxContainer5/LoadButton" to="MarginContainer/UIRoot/TabContainer/Game" method="_on_LoadButton_pressed"]
+[connection signal="pressed" from="MarginContainer/UIRoot/TabContainer/Game/HBoxContainer5/SetDefault" to="MarginContainer/UIRoot/TabContainer/Game" method="_on_SetDefault_pressed"]
 [connection signal="resized" from="MarginContainer/UIRoot/TabContainer/Tiles" to="MarginContainer/UIRoot/TabContainer/Tiles" method="_on_Tiles_resized"]
 [connection signal="pressed" from="MarginContainer/UIRoot/TabContainer/Tiles/HBoxContainer/NewTileButton" to="MarginContainer/UIRoot/TabContainer/Tiles" method="_on_NewTileButton_pressed"]
 [connection signal="resized" from="MarginContainer/UIRoot/TabContainer/Entities" to="MarginContainer/UIRoot/TabContainer/Entities" method="_on_Tiles_resized"]
@@ -427,3 +513,6 @@ text = "Cancel"
 [connection signal="pressed" from="MarginContainer/UIRoot/TileEntityEditorWindow/PanelContainer/VBoxContainer/HBoxContainer4/VBoxContainer/RemovePropertyButton" to="MarginContainer/UIRoot/TileEntityEditorWindow" method="_on_RemovePropertyButton_pressed"]
 [connection signal="pressed" from="MarginContainer/UIRoot/TileEntityEditorWindow/PanelContainer/VBoxContainer/HBoxContainer3/UpdateButton" to="MarginContainer/UIRoot/TileEntityEditorWindow" method="_on_UpdateButton_pressed"]
 [connection signal="pressed" from="MarginContainer/UIRoot/TileEntityEditorWindow/PanelContainer/VBoxContainer/HBoxContainer3/CancelButton" to="MarginContainer/UIRoot/TileEntityEditorWindow" method="_on_CancelButton_pressed"]
+[connection signal="pressed" from="MarginContainer/UIRoot/BackButton" to="MarginContainer/UIRoot" method="_on_BackButton_pressed"]
+
+[editable path="BGEffects"]

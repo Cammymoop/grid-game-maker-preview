@@ -68,6 +68,8 @@ var entity_list = []
 
 var im_ready = false
 
+var instance_counter = 0
+
 func _ready():
 	if not TextureManager.im_ready:
 		yield(TextureManager, "textures_loaded")
@@ -132,9 +134,9 @@ func create_randoms() -> void:
 	create_random_entity("bouncer")
 
 func create_default_player() -> void:
-	create_entity(get_entity_index("player"), Vector2(3, 3))
+	create_entity(get_entity_index("player"), Vector2(2, 2))
 func create_default_box() -> void:
-	create_entity(get_entity_index("green_box"), Vector2(4, 3))
+	create_entity(get_entity_index("green_box"), Vector2(2, 1))
 
 func create_random_entity(entity_name) -> void:
 	var tries = 20
@@ -178,6 +180,12 @@ func create_entity(entity_index, tile_position, facing=0, activate=true) -> void
 	if "groups" in entity_info:
 		for g in entity_info["groups"]:
 			entity.add_to_group(g)
+	
+	entity.instance_index = instance_counter
+	instance_counter += 1
+	
+	if entity.entity_index == 0:
+		Utility.get_world().move_child(entity, 2)
 	
 	if activate:
 		entity.set_active(true)

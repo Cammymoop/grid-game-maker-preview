@@ -1,0 +1,32 @@
+[gd_scene load_steps=2 format=2]
+
+[ext_resource path="res://src/MainMenuEffects.gd" type="Script" id=1]
+
+[node name="BGEffects" type="Node"]
+
+[node name="CanvasLayer" type="CanvasLayer" parent="."]
+layer = -3
+
+[node name="ColorRect" type="ColorRect" parent="CanvasLayer"]
+show_behind_parent = true
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color( 0.12549, 0.105882, 0.168627, 1 )
+__meta__ = {
+"_edit_use_anchors_": false,
+"_editor_description_": ""
+}
+
+[node name="CanvasLayer2" type="CanvasLayer" parent="."]
+layer = -2
+
+[node name="Effects" type="Node2D" parent="CanvasLayer2"]
+pause_mode = 2
+script = ExtResource( 1 )
+density = 1.5
+background_color_rect = NodePath("../../CanvasLayer/ColorRect")
+
+[node name="NewObjTimer" type="Timer" parent="CanvasLayer2/Effects"]
+autostart = true
+
+[connection signal="timeout" from="CanvasLayer2/Effects/NewObjTimer" to="CanvasLayer2/Effects" method="_on_NewObjTimer_timeout"]

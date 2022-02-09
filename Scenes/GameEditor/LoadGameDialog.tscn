@@ -4,7 +4,6 @@
 [ext_resource path="res://src/GameEditor/LoadGameDialog.gd" type="Script" id=2]
 
 [node name="LoadGameDialog" type="ConfirmationDialog"]
-visible = true
 margin_left = 7.0
 margin_top = 7.0
 margin_right = 447.0
@@ -38,3 +37,5 @@ margin_top = 26.0
 margin_right = 424.0
 margin_bottom = 180.0
 size_flags_vertical = 3
+
+[connection signal="item_activated" from="VBoxContainer/GamesList" to="." method="_on_GamesList_item_activated"]

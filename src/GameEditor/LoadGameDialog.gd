@@ -13,3 +13,7 @@ func get_selected_game() -> String:
 	if len(selected) > 0:
 		return list.get_item_text(selected[0])
 	return ""
+
+
+func _on_GamesList_item_activated(_index):
+	emit_signal("confirmed")

@@ -136,10 +136,12 @@ func do_action(action_data, owning_entity, target_entity, tile_position):
 				print_debug("Not enough arguments to fill_tile_rectangle")
 				continue
 			var relative = a == "fill_tile_rectangle"
-			var start_x = int(split_action[1]) + (tile_position.x if relative else 0)
-			var start_y = int(split_action[2]) + (tile_position.y if relative else 0)
-			var width = int(split_action[3])
-			var height = int(split_action[4])
+			
+			var start_x = int(split_action[1]) + tile_position.x if relative else get_int_absolute(split_action[1])
+			var start_y = int(split_action[2]) + tile_position.y if relative else get_int_absolute(split_action[2])
+			var width = int(split_action[3]) if relative else get_int_absolute(split_action[3])
+			var height = int(split_action[4]) if relative else get_int_absolute(split_action[4])
+			
 			var tile_index = MapManager.get_tile_index(split_action[5])
 			var checker_tile = false
 			if len(split_action) >= 7:
@@ -167,3 +169,15 @@ func do_action(action_data, owning_entity, target_entity, tile_position):
 		_:
 			print_debug("Unrecognized action: " + a)
 	return quit
+
+func get_int_absolute(input_num: String) -> int:
+	match input_num:
+		"level_x":
+			return int(MapManager.get_map_size().position.x)
+		"level_y":
+			return int(MapManager.get_map_size().position.y)
+		"level_width":
+			return int(MapManager.get_map_size().size.x)
+		"level_height":
+			return int(MapManager.get_map_size().size.y)
+	return int(input_num)
