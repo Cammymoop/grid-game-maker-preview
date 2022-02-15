@@ -1,8 +1,9 @@
-[gd_scene load_steps=4 format=2]
+[gd_scene load_steps=5 format=2]
 
 [ext_resource path="res://src/MapEditor.gd" type="Script" id=1]
 [ext_resource path="res://assets/img/cursor.png" type="Texture" id=2]
 [ext_resource path="res://assets/img/entityTiles.png" type="Texture" id=3]
+[ext_resource path="res://src/EditorCam.gd" type="Script" id=4]
 
 [node name="MapEditor" type="Node2D"]
 pause_mode = 1
@@ -21,3 +22,8 @@ position = Vector2( 16, 16 )
 texture = ExtResource( 3 )
 region_enabled = true
 region_rect = Rect2( 0, 0, 32, 32 )
+
+[node name="EditorCam" type="Camera2D" parent="."]
+limit_smoothed = true
+smoothing_enabled = true
+script = ExtResource( 4 )

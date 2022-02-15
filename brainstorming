@@ -22,7 +22,7 @@ build the editor into the game
 
 Next up:
  - Saving/Loading levels
-   - Saving and restoring level state at play-time for checkpoint behavior
+   - Saving and restoring level state at play-time for checkpoint behavior *(done with checkpoints, need to save level files)
  
  - Edit Game Properties (name, camera type, etc) *(game name)
     - Actually make camera
@@ -30,7 +30,9 @@ Next up:
  - Tile rotation and get the facing for things like you_move or you_turn
  - Make other entity static properties editable *(controller and speed)
     - Some sort of static property ui api to tell the editor which properties can be edited
- - Make Controllers editable and configurable *(Editable)
+ - Make Controllers editable and configurable *(Editable, Bool Options Editable)
+ * fix "no controller options" message showing behind entity editor popup
+ 
 
  - Make image handling UI
     - add images into user_data
@@ -43,8 +45,8 @@ Next up:
  
  - Better level editor controls:
 	- mouse support
-    - copy tile
-	- repeatable place tile
+    - copy tile *
+	- repeatable place tile *
 	- multiselect
 	- paste
 	- fill
@@ -71,5 +73,12 @@ More condtions and actions:
  - fill_tile_rectangle (relative_x, relative_y, width, height, to_tile) *
  - fill_tile_rectangle_absolute (x, y, width, height, to_tile) *
  
- - save_checkpoint
- - reset_to_checkpoint
+ - save_checkpoint *
+ - reset_to_checkpoint *
+
+Puzzlescript games successfully cloned:
+Geode https://neonesque.itch.io/geode
+Broken Abacus https://www.puzzlescript.net/play.html?p=f7518dbe107486ab1a50e6119f4bc3f2
+The art of clonging https://rosden.itch.io/the-art-of-cloning
+Interconnection https://www.puzzlescript.net/play.html?p=3acdd359dea642168ff946bfc26f0152
+Newton's Crates https://www.puzzlescript.net/play.html?p=9cf57ca82a0181de97e4e225bc9bf4ca

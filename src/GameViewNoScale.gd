@@ -13,5 +13,8 @@ func set_resolution(new_resolution: Vector2) -> void:
 	tex_rect.expand = false
 	tex_rect.expand = true
 
+func get_resolution():
+	return size
+
 func get_scaled_mouse_position():
 	return get_mouse_position()

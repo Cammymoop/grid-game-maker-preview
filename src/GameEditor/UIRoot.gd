@@ -15,3 +15,7 @@ func show_message(message_text) -> void:
 
 func _on_BackButton_pressed():
 	GameManager.change_scene("Menu")
+
+
+func _on_OpenGameDir_pressed():
+	OS.shell_open(ProjectSettings.globalize_path("user://Games"))

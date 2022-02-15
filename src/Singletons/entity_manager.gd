@@ -1,5 +1,7 @@
 extends Node
 
+signal entity_list_updated
+
 var entity_template = preload("res://Scenes/BaseEntity.tscn")
 var controller_templates = {}
 
@@ -63,12 +65,19 @@ var entity_defs = {
 onready var loaded_entity_defs = entity_defs
 
 var entity_index_map = {}
+var entity_instance_map = {}
 
 var entity_list = []
+var bond_groups = []
 
 var im_ready = false
 
 var instance_counter = 0
+
+var frame_counter = 0
+
+func _physics_process(_delta):
+	frame_counter += 1
 
 func _ready():
 	if not TextureManager.im_ready:
@@ -78,9 +87,23 @@ func _ready():
 	
 	im_ready = true
 
+func create_signal(signal_name) -> void:
+	add_user_signal(signal_name)
+
+
+func do_emit_signal(signal_name, owning_entity=null, args=null) -> void:
+	if not has_user_signal(signal_name):
+		add_user_signal(signal_name)
+	if not args:
+		args = []
+	emit_signal(signal_name, owning_entity, args)
+
 func refresh_definition():
 	fix_string_keys()
 	create_index_map()
+
+func clear():
+	bond_groups = []
 
 func fix_string_keys():
 	var old_definition = entity_defs
@@ -93,8 +116,19 @@ func fix_string_keys():
 		if "tex_index" in entity_defs[intk]:
 			entity_defs[intk]["tex_index"] = int(entity_defs[intk]["tex_index"])
 
+func entity_order(a, b) -> bool:
+	if a.entity_index == b.entity_index:
+		return a.instance_id < b.instance_id
+	return a.entity_index < b.entity_index
+
 func refresh_entity_list():
+	entity_instance_map = {}
 	entity_list = get_tree().get_nodes_in_group("_entity_")
+	entity_list.sort_custom(self, "entity_order")
+	for e in entity_list:
+		entity_instance_map[e.instance_id] = e
+	
+	emit_signal("entity_list_updated")
 
 func clear_entity_list():
 	for entity in entity_list:
@@ -104,6 +138,12 @@ func clear_entity_list():
 		entity.set_active(false)
 		entity.queue_free()
 	entity_list = []
+	entity_instance_map = {}
+
+func get_instance(instance_id):
+	if not instance_id in entity_instance_map:
+		return null
+	return entity_instance_map[instance_id]
 
 func update_entity_definition(entity_index, entity_definition):
 	if not entity_index in entity_defs:
@@ -125,7 +165,7 @@ func new_entity(definition) -> int:
 
 func create_defaults() -> void:
 	create_default_player()
-	create_default_box()
+	#create_default_box()
 	
 func create_randoms() -> void:
 	create_default_player()
@@ -158,7 +198,15 @@ func get_entity_texture_rect(entity_index):
 func get_new_controller(controller_name):
 	return controller_templates[controller_name].instance()
 
-func create_entity(entity_index, tile_position, facing=0, activate=true) -> void:
+func add_entity_to_world(entity):
+	var destination = Utility.get_world().get_node("Entities")
+	for c in destination.get_children():
+		if c.entity_index > entity.entity_index:
+			destination.add_child_below_node(c, entity)
+			return
+	destination.add_child(entity)
+
+func create_entity(entity_index, tile_position, facing=0, activate=true) -> Node2D:
 	var entity_info = entity_defs[entity_index]
 	
 	var entity = entity_template.instance()
@@ -166,36 +214,62 @@ func create_entity(entity_index, tile_position, facing=0, activate=true) -> void
 		entity.set_intended_move_speed(entity_info['intended_move_speed'])
 	if "controller" in entity_info:
 		if entity_info["controller"] in controller_templates:
-			var controller = controller_templates[entity_info["controller"]].instance()
+			var controller = get_new_controller(entity_info["controller"])
 			entity.controller_name = entity_info['controller']
 			entity.add_child(controller)
 			entity.set_controller(controller)
+			if "controller_options" in entity_info:
+				controller.set_options(entity_info["controller_options"])
 	entity.entity_index = entity_index
 	entity.position = Vector2(MapManager.tile_width * tile_position.x, MapManager.tile_width * tile_position.y)
-	Utility.get_world().add_child(entity)
+	add_entity_to_world(entity)
+	entity.initialize()
 	setup_entity_texture(entity)
 	
 	entity.set_facing(facing)
+	if entity.visual_turn_on_move:
+		entity.set_visual_facing(facing)
 	
 	if "groups" in entity_info:
 		for g in entity_info["groups"]:
 			entity.add_to_group(g)
 	
-	entity.instance_index = instance_counter
+	entity.instance_id = instance_counter
 	instance_counter += 1
 	
-	if entity.entity_index == 0:
-		Utility.get_world().move_child(entity, 2)
+	var auto_bond = get_entity_property(entity, "auto_bond")
+	if auto_bond:
+		var need_to_bond = false
+		if auto_bond.is_conditional():
+			if auto_bond.resolve(self, null, entity.tile_position):
+				need_to_bond = true
+		elif auto_bond.get_value():
+			need_to_bond = true
+		
+		if need_to_bond:
+			var bonded = false
+			for abg in bond_groups:
+				# This is possible to break if you first add an auto bonding entity to another bonding group I think
+				# Pretty sure it's actually kind of hard to break
+				if get_instance(abg[0]).entity_index == entity_index:
+					bond_entity(entity, abg)
+					bonded = true
+					break
+			if not bonded:
+				create_bond_group([entity])
 	
 	if activate:
 		entity.set_active(true)
 	refresh_entity_list()
+	
+	return entity
 
 func restore_entity(serialized_entity, refresh=true) -> void:
 	var entity = entity_template.instance()
 	
-	Utility.get_world().add_child(entity)
+	add_entity_to_world(entity)
 	entity.deserialize(serialized_entity)
+	entity.initialize() # initialize after deserializing
 	setup_entity_texture(entity)
 	
 	if refresh:
@@ -213,18 +287,96 @@ func serialize() -> Dictionary:
 	for e in entity_list:
 		serialized_entities.append(e.serialize())
 	
-	return {"entity_list": serialized_entities}
+	return {"entity_list": serialized_entities, "bond_groups": bond_groups}
 
 func deserialize(data: Dictionary) -> void:
 	clear_entity_list()
 	for entity_data in data["entity_list"]:
 		restore_entity(entity_data)
+	bond_groups = data["bond_groups"]
 	refresh_entity_list()
+	instance_counter = 0
+	for e in entity_list:
+		instance_counter = max(instance_counter, e.instance_id + 1)
 
-func get_entities_at(tile_position, exclude_entity=null, include_moving_away=false) -> Array:
+func create_bond_group(entities: Array) -> void:
+	var group = []
+	bond_groups.append(group)
+	for e in entities:
+		group.append(e.instance_id)
+		e.bond_group = group
+
+func remove_entities_bond_group(entity) -> void:
+	if not entity.bond_group:
+		return
+	for e in entity.bond_group:
+		unbond_entity(e, false)
+	bond_group_update()
+
+func bond_entity(entity, bond_group) -> void:
+	entity.bond_group = bond_group
+	bond_group.append(entity.instance_id)
+
+func unbond_entity(entity, cull_empty=true) -> void:
+	if entity.bond_group:
+		var bg = entity.bond_group
+		bg.remove(bg.find(entity.instance_id))
+		entity.bond_group = null
+		if cull_empty:
+			bond_group_update()
+
+func bond_group_update() -> void:
+	var to_remove = []
+	for bg_index in range(len(bond_groups)):
+		if len(bond_groups[bg_index]) < 1:
+			to_remove.append(bg_index)
+	
+	# Reverse so we delete starting from the end and the indexes still hold after each delete
+	to_remove.invert()
+	for index in to_remove:
+		bond_groups.remove(index)
+
+func get_bond_group(entity):
+	for bg in bond_groups:
+		if bg.has(entity.instance_id):
+			return bg
+	return null
+
+func bond_group_start_move(bond_group, steps_per_tile, move_facing) -> bool:
+	var instances = []
+	for entity_instance_id in bond_group:
+		instances.append(get_instance(entity_instance_id))
+	
+	for entity in instances:
+		if entity.moving:
+			# Short circuit so we dont break by reverting a move on a currently moving entity
+			return false
+	
+	var move_allowed = true
+	for entity in instances:
+		# set change visual facing to false for group moves for now
+		# good default but should be configurable somehow
+		entity.set_current_speed(steps_per_tile)
+		if not entity.start_move(move_facing, false, true):
+			move_allowed = false
+	
+	# At least one of the entities in the bond group were blocked
+	# Stop them all from moving
+	if not move_allowed:
+		for entity in instances:
+			entity.revert_move_start()
+	else:
+		for entity in instances:
+			post_move_actions(entity, entity.tile_position, entity.next_tile_pos)
+			entity.actually_started_move()
+	return move_allowed
+
+func get_entities_at(tile_position, exclude_entity=null, exclude_bond_group=null, include_moving_away=false) -> Array:
 	var entities_here = []
 	for e in entity_list:
 		if e == exclude_entity:
+			continue
+		if exclude_bond_group and e.instance_id in exclude_bond_group:
 			continue
 		if e.moving:
 			if e.next_tile_pos == tile_position or (include_moving_away and e.tile_position == tile_position):
@@ -232,6 +384,17 @@ func get_entities_at(tile_position, exclude_entity=null, include_moving_away=fal
 		elif e.tile_position == tile_position:
 			entities_here.append(e)
 	return entities_here
+
+func find_entity_by_index(entity_index, first=true):
+	var found = null
+	if first:
+		for e in entity_list:
+			if e.entity_index == entity_index:
+				if first:
+					return e
+				else:
+					found = e
+	return found
 
 func create_index_map() -> void:
 	entity_index_map = {}
@@ -277,34 +440,59 @@ func finish_move(moving_entity, tile_position) -> void:
 			fmot.resolve(e, moving_entity, tile_position)
 
 
-func attempt_move(moving_entity, tile_position) -> bool:
-	var entities_here = get_entities_at(tile_position, moving_entity)
+func attempt_move(moving_entity, tile_position, group_move=false) -> bool:
+	var entities_here: = []
+	if group_move:
+		entities_here = get_entities_at(moving_entity.tile_position, null, moving_entity.bond_group)
+	else:
+		entities_here = get_entities_at(moving_entity.tile_position, moving_entity)
 	for e in entities_here:
-		var move_onto: = get_entity_property(e, "move_onto")
+		var move_off_of: = get_entity_property(e, "move_off_of")
+		if move_off_of:
+			if move_off_of.is_conditional():
+				if not move_off_of.resolve(e, moving_entity, tile_position):
+					return false
+			elif not move_off_of.get_value():
+				return false
+	
+	var entities_there: = []
+	if group_move:
+		entities_there = get_entities_at(tile_position, null, moving_entity.bond_group)
+	else:
+		entities_there = get_entities_at(tile_position, moving_entity)
+	for e in entities_there:
+		if e in entities_here:
+			continue
+		var blocks: = get_entity_property(e, "blocks")
+		if blocks:
+			if blocks.is_conditional():
+				if blocks.resolve(e, moving_entity, tile_position):
+					return false
+			elif blocks.get_value():
+				return false
 		
+		var move_onto: = get_entity_property(e, "move_onto")
 		if move_onto:
 			if move_onto.is_conditional():
-				if move_onto.resolve(e, moving_entity, tile_position):
-					continue
-				else:
+				if not move_onto.resolve(e, moving_entity, tile_position):
 					return false
 			elif not move_onto.get_value():
 				return false
-		else:
-			var blocks: = get_entity_property(e, "blocks")
-			if blocks:
-				if blocks.is_conditional():
-					if not blocks.resolve(e, moving_entity, tile_position):
-						continue
-					return false
-				elif blocks.get_value():
-					return false
-				else:
-					continue
-			else:
-				continue
 		
 	return true
+
+func post_move_actions(moving_entity, from_position, to_position, exclude_group=null) -> void:
+	var entities_start = get_entities_at(from_position, moving_entity, exclude_group)
+	for e in entities_start:
+		var pmove_off_of: = get_entity_property(e, "post_move_off_of")
+		if pmove_off_of and pmove_off_of.is_conditional():
+			pmove_off_of.resolve(e, moving_entity, from_position)
+	
+	var entities_destination = get_entities_at(to_position, moving_entity, exclude_group)
+	for e in entities_destination:
+		var pmove_onto: = get_entity_property(e, "post_move_onto")
+		if pmove_onto and pmove_onto.is_conditional():
+			pmove_onto.resolve(e, moving_entity, to_position)
 
 func can_move_to(moving_entity, tile_position) -> bool:
 	var entities_here = get_entities_at(tile_position, moving_entity)
@@ -326,9 +514,16 @@ func get_entity_property(entity, property_name) -> Property:
 	var value = null
 	if not entity.has_local_property(property_name):
 		var def_props = entity_defs[entity.entity_index]["properties"]
-		if not property_name in def_props:
+		if property_name in def_props:
+			value = def_props[property_name]
+		elif "inherit_properties" in def_props:
+			var inherit_from = get_entity_index(def_props["inherit_properties"])
+			var inherit_props = entity_defs[inherit_from]["properties"]
+			if not property_name in inherit_props:
+				return null
+			value = inherit_props[property_name]
+		else:
 			return null
-		value = def_props[property_name]
 	else:
 		value = entity.get_local_property(property_name)
 	var property = Property.new()
@@ -336,11 +531,24 @@ func get_entity_property(entity, property_name) -> Property:
 	property.set_name(property_name)
 	return property
 
+func get_entity_property_list(entity) -> Array:
+	var props: Dictionary = {}
+	var definition_props = entity_defs[entity.entity_index]["properties"]
+	Utility.set_keys(props, definition_props.keys())
+	Utility.set_keys(props, entity.local_properties.keys())
+	if "inherit_properties" in definition_props:
+		var inherit_from = get_entity_index(definition_props["inherit_properties"])
+		Utility.set_keys(props, entity_defs[inherit_from]["properties"].keys())
+	
+	return props.keys()
+
 func get_entity_definition(entity_index) -> Dictionary:
-	return entity_defs[entity_index]
+	return entity_defs[entity_index].duplicate()
 
 func remove_entity(entity) -> void:
 	entity_list.remove(entity_list.find(entity))
+	if entity.bond_group:
+		unbond_entity(entity)
 	entity.remove_from_group("_entity_")
 	entity.set_active(false)
 	entity.call_deferred("queue_free")
@@ -349,6 +557,12 @@ func get_all_entity_indexes() -> Array:
 	var keys = entity_defs.keys()
 	keys.sort()
 	return keys
+
+func get_all_entity_names() -> Array:
+	var names = []
+	for e in entity_defs:
+		names.append(entity_defs[e]["name"])
+	return names
 
 func get_entity_index(entity_name) -> int:
 	return entity_index_map[entity_name]

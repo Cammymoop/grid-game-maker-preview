@@ -1,7 +1,7 @@
 extends Node
 
-var move_mode = "facing"
-var multi_try = true
+func get_options() -> Dictionary:
+	return {}
 
 func get_move():
 	var parent = get_parent()

@@ -1,6 +1,7 @@
 extends Viewport
 
 var scale_factor = 4
+var resolution = Vector2(384, 384)
 
 func _ready():
 	set_size_override(true, Vector2(384, 384))
@@ -17,6 +18,9 @@ func set_resolution(new_resolution: Vector2) -> void:
 	var tex_rect = get_parent()
 	tex_rect.expand = false
 	tex_rect.expand = true
+
+func get_resolution() -> Vector2:
+	return resolution
 
 func get_scaled_mouse_position():
 	# Why do I divide by 2??

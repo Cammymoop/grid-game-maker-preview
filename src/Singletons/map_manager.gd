@@ -1,5 +1,7 @@
 extends Node
 
+signal level_size_changed
+
 var map_layer_template = preload("res://Scenes/MapLayer.tscn")
 
 var layers = []
@@ -115,10 +117,13 @@ func create_plain_layer():
 	clear_layers()
 	var map_layer = create_empty_layer()
 	map_layer.single_init(get_tile_index("floor"))
+	
+	emit_signal("level_size_changed")
 
 func create_empty_layer():
 	var map_layer = map_layer_template.instance()
-	Utility.get_world().add_child(map_layer)
+	var ents = Utility.get_world().get_node("Entities")
+	Utility.get_world().add_child_below_node(ents, map_layer)
 	map_layer.tile_set = tileset
 	layers.append(map_layer)
 	return map_layer
@@ -181,7 +186,14 @@ func get_all_positions_of_tile(tile_index) -> Array:
 	return positions
 
 func get_map_size() -> Rect2:
-	return layers[0].get_used_rect()
+	if len(layers) > 0:
+		return layers[0].get_used_rect()
+	return Rect2(0, 0, 0, 0)
+
+func get_level_bounds() -> Rect2:
+	var map_bounds: = get_map_size()
+	var level_bounds: = Rect2(map_bounds.position * tile_width, map_bounds.size * tile_width)
+	return level_bounds
 
 func get_tile_index(tile_name) -> int:
 	return tile_index_map[tile_name]
@@ -216,12 +228,23 @@ func replace_tiles_at_array(position_list, new_tile):
 	for pos in position_list:
 		replace_tiles_at(pos, new_tile)
 
+func is_pos_out_of_bounds(tile_position) -> bool:
+	return Utility.position_in_rect_inclusive(tile_position, get_map_size())
+
 func replace_tiles_at(tile_position, new_tile) -> void:
+	var old_bounds = get_map_size()
 	clear_all_at(tile_position)
-	layers[0].set_cellv(tile_position, new_tile)
+	if new_tile != -1:
+		layers[0].set_cellv(tile_position, new_tile)
+	
+	if new_tile == -1:
+		if get_map_size() != old_bounds:
+			emit_signal("level_size_changed")
+	elif is_pos_out_of_bounds(tile_position):
+		emit_signal("level_size_changed")
 
 func get_tile_definition(tile_index):
-	return tile_defs[tile_index]
+	return tile_defs[tile_index].duplicate()
 
 func is_tile_at(tile_index, tile_position) -> bool:
 	var found = false
@@ -300,6 +323,9 @@ func check_blocks(entity, tile_position) -> bool:
 				return false
 	return true
 
+func get_tile_facing_at(tile_position) -> int:
+	return 0 # TODO do this
+
 func finish_move(moving_entity, tile_position) -> void:
 	EntityManager.finish_move(moving_entity, tile_position)
 	
@@ -315,8 +341,8 @@ func finish_move(moving_entity, tile_position) -> void:
 		if fmot and fmot.is_conditional():
 			fmot.resolve(null, moving_entity, tile_position)
 
-func attempt_move(moving_entity, tile_position) -> bool:
-	var entity_move_allow = EntityManager.attempt_move(moving_entity, tile_position)
+func attempt_move(moving_entity, tile_position, group_move=false) -> bool:
+	var entity_move_allow = EntityManager.attempt_move(moving_entity, tile_position, group_move)
 	
 	var tile_move_allow = check_blocks(moving_entity, tile_position)
 	return tile_move_allow and entity_move_allow

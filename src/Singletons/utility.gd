@@ -3,6 +3,17 @@ extends Node
 func _ready():
 	randomize()
 
+func set_keys(dict : Dictionary, keys: Array) -> void:
+	for k in keys:
+		dict[k] = true
+
+func exclusive_randf() -> float:
+	var r: = randf()
+	return 0.0 if r == 1.0 else r
+
+func random_int_range(start: int, end_exclusive: int) -> int:
+	return start + int(floor(exclusive_randf() * (end_exclusive - start)))
+
 func facing_vector(what_facing) -> Vector2:
 	match what_facing:
 		0:
@@ -61,9 +72,6 @@ func resolve_relative_direction(relative_direction, facing: int) -> int:
 func ucfirst(string:String) -> String:
 	return string[0].to_upper() + string.substr(1)
 
-func random_int_range(start: int, end_exclusive: int) -> int:
-	return start + int(floor(randf() * (end_exclusive - start)))
-
 func random_sign() -> int:
 	return int(floor(randf() * 2)) * 2 - 1
 
@@ -98,3 +106,15 @@ func atlas_texture_from_entity_index(entity_index):
 	atlas_tex.atlas = EntityManager.get_entity_texture(entity_index)
 	atlas_tex.region = EntityManager.get_entity_texture_rect(entity_index)
 	return atlas_tex
+
+func get_camera_setting(setting):
+	var game_settings = GameManager.game_definition["game_settings"]
+	if "camera_settings" in game_settings:
+		if setting in game_settings["camera_settings"]:
+			return game_settings["camera_settings"][setting]
+	return null
+
+# Normally rect.has_point is exclusive on the bottom and right edge
+func position_in_rect_inclusive(position: Vector2, rect: Rect2) -> bool:
+	var new_rect = Rect2(rect.position, rect.size + Vector2(1, 1))
+	return new_rect.has_point(position)

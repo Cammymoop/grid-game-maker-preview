@@ -74,7 +74,7 @@ func _on_NewTileButton_pressed():
 		try_name = "tile" + str(num)
 	
 	var definition = {"name": try_name, "texture": TextureManager.get_all_indexes()[0], "tex_index": 0, "properties": {}}
-	var new_index = MapManager.new_tile(definition)
+	var _new_index = MapManager.new_tile(definition)
 	update_the_grid()
 
 
@@ -86,5 +86,5 @@ func _on_NewEntityButton_pressed():
 		try_name = "entity" + str(num)
 	
 	var definition = {"name": try_name, "texture": TextureManager.get_all_indexes()[0], "tex_index": 0, "properties": {}}
-	var new_index = EntityManager.new_entity(definition)
+	var _new_index = EntityManager.new_entity(definition)
 	update_the_grid()

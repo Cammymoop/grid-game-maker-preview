@@ -6,7 +6,7 @@ var cur_scene = null
 var cur_game_name: = ""
 
 var checkpoint_save = {}
-var suspend_save = {}
+var editor_save = {}
 
 var loaded = false
 
@@ -17,9 +17,17 @@ var scenes: = {
 	"GameEditor": "res://Scenes/GameEditor.tscn",
 }
 
+var cameras = {
+	"SimpleCamera": preload("res://Scenes/SimpleCamera.tscn"),
+}
+
 var pauses = {}
 
 var game_view: = Vector2(12, 12)
+
+var game_definition = {}
+
+var game_camera = null
 
 func _ready():
 	# run _process even when the game is paused
@@ -29,6 +37,11 @@ func _ready():
 
 func load_game_definition_from_file(game_name) -> void:
 	var definition = FilesManager.get_game_definition(game_name)
+	
+	# required section, but older saves didn't have it, remove this once they all do
+	if not "game_settings" in definition:
+		definition["game_settings"] = {}
+	game_definition = definition
 	
 	set_game_name(definition['game_name'])
 	MapManager.tile_defs = definition['tile_definitions']
@@ -40,6 +53,9 @@ func load_game_definition_from_file(game_name) -> void:
 		set_game_view(definition['window_width'], definition['window_height'])
 	else:
 		set_game_view(12, 12)
+	
+	# Set the window size when loading a new game definition
+	rescale_window()
 	
 	if cur_scene != "Loading":
 		change_scene(cur_scene)
@@ -66,15 +82,36 @@ func load_serialized_play_state(serialized_state: Dictionary) -> void:
 	if cur_scene != "Play":
 		print("Can't deserialize play state, not in play scene")
 		return
+	if not serialized_state:
+		return
 	
 	get_tree().paused = true
 	
 	yield(get_tree(), "idle_frame")
 	yield(get_tree(), "idle_frame")
+	EntityManager.clear()
 	MapManager.deserialize(serialized_state['map'])
 	EntityManager.deserialize(serialized_state['entities'])
 	
 	get_tree().paused = false
+
+func create_game_camera() -> void:
+	var cam = cameras["SimpleCamera"].instance()
+	Utility.get_world().add_child(cam)
+	game_camera = cam
+
+func position_gameplay_camera(pos: Vector2) -> void:
+	if game_camera:
+		game_camera.position = pos
+
+func get_gameplay_camera_position() -> Vector2:
+	if game_camera:
+		return game_camera.get_camera_screen_center()
+	return Vector2.ZERO
+
+func activate_gameplay_camera() -> void:
+	if game_camera:
+		game_camera.activate()
 
 func set_pause(source, paused: bool) -> void:
 	pauses[source] = paused
@@ -93,11 +130,16 @@ func _unpause() -> void:
 
 func save_checkpoint() -> void:
 	checkpoint_save = get_serialized_play_state()
-
 func load_checkpoint() -> void:
 	load_serialized_play_state(checkpoint_save)
 
+func save_edited() -> void:
+	editor_save = get_serialized_play_state()
+func load_edited() -> void:
+	load_serialized_play_state(editor_save)
+
 func level_start():
+	EntityManager.clear()
 	update_game_viewport()
 	MapManager.create_plain_layer()
 	EntityManager.create_defaults()
@@ -105,6 +147,7 @@ func level_start():
 	save_checkpoint()
 
 func load_random_level():
+	EntityManager.clear()
 	update_game_viewport()
 	MapManager.create_random_layer()
 	EntityManager.create_randoms()
@@ -118,6 +161,8 @@ func change_scene(new_scene: String):
 	
 	if cur_scene == "Play":
 		EntityManager.clear_entity_list()
+		MapManager.clear_layers()
+		game_camera = null
 		_unpause()
 	elif cur_scene == "GameEditor":
 		EntityManager.refresh_definition()
@@ -126,8 +171,12 @@ func change_scene(new_scene: String):
 	cur_scene = new_scene
 	get_tree().change_scene(scenes[new_scene])
 	
-	if new_scene == "Play":
-		yield(get_tree(), "idle_frame")
+	call_deferred("post_scene_change")
+
+func post_scene_change() -> void:
+	if cur_scene == "Play":
+		create_game_camera()
+		activate_gameplay_camera()
 		level_start()
 
 func update_game_viewport() -> void:
@@ -162,6 +211,7 @@ func start_on_ready() -> bool:
 			load_game_definition_from_file(default_game)
 		else:
 			set_game_name("Basic")
+			game_definition["game_settings"] = {}
 
 		# Set the window size for the default game
 		rescale_window()
@@ -181,8 +231,9 @@ func _process(_delta):
 	
 	if cur_scene == "Play":
 		if Input.is_action_just_pressed("refresh"):
-			get_tree().reload_current_scene()
-			call_deferred("load_random_level")
+			#get_tree().reload_current_scene()
+			#call_deferred("load_random_level")
+			load_edited()
 		elif Input.is_action_just_pressed("editor_new_map"):
 			get_tree().reload_current_scene()
 			call_deferred("level_start")

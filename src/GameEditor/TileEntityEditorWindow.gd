@@ -4,6 +4,8 @@ var tex_popup_scene = preload("res://Scenes/GameEditor/BetterTextureDialog.tscn"
 var new_prop_popup_scene = preload("res://Scenes/GameEditor/NewPropertyDialog.tscn")
 var update_prop_popup_scene = preload("res://Scenes/GameEditor/PropertyDialog.tscn")
 
+var controller_options_popup_scene = preload("res://Scenes/GameEditor/ControllerOptionsPopup.tscn")
+
 var alert_popup_scene = preload("res://Scenes/GameEditor/AlertDialog.tscn")
 
 var tile_entity_mode = "tile"
@@ -27,10 +29,18 @@ func set_controller(list_index) -> void:
 	var controller_button = find_node("EditController")
 	var controller_list:PopupMenu = controller_button.get_popup()
 	var controller = controller_list.get_item_text(list_index)
+	if controller == the_definition["controller"]:
+		return
+	
+	if "controller_options" in the_definition:
+		the_definition.erase("controller_options")
+	
 	if controller != "None":
 		the_definition['controller'] = controller
+		find_node("ControllerOpContainer").visible = true
 	else:
 		the_definition.erase('controller')
+		find_node("ControllerOpContainer").visible = false
 	
 	controller_button.text = controller
 
@@ -49,6 +59,8 @@ func load_entity_info(ti):
 	var text = "None"
 	if "controller" in the_definition:
 		text = the_definition['controller']
+	else:
+		find_node("ControllerOpContainer").visible = false
 	controller_select.text = text
 	
 	load_common()
@@ -73,9 +85,11 @@ func set_tile_entity_mode(te: String) -> void:
 	
 	if tile_entity_mode == "entity":
 		find_node("Controller").visible = true
+		find_node("ControllerOpContainer").visible = true
 		find_node("MoveSpeed").visible = true
 	else:
 		find_node("Controller").visible = false
+		find_node("ControllerOpContainer").visible = false
 		find_node("MoveSpeed").visible = false
 
 
@@ -249,7 +263,6 @@ func _on_PropertyList_item_activated(index):
 		current_val = str(current_val)
 	
 	var update_property_popup = update_prop_popup_scene.instance()
-	update_property_popup
 	update_property_popup.find_node("SetName").text = prop_key
 	update_property_popup.find_node("SetValue").text = current_val
 	
@@ -264,3 +277,32 @@ func _on_EditMoveSpeed_value_changed(value):
 	if tile_entity_mode != "entity":
 		return
 	the_definition['intended_move_speed'] = value
+
+func update_controller_options(popup):
+	the_definition["controller_options"] = popup.option_values.duplicate()
+	
+	popup.queue_free()
+
+func _on_ControllerOptionsShow_pressed():
+	if not "controller" in the_definition:
+		return
+	var controller_instance = EntityManager.get_new_controller(the_definition["controller"])
+	var set_options = {}
+	if "controller_options" in the_definition:
+		set_options = the_definition["controller_options"].duplicate()
+	
+	var available_options = controller_instance.get_options()
+	if available_options:
+		var controller_popup = controller_options_popup_scene.instance()
+		
+		add_child(controller_popup)
+		controller_popup.init(controller_instance.get_options(), set_options)
+		controller_popup.connect("popup_hide", self, "update_controller_options", [controller_popup])
+		controller_popup.popup_centered()
+	else:
+		find_parent("UIRoot").show_message(the_definition["controller"] + " has no options")
+
+
+func _on_ControllerOptionsReset_pressed():
+	if "controller_options" in the_definition:
+		the_definition.erase("controller_options")
