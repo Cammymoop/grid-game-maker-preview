@@ -1,0 +1,93 @@
+[gd_scene load_steps=10 format=2]
+
+[ext_resource path="res://assets/img/particle_textures/puff.png" type="Texture" id=1]
+[ext_resource path="res://src/Effects/VoidParticles.gd" type="Script" id=3]
+[ext_resource path="res://src/Effects/ColorRect_FadeToBlack.gd" type="Script" id=4]
+
+[sub_resource type="Environment" id=15]
+background_mode = 4
+glow_enabled = true
+glow_intensity = 2.75
+glow_strength = 0.94
+glow_blend_mode = 1
+glow_hdr_threshold = 0.22
+glow_hdr_scale = 0.29
+glow_bicubic_upscale = true
+
+[sub_resource type="World" id=16]
+environment = SubResource( 15 )
+
+[sub_resource type="CanvasItemMaterial" id=17]
+blend_mode = 2
+
+[sub_resource type="Gradient" id=19]
+offsets = PoolRealArray( 0, 0.118012, 0.900621, 1 )
+colors = PoolColorArray( 0.137255, 0.117647, 0.117647, 0, 0.137255, 0.117647, 0.117647, 1, 0.137255, 0.117647, 0.117647, 1, 0.137255, 0.117647, 0.117647, 0 )
+
+[sub_resource type="GradientTexture" id=20]
+gradient = SubResource( 19 )
+
+[sub_resource type="ParticlesMaterial" id=18]
+emission_shape = 2
+emission_box_extents = Vector3( 384, 576, 1 )
+flag_disable_z = true
+spread = 180.0
+gravity = Vector3( 0, 0, 0 )
+initial_velocity = 5.0
+angular_velocity = 25.0
+angular_velocity_random = 1.0
+orbit_velocity = 0.0
+orbit_velocity_random = 0.0
+angle = 360.0
+angle_random = 1.0
+scale = 24.0
+scale_random = 1.0
+color_ramp = SubResource( 20 )
+
+[node name="BGEffects" type="Node"]
+
+[node name="CanvasLayer2" type="CanvasLayer" parent="."]
+layer = -2
+
+[node name="ViewportContainer" type="ViewportContainer" parent="CanvasLayer2"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+stretch = true
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Viewport" type="Viewport" parent="CanvasLayer2/ViewportContainer"]
+size = Vector2( 768, 768 )
+own_world = true
+world = SubResource( 16 )
+handle_input_locally = false
+render_target_update_mode = 3
+
+[node name="Darks" type="Particles2D" parent="CanvasLayer2/ViewportContainer/Viewport"]
+pause_mode = 2
+material = SubResource( 17 )
+position = Vector2( 192, 192 )
+amount = 40
+lifetime = 10.0
+preprocess = 30.0
+visibility_rect = Rect2( -192, -192, 1000, 384 )
+draw_order = 1
+process_material = SubResource( 18 )
+texture = ExtResource( 1 )
+script = ExtResource( 3 )
+
+[node name="CanvasLayer" type="CanvasLayer" parent="CanvasLayer2/ViewportContainer/Viewport"]
+layer = -3
+
+[node name="ColorRect" type="ColorRect" parent="CanvasLayer2/ViewportContainer/Viewport/CanvasLayer"]
+show_behind_parent = true
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color( 0.109804, 0.0862745, 0.0901961, 1 )
+script = ExtResource( 4 )
+__meta__ = {
+"_edit_use_anchors_": false,
+"_editor_description_": ""
+}
+fade_length = 0.2

@@ -1,0 +1,61 @@
+[gd_scene load_steps=3 format=2]
+
+[ext_resource path="res://assets/font/medium_font.tres" type="DynamicFont" id=1]
+[ext_resource path="res://src/LoadLevelDialog.gd" type="Script" id=2]
+
+[node name="SaveLevelDialog" type="WindowDialog"]
+visible = true
+margin_left = 347.0
+margin_top = 265.0
+margin_right = 570.0
+margin_bottom = 366.0
+popup_exclusive = true
+window_title = "Load Level"
+script = ExtResource( 2 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="MarginContainer" type="MarginContainer" parent="."]
+anchor_right = 1.0
+margin_bottom = 40.0
+custom_constants/margin_right = 8
+custom_constants/margin_top = 8
+custom_constants/margin_left = 8
+custom_constants/margin_bottom = 8
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="PanelContainer" type="VBoxContainer" parent="MarginContainer"]
+margin_left = 8.0
+margin_top = 8.0
+margin_right = 215.0
+margin_bottom = 72.0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/PanelContainer"]
+margin_right = 207.0
+margin_bottom = 20.0
+alignment = 1
+
+[node name="SelectLevelButton" type="MenuButton" parent="MarginContainer/PanelContainer/HBoxContainer"]
+margin_left = 23.0
+margin_right = 183.0
+margin_bottom = 20.0
+rect_min_size = Vector2( 160, 0 )
+text = "Select Level:"
+flat = false
+
+[node name="LoadFileButton" type="Button" parent="MarginContainer/PanelContainer"]
+margin_left = 69.0
+margin_top = 24.0
+margin_right = 137.0
+margin_bottom = 64.0
+size_flags_horizontal = 4
+custom_fonts/font = ExtResource( 1 )
+text = "Load"
+
+[connection signal="pressed" from="MarginContainer/PanelContainer/LoadFileButton" to="." method="_on_LoadFileButton_pressed"]

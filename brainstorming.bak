@@ -30,8 +30,9 @@ Next up:
  - Tile rotation and get the facing for things like you_move or you_turn
  - Make other entity static properties editable *(controller and speed)
     - Some sort of static property ui api to tell the editor which properties can be edited
- - Make Controllers editable and configurable *(Editable)
+ - Make Controllers editable and configurable *(Editable, Bool Options Editable)
  * fix "no controller options" message showing behind entity editor popup
+ 
 
  - Make image handling UI
     - add images into user_data

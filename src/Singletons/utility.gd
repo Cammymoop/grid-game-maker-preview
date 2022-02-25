@@ -72,6 +72,21 @@ func resolve_relative_direction(relative_direction, facing: int) -> int:
 func ucfirst(string:String) -> String:
 	return string[0].to_upper() + string.substr(1)
 
+func string_to_string_float(the_string: String) -> String:
+	if the_string == "":
+		return ""
+	if the_string == ".":
+		return "."
+	
+	var new_str: = str(float(the_string))
+	if len(new_str) < 1:
+		return ""
+	
+	if new_str[0] == "0" and the_string[0] != "0":
+		new_str = new_str.substr(1)
+	new_str = new_str.trim_suffix(".0")
+	return new_str
+
 func random_sign() -> int:
 	return int(floor(randf() * 2)) * 2 - 1
 
@@ -85,6 +100,14 @@ func get_world() -> Node2D:
 		return f[0]
 	print_debug("Error could not find world")
 	return null
+
+func get_pause_menu() -> Node2D:
+	var f = get_tree().get_nodes_in_group("PauseMenu")
+	if f:
+		return f[0]
+	print_debug("Error could not find pause menu")
+	return null
+
 
 func atlas_texture_from_texture_index(texture_index, sub_index):
 	var atlas_tex: = AtlasTexture.new()
@@ -114,7 +137,82 @@ func get_camera_setting(setting):
 			return game_settings["camera_settings"][setting]
 	return null
 
+var animal_file = "res://src/animals.txt"
+var animals = []
+func _fetch_animals() -> void:
+	var f = File.new()
+	if f.open(animal_file, File.READ) == OK:
+		var text = f.get_as_text()
+		f.close()
+		animals = text.split("\n", false)
+	
+func random_animal() -> String:
+	if len(animals) < 1:
+		_fetch_animals()
+	return animals[random_int_range(0, len(animals))]
+
+func vector_to_list(vec: Vector2) -> Array:
+	return [vec.x, vec.y]
+
+func array_vectors_to_lists(arr: Array) -> Array:
+	var new_arr = []
+	for val in arr:
+		if typeof(val) == TYPE_VECTOR2:
+			new_arr.append(vector_to_list(val))
+		elif typeof(val) == TYPE_ARRAY:
+			new_arr.append(array_vectors_to_lists(val))
+		elif typeof(val) == TYPE_DICTIONARY:
+			new_arr.append(dict_vectors_to_lists(val))
+		else:
+			new_arr.append(val)
+	return new_arr
+
+func facing_from_adjacent_positions(from_pos, to_pos) -> int:
+	if to_pos.x > from_pos.x:
+		return 1
+	elif to_pos.x < from_pos.x:
+		return 3
+	elif to_pos.y < from_pos.y:
+		return 0
+	elif to_pos.y > from_pos.y:
+		return 2
+	else:
+		return -1
+	
+
+func dict_vectors_to_lists(dict: Dictionary) -> Dictionary:
+	var new_dict = {}
+	for key in dict:
+		var val = dict[key]
+		if typeof(val) == TYPE_ARRAY:
+			new_dict[key] = array_vectors_to_lists(val)
+		elif typeof(val) == TYPE_DICTIONARY:
+			new_dict[key] = dict_vectors_to_lists(val)
+		elif typeof(val) == TYPE_VECTOR2:
+			new_dict[key] = vector_to_list(val)
+		else:
+			new_dict[key] = val
+	return new_dict
+
+func max_integer_scale_in(base: Vector2, max_size: Vector2) -> int:
+	var max_x = int(floor(max_size.x / base.x))
+	var max_y = int(floor(max_size.y / base.y))
+	return max_x if max_x <= max_y else max_y
+
 # Normally rect.has_point is exclusive on the bottom and right edge
 func position_in_rect_inclusive(position: Vector2, rect: Rect2) -> bool:
 	var new_rect = Rect2(rect.position, rect.size + Vector2(1, 1))
 	return new_rect.has_point(position)
+
+func get_2d_coords_from_index(index : int, tpr : int) -> Vector2:
+	return Vector2(index % tpr, floor(float(index)/tpr))
+
+func get_texture_index_offset(texture_sub_index, tile_size, border, separation, tpr) -> Vector2:
+	var coord = get_2d_coords_from_index(texture_sub_index, tpr)
+	var combined_tile_size = tile_size + separation
+	return border + (coord * combined_tile_size)
+	#return Vector2(texture_sub_index % tpr * MapManager.tile_width, floor(texture_sub_index/tpr) * MapManager.tile_width)
+
+func get_texture_index_rect(texture_sub_index, tile_size, border, separation, tpr) -> Rect2:
+	var t_offset = get_texture_index_offset(texture_sub_index, tile_size, border, separation, tpr)
+	return Rect2(t_offset, tile_size)

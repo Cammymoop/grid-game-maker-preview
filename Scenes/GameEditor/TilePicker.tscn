@@ -1,0 +1,58 @@
+[gd_scene load_steps=5 format=2]
+
+[ext_resource path="res://src/GameEditor/TilePicker.gd" type="Script" id=1]
+[ext_resource path="res://assets/img/tiles.png" type="Texture" id=2]
+
+[sub_resource type="AtlasTexture" id=2]
+atlas = ExtResource( 2 )
+region = Rect2( 0, 0, 32, 32 )
+
+[sub_resource type="StyleBoxFlat" id=3]
+draw_center = false
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color( 0, 0, 0, 1 )
+expand_margin_left = 2.0
+expand_margin_right = 2.0
+expand_margin_top = 2.0
+expand_margin_bottom = 2.0
+shadow_size = 5
+
+[node name="TilePicker" type="TextureRect"]
+margin_left = 98.0
+margin_top = 54.0
+margin_right = 386.0
+margin_bottom = 182.0
+mouse_filter = 0
+mouse_default_cursor_shape = 2
+size_flags_horizontal = 4
+texture = ExtResource( 2 )
+expand = true
+stretch_mode = 6
+script = ExtResource( 1 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="HighlightedTile" type="TextureRect" parent="."]
+mouse_filter = 2
+texture = SubResource( 2 )
+expand = true
+stretch_mode = 6
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Cursor" type="Panel" parent="."]
+margin_right = 32.0
+margin_bottom = 32.0
+mouse_filter = 2
+custom_styles/panel = SubResource( 3 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[connection signal="mouse_entered" from="." to="." method="_on_TilePicker_mouse_entered"]
+[connection signal="mouse_exited" from="." to="." method="_on_TilePicker_mouse_exited"]

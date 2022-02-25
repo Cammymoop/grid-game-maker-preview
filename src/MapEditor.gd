@@ -30,9 +30,17 @@ var cursor_tile_pos = Vector2(0, 0)
 
 var last_mouse = Vector2(0, 0)
 
-func _ready():
+func _ready() -> void:
 	if not edit_mode:
 		enable_edit_mode(false, false)
+	
+	var pause_menu = Utility.get_pause_menu()
+	pause_menu.connect("gameplay_paused", self, "save_current_level_state")
+
+func save_current_level_state() -> void:
+	if not edit_mode:
+		return
+	GameManager.save_edited()
 
 func enable_edit_mode(on, save_state=true):
 	edit_mode = on
@@ -141,16 +149,31 @@ func _place(holding=false):
 			EntityManager.remove_entity(e)
 
 func _process(delta):
+	if GameManager.get_pause("pause_menu"):
+		return
+	if Input.is_action_just_pressed("editor_start"):
+		enable_edit_mode(not edit_mode)
+	
+	if Input.is_action_just_pressed("refresh") and not edit_mode:
+		#get_tree().reload_current_scene()
+		#call_deferred("load_random_level")
+		GameManager.load_edited()
+	if Input.is_action_just_pressed("editor_new_map"):
+		#get_tree().reload_current_scene()
+		EntityManager.clear_entity_list()
+		MapManager.clear_layers()
+		MapManager.create_plain_layer()
+		EntityManager.create_defaults()
+	
+	if not edit_mode:
+		return
+	
 	var new_mouse = get_viewport().get_scaled_mouse_position()
 	new_mouse += $EditorCam.get_tl_position()
 	new_mouse = new_mouse.round()
 	if edit_mode and last_mouse != new_mouse:
 		mouse_moved(new_mouse)
 	last_mouse = new_mouse
-	if Input.is_action_just_pressed("editor_start"):
-		enable_edit_mode(not edit_mode)
-	if not edit_mode:
-		return
 	
 	var iup = Input.is_action_just_pressed("editor_cursor_up")
 	var idown = Input.is_action_just_pressed("editor_cursor_down")

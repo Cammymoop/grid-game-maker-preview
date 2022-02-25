@@ -1,0 +1,26 @@
+{
+	"tiles.png":
+		{
+			"size": [288, 128],
+			"tile_size": [32, 32],
+			"size_in_tiles": [9, 4],
+			"border": [0, 0],
+			"separation": [0, 0],
+		},
+	"entityTiles.png":
+		{
+			"size": [288, 160],
+			"tile_size": [32, 32],  
+			"size_in_tiles": [9, 5],
+			"border": [0, 0],
+			"separation": [0, 0],
+		},
+	"shapes32x.png":
+		{
+			"size": [288, 128],
+			"tile_size": [32, 32],
+			"size_in_tiles": [9, 4],
+			"border": [0, 0],
+			"separation": [0, 0],
+		}
+}

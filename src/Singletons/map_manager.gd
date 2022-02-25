@@ -74,7 +74,8 @@ var tileset = null
 
 var im_ready = false
 
-func _ready() -> void:
+func setup() -> void:
+	fix_string_keys()
 	if not TextureManager.im_ready:
 		yield(TextureManager, "textures_loaded")
 	create_tileset()
@@ -141,7 +142,15 @@ func create_tileset():
 			print_debug("WARNING: tile name already in use: " + tile_info['name'])
 		tile_index_map[tile_info['name']] = tile_index
 		
-		new_tileset.tile_set_region(tile_index, TextureManager.get_index_rect(tile_info['texture'], tile_info['tex_index']))
+		var texture_rect = TextureManager.get_index_rect(tile_info['texture'], tile_info['tex_index'])
+		new_tileset.tile_set_region(tile_index, texture_rect)
+		if texture_rect.size.x != tile_width or texture_rect.size.y != tile_width:
+			var offset = ((Vector2(tile_width, tile_width) - texture_rect.size) / 2).floor()
+			new_tileset.tile_set_texture_offset(tile_index, offset)
+		
+		if "z-index" in tile_info['properties']:
+			new_tileset.tile_set_z_index(tile_index, tile_info['properties']['z-index'])
+			
 	
 	tileset = new_tileset
 
@@ -171,6 +180,8 @@ func deserialize(data: Dictionary) -> void:
 	for layer_data in data["layers"]:
 		var new_layer = create_empty_layer()
 		new_layer.deserialize(layer_data)
+	
+	emit_signal("level_size_changed")
 
 func get_all_tile_indexes() -> Array:
 	var keys = tile_defs.keys()
@@ -323,7 +334,7 @@ func check_blocks(entity, tile_position) -> bool:
 				return false
 	return true
 
-func get_tile_facing_at(tile_position) -> int:
+func get_tile_facing_at(_tile_position) -> int:
 	return 0 # TODO do this
 
 func finish_move(moving_entity, tile_position) -> void:

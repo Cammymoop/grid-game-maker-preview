@@ -1,13 +1,44 @@
-[gd_scene load_steps=5 format=2]
+[gd_scene load_steps=8 format=2]
 
 [ext_resource path="res://src/MapEditor.gd" type="Script" id=1]
 [ext_resource path="res://assets/img/cursor.png" type="Texture" id=2]
 [ext_resource path="res://assets/img/entityTiles.png" type="Texture" id=3]
 [ext_resource path="res://src/EditorCam.gd" type="Script" id=4]
+[ext_resource path="res://src/TileEntityPreview.gd" type="Script" id=5]
+
+[sub_resource type="Animation" id=14]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/path = NodePath(".:self_modulate")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 0,
+"values": [ Color( 1, 1, 1, 0.388235 ) ]
+}
+
+[sub_resource type="Animation" id=15]
+resource_name = "alpha_pulse"
+loop = true
+tracks/0/type = "value"
+tracks/0/path = NodePath(".:self_modulate")
+tracks/0/interp = 2
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0, 0.2, 1 ),
+"transitions": PoolRealArray( 1, 1, 1 ),
+"update": 0,
+"values": [ Color( 1, 1, 1, 0.388235 ), Color( 1, 1, 1, 0.686275 ), Color( 1, 1, 1, 0.388235 ) ]
+}
 
 [node name="MapEditor" type="Node2D"]
 pause_mode = 1
-visible = false
 z_index = 10
 script = ExtResource( 1 )
 
@@ -17,11 +48,17 @@ centered = false
 offset = Vector2( -2.3, -2 )
 
 [node name="TileEntityPreview" type="Sprite" parent="Cursor"]
+modulate = Color( 1.2, 1.2, 1.2, 1 )
 self_modulate = Color( 1, 1, 1, 0.388235 )
 position = Vector2( 16, 16 )
 texture = ExtResource( 3 )
 region_enabled = true
 region_rect = Rect2( 0, 0, 32, 32 )
+script = ExtResource( 5 )
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="Cursor/TileEntityPreview"]
+anims/RESET = SubResource( 14 )
+anims/alpha_pulse = SubResource( 15 )
 
 [node name="EditorCam" type="Camera2D" parent="."]
 limit_smoothed = true

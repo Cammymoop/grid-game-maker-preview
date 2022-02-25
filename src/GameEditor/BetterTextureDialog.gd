@@ -16,6 +16,8 @@ func setup(texture_index, sub_index):
 	
 	set_texture(texture_index)
 	find_node("TilePicker").set_selected_index(sub_index)
+	
+	connect("popup_hide", self, "queue_free")
 
 func set_texture(texture_index):
 	selected_texture = texture_index
@@ -23,6 +25,8 @@ func set_texture(texture_index):
 	find_node("TilePicker").set_texture(texture_index)
 	var tex_selector = find_node("TextureSelector")
 	tex_selector.text = tex_selector.get_popup().get_item_text(texture_index)
+	
+	minimum_size_changed()
 
 func get_selected_texture() -> int:
 	return selected_texture

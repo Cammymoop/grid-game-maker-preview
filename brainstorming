@@ -35,8 +35,10 @@ Next up:
  
 
  - Make image handling UI
-    - add images into user_data
-	- define images used by game
+    - add images into user_data *
+	- define images used by game *
+	- Tile Compositor *
+	- Fix escape on tile compositor crashing
  
  - Discrete Mode: entities move on discrete intervals or wait for the turn to advance
  

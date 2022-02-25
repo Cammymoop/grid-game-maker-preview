@@ -283,18 +283,31 @@ func do_action(action_data, owning_entity, target_entity, tile_position, argumen
 			for i in range(len(tile_indexes)):
 				var i2 = 0 if i == len(tile_indexes) - 1 else i + 1
 				MapManager.replace_tiles_at_array(found_tiles[i], tile_indexes[i2])
-		"fill_tile_rectangle", "fill_tile_rectangle_absolute":
-			if len(split_action) < 6:
-				print_debug("Not enough arguments to fill_tile_rectangle")
-				return false
-			var relative = a == "fill_tile_rectangle"
+		"fill_tile_rectangle", "fill_tile_rectangle_absolute", "fill_whole_level":
+			var start_x
+			var start_y
+			var width
+			var height
+			var arg = 5
+			if a == "fill_whole_level":
+				var bounds = MapManager.get_map_size()
+				start_x = bounds.position.x
+				start_y = bounds.position.y
+				width = bounds.size.x
+				height = bounds.size.y
+				arg = 1
+			else:
+				if len(split_action) < 6:
+					print_debug("Not enough arguments to fill_tile_rectangle")
+					return false
+				var relative = a == "fill_tile_rectangle"
+				
+				start_x = int(split_action[1]) + tile_position.x if relative else get_int_absolute(split_action[1])
+				start_y = int(split_action[2]) + tile_position.y if relative else get_int_absolute(split_action[2])
+				width = int(split_action[3]) if relative else get_int_absolute(split_action[3])
+				height = int(split_action[4]) if relative else get_int_absolute(split_action[4])
 			
-			var start_x = int(split_action[1]) + tile_position.x if relative else get_int_absolute(split_action[1])
-			var start_y = int(split_action[2]) + tile_position.y if relative else get_int_absolute(split_action[2])
-			var width = int(split_action[3]) if relative else get_int_absolute(split_action[3])
-			var height = int(split_action[4]) if relative else get_int_absolute(split_action[4])
-			
-			var tile_index = MapManager.get_tile_index(split_action[5])
+			var tile_index = MapManager.get_tile_index(split_action[arg])
 			var checker_tile = false
 			if len(split_action) >= 7:
 				checker_tile = MapManager.get_tile_index(split_action[6])
@@ -351,15 +364,23 @@ func do_action(action_data, owning_entity, target_entity, tile_position, argumen
 		"increment_property", "decrement_property":
 			var ent = owning_entity
 			var prop_name = split_action[1]
+			var arg = 2
 			if split_action[1] == "target":
 				ent = target_entity
 				prop_name = split_action[2]
+				arg += 1
 			var val = EntityManager.get_entity_property(ent, prop_name)
-			if val.is_conditional():
-				print_debug("Cant increment/decrement conditional")
-				return false
-			val = val.get_value() + (1 if a == "increment_property" else -1)
+			if val != null:
+				if val.is_conditional():
+					print_debug("Cant increment/decrement conditional")
+					return false
+				val = val.get_value() + (1 if a == "increment_property" else -1)
+			else:
+				val = 1
 			EntityManager.set_entity_property(ent, prop_name, val)
+			if arg <= len(split_action) - 1 and split_action[arg] == "remove":
+				if val <= 0 and ent.has_local_property(prop_name):
+					ent.remove_local_property(prop_name)
 		"save_facing":
 			EntityManager.set_entity_property(owning_entity, split_action[1], target_entity.facing)
 		"unset_property", "i_unset_property":

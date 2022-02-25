@@ -76,14 +76,45 @@ var instance_counter = 0
 
 var frame_counter = 0
 
+var movements_enabled: bool = true
+var movement_requested: bool = false
+var requested_move_frames = 0
+var controller_frame: bool = true
+var movement_mode: int
+
 func _physics_process(_delta):
-	frame_counter += 1
+	if movements_enabled:
+		frame_counter += 1
+	
+	if movement_mode != GameManager.MovementMode.MOVEMENT_CONTINUOUS:
+		yield(get_tree(), "physics_frame")
+		controller_frame = false
+		if movements_enabled:
+			if movement_mode == GameManager.MovementMode.MOVEMENT_DISCRETE:
+				requested_move_frames -= 1
+				if requested_move_frames <= 0:
+					movements_enabled = false
+			elif movement_mode == GameManager.MovementMode.MOVEMENT_DISCRETE_WAIT and all_entities_settled():
+				movements_enabled = false
+		elif movement_requested:
+			movement_requested = false
+			movements_enabled = true
+			controller_frame = true
+
+func all_entities_settled() -> bool:
+	var settled = true
+	for e in entity_list:
+		settled = settled and e.is_settled()
+	return settled
 
 func _ready():
+	preload_controller_templates()
+
+func setup():
+	fix_string_keys()
 	if not TextureManager.im_ready:
 		yield(TextureManager, "textures_loaded")
 	create_index_map()
-	preload_controller_templates()
 	
 	im_ready = true
 
@@ -99,8 +130,21 @@ func do_emit_signal(signal_name, owning_entity=null, args=null) -> void:
 	emit_signal(signal_name, owning_entity, args)
 
 func refresh_definition():
+	update_movement_mode()
 	fix_string_keys()
 	create_index_map()
+
+func update_movement_mode():
+	movement_mode = GameManager.get_game_setting("movement_mode", GameManager.MovementMode.MOVEMENT_CONTINUOUS)
+	
+	if movement_mode == GameManager.MovementMode.MOVEMENT_CONTINUOUS:
+		controller_frame = true
+		movements_enabled = true
+	else:
+		controller_frame = false
+		movements_enabled = false
+	
+	print("MOVMENT MODE is now " + GameManager.describe_movement_mode(movement_mode))
 
 func clear():
 	bond_groups = []
@@ -139,6 +183,13 @@ func clear_entity_list():
 		entity.queue_free()
 	entity_list = []
 	entity_instance_map = {}
+	clear()
+
+# In discrete mode we wont update entities at all until a move is requested
+func request_move(entity) -> void:
+	if movement_mode == GameManager.MovementMode.MOVEMENT_DISCRETE:
+		requested_move_frames = entity.steps_per_tile
+	movement_requested = true
 
 func get_instance(instance_id):
 	if not instance_id in entity_instance_map:
@@ -202,7 +253,8 @@ func add_entity_to_world(entity):
 	var destination = Utility.get_world().get_node("Entities")
 	for c in destination.get_children():
 		if c.entity_index > entity.entity_index:
-			destination.add_child_below_node(c, entity)
+			destination.add_child(entity)
+			destination.move_child(entity, c.get_index())
 			return
 	destination.add_child(entity)
 
@@ -221,7 +273,7 @@ func create_entity(entity_index, tile_position, facing=0, activate=true) -> Node
 			if "controller_options" in entity_info:
 				controller.set_options(entity_info["controller_options"])
 	entity.entity_index = entity_index
-	entity.position = Vector2(MapManager.tile_width * tile_position.x, MapManager.tile_width * tile_position.y)
+	entity.position = MapManager.tile_to_world_position(tile_position)
 	add_entity_to_world(entity)
 	entity.initialize()
 	setup_entity_texture(entity)
@@ -237,11 +289,44 @@ func create_entity(entity_index, tile_position, facing=0, activate=true) -> Node
 	entity.instance_id = instance_counter
 	instance_counter += 1
 	
+	auto_bond_handler(entity)
+	auto_tail_handler(entity)
+	
+	if activate:
+		entity.set_active(true)
+	refresh_entity_list()
+	
+	return entity
+
+func auto_tail_handler(entity) -> void:
+	var auto_tail = get_entity_property(entity, "auto_tail")
+	if auto_tail:
+		var prop_filter = false
+		if auto_tail.is_conditional():
+			prop_filter = auto_tail.resolve(entity, null, entity.tile_position)
+		else:
+			prop_filter = auto_tail.get_value()
+	
+		if not prop_filter:
+			return
+		
+		if typeof(prop_filter) == TYPE_STRING and prop_filter.to_lower() == "true":
+			prop_filter = true
+		
+		var looking_at_tile = entity.tile_position + Utility.facing_vector(entity.facing)
+		var entities_in_front = get_entities_at(looking_at_tile)
+		for e in entities_in_front:
+			if typeof(prop_filter) == TYPE_STRING and entity_has_property(e, prop_filter):
+				entity.set_tailing(e)
+			elif prop_filter:
+				entity.set_tailing(e)
+
+func auto_bond_handler(entity) -> void:
 	var auto_bond = get_entity_property(entity, "auto_bond")
 	if auto_bond:
 		var need_to_bond = false
 		if auto_bond.is_conditional():
-			if auto_bond.resolve(self, null, entity.tile_position):
+			if auto_bond.resolve(entity, null, entity.tile_position):
 				need_to_bond = true
 		elif auto_bond.get_value():
 			need_to_bond = true
@@ -251,18 +336,12 @@ func create_entity(entity_index, tile_position, facing=0, activate=true) -> Node
 			for abg in bond_groups:
 				# This is possible to break if you first add an auto bonding entity to another bonding group I think
 				# Pretty sure it's actually kind of hard to break
-				if get_instance(abg[0]).entity_index == entity_index:
+				if get_instance(abg[0]).entity_index == entity.entity_index:
 					bond_entity(entity, abg)
 					bonded = true
 					break
 			if not bonded:
 				create_bond_group([entity])
-	
-	if activate:
-		entity.set_active(true)
-	refresh_entity_list()
-	
-	return entity
 
 func restore_entity(serialized_entity, refresh=true) -> void:
 	var entity = entity_template.instance()
@@ -530,6 +609,15 @@ func get_entity_property(entity, property_name) -> Property:
 	property.set_value(value)
 	property.set_name(property_name)
 	return property
+
+func entity_has_property(entity, property_name: String) -> bool:
+	var entity_props = entity_defs[entity.entity_index]["properties"]
+	var has = entity.has_local_property(property_name) 
+	has = has or property_name in entity_props
+	if "inherit_properties" in entity_props:
+		var from = entity_props["inherit_properties"]
+		has = has or property_name in entity_defs[from]["properties"]
+	return has
 
 func get_entity_property_list(entity) -> Array:
 	var props: Dictionary = {}

@@ -1,0 +1,637 @@
+extends WindowDialog
+
+var texture_dialog = preload("res://Scenes/GameEditor/BetterTextureDialog.tscn")
+
+onready var local_tile_picker = find_node("TilePickerLocal")
+export var loaded_texture: Texture
+export var make_tex_with_size: Vector2
+var save_to_file: = ""
+
+var edited_image: Image
+var edited_texture: Texture
+
+var image_meta: Dictionary
+
+var tile_brush_image: Image
+var temp_tile_brush_image: Image
+var tile_brush_texture: Texture
+export var picked_brush_tex: AtlasTexture
+var picked_brush_image: Image
+var picked_colored_preview: ImageTexture
+var picked_colored_brush_image: Image
+
+
+onready var undoer = $UndoRedoer
+const MAX_TILE_BRUSH_UNDOS = 100
+const MAX_TEXTURE_UNDOS = 10
+
+onready var tile_brush_canvas = find_node("BrushView")
+const TBC_MAX_WIDTH: = 96
+const TBC_MAX_HEIGHT: = 96
+
+const PICKED_BRUSH_MAX: Vector2 = Vector2(70, 70)
+
+# targeted size for local tile picker
+var ltp_target_height: = 200
+var ltp_margin: = 120
+
+var brush_wrap: = true
+
+var picked_texture_index = 0
+var picked_texture_sub_index = 0
+
+var picked_brush_offset: Vector2 = Vector2.ZERO
+
+var brush_creator_mode: = "replace"
+
+var brush_color_mode: = "source"
+var brush_color: = Color.white
+
+var brush_sliding_h: = 0
+var brush_sliding_v: = 0
+
+var transparent: Image
+
+var corner_size: Vector2
+var tl_corner: Rect2
+var tr_corner: Rect2
+var bl_corner: Rect2
+var br_corner: Rect2
+var whole_brush: Rect2
+
+func set_texture(tex: Texture) -> void:
+	loaded_texture = tex
+
+func set_new_texture_size(size: Vector2) -> void:
+	loaded_texture = null
+	make_tex_with_size = size
+
+func set_metadata(metadata: Dictionary) -> void:
+	image_meta = metadata
+
+func set_save_path(file_name: String) -> void:
+	save_to_file = file_name
+	if save_to_file:
+		find_node("SaveFileButton").disabled = false
+	else:
+		find_node("SaveFileButton").disabled = true
+		
+
+func _ready():
+	if get_parent() is Viewport:
+		# Running scene in standalone mode
+		popup_centered()
+	if not loaded_texture and not make_tex_with_size:
+		print_debug("I need a texture to edit, or a size to create")
+		queue_free()
+		return
+	
+	undoer.add_undo_stack("tile_brush", MAX_TILE_BRUSH_UNDOS)
+	undoer.set_buttons("tile_brush", find_node("UndoBrushButton"), find_node("RedoBrushButton"))
+	undoer.add_undo_stack("texture", MAX_TEXTURE_UNDOS)
+	undoer.set_buttons("texture", find_node("UndoTextureButton"), find_node("RedoTextureButton"))
+	
+	
+	var tile_size = image_meta['tile_size']
+	set_tile_brush_size(tile_size)
+	
+	if loaded_texture:
+		edited_image = loaded_texture.get_data()
+	else:
+		edited_image = Image.new()
+		edited_image.create(make_tex_with_size.x, make_tex_with_size.y, true, Image.FORMAT_RGBA8)
+	
+	edited_texture = ImageTexture.new()
+	edited_texture.create_from_image(edited_image)
+	
+	local_tile_picker.set_raw_texture(edited_texture, image_meta)
+	
+	rescale_tile_picker()
+	
+	var brushModes = find_node("BrushCreatorModes")
+	if brushModes and brushModes.get_child_count() > 0:
+		brushModes.get_child(0).group.connect("pressed", self, "_on_BrushModeChange")
+	
+	var brushColorModes = find_node("BrushColorModes")
+	if brushColorModes and brushColorModes.get_child_count() > 0:
+		brushColorModes.get_child(0).group.connect("pressed", self, "_on_BrushColorModeChange")
+	
+	
+	
+	if picked_brush_tex:
+		update_picked_brush()
+	
+	update_tile_brush_preview()
+	
+	connect("popup_hide", self, "queue_free")
+
+func on_scale() -> void:
+	rescale_tile_picker()
+
+func rescale_tile_picker() -> void:
+	var tp_scale = Utility.max_integer_scale_in(edited_image.get_size(), Vector2(rect_size.x - ltp_margin, ltp_target_height))
+	if tp_scale == 0:
+		tp_scale = 1
+	local_tile_picker.set_scale(tp_scale)
+#	local_tile_picker.rect_min_size = edited_image.get_size() * tp_scale
+#	local_tile_picker.rect_size = local_tile_picker.rect_min_size
+
+
+func set_tile_brush_size(tile_size: Vector2) -> void:
+	whole_brush = Rect2(Vector2.ZERO, tile_size)
+	corner_size = Vector2(ceil(tile_size.x/2), ceil(tile_size.y/2))
+	tl_corner = Rect2(Vector2.ZERO, corner_size)
+	var odd_x = int(tile_size.x) % 2
+	var odd_y = int(tile_size.y) % 2
+	tr_corner = Rect2(Vector2(corner_size.x - odd_x, 0), corner_size)
+	bl_corner = Rect2(Vector2(0, corner_size.y - odd_y), corner_size)
+	br_corner = Rect2(Vector2(corner_size.x - odd_x, corner_size.y - odd_y), corner_size)
+	
+	tile_brush_image = Image.new()
+	tile_brush_image.create(tile_size.x, tile_size.y, false, Image.FORMAT_RGBA8)
+	tile_brush_image.fill(Color.transparent)
+	transparent = Image.new()
+	transparent.create(tile_size.x, tile_size.y, false, Image.FORMAT_RGBA8)
+	transparent.fill(Color.transparent)
+	
+	var preview_scale = Utility.max_integer_scale_in(tile_size, Vector2(TBC_MAX_WIDTH, TBC_MAX_HEIGHT))
+	print(tile_size * preview_scale)
+	tile_brush_canvas.rect_min_size = tile_size * preview_scale
+	tile_brush_canvas.rect_size = tile_size * preview_scale
+	
+	var h_slide = find_node("BrushSlideH")
+	h_slide.max_value = tile_size.x - odd_x
+	h_slide.value = floor(tile_size.x/2.0)
+	
+	var v_slide = find_node("BrushSlideV")
+	v_slide.max_value = tile_size.y - odd_y
+	v_slide.value = ceil(tile_size.y/2.0)
+
+
+func _on_BrushModeChange(new_selected):
+	brush_creator_mode = new_selected.text.to_lower()
+func _on_BrushColorModeChange(new_selected):
+	brush_color_mode = new_selected.text.to_lower()
+	update_picked_colored_brush()
+
+func update_picked_brush() -> void:
+	picked_brush_image = picked_brush_tex.get_data()
+	update_picked_colored_brush()
+
+func update_picked_colored_brush() -> void:
+	if not picked_colored_brush_image:
+		picked_colored_brush_image = Image.new()
+	picked_colored_brush_image.copy_from(picked_brush_image)
+	color_brush()
+	picked_colored_preview = ImageTexture.new()
+	picked_colored_preview.create_from_image(picked_colored_brush_image, 0)
+	
+	var picked_size = picked_brush_image.get_size()
+	for tex_rect in [find_node("BrushColorPreview"), find_node("PickBrushButton").find_node("Icon")]:
+		tex_rect.texture = picked_colored_preview
+		tex_rect.expand = false
+		tex_rect.expand = true
+		
+		var preview_scale = Utility.max_integer_scale_in(picked_size, PICKED_BRUSH_MAX)
+		tex_rect.rect_min_size = picked_size * preview_scale
+		tex_rect.rect_size = picked_size * preview_scale
+	
+	var crosshair = find_node("PickedCrosshair")
+	picked_brush_offset = ((picked_size - tile_brush_image.get_size()) / 2).floor()
+	crosshair.set_my_size(picked_size)
+	crosshair.set_size_offset(tile_brush_image.get_size(), picked_brush_offset)
+
+
+func color_brush() -> void:
+	if brush_color_mode == "source":
+		return
+	
+	var img = picked_colored_brush_image
+	
+	img.lock()
+	
+	var mode_flat: = brush_color_mode == "flat"
+	var mode_colorize: = brush_color_mode == "colorize"
+	
+	for x in range(img.get_width()):
+		for y in range(img.get_height()):
+			var alpha = img.get_pixel(x, y).a8
+			if mode_flat:
+				var pix_col = brush_color
+				pix_col.a8 = alpha
+				img.set_pixel(x, y, pix_col)
+			elif mode_colorize:
+				var brightness = img.get_pixel(x, y).v * brush_color.v
+				img.set_pixel(x, y, Color.from_hsv(brush_color.h, brush_color.s, brightness, alpha))
+	
+	img.unlock()
+		
+
+func update_tile_brush_preview() -> void:
+	tile_brush_texture = ImageTexture.new()
+	tile_brush_texture.create_from_image(tile_brush_image)
+	tile_brush_texture.flags = 0
+	
+	find_node("BrushView").texture = tile_brush_texture
+
+func repaint() -> void:
+	edited_texture = ImageTexture.new()
+	edited_texture.create_from_image(edited_image)
+	local_tile_picker.set_raw_texture(edited_texture, image_meta)
+
+func corner_toggled(corner) -> void:
+	undoer.save_current_image("tile_brush", tile_brush_image)
+	var src_rect = corner
+	src_rect.position += picked_brush_offset
+	if brush_creator_mode == "erase":
+		tile_brush_image.blit_rect(transparent, src_rect, corner.position)
+	elif brush_creator_mode == "replace":
+		tile_brush_image.blit_rect(picked_colored_brush_image, src_rect, corner.position)
+	elif brush_creator_mode == "over":
+		tile_brush_image.blend_rect(picked_colored_brush_image, src_rect, corner.position)
+	elif brush_creator_mode == "under":
+		var old_brush = Image.new()
+		old_brush.copy_from(tile_brush_image)
+		tile_brush_image.blit_rect(picked_colored_brush_image, src_rect, corner.position)
+		tile_brush_image.blend_rect(old_brush, whole_brush, Vector2.ZERO)
+	elif brush_creator_mode == "stencil":
+		stencil_blit(picked_colored_brush_image, tile_brush_image, src_rect, corner.position)
+	elif brush_creator_mode == "cut":
+		alpha_subtract(picked_colored_brush_image, tile_brush_image, src_rect, corner.position)
+	
+	update_tile_brush_preview()
+
+func alpha_subtract(from_image: Image, to_image, src_rect: Rect2, dest_offset: Vector2) -> void:
+	var w = src_rect.size.x
+	var h = src_rect.size.y
+	var src_offset = src_rect.position
+	
+	from_image.lock()
+	to_image.lock()
+	
+	for x in range(w):
+		for y in range(h):
+			var alpha: = from_image.get_pixel(src_offset.x + x, src_offset.y + y).a8
+			var cur_pixel: Color = to_image.get_pixel(dest_offset.x + x, dest_offset.y + y)
+			cur_pixel.a8 = int(max(0, cur_pixel.a8 - alpha))
+			to_image.set_pixel(dest_offset.x + x, dest_offset.y + y, cur_pixel)
+	
+	from_image.unlock()
+	to_image.unlock()
+
+# paints the specified region onto to_image, while leaving the alpha channel unmodified
+func stencil_blit(from_image: Image, to_image: Image, src_rect: Rect2, dest_offset: Vector2) -> void:
+	var w = src_rect.size.x
+	var h = src_rect.size.y
+	var src_offset = src_rect.position
+	
+	from_image.lock()
+	to_image.lock()
+	
+	for x in range(w):
+		for y in range(h):
+			var color: = from_image.get_pixel(src_offset.x + x, src_offset.y + y)
+			if color.a8 < 1:
+				# ignore completely transparent pixels from source
+				continue
+			color.a8 = to_image.get_pixel(dest_offset.x + x, dest_offset.y + y).a8
+			to_image.set_pixel(dest_offset.x + x, dest_offset.y + y, color)
+	
+	from_image.unlock()
+	to_image.unlock()
+
+func _on_TLButton_pressed() -> void:
+	corner_toggled(tl_corner)
+func _on_TRButton_pressed() -> void:
+	corner_toggled(tr_corner)
+func _on_BLButton_pressed() -> void:
+	corner_toggled(bl_corner)
+func _on_BRButton_pressed() -> void:
+	corner_toggled(br_corner)
+func _on_AllButton_pressed() -> void:
+	corner_toggled(whole_brush)
+
+# not assumes square img
+func make_transposed_img(from_img: Image) -> Image:
+	var copy = Image.new()
+	copy.copy_from(from_img)
+	
+	copy.lock()
+	from_img.lock()
+	
+	for x in range(from_img.get_width()):
+		for y in range(from_img.get_height()):
+			copy.set_pixel(y, x, from_img.get_pixel(x, y))
+	
+	copy.unlock()
+	from_img.unlock()
+	return copy
+
+var alternate_half_shift_v: = false
+func make_half_v_shifted_img_odd(from_img: Image, do_wrap: bool) -> Image:
+	var half = from_img.get_height()/2.0
+	half = floor(half) if alternate_half_shift_v else ceil(half)
+	alternate_half_shift_v = not alternate_half_shift_v
+	
+	return make_v_shifted_img_by(from_img, half, do_wrap)
+	
+func make_v_shifted_img_by(from_img: Image, amount: int, do_wrap: bool) -> Image:
+	var copy = Image.new()
+	copy.copy_from(from_img)
+	
+	var negative = amount < 0
+	if negative:
+		amount += from_img.get_height()
+	
+	var size_a = Vector2(from_img.get_width(), from_img.get_height() - amount)
+	var size_b = Vector2(from_img.get_width(), amount)
+	var offset_a = Vector2(0, size_a.y)
+	var offset_b = Vector2(0, size_b.y)
+	
+	var img_a: Image = from_img
+	var img_b: Image = from_img
+	if not do_wrap:
+		if negative:
+			img_a = transparent
+		else:
+			img_b = transparent
+	copy.blit_rect(img_a, Rect2(Vector2.ZERO, size_a), offset_b)
+	copy.blit_rect(img_b, Rect2(offset_a, size_b), Vector2.ZERO)
+	return copy
+
+var alternate_half_shift_h: = false
+func make_half_h_shifted_img_odd(from_img: Image, do_wrap: bool) -> Image:
+	var half = from_img.get_width()/2.0
+	half = floor(half) if alternate_half_shift_h else ceil(half)
+	alternate_half_shift_h = not alternate_half_shift_h
+	
+	return make_h_shifted_img_by(from_img, half, do_wrap)
+
+func make_h_shifted_img_by(from_img: Image, amount: int, do_wrap: bool) -> Image:
+	var copy = Image.new()
+	copy.copy_from(from_img)
+	
+	var negative = amount < 0
+	if negative:
+		amount += from_img.get_width()
+	
+	var size_a = Vector2(from_img.get_width() - amount, from_img.get_height())
+	var size_b = Vector2(amount, from_img.get_height())
+	var offset_a = Vector2(size_a.x, 0)
+	var offset_b = Vector2(size_b.x, 0)
+	
+	var img_a: Image = from_img
+	var img_b: Image = from_img
+	if not do_wrap:
+		if negative:
+			img_a = transparent
+		else:
+			img_b = transparent
+	copy.blit_rect(img_a, Rect2(Vector2.ZERO, size_a), offset_b)
+	copy.blit_rect(img_b, Rect2(offset_a, size_b), Vector2.ZERO)
+	return copy
+
+
+func make_half_v_shifted_img(from_img: Image, do_wrap: bool) -> Image:
+	if from_img.get_height() % 2 == 1:
+		return make_half_v_shifted_img_odd(from_img, do_wrap)
+	var copy = Image.new()
+	copy.copy_from(from_img)
+	
+	var half_size = Vector2(from_img.get_width(), floor(from_img.get_height()/2.0))
+	var half_offset = Vector2(0, half_size.y)
+	
+	copy.blit_rect(from_img, Rect2(Vector2.ZERO, half_size), half_offset)
+	copy.blit_rect(from_img if do_wrap else transparent, Rect2(half_offset, half_size), Vector2.ZERO)
+	
+	return copy
+func make_half_h_shifted_img(from_img: Image, do_wrap: bool) -> Image:
+	if from_img.get_width() % 2 == 1:
+		return make_half_h_shifted_img_odd(from_img, do_wrap)
+	var copy = Image.new()
+	copy.copy_from(from_img)
+	
+	var half_size = Vector2(floor(from_img.get_width()/2.0), from_img.get_height())
+	var half_offset = Vector2(half_size.x, 0)
+	
+	copy.blit_rect(from_img, Rect2(Vector2.ZERO, half_size), half_offset)
+	copy.blit_rect(from_img if do_wrap else transparent, Rect2(half_offset, half_size), Vector2.ZERO)
+	
+	return copy
+
+func rotated_ccw(from_img: Image) -> Image:
+	var copy = Image.new()
+	copy.copy_from(from_img)
+	copy.flip_x()
+	return make_transposed_img(copy)
+func rotated_cw(from_img: Image) -> Image:
+	var copy = Image.new()
+	copy.copy_from(from_img)
+	copy.flip_y()
+	return make_transposed_img(copy)
+	
+
+func _on_PaintButton_pressed():
+	undoer.save_current_image("texture", edited_image)
+	var src_rect = Rect2(Vector2.ZERO, tile_brush_image.get_size())
+	var dest = local_tile_picker.get_picked_offset()
+	edited_image.blend_rect(tile_brush_image, src_rect, dest)
+	repaint()
+	
+func _on_EraseButton_pressed():
+	undoer.save_current_image("texture", edited_image)
+	var dest = local_tile_picker.get_picked_offset()
+	edited_image.blit_rect(transparent, whole_brush, dest)
+	repaint()
+
+func _on_PickFromEditedButton_pressed():
+	picked_brush_tex.atlas = edited_texture
+	picked_brush_tex.region = local_tile_picker.get_picked_region()
+	update_picked_brush()
+
+func _on_PickTileFromEditedButton_pressed():
+	var tex = AtlasTexture.new()
+	tex.atlas = edited_texture
+	tex.region.size = tile_brush_image.get_size()
+	tex.region.position = local_tile_picker.get_picked_offset()
+	undoer.save_current_image("tile_brush", tile_brush_image)
+	tile_brush_image = tex.get_data()
+	update_tile_brush_preview()
+
+func _on_TileToBrushButton_pressed():
+	picked_brush_tex.atlas = tile_brush_texture
+	picked_brush_tex.region.position = Vector2.ZERO
+	update_picked_brush()
+
+func _on_CCWButton_pressed():
+	tile_brush_image = rotated_ccw(tile_brush_image)
+	update_tile_brush_preview()
+func _on_CWButton_pressed():
+	tile_brush_image = rotated_cw(tile_brush_image)
+	update_tile_brush_preview()
+func _on_HFlipButton_pressed():
+	tile_brush_image.flip_x()
+	tile_brush_image.copy_from(tile_brush_image)
+	update_tile_brush_preview()
+func _on_VFlipButton_pressed():
+	tile_brush_image.flip_y()
+	tile_brush_image.copy_from(tile_brush_image)
+	update_tile_brush_preview()
+
+
+func _on_ShiftDownButton_pressed():
+	if not brush_wrap:
+		undoer.save_current_image("tile_brush", tile_brush_image)
+	tile_brush_image = make_half_v_shifted_img(tile_brush_image, brush_wrap)
+	update_tile_brush_preview()
+func _on_ShiftRightButton_pressed():
+	if not brush_wrap:
+		undoer.save_current_image("tile_brush", tile_brush_image)
+	tile_brush_image = make_half_h_shifted_img(tile_brush_image, brush_wrap)
+	update_tile_brush_preview()
+
+func brush_picked(dialog) -> void:
+	picked_texture_index = dialog.get_selected_texture()
+	picked_texture_sub_index = dialog.get_selected_sub_index()
+	
+	picked_brush_tex.atlas = TextureManager.get_texture(picked_texture_index)
+	picked_brush_tex.region = TextureManager.get_index_rect(picked_texture_index, picked_texture_sub_index)
+	#picked_brush_tex.region.position = TextureManager.get_index_offset(picked_texture_index, picked_texture_sub_index)
+	update_picked_brush()
+	
+
+func _on_PickBrushButton_pressed():
+	var dialog = texture_dialog.instance()
+	dialog.setup(picked_texture_index, picked_texture_sub_index)
+	
+	dialog.connect("confirmed", self, "brush_picked", [dialog])
+	add_child(dialog)
+	dialog.popup_centered()
+
+func _on_BrushSlideH_mouse_pressed():
+	show_tile_brush_crosshair(true)
+	if not brush_wrap:
+		undoer.save_current_image("tile_brush", tile_brush_image)
+		temp_tile_brush_image = Image.new()
+		temp_tile_brush_image.copy_from(tile_brush_image)
+func _on_BrushSlideH_mouse_released():
+	show_tile_brush_crosshair(false)
+	brush_sliding_h = floor(tile_brush_image.get_width()/2.0)
+	find_node("BrushSlideH").value = brush_sliding_h
+func _on_BrushSlideH_value_changed(value):
+	var diff = value - brush_sliding_h
+	if diff == 0:
+		return
+	brush_sliding_h = value
+	
+	var from_img = tile_brush_image
+	if not brush_wrap:
+		# copying from saved copy so the diff is relative to the center not the last value
+		diff = value - floor(tile_brush_image.get_width()/2.0)
+		from_img = temp_tile_brush_image
+	
+	tile_brush_image = make_h_shifted_img_by(from_img, diff, brush_wrap)
+	update_tile_brush_preview()
+
+func _on_BrushSlideV_mouse_pressed():
+	show_tile_brush_crosshair(true)
+	if not brush_wrap:
+		undoer.save_current_image("tile_brush", tile_brush_image)
+		temp_tile_brush_image = Image.new()
+		temp_tile_brush_image.copy_from(tile_brush_image)
+func _on_BrushSlideV_mouse_released():
+	show_tile_brush_crosshair(false)
+	brush_sliding_v = ceil(tile_brush_image.get_height()/2.0)
+	var alt = floor(tile_brush_image.get_height()/2.0)
+	find_node("BrushSlideV").value = alt
+func _on_BrushSlideV_value_changed(value):
+	# vertical slider has 0 at the bottom
+	value = tile_brush_image.get_height() - value
+	var diff = value - brush_sliding_v
+	if diff == 0:
+		return
+	brush_sliding_v = value
+	
+	var from_img = tile_brush_image
+	if not brush_wrap:
+		# copying from saved copy so the diff is relative to the center not the last value
+		diff = value - floor(tile_brush_image.get_height()/2.0)
+		from_img = temp_tile_brush_image
+	
+	tile_brush_image = make_v_shifted_img_by(from_img, diff, brush_wrap)
+	update_tile_brush_preview()
+	
+
+func _on_BrushWrap_toggled(button_pressed):
+	brush_wrap = button_pressed
+
+
+func _on_UndoBrushButton_pressed():
+	if undoer.has_undo("tile_brush"):
+		tile_brush_image = undoer.undo("tile_brush", tile_brush_image)
+		update_tile_brush_preview()
+func _on_RedoBrushButton2_pressed():
+	if undoer.has_redo("tile_brush"):
+		tile_brush_image = undoer.redo("tile_brush", tile_brush_image)
+		update_tile_brush_preview()
+
+func _on_UndoTextureButton_pressed():
+	if undoer.has_undo("texture"):
+		edited_image = undoer.undo("texture", edited_image)
+		repaint()
+func _on_RedoTextureButton_pressed():
+	if undoer.has_redo("texture"):
+		edited_image = undoer.redo("texture", edited_image)
+		repaint()
+
+
+
+func _on_DiscardButton_pressed():
+	emit_signal("popup_hide")
+
+
+func _on_SaveAsFileButton_pressed():
+	if not save_to_file:
+		save_to_file = Utility.random_animal() + ".png"
+	$SaveAsDialog.current_path = "user://images/" + save_to_file
+	$SaveAsDialog.popup_centered()
+	$SaveAsDialog.deselect_items()
+
+
+func _on_SaveAsDialog_file_selected(path):
+	edited_image.save_png(path)
+	find_parent("UIRoot").show_message("Saved")
+	set_save_path($SaveAsDialog.current_file)
+	FilesManager.update_local_image_metadata(save_to_file, image_meta)
+
+
+func _on_BrushColorPicker_color_changed(color):
+	brush_color = color
+	update_picked_colored_brush()
+
+
+func _on_SaveFileButton_pressed():
+	if save_to_file == "":
+		return
+	edited_image.save_png("user://images/" + save_to_file)
+	FilesManager.update_local_image_metadata(save_to_file, image_meta)
+	find_parent("UIRoot").show_message("Saved")
+	
+
+
+func _on_CornerButtonHover():
+	show_tile_brush_crosshair(true)
+func _on_CornerButtonUnHover():
+	show_tile_brush_crosshair(false)
+
+func show_tile_brush_crosshair(show: bool) -> void:
+	tile_brush_canvas.get_node("Crosshair").visible = show
+	
+
+
+func _on_resized():
+	var min_size = get_node("MarginContainer").get_minimum_size()
+	if rect_size.x < min_size.x:
+		rect_size.x = min_size.x
+	if rect_size.y < min_size.y:
+		rect_size.y = min_size.y

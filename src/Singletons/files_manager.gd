@@ -15,6 +15,19 @@ func init_folders():
 	if not directory.dir_exists("worlds"):
 		directory.make_dir("worlds")
 
+func ensure_dir_exists(dir) -> void:
+	var directory = Directory.new()
+	if directory.open("user://") != OK:
+		print_debug("Could not open user directory")
+		return
+	
+	if not directory.dir_exists(dir):
+		directory.make_dir(dir)
+
+func user_file_exists(file_path: String) -> bool:
+	var directory: = Directory.new()
+	return directory.file_exists("user://" + file_path)
+
 func save_json(json_string, directory, file_name) -> void:
 	var path = "user://" + directory + "/" + file_name + ".json"
 	
@@ -42,6 +55,7 @@ func save_game_info(game_info) -> void:
 	save_json(serialized, "games", game_file_name(game_info['game_name']))
 
 func game_file_name(game_name) -> String:
+	# TODO make this more sanitary
 	var file_name:String = game_name
 	file_name.replace(' ', '_')
 	return file_name
@@ -76,7 +90,7 @@ func get_games_list() -> Array:
 		var fn = directory.get_next()
 		while fn != "":
 			if not directory.current_is_dir():
-				var extension = fn.substr(fn.find_last('.') + 1)
+				var extension = get_extension(fn)
 				if extension == "json":
 					var f = File.new()
 					if not f.open(dir_path + fn, File.READ) == OK:
@@ -91,3 +105,110 @@ func get_games_list() -> Array:
 			fn = directory.get_next()
 	
 	return games_list
+
+func update_local_image_metadata(local_image_name, data) -> void:
+	var existing_data = _get_local_images_metadata()
+	existing_data[local_image_name] = Utility.dict_vectors_to_lists(data)
+	var f: = File.new()
+	f.open("user://local_image_meta.json", File.WRITE)
+	f.store_string(JSON.print(existing_data))
+	f.close()
+
+func get_local_image_metadata(local_image_name) -> Dictionary:
+	var local_meta = _get_local_images_metadata()
+	if local_meta and local_image_name in local_meta:
+		return local_meta[local_image_name]
+	return {}
+
+func _get_local_images_metadata() -> Dictionary:
+	var f = File.new()
+	if not user_file_exists("local_image_meta.json"):
+		print_debug("No local image meta")
+		return {}
+	if f.open("user://local_image_meta.json", File.READ) == OK:
+		var parsed = JSON.parse(f.get_as_text())
+		f.close()
+		if parsed.error == OK:
+			return parsed.result
+	print_debug("Error loading local image meta")
+	return {}
+	
+
+func get_all_image_names() -> Array:
+	var directory: = Directory.new()
+	
+	var dir_path = "user://images/"
+	
+	var images_list = []
+	if directory.open(dir_path) == OK:
+		directory.list_dir_begin(true)
+		
+		var first = true
+		var fn = directory.get_next()
+		while fn != "":
+			if first:
+				first = false
+			else:
+				fn = directory.get_next()
+			
+			if directory.current_is_dir():
+				continue
+			
+			var extension = get_extension(fn)
+			if extension == "png":
+				images_list.append(fn)
+	
+	return images_list
+
+func get_extension(fn: String) -> String:
+	var ext = ""
+	if fn.find_last('.') > -1:
+		ext = fn.substr(fn.find_last('.') + 1)
+	return ext
+
+func save_level(game_name, level_data) -> void:
+	var level_name = level_data["name"]
+	var serialized = JSON.print(level_data)
+	
+	var levels_dir = "levels/" + game_file_name(game_name)
+	ensure_dir_exists(levels_dir)
+	save_json(serialized, levels_dir, game_file_name(level_name))
+
+func get_level_data(game_name, level_name):
+	var file_name = game_file_name(level_name) + ".json"
+	var f = File.new()
+	if f.open("user://levels/" + game_file_name(game_name) + "/" + file_name, File.READ) == OK:
+		var parsed = JSON.parse(f.get_as_text())
+		f.close()
+		if parsed.error == OK:
+			return parsed.result
+	print_debug("Error loading level: " + file_name)
+	return {}
+
+func get_level_list(game_name) -> Array:
+	var directory: = Directory.new()
+	
+	var dir_path = "user://"
+	dir_path += "levels/" + game_file_name(game_name) + "/"
+	
+	var levels_list = []
+	if directory.open(dir_path) == OK:
+		directory.list_dir_begin(true)
+		var fn = directory.get_next()
+		while fn != "":
+			if not directory.current_is_dir():
+				var extension = get_extension(fn)
+				if extension == "json":
+					var f = File.new()
+					if not f.open(dir_path + fn, File.READ) == OK:
+						print_debug("Error opening file " + fn)
+					else:
+						var parsed = JSON.parse(f.get_as_text())
+						if parsed.error == OK:
+							if not parsed.result['name'] in levels_list:
+								levels_list.append(parsed.result['name'])
+						else:
+							print_debug("Error parsing level file " + fn)
+			fn = directory.get_next()
+	
+	return levels_list

@@ -12,8 +12,16 @@ func _ready():
 	name_box.text = GameManager.get_game_name()
 	find_node("SetWindowWidth").value = GameManager.game_view.x
 	find_node("SetWindowHeight").value = GameManager.game_view.y
+	init_movement_modes()
 	
 	game_settings = GameManager.game_definition["game_settings"]
+	
+	if "pixel_scale" in game_settings:
+		find_node("PixelScaleInput").value = game_settings["pixel_scale"]
+	if "auto_aspect" in game_settings:
+		find_node("AutoAspect").pressed = game_settings["auto_aspect"]
+	if "movement_mode" in game_settings:
+		find_node("MovementModeMenuButton").text = GameManager.describe_movement_mode(game_settings["movement_mode"])
 	
 	var cam_settings = {}
 	if "camera_settings" in game_settings:
@@ -24,6 +32,21 @@ func _ready():
 		follow_entity_validate()
 	if "enable_limits" in cam_settings:
 		find_node("EnableLimitsToggle").pressed = cam_settings["enable_limits"]
+
+func init_movement_modes() -> void:
+	var popup_menu: PopupMenu = find_node("MovementModeMenuButton").get_popup()
+	
+	for mode in GameManager.MovementMode.values():
+		popup_menu.add_item(GameManager.describe_movement_mode(mode), mode)
+	
+	popup_menu.connect("index_pressed", self, "movement_mode_picked")
+
+func movement_mode_picked(index) -> void:
+	var popup_menu: PopupMenu = find_node("MovementModeMenuButton").get_popup()
+	find_node("MovementModeMenuButton").text = popup_menu.get_item_text(index)
+	var mode = popup_menu.get_item_id(index)
+	
+	game_settings["movement_mode"] = mode
 
 func _on_SaveButton_pressed():
 	if FilesManager.game_definition_exists(GameManager.get_game_name()):
@@ -36,6 +59,7 @@ func _on_SaveButton_pressed():
 
 func _real_save():
 	var game_data = {"game_name": GameManager.get_game_name()}
+	game_data['textures'] = TextureManager.get_texture_spec()
 	game_data['tile_definitions'] = MapManager.tile_defs
 	game_data['entity_definitions'] = EntityManager.entity_defs
 	game_data['window_width'] = GameManager.game_view.x
@@ -101,3 +125,10 @@ func _on_EnableLimitsToggle_toggled(button_pressed):
 	set_camera_settings("enable_limits", button_pressed)
 func _on_ExtendCamLimits_value_changed(value):
 	set_camera_settings("extend_limits", value)
+
+
+func _on_PixelScaleInput_value_changed(value):
+	game_settings["pixel_scale"] = value
+
+func _on_AutoAspect_toggled(button_pressed):
+	game_settings["auto_aspect"] = button_pressed

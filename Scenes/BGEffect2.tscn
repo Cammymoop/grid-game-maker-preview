@@ -1,0 +1,97 @@
+[gd_scene load_steps=12 format=2]
+
+[ext_resource path="res://src/Effects/VoidParticles.gd" type="Script" id=1]
+
+[sub_resource type="Environment" id=10]
+background_mode = 4
+glow_enabled = true
+glow_intensity = 3.29
+glow_strength = 0.67
+glow_bloom = 1.0
+
+[sub_resource type="World" id=11]
+environment = SubResource( 10 )
+
+[sub_resource type="CanvasItemMaterial" id=12]
+blend_mode = 1
+
+[sub_resource type="Gradient" id=6]
+offsets = PoolRealArray( 0.192547, 0.341615, 0.478261, 0.720497, 1 )
+colors = PoolColorArray( 0.263672, 0.0494385, 0.0569701, 1, 0.0894547, 0.143669, 0.341797, 1, 0.932209, 0.403748, 0.984375, 1, 0.518636, 0.41178, 0.578579, 1, 0.15625, 0.116577, 0.119367, 1 )
+
+[sub_resource type="GradientTexture" id=7]
+gradient = SubResource( 6 )
+
+[sub_resource type="Curve" id=1]
+_data = [ Vector2( 0, 0.0602273 ), 0.0, 0.0, 0, 0, Vector2( 0.26087, 0.902273 ), 0.0, 0.0, 0, 0, Vector2( 0.766304, 0.996591 ), 0.0, 0.0, 0, 0, Vector2( 1, 0.0329546 ), 0.0, 0.0, 0, 0 ]
+
+[sub_resource type="CurveTexture" id=2]
+curve = SubResource( 1 )
+
+[sub_resource type="ParticlesMaterial" id=8]
+emission_shape = 2
+emission_box_extents = Vector3( 192, 288, 1 )
+flag_disable_z = true
+spread = 20.0
+gravity = Vector3( -35, 0, 0 )
+initial_velocity = 90.0
+orbit_velocity = 0.0
+orbit_velocity_random = 0.0
+angle = 169.4
+angle_random = 0.45
+scale = 5.0
+scale_curve = SubResource( 2 )
+color = Color( 1.4, 1.4, 1.4, 1 )
+color_ramp = SubResource( 7 )
+
+[sub_resource type="Gradient" id=4]
+colors = PoolColorArray( 1, 1, 1, 1, 1, 1, 1, 1 )
+
+[sub_resource type="GradientTexture" id=9]
+gradient = SubResource( 4 )
+width = 1
+
+[node name="BGEffects" type="Node"]
+
+[node name="CanvasLayer2" type="CanvasLayer" parent="."]
+layer = -2
+
+[node name="ViewportContainer" type="ViewportContainer" parent="CanvasLayer2"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+stretch = true
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Viewport" type="Viewport" parent="CanvasLayer2/ViewportContainer"]
+size = Vector2( 768, 768 )
+own_world = true
+world = SubResource( 11 )
+
+[node name="CanvasLayer" type="CanvasLayer" parent="CanvasLayer2/ViewportContainer/Viewport"]
+layer = -3
+
+[node name="ColorRect" type="ColorRect" parent="CanvasLayer2/ViewportContainer/Viewport/CanvasLayer"]
+show_behind_parent = true
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color( 0.12549, 0.105882, 0.168627, 1 )
+__meta__ = {
+"_edit_use_anchors_": false,
+"_editor_description_": ""
+}
+
+[node name="Particles2D" type="Particles2D" parent="CanvasLayer2/ViewportContainer/Viewport"]
+pause_mode = 2
+material = SubResource( 12 )
+position = Vector2( 192, 192 )
+amount = 600
+lifetime = 6.5
+preprocess = 9.0
+speed_scale = 0.8
+visibility_rect = Rect2( -192, -192, 1000, 384 )
+draw_order = 1
+process_material = SubResource( 8 )
+texture = SubResource( 9 )
+script = ExtResource( 1 )

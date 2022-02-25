@@ -35,6 +35,7 @@ func update_bounds() -> void:
 		var center_y = level_bounds.position.y + level_bounds.size.y/2
 		limit_top = center_y - vp_size.y/2
 		limit_bottom = center_y + vp_size.y/2
+	print([limit_left, limit_right])
 
 func activate():
 	active = true

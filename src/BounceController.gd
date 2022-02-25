@@ -1,10 +1,16 @@
 extends Node
 
+var move_mode = "facing"
+
+onready var parent = get_parent()
+
 func get_options() -> Dictionary:
 	return {}
 
 func get_move():
-	var parent = get_parent()
+	if not EntityManager.controller_frame:
+		return -1
+	
 	if parent.can_i_move_relative("forward"):
 		return parent.facing
 	

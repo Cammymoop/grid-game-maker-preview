@@ -30,6 +30,7 @@ var entity_index = 0
 var entity_name = null
 
 var bond_group = null
+var tailing: Node = null
 
 var has_idle_update_conditional = false
 var idle_update_cache = null
@@ -46,15 +47,33 @@ func _ready() -> void:
 	tile_position = MapManager.world_to_tile_position(global_position)
 	next_tile_pos = tile_position
 	entity_name = EntityManager.get_entity_name(entity_index)
+	
+	offset_center()
 
 func initialize() -> void:
 	check_for_idle_update_conditional()
 	check_visual_turn_on_move()
 	
 	connect_to_signals()
+	
+	update_z()
+
+func update_z():
+	var z = EntityManager.get_entity_property(self, "z-index")
+	if z:
+		if z.is_conditional():
+			z_index = int(z.resolve(self, null, tile_position))
+		else:
+			z_index = int(z.get_value())
+	else:
+		z_index = 0
+
+func offset_center() -> void:
+	$Sprite.position.x = floor(MapManager.tile_width/2)
+	$Sprite.position.y = floor(MapManager.tile_width/2)
 
 func get_center_offset() -> Vector2:
-	return Vector2(MapManager.tile_width/2, MapManager.tile_width/2)
+	return $Sprite.position
 
 func connect_to_signals() -> void:
 	var all_props = EntityManager.get_entity_property_list(self)
@@ -64,7 +83,7 @@ func connect_to_signals() -> void:
 			var signal_name = prop.substr(12)
 			if not EntityManager.has_user_signal(signal_name):
 				EntityManager.create_signal(signal_name)
-			EntityManager.connect(signal_name, self, "em_signal", [signal_name])
+			EntityManager.connect(signal_name, self, "entity_manager_signal", [signal_name])
 
 	
 func check_for_idle_update_conditional() -> void:
@@ -101,8 +120,8 @@ func deserialize(data: Dictionary) -> void:
 	active = data['active']
 	set_self_speed(data['self_steps_per_tile'])
 	set_current_speed(data['steps_per_tile'])
-	entity_index = data['entity_index']
-	instance_id = data['instance_id']
+	entity_index = int(data['entity_index'])
+	instance_id = int(data['instance_id'])
 	entity_name = EntityManager.get_entity_name(entity_index)
 	local_properties = data['local_properties']
 	
@@ -127,6 +146,10 @@ func set_active(new_active) -> void:
 	active = new_active
 
 func _physics_process(_delta) -> void:
+	if EntityManager.movements_enabled:
+		entity_process()
+
+func entity_process() -> void:
 	if not active:
 		return
 	
@@ -246,6 +269,9 @@ func actually_started_move() -> void:
 		print("post move conditional")
 		post_move.resolve(self, null, next_tile_pos)
 
+func is_settled() -> bool:
+	return not moving
+
 func set_controller(new_controller) -> void:
 	controller = new_controller
 	
@@ -310,10 +336,37 @@ func die() -> void:
 		dying.resolve(self, null, tile_position)
 	EntityManager.remove_entity(self)
 
+func set_tailing(entity_to_tail) -> void:
+	tailing = entity_to_tail
+	tailing.connect("started_move", self, "tail_follow")
+
+func untail() -> void:
+	if tailing and is_instance_valid(tailing):
+		if tailing.is_connected("started_move", self, "tail_follow"):
+			tailing.disconnect("started_move", self, "tail_follow")
+	tailing = null
+
+func tail_follow() -> void:
+	if not tailing:
+		return
+	if steps_per_tile != tailing.steps_per_tile:
+		set_current_speed(tailing.steps_per_tile)
+	
+	var target_tile = tailing.tile_position
+	if (target_tile - tile_position).length() > 1:
+		print_debug('tail detached')
+		untail()
+	
+	var new_facing = Utility.facing_from_adjacent_positions(tile_position, target_tile)
+	var moved = start_move(new_facing)
+	if not moved:
+		print_debug('tail failed to move')
+		untail()
+
 func can_i_move_relative(relative_direction) -> bool:
 	return can_i_move(Utility.resolve_relative_direction(relative_direction, facing))
 
-func em_signal(signaling_entity, args, signal_name) -> void:
+func entity_manager_signal(signaling_entity, args, signal_name) -> void:
 	var handler = EntityManager.get_entity_property(self, "when_signal_" + signal_name)
 	if handler and handler.is_conditional():
 		handler.resolve(self, signaling_entity, tile_position, args)

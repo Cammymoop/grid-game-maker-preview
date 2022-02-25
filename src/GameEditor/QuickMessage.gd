@@ -14,7 +14,7 @@ func _process(delta):
 	t -= delta
 	var alpha = t/fade_time * 3
 	
-	modulate = Color(1, 1, 1, alpha)
+	modulate = Color(1, 1, 1, min(1, alpha))
 	if alpha < 0:
 		queue_free()
 	

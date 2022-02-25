@@ -1,7 +1,8 @@
-[gd_scene load_steps=5 format=2]
+[gd_scene load_steps=6 format=2]
 
 [ext_resource path="res://Scenes/MapEditor.tscn" type="PackedScene" id=1]
 [ext_resource path="res://Scenes/PauseMenu.tscn" type="PackedScene" id=2]
+[ext_resource path="res://Scenes/VoidBGEffect.tscn" type="PackedScene" id=3]
 [ext_resource path="res://src/ScalerViewport.gd" type="Script" id=4]
 [ext_resource path="res://src/GameViewNoScale.gd" type="Script" id=5]
 
@@ -50,3 +51,5 @@ script = ExtResource( 5 )
 z_index = 1
 
 [node name="PauseMenu" parent="." instance=ExtResource( 2 )]
+
+[node name="VoidBGEffects" parent="." instance=ExtResource( 3 )]

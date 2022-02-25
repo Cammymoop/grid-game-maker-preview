@@ -7,6 +7,9 @@ var cur_game_name: = ""
 
 var checkpoint_save = {}
 var editor_save = {}
+var loaded_level = {}
+
+var loaded_level_name = ""
 
 var loaded = false
 
@@ -29,11 +32,39 @@ var game_definition = {}
 
 var game_camera = null
 
+enum MovementMode {
+	MOVEMENT_CONTINUOUS, MOVEMENT_DISCRETE, MOVEMENT_DISCRETE_WAIT
+}
+
 func _ready():
 	# run _process even when the game is paused
 	pause_mode = PAUSE_MODE_PROCESS
 	cur_scene = get_tree().current_scene.name
 	FilesManager.init_folders()
+	
+	var default_game = FilesManager.get_default_game()
+	if len(default_game) > 0:
+		load_game_definition_from_file(default_game)
+		start_managers()
+	else:
+		set_game_name("Basic")
+		game_definition["game_settings"] = {"pixel_scale": 2}
+		start_managers()
+
+func start_managers() -> void:
+	TextureManager.setup()
+	MapManager.setup()
+	EntityManager.setup()
+
+func describe_movement_mode(mode: int) -> String:
+	match mode:
+		MovementMode.MOVEMENT_CONTINUOUS:
+			return "Continuous"
+		MovementMode.MOVEMENT_DISCRETE:
+			return "Discrete"
+		MovementMode.MOVEMENT_DISCRETE_WAIT:
+			return "Discrete, wait for all moves to finish"
+	return ""
 
 func load_game_definition_from_file(game_name) -> void:
 	var definition = FilesManager.get_game_definition(game_name)
@@ -44,10 +75,19 @@ func load_game_definition_from_file(game_name) -> void:
 	game_definition = definition
 	
 	set_game_name(definition['game_name'])
+	
+	TextureManager.clear()
+	if "textures" in definition:
+		TextureManager.set_textures(definition['textures'])
+	else:
+		TextureManager.set_default_textures()
+	
 	MapManager.tile_defs = definition['tile_definitions']
-	MapManager.refresh_definition()
+	if MapManager.im_ready:
+		MapManager.refresh_definition()
 	EntityManager.entity_defs = definition['entity_definitions']
-	EntityManager.refresh_definition()
+	if EntityManager.im_ready:
+		EntityManager.refresh_definition()
 	
 	if "window_width" in definition:
 		set_game_view(definition['window_width'], definition['window_height'])
@@ -62,6 +102,14 @@ func load_game_definition_from_file(game_name) -> void:
 		
 		if cur_scene == "GameEditor":
 			loaded = true
+
+func get_game_setting(setting_name, default):
+	if not setting_name in game_definition["game_settings"]:
+		return default
+	return game_definition["game_settings"][setting_name]
+
+func get_default_pixel_scale() -> float:
+	return get_game_setting("pixel_scale", 1)
 
 func get_game_name() -> String:
 	return cur_game_name
@@ -90,6 +138,7 @@ func load_serialized_play_state(serialized_state: Dictionary) -> void:
 	yield(get_tree(), "idle_frame")
 	yield(get_tree(), "idle_frame")
 	EntityManager.clear()
+	MapManager.clear_layers()
 	MapManager.deserialize(serialized_state['map'])
 	EntityManager.deserialize(serialized_state['entities'])
 	
@@ -123,6 +172,10 @@ func set_pause(source, paused: bool) -> void:
 				actually_paused = true
 	if actually_paused != get_tree().paused:
 		get_tree().paused = actually_paused
+func get_pause(source) -> bool:
+	if source in pauses:
+		return pauses[source]
+	return false
 
 func _unpause() -> void:
 	pauses = {}
@@ -134,13 +187,19 @@ func load_checkpoint() -> void:
 	load_serialized_play_state(checkpoint_save)
 
 func save_edited() -> void:
+	print_debug("setting editor_save")
 	editor_save = get_serialized_play_state()
 func load_edited() -> void:
 	load_serialized_play_state(editor_save)
 
+func load_level_data(level_data):
+	loaded_level_name = level_data["name"]
+	editor_save = level_data["state"]
+	load_edited()
+	toggle_pause_menu()
+
 func level_start():
 	EntityManager.clear()
-	update_game_viewport()
 	MapManager.create_plain_layer()
 	EntityManager.create_defaults()
 	
@@ -148,7 +207,6 @@ func level_start():
 
 func load_random_level():
 	EntityManager.clear()
-	update_game_viewport()
 	MapManager.create_random_layer()
 	EntityManager.create_randoms()
 	
@@ -160,6 +218,8 @@ func change_scene(new_scene: String):
 		return
 	
 	if cur_scene == "Play":
+		if editor_save:
+			loaded_level = editor_save
 		EntityManager.clear_entity_list()
 		MapManager.clear_layers()
 		game_camera = null
@@ -175,12 +235,18 @@ func change_scene(new_scene: String):
 
 func post_scene_change() -> void:
 	if cur_scene == "Play":
+		update_game_viewport()
 		create_game_camera()
 		activate_gameplay_camera()
-		level_start()
+		if loaded_level:
+			load_serialized_play_state(loaded_level)
+		else:
+			level_start()
 
 func update_game_viewport() -> void:
-	Utility.get_world().get_viewport().set_resolution(game_view * MapManager.tile_width)
+	var vp = Utility.get_world().get_viewport()
+	vp.update_aspect = get_game_setting("auto_aspect", true)
+	vp.set_resolution(game_view * MapManager.tile_width)
 
 func set_game_view(width, height) -> void:
 	game_view = Vector2(width, height)
@@ -189,7 +255,7 @@ func rescale_window() -> void:
 	if OS.window_fullscreen or OS.window_maximized:
 		return
 	
-	OS.window_size = game_view * MapManager.tile_width * 2
+	OS.window_size = game_view * MapManager.tile_width * get_default_pixel_scale()
 	
 	# Re-center the window
 	var screen = OS.get_screen_size()
@@ -206,15 +272,15 @@ func toggle_pause_menu():
 func start_on_ready() -> bool:
 	if TextureManager.im_ready and MapManager.im_ready and EntityManager.im_ready:
 		
-		var default_game = FilesManager.get_default_game()
-		if len(default_game) > 0:
-			load_game_definition_from_file(default_game)
-		else:
-			set_game_name("Basic")
-			game_definition["game_settings"] = {}
+#		var default_game = FilesManager.get_default_game()
+#		if len(default_game) > 0:
+#			load_game_definition_from_file(default_game)
+#		else:
+#			set_game_name("Basic")
+#			game_definition["game_settings"] = {"pixel_scale": 2}
 
 		# Set the window size for the default game
-		rescale_window()
+#		rescale_window()
 		
 		started = true
 		if cur_scene == "Loading":
@@ -228,15 +294,6 @@ func _process(_delta):
 	if not started:
 		if not start_on_ready():
 			return
-	
-	if cur_scene == "Play":
-		if Input.is_action_just_pressed("refresh"):
-			#get_tree().reload_current_scene()
-			#call_deferred("load_random_level")
-			load_edited()
-		elif Input.is_action_just_pressed("editor_new_map"):
-			get_tree().reload_current_scene()
-			call_deferred("level_start")
 	
 	if Input.is_action_just_pressed("escape"):
 		if cur_scene == "GameEditor":

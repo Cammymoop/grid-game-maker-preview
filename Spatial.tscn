@@ -1,0 +1,41 @@
+[gd_scene load_steps=6 format=2]
+
+[ext_resource path="res://Spatial.gd" type="Script" id=1]
+
+[sub_resource type="ProceduralSky" id=1]
+sun_latitude = 0.0
+sun_angle_max = 50.0
+sun_curve = 0.0757859
+texture_size = 1
+
+[sub_resource type="Environment" id=2]
+background_mode = 3
+background_sky = SubResource( 1 )
+glow_enabled = true
+glow_bloom = 0.6
+glow_blend_mode = 1
+glow_bicubic_upscale = true
+
+[sub_resource type="SpatialMaterial" id=4]
+roughness = 0.1
+
+[sub_resource type="CubeMesh" id=3]
+material = SubResource( 4 )
+
+[node name="Spatial" type="Spatial"]
+script = ExtResource( 1 )
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource( 2 )
+
+[node name="Camera" type="Camera" parent="."]
+transform = Transform( -0.61017, 0.394912, -0.686831, 0, 0.866914, 0.498457, 0.79227, 0.304143, -0.528965, -5.83711, 3.54316, -10.161 )
+
+[node name="MeshInstance" type="MeshInstance" parent="."]
+transform = Transform( 1, 0, 0, 0, 0.817064, -0.576546, 0, 0.576546, 0.817064, 0, 0, -5.24771 )
+mesh = SubResource( 3 )
+material/0 = null
+
+[node name="OmniLight" type="OmniLight" parent="."]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -9.65449 )
+light_energy = 1.5
