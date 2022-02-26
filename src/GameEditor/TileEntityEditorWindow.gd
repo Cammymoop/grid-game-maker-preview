@@ -29,7 +29,7 @@ func set_controller(list_index) -> void:
 	var controller_button = find_node("EditController")
 	var controller_list:PopupMenu = controller_button.get_popup()
 	var controller = controller_list.get_item_text(list_index)
-	if controller == the_definition["controller"]:
+	if the_definition.has("controller") and controller == the_definition["controller"]:
 		return
 	
 	if "controller_options" in the_definition:

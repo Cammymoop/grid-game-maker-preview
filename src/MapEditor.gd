@@ -142,7 +142,10 @@ func _place(holding=false):
 		var entities_here = EntityManager.get_entities_at(cursor_tile_pos)
 		if not delete_held_on_entity and (len(entities_here) < 1 or holding):
 			# No entities, remove the tile
-			MapManager.replace_tiles_at(cursor_tile_pos, -1)
+			var here = MapManager.get_tile_index_at(cursor_tile_pos)
+			if here > -1:
+				MapManager.replace_tiles_at(cursor_tile_pos, -1)
+				$DustParticles.emit_at(MapManager.tile_to_world_position_centered(cursor_tile_pos))
 		elif not holding:
 			delete_held_on_entity = true
 		for e in entities_here:

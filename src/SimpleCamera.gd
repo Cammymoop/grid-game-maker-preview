@@ -52,17 +52,27 @@ func _process(_delta):
 	if not active:
 		return
 	
-	if target_entity:
+	if target_entity and is_instance_valid(target_entity):
 		position = target_entity.global_position + ent_center_offset
 
 func find_entity_to_follow() -> void:
 	if not active:
 		return
 	
-	var ent_name = Utility.get_camera_setting("follow_entity")
-	if ent_name:
-		var ent_index = EntityManager.get_entity_index(ent_name)
-		target_entity = EntityManager.find_entity_by_index(ent_index)
-		if target_entity:
-			ent_center_offset = target_entity.get_center_offset()
+	var follow_this = Utility.get_camera_setting("follow_entity")
+	var by_mode = Utility.get_camera_setting("follow_entity_by")
+	
+	if follow_this:
+		if not by_mode or by_mode == "name":
+			print_debug("finding name " + follow_this)
+			var ent_index = EntityManager.get_entity_index(follow_this)
+			target_entity = EntityManager.find_entity_by_index(ent_index, false)
+			if target_entity:
+				ent_center_offset = target_entity.get_center_offset()
+			else:
+				print_debug("not found name " + follow_this + " " + str(ent_index))
+		else:
+			target_entity = EntityManager.find_entity_with_property(follow_this, false)
+			if target_entity:
+				ent_center_offset = target_entity.get_center_offset()
 		

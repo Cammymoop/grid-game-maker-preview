@@ -370,3 +370,5 @@ func world_to_tile_position(world_position):
 
 func tile_to_world_position(tile_position):
 	return Vector2(tile_position.x * tile_width, tile_position.y * tile_width)
+func tile_to_world_position_centered(tile_position):
+	return (tile_position + Vector2(0.5, 0.5)) * tile_width

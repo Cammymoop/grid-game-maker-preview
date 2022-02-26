@@ -1,8 +1,10 @@
 extends Node
 
 signal entity_list_updated
+signal post_deserialize
 
 var entity_template = preload("res://Scenes/BaseEntity.tscn")
+var large_entity_template = preload("res://Scenes/LargeEntity.tscn")
 var controller_templates = {}
 
 var entity_defs = {
@@ -261,7 +263,11 @@ func add_entity_to_world(entity):
 func create_entity(entity_index, tile_position, facing=0, activate=true) -> Node2D:
 	var entity_info = entity_defs[entity_index]
 	
-	var entity = entity_template.instance()
+	var entity: BaseEntity
+	if "entity_type" in entity_info:
+		entity = large_entity_template.instance()
+	else: 
+		entity = entity_template.instance()
 	if "intended_move_speed" in entity_info:
 		entity.set_intended_move_speed(entity_info['intended_move_speed'])
 	if "controller" in entity_info:
@@ -270,8 +276,6 @@ func create_entity(entity_index, tile_position, facing=0, activate=true) -> Node
 			entity.controller_name = entity_info['controller']
 			entity.add_child(controller)
 			entity.set_controller(controller)
-			if "controller_options" in entity_info:
-				controller.set_options(entity_info["controller_options"])
 	entity.entity_index = entity_index
 	entity.position = MapManager.tile_to_world_position(tile_position)
 	add_entity_to_world(entity)
@@ -298,7 +302,7 @@ func create_entity(entity_index, tile_position, facing=0, activate=true) -> Node
 	
 	return entity
 
-func auto_tail_handler(entity) -> void:
+func auto_tail_handler(entity: BaseEntity) -> void:
 	var auto_tail = get_entity_property(entity, "auto_tail")
 	if auto_tail:
 		var prop_filter = false
@@ -321,7 +325,7 @@ func auto_tail_handler(entity) -> void:
 			elif prop_filter:
 				entity.set_tailing(e)
 
-func auto_bond_handler(entity) -> void:
+func auto_bond_handler(entity: BaseEntity) -> void:
 	var auto_bond = get_entity_property(entity, "auto_bond")
 	if auto_bond:
 		var need_to_bond = false
@@ -344,7 +348,11 @@ func auto_bond_handler(entity) -> void:
 				create_bond_group([entity])
 
 func restore_entity(serialized_entity, refresh=true) -> void:
-	var entity = entity_template.instance()
+	var entity: BaseEntity
+	if not "entity_class" in serialized_entity or serialized_entity["entity_class"] == "BaseEntity":
+		entity = entity_template.instance()
+	else:
+		entity = large_entity_template.instance()
 	
 	add_entity_to_world(entity)
 	entity.deserialize(serialized_entity)
@@ -377,6 +385,8 @@ func deserialize(data: Dictionary) -> void:
 	instance_counter = 0
 	for e in entity_list:
 		instance_counter = max(instance_counter, e.instance_id + 1)
+	
+	emit_signal("post_deserialize")
 
 func create_bond_group(entities: Array) -> void:
 	var group = []
@@ -457,23 +467,28 @@ func get_entities_at(tile_position, exclude_entity=null, exclude_bond_group=null
 			continue
 		if exclude_bond_group and e.instance_id in exclude_bond_group:
 			continue
-		if e.moving:
-			if e.next_tile_pos == tile_position or (include_moving_away and e.tile_position == tile_position):
+		if e is LargeEntity:
+			if e.is_at(tile_position):
 				entities_here.append(e)
-		elif e.tile_position == tile_position:
-			entities_here.append(e)
+		else:
+			if e.moving:
+				if e.next_tile_pos == tile_position or (include_moving_away and e.tile_position == tile_position):
+					entities_here.append(e)
+			elif e.tile_position == tile_position:
+				entities_here.append(e)
 	return entities_here
 
 func find_entity_by_index(entity_index, first=true):
-	var found = null
-	if first:
-		for e in entity_list:
-			if e.entity_index == entity_index:
-				if first:
-					return e
-				else:
-					found = e
-	return found
+	for i in Utility.array_iter(entity_list, not first):
+		if entity_list[i].entity_index == entity_index:
+			return entity_list[i]
+	return null
+
+func find_entity_with_property(prop_name, first=true):
+	for i in Utility.array_iter(entity_list, not first):
+		if entity_has_property(entity_list[i], prop_name):
+			return entity_list[i]
+	return null
 
 func create_index_map() -> void:
 	entity_index_map = {}
@@ -615,7 +630,7 @@ func entity_has_property(entity, property_name: String) -> bool:
 	var has = entity.has_local_property(property_name) 
 	has = has or property_name in entity_props
 	if "inherit_properties" in entity_props:
-		var from = entity_props["inherit_properties"]
+		var from = get_entity_index(entity_props["inherit_properties"])
 		has = has or property_name in entity_defs[from]["properties"]
 	return has
 

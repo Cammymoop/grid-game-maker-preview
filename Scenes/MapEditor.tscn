@@ -1,10 +1,12 @@
-[gd_scene load_steps=8 format=2]
+[gd_scene load_steps=15 format=2]
 
 [ext_resource path="res://src/MapEditor.gd" type="Script" id=1]
 [ext_resource path="res://assets/img/cursor.png" type="Texture" id=2]
 [ext_resource path="res://assets/img/entityTiles.png" type="Texture" id=3]
 [ext_resource path="res://src/EditorCam.gd" type="Script" id=4]
 [ext_resource path="res://src/TileEntityPreview.gd" type="Script" id=5]
+[ext_resource path="res://src/BatchOneShotEmitters.gd" type="Script" id=7]
+[ext_resource path="res://assets/img/particle_textures/soft_cloud.png" type="Texture" id=8]
 
 [sub_resource type="Animation" id=14]
 length = 0.001
@@ -37,6 +39,35 @@ tracks/0/keys = {
 "values": [ Color( 1, 1, 1, 0.388235 ), Color( 1, 1, 1, 0.686275 ), Color( 1, 1, 1, 0.388235 ) ]
 }
 
+[sub_resource type="Gradient" id=16]
+offsets = PoolRealArray( 0, 0.180124, 1 )
+colors = PoolColorArray( 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0 )
+
+[sub_resource type="GradientTexture" id=17]
+gradient = SubResource( 16 )
+
+[sub_resource type="Curve" id=18]
+_data = [ Vector2( 0, 0 ), 0.0, 0.0, 0, 0, Vector2( 0.282609, 1 ), 0.0, 0.0, 0, 0, Vector2( 0.434783, 1 ), 0.0, 0.0, 0, 0, Vector2( 0.978261, 0.456818 ), 0.0, 0.0, 0, 0 ]
+
+[sub_resource type="CurveTexture" id=19]
+curve = SubResource( 18 )
+
+[sub_resource type="ParticlesMaterial" id=20]
+emission_shape = 2
+emission_box_extents = Vector3( 8, 8, 1 )
+flag_disable_z = true
+spread = 180.0
+gravity = Vector3( 0, 0, 0 )
+initial_velocity = 100.0
+orbit_velocity = 0.0
+orbit_velocity_random = 0.0
+damping = 200.0
+angle = 720.0
+angle_random = 1.0
+scale = 0.7
+scale_curve = SubResource( 19 )
+color_ramp = SubResource( 17 )
+
 [node name="MapEditor" type="Node2D"]
 pause_mode = 1
 z_index = 10
@@ -64,3 +95,98 @@ anims/alpha_pulse = SubResource( 15 )
 limit_smoothed = true
 smoothing_enabled = true
 script = ExtResource( 4 )
+
+[node name="DustParticles" type="Node2D" parent="."]
+z_index = -3
+z_as_relative = false
+script = ExtResource( 7 )
+
+[node name="ColorRect" type="ColorRect" parent="DustParticles"]
+visible = false
+show_behind_parent = true
+margin_left = -41.0
+margin_top = -30.0
+margin_right = 71.0
+margin_bottom = 135.0
+color = Color( 0, 0, 0, 1 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Emitter" type="Particles2D" parent="DustParticles"]
+self_modulate = Color( 1, 1, 1, 0.658824 )
+position = Vector2( 16, 48 )
+emitting = false
+amount = 20
+lifetime = 0.6
+one_shot = true
+speed_scale = 1.4
+explosiveness = 0.9
+local_coords = false
+process_material = SubResource( 20 )
+texture = ExtResource( 8 )
+
+[node name="Emitter2" type="Particles2D" parent="DustParticles"]
+self_modulate = Color( 1, 1, 1, 0.658824 )
+position = Vector2( 16, 48 )
+emitting = false
+amount = 20
+lifetime = 0.6
+one_shot = true
+speed_scale = 1.4
+explosiveness = 0.9
+local_coords = false
+process_material = SubResource( 20 )
+texture = ExtResource( 8 )
+
+[node name="Emitter3" type="Particles2D" parent="DustParticles"]
+self_modulate = Color( 1, 1, 1, 0.658824 )
+position = Vector2( 16, 48 )
+emitting = false
+amount = 20
+lifetime = 0.6
+one_shot = true
+speed_scale = 1.4
+explosiveness = 0.9
+local_coords = false
+process_material = SubResource( 20 )
+texture = ExtResource( 8 )
+
+[node name="Emitter4" type="Particles2D" parent="DustParticles"]
+self_modulate = Color( 1, 1, 1, 0.658824 )
+position = Vector2( 16, 48 )
+emitting = false
+amount = 20
+lifetime = 0.6
+one_shot = true
+speed_scale = 1.4
+explosiveness = 0.9
+local_coords = false
+process_material = SubResource( 20 )
+texture = ExtResource( 8 )
+
+[node name="Emitter5" type="Particles2D" parent="DustParticles"]
+self_modulate = Color( 1, 1, 1, 0.658824 )
+position = Vector2( 16, 48 )
+emitting = false
+amount = 20
+lifetime = 0.6
+one_shot = true
+speed_scale = 1.4
+explosiveness = 0.9
+local_coords = false
+process_material = SubResource( 20 )
+texture = ExtResource( 8 )
+
+[node name="Emitter6" type="Particles2D" parent="DustParticles"]
+self_modulate = Color( 1, 1, 1, 0.658824 )
+position = Vector2( 16, 48 )
+emitting = false
+amount = 20
+lifetime = 0.6
+one_shot = true
+speed_scale = 1.4
+explosiveness = 0.9
+local_coords = false
+process_material = SubResource( 20 )
+texture = ExtResource( 8 )

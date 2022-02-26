@@ -1,4 +1,5 @@
 extends Node2D
+class_name BaseEntity
 
 signal started_move
 signal finished_move
@@ -114,6 +115,11 @@ func serialize() -> Dictionary:
 	if controller_name:
 		important_stuff['controller_name'] = controller_name
 	
+	if tailing and is_instance_valid(tailing):
+		important_stuff['tailing'] = tailing.instance_id
+	
+	important_stuff['entity_class'] = "BaseEntity"
+	
 	return important_stuff
 
 func deserialize(data: Dictionary) -> void:
@@ -141,6 +147,8 @@ func deserialize(data: Dictionary) -> void:
 		var new_controller = EntityManager.get_new_controller(controller_name)
 		add_child(new_controller)
 		set_controller(new_controller)
+	
+	yield(EntityManager, "post_deserialize")
 
 func set_active(new_active) -> void:
 	active = new_active
@@ -218,7 +226,7 @@ func finish_move() -> void:
 	tile_position = MapManager.world_to_tile_position(global_position)
 	emit_signal("finished_move")
 	if tile_position != next_tile_pos:
-		print("???")
+		print_debug("???")
 	moving = false
 	MapManager.finish_move(self, tile_position)
 

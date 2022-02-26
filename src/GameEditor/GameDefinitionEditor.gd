@@ -27,9 +27,14 @@ func _ready():
 	if "camera_settings" in game_settings:
 		cam_settings = game_settings["camera_settings"]
 	
+	var follow_by_button = find_node("FollowBy")
+	follow_by_button.connect("changed", self, "change_follow_by")
+	
 	if "follow_entity" in cam_settings:
 		find_node("FollowEntity").text = cam_settings["follow_entity"]
 		follow_entity_validate()
+	if "follow_entity_by" in cam_settings:
+		follow_by_button.text = cam_settings["follow_entity_by"]
 	if "enable_limits" in cam_settings:
 		find_node("EnableLimitsToggle").pressed = cam_settings["enable_limits"]
 
@@ -40,6 +45,9 @@ func init_movement_modes() -> void:
 		popup_menu.add_item(GameManager.describe_movement_mode(mode), mode)
 	
 	popup_menu.connect("index_pressed", self, "movement_mode_picked")
+
+func change_follow_by(val: String) -> void:
+	set_camera_settings("follow_entity_by", val)
 
 func movement_mode_picked(index) -> void:
 	var popup_menu: PopupMenu = find_node("MovementModeMenuButton").get_popup()
@@ -111,8 +119,12 @@ func set_camera_settings(setting: String, value) -> void:
 	game_settings["camera_settings"][setting] = value
 
 func follow_entity_validate() -> void:
-	var entity_list = EntityManager.get_all_entity_names()
+	var follow_by = Utility.get_camera_setting("follow_entity_by")
 	var input = find_node("FollowEntity")
+	if follow_by and follow_by != "name":
+		input.add_color_override("font_color", Color.white)
+		return
+	var entity_list = EntityManager.get_all_entity_names()
 	if not input.text in entity_list:
 		input.add_color_override("font_color", invalid_field_color)
 	else:

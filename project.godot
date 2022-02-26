@@ -9,12 +9,24 @@
 config_version=4
 
 _global_script_classes=[ {
+"base": "Node2D",
+"class": "BaseEntity",
+"language": "GDScript",
+"path": "res://src/BaseEntity.gd"
+}, {
+"base": "BaseEntity",
+"class": "LargeEntity",
+"language": "GDScript",
+"path": "res://src/LargeEntity.gd"
+}, {
 "base": "Reference",
 "class": "Property",
 "language": "GDScript",
 "path": "res://src/Property.gd"
 } ]
 _global_script_class_icons={
+"BaseEntity": "",
+"LargeEntity": "",
 "Property": ""
 }
 

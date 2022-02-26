@@ -194,6 +194,14 @@ func dict_vectors_to_lists(dict: Dictionary) -> Dictionary:
 			new_dict[key] = val
 	return new_dict
 
+func array_iter(arr, reversed: bool = false) -> Array:
+	if reversed:
+		return reversed_array_iter(arr)
+	return range(len(arr))
+
+func reversed_array_iter(arr) -> Array:
+	return range(len(arr) - 1, -1, -1)
+
 func max_integer_scale_in(base: Vector2, max_size: Vector2) -> int:
 	var max_x = int(floor(max_size.x / base.x))
 	var max_y = int(floor(max_size.y / base.y))
