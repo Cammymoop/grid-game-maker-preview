@@ -1,0 +1,129 @@
+[gd_scene load_steps=7 format=2]
+
+[ext_resource path="res://assets/font/my_font.tres" type="DynamicFont" id=1]
+[ext_resource path="res://assets/font/pixel_font_white.tres" type="BitmapFont" id=2]
+[ext_resource path="res://Scenes/UI/ButtonContainer.tscn" type="PackedScene" id=3]
+[ext_resource path="res://assets/img/button_icons/slot_icons/red_diamond.png" type="Texture" id=4]
+
+[sub_resource type="StyleBoxFlat" id=1]
+bg_color = Color( 0.505882, 0.254902, 0.254902, 1 )
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color( 0.14902, 0.0509804, 0.0509804, 1 )
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id=2]
+bg_color = Color( 0.505882, 0.254902, 0.254902, 1 )
+border_width_top = 2
+border_color = Color( 0.14902, 0.0509804, 0.0509804, 1 )
+expand_margin_top = 2.0
+
+[node name="PropertyInterfaceTest" type="Control"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="PanelContainer" type="PanelContainer" parent="."]
+margin_left = 81.0
+margin_top = 44.0
+margin_right = 322.0
+margin_bottom = 147.0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="VBoxContainer" type="VBoxContainer" parent="PanelContainer"]
+margin_left = 7.0
+margin_top = 7.0
+margin_right = 234.0
+margin_bottom = 96.0
+rect_min_size = Vector2( 100, 20 )
+
+[node name="Command" type="PanelContainer" parent="PanelContainer/VBoxContainer"]
+margin_right = 227.0
+margin_bottom = 45.0
+rect_min_size = Vector2( 0, 45 )
+custom_styles/panel = SubResource( 1 )
+
+[node name="Control" type="Control" parent="PanelContainer/VBoxContainer/Command"]
+margin_left = 2.0
+margin_top = 2.0
+margin_right = 225.0
+margin_bottom = 43.0
+
+[node name="Panel" type="Panel" parent="PanelContainer/VBoxContainer/Command/Control"]
+margin_left = 12.0
+margin_top = -2.0
+margin_right = 56.0
+custom_styles/panel = SubResource( 2 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Label2" type="Label" parent="PanelContainer/VBoxContainer/Command/Control/Panel"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_top = 1.0
+custom_colors/font_color = Color( 0.14902, 0.0509804, 0.0509804, 1 )
+custom_fonts/font = ExtResource( 2 )
+text = "Die"
+align = 1
+uppercase = true
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="MarginContainer" type="MarginContainer" parent="PanelContainer/VBoxContainer/Command"]
+margin_left = 2.0
+margin_top = 2.0
+margin_right = 225.0
+margin_bottom = 43.0
+custom_constants/margin_right = 4
+custom_constants/margin_top = 6
+custom_constants/margin_left = 4
+custom_constants/margin_bottom = 4
+
+[node name="HBoxContainer" type="HBoxContainer" parent="PanelContainer/VBoxContainer/Command/MarginContainer"]
+margin_left = 4.0
+margin_top = 6.0
+margin_right = 219.0
+margin_bottom = 37.0
+
+[node name="ButtonContainer" parent="PanelContainer/VBoxContainer/Command/MarginContainer/HBoxContainer" instance=ExtResource( 3 )]
+anchor_right = 0.0
+anchor_bottom = 0.0
+margin_top = 1.0
+margin_right = 28.0
+margin_bottom = 29.0
+size_flags_horizontal = 4
+size_flags_vertical = 4
+
+[node name="TextureRect" type="TextureRect" parent="PanelContainer/VBoxContainer/Command/MarginContainer/HBoxContainer/ButtonContainer"]
+margin_right = 28.0
+margin_bottom = 28.0
+mouse_filter = 2
+texture = ExtResource( 4 )
+
+[node name="Button" type="Button" parent="PanelContainer/VBoxContainer/Command/MarginContainer/HBoxContainer"]
+visible = false
+margin_left = 4.0
+margin_right = 44.0
+margin_bottom = 34.0
+size_flags_horizontal = 4
+size_flags_vertical = 4
+icon = ExtResource( 4 )
+
+[node name="Label" type="Label" parent="PanelContainer/VBoxContainer/Command/MarginContainer/HBoxContainer"]
+margin_left = 32.0
+margin_top = 4.0
+margin_right = 169.0
+margin_bottom = 26.0
+custom_fonts/font = ExtResource( 1 )
+text = "This Entity dies now"

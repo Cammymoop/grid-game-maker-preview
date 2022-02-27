@@ -45,6 +45,7 @@ GameManager="*res://src/Singletons/game_manager.gd"
 TextureManager="*res://src/Singletons/texture_manager.gd"
 ConditionalFunctions="*res://src/Singletons/conditional_functions.gd"
 FilesManager="*res://src/Singletons/files_manager.gd"
+Commands="*res://src/Singletons/commands.gd"
 
 [debug]
 
