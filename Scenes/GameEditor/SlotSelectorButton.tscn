@@ -1,0 +1,156 @@
+[gd_scene load_steps=8 format=2]
+
+[ext_resource path="res://Scenes/UI/ButtonContainer.tscn" type="PackedScene" id=1]
+[ext_resource path="res://assets/img/button_icons/slot_icons/red_diamond.png" type="Texture" id=2]
+[ext_resource path="res://assets/img/button_icons/slot_icons/blue_square.png" type="Texture" id=3]
+[ext_resource path="res://src/GameEditor/SlotSelectorButton.gd" type="Script" id=4]
+[ext_resource path="res://assets/img/button_icons/slot_icons/pink_heart.png" type="Texture" id=5]
+[ext_resource path="res://assets/img/button_icons/slot_icons/white_triangle.png" type="Texture" id=6]
+
+[sub_resource type="StyleBoxFlat" id=1]
+bg_color = Color( 0.0901961, 0.0901961, 0.168627, 1 )
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+expand_margin_left = 4.0
+expand_margin_right = 4.0
+expand_margin_top = 4.0
+expand_margin_bottom = 4.0
+
+[node name="SlotSelectorButton" type="CenterContainer"]
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+margin_left = -384.0
+margin_top = -384.0
+margin_right = 384.0
+margin_bottom = 384.0
+script = ExtResource( 4 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="ButtonContainer" parent="." instance=ExtResource( 1 )]
+anchor_right = 0.0
+anchor_bottom = 0.0
+margin_left = 370.0
+margin_top = 370.0
+margin_right = 398.0
+margin_bottom = 398.0
+
+[node name="CenterContainer" type="CenterContainer" parent="ButtonContainer"]
+margin_right = 28.0
+margin_bottom = 28.0
+mouse_filter = 2
+
+[node name="CurrentSlotDisplay" type="TextureRect" parent="ButtonContainer/CenterContainer"]
+margin_right = 28.0
+margin_bottom = 28.0
+mouse_filter = 2
+texture = ExtResource( 2 )
+
+[node name="PopupPicker" type="Popup" parent="."]
+visible = true
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+grow_horizontal = 2
+grow_vertical = 2
+popup_exclusive = true
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="PopupPanel" type="PanelContainer" parent="PopupPicker"]
+custom_styles/panel = SubResource( 1 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="VBoxContainer" type="VBoxContainer" parent="PopupPicker/PopupPanel"]
+margin_right = 28.0
+margin_bottom = 124.0
+grow_horizontal = 2
+size_flags_horizontal = 4
+
+[node name="PickRed" parent="PopupPicker/PopupPanel/VBoxContainer" instance=ExtResource( 1 )]
+anchor_right = 0.0
+anchor_bottom = 0.0
+margin_right = 28.0
+margin_bottom = 28.0
+size_flags_horizontal = 4
+
+[node name="CenterContainer" type="CenterContainer" parent="PopupPicker/PopupPanel/VBoxContainer/PickRed"]
+margin_right = 28.0
+margin_bottom = 28.0
+mouse_filter = 2
+
+[node name="TextureRect2" type="TextureRect" parent="PopupPicker/PopupPanel/VBoxContainer/PickRed/CenterContainer"]
+margin_right = 28.0
+margin_bottom = 28.0
+mouse_filter = 2
+texture = ExtResource( 2 )
+
+[node name="PickBlue" parent="PopupPicker/PopupPanel/VBoxContainer" instance=ExtResource( 1 )]
+anchor_right = 0.0
+anchor_bottom = 0.0
+margin_top = 32.0
+margin_right = 28.0
+margin_bottom = 60.0
+
+[node name="CenterContainer" type="CenterContainer" parent="PopupPicker/PopupPanel/VBoxContainer/PickBlue"]
+margin_right = 28.0
+margin_bottom = 28.0
+mouse_filter = 2
+
+[node name="TextureRect2" type="TextureRect" parent="PopupPicker/PopupPanel/VBoxContainer/PickBlue/CenterContainer"]
+margin_right = 28.0
+margin_bottom = 28.0
+mouse_filter = 2
+texture = ExtResource( 3 )
+
+[node name="PickWhite" parent="PopupPicker/PopupPanel/VBoxContainer" instance=ExtResource( 1 )]
+anchor_right = 0.0
+anchor_bottom = 0.0
+margin_top = 64.0
+margin_right = 28.0
+margin_bottom = 92.0
+
+[node name="CenterContainer" type="CenterContainer" parent="PopupPicker/PopupPanel/VBoxContainer/PickWhite"]
+margin_right = 28.0
+margin_bottom = 28.0
+mouse_filter = 2
+
+[node name="TextureRect2" type="TextureRect" parent="PopupPicker/PopupPanel/VBoxContainer/PickWhite/CenterContainer"]
+margin_right = 28.0
+margin_bottom = 28.0
+mouse_filter = 2
+texture = ExtResource( 6 )
+
+[node name="PickPink" parent="PopupPicker/PopupPanel/VBoxContainer" instance=ExtResource( 1 )]
+anchor_right = 0.0
+anchor_bottom = 0.0
+margin_top = 96.0
+margin_right = 28.0
+margin_bottom = 124.0
+size_flags_horizontal = 4
+
+[node name="CenterContainer" type="CenterContainer" parent="PopupPicker/PopupPanel/VBoxContainer/PickPink"]
+margin_right = 28.0
+margin_bottom = 28.0
+mouse_filter = 2
+
+[node name="TextureRect2" type="TextureRect" parent="PopupPicker/PopupPanel/VBoxContainer/PickPink/CenterContainer"]
+margin_right = 28.0
+margin_bottom = 28.0
+mouse_filter = 2
+texture = ExtResource( 5 )
+
+[connection signal="pressed" from="ButtonContainer" to="." method="_on_ButtonContainer_pressed"]
+[connection signal="pressed" from="PopupPicker/PopupPanel/VBoxContainer/PickRed" to="." method="_on_SlotSelected" binds= [ "red" ]]
+[connection signal="pressed" from="PopupPicker/PopupPanel/VBoxContainer/PickBlue" to="." method="_on_SlotSelected" binds= [ "blue" ]]
+[connection signal="pressed" from="PopupPicker/PopupPanel/VBoxContainer/PickWhite" to="." method="_on_SlotSelected" binds= [ "white" ]]
+[connection signal="pressed" from="PopupPicker/PopupPanel/VBoxContainer/PickPink" to="." method="_on_SlotSelected" binds= [ "pink" ]]

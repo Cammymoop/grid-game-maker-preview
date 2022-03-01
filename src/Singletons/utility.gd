@@ -27,6 +27,9 @@ func facing_vector(what_facing) -> Vector2:
 	print_debug("bad facing")
 	return Vector2(0, 0)
 
+func facing_rotated(what_facing: int, what_rotation: int) -> int:
+	return posmod(what_facing + what_rotation, 4)
+
 func facing_rotation(what_facing) -> float:
 	return (what_facing * PI) / 2.0
 
@@ -224,3 +227,37 @@ func get_texture_index_offset(texture_sub_index, tile_size, border, separation, 
 func get_texture_index_rect(texture_sub_index, tile_size, border, separation, tpr) -> Rect2:
 	var t_offset = get_texture_index_offset(texture_sub_index, tile_size, border, separation, tpr)
 	return Rect2(t_offset, tile_size)
+
+
+const FULL_DIR_RELATIVE_BIT = 4
+const FULL_DIR_RELATIVE_MODE_BIT = 8
+const FULL_DIR_SLOT_SHIFT = 4
+
+func full_direction_is_absolute(full_dir: int) -> bool:
+	return bool(FULL_DIR_RELATIVE_BIT & full_dir)
+
+func get_full_direction_slot(full_dir: int) -> int:
+	return full_dir << FULL_DIR_SLOT_SHIFT
+
+func get_full_direction_absolute(full_dir: int) -> int:
+	return full_dir & 3 # Just the first 2 bits
+
+func is_full_dir_relative_to_visual_facing(full_dir: int) -> bool:
+	return bool(FULL_DIR_RELATIVE_MODE_BIT & full_dir)
+
+func resolve_full_direction_to_facing(full_direction: int, slots: Dictionary) -> int:
+	if full_direction_is_absolute(full_direction):
+		return get_full_direction_absolute(full_direction)
+	
+	var entity = slots[get_full_direction_slot(full_direction)]
+	if not entity:
+		print_debug("Slot for relative direction is empty")
+		return get_full_direction_absolute(full_direction)
+	
+	var facing: int
+	if is_full_dir_relative_to_visual_facing(full_direction):
+		facing = entity.visual_facing
+	else:
+		facing = entity.facing
+	
+	return facing_rotated(facing, get_full_direction_absolute(full_direction))

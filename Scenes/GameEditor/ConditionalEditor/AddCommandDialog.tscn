@@ -1,0 +1,64 @@
+[gd_scene load_steps=3 format=2]
+
+[ext_resource path="res://src/GameEditor/ConditionalEditor/AddConditionDialog.gd" type="Script" id=1]
+[ext_resource path="res://Scenes/GameEditor/SlotSelectorButton.tscn" type="PackedScene" id=2]
+
+[node name="AddActionDialog" type="ConfirmationDialog"]
+margin_left = 278.0
+margin_top = 201.0
+margin_right = 630.0
+margin_bottom = 437.0
+window_title = "Add a Condition"
+script = ExtResource( 1 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_left = 8.0
+margin_top = 8.0
+margin_right = -8.0
+margin_bottom = -36.0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer"]
+margin_right = 336.0
+margin_bottom = 28.0
+
+[node name="SlotSelectorButton" parent="VBoxContainer/HBoxContainer" instance=ExtResource( 2 )]
+anchor_left = 0.0
+anchor_top = 0.0
+anchor_right = 0.0
+anchor_bottom = 0.0
+margin_left = 0.0
+margin_top = 0.0
+margin_right = 28.0
+margin_bottom = 28.0
+
+[node name="Filter" type="LineEdit" parent="VBoxContainer/HBoxContainer"]
+margin_left = 32.0
+margin_top = 2.0
+margin_right = 336.0
+margin_bottom = 26.0
+size_flags_horizontal = 3
+size_flags_vertical = 4
+clear_button_enabled = true
+placeholder_text = "filter"
+placeholder_alpha = 0.25
+
+[node name="AllCommands" type="ItemList" parent="VBoxContainer"]
+margin_top = 32.0
+margin_right = 336.0
+margin_bottom = 192.0
+size_flags_vertical = 3
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[connection signal="confirmed" from="." to="." method="_on_AddConditionDialog_confirmed"]
+[connection signal="text_changed" from="VBoxContainer/HBoxContainer/Filter" to="." method="_on_Filter_text_changed"]
+[connection signal="item_activated" from="VBoxContainer/AllCommands" to="." method="_on_AllCommands_item_activated"]
