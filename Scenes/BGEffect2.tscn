@@ -52,6 +52,7 @@ gradient = SubResource( 4 )
 width = 1
 
 [node name="BGEffects" type="Node"]
+pause_mode = 2
 
 [node name="CanvasLayer2" type="CanvasLayer" parent="."]
 layer = -2
@@ -68,6 +69,8 @@ __meta__ = {
 size = Vector2( 768, 768 )
 own_world = true
 world = SubResource( 11 )
+handle_input_locally = false
+render_target_update_mode = 3
 
 [node name="CanvasLayer" type="CanvasLayer" parent="CanvasLayer2/ViewportContainer/Viewport"]
 layer = -3
@@ -83,7 +86,6 @@ __meta__ = {
 }
 
 [node name="Particles2D" type="Particles2D" parent="CanvasLayer2/ViewportContainer/Viewport"]
-pause_mode = 2
 material = SubResource( 12 )
 position = Vector2( 192, 192 )
 amount = 600

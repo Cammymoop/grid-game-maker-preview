@@ -10,6 +10,26 @@ var slot_textures: = {
 	Commands.Slot.BLUE:   preload("res://assets/img/button_icons/slot_icons/blue_square.png"), 
 	Commands.Slot.WHITE:  preload("res://assets/img/button_icons/slot_icons/white_triangle.png"),
 	Commands.Slot.PINK:   preload("res://assets/img/button_icons/slot_icons/pink_heart.png"), 
+	
+	Commands.Slot.GREY:    preload("res://assets/img/button_icons/slot_icons/grey_pentagon.png"),
+	Commands.Slot.BLACK:   preload("res://assets/img/button_icons/slot_icons/black_hexagon.png"),
+	
+	Commands.Slot.A:  preload("res://assets/img/button_icons/slot_icons/A.png"),
+	Commands.Slot.B:   preload("res://assets/img/button_icons/slot_icons/B.png"), 
+	Commands.Slot.C:   preload("res://assets/img/button_icons/slot_icons/C.png"), 
+	
+	Commands.Slot.X:  preload("res://assets/img/button_icons/slot_icons/X.png"),
+	Commands.Slot.Y:   preload("res://assets/img/button_icons/slot_icons/Y.png"), 
+	Commands.Slot.Z:   preload("res://assets/img/button_icons/slot_icons/Z.png"), 
+	
+	Commands.Slot.I:  preload("res://assets/img/button_icons/slot_icons/I.png"),
+	Commands.Slot.II:   preload("res://assets/img/button_icons/slot_icons/II.png"), 
+	Commands.Slot.III:   preload("res://assets/img/button_icons/slot_icons/III.png"), 
+	
+	Commands.Slot.DARK_RED:    preload("res://assets/img/button_icons/slot_icons/dark_red_blob.png"),
+	Commands.Slot.DARK_BLUE:   preload("res://assets/img/button_icons/slot_icons/dark_blue_blob.png"), 
+	Commands.Slot.DARK_GREEN:  preload("res://assets/img/button_icons/slot_icons/dark_green_blob.png"),
+	Commands.Slot.DARK_ORANGE:   preload("res://assets/img/button_icons/slot_icons/dark_orange_blob.png"), 
 }
 
 var slot_ids: = {
@@ -43,6 +63,9 @@ var current_slot_id: int = Commands.Slot.RED
 
 var picker_open: = false
 
+var PICKER_SCREEN_MARGIN_H = 10
+var PICKER_SCREEN_MARGIN_V = 10
+
 func _ready():
 	picker.visible = false
 
@@ -53,6 +76,17 @@ func show_picker() -> void:
 	
 	var center_pos = $ButtonContainer.rect_global_position + ($ButtonContainer.rect_size / 2)
 	picker.rect_global_position = center_pos - (picker.rect_size/2)
+	
+	var picker_size = picker.rect_size
+	var viewport_size = get_viewport().size
+	if picker.rect_global_position.x < PICKER_SCREEN_MARGIN_H:
+		picker.rect_global_position.x = PICKER_SCREEN_MARGIN_H
+	elif picker.rect_global_position.x + picker_size.x > viewport_size.x - PICKER_SCREEN_MARGIN_H:
+		picker.rect_global_position.x = (viewport_size.x - PICKER_SCREEN_MARGIN_H) - picker_size.x
+	if picker.rect_global_position.y < PICKER_SCREEN_MARGIN_V:
+		picker.rect_global_position.y = PICKER_SCREEN_MARGIN_V
+	elif picker.rect_global_position.y + picker_size.y > viewport_size.y - PICKER_SCREEN_MARGIN_V:
+		picker.rect_global_position.y = (viewport_size.y - PICKER_SCREEN_MARGIN_V) - picker_size.y
 
 func hide_picker() -> void:
 	picker_open = false
@@ -76,17 +110,14 @@ func _input(e):
 		return
 	
 	if picker_open:
-		print('picker is open')
 		var panel = picker.get_node("PopupPanel")
 		var local_click = panel.make_input_local(click_event)
 		var bounds = Rect2(Vector2.ZERO, panel.rect_size)
 		if not bounds.has_point(local_click.position):
-			print('picker is getting hid')
 			hide_picker()
 
 
 func _on_SlotSelected(slot_name: String):
-	print("im selected " + slot_name)
 	hide_picker()
 	set_current_slot(slot_ids[slot_name])
 

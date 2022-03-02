@@ -45,6 +45,7 @@ scale_random = 1.0
 color_ramp = SubResource( 20 )
 
 [node name="BGEffects" type="Node"]
+pause_mode = 2
 
 [node name="CanvasLayer2" type="CanvasLayer" parent="."]
 layer = -2
@@ -65,7 +66,6 @@ handle_input_locally = false
 render_target_update_mode = 3
 
 [node name="Darks" type="Particles2D" parent="CanvasLayer2/ViewportContainer/Viewport"]
-pause_mode = 2
 material = SubResource( 17 )
 position = Vector2( 192, 192 )
 amount = 40

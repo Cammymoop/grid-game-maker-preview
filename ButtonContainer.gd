@@ -11,6 +11,8 @@ signal toggled(button_pressed)
 
 var button
 
+var small_font = preload("res://assets/font/pixel_font_white.tres")
+
 export var toggle_mode = false setget set_toggle_mode, get_toggle_mode
 export var pressed = false setget set_pressed, get_pressed
 
@@ -23,6 +25,9 @@ func _init():
 	button.anchor_bottom = 1
 	button.margin_right = 0
 	button.margin_bottom = 0
+	
+	# slight hack to make the button have a shorter minimum size
+	button.add_font_override("font", small_font)
 	
 	button.connect("button_down", self, "emit_signal", ["button_down"])
 	button.connect("button_up", self, "emit_signal", ["button_up"])

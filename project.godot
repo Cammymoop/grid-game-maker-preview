@@ -62,6 +62,10 @@ window/size/always_on_top=true
 window/size/test_width=768
 window/size/test_height=768
 
+[gui]
+
+theme/custom="res://src/UI/DefaultProjectTheme.tres"
+
 [importer_defaults]
 
 texture={

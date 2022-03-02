@@ -5,34 +5,14 @@
 [ext_resource path="res://assets/font/my_font.tres" type="DynamicFont" id=3]
 [ext_resource path="res://src/GameEditor/CommandListItem.gd" type="Script" id=4]
 [ext_resource path="res://assets/img/button_icons/x.png" type="Texture" id=5]
-
-[sub_resource type="StyleBoxFlat" id=1]
-bg_color = Color( 0.505882, 0.254902, 0.254902, 1 )
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color( 0.14902, 0.0509804, 0.0509804, 1 )
-corner_radius_top_left = 4
-corner_radius_top_right = 4
-corner_radius_bottom_right = 4
-corner_radius_bottom_left = 4
-
-[sub_resource type="StyleBoxFlat" id=2]
-bg_color = Color( 0.505882, 0.254902, 0.254902, 1 )
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_color = Color( 0.14902, 0.0509804, 0.0509804, 1 )
-corner_radius_top_left = 2
-corner_radius_top_right = 2
-expand_margin_top = 2.0
+[ext_resource path="res://assets/ui/PropertyEditor/RedBackground.tres" type="StyleBox" id=6]
+[ext_resource path="res://assets/ui/PropertyEditor/RedTabBackground.tres" type="StyleBox" id=7]
 
 [node name="Command" type="PanelContainer"]
 margin_right = 239.0
 margin_bottom = 45.0
 rect_min_size = Vector2( 0, 45 )
-custom_styles/panel = SubResource( 1 )
+custom_styles/panel = ExtResource( 6 )
 script = ExtResource( 4 )
 __meta__ = {
 "_edit_use_anchors_": false
@@ -44,16 +24,16 @@ margin_top = 2.0
 margin_right = 237.0
 margin_bottom = 43.0
 
-[node name="Panel" type="Panel" parent="TitleTab"]
+[node name="TabPanel" type="Panel" parent="TitleTab"]
 margin_left = 12.0
 margin_top = -4.0
 margin_right = 56.0
-custom_styles/panel = SubResource( 2 )
+custom_styles/panel = ExtResource( 7 )
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="TitleText" type="Label" parent="TitleTab/Panel"]
+[node name="TitleText" type="Label" parent="TitleTab/TabPanel"]
 anchor_right = 1.0
 anchor_bottom = 1.0
 margin_top = 1.0
@@ -84,11 +64,8 @@ margin_right = 231.0
 margin_bottom = 37.0
 
 [node name="CommandSlot" parent="Content/HBoxContainer" instance=ExtResource( 1 )]
-anchor_left = 0.0
-anchor_top = 0.0
 anchor_right = 0.0
 anchor_bottom = 0.0
-margin_left = 0.0
 margin_top = 1.0
 margin_right = 28.0
 margin_bottom = 29.0
@@ -113,6 +90,7 @@ margin_left = 2.0
 margin_top = 2.0
 margin_right = 237.0
 margin_bottom = 43.0
+mouse_filter = 2
 
 [node name="TextureRect" type="TextureRect" parent="Control"]
 anchor_left = 1.0

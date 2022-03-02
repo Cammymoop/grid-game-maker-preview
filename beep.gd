@@ -1,7 +1,7 @@
 extends Control
 
-onready var vbox = find_node("VBox")
-onready var vbox2 = find_node("VBox2")
+onready var cond_list = find_node("ConditionsList")
+onready var true_actions_list = find_node("TrueActionsList")
 
 onready var add_condition_dialog = find_node("AddConditionDialog")
 onready var add_action_dialog = find_node("AddActionDialog")
@@ -19,22 +19,15 @@ func _ready():
 #		vbox.add_child(new_list_item)
 #		vbox2.add_child(new_list_item2)
 	
-	add_condition_dialog.connect("command_selected", self, "add_command")
-	add_action_dialog.connect("command_selected", self, "add_action")
+	add_condition_dialog.connect("command_selected", self, "add_command", [cond_list])
+	add_action_dialog.connect("command_selected", self, "add_command", [true_actions_list])
 
-func add_command(command_id: int, slot_id: int) -> void:
+func add_command(command_id: int, slot_id: int, to_list) -> void:
 		var new_list_item = command_list_item.instance()
 		new_list_item.set_slot(slot_id)
 		new_list_item.set_ui_data(Commands.Friendly[command_id])
 		
-		vbox.add_child(new_list_item)
-
-func add_action(command_id: int, slot_id: int) -> void:
-		var new_list_item = command_list_item.instance()
-		new_list_item.set_slot(slot_id)
-		new_list_item.set_ui_data(Commands.Friendly[command_id])
-		
-		vbox2.add_child(new_list_item)
+		to_list.add_child(new_list_item)
 
 
 func _on_NewConditionButton_pressed():

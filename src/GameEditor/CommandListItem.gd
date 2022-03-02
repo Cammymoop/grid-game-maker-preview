@@ -1,8 +1,30 @@
 extends PanelContainer
 
+var panels = {
+	Commands.Slot.RED: {
+		main= preload("res://assets/ui/PropertyEditor/RedBackground.tres"),
+		tab= preload("res://assets/ui/PropertyEditor/RedTabBackground.tres"),
+	},
+	Commands.Slot.BLUE: {
+		main= preload("res://assets/ui/PropertyEditor/BlueBackground.tres"),
+		tab= preload("res://assets/ui/PropertyEditor/BlueTabBackground.tres"),
+	},
+	Commands.Slot.WHITE: {
+		main= preload("res://assets/ui/PropertyEditor/WhiteBackground.tres"),
+		tab= preload("res://assets/ui/PropertyEditor/WhiteTabBackground.tres"),
+	},
+	Commands.Slot.PINK: {
+		main= preload("res://assets/ui/PropertyEditor/PinkBackground.tres"),
+		tab= preload("res://assets/ui/PropertyEditor/PinkTabBackground.tres"),
+	},
+}
+
+const TAB_INTERNAL_MARGIN = 10
+
 onready var generated_content = find_node("GeneratedContent")
 onready var command_slot = find_node("CommandSlot")
 onready var title_label = find_node("TitleText")
+onready var tab_panel = find_node("TabPanel")
 
 var current_slot: int = Commands.Slot.RED
 
@@ -18,6 +40,17 @@ func set_slot(slot_id: int) -> void:
 	current_slot = slot_id
 	if is_inside_tree():
 		find_node("CommandSlot").set_current_slot(slot_id)
+		update_panel_background()
+
+func update_panel_background() -> void:
+	print_debug("new panel time")
+	if current_slot in panels:
+		print_debug("new panel is")
+		add_stylebox_override("panel", panels[current_slot].main)
+		tab_panel.add_stylebox_override("panel", panels[current_slot].tab)
+		var box: StyleBoxFlat = get_stylebox("panel") as StyleBoxFlat
+		if box:
+			title_label.add_color_override("font_color", box.border_color)
 
 func generate_ui() -> void:
 	for child in generated_content.get_children():
@@ -29,6 +62,8 @@ func generate_ui() -> void:
 		return
 	
 	title_label.text = ui_data.display_name
+	
+	tab_panel.rect_size.x = title_label.get_minimum_size().x + TAB_INTERNAL_MARGIN
 	
 	for ui_bit in ui_data.ui:
 		if ui_bit[0] == "[":
@@ -46,7 +81,9 @@ func generate_ui() -> void:
 			
 			generated_content.add_child(text)
 	
-	find_node("CommandSlot").set_current_slot(current_slot)
+	set_slot(current_slot)
+	
+	yield(get_tree(), "idle_frame")
 
 
 func _on_TextureRect_gui_input(event):
@@ -59,3 +96,4 @@ func _on_TextureRect_gui_input(event):
 
 func _on_CommandSlot_slot_changed(new_slot_id):
 	current_slot = new_slot_id
+	update_panel_background()

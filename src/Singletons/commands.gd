@@ -31,12 +31,27 @@ enum CC {
 	
 	# Actions
 	A_DIE,
+	A_MOVE,
 	A_FIND_SWAP_TILES,
 }
+
+var FIRST_CONDITION = CC.C_HAS_PROPERTY
+var FIRST_ACTION = CC.A_DIE
+
+func is_other(command_id) -> bool:
+	return command_id < FIRST_CONDITION
+
+func is_condition(command_id) -> bool:
+	return command_id >= FIRST_CONDITION and command_id < FIRST_ACTION
+
+func is_action(command_id) -> bool:
+	return command_id >= FIRST_ACTION
+
 
 var Friendly = {
 	CC.C_HAS_PROPERTY: {
 		display_name= "Has Property",
+		slot_types= ["entity"],
 		options= {
 			"property_name": {input_type= InputTypes.PropertyInput},
 		},
@@ -45,20 +60,33 @@ var Friendly = {
 	},
 	CC.C_CAN_MOVE: {
 		display_name= "Can Move",
+		slot_types= ["entity"],
 		options= {
 			"direction": {input_type= InputTypes.DirectionInput},
 		},
 		condition= true,
 		ui= ["This Entity can move this way ","[direction",]
 	},
+	
 	CC.A_DIE: {
 		display_name= "Die",
+		slot_types= ["entity"],
 		options= {},
 		action= true,
 		ui= ["This Entity dies now",]
 	},
+	CC.A_MOVE: {
+		display_name= "Move",
+		slot_types= ["entity"],
+		options= {
+			"direction": {input_type= InputTypes.DirectionInput},
+		},
+		condition= true,
+		ui= ["Start moving this way ","[direction",]
+	},
 	CC.A_FIND_SWAP_TILES: {
 		display_name= "Swap Tiles",
+		slot_types= ["tile_pos"],
 		options= {
 			"tile1": {input_type= InputTypes.TileNameInput},
 			"tile2": {input_type= InputTypes.TileNameInput},

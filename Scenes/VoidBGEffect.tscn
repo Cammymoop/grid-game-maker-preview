@@ -37,6 +37,7 @@ gradient = SubResource( 4 )
 width = 1
 
 [node name="VoidBGEffects" type="Node"]
+pause_mode = 2
 
 [node name="CanvasLayer" type="CanvasLayer" parent="."]
 layer = -3
@@ -55,7 +56,6 @@ __meta__ = {
 layer = -2
 
 [node name="Particles2D" type="Particles2D" parent="CanvasLayer2"]
-pause_mode = 2
 position = Vector2( 192, 192 )
 amount = 600
 lifetime = 6.5
