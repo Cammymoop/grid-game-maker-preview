@@ -41,12 +41,13 @@ config/icon="res://icon.png"
 Utility="*res://src/Singletons/utility.gd"
 EntityManager="*res://src/Singletons/entity_manager.gd"
 MapManager="*res://src/Singletons/map_manager.gd"
-GameManager="*res://src/Singletons/game_manager.gd"
+GameManager="*res://src/Singletons/GameManager.tscn"
 TextureManager="*res://src/Singletons/texture_manager.gd"
 ConditionalFunctions="*res://src/Singletons/conditional_functions.gd"
 FilesManager="*res://src/Singletons/files_manager.gd"
 InputTemplates="*res://src/Singletons/input_templates.gd"
 Commands="*res://src/Singletons/commands.gd"
+ConditionalsV2="*res://src/Singletons/conditionals_v2.gd"
 
 [debug]
 

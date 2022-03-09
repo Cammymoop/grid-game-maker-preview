@@ -95,6 +95,9 @@ func hide_picker() -> void:
 func get_current_slot() -> int:
 	return current_slot_id
 
+func get_value() -> int:
+	return get_current_slot()
+
 func set_current_slot(slot_id: int) -> void:
 	current_slot_id = slot_id
 	update_texture()

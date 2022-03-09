@@ -79,6 +79,7 @@ layer = -3
 show_behind_parent = true
 anchor_right = 1.0
 anchor_bottom = 1.0
+mouse_filter = 2
 color = Color( 0.12549, 0.105882, 0.168627, 1 )
 __meta__ = {
 "_edit_use_anchors_": false,

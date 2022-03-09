@@ -1,0 +1,13 @@
+[gd_scene load_steps=3 format=2]
+
+[ext_resource path="res://src/Singletons/game_manager.gd" type="Script" id=1]
+
+[sub_resource type="Curve" id=1]
+bake_resolution = 400
+_data = [ Vector2( 0, 0 ), 0.0, 15.6121, 0, 0, Vector2( 0.0178571, 0.245455 ), 7.73818, 7.73818, 0, 0, Vector2( 0.0491071, 0.490909 ), 3.92727, 3.92727, 0, 0, Vector2( 0.133929, 0.681818 ), 2.03636, 2.03636, 0, 0, Vector2( 0.290179, 0.854545 ), 0.696651, 0.696651, 0, 0, Vector2( 1, 1 ), 0.0947148, 0.0, 0, 0 ]
+
+[node name="GameManager" type="Node"]
+script = ExtResource( 1 )
+scene_transition_curve = SubResource( 1 )
+
+[node name="SceneTransistionTimer" type="Timer" parent="."]

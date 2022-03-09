@@ -189,12 +189,22 @@ func get_all_tile_indexes() -> Array:
 	return keys
  
 
-func get_all_positions_of_tile(tile_index) -> Array:
+func get_all_positions_of_tile(tile_index, position_filter = null) -> Array:
 	var positions = []
 	for l in layers:
 		for pos in l.get_used_cells_by_id(tile_index):
-			positions.append(pos)
+			if is_pos_in_filter(pos, position_filter):
+				positions.append(pos)
 	return positions
+
+func is_pos_in_filter(tile_position, position_filter) -> bool:
+	if not position_filter:
+		return true
+	if position_filter[0] == "rectangle":
+		var rect = Rect2(position_filter[1], position_filter[2] + Vector2(1, 1))
+		return rect.has_point(tile_position)
+	else:
+		return tile_position in position_filter
 
 func get_map_size() -> Rect2:
 	if len(layers) > 0:

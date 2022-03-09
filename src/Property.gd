@@ -23,12 +23,15 @@ func resolve(owner, target, tile_position, args=[]):
 	if not is_conditional():
 		return
 	
+	#var slots = ConditionalsV2.make_slots(owner, target, tile_position, args)
 	var result = true
 	if typeof(internal_value) == TYPE_DICTIONARY:
 		return ConditionalFunctions.resolve_conditional(property_name, internal_value, owner, target, tile_position, args)['value']
+		#return ConditionalsV2.resolve_conditional(internal_value, slots)
 	elif typeof(internal_value) == TYPE_ARRAY:
 		for conditional in internal_value:
 			var one_result = ConditionalFunctions.resolve_conditional(property_name, conditional, owner, target, tile_position, args)
+			#var one_result = ConditionalsV2.resolve_conditional(internal_value, slots)
 			if one_result['quit']:
 				return one_result['value']
 			result = one_result['value']

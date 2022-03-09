@@ -309,6 +309,7 @@ layer = -2
 [node name="ViewportContainer" type="ViewportContainer" parent="CanvasLayer2"]
 anchor_right = 1.0
 anchor_bottom = 1.0
+mouse_filter = 2
 stretch = true
 __meta__ = {
 "_edit_use_anchors_": false
@@ -354,6 +355,7 @@ layer = -3
 show_behind_parent = true
 anchor_right = 1.0
 anchor_bottom = 1.0
+mouse_filter = 2
 color = Color( 0.109804, 0.0862745, 0.0901961, 1 )
 script = ExtResource( 3 )
 __meta__ = {

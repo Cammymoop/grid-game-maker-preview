@@ -32,6 +32,12 @@ var game_definition = {}
 
 var game_camera = null
 
+var transitioning = false
+var transition_anim_target: Node
+var scene_transition_duration = 0.6
+var transition_left = true
+export var scene_transition_curve: Curve = Curve.new()
+
 enum MovementMode {
 	MOVEMENT_CONTINUOUS, MOVEMENT_DISCRETE, MOVEMENT_DISCRETE_WAIT
 }
@@ -42,6 +48,14 @@ func _ready():
 	cur_scene = get_tree().current_scene.name
 	FilesManager.init_folders()
 	
+	var st_timer = Timer.new()
+	st_timer.set_name("SceneTransitionTimer")
+	add_child(st_timer)
+	
+	st_timer.one_shot = true
+	st_timer.connect("timeout", self, "scene_transition_clear")
+	bake_scene_transition_curve()
+	
 	var default_game = FilesManager.get_default_game()
 	if len(default_game) > 0:
 		load_game_definition_from_file(default_game)
@@ -50,6 +64,9 @@ func _ready():
 		set_game_name("Basic")
 		game_definition["game_settings"] = {"pixel_scale": 2}
 		start_managers()
+
+func bake_scene_transition_curve() -> void:
+	scene_transition_curve.bake()
 
 func start_managers() -> void:
 	TextureManager.setup()
@@ -213,11 +230,15 @@ func load_random_level():
 	save_checkpoint()
 
 func change_scene(new_scene: String):
+	if cur_scene != "Loading":
+		show_scene_transition()
+	
 	if not new_scene in scenes:
 		print("I dont know about scene " + new_scene)
 		return
 	
 	if cur_scene == "Play":
+		transition_left = true
 		if editor_save:
 			loaded_level = editor_save
 		EntityManager.clear_entity_list()
@@ -225,13 +246,52 @@ func change_scene(new_scene: String):
 		game_camera = null
 		_unpause()
 	elif cur_scene == "GameEditor":
+		transition_left = false
 		EntityManager.refresh_definition()
 		MapManager.refresh_definition()
+	
+	if new_scene == "Play":
+		transition_left = false
+	elif new_scene == "GameEditor":
+		transition_left = true
 	
 	cur_scene = new_scene
 	get_tree().change_scene(scenes[new_scene])
 	
 	call_deferred("post_scene_change")
+
+func show_scene_transition() -> void:
+	var main_viewport_copy = get_viewport().get_texture().get_data()
+	main_viewport_copy.flip_y()
+	var copy_tex = ImageTexture.new()
+	copy_tex.create_from_image(main_viewport_copy)
+	var overlay = TextureRect.new()
+	overlay.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	overlay.texture = copy_tex
+	
+	var overlay_layer = CanvasLayer.new()
+	overlay_layer.layer = 128
+	get_viewport().add_child(overlay_layer)
+	overlay_layer.add_child(overlay)
+	overlay.set_anchors_and_margins_preset(Control.PRESET_WIDE)
+	overlay_layer.add_to_group("TransitionOverlay")
+	
+	transitioning = true
+	$SceneTransitionTimer.start(scene_transition_duration)
+	transition_anim_target = overlay
+
+func scene_transisiton_update() -> void:
+	var progress = (scene_transition_duration - $SceneTransitionTimer.time_left)/scene_transition_duration
+	var curve_val = scene_transition_curve.interpolate_baked(progress)
+	var transition_sign = -1 if transition_left else 1
+	transition_anim_target.rect_position.x = curve_val * get_viewport().size.x * transition_sign
+
+func scene_transition_clear() -> void:
+	for overlay_layer in get_tree().get_nodes_in_group("TransitionOverlay"):
+		overlay_layer.queue_free()
+	
+	transition_anim_target = null
+	transitioning = false
 
 func post_scene_change() -> void:
 	if cur_scene == "Play":
@@ -294,6 +354,9 @@ func _process(_delta):
 	if not started:
 		if not start_on_ready():
 			return
+	
+	if transitioning:
+		scene_transisiton_update()
 	
 	if Input.is_action_just_pressed("escape"):
 		if cur_scene == "GameEditor":

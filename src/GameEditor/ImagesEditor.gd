@@ -15,8 +15,6 @@ func refresh_list():
 	var all_builtin_textures: Dictionary = TextureManager.get_all_builtin_textures()
 	var all_user_textures: Dictionary = TextureManager.get_all_user_textures()
 	
-	
-	
 	var list = find_node("ListContainer")
 	list.clear_all()
 	for tex in all_builtin_textures:

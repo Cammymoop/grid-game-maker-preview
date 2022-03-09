@@ -26,14 +26,18 @@ onready var command_slot = find_node("CommandSlot")
 onready var title_label = find_node("TitleText")
 onready var tab_panel = find_node("TabPanel")
 
+var inputs = []
+
 var current_slot: int = Commands.Slot.RED
 
+var command_code: int
 var ui_data: Dictionary
 
 func _ready():
 	generate_ui()
 
-func set_ui_data(command_data: Dictionary) -> void:
+func set_ui_data(the_command_code: int, command_data: Dictionary) -> void:
+	command_code = the_command_code
 	ui_data = command_data
 
 func set_slot(slot_id: int) -> void:
@@ -61,6 +65,8 @@ func generate_ui() -> void:
 	if not ui_data:
 		return
 	
+	inputs = []
+	
 	title_label.text = ui_data.display_name
 	
 	tab_panel.rect_size.x = title_label.get_minimum_size().x + TAB_INTERNAL_MARGIN
@@ -75,6 +81,7 @@ func generate_ui() -> void:
 			var input_type = ui_data.options[input_name].input_type
 			var input = InputTemplates.templates[input_type].instance()
 			generated_content.add_child(input)
+			inputs.append(input)
 		else:
 			var text = Label.new()
 			text.text = ui_bit
@@ -84,6 +91,19 @@ func generate_ui() -> void:
 	set_slot(current_slot)
 	
 	yield(get_tree(), "idle_frame")
+
+func get_command_code() -> int:
+	return command_code
+
+func get_slot_id() -> int:
+	return current_slot
+
+func get_option_values() -> Array:
+	var vals = []
+	for input_thing in inputs:
+		vals.append(input_thing.get_value())
+	
+	return vals
 
 
 func _on_TextureRect_gui_input(event):

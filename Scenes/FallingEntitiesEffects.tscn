@@ -2,7 +2,7 @@
 
 [ext_resource path="res://src/MainMenuEffects.gd" type="Script" id=1]
 
-[node name="BGEffects" type="Node"]
+[node name="FallingEntities" type="Node"]
 
 [node name="CanvasLayer" type="CanvasLayer" parent="."]
 layer = -3

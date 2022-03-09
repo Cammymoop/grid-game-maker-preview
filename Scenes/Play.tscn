@@ -2,7 +2,7 @@
 
 [ext_resource path="res://Scenes/MapEditor.tscn" type="PackedScene" id=1]
 [ext_resource path="res://Scenes/PauseMenu.tscn" type="PackedScene" id=2]
-[ext_resource path="res://Scenes/BGEffect2.tscn" type="PackedScene" id=3]
+[ext_resource path="res://Scenes/BGEffect3.tscn" type="PackedScene" id=3]
 [ext_resource path="res://src/GameView.gd" type="Script" id=5]
 
 [node name="Play" type="Control"]

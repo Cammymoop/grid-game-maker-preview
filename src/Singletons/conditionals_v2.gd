@@ -27,7 +27,7 @@ func make_slots(owning_entity, target_entity, tile_position, arguments = []) -> 
 	var slots = {}
 	slots[Slot.RED] = owning_entity
 	slots[Slot.BLUE] = target_entity
-	slots[Slot.GREY] = tile_position
+	slots[Slot.GREY] = [tile_position]
 	
 	if arguments:
 		var arg_slots = [Slot.DARK_RED, Slot.DARK_BLUE, Slot.DARK_GREEN, Slot.DARK_ORANGE,]
@@ -47,17 +47,82 @@ func resolve_conditional(conditional: Dictionary, slots: Dictionary):
 	original_me = slots[Slot.RED]
 	original_them = slots[Slot.BLUE]
 	original_here = slots[Slot.GREY]
+	
+	var condition_stack = []
+	for condition in conditional.conditions:
+		if typeof(condition) == TYPE_STRING:
+			if condition == "and" or condition == "or":
+				var a = condition_stack.pop_back()
+				var b = condition_stack.pop_back()
+				condition_stack.append(a and b if condition == "and" else a or b)
+			elif condition == "not":
+				var top = condition_stack.pop_back()
+				condition_stack.append(not top)
+		else:
+			condition_stack.append(do_command_data(condition, slots))
+	
+	if len(condition_stack) > 1:
+		print_debug("Conditions not fully resolved: " + str(condition_stack))
+		assert(false)
+	
+	var final_condition = condition_stack[0]
+	
+	var quit = false
+	
+	if final_condition:
+		for action in conditional.true_actions:
+			if do_command_data(action, slots):
+				quit = true
+	else:
+		for action in conditional.false_actions:
+			if do_command_data(action, slots):
+				quit = true
+	
+	for action in conditional.always_actions:
+		if do_command_data(action, slots):
+			quit = true
+	
+	return {"result": final_condition, "quit": quit}
 
-func command(command: int, selected_slot: int, slots: Dictionary, command_options: Array = []):
-	match command:
-		CommandCodes.SELECT_DEFAULTS:
-			match command_options[0]:
-				"me":
-					slots[selected_slot] = original_me
-				"them":
-					slots[selected_slot] = original_them
-				"here":
-					slots[selected_slot] = original_here
+func do_command_data(command_data: Dictionary, slots: Dictionary):
+	do_command(command_data["code"], command_data["slot"], slots, command_data["options"])
+
+func do_command(command_code: int, selected_slot: int, slots: Dictionary, command_options: Array = []):
+	if command_code >= Commands.FIRST_ACTION:
+		return do_action(command_code, selected_slot, slots, command_options)
+	elif command_code >= Commands.FIRST_CONDITION:
+		return do_condition(command_code, selected_slot, slots, command_options)
+	else:
+		match command_code:
+			CommandCodes.SELECT_DEFAULTS:
+				match command_options[0]:
+					"me":
+						slots[selected_slot] = original_me
+					"them":
+						slots[selected_slot] = original_them
+					"here":
+						slots[selected_slot] = original_here
+
+func do_action(command_code: int, selected_slot: int, slots: Dictionary, command_options: Array = []):
+	var selected_entity = slots[selected_slot]
+	match command_code:
+		CommandCodes.A_DIE:
+			selected_entity.die()
+		CommandCodes.A_MOVE:
+			selected_entity.start_move(Utility.resolve_full_direction_to_facing(command_options[0], slots))
+		CommandCodes.A_FIND_SWAP_TILES:
+			var tile_positions_a = MapManager.get_all_positions_of_tile(command_options[0], slots[selected_slot])
+			var tile_positions_b = MapManager.get_all_positions_of_tile(command_options[1], slots[selected_slot])
+			MapManager.replace_tiles_at_array(tile_positions_a, command_options[1])
+			MapManager.replace_tiles_at_array(tile_positions_b, command_options[0])
+
+func do_condition(command_code: int, selected_slot: int, slots: Dictionary, command_options: Array = []):
+	var selected_entity = slots[selected_slot]
+	match command_code:
+		CommandCodes.C_HAS_PROPERTY:
+			return EntityManager.entity_has_property(selected_entity, command_options[0])
+		CommandCodes.C_CAN_MOVE:
+			return selected_entity.can_move(Utility.resolve_full_direction_to_facing(command_options[0], slots))
 
 func resolve_conditional_old(conditional_name, conditional_data, owning_entity, target_entity, tile_position, arguments):
 	var condition_stack = []
