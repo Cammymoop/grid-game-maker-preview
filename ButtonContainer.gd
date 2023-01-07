@@ -9,7 +9,7 @@ signal button_up
 signal pressed
 signal toggled(button_pressed)
 
-var button
+var button: Button
 
 var small_font = preload("res://assets/font/pixel_font_white.tres")
 
@@ -36,6 +36,9 @@ func _init():
 	
 	button.connect("mouse_entered", self, "emit_signal", ["mouse_entered"])
 	button.connect("mouse_exited", self, "emit_signal", ["mouse_exited"])
+
+func set_disabled(new_disabled: bool) -> void:
+	button.disabled = new_disabled
 
 func add_child(child: Node, legible_unique_name=false):
 	.add_child(child, legible_unique_name)

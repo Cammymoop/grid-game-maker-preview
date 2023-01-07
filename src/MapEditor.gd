@@ -14,6 +14,8 @@ var current_tile_index = 0
 var all_tiles = []
 var all_entities = []
 
+var live_edit_mode: = true
+
 onready var cursor = get_node("Cursor")
 onready var preview = get_node("Cursor/TileEntityPreview")
 
@@ -51,9 +53,12 @@ func enable_edit_mode(on, save_state=true):
 		place_mode("none")
 		if save_state:
 			GameManager.save_edited()
+			GameManager.checkpoint_save = GameManager.editor_save
 		#GameManager.position_gameplay_camera($EditorCam.position)
 		GameManager.activate_gameplay_camera()
 	else:
+		if not live_edit_mode:
+			GameManager.load_edited()
 		var cam_position = GameManager.get_gameplay_camera_position()
 		move_cursor(MapManager.world_to_tile_position(cam_position))
 		$EditorCam.set_position_immediate(cam_position)
@@ -160,7 +165,7 @@ func _process(delta):
 	if Input.is_action_just_pressed("refresh") and not edit_mode:
 		#get_tree().reload_current_scene()
 		#call_deferred("load_random_level")
-		GameManager.load_edited()
+		GameManager.load_checkpoint()
 	if Input.is_action_just_pressed("editor_new_map"):
 		#get_tree().reload_current_scene()
 		EntityManager.clear_entity_list()

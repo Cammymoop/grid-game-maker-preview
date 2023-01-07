@@ -21,15 +21,14 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 theme = ExtResource( 2 )
 script = ExtResource( 5 )
-__meta__ = {
-"_edit_use_anchors_": false
-}
 
 [node name="PanelContainer" type="PanelContainer" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
 margin_left = 35.0
 margin_top = 17.0
-margin_right = 733.0
-margin_bottom = 740.0
+margin_right = -35.0
+margin_bottom = -17.0
 custom_styles/panel = ExtResource( 8 )
 __meta__ = {
 "_edit_use_anchors_": false
@@ -38,7 +37,7 @@ __meta__ = {
 [node name="VBoxContainer2" type="VBoxContainer" parent="PanelContainer"]
 margin_left = 4.0
 margin_right = 694.0
-margin_bottom = 719.0
+margin_bottom = 730.0
 
 [node name="TitleBar" type="Control" parent="PanelContainer/VBoxContainer2"]
 margin_right = 690.0
@@ -73,7 +72,7 @@ __meta__ = {
 [node name="VBoxContainer" type="VBoxContainer" parent="PanelContainer/VBoxContainer2"]
 margin_top = 28.0
 margin_right = 690.0
-margin_bottom = 719.0
+margin_bottom = 730.0
 size_flags_vertical = 3
 custom_constants/separation = 12
 
@@ -86,12 +85,12 @@ align = 1
 [node name="HBoxContainer" type="HBoxContainer" parent="PanelContainer/VBoxContainer2/VBoxContainer"]
 margin_top = 28.0
 margin_right = 690.0
-margin_bottom = 353.0
+margin_bottom = 359.0
 size_flags_vertical = 3
 
 [node name="TabContainer" type="TabContainer" parent="PanelContainer/VBoxContainer2/VBoxContainer/HBoxContainer"]
 margin_right = 642.0
-margin_bottom = 325.0
+margin_bottom = 331.0
 size_flags_horizontal = 3
 tab_align = 0
 
@@ -106,14 +105,14 @@ scroll_horizontal_enabled = false
 
 [node name="Panel" type="PanelContainer" parent="PanelContainer/VBoxContainer2/VBoxContainer/HBoxContainer/TabContainer/Conditions"]
 margin_right = 642.0
-margin_bottom = 301.0
+margin_bottom = 307.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
 custom_styles/panel = SubResource( 2 )
 
 [node name="MarginContainer" type="MarginContainer" parent="PanelContainer/VBoxContainer2/VBoxContainer/HBoxContainer/TabContainer/Conditions/Panel"]
 margin_right = 642.0
-margin_bottom = 301.0
+margin_bottom = 307.0
 custom_constants/margin_right = 2
 custom_constants/margin_top = 10
 custom_constants/margin_left = 2
@@ -123,26 +122,26 @@ custom_constants/margin_bottom = 10
 margin_left = 2.0
 margin_top = 10.0
 margin_right = 640.0
-margin_bottom = 291.0
+margin_bottom = 297.0
 rect_min_size = Vector2( 100, 20 )
 
 [node name="NewConditionButton" type="Button" parent="PanelContainer/VBoxContainer2/VBoxContainer/HBoxContainer"]
 margin_left = 646.0
-margin_top = 140.0
+margin_top = 143.0
 margin_right = 690.0
-margin_bottom = 184.0
+margin_bottom = 187.0
 size_flags_vertical = 4
 icon = ExtResource( 4 )
 
 [node name="HBoxContainer2" type="HBoxContainer" parent="PanelContainer/VBoxContainer2/VBoxContainer"]
-margin_top = 365.0
+margin_top = 371.0
 margin_right = 690.0
-margin_bottom = 691.0
+margin_bottom = 702.0
 size_flags_vertical = 3
 
 [node name="ActionsTabs" type="TabContainer" parent="PanelContainer/VBoxContainer2/VBoxContainer/HBoxContainer2"]
 margin_right = 642.0
-margin_bottom = 326.0
+margin_bottom = 331.0
 size_flags_horizontal = 3
 tab_align = 0
 script = ExtResource( 6 )
@@ -158,14 +157,14 @@ list = NodePath("Panel/MarginContainer/TrueActionsList")
 
 [node name="Panel" type="PanelContainer" parent="PanelContainer/VBoxContainer2/VBoxContainer/HBoxContainer2/ActionsTabs/True Actions"]
 margin_right = 642.0
-margin_bottom = 302.0
+margin_bottom = 307.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
 custom_styles/panel = SubResource( 2 )
 
 [node name="MarginContainer" type="MarginContainer" parent="PanelContainer/VBoxContainer2/VBoxContainer/HBoxContainer2/ActionsTabs/True Actions/Panel"]
 margin_right = 642.0
-margin_bottom = 302.0
+margin_bottom = 307.0
 custom_constants/margin_right = 2
 custom_constants/margin_top = 10
 custom_constants/margin_left = 2
@@ -175,7 +174,7 @@ custom_constants/margin_bottom = 10
 margin_left = 2.0
 margin_top = 10.0
 margin_right = 640.0
-margin_bottom = 292.0
+margin_bottom = 297.0
 rect_min_size = Vector2( 100, 20 )
 
 [node name="False Actions" type="ScrollContainer" parent="PanelContainer/VBoxContainer2/VBoxContainer/HBoxContainer2/ActionsTabs"]
@@ -190,7 +189,7 @@ list = NodePath("Panel/MarginContainer/FalseActionsList")
 
 [node name="Panel" type="PanelContainer" parent="PanelContainer/VBoxContainer2/VBoxContainer/HBoxContainer2/ActionsTabs/False Actions"]
 margin_right = 642.0
-margin_bottom = 302.0
+margin_bottom = 307.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
 custom_styles/panel = SubResource( 2 )
@@ -222,7 +221,7 @@ list = NodePath("Panel/MarginContainer/AlwaysActionsList")
 
 [node name="Panel" type="PanelContainer" parent="PanelContainer/VBoxContainer2/VBoxContainer/HBoxContainer2/ActionsTabs/Always Actions"]
 margin_right = 642.0
-margin_bottom = 302.0
+margin_bottom = 307.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
 custom_styles/panel = SubResource( 2 )
@@ -244,9 +243,9 @@ rect_min_size = Vector2( 100, 20 )
 
 [node name="NewActionButton" type="Button" parent="PanelContainer/VBoxContainer2/VBoxContainer/HBoxContainer2"]
 margin_left = 646.0
-margin_top = 141.0
+margin_top = 143.0
 margin_right = 690.0
-margin_bottom = 185.0
+margin_bottom = 187.0
 size_flags_vertical = 4
 icon = ExtResource( 4 )
 

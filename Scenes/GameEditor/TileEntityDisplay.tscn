@@ -42,17 +42,17 @@ __meta__ = {
 }
 
 [node name="TileName" type="Label" parent="VBox"]
-margin_top = 5.0
+margin_top = 4.0
 margin_right = 60.0
-margin_bottom = 19.0
+margin_bottom = 20.0
 text = "floor"
 align = 1
 
 [node name="TileImage" type="TextureRect" parent="VBox"]
 margin_left = 14.0
-margin_top = 23.0
+margin_top = 24.0
 margin_right = 46.0
-margin_bottom = 55.0
+margin_bottom = 56.0
 mouse_filter = 2
 size_flags_horizontal = 4
 texture = SubResource( 1 )

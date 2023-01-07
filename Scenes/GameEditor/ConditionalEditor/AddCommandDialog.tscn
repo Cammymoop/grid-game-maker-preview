@@ -5,7 +5,6 @@
 [ext_resource path="res://src/UI/ConditionalEditorTheme.tres" type="Theme" id=3]
 
 [node name="AddActionDialog" type="ConfirmationDialog"]
-visible = true
 margin_left = 278.0
 margin_top = 201.0
 margin_right = 630.0
@@ -23,25 +22,26 @@ anchor_bottom = 1.0
 margin_left = 8.0
 margin_top = 8.0
 margin_right = -8.0
-margin_bottom = -46.0
+margin_bottom = -40.0
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
 [node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer"]
 margin_right = 336.0
-margin_bottom = 32.0
+margin_bottom = 28.0
 
 [node name="SlotSelectorButton" parent="VBoxContainer/HBoxContainer" instance=ExtResource( 2 )]
 anchor_right = 0.0
 anchor_bottom = 0.0
 margin_right = 28.0
-margin_bottom = 32.0
+margin_bottom = 28.0
 
 [node name="Filter" type="LineEdit" parent="VBoxContainer/HBoxContainer"]
 margin_left = 32.0
+margin_top = 1.0
 margin_right = 336.0
-margin_bottom = 32.0
+margin_bottom = 27.0
 size_flags_horizontal = 3
 size_flags_vertical = 4
 clear_button_enabled = true
@@ -49,9 +49,9 @@ placeholder_text = "filter"
 placeholder_alpha = 0.25
 
 [node name="AllCommands" type="ItemList" parent="VBoxContainer"]
-margin_top = 36.0
+margin_top = 32.0
 margin_right = 336.0
-margin_bottom = 182.0
+margin_bottom = 188.0
 size_flags_vertical = 3
 __meta__ = {
 "_edit_use_anchors_": false
@@ -62,7 +62,7 @@ visible = false
 margin_left = 8.0
 margin_top = 8.0
 margin_right = 344.0
-margin_bottom = 190.0
+margin_bottom = 196.0
 
 [node name="Button" type="Button" parent="Control"]
 anchor_right = 1.0

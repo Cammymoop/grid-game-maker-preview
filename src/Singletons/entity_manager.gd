@@ -146,7 +146,7 @@ func update_movement_mode():
 		controller_frame = false
 		movements_enabled = false
 	
-	print("MOVMENT MODE is now " + GameManager.describe_movement_mode(movement_mode))
+	#print_debug("MOVEMENT MODE is now " + GameManager.describe_movement_mode(movement_mode))
 
 func clear():
 	bond_groups = []

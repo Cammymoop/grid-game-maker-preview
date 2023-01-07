@@ -64,6 +64,9 @@ func _ready():
 		set_game_name("Basic")
 		game_definition["game_settings"] = {"pixel_scale": 2}
 		start_managers()
+	
+	MapManager.refresh_definition()
+	EntityManager.refresh_definition()
 
 func bake_scene_transition_curve() -> void:
 	scene_transition_curve.bake()
@@ -201,7 +204,11 @@ func _unpause() -> void:
 func save_checkpoint() -> void:
 	checkpoint_save = get_serialized_play_state()
 func load_checkpoint() -> void:
+	if not checkpoint_save:
+		return
 	load_serialized_play_state(checkpoint_save)
+func clear_checkpoint() -> void:
+	checkpoint_save = {}
 
 func save_edited() -> void:
 	print_debug("setting editor_save")
@@ -214,6 +221,8 @@ func load_level_data(level_data):
 	editor_save = level_data["state"]
 	load_edited()
 	toggle_pause_menu()
+	
+	checkpoint_save = editor_save
 
 func level_start():
 	EntityManager.clear()

@@ -183,7 +183,12 @@ func entity_process() -> void:
 		var intended = get_intended_move()
 		if intended > -1:
 			set_current_speed(self_steps_per_tile)
-			start_move(intended)
+			var first_try = start_move(intended)
+			
+			if not first_try:
+				var second_intended = get_intended_move()
+				if second_intended != intended and second_intended > -1:
+					start_move(second_intended)
 	if moving:
 		
 		just_moved = false
@@ -253,11 +258,12 @@ func start_move(move_facing, change_visual_facing=true, group_move=false) -> boo
 				EntityManager.post_move_actions(self, tile_position, next_tile_pos)
 				actually_started_move()
 			else:
-				emit_signal("started_move")
+				emit_signal("started_move", move_facing)
 			return true
 		else:
 			next_tile_pos = tile_position
-			emit_signal("blocked")
+			if not group_move:
+				emit_signal("blocked", move_facing)
 			return false
 	return false
 
@@ -267,11 +273,11 @@ func revert_move_start() -> void:
 	moving = false
 	steps_remaining = 0
 	next_tile_pos = tile_position
-	emit_signal("blocked")
+	emit_signal("blocked", facing)
 
 # I started moving
 func actually_started_move() -> void:
-	emit_signal("started_move")
+	emit_signal("started_move", facing)
 	var post_move = EntityManager.get_entity_property(self, "post_move")
 	if post_move and post_move.is_conditional():
 		print("post move conditional")
@@ -354,7 +360,7 @@ func untail() -> void:
 			tailing.disconnect("started_move", self, "tail_follow")
 	tailing = null
 
-func tail_follow() -> void:
+func tail_follow(_move_facing) -> void:
 	if not tailing:
 		return
 	if steps_per_tile != tailing.steps_per_tile:

@@ -24,15 +24,34 @@ var InputTypes = InputTemplates.InputTypes
 # Define command codes
 enum CC {
 	SELECT_DEFAULTS,
+	SELECT_DEFAULT,
+	SELECT_NEAREST_ENTITY,
+	SELECT_ENTITY_AT,
+	SELECT_TILES_NAMED,
 	
 	# Conditions
-	C_HAS_PROPERTY,
+	C_HAS_PROPERTY = 4000,
+	C_HAS_NAME,
 	C_CAN_MOVE,
+	C_GET_PUSHED,
 	
 	# Actions
-	A_DIE,
+	A_DIE = 8000,
 	A_MOVE,
-	A_FIND_SWAP_TILES,
+	A_SWAP_TILES,
+	A_SET_TILES,
+	A_QUIT,
+	A_SET_PROPERTY,
+	A_PROPERTY_ADD,
+	A_PROPERTY_SUBTRACT,
+	A_REMOVE_PROPERTY,
+	
+	A_SAVE_CHECKPOINT,
+	A_LOAD_CHECKPOINT,
+	
+	A_CREATE_ENTITY,
+	A_TURN,
+	A_SEND_SIGNAL,
 }
 
 var FIRST_CONDITION = CC.C_HAS_PROPERTY
@@ -47,32 +66,89 @@ func is_condition(command_id) -> bool:
 func is_action(command_id) -> bool:
 	return command_id >= FIRST_ACTION
 
+func slot_is_entity(slot_id) -> bool:
+	return slot_id >= Slot.RED and slot_id <= Slot.PINK
 
 var Friendly = {
+	CC.SELECT_DEFAULTS: {
+		display_name= "Reset All Slots",
+		slot_types= [],
+		ui= ["Reset all slots to their default values"]
+	},
+	CC.SELECT_TILES_NAMED: {
+		display_name= "Select Tiles Named",
+		slot_types= ["tile_pos"],
+		options= {
+			"tile_name": {input_type= InputTypes.TileNameInput},
+		},
+		ui= ["<", "Select all the tiles named ", "[tile_name"]
+	},
+	
 	CC.C_HAS_PROPERTY: {
 		display_name= "Has Property",
-		slot_types= ["entity"],
+		slot_types= ["entity", "tile_pos"],
 		options= {
 			"property_name": {input_type= InputTypes.PropertyInput},
+			"invert": {
+				input_type= InputTypes.InvertInput,
+				template_options= {
+					regular_text= "has",
+					inverted_text= "does not have",
+				},
+			},
 		},
-		condition= true,
-		ui= ["This Entity has a property called ","[property_name",]
+		ui= ["This Entity/Tile ", "[invert", " a property called ","[property_name"]
+	},
+	CC.C_HAS_NAME: {
+		display_name= "Has Name",
+		slot_types= ["entity"],
+		options= {
+			"name": {input_type= InputTypes.EntityNameInput},
+			"invert": {
+				input_type= InputTypes.InvertInput,
+				template_options= {
+					regular_text= "is",
+					inverted_text= "is not",
+				},
+			},
+		},
+		ui= ["This Entity ", "[invert", " named: ","[name"]
 	},
 	CC.C_CAN_MOVE: {
 		display_name= "Can Move",
 		slot_types= ["entity"],
 		options= {
 			"direction": {input_type= InputTypes.DirectionInput},
+			"invert": {
+				input_type= InputTypes.InvertInput,
+				template_options= {
+					regular_text= "can",
+					inverted_text= "cannot",
+				},
+			},
 		},
-		condition= true,
-		ui= ["This Entity can move this way ","[direction",]
+		ui= ["This Entity ", "[invert", " move this way ", "[direction",]
+	},
+	CC.C_GET_PUSHED: {
+		display_name= "Get Pushed",
+		slot_types= ["entity"],
+		options= {
+			"direction": {input_type= InputTypes.DirectionInput},
+			"visual_facing": {
+				input_type= InputTypes.InvertInput,
+				template_options= {
+					regular_text= "",
+					inverted_text= " and doesn't change which way it's facing",
+				},
+			},
+		},
+		ui= ["This Entity gets pushed this way ", "[direction", " if it can", "br", "[visual_facing"]
 	},
 	
 	CC.A_DIE: {
 		display_name= "Die",
 		slot_types= ["entity"],
 		options= {},
-		action= true,
 		ui= ["This Entity dies now",]
 	},
 	CC.A_MOVE: {
@@ -81,17 +157,79 @@ var Friendly = {
 		options= {
 			"direction": {input_type= InputTypes.DirectionInput},
 		},
-		condition= true,
 		ui= ["Start moving this way ","[direction",]
 	},
-	CC.A_FIND_SWAP_TILES: {
+	CC.A_SWAP_TILES: {
 		display_name= "Swap Tiles",
 		slot_types= ["tile_pos"],
 		options= {
 			"tile1": {input_type= InputTypes.TileNameInput},
 			"tile2": {input_type= InputTypes.TileNameInput},
 		},
-		action= true,
-		ui= ["Swap all ","[tile1", " with ", "[tile2", " and vice-versa"]
+		ui= ["Swap ","[tile1", " with ", "[tile2", " and vice-versa"]
+	},
+	CC.A_SET_TILES: {
+		display_name= "Set Tiles",
+		slot_types= ["tile_pos"],
+		options= {
+			"tile": {input_type= InputTypes.TileNameInput},
+		},
+		ui= ["Change tiles to ","[tile"]
+	},
+	
+	CC.A_SET_PROPERTY: {
+		display_name= "Set Property",
+		slot_types= ["entity"],
+		options= {
+			"property_name": {input_type= InputTypes.PropertyInput},
+			"val": {input_type= InputTypes.ValueInput},
+		},
+		ui= ["Set the property called ", "[property_name", " on this Entity to ","[val"]
+	},
+	CC.A_PROPERTY_ADD: {
+		display_name= "Add To Property",
+		slot_types= ["entity"],
+		options= {
+			"property_name": {input_type= InputTypes.PropertyInput},
+			"val": {input_type= InputTypes.ValueInput},
+		},
+		ui= ["Increase the property called ", "[property_name", " on this Entity by ", "[val"]
+	},
+	CC.A_PROPERTY_SUBTRACT: {
+		display_name= "Subtract From Property",
+		slot_types= ["entity"],
+		options= {
+			"property_name": {input_type= InputTypes.PropertyInput},
+			"val": {input_type= InputTypes.ValueInput},
+			"autoremove": {input_type= InputTypes.InvertInput,
+				template_options= {
+					regular_text= "do nothing",
+					inverted_text= "remove it",
+				},
+			},
+		},
+		ui= ["Decrease the property called ", "[property_name", " on this Entity by ", "[val", "br",
+			"If the property is zero or less, ", "[autoremove"]
+	},
+	CC.A_REMOVE_PROPERTY: {
+		display_name= "Remove Property",
+		slot_types= ["entity"],
+		options= {
+			"property_name": {input_type= InputTypes.PropertyInput},
+		},
+		ui= ["Remove the property called ", "[property_name", " from this Entity"]
+	},
+	
+	CC.A_SAVE_CHECKPOINT: {
+		display_name= "Save Checkpoint",
+		slot_types= [],
+		options= {},
+		ui= ["Save a checkpoint",]
+	},
+	CC.A_LOAD_CHECKPOINT: {
+		display_name= "Load Checkpoint",
+		slot_types= [],
+		options= {},
+		ui= ["Load the saved checkpoint",]
 	},
 }

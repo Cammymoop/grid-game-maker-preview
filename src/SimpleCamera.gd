@@ -64,7 +64,7 @@ func find_entity_to_follow() -> void:
 	
 	if follow_this:
 		if not by_mode or by_mode == "name":
-			print_debug("finding name " + follow_this)
+			#print_debug("finding name " + follow_this)
 			var ent_index = EntityManager.get_entity_index(follow_this)
 			target_entity = EntityManager.find_entity_by_index(ent_index, false)
 			if target_entity:

@@ -19,10 +19,23 @@ build the editor into the game
   Also would be nice to be able to import from tiled but that could get really complicated
 
 
+++++++++++++++++
+++++++++++++++++
+++++++++++++++++
+++++++++++++++++ Elevator pitch:
+++++++++++++++++ Tile-based puzzle and adventure games share a ton of technical features, but have vast untouched depths of fun and complexity
+++++++++++++++++ What if you had a game-editor for purely tile-based games, but it was dead simple to use.
+++++++++++++++++ If you can explain to someone a tile-based game, then you can create it using this editor.
+++++++++++++++++ (Also the graphics are simple enough that you can edit them yourself, but the engine features pretty effects and animations for you)
+++++++++++++++++
+++++++++++++++++
+++++++++++++++++
+
 
 Next up:
  - Saving/Loading levels
-   - Saving and restoring level state at play-time for checkpoint behavior *(done with checkpoints, need to save level files)
+   - Saving and restoring level state at play-time for checkpoint behavior *DONE
+   - Saving and loading from file *DONE
  
  - Edit Game Properties (name, camera type, etc) *(game name)
     - Actually make camera
@@ -38,30 +51,100 @@ Next up:
     - add images into user_data *
 	- define images used by game *
 	- Tile Compositor *
-	- Fix escape on tile compositor crashing
+	- Fix escape on tile compositor crashing -Fixed?
  
- - Discrete Mode: entities move on discrete intervals or wait for the turn to advance
+ - Discrete Mode: entities move on discrete intervals or wait for the turn to advance *DONE
  
  - Adding sound files, playing sounds (add some builtin sfx)
  - Playing music (added, and builtin)
  
  - Better level editor controls:
-	- mouse support
+	- mouse support *
     - copy tile *
 	- repeatable place tile *
+	- fix mouse moving the cursor when the camera moves but the mouse is still
 	- multiselect
 	- paste
 	- fill
- - Actual UI for editing conditionals
+
+ - Actual UI for editing conditionals (CONDITIONAL OVERHAUL)
+    - Conditionals now have slots, to select entity/tile/values to act on *
+	- Conditional data is much more machine-processable *
+	- Conditional editor for easy editing without needing to know much *
+	- Simpleish system for defining conditional UI for new commands to simplify adding commands *
+	
+	- Convert all existing commands to the new system
+	- Convert and re-test all cloned games from old conditionals to new
+	- Finish making backgrounds for the other types of slots besides entity
+	- Some form of validation that a command is correctly placed and doesn't have invalid slot or data
+	- Add commands for dealing with number and string values (string can wait for now)
+	- Make smart value input templates where you can specify a literal value or one from a slot etc.
+	- Actually implement slot remembering (pink heart slot, possibly add remembered tile_pos and value slots)
+	    - Should it be per-entity? global? should there be one of each? configurable per-game? level?
+	- Fix the separators when not all categories of slots are shown
+	- Filter commands by slot type when slot is selected in the command selector
+	- By default have command selector start with no slot selected but show the default for one of the allowed categories when one is selected
+	    - Needs more thought, how do you show all commands by default,
+		    only commands that accept a certain slot after picking, and also show a sensible default slot for any given command if one hasn't yet been selected,
+			in addition to not being confusing
+	- probably more stuff too
+
+- Reduce number of clicks to get to property editor/conditional editor
+    - Possibly combine property editor, with event drop-down and conditional editor
+	- editing a conditional property should probably go straight to the conditional editor
+	- button on conditional editor to switch to a static property
+	- button on static property editor to transform into the conditional editor
+
+- Select default background effect scene in game-config
+   - probably need "player" config options including disabling or changing the background effect scene
  
  - Saving/Loading game configs *
  - Gamepad controls *
  - allow list of conditionals per event *
  - event name dropdown for new prop dialog *
  
- - Conditional validation (check keys, and value type)
+ Long term necessity:
+ 
+ - Figure out how to properly id downloaded games and resources from arbitrary creators
+     - I would prefer a completely decentralized system even if it leads to occasional id conflicts, but they should be very rare
+	 - Maybe creators can generate a uniqueID and the game can use that to keep track of ids for games/images etc
+	     - So the game can come up with locally unique id numbers for each asset
+		    Based on a sort of creator-local asset id (first image I upload is image 0)
+			Games can reference their own creators asset by creator local id, or define other creators by uniqueID and reference their assets by creator+creator-local id
+			then the engine translates that to the number it uses to keep track of stuff it has (engine id)
+	- Tile and Entity IDs should just be game-local and shouldn't need any of that
 
-More condtions and actions:
+- Set up a home server (Maker style but the games themselves, not just levels)
+    - interface so you can upload games/levels/assets to, explore and download them too
+	- server needs to at the very least be configurable so it could be pointed somewhere else easily for custom stuff or if I eventually abandon hosting it
+
+- Managed server system to take uploads, allow downloading games, allow uploading levelpacks/mods of games
+    - I'm going to have to figure out moderation, no way around it
+	- Probably need good secure authentication too
+	- This might end up needing to be a paid thing who knows
+	    - I hope all engine features can still be usable with no server, no account etc
+
+- Export system for stand-alone executables in all ways godot can, but just from within the engine itself
+    - May require separate download for export-templates and such
+	- Should be able to export to the platform it is running on without download
+ 
+ Wishlist:
+ 
+ - Console support (pls pls W4 be good :>)
+    - Probably just for exported games
+	- Would have to be done through an intermediary somehow just like godot in general
+	    - barely seems worth it but I can dream
+	- user generated content including whole games has precident though, dreams, little big planet
+	- emphasis on the wishlist I guess
+ 
+ 
+ 
+ - Wide-ranging animation support
+ 
+ - Import system for csv, tiled map files
+ 
+
+More condtions and actions: [OLD]
  - i_have_property *
  - tile_has_name *
  - entity_has_name *

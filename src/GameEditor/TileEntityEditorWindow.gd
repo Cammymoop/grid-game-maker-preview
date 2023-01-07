@@ -225,12 +225,9 @@ func update_property_to(prop_key, update_property_popup):
 		update_property_popup.queue_free()
 		return
 	
-	var value:String = update_property_popup.find_node("SetValue").text
+	var value = update_property_popup.get_value()
 	var new_value
-	var parsed = JSON.parse(value)
-	if parsed.error == OK and typeof(parsed.result) in [TYPE_DICTIONARY, TYPE_ARRAY]:
-		new_value = parsed.result
-	else:
+	if typeof(value) == TYPE_STRING:
 		value = value.strip_edges()
 		if value.to_lower() == "true":
 			new_value = true
@@ -242,6 +239,8 @@ func update_property_to(prop_key, update_property_popup):
 			new_value = float(value)
 		else:
 			new_value = value
+	else:
+		new_value = value
 	
 	if new_key != prop_key:
 		the_definition["properties"].erase(prop_key)
@@ -258,13 +257,13 @@ func _on_PropertyList_item_activated(index):
 	
 	var current_val = the_definition["properties"][prop_key]
 	if typeof(current_val) in [TYPE_DICTIONARY, TYPE_ARRAY]:
-		current_val = JSON.print(current_val, "  ")
+		pass
+		#current_val = JSON.print(current_val, "  ")
 	else:
 		current_val = str(current_val)
 	
 	var update_property_popup = update_prop_popup_scene.instance()
-	update_property_popup.find_node("SetName").text = prop_key
-	update_property_popup.find_node("SetValue").text = current_val
+	update_property_popup.set_info(prop_key, current_val)
 	
 	add_child(update_property_popup)
 	update_property_popup.connect("confirmed", self, "update_property_to", [prop_key, update_property_popup])

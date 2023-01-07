@@ -63,11 +63,37 @@ var current_slot_id: int = Commands.Slot.RED
 
 var picker_open: = false
 
+var show_categories: = ["all"]
+
 var PICKER_SCREEN_MARGIN_H = 10
 var PICKER_SCREEN_MARGIN_V = 10
 
 func _ready():
 	picker.visible = false
+
+func set_valid_slot_categories(categories: Array) -> void:
+	show_categories = categories
+	
+	var all = "all" in show_categories
+	
+	find_node("EntitySlots").visible = all or "entity" in show_categories
+	find_node("TilePosSlots").visible = all or "tile_pos" in show_categories
+	
+	var value = all or "value" in show_categories
+	var number = all or "number" in show_categories
+	
+	find_node("IntSlots").visible = value or number or "int" in show_categories
+	find_node("FloatSlots").visible = value or number or "float" in show_categories
+	find_node("StringSlots").visible = value or "string" in show_categories
+	
+	find_node("ArgSlots").visible = all or value or "argument" in show_categories
+	
+	if len(show_categories) == 0:
+		$ButtonContainer.set_disabled(true)
+		$ButtonContainer/CenterContainer.visible = false
+	else:
+		$ButtonContainer.set_disabled(false)
+		$ButtonContainer/CenterContainer.visible = true
 
 func show_picker() -> void:
 	picker_open = true

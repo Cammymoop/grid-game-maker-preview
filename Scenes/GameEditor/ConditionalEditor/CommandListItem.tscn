@@ -1,19 +1,19 @@
 [gd_scene load_steps=8 format=2]
 
-[ext_resource path="res://Scenes/GameEditor/SlotSelectorButton.tscn" type="PackedScene" id=1]
-[ext_resource path="res://assets/font/pixel_font_white.tres" type="BitmapFont" id=2]
-[ext_resource path="res://assets/font/my_font.tres" type="DynamicFont" id=3]
-[ext_resource path="res://src/GameEditor/CommandListItem.gd" type="Script" id=4]
+[ext_resource path="res://assets/font/pixel_font_white.tres" type="BitmapFont" id=1]
+[ext_resource path="res://Scenes/GameEditor/SlotSelectorButton.tscn" type="PackedScene" id=2]
+[ext_resource path="res://assets/ui/PropertyEditor/RedTabBackground.tres" type="StyleBox" id=3]
+[ext_resource path="res://assets/ui/PropertyEditor/RedBackground.tres" type="StyleBox" id=4]
 [ext_resource path="res://assets/img/button_icons/x.png" type="Texture" id=5]
-[ext_resource path="res://assets/ui/PropertyEditor/RedBackground.tres" type="StyleBox" id=6]
-[ext_resource path="res://assets/ui/PropertyEditor/RedTabBackground.tres" type="StyleBox" id=7]
+[ext_resource path="res://src/GameEditor/ConditionalEditor/CommandListItem.gd" type="Script" id=6]
+[ext_resource path="res://assets/font/my_font.tres" type="DynamicFont" id=7]
 
 [node name="Command" type="PanelContainer"]
 margin_right = 239.0
 margin_bottom = 45.0
 rect_min_size = Vector2( 0, 45 )
-custom_styles/panel = ExtResource( 6 )
-script = ExtResource( 4 )
+custom_styles/panel = ExtResource( 4 )
+script = ExtResource( 6 )
 __meta__ = {
 "_edit_use_anchors_": false
 }
@@ -22,16 +22,13 @@ __meta__ = {
 margin_left = 2.0
 margin_top = 2.0
 margin_right = 237.0
-margin_bottom = 43.0
+margin_bottom = 46.0
 
 [node name="TabPanel" type="Panel" parent="TitleTab"]
 margin_left = 12.0
 margin_top = -4.0
 margin_right = 56.0
-custom_styles/panel = ExtResource( 7 )
-__meta__ = {
-"_edit_use_anchors_": false
-}
+custom_styles/panel = ExtResource( 3 )
 
 [node name="TitleText" type="Label" parent="TitleTab/TabPanel"]
 anchor_right = 1.0
@@ -39,7 +36,7 @@ anchor_bottom = 1.0
 margin_top = 1.0
 margin_bottom = 6.0
 custom_colors/font_color = Color( 0.14902, 0.0509804, 0.0509804, 1 )
-custom_fonts/font = ExtResource( 2 )
+custom_fonts/font = ExtResource( 1 )
 text = "Die"
 align = 1
 uppercase = true
@@ -51,7 +48,7 @@ __meta__ = {
 margin_left = 2.0
 margin_top = 2.0
 margin_right = 237.0
-margin_bottom = 43.0
+margin_bottom = 46.0
 custom_constants/margin_right = 4
 custom_constants/margin_top = 6
 custom_constants/margin_left = 4
@@ -61,35 +58,41 @@ custom_constants/margin_bottom = 4
 margin_left = 4.0
 margin_top = 6.0
 margin_right = 231.0
-margin_bottom = 37.0
+margin_bottom = 40.0
 
-[node name="CommandSlot" parent="Content/HBoxContainer" instance=ExtResource( 1 )]
+[node name="CommandSlot" parent="Content/HBoxContainer" instance=ExtResource( 2 )]
 anchor_right = 0.0
 anchor_bottom = 0.0
-margin_top = 1.0
 margin_right = 28.0
-margin_bottom = 29.0
+margin_bottom = 28.0
 size_flags_horizontal = 4
-size_flags_vertical = 4
+size_flags_vertical = 0
 
-[node name="GeneratedContent" type="HBoxContainer" parent="Content/HBoxContainer"]
+[node name="GeneratedContent" type="VBoxContainer" parent="Content/HBoxContainer"]
 margin_left = 32.0
-margin_right = 227.0
-margin_bottom = 31.0
-size_flags_horizontal = 3
+margin_right = 169.0
+margin_bottom = 34.0
+size_flags_vertical = 3
 
-[node name="Label" type="Label" parent="Content/HBoxContainer/GeneratedContent"]
-margin_top = 7.0
+[node name="Row" type="HBoxContainer" parent="Content/HBoxContainer/GeneratedContent"]
 margin_right = 137.0
-margin_bottom = 23.0
-custom_fonts/font = ExtResource( 3 )
+margin_bottom = 34.0
+rect_min_size = Vector2( 0, 34 )
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="Label" type="Label" parent="Content/HBoxContainer/GeneratedContent/Row"]
+margin_top = 9.0
+margin_right = 137.0
+margin_bottom = 25.0
+custom_fonts/font = ExtResource( 7 )
 text = "This Entity dies now"
 
 [node name="Control" type="Control" parent="."]
 margin_left = 2.0
 margin_top = 2.0
 margin_right = 237.0
-margin_bottom = 43.0
+margin_bottom = 46.0
 mouse_filter = 2
 
 [node name="TextureRect" type="TextureRect" parent="Control"]

@@ -48,6 +48,7 @@ FilesManager="*res://src/Singletons/files_manager.gd"
 InputTemplates="*res://src/Singletons/input_templates.gd"
 Commands="*res://src/Singletons/commands.gd"
 ConditionalsV2="*res://src/Singletons/conditionals_v2.gd"
+OldConditionalConverter="*res://src/Singletons/old_conditional_converter.gd"
 
 [debug]
 
@@ -59,7 +60,6 @@ gdscript/warnings/return_value_discarded=false
 
 window/size/width=768
 window/size/height=768
-window/size/always_on_top=true
 window/size/test_width=768
 window/size/test_height=768
 

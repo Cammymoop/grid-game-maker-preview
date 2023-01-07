@@ -28,9 +28,109 @@ margin_top = -384.0
 margin_right = 384.0
 margin_bottom = 384.0
 script = ExtResource( 5 )
-__meta__ = {
-"_edit_use_anchors_": false
-}
+
+[node name="PopupPicker" type="Popup" parent="."]
+visible = true
+margin_left = 384.0
+margin_top = 384.0
+margin_right = 384.0
+margin_bottom = 384.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="PopupPickerPanel" type="PanelContainer" parent="PopupPicker"]
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+grow_horizontal = 2
+grow_vertical = 2
+custom_styles/panel = SubResource( 1 )
+
+[node name="VBoxContainer" type="VBoxContainer" parent="PopupPicker/PopupPickerPanel"]
+margin_right = 60.0
+margin_bottom = 92.0
+grow_horizontal = 2
+size_flags_horizontal = 4
+
+[node name="PickUp" parent="PopupPicker/PopupPickerPanel/VBoxContainer" instance=ExtResource( 4 )]
+anchor_right = 0.0
+anchor_bottom = 0.0
+margin_left = 16.0
+margin_right = 44.0
+margin_bottom = 28.0
+size_flags_horizontal = 4
+
+[node name="CenterContainer" type="CenterContainer" parent="PopupPicker/PopupPickerPanel/VBoxContainer/PickUp"]
+margin_right = 28.0
+margin_bottom = 28.0
+mouse_filter = 2
+
+[node name="Icon" type="TextureRect" parent="PopupPicker/PopupPickerPanel/VBoxContainer/PickUp/CenterContainer"]
+margin_right = 28.0
+margin_bottom = 28.0
+mouse_filter = 2
+texture = ExtResource( 1 )
+
+[node name="HBoxContainer" type="HBoxContainer" parent="PopupPicker/PopupPickerPanel/VBoxContainer"]
+margin_top = 32.0
+margin_right = 60.0
+margin_bottom = 60.0
+
+[node name="PickLeft" parent="PopupPicker/PopupPickerPanel/VBoxContainer/HBoxContainer" instance=ExtResource( 4 )]
+anchor_right = 0.0
+anchor_bottom = 0.0
+margin_right = 28.0
+margin_bottom = 28.0
+
+[node name="CenterContainer" type="CenterContainer" parent="PopupPicker/PopupPickerPanel/VBoxContainer/HBoxContainer/PickLeft"]
+margin_right = 28.0
+margin_bottom = 28.0
+mouse_filter = 2
+
+[node name="Icon" type="TextureRect" parent="PopupPicker/PopupPickerPanel/VBoxContainer/HBoxContainer/PickLeft/CenterContainer"]
+margin_right = 28.0
+margin_bottom = 28.0
+mouse_filter = 2
+texture = ExtResource( 3 )
+
+[node name="PickRight" parent="PopupPicker/PopupPickerPanel/VBoxContainer/HBoxContainer" instance=ExtResource( 4 )]
+anchor_right = 0.0
+anchor_bottom = 0.0
+margin_left = 32.0
+margin_right = 60.0
+margin_bottom = 28.0
+
+[node name="CenterContainer" type="CenterContainer" parent="PopupPicker/PopupPickerPanel/VBoxContainer/HBoxContainer/PickRight"]
+margin_right = 28.0
+margin_bottom = 28.0
+mouse_filter = 2
+
+[node name="Icon" type="TextureRect" parent="PopupPicker/PopupPickerPanel/VBoxContainer/HBoxContainer/PickRight/CenterContainer"]
+margin_right = 28.0
+margin_bottom = 28.0
+mouse_filter = 2
+texture = ExtResource( 2 )
+
+[node name="PickDown" parent="PopupPicker/PopupPickerPanel/VBoxContainer" instance=ExtResource( 4 )]
+anchor_right = 0.0
+anchor_bottom = 0.0
+margin_left = 16.0
+margin_top = 64.0
+margin_right = 44.0
+margin_bottom = 92.0
+size_flags_horizontal = 4
+
+[node name="CenterContainer" type="CenterContainer" parent="PopupPicker/PopupPickerPanel/VBoxContainer/PickDown"]
+margin_right = 28.0
+margin_bottom = 28.0
+mouse_filter = 2
+
+[node name="Icon" type="TextureRect" parent="PopupPicker/PopupPickerPanel/VBoxContainer/PickDown/CenterContainer"]
+margin_right = 28.0
+margin_bottom = 28.0
+mouse_filter = 2
+texture = ExtResource( 6 )
 
 [node name="ButtonContainer" parent="." instance=ExtResource( 4 )]
 anchor_right = 0.0
@@ -66,7 +166,7 @@ layer = 4
 [node name="Node2D" type="Node2D" parent="CanvasLayer"]
 position = Vector2( 384, 384 )
 
-[node name="PopupPicker" type="PanelContainer" parent="CanvasLayer/Node2D"]
+[node name="PopupPicker_" type="PanelContainer" parent="CanvasLayer/Node2D"]
 visible = false
 grow_horizontal = 2
 grow_vertical = 2
@@ -75,13 +175,13 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="VBoxContainer" type="VBoxContainer" parent="CanvasLayer/Node2D/PopupPicker"]
+[node name="VBoxContainer" type="VBoxContainer" parent="CanvasLayer/Node2D/PopupPicker_"]
 margin_right = 60.0
 margin_bottom = 92.0
 grow_horizontal = 2
 size_flags_horizontal = 4
 
-[node name="PickUp" parent="CanvasLayer/Node2D/PopupPicker/VBoxContainer" instance=ExtResource( 4 )]
+[node name="PickUp" parent="CanvasLayer/Node2D/PopupPicker_/VBoxContainer" instance=ExtResource( 4 )]
 anchor_right = 0.0
 anchor_bottom = 0.0
 margin_left = 16.0
@@ -89,58 +189,58 @@ margin_right = 44.0
 margin_bottom = 28.0
 size_flags_horizontal = 4
 
-[node name="CenterContainer" type="CenterContainer" parent="CanvasLayer/Node2D/PopupPicker/VBoxContainer/PickUp"]
+[node name="CenterContainer" type="CenterContainer" parent="CanvasLayer/Node2D/PopupPicker_/VBoxContainer/PickUp"]
 margin_right = 28.0
 margin_bottom = 28.0
 mouse_filter = 2
 
-[node name="Icon" type="TextureRect" parent="CanvasLayer/Node2D/PopupPicker/VBoxContainer/PickUp/CenterContainer"]
+[node name="Icon" type="TextureRect" parent="CanvasLayer/Node2D/PopupPicker_/VBoxContainer/PickUp/CenterContainer"]
 margin_right = 28.0
 margin_bottom = 28.0
 mouse_filter = 2
 texture = ExtResource( 1 )
 
-[node name="HBoxContainer" type="HBoxContainer" parent="CanvasLayer/Node2D/PopupPicker/VBoxContainer"]
+[node name="HBoxContainer" type="HBoxContainer" parent="CanvasLayer/Node2D/PopupPicker_/VBoxContainer"]
 margin_top = 32.0
 margin_right = 60.0
 margin_bottom = 60.0
 
-[node name="PickLeft" parent="CanvasLayer/Node2D/PopupPicker/VBoxContainer/HBoxContainer" instance=ExtResource( 4 )]
+[node name="PickLeft" parent="CanvasLayer/Node2D/PopupPicker_/VBoxContainer/HBoxContainer" instance=ExtResource( 4 )]
 anchor_right = 0.0
 anchor_bottom = 0.0
 margin_right = 28.0
 margin_bottom = 28.0
 
-[node name="CenterContainer" type="CenterContainer" parent="CanvasLayer/Node2D/PopupPicker/VBoxContainer/HBoxContainer/PickLeft"]
+[node name="CenterContainer" type="CenterContainer" parent="CanvasLayer/Node2D/PopupPicker_/VBoxContainer/HBoxContainer/PickLeft"]
 margin_right = 28.0
 margin_bottom = 28.0
 mouse_filter = 2
 
-[node name="Icon" type="TextureRect" parent="CanvasLayer/Node2D/PopupPicker/VBoxContainer/HBoxContainer/PickLeft/CenterContainer"]
+[node name="Icon" type="TextureRect" parent="CanvasLayer/Node2D/PopupPicker_/VBoxContainer/HBoxContainer/PickLeft/CenterContainer"]
 margin_right = 28.0
 margin_bottom = 28.0
 mouse_filter = 2
 texture = ExtResource( 3 )
 
-[node name="PickRight" parent="CanvasLayer/Node2D/PopupPicker/VBoxContainer/HBoxContainer" instance=ExtResource( 4 )]
+[node name="PickRight" parent="CanvasLayer/Node2D/PopupPicker_/VBoxContainer/HBoxContainer" instance=ExtResource( 4 )]
 anchor_right = 0.0
 anchor_bottom = 0.0
 margin_left = 32.0
 margin_right = 60.0
 margin_bottom = 28.0
 
-[node name="CenterContainer" type="CenterContainer" parent="CanvasLayer/Node2D/PopupPicker/VBoxContainer/HBoxContainer/PickRight"]
+[node name="CenterContainer" type="CenterContainer" parent="CanvasLayer/Node2D/PopupPicker_/VBoxContainer/HBoxContainer/PickRight"]
 margin_right = 28.0
 margin_bottom = 28.0
 mouse_filter = 2
 
-[node name="Icon" type="TextureRect" parent="CanvasLayer/Node2D/PopupPicker/VBoxContainer/HBoxContainer/PickRight/CenterContainer"]
+[node name="Icon" type="TextureRect" parent="CanvasLayer/Node2D/PopupPicker_/VBoxContainer/HBoxContainer/PickRight/CenterContainer"]
 margin_right = 28.0
 margin_bottom = 28.0
 mouse_filter = 2
 texture = ExtResource( 2 )
 
-[node name="PickDown" parent="CanvasLayer/Node2D/PopupPicker/VBoxContainer" instance=ExtResource( 4 )]
+[node name="PickDown" parent="CanvasLayer/Node2D/PopupPicker_/VBoxContainer" instance=ExtResource( 4 )]
 anchor_right = 0.0
 anchor_bottom = 0.0
 margin_left = 16.0
@@ -149,19 +249,23 @@ margin_right = 44.0
 margin_bottom = 92.0
 size_flags_horizontal = 4
 
-[node name="CenterContainer" type="CenterContainer" parent="CanvasLayer/Node2D/PopupPicker/VBoxContainer/PickDown"]
+[node name="CenterContainer" type="CenterContainer" parent="CanvasLayer/Node2D/PopupPicker_/VBoxContainer/PickDown"]
 margin_right = 28.0
 margin_bottom = 28.0
 mouse_filter = 2
 
-[node name="Icon" type="TextureRect" parent="CanvasLayer/Node2D/PopupPicker/VBoxContainer/PickDown/CenterContainer"]
+[node name="Icon" type="TextureRect" parent="CanvasLayer/Node2D/PopupPicker_/VBoxContainer/PickDown/CenterContainer"]
 margin_right = 28.0
 margin_bottom = 28.0
 mouse_filter = 2
 texture = ExtResource( 6 )
 
+[connection signal="pressed" from="PopupPicker/PopupPickerPanel/VBoxContainer/PickUp" to="." method="_on_DirectionSelected" binds= [ "up" ]]
+[connection signal="pressed" from="PopupPicker/PopupPickerPanel/VBoxContainer/HBoxContainer/PickLeft" to="." method="_on_DirectionSelected" binds= [ "left" ]]
+[connection signal="pressed" from="PopupPicker/PopupPickerPanel/VBoxContainer/HBoxContainer/PickRight" to="." method="_on_DirectionSelected" binds= [ "right" ]]
+[connection signal="pressed" from="PopupPicker/PopupPickerPanel/VBoxContainer/PickDown" to="." method="_on_DirectionSelected" binds= [ "down" ]]
 [connection signal="pressed" from="ButtonContainer" to="." method="_on_ButtonContainer_pressed"]
-[connection signal="pressed" from="CanvasLayer/Node2D/PopupPicker/VBoxContainer/PickUp" to="." method="_on_DirectionSelected" binds= [ "up" ]]
-[connection signal="pressed" from="CanvasLayer/Node2D/PopupPicker/VBoxContainer/HBoxContainer/PickLeft" to="." method="_on_DirectionSelected" binds= [ "left" ]]
-[connection signal="pressed" from="CanvasLayer/Node2D/PopupPicker/VBoxContainer/HBoxContainer/PickRight" to="." method="_on_DirectionSelected" binds= [ "right" ]]
-[connection signal="pressed" from="CanvasLayer/Node2D/PopupPicker/VBoxContainer/PickDown" to="." method="_on_DirectionSelected" binds= [ "down" ]]
+[connection signal="pressed" from="CanvasLayer/Node2D/PopupPicker_/VBoxContainer/PickUp" to="." method="_on_DirectionSelected" binds= [ "up" ]]
+[connection signal="pressed" from="CanvasLayer/Node2D/PopupPicker_/VBoxContainer/HBoxContainer/PickLeft" to="." method="_on_DirectionSelected" binds= [ "left" ]]
+[connection signal="pressed" from="CanvasLayer/Node2D/PopupPicker_/VBoxContainer/HBoxContainer/PickRight" to="." method="_on_DirectionSelected" binds= [ "right" ]]
+[connection signal="pressed" from="CanvasLayer/Node2D/PopupPicker_/VBoxContainer/PickDown" to="." method="_on_DirectionSelected" binds= [ "down" ]]

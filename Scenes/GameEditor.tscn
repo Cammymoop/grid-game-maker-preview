@@ -506,7 +506,6 @@ custom_fonts/font = ExtResource( 14 )
 text = "Open Images Folder"
 
 [node name="TileEntityEditorWindow" parent="MarginContainer/UIRoot" instance=ExtResource( 2 )]
-visible = false
 
 [node name="BackButton" type="Button" parent="MarginContainer/UIRoot"]
 margin_left = 641.0

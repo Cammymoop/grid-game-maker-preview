@@ -25,15 +25,20 @@ var picker_open: = false
 var showing_relative: = false
 
 func _ready():
-	picker.visible = false
+	pass#picker.visible = false
 
 func show_picker() -> void:
 	picker_open = true
-	picker.visible = true
+	#picker.visible = true
+	picker.popup()
+	var center = $ButtonContainer.get_global_rect().get_center()
+	picker.rect_size = picker.get_node("PopupPickerPanel").rect_size
+	picker.rect_global_position = center - (picker.rect_size/2)
 
 func hide_picker() -> void:
 	picker_open = false
-	picker.visible = false
+	#picker.visible = false
+	picker.hide()
 
 func get_direction() -> int:
 	return current_direction
@@ -49,24 +54,28 @@ func show_absolute() -> void:
 	update_picker()
 
 func _on_ButtonContainer_pressed():
-	if not picker_open:
-		show_picker()
+	show_picker()
 
-func _input(e):
-	var click_event = e as InputEventMouseButton
-	if not click_event:
-		return
-	
-	if picker_open:
-		var local_click = picker.make_input_local(click_event)
-		var bounds = Rect2(Vector2.ZERO, picker.rect_size)
-		if not bounds.has_point(local_click.position):
-			hide_picker()
+#func _input(e):
+#	var click_event = e as InputEventMouseButton
+#	if not click_event:
+#		return
+#
+#	if picker_open:
+#		var local_click = picker.make_input_local(click_event)
+#		var bounds = Rect2(Vector2.ZERO, picker.rect_size)
+#		if not bounds.has_point(local_click.position):
+#			hide_picker()
 
 
 func _on_DirectionSelected(direction_name: String):
 	hide_picker()
+	print(direction_name)
 	current_direction = absolute_directions[direction_name]
+	update_icon()
+
+func set_direction(direction_val: int) -> void:
+	current_direction = direction_val
 	update_icon()
 
 func update_picker() -> void:

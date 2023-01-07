@@ -4,6 +4,8 @@ class_name Property
 var internal_value = null
 var property_name = ""
 
+var use_conditionalv2 = true
+
 func get_value():
 	if is_conditional():
 		return null
@@ -23,17 +25,26 @@ func resolve(owner, target, tile_position, args=[]):
 	if not is_conditional():
 		return
 	
-	#var slots = ConditionalsV2.make_slots(owner, target, tile_position, args)
+	var slots: = {}
+	if use_conditionalv2:
+		slots = ConditionalsV2.make_slots(owner, target, tile_position, args)
 	var result = true
 	if typeof(internal_value) == TYPE_DICTIONARY:
-		return ConditionalFunctions.resolve_conditional(property_name, internal_value, owner, target, tile_position, args)['value']
-		#return ConditionalsV2.resolve_conditional(internal_value, slots)
+		if use_conditionalv2:
+			return ConditionalsV2.resolve_conditional(internal_value, slots)['result']
+		else:
+			return ConditionalFunctions.resolve_conditional(property_name, internal_value, owner, target, tile_position, args)['value']
 	elif typeof(internal_value) == TYPE_ARRAY:
 		for conditional in internal_value:
-			var one_result = ConditionalFunctions.resolve_conditional(property_name, conditional, owner, target, tile_position, args)
-			#var one_result = ConditionalsV2.resolve_conditional(internal_value, slots)
+			var one_result = {}
+			if use_conditionalv2:
+				one_result = ConditionalsV2.resolve_conditional(internal_value, slots)
+			else:
+				one_result = ConditionalFunctions.resolve_conditional(property_name, conditional, owner, target, tile_position, args)
+			
+			var result_key = 'result' if use_conditionalv2 else 'value'
 			if one_result['quit']:
-				return one_result['value']
-			result = one_result['value']
+				return one_result[result_key]
+			result = one_result[result_key]
 	
 	return result

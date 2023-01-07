@@ -234,10 +234,10 @@ const FULL_DIR_RELATIVE_MODE_BIT = 8
 const FULL_DIR_SLOT_SHIFT = 4
 
 func full_direction_is_absolute(full_dir: int) -> bool:
-	return bool(FULL_DIR_RELATIVE_BIT & full_dir)
+	return not bool(FULL_DIR_RELATIVE_BIT & full_dir)
 
 func get_full_direction_slot(full_dir: int) -> int:
-	return full_dir << FULL_DIR_SLOT_SHIFT
+	return full_dir >> FULL_DIR_SLOT_SHIFT
 
 func get_full_direction_absolute(full_dir: int) -> int:
 	return full_dir & 3 # Just the first 2 bits
@@ -249,6 +249,7 @@ func resolve_full_direction_to_facing(full_direction: int, slots: Dictionary) ->
 	if full_direction_is_absolute(full_direction):
 		return get_full_direction_absolute(full_direction)
 	
+	# TODO needs to know if the slot is a tile_pos and resolve direction relative to the tiles facing
 	var entity = slots[get_full_direction_slot(full_direction)]
 	if not entity:
 		print_debug("Slot for relative direction is empty")

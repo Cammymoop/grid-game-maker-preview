@@ -16,9 +16,14 @@ func toggle():
 		emit_signal("gameplay_paused")
 		visible = true
 		GameManager.set_pause("pause_menu", true)
+		on_show()
 	else:
 		visible = false
 		GameManager.set_pause("pause_menu", false)
+
+func on_show() -> void:
+	var restart_button = find_node("RestartLevel")
+	restart_button.visible = bool(GameManager.loaded_level_name)
 
 
 func _on_QuitToMenu_pressed():
@@ -35,3 +40,8 @@ func _on_LoadLevelButton_pressed():
 	var popup = load_dialog.instance()
 	add_child(popup)
 	popup.popup_centered()
+
+
+func _on_RestartLevel_pressed():
+	GameManager.load_edited()
+	toggle()
