@@ -49,5 +49,5 @@ func _on_SelectableTexItem_gui_input(event):
 			
 			add_theme_stylebox_override("panel", hibox)
 			
-		if button_event.doubleclick:
+		if button_event.double_click:
 			emit_signal("double_clicked")

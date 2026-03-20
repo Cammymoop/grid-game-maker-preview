@@ -1,12 +1,13 @@
 [gd_scene format=3 uid="uid://bn526a4shlrf6"]
 
 [ext_resource type="Texture2D" uid="uid://cv8l7ymc05wg5" path="res://assets/img/button_icons/plus.png" id="1"]
-[ext_resource type="PackedScene" path="res://Scenes/GameEditor/TileEntityEditorWindow.tscn" id="2"]
+[ext_resource type="PackedScene" uid="uid://dp8klau6une1m" path="res://Scenes/GameEditor/TileEntityEditorWindow.tscn" id="2"]
 [ext_resource type="Script" uid="uid://bx6f17nxjwie5" path="res://src/GameEditor/TilesEntitiesEditor.gd" id="3"]
+[ext_resource type="Theme" uid="uid://d02pi6tltv1cc" path="res://assets/ui/game_editor_tab_theme.tres" id="3_qrjoe"]
 [ext_resource type="StyleBox" path="res://assets/ui/HorizontalSeparatorStylebox.tres" id="4"]
 [ext_resource type="Script" uid="uid://cakuc61ui0t57" path="res://src/GameEditor/ImagesEditor.gd" id="5"]
 [ext_resource type="Script" uid="uid://benwn44a0nm5f" path="res://src/GameEditor/GameDefinitionEditor.gd" id="6"]
-[ext_resource type="Theme" path="res://assets/DefaultTheme.tres" id="7"]
+[ext_resource type="Theme" uid="uid://cqr0a0fienc2" path="res://assets/DefaultTheme.tres" id="7"]
 [ext_resource type="PackedScene" path="res://Scenes/FallingEntitiesEffects.tscn" id="8"]
 [ext_resource type="FontFile" uid="uid://biuf4hpin33j3" path="res://assets/font/medium_font.tres" id="9"]
 [ext_resource type="Script" uid="uid://b067pb4uemc40" path="res://src/GameEditor/UIRoot.gd" id="10"]
@@ -38,6 +39,8 @@ layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 theme = ExtResource("7")
 
 [node name="MarginContainer" type="MarginContainer" parent="." unique_id=677360245]
@@ -56,6 +59,7 @@ script = ExtResource("10")
 
 [node name="TabContainer" type="TabContainer" parent="MarginContainer/UIRoot" unique_id=540253846]
 layout_mode = 2
+theme = ExtResource("3_qrjoe")
 current_tab = 0
 
 [node name="Game" type="VBoxContainer" parent="MarginContainer/UIRoot/TabContainer" unique_id=1146228055]
@@ -209,7 +213,7 @@ alignment = 2
 [node name="OpenGameDir" type="Button" parent="MarginContainer/UIRoot/TabContainer/Game/HBoxContainer6" unique_id=1310730974]
 layout_mode = 2
 size_flags_vertical = 4
-text = "Open Game Save DirAccess"
+text = "Open Game Save Directory"
 
 [node name="HBoxContainer5" type="HBoxContainer" parent="MarginContainer/UIRoot/TabContainer/Game" unique_id=33989943]
 layout_mode = 2
@@ -368,8 +372,6 @@ theme_override_fonts/font = ExtResource("14")
 text = "Open Images Folder"
 
 [node name="TileEntityEditorWindow" parent="MarginContainer/UIRoot" unique_id=1695968813 instance=ExtResource("2")]
-oversampling_override = 1.0
-position = Vector2i(0, 36)
 visible = false
 
 [node name="BackButton" type="Button" parent="MarginContainer/UIRoot" unique_id=1510903638]
@@ -387,6 +389,8 @@ layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 script = ExtResource("12")
 
 [node name="Darken" type="ColorRect" parent="MarginContainer/UIRoot/PopupLayerLayer/PopupLayer" unique_id=2008979061]
@@ -403,6 +407,8 @@ layer = 10
 
 [node name="ColorRect" parent="FallingEntities/CanvasLayer" index="0"]
 anchors_preset = 15
+grow_horizontal = 2
+grow_vertical = 2
 
 [node name="Effects" parent="FallingEntities/CanvasLayer2" index="0"]
 size_factor = 0.5

@@ -54,7 +54,7 @@ func set_raw_texture(tex: Texture2D, meta: Dictionary) -> void:
 	origin = meta['border']
 	separation = meta['separation']
 	texture = tex.duplicate()
-	texture.flags = 0
+	#texture.flags = 0
 	
 	raw_mode = true
 	

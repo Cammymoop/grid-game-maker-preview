@@ -5,25 +5,30 @@ var TileEntityButton = preload("res://Scenes/GameEditor/TileEntityDisplay.tscn")
 @export var tile_entity_mode = "tile"
 var ui_root
 
-@export var the_grid_path:NodePath
-var the_grid:GridContainer
+@export var the_grid_path: NodePath
+var the_grid: GridContainer
+var grid_scroll_container: ScrollContainer
 
 var im_ready = false
 
 func _ready():
-	visibility_changed.connect(Callable(self, "_on_vis_changed"))
+	visibility_changed.connect(_on_vis_changed)
 	ui_root = find_parent("UIRoot")
 	the_grid = get_node(the_grid_path)
-	set_grid_columns()
-	update_the_grid()
+	grid_scroll_container = the_grid.get_parent()
 	
 	im_ready = true
 
 func set_grid_columns() -> void:
-	var grid_width = the_grid.size.x
-	the_grid.columns = floor(grid_width / (60 + the_grid.get_theme_constant("hseparation")))
+	var grid_width = grid_scroll_container.size.x
+	if grid_width < 61:
+		the_grid.columns = 1
+		return
+	var hsep: = the_grid.get_theme_constant("h_separation")
+	the_grid.columns = floor((grid_width + hsep - 1) / (60.0 + hsep))
 
 func update_the_grid() -> void:
+	set_grid_columns()
 	for c in the_grid.get_children():
 		the_grid.remove_child(c)
 	
@@ -88,4 +93,11 @@ func _on_NewEntityButton_pressed():
 	
 	var definition = {"name": try_name, "texture": TextureManager.get_all_indexes()[0], "tex_index": 0, "properties": {}}
 	var _new_index = EntityManager.new_entity(definition)
+	update_the_grid()
+
+func _on_vis_changed():
+	if not is_visible_in_tree():
+		return
+	prints("vis changed", visible)
+	await get_tree().process_frame
 	update_the_grid()

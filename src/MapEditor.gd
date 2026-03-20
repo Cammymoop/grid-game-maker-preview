@@ -62,7 +62,7 @@ func enable_edit_mode(on, save_state=true):
 		var cam_position = GameManager.get_gameplay_camera_position()
 		move_cursor(MapManager.world_to_tile_position(cam_position))
 		$EditorCam.set_position_immediate(cam_position)
-		$EditorCam.current = true
+		$EditorCam.make_current()
 		all_entities = EntityManager.get_all_entity_indexes()
 		current_entity_index = all_entities[cur_ent_i]
 		all_tiles = MapManager.get_all_tile_indexes()

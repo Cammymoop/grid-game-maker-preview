@@ -64,9 +64,9 @@ var whole_brush: Rect2
 func set_texture(tex: Texture2D) -> void:
 	loaded_texture = tex
 
-func set_new_texture_size(size: Vector2) -> void:
+func set_new_texture_size(new_size: Vector2) -> void:
 	loaded_texture = null
-	make_tex_with_size = size
+	make_tex_with_size = new_size
 
 func set_metadata(metadata: Dictionary) -> void:
 	image_meta = metadata
@@ -80,6 +80,8 @@ func set_save_path(file_name: String) -> void:
 		
 
 func _ready():
+	close_requested.connect(hide)
+	close_requested.connect(hide)
 	visibility_changed.connect(Callable(self, "_on_vis_changed"))
 	if get_parent() is SubViewport:
 		# Running scene in standalone mode
@@ -111,11 +113,11 @@ func _ready():
 	
 	var brushModes = find_child("BrushCreatorModes")
 	if brushModes and brushModes.get_child_count() > 0:
-		brushModes.get_child(0).group.connect("pressed", Callable(self, "_on_BrushModeChange"))
+		brushModes.get_child(0).button_group.connect("pressed", Callable(self, "_on_BrushModeChange"))
 	
 	var brushColorModes = find_child("BrushColorModes")
 	if brushColorModes and brushColorModes.get_child_count() > 0:
-		brushColorModes.get_child(0).group.connect("pressed", Callable(self, "_on_BrushColorModeChange"))
+		brushColorModes.get_child(0).button_group.connect("pressed", Callable(self, "_on_BrushColorModeChange"))
 	
 	
 	
@@ -133,7 +135,7 @@ func rescale_tile_picker() -> void:
 	var tp_scale = Utility.max_integer_scale_in(edited_image.get_size(), Vector2(size.x - ltp_margin, ltp_target_height))
 	if tp_scale == 0:
 		tp_scale = 1
-	local_tile_picker.set_scale(tp_scale)
+	local_tile_picker.set_view_scale(tp_scale)
 #	local_tile_picker.rect_min_size = edited_image.get_size() * tp_scale
 #	local_tile_picker.rect_size = local_tile_picker.rect_min_size
 
@@ -148,11 +150,9 @@ func set_tile_brush_size(tile_size: Vector2) -> void:
 	bl_corner = Rect2(Vector2(0, corner_size.y - odd_y), corner_size)
 	br_corner = Rect2(Vector2(corner_size.x - odd_x, corner_size.y - odd_y), corner_size)
 	
-	tile_brush_image = Image.new()
-	tile_brush_image.create(tile_size.x, tile_size.y, false, Image.FORMAT_RGBA8)
+	tile_brush_image = Image.create(tile_size.x, tile_size.y, false, Image.FORMAT_RGBA8)
 	tile_brush_image.fill(Color.TRANSPARENT)
-	transparent_img = Image.new()
-	transparent_img.create(tile_size.x, tile_size.y, false, Image.FORMAT_RGBA8)
+	transparent_img = Image.create(tile_size.x, tile_size.y, false, Image.FORMAT_RGBA8)
 	transparent_img.fill(Color.TRANSPARENT)
 	
 	var preview_scale = Utility.max_integer_scale_in(tile_size, Vector2(TBC_MAX_WIDTH, TBC_MAX_HEIGHT))
@@ -189,8 +189,8 @@ func update_picked_colored_brush() -> void:
 	var picked_size = picked_brush_image.get_size()
 	for tex_rect in [find_child("BrushColorPreview"), find_child("PickBrushButton").find_child("Icon")]:
 		tex_rect.texture = picked_colored_preview
-		tex_rect.expand = false
-		tex_rect.expand = true
+		tex_rect.stretch_mode = TextureRect.STRETCH_KEEP
+		tex_rect.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
 		
 		var preview_scale = Utility.max_integer_scale_in(picked_size, PICKED_BRUSH_MAX)
 		tex_rect.custom_minimum_size = picked_size * preview_scale
@@ -225,7 +225,7 @@ func color_brush() -> void:
 
 func update_tile_brush_preview() -> void:
 	tile_brush_texture = ImageTexture.create_from_image(tile_brush_image)
-	tile_brush_texture.flags = 0
+	#tile_brush_texture.flags = 0
 	
 	find_child("BrushView").texture = tile_brush_texture
 
@@ -606,14 +606,14 @@ func show_tile_brush_crosshair(show: bool) -> void:
 	
 
 
-func _on_resized():
-	var min_size = get_node("MarginContainer").get_minimum_size()
-	if size.x < min_size.x:
-		size.x = min_size.x
-	if size.y < min_size.y:
-		size.y = min_size.y
-
 
 func _on_vis_changed():
 	if not visible:
 		hidden.emit()
+
+func _on_margin_container_resized() -> void:
+	var min_content_size = get_node("MarginContainer").get_minimum_size()
+	if size.x < min_content_size.x:
+		size.x = min_content_size.x
+	if size.y < min_content_size.y:
+		size.y = min_content_size.y

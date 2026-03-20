@@ -16,11 +16,12 @@ func setup(texture_index, sub_index):
 		tex_menu.add_item(tex_list[i])
 	
 	tex_menu.connect("index_pressed", Callable(self, "set_texture"))
-	
+	hidden.connect(queue_free)
+
+	await ready
 	set_texture(texture_index)
 	find_child("TilePicker").set_selected_index(sub_index)
 	
-	hidden.connect(queue_free)
 
 func set_texture(texture_index):
 	selected_texture = texture_index

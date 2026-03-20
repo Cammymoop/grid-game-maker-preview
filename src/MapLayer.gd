@@ -8,6 +8,9 @@ func single_init(tile_index):
 			set_cell_i_source(i, j, tile_index)
 
 func set_cell_s(at_coord: Vector2i, tile_source: int) -> void:
+	if tile_source == -1:
+		erase_cell(at_coord)
+		return
 	var atlas_source: = tile_set.get_source(tile_source) as TileSetAtlasSource
 	var tile_atlas_coords: = atlas_source.get_tile_id(0)
 	set_cell(at_coord, tile_source, tile_atlas_coords)
