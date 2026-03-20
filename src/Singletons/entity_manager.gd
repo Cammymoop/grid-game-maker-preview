@@ -274,7 +274,7 @@ func get_entity_texture_rect(entity_index):
 	return TextureManager.get_index_rect(entity_defs[entity_index]['texture'], entity_defs[entity_index]['tex_index'])
 
 func get_new_controller(controller_name):
-	return controller_templates[controller_name].instance()
+	return controller_templates[controller_name].instantiate()
 
 func add_entity_to_world(entity):
 	var destination = Utility.get_world().get_node("Entities")
@@ -290,9 +290,9 @@ func create_entity(entity_index, tile_position, facing=0, activate=true) -> Node
 	
 	var entity: BaseEntity
 	if "entity_type" in entity_info:
-		entity = large_entity_template.instance()
+		entity = large_entity_template.instantiate()
 	else: 
-		entity = entity_template.instance()
+		entity = entity_template.instantiate()
 	if "intended_move_speed" in entity_info:
 		entity.set_intended_move_speed(entity_info['intended_move_speed'])
 	if "controller" in entity_info:
@@ -375,9 +375,9 @@ func auto_bond_handler(entity: BaseEntity) -> void:
 func restore_entity(serialized_entity, refresh=true) -> void:
 	var entity: BaseEntity
 	if not "entity_class" in serialized_entity or serialized_entity["entity_class"] == "BaseEntity":
-		entity = entity_template.instance()
+		entity = entity_template.instantiate()
 	else:
-		entity = large_entity_template.instance()
+		entity = large_entity_template.instantiate()
 	
 	add_entity_to_world(entity)
 	entity.deserialize(serialized_entity)
@@ -390,7 +390,7 @@ func restore_entity(serialized_entity, refresh=true) -> void:
 func setup_entity_texture(entity) -> void:
 	var texture_index = entity_defs[entity.entity_index]['texture']
 	var texture_sub_index = entity_defs[entity.entity_index]['tex_index']
-	var sprite = entity.get_node("Sprite")
+	var sprite = entity.get_node("Sprite2D")
 	sprite.texture = TextureManager.get_texture(texture_index)
 	sprite.region_rect = TextureManager.get_index_rect(texture_index, texture_sub_index)
 

@@ -82,7 +82,7 @@ func make_atlas_tex() -> void:
 	atlas.atlas = texture
 	atlas.region = Rect2(Vector2.ZERO, tile_size)
 	$HighlightedTile.texture = atlas
-	$HighlightedTile.size = tile_size * scale
+	$HighlightedTile.size = tile_size * view_scale
 	
 	var last_sub_index = (tpr * rows) - 1
 	if selected_sub_index > last_sub_index:
@@ -93,11 +93,11 @@ func make_atlas_tex() -> void:
 func set_selected_index(index):
 	selected_sub_index = index
 	
-	var offset = Utility.get_texture_index_offset(index, tile_size, origin, separation, tpr) * scale
+	var offset = Utility.get_texture_index_offset(index, tile_size, origin, separation, tpr) * view_scale
 	$Cursor.offset_left = offset.x
-	$Cursor.offset_right = offset.x + (tile_size.x * scale)
+	$Cursor.offset_right = offset.x + (tile_size.x * view_scale)
 	$Cursor.offset_top = offset.y
-	$Cursor.offset_bottom = offset.y + (tile_size.y * scale)
+	$Cursor.offset_bottom = offset.y + (tile_size.y * view_scale)
 
 func get_picked_offset() -> Vector2:
 	return Utility.get_texture_index_offset(selected_sub_index, tile_size, origin, separation, tpr)
@@ -107,11 +107,11 @@ func get_picked_region() -> Rect2:
 
 func highlight_index(hovered_index):
 	var base_offset = Utility.get_texture_index_offset(hovered_index, tile_size, origin, separation, tpr)
-	var offset = base_offset * scale
+	var offset = base_offset * view_scale
 	$HighlightedTile.offset_left = offset.x
 	$HighlightedTile.offset_top = offset.y
-	$HighlightedTile.offset_right = offset.x + (tile_size.x * scale)
-	$HighlightedTile.offset_bottom = offset.y + (tile_size.y * scale)
+	$HighlightedTile.offset_right = offset.x + (tile_size.x * view_scale)
+	$HighlightedTile.offset_bottom = offset.y + (tile_size.y * view_scale)
 	
 	$HighlightedTile.texture.region.position = base_offset
 	

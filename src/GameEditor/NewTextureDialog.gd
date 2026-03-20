@@ -1,9 +1,11 @@
 extends ConfirmationDialog
 
+signal hidden
+
 signal make_new_texture(texture_definition)
 
 func _ready():
-	connect("popup_hide", Callable(self, "queue_free"))
+	visibility_changed.connect(_on_vis_changed)
 
 func _on_NewTextureDialog_confirmed():
 	var t_width = find_child("TileWidth").value
@@ -27,3 +29,7 @@ func _on_NewTextureDialog_confirmed():
 	}
 	
 	emit_signal("make_new_texture", texture_meta)
+
+func _on_vis_changed():
+	if not visible:
+		hidden.emit()

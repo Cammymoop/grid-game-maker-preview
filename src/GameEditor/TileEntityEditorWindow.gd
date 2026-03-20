@@ -1,5 +1,7 @@
 extends Window
 
+signal hidden
+
 var tex_popup_scene = preload("res://Scenes/GameEditor/BetterTextureDialog.tscn")
 var new_prop_popup_scene = preload("res://Scenes/GameEditor/NewPropertyDialog.tscn")
 var update_prop_popup_scene = preload("res://Scenes/GameEditor/PropertyDialog.tscn")
@@ -16,6 +18,7 @@ var the_index = 0
 var the_definition: = {}
 
 func _ready():
+	visibility_changed.connect(_on_vis_changed)
 	var controller_list = find_child("EditController").get_popup()
 	for controller in EntityManager.get_all_controllers():
 		controller_list.add_item(controller)
@@ -81,7 +84,7 @@ func load_common():
 
 func set_tile_entity_mode(te: String) -> void:
 	tile_entity_mode = te
-	window_title = "Edit " + Utility.ucfirst(te)
+	title = "Edit " + Utility.ucfirst(te)
 	
 	if tile_entity_mode == "entity":
 		find_child("Controller").visible = true
@@ -108,8 +111,7 @@ func show_property_list() -> void:
 		prop_list.custom_minimum_size.x = 300
 
 func fix_size():
-	the_min_size = Vector2(0, 0)
-	set_as_minsize()
+	size = Vector2.ZERO
 	var panel = $PanelContainer
 	size = panel.size
 	size.x += panel.offset_left
@@ -136,7 +138,7 @@ func _on_TileEntityEditorWindow_resized():
 
 
 func _on_CancelButton_pressed():
-	get_close_button().emit_signal("pressed")
+	close_window()
 
 func update_texture(tex_popup):
 	the_definition['texture'] = tex_popup.get_selected_texture()
@@ -147,10 +149,10 @@ func update_texture(tex_popup):
 
 func _on_ImageButton_pressed():
 	var tex_popup = tex_popup_scene.instantiate()
+	add_child(tex_popup)
 	tex_popup.setup(the_definition['texture'], the_definition['tex_index'])
 	
 	tex_popup.connect("confirmed", Callable(self, "update_texture").bind(tex_popup))
-	add_child(tex_popup)
 	tex_popup.popup_centered()
 
 
@@ -165,7 +167,7 @@ func _on_UpdateButton_pressed():
 	else:
 		EntityManager.update_entity_definition(the_index, the_definition)
 		print('updated entity ' + the_definition['name'])
-	get_close_button().emit_signal("pressed")
+	close_window()
 
 func _on_RemovePropertyButton_pressed():
 	var prop_list:ItemList = find_child("PropertyList")
@@ -181,19 +183,15 @@ func _on_RemovePropertyButton_pressed():
 	prop_list.remove_item(selected_index)
 
 
-func show_alert(message, title="Alert!"):
+func show_alert(message, alert_title="Alert!"):
 	var alert_popup:AcceptDialog = alert_popup_scene.instantiate()
-	alert_popup.window_title = title
+	alert_popup.title = alert_title
 	alert_popup.dialog_text= message
 	
 	add_child(alert_popup)
 	alert_popup.popup_centered()
-	
-	alert_popup.connect("popup_hide", Callable(self, "remove_alert").bind(alert_popup))
-
-func remove_alert(alert_popup):
-	await get_tree().idle_frame
-	alert_popup.queue_free()
+	alert_popup.canceled.connect(alert_popup.queue_free)
+	alert_popup.confirmed.connect(alert_popup.queue_free)
 
 
 func add_prop(new_prop_popup) -> void:
@@ -205,7 +203,7 @@ func add_prop(new_prop_popup) -> void:
 	the_definition['properties'][new_key] = true
 	
 	show_property_list()
-	await get_tree().idle_frame
+	await get_tree().process_frame
 	fix_size()
 	new_prop_popup.queue_free()
 
@@ -213,7 +211,7 @@ func _on_AddPropertyButton_pressed():
 	var new_prop_popup = new_prop_popup_scene.instantiate()
 	
 	new_prop_popup.connect("confirmed", Callable(self, "add_prop").bind(new_prop_popup))
-	new_prop_popup.connect("popup_hide", Callable(self, "remove_alert").bind(new_prop_popup))
+	new_prop_popup.hidden.connect(new_prop_popup.queue_free)
 	add_child(new_prop_popup)
 	new_prop_popup.popup_centered()
 
@@ -247,7 +245,7 @@ func update_property_to(prop_key, update_property_popup):
 	the_definition['properties'][new_key] = new_value
 	
 	show_property_list()
-	await get_tree().idle_frame
+	await get_tree().process_frame
 	fix_size()
 	update_property_popup.queue_free()
 
@@ -267,7 +265,7 @@ func _on_PropertyList_item_activated(index):
 	
 	add_child(update_property_popup)
 	update_property_popup.connect("confirmed", Callable(self, "update_property_to").bind(prop_key, update_property_popup))
-	update_property_popup.connect("popup_hide", Callable(self, "remove_alert").bind(update_property_popup))
+	update_property_popup.connect("hidden", update_property_popup.queue_free)
 	update_property_popup.popup_centered()
 
 
@@ -296,7 +294,7 @@ func _on_ControllerOptionsShow_pressed():
 		
 		add_child(controller_popup)
 		controller_popup.init(controller_instance.get_options(), set_options)
-		controller_popup.connect("popup_hide", Callable(self, "update_controller_options").bind(controller_popup))
+		controller_popup.hidden.connect(Callable(self, "update_controller_options").bind(controller_popup))
 		controller_popup.popup_centered()
 	else:
 		find_parent("UIRoot").show_message(the_definition["controller"] + " has no options")
@@ -305,3 +303,10 @@ func _on_ControllerOptionsShow_pressed():
 func _on_ControllerOptionsReset_pressed():
 	if "controller_options" in the_definition:
 		the_definition.erase("controller_options")
+
+func close_window():
+	hide()
+
+func _on_vis_changed():
+	if not visible:
+		hidden.emit()

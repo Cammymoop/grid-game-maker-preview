@@ -1,5 +1,7 @@
 extends Window
 
+signal hidden
+
 var texture_dialog = preload("res://Scenes/GameEditor/BetterTextureDialog.tscn")
 
 @onready var local_tile_picker = find_child("TilePickerLocal")
@@ -78,6 +80,7 @@ func set_save_path(file_name: String) -> void:
 		
 
 func _ready():
+	visibility_changed.connect(Callable(self, "_on_vis_changed"))
 	if get_parent() is SubViewport:
 		# Running scene in standalone mode
 		popup_centered()
@@ -96,13 +99,11 @@ func _ready():
 	set_tile_brush_size(tile_size)
 	
 	if loaded_texture:
-		edited_image = loaded_texture.get_data()
+		edited_image = loaded_texture.get_image()
 	else:
-		edited_image = Image.new()
-		edited_image.create(make_tex_with_size.x, make_tex_with_size.y, true, Image.FORMAT_RGBA8)
+		edited_image = Image.create(make_tex_with_size.x, make_tex_with_size.y, true, Image.FORMAT_RGBA8)
 	
-	edited_texture = ImageTexture.new()
-	edited_texture.create_from_image(edited_image)
+	edited_texture = ImageTexture.create_from_image(edited_image)
 	
 	local_tile_picker.set_raw_texture(edited_texture, image_meta)
 	
@@ -123,7 +124,7 @@ func _ready():
 	
 	update_tile_brush_preview()
 	
-	connect("popup_hide", Callable(self, "queue_free"))
+	hidden.connect(queue_free)
 
 func on_scale() -> void:
 	rescale_tile_picker()
@@ -175,7 +176,7 @@ func _on_BrushColorModeChange(new_selected):
 	update_picked_colored_brush()
 
 func update_picked_brush() -> void:
-	picked_brush_image = picked_brush_tex.get_data()
+	picked_brush_image = picked_brush_tex.get_image()
 	update_picked_colored_brush()
 
 func update_picked_colored_brush() -> void:
@@ -183,8 +184,7 @@ func update_picked_colored_brush() -> void:
 		picked_colored_brush_image = Image.new()
 	picked_colored_brush_image.copy_from(picked_brush_image)
 	color_brush()
-	picked_colored_preview = ImageTexture.new()
-	picked_colored_preview.create_from_image(picked_colored_brush_image) #,0
+	picked_colored_preview = ImageTexture.create_from_image(picked_colored_brush_image) #,0
 	
 	var picked_size = picked_brush_image.get_size()
 	for tex_rect in [find_child("BrushColorPreview"), find_child("PickBrushButton").find_child("Icon")]:
@@ -197,7 +197,7 @@ func update_picked_colored_brush() -> void:
 		tex_rect.size = picked_size * preview_scale
 	
 	var crosshair = find_child("PickedCrosshair")
-	picked_brush_offset = ((picked_size - tile_brush_image.get_size()) / 2).floor()
+	picked_brush_offset = ((picked_size - tile_brush_image.get_size()) / 2.0).floor()
 	crosshair.set_my_size(picked_size)
 	crosshair.set_size_offset(tile_brush_image.get_size(), picked_brush_offset)
 
@@ -207,8 +207,6 @@ func color_brush() -> void:
 		return
 	
 	var img = picked_colored_brush_image
-	
-	false # img.lock() # TODOConverter3To4, Image no longer requires locking, `false` helps to not break one line if/else, so it can freely be removed
 	
 	var mode_flat: = brush_color_mode == "flat"
 	var mode_colorize: = brush_color_mode == "colorize"
@@ -223,20 +221,16 @@ func color_brush() -> void:
 			elif mode_colorize:
 				var brightness = img.get_pixel(x, y).v * brush_color.v
 				img.set_pixel(x, y, Color.from_hsv(brush_color.h, brush_color.s, brightness, alpha))
-	
-	false # img.unlock() # TODOConverter3To4, Image no longer requires locking, `false` helps to not break one line if/else, so it can freely be removed
 		
 
 func update_tile_brush_preview() -> void:
-	tile_brush_texture = ImageTexture.new()
-	tile_brush_texture.create_from_image(tile_brush_image)
+	tile_brush_texture = ImageTexture.create_from_image(tile_brush_image)
 	tile_brush_texture.flags = 0
 	
 	find_child("BrushView").texture = tile_brush_texture
 
 func repaint() -> void:
-	edited_texture = ImageTexture.new()
-	edited_texture.create_from_image(edited_image)
+	edited_texture = ImageTexture.create_from_image(edited_image)
 	local_tile_picker.set_raw_texture(edited_texture, image_meta)
 
 func corner_toggled(corner) -> void:
@@ -266,27 +260,18 @@ func alpha_subtract(from_image: Image, to_image, src_rect: Rect2, dest_offset: V
 	var h = src_rect.size.y
 	var src_offset = src_rect.position
 	
-	false # from_image.lock() # TODOConverter3To4, Image no longer requires locking, `false` helps to not break one line if/else, so it can freely be removed
-	false # to_image.lock() # TODOConverter3To4, Image no longer requires locking, `false` helps to not break one line if/else, so it can freely be removed
-	
 	for x in range(w):
 		for y in range(h):
 			var alpha: = from_image.get_pixel(src_offset.x + x, src_offset.y + y).a8
 			var cur_pixel: Color = to_image.get_pixel(dest_offset.x + x, dest_offset.y + y)
 			cur_pixel.a8 = int(max(0, cur_pixel.a8 - alpha))
 			to_image.set_pixel(dest_offset.x + x, dest_offset.y + y, cur_pixel)
-	
-	false # from_image.unlock() # TODOConverter3To4, Image no longer requires locking, `false` helps to not break one line if/else, so it can freely be removed
-	false # to_image.unlock() # TODOConverter3To4, Image no longer requires locking, `false` helps to not break one line if/else, so it can freely be removed
 
 # paints the specified region onto to_image, while leaving the alpha channel unmodified
 func stencil_blit(from_image: Image, to_image: Image, src_rect: Rect2, dest_offset: Vector2) -> void:
 	var w = src_rect.size.x
 	var h = src_rect.size.y
 	var src_offset = src_rect.position
-	
-	false # from_image.lock() # TODOConverter3To4, Image no longer requires locking, `false` helps to not break one line if/else, so it can freely be removed
-	false # to_image.lock() # TODOConverter3To4, Image no longer requires locking, `false` helps to not break one line if/else, so it can freely be removed
 	
 	for x in range(w):
 		for y in range(h):
@@ -296,9 +281,6 @@ func stencil_blit(from_image: Image, to_image: Image, src_rect: Rect2, dest_offs
 				continue
 			color.a8 = to_image.get_pixel(dest_offset.x + x, dest_offset.y + y).a8
 			to_image.set_pixel(dest_offset.x + x, dest_offset.y + y, color)
-	
-	false # from_image.unlock() # TODOConverter3To4, Image no longer requires locking, `false` helps to not break one line if/else, so it can freely be removed
-	false # to_image.unlock() # TODOConverter3To4, Image no longer requires locking, `false` helps to not break one line if/else, so it can freely be removed
 
 func _on_TLButton_pressed() -> void:
 	corner_toggled(tl_corner)
@@ -316,15 +298,10 @@ func make_transposed_img(from_img: Image) -> Image:
 	var copy = Image.new()
 	copy.copy_from(from_img)
 	
-	false # copy.lock() # TODOConverter3To4, Image no longer requires locking, `false` helps to not break one line if/else, so it can freely be removed
-	false # from_img.lock() # TODOConverter3To4, Image no longer requires locking, `false` helps to not break one line if/else, so it can freely be removed
-	
 	for x in range(from_img.get_width()):
 		for y in range(from_img.get_height()):
 			copy.set_pixel(y, x, from_img.get_pixel(x, y))
 	
-	false # copy.unlock() # TODOConverter3To4, Image no longer requires locking, `false` helps to not break one line if/else, so it can freely be removed
-	false # from_img.unlock() # TODOConverter3To4, Image no longer requires locking, `false` helps to not break one line if/else, so it can freely be removed
 	return copy
 
 var alternate_half_shift_v: = false
@@ -455,7 +432,7 @@ func _on_PickTileFromEditedButton_pressed():
 	tex.region.size = tile_brush_image.get_size()
 	tex.region.position = local_tile_picker.get_picked_offset()
 	undoer.save_current_image("tile_brush", tile_brush_image)
-	tile_brush_image = tex.get_data()
+	tile_brush_image = tex.get_image()
 	update_tile_brush_preview()
 
 func _on_TileToBrushButton_pressed():
@@ -587,7 +564,7 @@ func _on_RedoTextureButton_pressed():
 
 
 func _on_DiscardButton_pressed():
-	emit_signal("popup_hide")
+	hide()
 
 
 func _on_SaveAsFileButton_pressed():
@@ -635,3 +612,8 @@ func _on_resized():
 		size.x = min_size.x
 	if size.y < min_size.y:
 		size.y = min_size.y
+
+
+func _on_vis_changed():
+	if not visible:
+		hidden.emit()

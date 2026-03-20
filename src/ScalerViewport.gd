@@ -1,10 +1,12 @@
 extends SubViewport
 
 func _ready():
+	var vp_display: = get_parent() as TextureRect
+	if not vp_display:
+		return
 	
-	get_texture().flags = Texture2D.FLAG_FILTER
-	get_parent().texture = get_texture()
-
+	vp_display.texture = get_texture()
+	vp_display.filter_mode = CanvasItem.TEXTURE_FILTER_LINEAR
 
 func set_resolution(new_resolution: Vector2) -> void:
 	size = new_resolution

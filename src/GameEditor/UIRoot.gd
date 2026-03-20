@@ -19,7 +19,7 @@ func add_popup_layer_node(node: Node) -> void:
 	popup_layer.add_something(node)
 
 func _on_BackButton_pressed():
-	GameManager.change_scene_to_file("Menu")
+	GameManager.change_scene("Menu")
 
 
 func _on_OpenGameDir_pressed():

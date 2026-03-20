@@ -27,7 +27,7 @@ func on_show() -> void:
 
 
 func _on_QuitToMenu_pressed():
-	GameManager.change_scene_to_file("Menu")
+	GameManager.change_scene("Menu")
 
 
 func _on_SaveLevelButton_pressed():

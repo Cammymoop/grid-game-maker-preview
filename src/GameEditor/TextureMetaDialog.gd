@@ -1,10 +1,13 @@
 extends ConfirmationDialog
 
+signal hidden
+
 signal meta_confirmed(texture_definition)
 signal done
 
 func _ready():
-	connect("popup_hide", Callable(self, "queue_free"))
+	visibility_changed.connect(Callable(self, "_on_vis_changed"))
+	hidden.connect(queue_free)
 #
 #func closed() -> void:
 #	emit_signal("done")
@@ -43,3 +46,7 @@ func _on_TextureMetaDialog_confirmed():
 	
 	emit_signal("done", texture_meta)
 	emit_signal("meta_confirmed", texture_meta)
+
+func _on_vis_changed():
+	if not visible:
+		hidden.emit()

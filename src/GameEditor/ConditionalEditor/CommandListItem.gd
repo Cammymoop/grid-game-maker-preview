@@ -108,7 +108,7 @@ func generate_ui() -> void:
 	
 	set_slot(current_slot)
 	
-	await get_tree().idle_frame
+	await get_tree().process_frame
 
 func get_command_code() -> int:
 	return command_code

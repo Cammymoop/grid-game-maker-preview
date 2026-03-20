@@ -1,10 +1,13 @@
 extends AcceptDialog
 
+signal hidden
+
 var bool_opt = preload("res://Scenes/GameEditor/ControllerOptions/BoolControllerOption.tscn")
 
 var option_values = {}
 
 func init(available_options, current_options) -> void:
+	visibility_changed.connect(_on_vis_changed)
 	for option_name in available_options:
 		var option = available_options[option_name]
 		var opt
@@ -26,3 +29,7 @@ func init(available_options, current_options) -> void:
 
 func option_updated(value, option_name) -> void:
 	option_values[option_name] = value
+
+func _on_vis_changed():
+	if not visible:
+		hidden.emit()

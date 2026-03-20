@@ -5,23 +5,21 @@ func single_init(tile_index):
 	var height = 5
 	for i in range(width):
 		for j in range(height):
-			set_cell_tile_idx(i, j, tile_index)
+			set_cell_i_source(i, j, tile_index)
 
-func get_atlas_size() -> Vector2i:
-	return (tile_set.get_source(0) as TileSetAtlasSource).get_atlas_grid_size()
+func set_cell_s(at_coord: Vector2i, tile_source: int) -> void:
+	var atlas_source: = tile_set.get_source(tile_source) as TileSetAtlasSource
+	var tile_atlas_coords: = atlas_source.get_tile_id(0)
+	set_cell(at_coord, tile_source, tile_atlas_coords)
 
-func atlas_coords_to_index(atlas_coords: Vector2i) -> int:
-	return atlas_coords.x + (atlas_coords.y * get_atlas_size().x)
+func set_cell_i_source(x: int, y: int, tile_source: int):
+	set_cell_s(Vector2i(x, y), tile_source)
 
-func index_to_atlas_coords(index: int) -> Vector2i:
-	@warning_ignore("integer_division")
-	return Vector2i(index % get_atlas_size().x, index / get_atlas_size().x)
+func get_cell_s(at_coord: Vector2i) -> int:
+	return get_cell_source_id(at_coord)
 
-func set_cell_tile_idx(x: int, y: int, tile_index: int):
-	set_cell(Vector2i(x, y), 0, index_to_atlas_coords(tile_index))
-
-func get_cell_tile_idx(x: int, y: int) -> int:
-	return atlas_coords_to_index(get_cell_atlas_coords(Vector2i(x, y)))
+func get_cell_i_source(x: int, y: int) -> int:
+	return get_cell_source_id(Vector2i(x, y))
 
 func random_init():
 	var width = 5
@@ -34,7 +32,7 @@ func random_init():
 	
 	for i in range(width):
 		for j in range(height):
-			set_cell_tile_idx(i, j, Utility.random_list_element(random_ti))
+			set_cell_i_source(i, j, Utility.random_list_element(random_ti))
 
 func serialize() -> Dictionary:
 	var rect = get_used_rect()
@@ -45,7 +43,7 @@ func serialize() -> Dictionary:
 	for y in range(start_y, rect.end.y):
 		var row = []
 		for x in x_range:
-			row.append(get_cell_tile_idx(x, y))
+			row.append(get_cell_i_source(x, y))
 		rows.append(row)
 	
 	return {"start_x": start_x, "start_y": start_y, "tiles": rows}
@@ -62,4 +60,4 @@ func deserialize(data: Dictionary) -> void:
 	for i in i_range:
 		var row = tile_data[i]
 		for j in j_range:
-			set_cell_tile_idx(j + sx, i + sy, row[j])
+			set_cell_i_source(j + sx, i + sy, row[j])

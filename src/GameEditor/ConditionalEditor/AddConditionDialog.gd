@@ -59,5 +59,8 @@ func filtered(list, string):
 
 func _on_AllCommands_item_activated(_index):
 	print("item activated")
-	get_close_button().emit_signal("pressed")
+	close_dialog()
 	done()
+
+func close_dialog():
+	hide()

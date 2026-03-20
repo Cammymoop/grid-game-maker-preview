@@ -30,7 +30,7 @@ var game_view: = Vector2(12, 12)
 
 var game_definition = {}
 
-var game_camera = null
+var game_camera: Camera2D = null
 
 var transitioning = false
 var transition_anim_target: Node
@@ -165,7 +165,7 @@ func load_serialized_play_state(serialized_state: Dictionary) -> void:
 	get_tree().paused = false
 
 func create_game_camera() -> void:
-	var cam = cameras["SimpleCamera"].instance()
+	var cam = cameras["SimpleCamera"].instantiate()
 	Utility.get_world().add_child(cam)
 	game_camera = cam
 
@@ -175,7 +175,7 @@ func position_gameplay_camera(pos: Vector2) -> void:
 
 func get_gameplay_camera_position() -> Vector2:
 	if game_camera:
-		return game_camera.get_camera_screen_center()
+		return game_camera.get_screen_center_position()
 	return Vector2.ZERO
 
 func activate_gameplay_camera() -> void:
@@ -265,15 +265,15 @@ func change_scene(new_scene: String):
 		transition_left = true
 	
 	cur_scene = new_scene
-	get_tree().change_scene(scenes[new_scene])
+	get_tree().change_scene_to_file(scenes[new_scene])
 	
-	call_deferred("post_scene_change")
+	await get_tree().process_frame
+	post_scene_change()
 
 func show_scene_transition() -> void:
-	var main_viewport_copy = get_viewport().get_texture().get_data()
+	var main_viewport_copy: = get_viewport().get_texture().get_image()
 	main_viewport_copy.flip_y()
-	var copy_tex = ImageTexture.new()
-	copy_tex.create_from_image(main_viewport_copy)
+	var copy_tex = ImageTexture.create_from_image(main_viewport_copy)
 	var overlay = TextureRect.new()
 	overlay.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	overlay.texture = copy_tex
@@ -282,7 +282,7 @@ func show_scene_transition() -> void:
 	overlay_layer.layer = 128
 	get_viewport().add_child(overlay_layer)
 	overlay_layer.add_child(overlay)
-	overlay.set_anchors_and_margins_preset(Control.PRESET_VCENTER_WIDE)
+	overlay.set_anchors_and_offsets_preset(Control.PRESET_VCENTER_WIDE)
 	overlay_layer.add_to_group("TransitionOverlay")
 	
 	transitioning = true
@@ -293,7 +293,7 @@ func scene_transisiton_update() -> void:
 	var progress = (scene_transition_duration - $SceneTransitionTimer.time_left)/scene_transition_duration
 	var curve_val = scene_transition_curve.sample_baked(progress)
 	var transition_sign = -1 if transition_left else 1
-	transition_anim_target.rect_position.x = curve_val * get_viewport().size.x * transition_sign
+	transition_anim_target.position.x = curve_val * get_viewport().size.x * transition_sign
 
 func scene_transition_clear() -> void:
 	for overlay_layer in get_tree().get_nodes_in_group("TransitionOverlay"):
@@ -303,6 +303,8 @@ func scene_transition_clear() -> void:
 	transitioning = false
 
 func post_scene_change() -> void:
+	await get_tree().process_frame
+	await get_tree().process_frame
 	if cur_scene == "Play":
 		update_game_viewport()
 		create_game_camera()
@@ -329,6 +331,7 @@ func rescale_window() -> void:
 	
 	# Re-center the window
 	var screen_size = DisplayServer.screen_get_size()
+	@warning_ignore("integer_division")
 	window.position = Vector2(screen_size.x/2 - window.size.x/2, screen_size.y/2 - window.size.y/2)
 
 func toggle_pause_menu():

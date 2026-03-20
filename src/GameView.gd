@@ -12,13 +12,12 @@ var cached_pixel_scale = null
 var cached_tl_offset = null
 
 func _ready():
-	set_size_2d_override(true, resolution)
+	size_2d_override = resolution
 	set_size_2d_override_stretch(true)
-	
-	get_texture().flags = Texture2D.FLAG_FILTER
 	
 	var parent: = get_parent() as TextureRect
 	parent.texture = get_texture()
+	parent.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
 	
 	parent_vp = parent.get_viewport()
 	parent_vp.connect("size_changed", Callable(self, "rescale"))
@@ -46,12 +45,12 @@ func set_resolution(new_resolution: Vector2) -> void:
 	if update_aspect:
 		resolution = fit_resolution_into_aspect()
 	size = resolution * scale_factor
-	set_size_2d_override(true, resolution)
+	size_2d_override = resolution
 	
 	# Let the texture rect know it needs to scale the texture again
-	var tex_rect = get_parent()
-	tex_rect.expand = false
-	tex_rect.expand = true
+	var tex_rect: = get_parent() as TextureRect
+	tex_rect.stretch_mode = TextureRect.STRETCH_KEEP
+	tex_rect.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
 
 func fit_resolution_into_aspect() -> Vector2:
 	var window_size = get_window().size

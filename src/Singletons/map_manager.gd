@@ -123,35 +123,34 @@ func create_plain_layer():
 
 func create_empty_layer():
 	var map_layer = map_layer_template.instantiate()
-	var ents = Utility.get_world_3d().get_node("Entities")
-	Utility.get_world_3d().add_sibling(ents, map_layer)
+	var ents = Utility.get_world().get_node("Entities")
+	ents.add_sibling(map_layer, true)
 	map_layer.tile_set = tileset
 	layers.append(map_layer)
 	return map_layer
 
 func create_tileset():
 	var new_tileset: = TileSet.new()
+	new_tileset.tile_size = Vector2i.ONE * tile_width
 	tile_index_map = {}
 	
 	for tile_index in tile_defs:
 		var tile_info = tile_defs[tile_index]
-		new_tileset.create_tile(tile_index)
-		new_tileset.tile_set_texture(tile_index, TextureManager.get_texture(tile_info['texture']))
+		var atlas_source: = TileSetAtlasSource.new()
+		atlas_source.texture = TextureManager.get_texture(tile_info['texture'])
+		new_tileset.add_source(atlas_source)
 		
 		if tile_info['name'] in tile_index_map:
 			print_debug("WARNING: tile name already in use: " + tile_info['name'])
 		tile_index_map[tile_info['name']] = tile_index
 		
-		var texture_rect = TextureManager.get_index_rect(tile_info['texture'], tile_info['tex_index'])
-		new_tileset.tile_set_region(tile_index, texture_rect)
-		if texture_rect.size.x != tile_width or texture_rect.size.y != tile_width:
-			var offset = ((Vector2(tile_width, tile_width) - texture_rect.size) / 2).floor()
-			new_tileset.tile_set_texture_offset(tile_index, offset)
+		var tile_native_size = TextureManager.get_texture_tile_size(tile_info['texture'])
+		atlas_source.texture_region_size = tile_native_size
+		atlas_source.create_tile(TextureManager.get_index_atlas_coords(tile_info['texture'], tile_info['tex_index']))
 		
 		if "z-index" in tile_info['properties']:
 			new_tileset.tile_set_z_index(tile_index, tile_info['properties']['z-index'])
 			
-	
 	tileset = new_tileset
 
 func update_index_map() -> void:
@@ -235,9 +234,9 @@ func find_blocking() -> void:
 
 func clear_all_at(tile_position) -> void:
 	for l in layers:
-		l.set_cellv(tile_position, -1)
+		l.set_cell_s(tile_position, -1)
 
-func replace_tiles_in_rect(rect:Rect2, new_tile, checker_tile=false):
+func replace_tiles_in_rect(rect: Rect2, new_tile, checker_tile=false):
 	for x in range(rect.position.x, rect.end.x):
 		for y in range(rect.position.y, rect.end.y):
 			var ti = new_tile
@@ -256,7 +255,7 @@ func replace_tiles_at(tile_position, new_tile) -> void:
 	var old_bounds = get_map_size()
 	clear_all_at(tile_position)
 	if new_tile != -1:
-		layers[0].set_cellv(tile_position, new_tile)
+		layers[0].set_cell_s(tile_position, new_tile)
 	
 	if new_tile == -1:
 		if get_map_size() != old_bounds:
@@ -270,7 +269,7 @@ func get_tile_definition(tile_index):
 func is_tile_at(tile_index, tile_position) -> bool:
 	var found = false
 	for l in layers:
-		if l.get_cellv(tile_position) == tile_index:
+		if l.get_cell_s(tile_position) == tile_index:
 			found = true
 	return found
 
@@ -281,7 +280,7 @@ func update_tile_definition(tile_index, definition) -> void:
 	tile_defs[tile_index] = definition
 	update_index_map()
 
-func new_tile(definition) -> int:
+func make_new_tile(definition) -> int:
 	var try_index = 0
 	while try_index in tile_defs:
 		try_index += 1
@@ -302,7 +301,7 @@ func remove_tile_definition(tile_index) -> void:
 func get_tile_property_at(tile_position, property_name) -> Property:
 	var return_val = null
 	for l in layers:
-		var ti = l.get_cellv(tile_position)
+		var ti = l.get_cell_s(tile_position)
 		if ti != -1:
 			var tprop = get_tile_property(ti, property_name)
 			if tprop != null:
@@ -312,7 +311,7 @@ func get_tile_property_at(tile_position, property_name) -> Property:
 func get_tile_index_at(tile_position):
 	var tile_index = -1
 	for l in layers:
-		var ti = l.get_cellv(tile_position)
+		var ti = l.get_cell_s(tile_position)
 		if ti != -1:
 			tile_index = ti
 	return tile_index
@@ -334,7 +333,7 @@ func can_move_to(entity, tile_position) -> bool:
 	
 func check_blocks(entity, tile_position) -> bool:
 	for layer in layers:
-		var tile_here = layer.get_cellv(tile_position)
+		var tile_here = layer.get_cell_s(tile_position)
 		if tile_here == -1 or tile_here in blocking_tiles:
 			return false
 		var blocks_conditional: = get_tile_property(tile_here, "blocks")
@@ -355,7 +354,7 @@ func finish_move(moving_entity, tile_position) -> void:
 		ifmot.resolve(moving_entity, null, tile_position)
 	
 	for l in layers:
-		var ti = l.get_cellv(tile_position)
+		var ti = l.get_cell_s(tile_position)
 		if ti == -1:
 			continue
 		var fmot: = get_tile_property(ti, "finish_move_onto_tile")
@@ -370,7 +369,7 @@ func attempt_move(moving_entity, tile_position, group_move=false) -> bool:
 
 func is_blocked(tile_position) -> bool:
 	for layer in layers:
-		var tile_here = layer.get_cellv(tile_position)
+		var tile_here = layer.get_cell_s(tile_position)
 		if tile_here in blocking_tiles:
 			return true
 	return false

@@ -135,19 +135,19 @@ func _process(delta):
 		var spr_fall_v = fall_v * spr.scale.x
 		if fall_y:
 			if abs(spr.y_velocity - spr_fall_v) > 0.01:
-				spr.y_velocity = lerp(spr.y_velocity, spr_fall_v, 0.7*delta)
+				spr.y_velocity = lerpf(spr.y_velocity, spr_fall_v, 0.7*delta)
 		else:
 			if abs(spr.x_velocity - spr_fall_v) > 0.01:
-				spr.x_velocity = lerp(spr.x_velocity, spr_fall_v, 0.7*delta)
+				spr.x_velocity = lerpf(spr.x_velocity, spr_fall_v, 0.7*delta)
 		
 		var mouse_diff = (mouse - spr.position).length()
 		
 		var other_delta = 0
 		if fall_y:
-			other_delta = lerp(spr.x_velocity, 0, 1.5 * delta) - spr.x_velocity
+			other_delta = lerpf(spr.x_velocity, 0, 1.5 * delta) - spr.x_velocity
 		else:
-			other_delta = lerp(spr.y_velocity, 0, 1.5 * delta) - spr.y_velocity
-		spr.angular_velocity = lerp(spr.angular_velocity, 0, 0.1 * delta)
+			other_delta = lerpf(spr.y_velocity, 0, 1.5 * delta) - spr.y_velocity
+		spr.angular_velocity = lerpf(spr.angular_velocity, 0, 0.1 * delta)
 		if mouse_diff < mouse_push_min:
 			var dir = sign(spr.position.x - mouse.x)
 			

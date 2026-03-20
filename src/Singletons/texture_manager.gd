@@ -136,11 +136,7 @@ func load_texture(tex: Dictionary):
 				texture = placeholder
 				metadata = placeholder_metadata
 			else:
-				texture = ImageTexture.new()
-				#var flags = Texture.Flags.FLAG_MIPMAPS | Texture.Flags.FLAG_REPEAT
-				#if "filter" in tex and tex["filter"]:
-					#flags = Texture.FLAGS_DEFAULT
-				texture.create_from_image(img)
+				texture = ImageTexture.create_from_image(img)
 				metadata = fix_texture_meta(FilesManager.get_local_image_metadata(tex['image_name']))
 			
 	elif tex['type'] == 'builtin':
@@ -243,6 +239,13 @@ func get_texture_metadata(texture_index) -> Dictionary:
 
 func get_index_rect(texture_index, tile_index) -> Rect2:
 	return Rect2(get_index_offset(texture_index, tile_index), tile_sizes[texture_index])
+
+func get_texture_tile_size(texture_index) -> Vector2i:
+	return tile_sizes[texture_index]
+
+func get_index_atlas_coords(texture_index, tile_index) -> Vector2i:
+	var tpr = tiles_per_row[texture_index]
+	return Vector2i(tile_index % tpr, floor(tile_index/tpr))
 
 func get_last_sub_index(texture_index) -> int:
 	var tpr = tiles_per_row[texture_index]

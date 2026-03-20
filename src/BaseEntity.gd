@@ -14,7 +14,7 @@ var moving: = false
 var just_moved = false
 var steps_remaining:int = 0
 
-@onready var sprite: = $Sprite
+@onready var sprite: = $Sprite2D
 
 # tiles per second
 var current_move_speed = 0
@@ -70,11 +70,15 @@ func update_z():
 		z_index = 0
 
 func offset_center() -> void:
-	$Sprite.position.x = floor(MapManager.tile_width/2)
-	$Sprite.position.y = floor(MapManager.tile_width/2)
+	if not sprite:
+		sprite = $Sprite2D
+	sprite.position.x = floor(MapManager.tile_width/2.0)
+	sprite.position.y = floor(MapManager.tile_width/2.0)
 
 func get_center_offset() -> Vector2:
-	return $Sprite.position
+	if not sprite:
+		sprite = $Sprite2D
+	return sprite.position
 
 func connect_to_signals() -> void:
 	var all_props = EntityManager.get_entity_property_list(self)
@@ -310,7 +314,7 @@ func set_facing(new_facing):
 	facing = new_facing
 
 func set_intended_move_speed(intended) -> void:
-	var fps = ProjectSettings.get("physics/common/physics_fps")
+	var fps = ProjectSettings.get("physics/common/physics_ticks_per_second")
 	
 	if intended > 0:
 		var spt = max(1, round(fps / intended))

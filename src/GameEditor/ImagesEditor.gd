@@ -65,7 +65,7 @@ func edit_tex_continue(meta, selected_item) -> void:
 	ui_root.add_popup_layer_node(tex_edit)
 	tex_edit.popup_centered()
 	
-	tex_edit.connect("popup_hide", Callable(self, "images_updated"))
+	tex_edit.hidden.connect(Callable(self, "images_updated"))
 
 func edit_new_texture(texture_meta: Dictionary) -> void:
 	var tex_edit = tile_compositor_scn.instantiate()
@@ -74,7 +74,7 @@ func edit_new_texture(texture_meta: Dictionary) -> void:
 	ui_root.add_popup_layer_node(tex_edit)
 	tex_edit.popup_centered()
 	
-	tex_edit.connect("popup_hide", Callable(self, "images_updated"))
+	tex_edit.hidden.connect(Callable(self, "images_updated"))
 
 func _on_NewTexButton_pressed() -> void:
 	var dialog = metadata_dialog.instantiate()

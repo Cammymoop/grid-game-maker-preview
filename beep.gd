@@ -10,7 +10,7 @@ extends Control
 
 @onready var action_tabs = find_child("ActionsTabs")
 
-var command_list_item: PackedScene = preload("res://Scenes/GameEditor/CommandListItem.tscn")
+var command_list_item: PackedScene = preload("res://Scenes/GameEditor/ConditionalEditor/CommandListItem.tscn")
 
 func _ready():
 	add_condition_dialog.connect("command_selected", Callable(self, "add_command").bind("condition"))

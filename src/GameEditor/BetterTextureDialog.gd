@@ -1,10 +1,13 @@
 extends ConfirmationDialog
 
+signal hidden
+
 var selected_texture
 
 var HEIGHT_ADD = 110
 
 func setup(texture_index, sub_index):
+	visibility_changed.connect(Callable(self, "_on_vis_changed"))
 	var tex_list = TextureManager.get_texture_name_list()
 	
 	var tex_menu:PopupMenu = find_child("TextureSelector").get_popup()
@@ -17,7 +20,7 @@ func setup(texture_index, sub_index):
 	set_texture(texture_index)
 	find_child("TilePicker").set_selected_index(sub_index)
 	
-	connect("popup_hide", Callable(self, "queue_free"))
+	hidden.connect(queue_free)
 
 func set_texture(texture_index):
 	selected_texture = texture_index
@@ -42,3 +45,7 @@ func get_selected_sub_index() -> int:
 
 func _on_TilePicker_resized():
 	size.y = HEIGHT_ADD + find_child("TilePicker").size.y
+
+func _on_vis_changed():
+	if not visible:
+		hidden.emit()

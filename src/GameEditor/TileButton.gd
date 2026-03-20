@@ -1,7 +1,7 @@
 extends Button
 
 var parent_editor = null
-var the_index = 0
+var tile_index = 0
 
 var tile_entity_mode = "tile"
 
@@ -12,13 +12,13 @@ func _ready():
 	set_the_texture(Utility.atlas_texture_from_tile_index(tile_index))
 
 func set_the_name(the_name: String):
-	tooltip_text = tile_name
-	if len(tile_name) > NAME_CHARACTERS:
-		tile_name = tile_name.substr(0, NAME_CHARACTERS - 2) + '...'
-	$VBox/TileName.text = tile_name
+	tooltip_text = the_name
+	if len(the_name) > NAME_CHARACTERS:
+		the_name = the_name.substr(0, NAME_CHARACTERS - 2) + '...'
+	$VBox/TileName.text = the_name
 
 func set_the_texture(texture):
 	$VBox/TileImage.texture = texture
 
 func _on_TileDisplay_pressed():
-	tile_editor.edit_tile(tile_index)
+	parent_editor.edit_tile(tile_index)

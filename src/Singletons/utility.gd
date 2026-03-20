@@ -97,14 +97,14 @@ func random_list_element(list):
 	var index = random_int_range(0, len(list))
 	return list[index]
 
-func get_world() -> Node2D:
+func get_world() -> Node:
 	var f = get_tree().get_nodes_in_group("World")
 	if f:
 		return f[0]
 	print_debug("Error could not find world")
 	return null
 
-func get_pause_menu() -> Node2D:
+func get_pause_menu() -> Node:
 	var f = get_tree().get_nodes_in_group("PauseMenu")
 	if f:
 		return f[0]
@@ -268,4 +268,4 @@ func parse_json(text: String):
 	if parser.parse(text) != OK:
 		print_debug("JSON parse error at line %d: %s" % [parser.get_error_line(), parser.get_error_string()])
 		return null
-	return parser.get_result()
+	return parser.data

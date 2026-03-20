@@ -1,11 +1,11 @@
 @tool
 extends Container
 
-# warning-ignore:unused_signal
+@warning_ignore("unused_signal")
 signal button_down
-# warning-ignore:unused_signal
+@warning_ignore("unused_signal")
 signal button_up
-# warning-ignore:unused_signal
+@warning_ignore("unused_signal")
 signal pressed
 signal toggled(button_pressed)
 

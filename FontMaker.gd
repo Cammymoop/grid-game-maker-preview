@@ -57,4 +57,4 @@ func make_font():
 	if label:
 		label.add_theme_font_override("font", font)
 	
-	ResourceSaver.save("res://assets/font/" + out_name + ".tres", font)
+	ResourceSaver.save(font, "res://assets/font/" + out_name + ".tres")

@@ -63,7 +63,7 @@ func _on_ButtonContainer_pressed():
 #
 #	if picker_open:
 #		var local_click = picker.make_input_local(click_event)
-#		var bounds = Rect2(Vector2.ZERO, picker.rect_size)
+#		var bounds = Rect2(Vector2.ZERO, picker.size)
 #		if not bounds.has_point(local_click.position):
 #			hide_picker()
 

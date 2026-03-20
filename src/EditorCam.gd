@@ -16,7 +16,7 @@ func set_position_immediate(pos: Vector2) -> void:
 	force_update_scroll()
 	
 	# wait for a frame so the camera is positioned properly before we re-enable smoothing and the level bounds
-	await get_tree().idle_frame
+	await get_tree().process_frame
 	position_smoothing_enabled = true
 	update_bounds()
 
@@ -51,9 +51,8 @@ func do_scroll(hscroll, vscroll):
 	var pos = _clamped_by_limits(position)
 	position = pos + Vector2(hscroll, vscroll)
 
-
 func get_tl_position() -> Vector2:
-	return get_camera_screen_center() - (vp.get_resolution()/2)
+	return get_screen_center_position() - (vp.get_resolution()/2)
 
 func outsize_bounds() -> void:
 	limit_left = -10000000
