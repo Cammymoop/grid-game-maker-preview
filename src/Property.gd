@@ -1,4 +1,4 @@
-extends Reference
+extends RefCounted
 class_name Property
 
 var internal_value = null

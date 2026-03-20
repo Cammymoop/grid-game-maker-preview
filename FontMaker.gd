@@ -1,11 +1,11 @@
 extends Node
 
-export var font_name = "img_font.png"
-export var out_name = "out_font"
-export var font_width = 6
-export var font_height = 9
+@export var font_name = "img_font.png"
+@export var out_name = "out_font"
+@export var font_width = 6
+@export var font_height = 9
 
-export var symbols : String = ''
+@export var symbols : String = ''
 
 # table of ascii codes for supported symbols
 var supported_symbols = {
@@ -22,7 +22,7 @@ func _ready():
 func make_font():
 	print('lets make a font')
 	var font_img = load("res://assets/font/" + font_name)
-	var font : BitmapFont = BitmapFont.new()
+	var font : FontFile = FontFile.new()
 	font.add_texture(font_img)
 	font.set_height(font_height)
 	
@@ -53,8 +53,8 @@ func make_font():
 	
 	font.add_char(KEY_SPACE, 0, Rect2(Vector2(30, 8), Vector2(6, 7)))
 	
-	var label = find_node("Label")
+	var label = find_child("Label")
 	if label:
-		label.add_font_override("font", font)
+		label.add_theme_font_override("font", font)
 	
 	ResourceSaver.save("res://assets/font/" + out_name + ".tres", font)

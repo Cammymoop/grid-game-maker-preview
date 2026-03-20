@@ -16,8 +16,8 @@ var all_entities = []
 
 var live_edit_mode: = true
 
-onready var cursor = get_node("Cursor")
-onready var preview = get_node("Cursor/TileEntityPreview")
+@onready var cursor = get_node("Cursor")
+@onready var preview = get_node("Cursor/TileEntityPreview")
 
 var cursor_tex = preload("res://assets/img/cursor.png")
 var entity_cursor_tex = preload("res://assets/img/cursor_entity.png")
@@ -37,7 +37,7 @@ func _ready() -> void:
 		enable_edit_mode(false, false)
 	
 	var pause_menu = Utility.get_pause_menu()
-	pause_menu.connect("gameplay_paused", self, "save_current_level_state")
+	pause_menu.connect("gameplay_paused", Callable(self, "save_current_level_state"))
 
 func save_current_level_state() -> void:
 	if not edit_mode:
@@ -47,7 +47,7 @@ func save_current_level_state() -> void:
 func enable_edit_mode(on, save_state=true):
 	edit_mode = on
 	visible = on
-	pause_mode = PAUSE_MODE_PROCESS if on else PAUSE_MODE_STOP
+	process_mode = PROCESS_MODE_ALWAYS if on else PROCESS_MODE_PAUSABLE
 	GameManager.set_pause("map_editor", on)
 	if not on:
 		place_mode("none")

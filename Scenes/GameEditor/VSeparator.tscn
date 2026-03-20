@@ -13,7 +13,7 @@ corner_radius_bottom_right = 1
 corner_radius_bottom_left = 1
 
 [node name="VSeparator" type="VSeparator"]
-margin_top = 28.0
-margin_right = 4.0
-margin_bottom = 121.0
-custom_styles/separator = SubResource( 1 )
+offset_top = 28.0
+offset_right = 4.0
+offset_bottom = 121.0
+theme_override_styles/separator = SubResource( 1 )

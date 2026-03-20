@@ -1,11 +1,27 @@
-extends TileMap
+extends TileMapLayer
 
 func single_init(tile_index):
 	var width = 5
 	var height = 5
 	for i in range(width):
 		for j in range(height):
-			set_cell(i, j, tile_index)
+			set_cell_tile_idx(i, j, tile_index)
+
+func get_atlas_size() -> Vector2i:
+	return (tile_set.get_source(0) as TileSetAtlasSource).get_atlas_grid_size()
+
+func atlas_coords_to_index(atlas_coords: Vector2i) -> int:
+	return atlas_coords.x + (atlas_coords.y * get_atlas_size().x)
+
+func index_to_atlas_coords(index: int) -> Vector2i:
+	@warning_ignore("integer_division")
+	return Vector2i(index % get_atlas_size().x, index / get_atlas_size().x)
+
+func set_cell_tile_idx(x: int, y: int, tile_index: int):
+	set_cell(Vector2i(x, y), 0, index_to_atlas_coords(tile_index))
+
+func get_cell_tile_idx(x: int, y: int) -> int:
+	return atlas_coords_to_index(get_cell_atlas_coords(Vector2i(x, y)))
 
 func random_init():
 	var width = 5
@@ -18,7 +34,7 @@ func random_init():
 	
 	for i in range(width):
 		for j in range(height):
-			set_cell(i, j, Utility.random_list_element(random_ti))
+			set_cell_tile_idx(i, j, Utility.random_list_element(random_ti))
 
 func serialize() -> Dictionary:
 	var rect = get_used_rect()
@@ -29,7 +45,7 @@ func serialize() -> Dictionary:
 	for y in range(start_y, rect.end.y):
 		var row = []
 		for x in x_range:
-			row.append(get_cell(x, y))
+			row.append(get_cell_tile_idx(x, y))
 		rows.append(row)
 	
 	return {"start_x": start_x, "start_y": start_y, "tiles": rows}
@@ -46,4 +62,4 @@ func deserialize(data: Dictionary) -> void:
 	for i in i_range:
 		var row = tile_data[i]
 		for j in j_range:
-			set_cell(j + sx, i + sy, row[j])
+			set_cell_tile_idx(j + sx, i + sy, row[j])

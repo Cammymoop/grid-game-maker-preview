@@ -1,7 +1,7 @@
 [gd_scene load_steps=34 format=2]
 
 [ext_resource path="res://src/GameEditor/TileCompositor.gd" type="Script" id=1]
-[ext_resource path="res://assets/img/entityTiles.png" type="Texture" id=2]
+[ext_resource path="res://assets/img/entityTiles.png" type="Texture2D" id=2]
 [ext_resource path="res://Scenes/GameEditor/TilePicker.tscn" type="PackedScene" id=3]
 [ext_resource path="res://Scenes/GameEditor/HSeparator.tscn" type="PackedScene" id=4]
 [ext_resource path="res://Scenes/UI/ButtonContainer.tscn" type="PackedScene" id=5]
@@ -9,16 +9,16 @@
 [ext_resource path="res://Scenes/GameEditor/UndoRedoer.gd" type="Script" id=7]
 [ext_resource path="res://src/GameEditor/BrushSlideH.gd" type="Script" id=8]
 [ext_resource path="res://src/GameEditor/BrushSlideV.gd" type="Script" id=9]
-[ext_resource path="res://assets/img/button_icons/rotate_ccw.png" type="Texture" id=10]
-[ext_resource path="res://assets/img/button_icons/shift_down.png" type="Texture" id=11]
-[ext_resource path="res://assets/img/button_icons/flip_v.png" type="Texture" id=12]
-[ext_resource path="res://assets/img/button_icons/shift_right.png" type="Texture" id=13]
-[ext_resource path="res://assets/img/button_icons/corners.png" type="Texture" id=14]
-[ext_resource path="res://assets/img/button_icons/flip.png" type="Texture" id=15]
-[ext_resource path="res://assets/img/button_icons/rotate_cw.png" type="Texture" id=16]
-[ext_resource path="res://assets/img/transparency_help_small.png" type="Texture" id=17]
-[ext_resource path="res://assets/img/transparency_help.png" type="Texture" id=18]
-[ext_resource path="res://assets/font/small_font.tres" type="DynamicFont" id=19]
+[ext_resource path="res://assets/img/button_icons/rotate_ccw.png" type="Texture2D" id=10]
+[ext_resource path="res://assets/img/button_icons/shift_down.png" type="Texture2D" id=11]
+[ext_resource path="res://assets/img/button_icons/flip_v.png" type="Texture2D" id=12]
+[ext_resource path="res://assets/img/button_icons/shift_right.png" type="Texture2D" id=13]
+[ext_resource path="res://assets/img/button_icons/corners.png" type="Texture2D" id=14]
+[ext_resource path="res://assets/img/button_icons/flip.png" type="Texture2D" id=15]
+[ext_resource path="res://assets/img/button_icons/rotate_cw.png" type="Texture2D" id=16]
+[ext_resource path="res://assets/img/transparency_help_small.png" type="Texture2D" id=17]
+[ext_resource path="res://assets/img/transparency_help.png" type="Texture2D" id=18]
+[ext_resource path="res://assets/font/small_font.tres" type="FontFile" id=19]
 [ext_resource path="res://src/GameEditor/PickedCrosshair.gd" type="Script" id=20]
 
 [sub_resource type="AtlasTexture" id=3]
@@ -75,14 +75,14 @@ region = Rect2( 18, 18, 18, 18 )
 
 [sub_resource type="ButtonGroup" id=13]
 
-[node name="TileCompositor" type="WindowDialog"]
+[node name="TileCompositor" type="Window"]
 visible = true
 anchor_right = 1.0
-margin_left = 139.0
-margin_top = 83.0
-margin_right = -41.0
-margin_bottom = 691.0
-popup_exclusive = true
+offset_left = 139.0
+offset_top = 83.0
+offset_right = -41.0
+offset_bottom = 691.0
+exclusive = true
 window_title = "Tile Compositor"
 resizable = true
 script = ExtResource( 1 )
@@ -95,37 +95,37 @@ picked_brush_tex = SubResource( 3 )
 [node name="MarginContainer" type="MarginContainer" parent="."]
 anchor_right = 1.0
 anchor_bottom = 1.0
-custom_constants/margin_top = 10
-custom_constants/margin_bottom = 10
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_bottom = 10
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
 [node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer"]
-margin_top = 10.0
-margin_right = 588.0
-margin_bottom = 598.0
+offset_top = 10.0
+offset_right = 588.0
+offset_bottom = 598.0
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
 [node name="Label" type="Label" parent="MarginContainer/VBoxContainer"]
-margin_right = 588.0
-margin_bottom = 14.0
+offset_right = 588.0
+offset_bottom = 14.0
 text = "Image:"
 align = 1
 
 [node name="HBoxContainer2" type="HBoxContainer" parent="MarginContainer/VBoxContainer"]
-margin_top = 18.0
-margin_right = 588.0
-margin_bottom = 118.0
+offset_top = 18.0
+offset_right = 588.0
+offset_bottom = 118.0
 alignment = 1
 
 [node name="TilePickerLocal" parent="MarginContainer/VBoxContainer/HBoxContainer2" instance=ExtResource( 3 )]
-margin_left = 237.0
-margin_top = 50.0
-margin_right = 237.0
-margin_bottom = 50.0
+offset_left = 237.0
+offset_top = 50.0
+offset_right = 237.0
+offset_bottom = 50.0
 size_flags_vertical = 4
 
 [node name="TransparencyHelp" type="TextureRect" parent="MarginContainer/VBoxContainer/HBoxContainer2/TilePickerLocal"]
@@ -139,121 +139,121 @@ __meta__ = {
 }
 
 [node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/VBoxContainer/HBoxContainer2"]
-margin_left = 241.0
-margin_right = 283.0
-margin_bottom = 100.0
+offset_left = 241.0
+offset_right = 283.0
+offset_bottom = 100.0
 
 [node name="PaintButton" parent="MarginContainer/VBoxContainer/HBoxContainer2/VBoxContainer" instance=ExtResource( 5 )]
 anchor_right = 0.0
 anchor_bottom = 0.0
-margin_right = 42.0
-margin_bottom = 48.0
+offset_right = 42.0
+offset_bottom = 48.0
 size_flags_vertical = 3
 
 [node name="CenterContainer" type="CenterContainer" parent="MarginContainer/VBoxContainer/HBoxContainer2/VBoxContainer/PaintButton"]
-margin_right = 42.0
-margin_bottom = 48.0
+offset_right = 42.0
+offset_bottom = 48.0
 mouse_filter = 2
 
 [node name="Label" type="Label" parent="MarginContainer/VBoxContainer/HBoxContainer2/VBoxContainer/PaintButton/CenterContainer"]
-margin_left = 6.0
-margin_top = 13.0
-margin_right = 36.0
-margin_bottom = 34.0
+offset_left = 6.0
+offset_top = 13.0
+offset_right = 36.0
+offset_bottom = 34.0
 text = "Paint
 Tile"
 align = 1
 
 [node name="EraseButton" type="Button" parent="MarginContainer/VBoxContainer/HBoxContainer2/VBoxContainer"]
-margin_top = 52.0
-margin_right = 42.0
-margin_bottom = 100.0
+offset_top = 52.0
+offset_right = 42.0
+offset_bottom = 100.0
 size_flags_vertical = 3
 text = "Erase"
 
 [node name="VBoxContainer2" type="VBoxContainer" parent="MarginContainer/VBoxContainer/HBoxContainer2"]
-margin_left = 287.0
-margin_right = 351.0
-margin_bottom = 100.0
+offset_left = 287.0
+offset_right = 351.0
+offset_bottom = 100.0
 
 [node name="PickFromEditedButton" type="Button" parent="MarginContainer/VBoxContainer/HBoxContainer2/VBoxContainer2"]
-margin_right = 64.0
-margin_bottom = 22.0
+offset_right = 64.0
+offset_bottom = 22.0
 size_flags_vertical = 3
 size_flags_stretch_ratio = 2.0
 text = "To Brush"
 
 [node name="PickTileFromEditedButton" type="Button" parent="MarginContainer/VBoxContainer/HBoxContainer2/VBoxContainer2"]
-margin_top = 26.0
-margin_right = 64.0
-margin_bottom = 48.0
+offset_top = 26.0
+offset_right = 64.0
+offset_bottom = 48.0
 size_flags_vertical = 3
 size_flags_stretch_ratio = 2.0
 text = "To Tile"
 
 [node name="UndoTextureButton" type="Button" parent="MarginContainer/VBoxContainer/HBoxContainer2/VBoxContainer2"]
-margin_top = 52.0
-margin_right = 64.0
-margin_bottom = 74.0
+offset_top = 52.0
+offset_right = 64.0
+offset_bottom = 74.0
 size_flags_vertical = 3
 text = "Undo"
 
 [node name="RedoTextureButton" type="Button" parent="MarginContainer/VBoxContainer/HBoxContainer2/VBoxContainer2"]
-margin_top = 78.0
-margin_right = 64.0
-margin_bottom = 100.0
+offset_top = 78.0
+offset_right = 64.0
+offset_bottom = 100.0
 size_flags_vertical = 3
 text = "Redo"
 
 [node name="HSeparator" parent="MarginContainer/VBoxContainer" instance=ExtResource( 4 )]
-margin_top = 122.0
-margin_right = 588.0
-margin_bottom = 126.0
+offset_top = 122.0
+offset_right = 588.0
+offset_bottom = 126.0
 
 [node name="TileSectionLabel" type="Label" parent="MarginContainer/VBoxContainer"]
-margin_top = 130.0
-margin_right = 588.0
-margin_bottom = 144.0
+offset_top = 130.0
+offset_right = 588.0
+offset_bottom = 144.0
 text = "Create Tile:"
 align = 1
 
 [node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer"]
-margin_top = 148.0
-margin_right = 588.0
-margin_bottom = 323.0
+offset_top = 148.0
+offset_right = 588.0
+offset_bottom = 323.0
 alignment = 1
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
 [node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/VBoxContainer/HBoxContainer"]
-margin_left = 39.0
-margin_right = 199.0
-margin_bottom = 175.0
+offset_left = 39.0
+offset_right = 199.0
+offset_bottom = 175.0
 
 [node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer"]
-margin_right = 160.0
-margin_bottom = 85.0
-rect_min_size = Vector2( 160, 0 )
+offset_right = 160.0
+offset_bottom = 85.0
+custom_minimum_size = Vector2( 160, 0 )
 size_flags_vertical = 3
 
 [node name="ShiftDownButton" parent="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer/HBoxContainer" instance=ExtResource( 5 )]
 anchor_right = 0.0
 anchor_bottom = 0.0
-margin_right = 50.0
-margin_bottom = 85.0
+offset_right = 50.0
+offset_bottom = 85.0
 size_flags_horizontal = 3
 
 [node name="CenterContainer" type="CenterContainer" parent="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer/HBoxContainer/ShiftDownButton"]
-margin_right = 50.0
-margin_bottom = 85.0
+offset_right = 50.0
+offset_bottom = 85.0
 mouse_filter = 2
 
 [node name="TextureRect" type="TextureRect" parent="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer/HBoxContainer/ShiftDownButton/CenterContainer"]
-margin_left = 7.0
-margin_top = 24.0
-margin_right = 43.0
-margin_bottom = 60.0
+offset_left = 7.0
+offset_top = 24.0
+offset_right = 43.0
+offset_bottom = 60.0
 mouse_filter = 2
 texture = ExtResource( 11 )
 stretch_mode = 3
@@ -261,21 +261,21 @@ stretch_mode = 3
 [node name="CCWButton" parent="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer/HBoxContainer" instance=ExtResource( 5 )]
 anchor_right = 0.0
 anchor_bottom = 0.0
-margin_left = 54.0
-margin_right = 105.0
-margin_bottom = 85.0
+offset_left = 54.0
+offset_right = 105.0
+offset_bottom = 85.0
 size_flags_horizontal = 3
 
 [node name="CenterContainer" type="CenterContainer" parent="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer/HBoxContainer/CCWButton"]
-margin_right = 51.0
-margin_bottom = 85.0
+offset_right = 51.0
+offset_bottom = 85.0
 mouse_filter = 2
 
 [node name="TextureRect" type="TextureRect" parent="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer/HBoxContainer/CCWButton/CenterContainer"]
-margin_left = 7.0
-margin_top = 24.0
-margin_right = 43.0
-margin_bottom = 60.0
+offset_left = 7.0
+offset_top = 24.0
+offset_right = 43.0
+offset_bottom = 60.0
 mouse_filter = 2
 texture = ExtResource( 10 )
 stretch_mode = 3
@@ -283,49 +283,49 @@ stretch_mode = 3
 [node name="CWButton" parent="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer/HBoxContainer" instance=ExtResource( 5 )]
 anchor_right = 0.0
 anchor_bottom = 0.0
-margin_left = 109.0
-margin_right = 160.0
-margin_bottom = 85.0
+offset_left = 109.0
+offset_right = 160.0
+offset_bottom = 85.0
 size_flags_horizontal = 3
 
 [node name="CenterContainer" type="CenterContainer" parent="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer/HBoxContainer/CWButton"]
-margin_right = 51.0
-margin_bottom = 85.0
+offset_right = 51.0
+offset_bottom = 85.0
 mouse_filter = 2
 
 [node name="TextureRect" type="TextureRect" parent="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer/HBoxContainer/CWButton/CenterContainer"]
-margin_left = 7.0
-margin_top = 24.0
-margin_right = 43.0
-margin_bottom = 60.0
+offset_left = 7.0
+offset_top = 24.0
+offset_right = 43.0
+offset_bottom = 60.0
 mouse_filter = 2
 texture = ExtResource( 16 )
 stretch_mode = 3
 
 [node name="HBoxContainer2" type="HBoxContainer" parent="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer"]
-margin_top = 89.0
-margin_right = 160.0
-margin_bottom = 175.0
-rect_min_size = Vector2( 100, 0 )
+offset_top = 89.0
+offset_right = 160.0
+offset_bottom = 175.0
+custom_minimum_size = Vector2( 100, 0 )
 size_flags_vertical = 3
 
 [node name="ShiftRightButton" parent="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer/HBoxContainer2" instance=ExtResource( 5 )]
 anchor_right = 0.0
 anchor_bottom = 0.0
-margin_right = 50.0
-margin_bottom = 86.0
+offset_right = 50.0
+offset_bottom = 86.0
 size_flags_horizontal = 3
 
 [node name="CenterContainer" type="CenterContainer" parent="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer/HBoxContainer2/ShiftRightButton"]
-margin_right = 50.0
-margin_bottom = 86.0
+offset_right = 50.0
+offset_bottom = 86.0
 mouse_filter = 2
 
 [node name="TextureRect" type="TextureRect" parent="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer/HBoxContainer2/ShiftRightButton/CenterContainer"]
-margin_left = 7.0
-margin_top = 25.0
-margin_right = 43.0
-margin_bottom = 61.0
+offset_left = 7.0
+offset_top = 25.0
+offset_right = 43.0
+offset_bottom = 61.0
 mouse_filter = 2
 texture = ExtResource( 13 )
 stretch_mode = 3
@@ -333,21 +333,21 @@ stretch_mode = 3
 [node name="HFlipButton" parent="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer/HBoxContainer2" instance=ExtResource( 5 )]
 anchor_right = 0.0
 anchor_bottom = 0.0
-margin_left = 54.0
-margin_right = 105.0
-margin_bottom = 86.0
+offset_left = 54.0
+offset_right = 105.0
+offset_bottom = 86.0
 size_flags_horizontal = 3
 
 [node name="CenterContainer" type="CenterContainer" parent="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer/HBoxContainer2/HFlipButton"]
-margin_right = 51.0
-margin_bottom = 86.0
+offset_right = 51.0
+offset_bottom = 86.0
 mouse_filter = 2
 
 [node name="TextureRect" type="TextureRect" parent="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer/HBoxContainer2/HFlipButton/CenterContainer"]
-margin_left = 7.0
-margin_top = 25.0
-margin_right = 43.0
-margin_bottom = 61.0
+offset_left = 7.0
+offset_top = 25.0
+offset_right = 43.0
+offset_bottom = 61.0
 mouse_filter = 2
 texture = ExtResource( 15 )
 stretch_mode = 3
@@ -355,31 +355,31 @@ stretch_mode = 3
 [node name="VFlipButton" parent="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer/HBoxContainer2" instance=ExtResource( 5 )]
 anchor_right = 0.0
 anchor_bottom = 0.0
-margin_left = 109.0
-margin_right = 160.0
-margin_bottom = 86.0
+offset_left = 109.0
+offset_right = 160.0
+offset_bottom = 86.0
 size_flags_horizontal = 3
 
 [node name="CenterContainer" type="CenterContainer" parent="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer/HBoxContainer2/VFlipButton"]
-margin_right = 51.0
-margin_bottom = 86.0
+offset_right = 51.0
+offset_bottom = 86.0
 mouse_filter = 2
 
 [node name="TextureRect" type="TextureRect" parent="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer/HBoxContainer2/VFlipButton/CenterContainer"]
-margin_left = 7.0
-margin_top = 25.0
-margin_right = 43.0
-margin_bottom = 61.0
+offset_left = 7.0
+offset_top = 25.0
+offset_right = 43.0
+offset_bottom = 61.0
 mouse_filter = 2
 texture = ExtResource( 12 )
 stretch_mode = 3
 
 [node name="Panel" type="Panel" parent="MarginContainer/VBoxContainer/HBoxContainer"]
-margin_left = 203.0
-margin_right = 343.0
-margin_bottom = 175.0
-rect_min_size = Vector2( 140, 175 )
-custom_styles/panel = SubResource( 10 )
+offset_left = 203.0
+offset_right = 343.0
+offset_bottom = 175.0
+custom_minimum_size = Vector2( 140, 175 )
+theme_override_styles/panel = SubResource( 10 )
 
 [node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/VBoxContainer/HBoxContainer/Panel"]
 anchor_left = 0.5
@@ -394,20 +394,20 @@ __meta__ = {
 }
 
 [node name="MarginContainer" type="MarginContainer" parent="MarginContainer/VBoxContainer/HBoxContainer/Panel/VBoxContainer"]
-margin_right = 122.0
-margin_bottom = 109.0
-custom_constants/margin_right = 13
-custom_constants/margin_top = 13
-custom_constants/margin_left = 13
+offset_right = 122.0
+offset_bottom = 109.0
+theme_override_constants/margin_right = 13
+theme_override_constants/margin_top = 13
+theme_override_constants/margin_left = 13
 
 [node name="BrushView" type="TextureRect" parent="MarginContainer/VBoxContainer/HBoxContainer/Panel/VBoxContainer/MarginContainer"]
-margin_left = 13.0
-margin_top = 13.0
-margin_right = 109.0
-margin_bottom = 109.0
+offset_left = 13.0
+offset_top = 13.0
+offset_right = 109.0
+offset_bottom = 109.0
 grow_horizontal = 2
 grow_vertical = 2
-rect_min_size = Vector2( 96, 96 )
+custom_minimum_size = Vector2( 96, 96 )
 texture = SubResource( 1 )
 expand = true
 stretch_mode = 6
@@ -428,10 +428,10 @@ __meta__ = {
 
 [node name="BrushSlideH" type="HSlider" parent="MarginContainer/VBoxContainer/HBoxContainer/Panel/VBoxContainer/MarginContainer/BrushView"]
 anchor_right = 1.0
-margin_left = -8.0
-margin_top = -16.0
-margin_right = 8.0
-custom_styles/slider = SubResource( 11 )
+offset_left = -8.0
+offset_top = -16.0
+offset_right = 8.0
+theme_override_styles/slider = SubResource( 11 )
 max_value = 50.0
 value = 25.0
 tick_count = 1
@@ -443,10 +443,10 @@ __meta__ = {
 
 [node name="BrushSlideV" type="VSlider" parent="MarginContainer/VBoxContainer/HBoxContainer/Panel/VBoxContainer/MarginContainer/BrushView"]
 anchor_bottom = 1.0
-margin_left = -16.0
-margin_top = -8.0
-margin_bottom = 8.0
-custom_styles/slider = SubResource( 12 )
+offset_left = -16.0
+offset_top = -8.0
+offset_bottom = 8.0
+theme_override_styles/slider = SubResource( 12 )
 max_value = 50.0
 value = 25.0
 script = ExtResource( 9 )
@@ -467,7 +467,7 @@ anchor_left = 0.5
 anchor_right = 0.5
 anchor_bottom = 1.0
 grow_horizontal = 2
-rect_min_size = Vector2( 2, 0 )
+custom_minimum_size = Vector2( 2, 0 )
 color = Color( 0, 0, 0, 0.658824 )
 __meta__ = {
 "_edit_use_anchors_": false
@@ -478,107 +478,107 @@ anchor_top = 0.5
 anchor_right = 1.0
 anchor_bottom = 0.5
 grow_vertical = 2
-rect_min_size = Vector2( 0, 2 )
+custom_minimum_size = Vector2( 0, 2 )
 color = Color( 0, 0, 0, 0.658824 )
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
 [node name="BrushWrap" type="CheckBox" parent="MarginContainer/VBoxContainer/HBoxContainer/Panel/VBoxContainer"]
-margin_left = 33.0
-margin_top = 113.0
-margin_right = 89.0
-margin_bottom = 137.0
+offset_left = 33.0
+offset_top = 113.0
+offset_right = 89.0
+offset_bottom = 137.0
 size_flags_horizontal = 4
-custom_fonts/font = ExtResource( 19 )
+theme_override_fonts/font = ExtResource( 19 )
 pressed = true
 text = "Wrap"
 
 [node name="TileToBrushButton" type="Button" parent="MarginContainer/VBoxContainer/HBoxContainer/Panel/VBoxContainer"]
-margin_left = 29.0
-margin_top = 141.0
-margin_right = 93.0
-margin_bottom = 163.0
+offset_left = 29.0
+offset_top = 141.0
+offset_right = 93.0
+offset_bottom = 163.0
 size_flags_horizontal = 4
 text = "To Brush"
 
 [node name="PanelContainer" type="PanelContainer" parent="MarginContainer/VBoxContainer/HBoxContainer"]
-margin_left = 347.0
-margin_right = 472.0
-margin_bottom = 175.0
-custom_styles/panel = SubResource( 8 )
+offset_left = 347.0
+offset_right = 472.0
+offset_bottom = 175.0
+theme_override_styles/panel = SubResource( 8 )
 
 [node name="MarginContainer" type="MarginContainer" parent="MarginContainer/VBoxContainer/HBoxContainer/PanelContainer"]
-margin_right = 125.0
-margin_bottom = 175.0
-custom_constants/margin_bottom = 4
+offset_right = 125.0
+offset_bottom = 175.0
+theme_override_constants/margin_bottom = 4
 
 [node name="VBoxContainer2" type="VBoxContainer" parent="MarginContainer/VBoxContainer/HBoxContainer/PanelContainer/MarginContainer"]
-margin_right = 125.0
-margin_bottom = 171.0
+offset_right = 125.0
+offset_bottom = 171.0
 
 [node name="BrushCreatorModes" type="GridContainer" parent="MarginContainer/VBoxContainer/HBoxContainer/PanelContainer/MarginContainer/VBoxContainer2"]
-margin_right = 125.0
-margin_bottom = 68.0
+offset_right = 125.0
+offset_bottom = 68.0
 theme = SubResource( 9 )
-custom_constants/vseparation = -2
-custom_constants/hseparation = -4
+theme_override_constants/v_separation = -2
+theme_override_constants/h_separation = -4
 columns = 2
 
 [node name="replace" type="CheckBox" parent="MarginContainer/VBoxContainer/HBoxContainer/PanelContainer/MarginContainer/VBoxContainer2/BrushCreatorModes"]
-margin_right = 68.0
-margin_bottom = 24.0
+offset_right = 68.0
+offset_bottom = 24.0
 pressed = true
 group = SubResource( 14 )
 text = "Replace"
 
 [node name="over" type="CheckBox" parent="MarginContainer/VBoxContainer/HBoxContainer/PanelContainer/MarginContainer/VBoxContainer2/BrushCreatorModes"]
-margin_left = 64.0
-margin_right = 125.0
-margin_bottom = 24.0
+offset_left = 64.0
+offset_right = 125.0
+offset_bottom = 24.0
 group = SubResource( 14 )
 text = "Over"
 
 [node name="erase" type="CheckBox" parent="MarginContainer/VBoxContainer/HBoxContainer/PanelContainer/MarginContainer/VBoxContainer2/BrushCreatorModes"]
-margin_top = 22.0
-margin_right = 68.0
-margin_bottom = 46.0
+offset_top = 22.0
+offset_right = 68.0
+offset_bottom = 46.0
 group = SubResource( 14 )
 text = "Erase"
 
 [node name="under" type="CheckBox" parent="MarginContainer/VBoxContainer/HBoxContainer/PanelContainer/MarginContainer/VBoxContainer2/BrushCreatorModes"]
-margin_left = 64.0
-margin_top = 22.0
-margin_right = 125.0
-margin_bottom = 46.0
+offset_left = 64.0
+offset_top = 22.0
+offset_right = 125.0
+offset_bottom = 46.0
 group = SubResource( 14 )
 text = "Under"
 
 [node name="stencil" type="CheckBox" parent="MarginContainer/VBoxContainer/HBoxContainer/PanelContainer/MarginContainer/VBoxContainer2/BrushCreatorModes"]
-margin_top = 44.0
-margin_right = 68.0
-margin_bottom = 68.0
+offset_top = 44.0
+offset_right = 68.0
+offset_bottom = 68.0
 group = SubResource( 14 )
 text = "Stencil"
 
 [node name="cut" type="CheckBox" parent="MarginContainer/VBoxContainer/HBoxContainer/PanelContainer/MarginContainer/VBoxContainer2/BrushCreatorModes"]
-margin_left = 64.0
-margin_top = 44.0
-margin_right = 125.0
-margin_bottom = 68.0
+offset_left = 64.0
+offset_top = 44.0
+offset_right = 125.0
+offset_bottom = 68.0
 group = SubResource( 14 )
 text = "Cut"
 
 [node name="ButtonGroup" type="MarginContainer" parent="MarginContainer/VBoxContainer/HBoxContainer/PanelContainer/MarginContainer/VBoxContainer2"]
-margin_top = 72.0
-margin_right = 125.0
-margin_bottom = 164.0
+offset_top = 72.0
+offset_right = 125.0
+offset_bottom = 164.0
 
 [node name="GridContainer" type="GridContainer" parent="MarginContainer/VBoxContainer/HBoxContainer/PanelContainer/MarginContainer/VBoxContainer2/ButtonGroup"]
-margin_left = 16.0
-margin_right = 108.0
-margin_bottom = 92.0
-rect_min_size = Vector2( 60, 60 )
+offset_left = 16.0
+offset_right = 108.0
+offset_bottom = 92.0
+custom_minimum_size = Vector2( 60, 60 )
 mouse_filter = 2
 size_flags_horizontal = 4
 size_flags_vertical = 3
@@ -587,23 +587,23 @@ columns = 2
 [node name="TLButton" parent="MarginContainer/VBoxContainer/HBoxContainer/PanelContainer/MarginContainer/VBoxContainer2/ButtonGroup/GridContainer" instance=ExtResource( 5 )]
 anchor_right = 0.0
 anchor_bottom = 0.0
-margin_right = 44.0
-margin_bottom = 44.0
-rect_min_size = Vector2( 44, 44 )
+offset_right = 44.0
+offset_bottom = 44.0
+custom_minimum_size = Vector2( 44, 44 )
 size_flags_horizontal = 3
 size_flags_vertical = 3
 
 [node name="Control" type="Control" parent="MarginContainer/VBoxContainer/HBoxContainer/PanelContainer/MarginContainer/VBoxContainer2/ButtonGroup/GridContainer/TLButton"]
-margin_right = 44.0
-margin_bottom = 44.0
+offset_right = 44.0
+offset_bottom = 44.0
 mouse_filter = 2
 
 [node name="TextureRect" type="TextureRect" parent="MarginContainer/VBoxContainer/HBoxContainer/PanelContainer/MarginContainer/VBoxContainer2/ButtonGroup/GridContainer/TLButton/Control"]
-margin_left = 7.0
-margin_top = 7.0
-margin_right = 25.0
-margin_bottom = 25.0
-rect_pivot_offset = Vector2( 15, 15 )
+offset_left = 7.0
+offset_top = 7.0
+offset_right = 25.0
+offset_bottom = 25.0
+pivot_offset = Vector2( 15, 15 )
 mouse_filter = 2
 texture = SubResource( 4 )
 stretch_mode = 3
@@ -614,26 +614,26 @@ __meta__ = {
 [node name="TRButton" parent="MarginContainer/VBoxContainer/HBoxContainer/PanelContainer/MarginContainer/VBoxContainer2/ButtonGroup/GridContainer" instance=ExtResource( 5 )]
 anchor_right = 0.0
 anchor_bottom = 0.0
-margin_left = 48.0
-margin_right = 92.0
-margin_bottom = 44.0
-rect_min_size = Vector2( 44, 44 )
+offset_left = 48.0
+offset_right = 92.0
+offset_bottom = 44.0
+custom_minimum_size = Vector2( 44, 44 )
 size_flags_horizontal = 3
 size_flags_vertical = 3
 
 [node name="Control" type="Control" parent="MarginContainer/VBoxContainer/HBoxContainer/PanelContainer/MarginContainer/VBoxContainer2/ButtonGroup/GridContainer/TRButton"]
-margin_right = 44.0
-margin_bottom = 44.0
+offset_right = 44.0
+offset_bottom = 44.0
 mouse_filter = 2
 
 [node name="TextureRect" type="TextureRect" parent="MarginContainer/VBoxContainer/HBoxContainer/PanelContainer/MarginContainer/VBoxContainer2/ButtonGroup/GridContainer/TRButton/Control"]
 anchor_left = 1.0
 anchor_right = 1.0
-margin_left = -25.0
-margin_top = 7.0
-margin_right = -7.0
-margin_bottom = 25.0
-rect_pivot_offset = Vector2( 15, 15 )
+offset_left = -25.0
+offset_top = 7.0
+offset_right = -7.0
+offset_bottom = 25.0
+pivot_offset = Vector2( 15, 15 )
 mouse_filter = 2
 texture = SubResource( 5 )
 stretch_mode = 3
@@ -644,26 +644,26 @@ __meta__ = {
 [node name="BLButton" parent="MarginContainer/VBoxContainer/HBoxContainer/PanelContainer/MarginContainer/VBoxContainer2/ButtonGroup/GridContainer" instance=ExtResource( 5 )]
 anchor_right = 0.0
 anchor_bottom = 0.0
-margin_top = 48.0
-margin_right = 44.0
-margin_bottom = 92.0
-rect_min_size = Vector2( 44, 44 )
+offset_top = 48.0
+offset_right = 44.0
+offset_bottom = 92.0
+custom_minimum_size = Vector2( 44, 44 )
 size_flags_horizontal = 3
 size_flags_vertical = 3
 
 [node name="Control" type="Control" parent="MarginContainer/VBoxContainer/HBoxContainer/PanelContainer/MarginContainer/VBoxContainer2/ButtonGroup/GridContainer/BLButton"]
-margin_right = 44.0
-margin_bottom = 44.0
+offset_right = 44.0
+offset_bottom = 44.0
 mouse_filter = 2
 
 [node name="TextureRect" type="TextureRect" parent="MarginContainer/VBoxContainer/HBoxContainer/PanelContainer/MarginContainer/VBoxContainer2/ButtonGroup/GridContainer/BLButton/Control"]
 anchor_top = 1.0
 anchor_bottom = 1.0
-margin_left = 7.0
-margin_top = -25.0
-margin_right = 25.0
-margin_bottom = -7.0
-rect_pivot_offset = Vector2( 15, 15 )
+offset_left = 7.0
+offset_top = -25.0
+offset_right = 25.0
+offset_bottom = -7.0
+pivot_offset = Vector2( 15, 15 )
 mouse_filter = 2
 texture = SubResource( 6 )
 stretch_mode = 3
@@ -674,17 +674,17 @@ __meta__ = {
 [node name="BRButton" parent="MarginContainer/VBoxContainer/HBoxContainer/PanelContainer/MarginContainer/VBoxContainer2/ButtonGroup/GridContainer" instance=ExtResource( 5 )]
 anchor_right = 0.0
 anchor_bottom = 0.0
-margin_left = 48.0
-margin_top = 48.0
-margin_right = 92.0
-margin_bottom = 92.0
-rect_min_size = Vector2( 44, 44 )
+offset_left = 48.0
+offset_top = 48.0
+offset_right = 92.0
+offset_bottom = 92.0
+custom_minimum_size = Vector2( 44, 44 )
 size_flags_horizontal = 3
 size_flags_vertical = 3
 
 [node name="Control" type="Control" parent="MarginContainer/VBoxContainer/HBoxContainer/PanelContainer/MarginContainer/VBoxContainer2/ButtonGroup/GridContainer/BRButton"]
-margin_right = 44.0
-margin_bottom = 44.0
+offset_right = 44.0
+offset_bottom = 44.0
 mouse_filter = 2
 
 [node name="TextureRect2" type="TextureRect" parent="MarginContainer/VBoxContainer/HBoxContainer/PanelContainer/MarginContainer/VBoxContainer2/ButtonGroup/GridContainer/BRButton/Control"]
@@ -692,11 +692,11 @@ anchor_left = 1.0
 anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
-margin_left = -25.0
-margin_top = -25.0
-margin_right = -7.0
-margin_bottom = -7.0
-rect_pivot_offset = Vector2( 15, 15 )
+offset_left = -25.0
+offset_top = -25.0
+offset_right = -7.0
+offset_bottom = -7.0
+pivot_offset = Vector2( 15, 15 )
 mouse_filter = 2
 texture = SubResource( 7 )
 stretch_mode = 3
@@ -705,80 +705,80 @@ __meta__ = {
 }
 
 [node name="CenterContainer" type="CenterContainer" parent="MarginContainer/VBoxContainer/HBoxContainer/PanelContainer/MarginContainer/VBoxContainer2/ButtonGroup"]
-margin_right = 125.0
-margin_bottom = 92.0
+offset_right = 125.0
+offset_bottom = 92.0
 mouse_filter = 2
 
 [node name="AllButton" parent="MarginContainer/VBoxContainer/HBoxContainer/PanelContainer/MarginContainer/VBoxContainer2/ButtonGroup/CenterContainer" instance=ExtResource( 5 )]
 anchor_right = 0.0
 anchor_bottom = 0.0
-margin_left = 42.0
-margin_top = 26.0
-margin_right = 82.0
-margin_bottom = 66.0
+offset_left = 42.0
+offset_top = 26.0
+offset_right = 82.0
+offset_bottom = 66.0
 mouse_filter = 2
 
 [node name="MarginContainer2" type="MarginContainer" parent="MarginContainer/VBoxContainer/HBoxContainer/PanelContainer/MarginContainer/VBoxContainer2/ButtonGroup/CenterContainer/AllButton"]
-margin_right = 40.0
-margin_bottom = 40.0
+offset_right = 40.0
+offset_bottom = 40.0
 mouse_filter = 2
-custom_constants/margin_right = 2
-custom_constants/margin_top = 2
-custom_constants/margin_left = 2
-custom_constants/margin_bottom = 2
+theme_override_constants/margin_right = 2
+theme_override_constants/margin_top = 2
+theme_override_constants/margin_left = 2
+theme_override_constants/margin_bottom = 2
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
 [node name="TextureRect" type="TextureRect" parent="MarginContainer/VBoxContainer/HBoxContainer/PanelContainer/MarginContainer/VBoxContainer2/ButtonGroup/CenterContainer/AllButton/MarginContainer2"]
-margin_left = 2.0
-margin_top = 2.0
-margin_right = 38.0
-margin_bottom = 38.0
+offset_left = 2.0
+offset_top = 2.0
+offset_right = 38.0
+offset_bottom = 38.0
 mouse_filter = 2
 texture = ExtResource( 14 )
 
 [node name="VBoxContainer2" type="VBoxContainer" parent="MarginContainer/VBoxContainer/HBoxContainer"]
-margin_left = 476.0
-margin_right = 548.0
-margin_bottom = 175.0
+offset_left = 476.0
+offset_right = 548.0
+offset_bottom = 175.0
 alignment = 1
 
 [node name="Label" type="Label" parent="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer2"]
-margin_right = 72.0
-margin_bottom = 14.0
+offset_right = 72.0
+offset_bottom = 14.0
 text = "Brush:"
 align = 1
 
 [node name="PickBrushButton" parent="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer2" instance=ExtResource( 5 )]
 anchor_right = 0.0
 anchor_bottom = 0.0
-margin_top = 18.0
-margin_right = 72.0
-margin_bottom = 103.0
+offset_top = 18.0
+offset_right = 72.0
+offset_bottom = 103.0
 size_flags_vertical = 4
 
 [node name="MarginContainer" type="MarginContainer" parent="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer2/PickBrushButton"]
-margin_right = 72.0
-margin_bottom = 85.0
+offset_right = 72.0
+offset_bottom = 85.0
 mouse_filter = 2
-custom_constants/margin_right = 4
-custom_constants/margin_top = 4
-custom_constants/margin_left = 4
-custom_constants/margin_bottom = 4
+theme_override_constants/margin_right = 4
+theme_override_constants/margin_top = 4
+theme_override_constants/margin_left = 4
+theme_override_constants/margin_bottom = 4
 
 [node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer2/PickBrushButton/MarginContainer"]
-margin_left = 4.0
-margin_top = 4.0
-margin_right = 68.0
-margin_bottom = 81.0
+offset_left = 4.0
+offset_top = 4.0
+offset_right = 68.0
+offset_bottom = 81.0
 mouse_filter = 2
 alignment = 1
 
 [node name="Icon" type="TextureRect" parent="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer2/PickBrushButton/MarginContainer/VBoxContainer"]
-margin_right = 64.0
-margin_bottom = 64.0
-rect_min_size = Vector2( 64, 64 )
+offset_right = 64.0
+offset_bottom = 64.0
+custom_minimum_size = Vector2( 64, 64 )
 mouse_filter = 2
 size_flags_horizontal = 4
 stretch_mode = 6
@@ -786,7 +786,7 @@ stretch_mode = 6
 [node name="PickedCrosshair" type="Control" parent="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer2/PickBrushButton/MarginContainer/VBoxContainer/Icon"]
 anchor_right = 1.0
 anchor_bottom = 1.0
-rect_clip_content = true
+clip_contents = true
 mouse_filter = 2
 script = ExtResource( 20 )
 __meta__ = {
@@ -806,7 +806,7 @@ anchor_left = 0.5
 anchor_right = 0.5
 anchor_bottom = 1.0
 grow_horizontal = 2
-rect_min_size = Vector2( 1, 0 )
+custom_minimum_size = Vector2( 1, 0 )
 mouse_filter = 2
 color = Color( 0, 0, 0, 0.658824 )
 __meta__ = {
@@ -818,7 +818,7 @@ anchor_top = 0.5
 anchor_right = 1.0
 anchor_bottom = 0.5
 grow_vertical = 2
-rect_min_size = Vector2( 0, 1 )
+custom_minimum_size = Vector2( 0, 1 )
 mouse_filter = 2
 color = Color( 0, 0, 0, 0.658824 )
 __meta__ = {
@@ -835,7 +835,7 @@ __meta__ = {
 
 [node name="BorderLeft" type="ColorRect" parent="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer2/PickBrushButton/MarginContainer/VBoxContainer/Icon/PickedCrosshair/CrosshairBorder"]
 anchor_bottom = 1.0
-rect_min_size = Vector2( 1, 0 )
+custom_minimum_size = Vector2( 1, 0 )
 mouse_filter = 2
 color = Color( 0, 0, 0, 0.658824 )
 __meta__ = {
@@ -847,7 +847,7 @@ anchor_left = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 0
-rect_min_size = Vector2( 1, 0 )
+custom_minimum_size = Vector2( 1, 0 )
 mouse_filter = 2
 color = Color( 0, 0, 0, 0.658824 )
 __meta__ = {
@@ -859,7 +859,7 @@ anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_vertical = 0
-rect_min_size = Vector2( 0, 1 )
+custom_minimum_size = Vector2( 0, 1 )
 mouse_filter = 2
 color = Color( 0, 0, 0, 0.658824 )
 __meta__ = {
@@ -868,7 +868,7 @@ __meta__ = {
 
 [node name="BorderTop" type="ColorRect" parent="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer2/PickBrushButton/MarginContainer/VBoxContainer/Icon/PickedCrosshair/CrosshairBorder"]
 anchor_right = 1.0
-rect_min_size = Vector2( 0, 1 )
+custom_minimum_size = Vector2( 0, 1 )
 mouse_filter = 2
 color = Color( 0, 0, 0, 0.658824 )
 __meta__ = {
@@ -876,192 +876,192 @@ __meta__ = {
 }
 
 [node name="Label" type="Label" parent="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer2/PickBrushButton/MarginContainer/VBoxContainer"]
-margin_top = 68.0
-margin_right = 64.0
-margin_bottom = 77.0
+offset_top = 68.0
+offset_right = 64.0
+offset_bottom = 77.0
 text = "Pick Brush"
 
 [node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer2"]
-margin_top = 107.0
-margin_right = 72.0
-margin_bottom = 123.0
+offset_top = 107.0
+offset_right = 72.0
+offset_bottom = 123.0
 size_flags_vertical = 3
 
 [node name="UndoBrushButton" type="Button" parent="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer2"]
-margin_top = 127.0
-margin_right = 72.0
-margin_bottom = 149.0
+offset_top = 127.0
+offset_right = 72.0
+offset_bottom = 149.0
 disabled = true
 text = "Undo"
 
 [node name="RedoBrushButton" type="Button" parent="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer2"]
-margin_top = 153.0
-margin_right = 72.0
-margin_bottom = 175.0
+offset_top = 153.0
+offset_right = 72.0
+offset_bottom = 175.0
 disabled = true
 text = "Redo"
 
 [node name="HSeparator2" parent="MarginContainer/VBoxContainer" instance=ExtResource( 4 )]
-margin_top = 327.0
-margin_right = 588.0
-margin_bottom = 331.0
+offset_top = 327.0
+offset_right = 588.0
+offset_bottom = 331.0
 
 [node name="CollapsableSection" type="MarginContainer" parent="MarginContainer/VBoxContainer"]
-margin_top = 335.0
-margin_right = 588.0
-margin_bottom = 431.0
+offset_top = 335.0
+offset_right = 588.0
+offset_bottom = 431.0
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
 [node name="HBoxContainer5" type="HBoxContainer" parent="MarginContainer/VBoxContainer/CollapsableSection"]
-margin_right = 588.0
-margin_bottom = 96.0
+offset_right = 588.0
+offset_bottom = 96.0
 alignment = 1
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
 [node name="PanelContainer2" type="PanelContainer" parent="MarginContainer/VBoxContainer/CollapsableSection/HBoxContainer5"]
-margin_left = 197.0
-margin_right = 391.0
-margin_bottom = 96.0
-custom_styles/panel = SubResource( 8 )
+offset_left = 197.0
+offset_right = 391.0
+offset_bottom = 96.0
+theme_override_styles/panel = SubResource( 8 )
 
 [node name="MarginContainer" type="MarginContainer" parent="MarginContainer/VBoxContainer/CollapsableSection/HBoxContainer5/PanelContainer2"]
-margin_right = 194.0
-margin_bottom = 96.0
-custom_constants/margin_right = 4
-custom_constants/margin_top = 4
-custom_constants/margin_left = 4
-custom_constants/margin_bottom = 4
+offset_right = 194.0
+offset_bottom = 96.0
+theme_override_constants/margin_right = 4
+theme_override_constants/margin_top = 4
+theme_override_constants/margin_left = 4
+theme_override_constants/margin_bottom = 4
 
 [node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer/CollapsableSection/HBoxContainer5/PanelContainer2/MarginContainer"]
-margin_left = 4.0
-margin_top = 4.0
-margin_right = 190.0
-margin_bottom = 92.0
+offset_left = 4.0
+offset_top = 4.0
+offset_right = 190.0
+offset_bottom = 92.0
 
 [node name="VBoxContainer2" type="VBoxContainer" parent="MarginContainer/VBoxContainer/CollapsableSection/HBoxContainer5/PanelContainer2/MarginContainer/HBoxContainer"]
-margin_right = 118.0
-margin_bottom = 88.0
+offset_right = 118.0
+offset_bottom = 88.0
 
 [node name="Label" type="Label" parent="MarginContainer/VBoxContainer/CollapsableSection/HBoxContainer5/PanelContainer2/MarginContainer/HBoxContainer/VBoxContainer2"]
-margin_right = 118.0
-margin_bottom = 14.0
+offset_right = 118.0
+offset_bottom = 14.0
 text = "Brush Color Mode:"
 
 [node name="BrushColorModes" type="GridContainer" parent="MarginContainer/VBoxContainer/CollapsableSection/HBoxContainer5/PanelContainer2/MarginContainer/HBoxContainer/VBoxContainer2"]
-margin_top = 18.0
-margin_right = 118.0
-margin_bottom = 64.0
+offset_top = 18.0
+offset_right = 118.0
+offset_bottom = 64.0
 theme = SubResource( 9 )
-custom_constants/vseparation = -2
-custom_constants/hseparation = -4
+theme_override_constants/v_separation = -2
+theme_override_constants/h_separation = -4
 columns = 2
 
 [node name="source" type="CheckBox" parent="MarginContainer/VBoxContainer/CollapsableSection/HBoxContainer5/PanelContainer2/MarginContainer/HBoxContainer/VBoxContainer2/BrushColorModes"]
-margin_right = 71.0
-margin_bottom = 24.0
+offset_right = 71.0
+offset_bottom = 24.0
 pressed = true
 group = SubResource( 13 )
 text = "Source"
 
 [node name="flat" type="CheckBox" parent="MarginContainer/VBoxContainer/CollapsableSection/HBoxContainer5/PanelContainer2/MarginContainer/HBoxContainer/VBoxContainer2/BrushColorModes"]
-margin_left = 67.0
-margin_right = 114.0
-margin_bottom = 24.0
+offset_left = 67.0
+offset_right = 114.0
+offset_bottom = 24.0
 group = SubResource( 13 )
 text = "Flat"
 
 [node name="colorize" type="CheckBox" parent="MarginContainer/VBoxContainer/CollapsableSection/HBoxContainer5/PanelContainer2/MarginContainer/HBoxContainer/VBoxContainer2/BrushColorModes"]
-margin_top = 22.0
-margin_right = 71.0
-margin_bottom = 46.0
+offset_top = 22.0
+offset_right = 71.0
+offset_bottom = 46.0
 group = SubResource( 13 )
 text = "Colorize"
 
 [node name="BrushColorPicker" type="ColorPickerButton" parent="MarginContainer/VBoxContainer/CollapsableSection/HBoxContainer5/PanelContainer2/MarginContainer/HBoxContainer/VBoxContainer2"]
-margin_top = 68.0
-margin_right = 118.0
-margin_bottom = 88.0
+offset_top = 68.0
+offset_right = 118.0
+offset_bottom = 88.0
 color = Color( 1, 1, 1, 1 )
 edit_alpha = false
 
 [node name="BrushColorPreview" type="TextureRect" parent="MarginContainer/VBoxContainer/CollapsableSection/HBoxContainer5/PanelContainer2/MarginContainer/HBoxContainer"]
-margin_left = 122.0
-margin_top = 12.0
-margin_right = 186.0
-margin_bottom = 76.0
-rect_min_size = Vector2( 64, 64 )
+offset_left = 122.0
+offset_top = 12.0
+offset_right = 186.0
+offset_bottom = 76.0
+custom_minimum_size = Vector2( 64, 64 )
 size_flags_vertical = 4
 
 [node name="HBoxContainer4" type="HBoxContainer" parent="MarginContainer/VBoxContainer"]
-margin_top = 435.0
-margin_right = 588.0
-margin_bottom = 554.0
+offset_top = 435.0
+offset_right = 588.0
+offset_bottom = 554.0
 size_flags_vertical = 3
 
 [node name="HBoxContainer3" type="HBoxContainer" parent="MarginContainer/VBoxContainer"]
-margin_top = 558.0
-margin_right = 588.0
-margin_bottom = 588.0
+offset_top = 558.0
+offset_right = 588.0
+offset_bottom = 588.0
 theme = ExtResource( 6 )
-custom_constants/separation = 16
+theme_override_constants/separation = 16
 alignment = 1
 
 [node name="Control2" type="Control" parent="MarginContainer/VBoxContainer/HBoxContainer3"]
-margin_right = 89.0
-margin_bottom = 30.0
+offset_right = 89.0
+offset_bottom = 30.0
 size_flags_horizontal = 3
 
 [node name="SaveFileButton" type="Button" parent="MarginContainer/VBoxContainer/HBoxContainer3"]
-margin_left = 105.0
-margin_right = 185.0
-margin_bottom = 30.0
-rect_min_size = Vector2( 80, 30 )
+offset_left = 105.0
+offset_right = 185.0
+offset_bottom = 30.0
+custom_minimum_size = Vector2( 80, 30 )
 disabled = true
 text = "Save"
 
 [node name="SaveAsFileButton" type="Button" parent="MarginContainer/VBoxContainer/HBoxContainer3"]
-margin_left = 201.0
-margin_right = 281.0
-margin_bottom = 30.0
-rect_min_size = Vector2( 80, 30 )
+offset_left = 201.0
+offset_right = 281.0
+offset_bottom = 30.0
+custom_minimum_size = Vector2( 80, 30 )
 text = "Save As"
 
 [node name="Control" type="Control" parent="MarginContainer/VBoxContainer/HBoxContainer3"]
-margin_left = 297.0
-margin_right = 386.0
-margin_bottom = 30.0
+offset_left = 297.0
+offset_right = 386.0
+offset_bottom = 30.0
 size_flags_horizontal = 3
 
 [node name="DiscardButton" type="Button" parent="MarginContainer/VBoxContainer/HBoxContainer3"]
-margin_left = 402.0
-margin_right = 482.0
-margin_bottom = 30.0
-rect_min_size = Vector2( 80, 0 )
+offset_left = 402.0
+offset_right = 482.0
+offset_bottom = 30.0
+custom_minimum_size = Vector2( 80, 0 )
 text = "Cancel"
 
 [node name="Control3" type="Control" parent="MarginContainer/VBoxContainer/HBoxContainer3"]
-margin_left = 498.0
-margin_right = 588.0
-margin_bottom = 30.0
+offset_left = 498.0
+offset_right = 588.0
+offset_bottom = 30.0
 size_flags_horizontal = 3
 
 [node name="UndoRedoer" type="Node" parent="."]
 script = ExtResource( 7 )
 
 [node name="SaveAsDialog" type="FileDialog" parent="."]
-margin_left = -18.0
-margin_top = 95.0
-margin_right = 555.0
-margin_bottom = 399.0
-popup_exclusive = true
+offset_left = -18.0
+offset_top = 95.0
+offset_right = 555.0
+offset_bottom = 399.0
+exclusive = true
 window_title = "Save Image"
 mode_overrides_title = false
 access = 1
-filters = PoolStringArray( "*.png" )
+filters = PackedStringArray( "*.png" )
 current_dir = "user://"
 current_path = "user://"
 __meta__ = {

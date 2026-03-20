@@ -8,7 +8,7 @@ func _on_BrushSlide_gui_input(the_event):
 	var event: = the_event as InputEventMouseButton
 	if not event:
 		return
-	if event.button_index == BUTTON_MASK_LEFT:
+	if event.button_index == MOUSE_BUTTON_MASK_LEFT:
 		if not event.is_pressed():
 			emit_signal("mouse_released")
 		else:

@@ -7,10 +7,10 @@ enum Slot {
 	GREY, BLACK,
 	
 	# Integer slots
-	A, B, C
+	A, B, C,
 	
 	# Decimal slots
-	X, Y, Z
+	X, Y, Z,
 	
 	# Text slots
 	I, II, III,

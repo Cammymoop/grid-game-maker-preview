@@ -22,7 +22,7 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="GameView" type="Viewport" parent="Display" groups=["World"]]
+[node name="GameView" type="SubViewport" parent="Display" groups=["World"]]
 size = Vector2( 1536, 1536 )
 transparent_bg = true
 handle_input_locally = false

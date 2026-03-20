@@ -21,9 +21,9 @@ var panels = {
 
 const TAB_INTERNAL_MARGIN = 10
 
-onready var generated_content = find_node("GeneratedContent")
-onready var title_label = find_node("TitleText")
-onready var tab_panel = find_node("TabPanel")
+@onready var generated_content = find_child("GeneratedContent")
+@onready var title_label = find_child("TitleText")
+@onready var tab_panel = find_child("TabPanel")
 
 var inputs = []
 
@@ -45,20 +45,20 @@ func set_ui_data(the_command_code: int, command_data: Dictionary) -> void:
 func set_slot(slot_id: int) -> void:
 	current_slot = slot_id
 	if is_inside_tree():
-		find_node("CommandSlot").set_current_slot(slot_id)
+		find_child("CommandSlot").set_current_slot(slot_id)
 		update_panel_background()
 
 func update_panel_background() -> void:
 	if current_slot in panels:
-		add_stylebox_override("panel", panels[current_slot].main)
-		tab_panel.add_stylebox_override("panel", panels[current_slot].tab)
-		var box: StyleBoxFlat = get_stylebox("panel") as StyleBoxFlat
-		if box:
-			title_label.add_color_override("font_color", box.border_color)
+		var panel: = panels[current_slot].main as StyleBoxFlat
+		if panel:
+			title_label.add_theme_color_override("font_color", panel.border_color)
+			add_theme_stylebox_override("panel", panel)
+		tab_panel.add_theme_stylebox_override("panel", panels[current_slot].tab)
 
 func add_generated_row() -> HBoxContainer:
 	var new_row = HBoxContainer.new()
-	new_row.rect_min_size.y = 34
+	new_row.custom_minimum_size.y = 34
 	generated_content.add_child(new_row)
 	return new_row
 
@@ -79,7 +79,7 @@ func generate_ui() -> void:
 	
 	title_label.text = ui_data.display_name
 	
-	tab_panel.rect_size.x = title_label.get_minimum_size().x + TAB_INTERNAL_MARGIN
+	tab_panel.size.x = title_label.get_minimum_size().x + TAB_INTERNAL_MARGIN
 	
 	for ui_bit in ui_data.ui:
 		if ui_bit == "br":
@@ -91,7 +91,7 @@ func generate_ui() -> void:
 				continue
 			
 			var input_type = ui_data.options[input_name].input_type
-			var input = InputTemplates.templates[input_type].instance()
+			var input = InputTemplates.templates[input_type].instantiate()
 			current_row.add_child(input)
 			if ui_data.options[input_name].has("template_options"):
 				if input.has_method("apply_template_options"):
@@ -104,11 +104,11 @@ func generate_ui() -> void:
 			current_row.add_child(text)
 	
 	if "slot_types" in ui_data:
-		find_node("CommandSlot").set_valid_slot_categories(ui_data.slot_types)
+		find_child("CommandSlot").set_valid_slot_categories(ui_data.slot_types)
 	
 	set_slot(current_slot)
 	
-	yield(get_tree(), "idle_frame")
+	await get_tree().idle_frame
 
 func get_command_code() -> int:
 	return command_code
@@ -141,7 +141,7 @@ func _on_TextureRect_gui_input(event):
 	var e = event as InputEventMouseButton
 	if not e:
 		return
-	if e.button_mask == BUTTON_MASK_LEFT and e.is_pressed():
+	if e.button_mask == MOUSE_BUTTON_MASK_LEFT and e.is_pressed():
 		queue_free()
 
 

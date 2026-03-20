@@ -1,16 +1,16 @@
 [gd_scene format=2]
 
 [node name="BoolControllerOption" type="HBoxContainer"]
-margin_right = 136.0
-margin_bottom = 40.0
+offset_right = 136.0
+offset_bottom = 40.0
 
 [node name="Label" type="Label" parent="."]
-margin_top = 13.0
-margin_right = 52.0
-margin_bottom = 27.0
+offset_top = 13.0
+offset_right = 52.0
+offset_bottom = 27.0
 text = "OPTION"
 
 [node name="BoolOptionValue" type="CheckButton" parent="."]
-margin_left = 56.0
-margin_right = 132.0
-margin_bottom = 40.0
+offset_left = 56.0
+offset_right = 132.0
+offset_bottom = 40.0

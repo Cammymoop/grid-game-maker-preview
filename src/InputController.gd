@@ -24,8 +24,8 @@ var available_options = {
 }
 
 func _ready():
-	get_parent().connect("blocked", self, "got_blocked")
-	get_parent().connect("started_move", self, "on_start_move")
+	get_parent().connect("blocked", Callable(self, "got_blocked"))
+	get_parent().connect("started_move", Callable(self, "on_start_move"))
 
 func set_options(options: Dictionary) -> void:
 	if "stop_repeat_after_bonk" in options:

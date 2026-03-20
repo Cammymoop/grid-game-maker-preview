@@ -2,7 +2,7 @@ extends Node
 
 var move_mode = "facing"
 
-onready var parent = get_parent()
+@onready var parent = get_parent()
 
 func get_options() -> Dictionary:
 	return {}

@@ -10,10 +10,10 @@ func init(available_options, current_options) -> void:
 		var opt
 		match option["type"]:
 			"bool":
-				opt = bool_opt.instance()
+				opt = bool_opt.instantiate()
 				$VBoxContainer.add_child(opt)
 				
-				opt.get_node("BoolOptionValue").connect("toggled", self, "option_updated", [option_name])
+				opt.get_node("BoolOptionValue").connect("toggled", Callable(self, "option_updated").bind(option_name))
 				option_values[option_name] = false
 		
 		opt.get_node("Label").text = option["display_name"]
@@ -22,7 +22,7 @@ func init(available_options, current_options) -> void:
 			option_values[option_name] = current_options[option_name]
 			match option["type"]:
 				"bool":
-					opt.get_node("BoolOptionValue").pressed = current_options[option_name]
+					opt.get_node("BoolOptionValue").button_pressed = current_options[option_name]
 
 func option_updated(value, option_name) -> void:
 	option_values[option_name] = value

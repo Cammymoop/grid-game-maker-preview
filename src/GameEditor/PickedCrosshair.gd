@@ -1,7 +1,7 @@
 extends Control
 
 var tile_brush_size: Vector2 = Vector2(32, 32)
-onready var my_size: Vector2 = rect_size
+@onready var my_size: Vector2 = size
 
 func set_my_size(new_size: Vector2) -> void:
 	my_size = new_size
@@ -20,11 +20,11 @@ func update_visual(offset):
 	var m_left = offset.x
 	var m_right = - ((my_size.x - tile_brush_size.x) - offset.x)
 	
-	$CrosshairBorder.margin_top = m_top
-	$CrosshairCenter.margin_top = m_top
-	$CrosshairBorder.margin_bottom = m_bottom
-	$CrosshairCenter.margin_bottom = m_bottom
-	$CrosshairBorder.margin_left = m_left
-	$CrosshairCenter.margin_left = m_left
-	$CrosshairBorder.margin_right = m_right
-	$CrosshairCenter.margin_right = m_right
+	$CrosshairBorder.offset_top = m_top
+	$CrosshairCenter.offset_top = m_top
+	$CrosshairBorder.offset_bottom = m_bottom
+	$CrosshairCenter.offset_bottom = m_bottom
+	$CrosshairBorder.offset_left = m_left
+	$CrosshairCenter.offset_left = m_left
+	$CrosshairBorder.offset_right = m_right
+	$CrosshairCenter.offset_right = m_right

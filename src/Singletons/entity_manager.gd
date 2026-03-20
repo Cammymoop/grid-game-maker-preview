@@ -64,17 +64,15 @@ var entity_defs = {
 		},
 	},
 }
-onready var loaded_entity_defs = entity_defs
+@onready var loaded_entity_defs = entity_defs
 
 var entity_index_map = {}
 var entity_instance_map = {}
 
+var entity_signal_connections = {}
+
 var entity_list = []
 var bond_groups = []
-
-# Custom signal system: replaces GD3's add_user_signal/has_user_signal/emit_signal for dynamic signals.
-# Each entry: signal_name -> Array of {object, method, bind_args}
-var _dynamic_signal_connections: Dictionary = {}
 
 var im_ready = false
 
@@ -93,7 +91,7 @@ func _physics_process(_delta):
 		frame_counter += 1
 	
 	if movement_mode != GameManager.MovementMode.MOVEMENT_CONTINUOUS:
-		yield(get_tree(), "physics_frame")
+		await get_tree().physics_frame
 		controller_frame = false
 		if movements_enabled:
 			if movement_mode == GameManager.MovementMode.MOVEMENT_DISCRETE:
@@ -119,38 +117,43 @@ func _ready():
 func setup():
 	fix_string_keys()
 	if not TextureManager.im_ready:
-		yield(TextureManager, "textures_loaded")
+		await TextureManager.textures_loaded
 	create_index_map()
 	
 	im_ready = true
 
-func create_signal(signal_name: String) -> void:
-	if not _dynamic_signal_connections.has(signal_name):
-		_dynamic_signal_connections[signal_name] = []
-
-
-func has_user_signal(signal_name: String) -> bool:
-	return _dynamic_signal_connections.has(signal_name)
-
+func create_signal(signal_name: StringName) -> void:
+	add_user_signal(signal_name)
 
 func connect_custom_signal(signal_name: String, target: Object, method: String, bind_args: Array = []) -> void:
-	if not _dynamic_signal_connections.has(signal_name):
-		_dynamic_signal_connections[signal_name] = []
-	_dynamic_signal_connections[signal_name].append({
-		"object": target,
-		"method": method,
-		"bind_args": bind_args,
-	})
-
+	if not has_user_signal(signal_name):
+		print_debug("ERROR: custom signal not found: " + signal_name)
+		return
+	if target and not target.is_queued_for_deletion():
+		if target not in entity_signal_connections:
+			entity_signal_connections[target] = []
+		if signal_name not in entity_signal_connections[target]:
+			entity_signal_connections[target].append(signal_name)
+		connect(signal_name, Callable(target, method).bind(bind_args))
 
 func do_emit_signal(signal_name: String, owning_entity = null, args = null) -> void:
-	if not _dynamic_signal_connections.has(signal_name):
+	if not has_user_signal(signal_name):
+		print_debug("ERROR: custom signal not found: " + signal_name)
 		return
-	if not args:
-		args = []
-	for conn in _dynamic_signal_connections[signal_name]:
-		if is_instance_valid(conn.object):
-			conn.object.callv(conn.method, [owning_entity, args] + conn.bind_args)
+	emit_signal(signal_name, owning_entity, args)
+
+func get_custom_signals() -> Array:
+	var signals = []
+	for signal_info in get_signal_list():
+		if not has_user_signal(signal_info["name"]):
+			continue
+		signals.append(Signal(self, signal_info["name"]))
+	return signals
+
+func disconnect_all_custom_signals() -> void:
+	for custom_sig in get_custom_signals():
+		for sig_conn in custom_sig.get_connections():
+			custom_sig.disconnect(sig_conn.callable)
 
 func refresh_definition():
 	update_movement_mode()
@@ -191,13 +194,14 @@ func entity_order(a, b) -> bool:
 func refresh_entity_list():
 	entity_instance_map = {}
 	entity_list = get_tree().get_nodes_in_group("_entity_")
-	entity_list.sort_custom(self, "entity_order")
+	entity_list.sort_custom(entity_order)
 	for e in entity_list:
 		entity_instance_map[e.instance_id] = e
 	
 	emit_signal("entity_list_updated")
 
 func clear_entity_list():
+	disconnect_all_custom_signals()
 	for entity in entity_list:
 		if not entity:
 			continue
@@ -206,7 +210,6 @@ func clear_entity_list():
 		entity.queue_free()
 	entity_list = []
 	entity_instance_map = {}
-	_dynamic_signal_connections.clear()
 	clear()
 
 # In discrete mode we wont update entities at all until a move is requested
@@ -524,25 +527,23 @@ func create_index_map() -> void:
 
 func preload_controller_templates() -> void:
 	var controller_class_files = []
-	var directory_walker:Directory = Directory.new()
 	var controllers_path = "res://Scenes/Controllers/"
-	if directory_walker.open(controllers_path) == OK:
-		directory_walker.list_dir_begin(true)
-		
-		var file_name = directory_walker.get_next()
-		while file_name != "":
-			if directory_walker.current_is_dir():
-				file_name = directory_walker.get_next()
-				continue
+	var directory_walker: = DirAccess.open(controllers_path)
+	if not directory_walker:
+		print_debug("error opening controller class path")
+		return
+
+	directory_walker.list_dir_begin()
+	
+	var file_name = directory_walker.get_next()
+	while file_name != "":
+		if not directory_walker.current_is_dir():
 			if file_name.ends_with(".tscn"):
 				controller_class_files.append(file_name)
-			file_name = directory_walker.get_next()
-		directory_walker.list_dir_end()
-	else:
-		print_debug("error opening controller class path")
+		file_name = directory_walker.get_next()
 	
 	for fname in controller_class_files:
-		var controller_name = fname.split('.')[0]
+		var controller_name = fname.get_basename()
 		controller_templates[controller_name] = load(controllers_path + fname)
 
 func finish_move(moving_entity, tile_position) -> void:
@@ -671,11 +672,13 @@ func get_entity_definition(entity_index) -> Dictionary:
 	return entity_defs[entity_index].duplicate()
 
 func remove_entity(entity) -> void:
-	for signal_name in _dynamic_signal_connections:
-		var connections: Array = _dynamic_signal_connections[signal_name]
-		for i in range(len(connections) - 1, -1, -1):
-			if connections[i].object == entity:
-				connections.remove(i)
+	if entity in entity_signal_connections:
+		for connected_sig in entity_signal_connections.get(entity, []):
+			var signal_connections = get_signal_connection_list(connected_sig)
+			for sig_conn in signal_connections:
+				if (sig_conn.callable as Callable).get_object() == entity:
+					sig_conn.signal.disconnect(sig_conn.callable)
+		entity_signal_connections.erase(entity)
 	entity_list.remove(entity_list.find(entity))
 	if entity.bond_group:
 		unbond_entity(entity)

@@ -1,7 +1,7 @@
 extends CenterContainer
 
-onready var picker = find_node("PopupPicker")
-onready var cur_display = find_node("CurrentDirectionDisplay")
+@onready var picker = find_child("PopupPicker")
+@onready var cur_display = find_child("CurrentDirectionDisplay")
 
 var direction_textures: = {
 	0: preload("res://assets/img/button_icons/direction_icons/up.png"),
@@ -32,8 +32,8 @@ func show_picker() -> void:
 	#picker.visible = true
 	picker.popup()
 	var center = $ButtonContainer.get_global_rect().get_center()
-	picker.rect_size = picker.get_node("PopupPickerPanel").rect_size
-	picker.rect_global_position = center - (picker.rect_size/2)
+	picker.size = picker.get_node("PopupPickerPanel").size
+	picker.global_position = center - (picker.size/2)
 
 func hide_picker() -> void:
 	picker_open = false
@@ -80,10 +80,10 @@ func set_direction(direction_val: int) -> void:
 
 func update_picker() -> void:
 	var textures = relative_direction_textures if showing_relative else direction_textures
-	picker.find_node("PickUp").find_node("Icon").texture = textures[0]
-	picker.find_node("PickLeft").find_node("Icon").texture = textures[3]
-	picker.find_node("PickRight").find_node("Icon").texture = textures[1]
-	picker.find_node("PickDown").find_node("Icon").texture = textures[2]
+	picker.find_child("PickUp").find_child("Icon").texture = textures[0]
+	picker.find_child("PickLeft").find_child("Icon").texture = textures[3]
+	picker.find_child("PickRight").find_child("Icon").texture = textures[1]
+	picker.find_child("PickDown").find_child("Icon").texture = textures[2]
 
 func update_icon() -> void:
 	if showing_relative:

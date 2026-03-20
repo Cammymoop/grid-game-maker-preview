@@ -5,7 +5,7 @@ signal command_selected
 var names_to_ids: Dictionary = {}
 
 func _ready():
-	var list = find_node("AllCommands")
+	var list = find_child("AllCommands")
 	
 	for comm in Commands.Friendly:
 		var command_name = Commands.Friendly[comm].display_name
@@ -15,20 +15,20 @@ func _ready():
 		list.add_item(command_name)
 
 func set_items(new_list) -> void:
-	var list = find_node("AllCommands")
+	var list = find_child("AllCommands")
 	list.clear()
 	
 	for command_name in new_list:
 		list.add_item(command_name)
 
 func done() -> void:
-	var list = find_node("AllCommands")
+	var list = find_child("AllCommands")
 	if len(list.get_selected_items()) < 1:
 		return
 	var selected = list.get_item_text(list.get_selected_items()[0])
 	
 	var selected_id = names_to_ids[selected]
-	var slot = find_node("SlotSelectorButton").current_slot_id
+	var slot = find_child("SlotSelectorButton").current_slot_id
 	emit_signal("command_selected", selected_id, slot)
 
 

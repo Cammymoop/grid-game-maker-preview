@@ -1,27 +1,27 @@
 [gd_scene load_steps=25 format=2]
 
 [ext_resource path="res://Scenes/UI/ButtonContainer.tscn" type="PackedScene" id=1]
-[ext_resource path="res://assets/img/button_icons/slot_icons/red_diamond.png" type="Texture" id=2]
-[ext_resource path="res://assets/img/button_icons/slot_icons/blue_square.png" type="Texture" id=3]
+[ext_resource path="res://assets/img/button_icons/slot_icons/red_diamond.png" type="Texture2D" id=2]
+[ext_resource path="res://assets/img/button_icons/slot_icons/blue_square.png" type="Texture2D" id=3]
 [ext_resource path="res://src/GameEditor/SlotSelectorButton.gd" type="Script" id=4]
-[ext_resource path="res://assets/img/button_icons/slot_icons/pink_heart.png" type="Texture" id=5]
-[ext_resource path="res://assets/img/button_icons/slot_icons/white_triangle.png" type="Texture" id=6]
+[ext_resource path="res://assets/img/button_icons/slot_icons/pink_heart.png" type="Texture2D" id=5]
+[ext_resource path="res://assets/img/button_icons/slot_icons/white_triangle.png" type="Texture2D" id=6]
 [ext_resource path="res://Scenes/GameEditor/VSeparator.tscn" type="PackedScene" id=7]
-[ext_resource path="res://assets/img/button_icons/slot_icons/black_hexagon.png" type="Texture" id=8]
-[ext_resource path="res://assets/img/button_icons/slot_icons/grey_pentagon.png" type="Texture" id=9]
-[ext_resource path="res://assets/img/button_icons/slot_icons/Z.png" type="Texture" id=10]
-[ext_resource path="res://assets/img/button_icons/slot_icons/dark_red_blob.png" type="Texture" id=11]
-[ext_resource path="res://assets/img/button_icons/slot_icons/dark_blue_blob.png" type="Texture" id=12]
-[ext_resource path="res://assets/img/button_icons/slot_icons/Y.png" type="Texture" id=13]
-[ext_resource path="res://assets/img/button_icons/slot_icons/dark_orange_blob.png" type="Texture" id=14]
-[ext_resource path="res://assets/img/button_icons/slot_icons/I.png" type="Texture" id=15]
-[ext_resource path="res://assets/img/button_icons/slot_icons/II.png" type="Texture" id=16]
-[ext_resource path="res://assets/img/button_icons/slot_icons/X.png" type="Texture" id=17]
-[ext_resource path="res://assets/img/button_icons/slot_icons/III.png" type="Texture" id=18]
-[ext_resource path="res://assets/img/button_icons/slot_icons/A.png" type="Texture" id=19]
-[ext_resource path="res://assets/img/button_icons/slot_icons/B.png" type="Texture" id=20]
-[ext_resource path="res://assets/img/button_icons/slot_icons/C.png" type="Texture" id=21]
-[ext_resource path="res://assets/img/button_icons/slot_icons/dark_green_blob.png" type="Texture" id=22]
+[ext_resource path="res://assets/img/button_icons/slot_icons/black_hexagon.png" type="Texture2D" id=8]
+[ext_resource path="res://assets/img/button_icons/slot_icons/grey_pentagon.png" type="Texture2D" id=9]
+[ext_resource path="res://assets/img/button_icons/slot_icons/Z.png" type="Texture2D" id=10]
+[ext_resource path="res://assets/img/button_icons/slot_icons/dark_red_blob.png" type="Texture2D" id=11]
+[ext_resource path="res://assets/img/button_icons/slot_icons/dark_blue_blob.png" type="Texture2D" id=12]
+[ext_resource path="res://assets/img/button_icons/slot_icons/Y.png" type="Texture2D" id=13]
+[ext_resource path="res://assets/img/button_icons/slot_icons/dark_orange_blob.png" type="Texture2D" id=14]
+[ext_resource path="res://assets/img/button_icons/slot_icons/I.png" type="Texture2D" id=15]
+[ext_resource path="res://assets/img/button_icons/slot_icons/II.png" type="Texture2D" id=16]
+[ext_resource path="res://assets/img/button_icons/slot_icons/X.png" type="Texture2D" id=17]
+[ext_resource path="res://assets/img/button_icons/slot_icons/III.png" type="Texture2D" id=18]
+[ext_resource path="res://assets/img/button_icons/slot_icons/A.png" type="Texture2D" id=19]
+[ext_resource path="res://assets/img/button_icons/slot_icons/B.png" type="Texture2D" id=20]
+[ext_resource path="res://assets/img/button_icons/slot_icons/C.png" type="Texture2D" id=21]
+[ext_resource path="res://assets/img/button_icons/slot_icons/dark_green_blob.png" type="Texture2D" id=22]
 [ext_resource path="res://src/UI/ConditionalEditorTheme.tres" type="Theme" id=23]
 
 [sub_resource type="StyleBoxFlat" id=1]
@@ -47,137 +47,137 @@ script = ExtResource( 4 )
 [node name="ButtonContainer" parent="." instance=ExtResource( 1 )]
 anchor_right = 0.0
 anchor_bottom = 0.0
-margin_left = 370.0
-margin_top = 370.0
-margin_right = 398.0
-margin_bottom = 398.0
+offset_left = 370.0
+offset_top = 370.0
+offset_right = 398.0
+offset_bottom = 398.0
 
 [node name="CenterContainer" type="CenterContainer" parent="ButtonContainer"]
-margin_right = 28.0
-margin_bottom = 28.0
+offset_right = 28.0
+offset_bottom = 28.0
 mouse_filter = 2
 
 [node name="CurrentSlotDisplay" type="TextureRect" parent="ButtonContainer/CenterContainer"]
-margin_right = 28.0
-margin_bottom = 28.0
+offset_right = 28.0
+offset_bottom = 28.0
 mouse_filter = 2
 texture = ExtResource( 2 )
 
 [node name="PopupPicker" type="Popup" parent="."]
-margin_left = 384.0
-margin_top = 384.0
-margin_right = 384.0
-margin_bottom = 384.0
+offset_left = 384.0
+offset_top = 384.0
+offset_right = 384.0
+offset_bottom = 384.0
 grow_horizontal = 2
 grow_vertical = 2
-popup_exclusive = true
+exclusive = true
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
 [node name="PopupPanel" type="PanelContainer" parent="PopupPicker"]
-custom_styles/panel = SubResource( 1 )
+theme_override_styles/panel = SubResource( 1 )
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
 [node name="HBoxContainer" type="HBoxContainer" parent="PopupPicker/PopupPanel"]
-margin_right = 228.0
-margin_bottom = 124.0
+offset_right = 228.0
+offset_bottom = 124.0
 alignment = 1
 
 [node name="EntitySlots" type="VBoxContainer" parent="PopupPicker/PopupPanel/HBoxContainer"]
-margin_right = 28.0
-margin_bottom = 124.0
+offset_right = 28.0
+offset_bottom = 124.0
 grow_horizontal = 2
 size_flags_horizontal = 4
 
 [node name="PickRed" parent="PopupPicker/PopupPanel/HBoxContainer/EntitySlots" instance=ExtResource( 1 )]
 anchor_right = 0.0
 anchor_bottom = 0.0
-margin_right = 28.0
-margin_bottom = 28.0
+offset_right = 28.0
+offset_bottom = 28.0
 size_flags_horizontal = 4
 
 [node name="CenterContainer" type="CenterContainer" parent="PopupPicker/PopupPanel/HBoxContainer/EntitySlots/PickRed"]
-margin_right = 28.0
-margin_bottom = 28.0
+offset_right = 28.0
+offset_bottom = 28.0
 mouse_filter = 2
 
 [node name="TextureRect2" type="TextureRect" parent="PopupPicker/PopupPanel/HBoxContainer/EntitySlots/PickRed/CenterContainer"]
-margin_right = 28.0
-margin_bottom = 28.0
+offset_right = 28.0
+offset_bottom = 28.0
 mouse_filter = 2
 texture = ExtResource( 2 )
 
 [node name="PickBlue" parent="PopupPicker/PopupPanel/HBoxContainer/EntitySlots" instance=ExtResource( 1 )]
 anchor_right = 0.0
 anchor_bottom = 0.0
-margin_top = 32.0
-margin_right = 28.0
-margin_bottom = 60.0
+offset_top = 32.0
+offset_right = 28.0
+offset_bottom = 60.0
 
 [node name="CenterContainer" type="CenterContainer" parent="PopupPicker/PopupPanel/HBoxContainer/EntitySlots/PickBlue"]
-margin_right = 28.0
-margin_bottom = 28.0
+offset_right = 28.0
+offset_bottom = 28.0
 mouse_filter = 2
 
 [node name="TextureRect2" type="TextureRect" parent="PopupPicker/PopupPanel/HBoxContainer/EntitySlots/PickBlue/CenterContainer"]
-margin_right = 28.0
-margin_bottom = 28.0
+offset_right = 28.0
+offset_bottom = 28.0
 mouse_filter = 2
 texture = ExtResource( 3 )
 
 [node name="PickWhite" parent="PopupPicker/PopupPanel/HBoxContainer/EntitySlots" instance=ExtResource( 1 )]
 anchor_right = 0.0
 anchor_bottom = 0.0
-margin_top = 64.0
-margin_right = 28.0
-margin_bottom = 92.0
+offset_top = 64.0
+offset_right = 28.0
+offset_bottom = 92.0
 
 [node name="CenterContainer" type="CenterContainer" parent="PopupPicker/PopupPanel/HBoxContainer/EntitySlots/PickWhite"]
-margin_right = 28.0
-margin_bottom = 28.0
+offset_right = 28.0
+offset_bottom = 28.0
 mouse_filter = 2
 
 [node name="TextureRect2" type="TextureRect" parent="PopupPicker/PopupPanel/HBoxContainer/EntitySlots/PickWhite/CenterContainer"]
-margin_right = 28.0
-margin_bottom = 28.0
+offset_right = 28.0
+offset_bottom = 28.0
 mouse_filter = 2
 texture = ExtResource( 6 )
 
 [node name="PickPink" parent="PopupPicker/PopupPanel/HBoxContainer/EntitySlots" instance=ExtResource( 1 )]
 anchor_right = 0.0
 anchor_bottom = 0.0
-margin_top = 96.0
-margin_right = 28.0
-margin_bottom = 124.0
+offset_top = 96.0
+offset_right = 28.0
+offset_bottom = 124.0
 size_flags_horizontal = 4
 
 [node name="CenterContainer" type="CenterContainer" parent="PopupPicker/PopupPanel/HBoxContainer/EntitySlots/PickPink"]
-margin_right = 28.0
-margin_bottom = 28.0
+offset_right = 28.0
+offset_bottom = 28.0
 mouse_filter = 2
 
 [node name="TextureRect2" type="TextureRect" parent="PopupPicker/PopupPanel/HBoxContainer/EntitySlots/PickPink/CenterContainer"]
-margin_right = 28.0
-margin_bottom = 28.0
+offset_right = 28.0
+offset_bottom = 28.0
 mouse_filter = 2
 texture = ExtResource( 5 )
 
 [node name="VSeparator" parent="PopupPicker/PopupPanel/HBoxContainer" instance=ExtResource( 7 )]
-margin_left = 32.0
-margin_top = 34.0
-margin_right = 36.0
-margin_bottom = 89.0
-rect_min_size = Vector2( 0, 55 )
+offset_left = 32.0
+offset_top = 34.0
+offset_right = 36.0
+offset_bottom = 89.0
+custom_minimum_size = Vector2( 0, 55 )
 size_flags_vertical = 4
 
 [node name="TilePosSlots" type="VBoxContainer" parent="PopupPicker/PopupPanel/HBoxContainer"]
-margin_left = 40.0
-margin_top = 32.0
-margin_right = 68.0
-margin_bottom = 92.0
+offset_left = 40.0
+offset_top = 32.0
+offset_right = 68.0
+offset_bottom = 92.0
 grow_horizontal = 2
 size_flags_horizontal = 4
 size_flags_vertical = 4
@@ -185,52 +185,52 @@ size_flags_vertical = 4
 [node name="PickGrey" parent="PopupPicker/PopupPanel/HBoxContainer/TilePosSlots" instance=ExtResource( 1 )]
 anchor_right = 0.0
 anchor_bottom = 0.0
-margin_right = 28.0
-margin_bottom = 28.0
+offset_right = 28.0
+offset_bottom = 28.0
 size_flags_horizontal = 4
 
 [node name="CenterContainer" type="CenterContainer" parent="PopupPicker/PopupPanel/HBoxContainer/TilePosSlots/PickGrey"]
-margin_right = 28.0
-margin_bottom = 28.0
+offset_right = 28.0
+offset_bottom = 28.0
 mouse_filter = 2
 
 [node name="TextureRect2" type="TextureRect" parent="PopupPicker/PopupPanel/HBoxContainer/TilePosSlots/PickGrey/CenterContainer"]
-margin_right = 28.0
-margin_bottom = 28.0
+offset_right = 28.0
+offset_bottom = 28.0
 mouse_filter = 2
 texture = ExtResource( 9 )
 
 [node name="PickBlack" parent="PopupPicker/PopupPanel/HBoxContainer/TilePosSlots" instance=ExtResource( 1 )]
 anchor_right = 0.0
 anchor_bottom = 0.0
-margin_top = 32.0
-margin_right = 28.0
-margin_bottom = 60.0
+offset_top = 32.0
+offset_right = 28.0
+offset_bottom = 60.0
 
 [node name="CenterContainer" type="CenterContainer" parent="PopupPicker/PopupPanel/HBoxContainer/TilePosSlots/PickBlack"]
-margin_right = 28.0
-margin_bottom = 28.0
+offset_right = 28.0
+offset_bottom = 28.0
 mouse_filter = 2
 
 [node name="TextureRect2" type="TextureRect" parent="PopupPicker/PopupPanel/HBoxContainer/TilePosSlots/PickBlack/CenterContainer"]
-margin_right = 28.0
-margin_bottom = 28.0
+offset_right = 28.0
+offset_bottom = 28.0
 mouse_filter = 2
 texture = ExtResource( 8 )
 
 [node name="VSeparator5" parent="PopupPicker/PopupPanel/HBoxContainer" instance=ExtResource( 7 )]
-margin_left = 72.0
-margin_top = 34.0
-margin_right = 76.0
-margin_bottom = 89.0
-rect_min_size = Vector2( 0, 55 )
+offset_left = 72.0
+offset_top = 34.0
+offset_right = 76.0
+offset_bottom = 89.0
+custom_minimum_size = Vector2( 0, 55 )
 size_flags_vertical = 4
 
 [node name="IntSlots" type="VBoxContainer" parent="PopupPicker/PopupPanel/HBoxContainer"]
-margin_left = 80.0
-margin_top = 16.0
-margin_right = 108.0
-margin_bottom = 108.0
+offset_left = 80.0
+offset_top = 16.0
+offset_right = 108.0
+offset_bottom = 108.0
 grow_horizontal = 2
 size_flags_horizontal = 4
 size_flags_vertical = 4
@@ -238,70 +238,70 @@ size_flags_vertical = 4
 [node name="PickA" parent="PopupPicker/PopupPanel/HBoxContainer/IntSlots" instance=ExtResource( 1 )]
 anchor_right = 0.0
 anchor_bottom = 0.0
-margin_right = 28.0
-margin_bottom = 28.0
+offset_right = 28.0
+offset_bottom = 28.0
 size_flags_horizontal = 4
 
 [node name="CenterContainer" type="CenterContainer" parent="PopupPicker/PopupPanel/HBoxContainer/IntSlots/PickA"]
-margin_right = 28.0
-margin_bottom = 28.0
+offset_right = 28.0
+offset_bottom = 28.0
 mouse_filter = 2
 
 [node name="TextureRect2" type="TextureRect" parent="PopupPicker/PopupPanel/HBoxContainer/IntSlots/PickA/CenterContainer"]
-margin_right = 28.0
-margin_bottom = 28.0
+offset_right = 28.0
+offset_bottom = 28.0
 mouse_filter = 2
 texture = ExtResource( 19 )
 
 [node name="PickB" parent="PopupPicker/PopupPanel/HBoxContainer/IntSlots" instance=ExtResource( 1 )]
 anchor_right = 0.0
 anchor_bottom = 0.0
-margin_top = 32.0
-margin_right = 28.0
-margin_bottom = 60.0
+offset_top = 32.0
+offset_right = 28.0
+offset_bottom = 60.0
 
 [node name="CenterContainer" type="CenterContainer" parent="PopupPicker/PopupPanel/HBoxContainer/IntSlots/PickB"]
-margin_right = 28.0
-margin_bottom = 28.0
+offset_right = 28.0
+offset_bottom = 28.0
 mouse_filter = 2
 
 [node name="TextureRect2" type="TextureRect" parent="PopupPicker/PopupPanel/HBoxContainer/IntSlots/PickB/CenterContainer"]
-margin_right = 28.0
-margin_bottom = 28.0
+offset_right = 28.0
+offset_bottom = 28.0
 mouse_filter = 2
 texture = ExtResource( 20 )
 
 [node name="PickC" parent="PopupPicker/PopupPanel/HBoxContainer/IntSlots" instance=ExtResource( 1 )]
 anchor_right = 0.0
 anchor_bottom = 0.0
-margin_top = 64.0
-margin_right = 28.0
-margin_bottom = 92.0
+offset_top = 64.0
+offset_right = 28.0
+offset_bottom = 92.0
 
 [node name="CenterContainer" type="CenterContainer" parent="PopupPicker/PopupPanel/HBoxContainer/IntSlots/PickC"]
-margin_right = 28.0
-margin_bottom = 28.0
+offset_right = 28.0
+offset_bottom = 28.0
 mouse_filter = 2
 
 [node name="TextureRect2" type="TextureRect" parent="PopupPicker/PopupPanel/HBoxContainer/IntSlots/PickC/CenterContainer"]
-margin_right = 28.0
-margin_bottom = 28.0
+offset_right = 28.0
+offset_bottom = 28.0
 mouse_filter = 2
 texture = ExtResource( 21 )
 
 [node name="VSeparator3" parent="PopupPicker/PopupPanel/HBoxContainer" instance=ExtResource( 7 )]
-margin_left = 112.0
-margin_top = 34.0
-margin_right = 116.0
-margin_bottom = 89.0
-rect_min_size = Vector2( 0, 55 )
+offset_left = 112.0
+offset_top = 34.0
+offset_right = 116.0
+offset_bottom = 89.0
+custom_minimum_size = Vector2( 0, 55 )
 size_flags_vertical = 4
 
 [node name="FloatSlots" type="VBoxContainer" parent="PopupPicker/PopupPanel/HBoxContainer"]
-margin_left = 120.0
-margin_top = 16.0
-margin_right = 148.0
-margin_bottom = 108.0
+offset_left = 120.0
+offset_top = 16.0
+offset_right = 148.0
+offset_bottom = 108.0
 grow_horizontal = 2
 size_flags_horizontal = 4
 size_flags_vertical = 4
@@ -309,70 +309,70 @@ size_flags_vertical = 4
 [node name="PickX" parent="PopupPicker/PopupPanel/HBoxContainer/FloatSlots" instance=ExtResource( 1 )]
 anchor_right = 0.0
 anchor_bottom = 0.0
-margin_right = 28.0
-margin_bottom = 28.0
+offset_right = 28.0
+offset_bottom = 28.0
 size_flags_horizontal = 4
 
 [node name="CenterContainer" type="CenterContainer" parent="PopupPicker/PopupPanel/HBoxContainer/FloatSlots/PickX"]
-margin_right = 28.0
-margin_bottom = 28.0
+offset_right = 28.0
+offset_bottom = 28.0
 mouse_filter = 2
 
 [node name="TextureRect2" type="TextureRect" parent="PopupPicker/PopupPanel/HBoxContainer/FloatSlots/PickX/CenterContainer"]
-margin_right = 28.0
-margin_bottom = 28.0
+offset_right = 28.0
+offset_bottom = 28.0
 mouse_filter = 2
 texture = ExtResource( 17 )
 
 [node name="PickY" parent="PopupPicker/PopupPanel/HBoxContainer/FloatSlots" instance=ExtResource( 1 )]
 anchor_right = 0.0
 anchor_bottom = 0.0
-margin_top = 32.0
-margin_right = 28.0
-margin_bottom = 60.0
+offset_top = 32.0
+offset_right = 28.0
+offset_bottom = 60.0
 
 [node name="CenterContainer" type="CenterContainer" parent="PopupPicker/PopupPanel/HBoxContainer/FloatSlots/PickY"]
-margin_right = 28.0
-margin_bottom = 28.0
+offset_right = 28.0
+offset_bottom = 28.0
 mouse_filter = 2
 
 [node name="TextureRect2" type="TextureRect" parent="PopupPicker/PopupPanel/HBoxContainer/FloatSlots/PickY/CenterContainer"]
-margin_right = 28.0
-margin_bottom = 28.0
+offset_right = 28.0
+offset_bottom = 28.0
 mouse_filter = 2
 texture = ExtResource( 13 )
 
 [node name="PickZ" parent="PopupPicker/PopupPanel/HBoxContainer/FloatSlots" instance=ExtResource( 1 )]
 anchor_right = 0.0
 anchor_bottom = 0.0
-margin_top = 64.0
-margin_right = 28.0
-margin_bottom = 92.0
+offset_top = 64.0
+offset_right = 28.0
+offset_bottom = 92.0
 
 [node name="CenterContainer" type="CenterContainer" parent="PopupPicker/PopupPanel/HBoxContainer/FloatSlots/PickZ"]
-margin_right = 28.0
-margin_bottom = 28.0
+offset_right = 28.0
+offset_bottom = 28.0
 mouse_filter = 2
 
 [node name="TextureRect2" type="TextureRect" parent="PopupPicker/PopupPanel/HBoxContainer/FloatSlots/PickZ/CenterContainer"]
-margin_right = 28.0
-margin_bottom = 28.0
+offset_right = 28.0
+offset_bottom = 28.0
 mouse_filter = 2
 texture = ExtResource( 10 )
 
 [node name="VSeparator4" parent="PopupPicker/PopupPanel/HBoxContainer" instance=ExtResource( 7 )]
-margin_left = 152.0
-margin_top = 34.0
-margin_right = 156.0
-margin_bottom = 89.0
-rect_min_size = Vector2( 0, 55 )
+offset_left = 152.0
+offset_top = 34.0
+offset_right = 156.0
+offset_bottom = 89.0
+custom_minimum_size = Vector2( 0, 55 )
 size_flags_vertical = 4
 
 [node name="StringSlots" type="VBoxContainer" parent="PopupPicker/PopupPanel/HBoxContainer"]
-margin_left = 160.0
-margin_top = 16.0
-margin_right = 188.0
-margin_bottom = 108.0
+offset_left = 160.0
+offset_top = 16.0
+offset_right = 188.0
+offset_bottom = 108.0
 grow_horizontal = 2
 size_flags_horizontal = 4
 size_flags_vertical = 4
@@ -380,142 +380,142 @@ size_flags_vertical = 4
 [node name="PickI" parent="PopupPicker/PopupPanel/HBoxContainer/StringSlots" instance=ExtResource( 1 )]
 anchor_right = 0.0
 anchor_bottom = 0.0
-margin_right = 28.0
-margin_bottom = 28.0
+offset_right = 28.0
+offset_bottom = 28.0
 size_flags_horizontal = 4
 
 [node name="CenterContainer" type="CenterContainer" parent="PopupPicker/PopupPanel/HBoxContainer/StringSlots/PickI"]
-margin_right = 28.0
-margin_bottom = 28.0
+offset_right = 28.0
+offset_bottom = 28.0
 mouse_filter = 2
 
 [node name="TextureRect2" type="TextureRect" parent="PopupPicker/PopupPanel/HBoxContainer/StringSlots/PickI/CenterContainer"]
-margin_right = 28.0
-margin_bottom = 28.0
+offset_right = 28.0
+offset_bottom = 28.0
 mouse_filter = 2
 texture = ExtResource( 15 )
 
 [node name="PickII" parent="PopupPicker/PopupPanel/HBoxContainer/StringSlots" instance=ExtResource( 1 )]
 anchor_right = 0.0
 anchor_bottom = 0.0
-margin_top = 32.0
-margin_right = 28.0
-margin_bottom = 60.0
+offset_top = 32.0
+offset_right = 28.0
+offset_bottom = 60.0
 
 [node name="CenterContainer" type="CenterContainer" parent="PopupPicker/PopupPanel/HBoxContainer/StringSlots/PickII"]
-margin_right = 28.0
-margin_bottom = 28.0
+offset_right = 28.0
+offset_bottom = 28.0
 mouse_filter = 2
 
 [node name="TextureRect2" type="TextureRect" parent="PopupPicker/PopupPanel/HBoxContainer/StringSlots/PickII/CenterContainer"]
-margin_right = 28.0
-margin_bottom = 28.0
+offset_right = 28.0
+offset_bottom = 28.0
 mouse_filter = 2
 texture = ExtResource( 16 )
 
 [node name="PickIII" parent="PopupPicker/PopupPanel/HBoxContainer/StringSlots" instance=ExtResource( 1 )]
 anchor_right = 0.0
 anchor_bottom = 0.0
-margin_top = 64.0
-margin_right = 28.0
-margin_bottom = 92.0
+offset_top = 64.0
+offset_right = 28.0
+offset_bottom = 92.0
 
 [node name="CenterContainer" type="CenterContainer" parent="PopupPicker/PopupPanel/HBoxContainer/StringSlots/PickIII"]
-margin_right = 28.0
-margin_bottom = 28.0
+offset_right = 28.0
+offset_bottom = 28.0
 mouse_filter = 2
 
 [node name="TextureRect2" type="TextureRect" parent="PopupPicker/PopupPanel/HBoxContainer/StringSlots/PickIII/CenterContainer"]
-margin_right = 28.0
-margin_bottom = 28.0
+offset_right = 28.0
+offset_bottom = 28.0
 mouse_filter = 2
 texture = ExtResource( 18 )
 
 [node name="VSeparator2" parent="PopupPicker/PopupPanel/HBoxContainer" instance=ExtResource( 7 )]
-margin_left = 192.0
-margin_top = 34.0
-margin_right = 196.0
-margin_bottom = 89.0
-rect_min_size = Vector2( 0, 55 )
+offset_left = 192.0
+offset_top = 34.0
+offset_right = 196.0
+offset_bottom = 89.0
+custom_minimum_size = Vector2( 0, 55 )
 size_flags_vertical = 4
 
 [node name="ArgSlots" type="VBoxContainer" parent="PopupPicker/PopupPanel/HBoxContainer"]
-margin_left = 200.0
-margin_right = 228.0
-margin_bottom = 124.0
+offset_left = 200.0
+offset_right = 228.0
+offset_bottom = 124.0
 grow_horizontal = 2
 size_flags_horizontal = 4
 
 [node name="PickDarkRed" parent="PopupPicker/PopupPanel/HBoxContainer/ArgSlots" instance=ExtResource( 1 )]
 anchor_right = 0.0
 anchor_bottom = 0.0
-margin_right = 28.0
-margin_bottom = 28.0
+offset_right = 28.0
+offset_bottom = 28.0
 size_flags_horizontal = 4
 
 [node name="CenterContainer" type="CenterContainer" parent="PopupPicker/PopupPanel/HBoxContainer/ArgSlots/PickDarkRed"]
-margin_right = 28.0
-margin_bottom = 28.0
+offset_right = 28.0
+offset_bottom = 28.0
 mouse_filter = 2
 
 [node name="TextureRect2" type="TextureRect" parent="PopupPicker/PopupPanel/HBoxContainer/ArgSlots/PickDarkRed/CenterContainer"]
-margin_right = 28.0
-margin_bottom = 28.0
+offset_right = 28.0
+offset_bottom = 28.0
 mouse_filter = 2
 texture = ExtResource( 11 )
 
 [node name="PickDarkBlue" parent="PopupPicker/PopupPanel/HBoxContainer/ArgSlots" instance=ExtResource( 1 )]
 anchor_right = 0.0
 anchor_bottom = 0.0
-margin_top = 32.0
-margin_right = 28.0
-margin_bottom = 60.0
+offset_top = 32.0
+offset_right = 28.0
+offset_bottom = 60.0
 
 [node name="CenterContainer" type="CenterContainer" parent="PopupPicker/PopupPanel/HBoxContainer/ArgSlots/PickDarkBlue"]
-margin_right = 28.0
-margin_bottom = 28.0
+offset_right = 28.0
+offset_bottom = 28.0
 mouse_filter = 2
 
 [node name="TextureRect2" type="TextureRect" parent="PopupPicker/PopupPanel/HBoxContainer/ArgSlots/PickDarkBlue/CenterContainer"]
-margin_right = 28.0
-margin_bottom = 28.0
+offset_right = 28.0
+offset_bottom = 28.0
 mouse_filter = 2
 texture = ExtResource( 12 )
 
 [node name="PickDarkGreen" parent="PopupPicker/PopupPanel/HBoxContainer/ArgSlots" instance=ExtResource( 1 )]
 anchor_right = 0.0
 anchor_bottom = 0.0
-margin_top = 64.0
-margin_right = 28.0
-margin_bottom = 92.0
+offset_top = 64.0
+offset_right = 28.0
+offset_bottom = 92.0
 
 [node name="CenterContainer" type="CenterContainer" parent="PopupPicker/PopupPanel/HBoxContainer/ArgSlots/PickDarkGreen"]
-margin_right = 28.0
-margin_bottom = 28.0
+offset_right = 28.0
+offset_bottom = 28.0
 mouse_filter = 2
 
 [node name="TextureRect2" type="TextureRect" parent="PopupPicker/PopupPanel/HBoxContainer/ArgSlots/PickDarkGreen/CenterContainer"]
-margin_right = 28.0
-margin_bottom = 28.0
+offset_right = 28.0
+offset_bottom = 28.0
 mouse_filter = 2
 texture = ExtResource( 22 )
 
 [node name="PickDarkOrange" parent="PopupPicker/PopupPanel/HBoxContainer/ArgSlots" instance=ExtResource( 1 )]
 anchor_right = 0.0
 anchor_bottom = 0.0
-margin_top = 96.0
-margin_right = 28.0
-margin_bottom = 124.0
+offset_top = 96.0
+offset_right = 28.0
+offset_bottom = 124.0
 size_flags_horizontal = 4
 
 [node name="CenterContainer" type="CenterContainer" parent="PopupPicker/PopupPanel/HBoxContainer/ArgSlots/PickDarkOrange"]
-margin_right = 28.0
-margin_bottom = 28.0
+offset_right = 28.0
+offset_bottom = 28.0
 mouse_filter = 2
 
 [node name="TextureRect2" type="TextureRect" parent="PopupPicker/PopupPanel/HBoxContainer/ArgSlots/PickDarkOrange/CenterContainer"]
-margin_right = 28.0
-margin_bottom = 28.0
+offset_right = 28.0
+offset_bottom = 28.0
 mouse_filter = 2
 texture = ExtResource( 14 )
 

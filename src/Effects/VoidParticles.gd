@@ -1,9 +1,9 @@
-extends Particles2D
+extends GPUParticles2D
 
 var density: float
-export var MAX_AMOUNT = 2000
-export var DENSITY_UPDATES: bool = true
-export var smooth_amount_reset: float = 0
+@export var MAX_AMOUNT = 2000
+@export var DENSITY_UPDATES: bool = true
+@export var smooth_amount_reset: float = 0
 var smooth_timer: float = 0
 
 var fading = false
@@ -13,7 +13,7 @@ enum ProcessType {
 	ParticlesMat, ShaderMat
 }
 
-export(ProcessType) var TYPE = ProcessType.ParticlesMat
+@export var TYPE: ProcessType = ProcessType.ParticlesMat
 
 func _ready():
 	set_process(false)
@@ -22,10 +22,10 @@ func _ready():
 	if TYPE == ProcessType.ParticlesMat:
 		extents = process_material.emission_box_extents
 	else:
-		extents = process_material.get_shader_param("emission_box_extents")
+		extents = process_material.get_shader_parameter("emission_box_extents")
 	density = amount / (extents.x * extents.y)
 	update_size(true)
-	get_viewport().connect("size_changed", self, "update_size")
+	get_viewport().connect("size_changed", Callable(self, "update_size"))
 
 func _process(delta):
 	if fading:
@@ -62,7 +62,7 @@ func real_update() -> void:
 	if TYPE == ProcessType.ParticlesMat:
 		process_material.emission_box_extents = Vector3((vp.size.x/2) * 1.2, vp.size.y * 1.5, 1)
 	else:
-		process_material.set_shader_param("emission_box_extents", Vector3((vp.size.x/2) * 1.2, vp.size.y * 1.5, 1))
+		process_material.set_shader_parameter("emission_box_extents", Vector3((vp.size.x/2) * 1.2, vp.size.y * 1.5, 1))
 	if DENSITY_UPDATES:
 		amount = min(MAX_AMOUNT, density * (vp.size.x * vp.size.y))
 	

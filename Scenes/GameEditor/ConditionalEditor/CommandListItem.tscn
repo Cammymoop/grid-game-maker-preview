@@ -1,42 +1,42 @@
 [gd_scene load_steps=8 format=2]
 
-[ext_resource path="res://assets/font/pixel_font_white.tres" type="BitmapFont" id=1]
+[ext_resource path="res://assets/font/pixel_font_white.tres" type="FontFile" id=1]
 [ext_resource path="res://Scenes/GameEditor/SlotSelectorButton.tscn" type="PackedScene" id=2]
 [ext_resource path="res://assets/ui/PropertyEditor/RedTabBackground.tres" type="StyleBox" id=3]
 [ext_resource path="res://assets/ui/PropertyEditor/RedBackground.tres" type="StyleBox" id=4]
-[ext_resource path="res://assets/img/button_icons/x.png" type="Texture" id=5]
+[ext_resource path="res://assets/img/button_icons/x.png" type="Texture2D" id=5]
 [ext_resource path="res://src/GameEditor/ConditionalEditor/CommandListItem.gd" type="Script" id=6]
-[ext_resource path="res://assets/font/my_font.tres" type="DynamicFont" id=7]
+[ext_resource path="res://assets/font/my_font.tres" type="FontFile" id=7]
 
 [node name="Command" type="PanelContainer"]
-margin_right = 239.0
-margin_bottom = 45.0
-rect_min_size = Vector2( 0, 45 )
-custom_styles/panel = ExtResource( 4 )
+offset_right = 239.0
+offset_bottom = 45.0
+custom_minimum_size = Vector2( 0, 45 )
+theme_override_styles/panel = ExtResource( 4 )
 script = ExtResource( 6 )
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
 [node name="TitleTab" type="Control" parent="."]
-margin_left = 2.0
-margin_top = 2.0
-margin_right = 237.0
-margin_bottom = 46.0
+offset_left = 2.0
+offset_top = 2.0
+offset_right = 237.0
+offset_bottom = 46.0
 
 [node name="TabPanel" type="Panel" parent="TitleTab"]
-margin_left = 12.0
-margin_top = -4.0
-margin_right = 56.0
-custom_styles/panel = ExtResource( 3 )
+offset_left = 12.0
+offset_top = -4.0
+offset_right = 56.0
+theme_override_styles/panel = ExtResource( 3 )
 
 [node name="TitleText" type="Label" parent="TitleTab/TabPanel"]
 anchor_right = 1.0
 anchor_bottom = 1.0
-margin_top = 1.0
-margin_bottom = 6.0
-custom_colors/font_color = Color( 0.14902, 0.0509804, 0.0509804, 1 )
-custom_fonts/font = ExtResource( 1 )
+offset_top = 1.0
+offset_bottom = 6.0
+theme_override_colors/font_color = Color( 0.14902, 0.0509804, 0.0509804, 1 )
+theme_override_fonts/font = ExtResource( 1 )
 text = "Die"
 align = 1
 uppercase = true
@@ -45,63 +45,63 @@ __meta__ = {
 }
 
 [node name="Content" type="MarginContainer" parent="."]
-margin_left = 2.0
-margin_top = 2.0
-margin_right = 237.0
-margin_bottom = 46.0
-custom_constants/margin_right = 4
-custom_constants/margin_top = 6
-custom_constants/margin_left = 4
-custom_constants/margin_bottom = 4
+offset_left = 2.0
+offset_top = 2.0
+offset_right = 237.0
+offset_bottom = 46.0
+theme_override_constants/margin_right = 4
+theme_override_constants/margin_top = 6
+theme_override_constants/margin_left = 4
+theme_override_constants/margin_bottom = 4
 
 [node name="HBoxContainer" type="HBoxContainer" parent="Content"]
-margin_left = 4.0
-margin_top = 6.0
-margin_right = 231.0
-margin_bottom = 40.0
+offset_left = 4.0
+offset_top = 6.0
+offset_right = 231.0
+offset_bottom = 40.0
 
 [node name="CommandSlot" parent="Content/HBoxContainer" instance=ExtResource( 2 )]
 anchor_right = 0.0
 anchor_bottom = 0.0
-margin_right = 28.0
-margin_bottom = 28.0
+offset_right = 28.0
+offset_bottom = 28.0
 size_flags_horizontal = 4
 size_flags_vertical = 0
 
 [node name="GeneratedContent" type="VBoxContainer" parent="Content/HBoxContainer"]
-margin_left = 32.0
-margin_right = 169.0
-margin_bottom = 34.0
+offset_left = 32.0
+offset_right = 169.0
+offset_bottom = 34.0
 size_flags_vertical = 3
 
 [node name="Row" type="HBoxContainer" parent="Content/HBoxContainer/GeneratedContent"]
-margin_right = 137.0
-margin_bottom = 34.0
-rect_min_size = Vector2( 0, 34 )
+offset_right = 137.0
+offset_bottom = 34.0
+custom_minimum_size = Vector2( 0, 34 )
 size_flags_horizontal = 3
 size_flags_vertical = 3
 
 [node name="Label" type="Label" parent="Content/HBoxContainer/GeneratedContent/Row"]
-margin_top = 9.0
-margin_right = 137.0
-margin_bottom = 25.0
-custom_fonts/font = ExtResource( 7 )
+offset_top = 9.0
+offset_right = 137.0
+offset_bottom = 25.0
+theme_override_fonts/font = ExtResource( 7 )
 text = "This Entity dies now"
 
 [node name="Control" type="Control" parent="."]
-margin_left = 2.0
-margin_top = 2.0
-margin_right = 237.0
-margin_bottom = 46.0
+offset_left = 2.0
+offset_top = 2.0
+offset_right = 237.0
+offset_bottom = 46.0
 mouse_filter = 2
 
 [node name="TextureRect" type="TextureRect" parent="Control"]
 anchor_left = 1.0
 anchor_right = 1.0
-margin_left = -12.0
-margin_top = 2.0
-margin_right = -2.0
-margin_bottom = 12.0
+offset_left = -12.0
+offset_top = 2.0
+offset_right = -2.0
+offset_bottom = 12.0
 mouse_filter = 0
 mouse_default_cursor_shape = 2
 texture = ExtResource( 5 )

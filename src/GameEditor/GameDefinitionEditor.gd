@@ -8,60 +8,60 @@ var game_settings = {}
 var invalid_field_color = Color(0.7, 0.4, 0.4)
 
 func _ready():
-	var name_box = find_node("NameInput")
+	var name_box = find_child("NameInput")
 	name_box.text = GameManager.get_game_name()
-	find_node("SetWindowWidth").value = GameManager.game_view.x
-	find_node("SetWindowHeight").value = GameManager.game_view.y
+	find_child("SetWindowWidth").value = GameManager.game_view.x
+	find_child("SetWindowHeight").value = GameManager.game_view.y
 	init_movement_modes()
 	
 	game_settings = GameManager.game_definition["game_settings"]
 	
 	if "pixel_scale" in game_settings:
-		find_node("PixelScaleInput").value = game_settings["pixel_scale"]
+		find_child("PixelScaleInput").value = game_settings["pixel_scale"]
 	if "auto_aspect" in game_settings:
-		find_node("AutoAspect").pressed = game_settings["auto_aspect"]
+		find_child("AutoAspect").button_pressed = game_settings["auto_aspect"]
 	if "movement_mode" in game_settings:
-		find_node("MovementModeMenuButton").text = GameManager.describe_movement_mode(game_settings["movement_mode"])
+		find_child("MovementModeMenuButton").text = GameManager.describe_movement_mode(game_settings["movement_mode"])
 	
 	var cam_settings = {}
 	if "camera_settings" in game_settings:
 		cam_settings = game_settings["camera_settings"]
 	
-	var follow_by_button = find_node("FollowBy")
-	follow_by_button.connect("changed", self, "change_follow_by")
+	var follow_by_button = find_child("FollowBy")
+	follow_by_button.connect("changed", Callable(self, "change_follow_by"))
 	
 	if "follow_entity" in cam_settings:
-		find_node("FollowEntity").text = cam_settings["follow_entity"]
+		find_child("FollowEntity").text = cam_settings["follow_entity"]
 		follow_entity_validate()
 	if "follow_entity_by" in cam_settings:
 		follow_by_button.text = cam_settings["follow_entity_by"]
 	if "enable_limits" in cam_settings:
-		find_node("EnableLimitsToggle").pressed = cam_settings["enable_limits"]
+		find_child("EnableLimitsToggle").button_pressed = cam_settings["enable_limits"]
 
 func init_movement_modes() -> void:
-	var popup_menu: PopupMenu = find_node("MovementModeMenuButton").get_popup()
+	var popup_menu: PopupMenu = find_child("MovementModeMenuButton").get_popup()
 	
 	for mode in GameManager.MovementMode.values():
 		popup_menu.add_item(GameManager.describe_movement_mode(mode), mode)
 	
-	popup_menu.connect("index_pressed", self, "movement_mode_picked")
+	popup_menu.connect("index_pressed", Callable(self, "movement_mode_picked"))
 
 func change_follow_by(val: String) -> void:
 	set_camera_settings("follow_entity_by", val)
 
 func movement_mode_picked(index) -> void:
-	var popup_menu: PopupMenu = find_node("MovementModeMenuButton").get_popup()
-	find_node("MovementModeMenuButton").text = popup_menu.get_item_text(index)
+	var popup_menu: PopupMenu = find_child("MovementModeMenuButton").get_popup()
+	find_child("MovementModeMenuButton").text = popup_menu.get_item_text(index)
 	var mode = popup_menu.get_item_id(index)
 	
 	game_settings["movement_mode"] = mode
 
 func _on_SaveButton_pressed():
 	if FilesManager.game_definition_exists(GameManager.get_game_name()):
-		var popup = generic_confirm.instance()
+		var popup = generic_confirm.instantiate()
 		var title = "Do you want to override"
 		var text = "A game with this name already exists, do you want to override it?"
-		popup.confirm_with_callbacks(title, text, self, "_real_save")
+		popup.confirm_with_callbacks(title, text, _real_save)
 	else:
 		_real_save()
 
@@ -93,10 +93,10 @@ func load_game_file(dialog) -> void:
 #	pass
 
 func _on_LoadButton_pressed():
-	var dialog = load_dialog.instance()
+	var dialog = load_dialog.instantiate()
 	
 	add_child(dialog)
-	dialog.connect("confirmed", self, "load_game_file", [dialog])
+	dialog.connect("confirmed", Callable(self, "load_game_file").bind(dialog))
 	dialog.popup_centered()
 
 
@@ -120,15 +120,15 @@ func set_camera_settings(setting: String, value) -> void:
 
 func follow_entity_validate() -> void:
 	var follow_by = Utility.get_camera_setting("follow_entity_by")
-	var input = find_node("FollowEntity")
+	var input = find_child("FollowEntity")
 	if follow_by and follow_by != "name":
-		input.add_color_override("font_color", Color.white)
+		input.add_theme_color_override("font_color", Color.WHITE)
 		return
 	var entity_list = EntityManager.get_all_entity_names()
 	if not input.text in entity_list:
-		input.add_color_override("font_color", invalid_field_color)
+		input.add_theme_color_override("font_color", invalid_field_color)
 	else:
-		input.add_color_override("font_color", Color.white)
+		input.add_theme_color_override("font_color", Color.WHITE)
 
 func _on_FollowEntity_text_changed(new_text):
 	set_camera_settings("follow_entity", new_text)

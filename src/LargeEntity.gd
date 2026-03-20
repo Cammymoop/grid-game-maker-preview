@@ -7,11 +7,11 @@ var entity_size: Vector2 = Vector2(2, 2)
 # At least for now in 3.0 parent class _ready is auto called before this
 func _ready() -> void:
 	#var grid_size = Vector2(MapManager.tile_width, MapManager.tile_width)
-	$Sprite.position = Vector2(MapManager.tile_width * entity_size.x, MapManager.tile_width * entity_size.y) / 2
-	$Sprite.scale = entity_size
+	$Sprite2D.position = Vector2(MapManager.tile_width * entity_size.x, MapManager.tile_width * entity_size.y) / 2
+	$Sprite2D.scale = entity_size
 
 func serialize() -> Dictionary:
-	var serialized = .serialize()
+	var serialized = super.serialize()
 	serialized["entity_class"] = "LargeEntity"
 	return serialized
 

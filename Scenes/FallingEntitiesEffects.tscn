@@ -21,7 +21,7 @@ __meta__ = {
 layer = -2
 
 [node name="Effects" type="Node2D" parent="CanvasLayer2"]
-pause_mode = 2
+process_mode = 3
 script = ExtResource( 1 )
 density = 1.5
 background_color_rect = NodePath("../../CanvasLayer/ColorRect")

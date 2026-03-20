@@ -1,7 +1,7 @@
 [gd_scene load_steps=5 format=2]
 
 [ext_resource path="res://src/GameEditor/QuickMessage.gd" type="Script" id=1]
-[ext_resource path="res://assets/font/medium_font.tres" type="DynamicFont" id=2]
+[ext_resource path="res://assets/font/medium_font.tres" type="FontFile" id=2]
 
 [sub_resource type="StyleBoxFlat" id=1]
 bg_color = Color( 0.215686, 0.207843, 0.266667, 1 )
@@ -19,7 +19,7 @@ content_margin_top = 6.0
 content_margin_bottom = 6.0
 
 [node name="QuickMessage" type="PanelContainer"]
-pause_mode = 2
+process_mode = 3
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
@@ -28,18 +28,18 @@ grow_horizontal = 2
 grow_vertical = 2
 size_flags_horizontal = 4
 size_flags_vertical = 4
-custom_styles/panel = SubResource( 1 )
+theme_override_styles/panel = SubResource( 1 )
 script = ExtResource( 1 )
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
 [node name="Text" type="Label" parent="."]
-margin_right = 103.0
-margin_bottom = 46.0
+offset_right = 103.0
+offset_bottom = 46.0
 size_flags_horizontal = 4
-custom_fonts/font = ExtResource( 2 )
-custom_styles/normal = SubResource( 2 )
+theme_override_fonts/font = ExtResource( 2 )
+theme_override_styles/normal = SubResource( 2 )
 text = "Hey!"
 __meta__ = {
 "_edit_use_anchors_": false

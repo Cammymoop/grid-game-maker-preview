@@ -1,4 +1,4 @@
-extends Viewport
+extends SubViewport
 
 var scale_factor = 4
 var resolution = Vector2(384, 384)
@@ -12,16 +12,16 @@ var cached_pixel_scale = null
 var cached_tl_offset = null
 
 func _ready():
-	set_size_override(true, resolution)
-	set_size_override_stretch(true)
+	set_size_2d_override(true, resolution)
+	set_size_2d_override_stretch(true)
 	
-	get_texture().flags = Texture.FLAG_FILTER
+	get_texture().flags = Texture2D.FLAG_FILTER
 	
 	var parent: = get_parent() as TextureRect
 	parent.texture = get_texture()
 	
 	parent_vp = parent.get_viewport()
-	parent_vp.connect("size_changed", self, "rescale")
+	parent_vp.connect("size_changed", Callable(self, "rescale"))
 	
 func set_update_aspect(new_val) -> void:
 	update_aspect = new_val
@@ -46,7 +46,7 @@ func set_resolution(new_resolution: Vector2) -> void:
 	if update_aspect:
 		resolution = fit_resolution_into_aspect()
 	size = resolution * scale_factor
-	set_size_override(true, resolution)
+	set_size_2d_override(true, resolution)
 	
 	# Let the texture rect know it needs to scale the texture again
 	var tex_rect = get_parent()
@@ -54,7 +54,7 @@ func set_resolution(new_resolution: Vector2) -> void:
 	tex_rect.expand = true
 
 func fit_resolution_into_aspect() -> Vector2:
-	var window_size = OS.window_size
+	var window_size = get_window().size
 	var intended_aspect = intended_resolution.x/intended_resolution.y
 	var window_aspect = window_size.x/window_size.y
 	
@@ -76,7 +76,7 @@ func get_resolution() -> Vector2:
 func get_current_pixel_scale() -> float:
 	if cached_pixel_scale:
 		return cached_pixel_scale
-	var window_size = OS.window_size
+	var window_size = get_window().size
 	var intended_aspect = intended_resolution.x/intended_resolution.y
 	var window_aspect = window_size.x/window_size.y
 	
@@ -91,7 +91,7 @@ func get_current_pixel_scale() -> float:
 func get_viewport_tl_offset() -> Vector2:
 	if cached_tl_offset:
 		return cached_tl_offset
-	var window_size = OS.window_size
+	var window_size = get_window().size
 	
 	var pixel_scale = get_current_pixel_scale()
 	var x_off = (window_size.x - (resolution.x*pixel_scale))/2

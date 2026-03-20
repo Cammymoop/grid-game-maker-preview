@@ -143,10 +143,9 @@ func get_camera_setting(setting):
 var animal_file = "res://src/animals.txt"
 var animals = []
 func _fetch_animals() -> void:
-	var f = File.new()
-	if f.open(animal_file, File.READ) == OK:
+	var f = FileAccess.open(animal_file, FileAccess.READ)
+	if f:
 		var text = f.get_as_text()
-		f.close()
 		animals = text.split("\n", false)
 	
 func random_animal() -> String:
@@ -264,10 +263,9 @@ func resolve_full_direction_to_facing(full_direction: int, slots: Dictionary) ->
 	return facing_rotated(facing, get_full_direction_absolute(full_direction))
 
 
-# Central JSON parsing helper. In GD4, replace body with: return JSON.parse_string(text)
 func parse_json(text: String):
-	var parsed = JSON.parse(text)
-	if parsed.error != OK:
-		print_debug("JSON parse error at line %d: %s" % [parsed.error_line, parsed.error_string])
+	var parser: = JSON.new()
+	if parser.parse(text) != OK:
+		print_debug("JSON parse error at line %d: %s" % [parser.get_error_line(), parser.get_error_string()])
 		return null
-	return parsed.result
+	return parser.get_result()

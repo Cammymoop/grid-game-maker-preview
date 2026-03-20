@@ -1,23 +1,23 @@
 extends Control
 
-onready var cond_list = find_node("ConditionsList")
-onready var true_actions_list = find_node("TrueActionsList")
-onready var false_actions_list = find_node("FalseActionsList")
-onready var always_actions_list = find_node("AlwaysActionsList")
+@onready var cond_list = find_child("ConditionsList")
+@onready var true_actions_list = find_child("TrueActionsList")
+@onready var false_actions_list = find_child("FalseActionsList")
+@onready var always_actions_list = find_child("AlwaysActionsList")
 
-onready var add_condition_dialog = find_node("AddConditionDialog")
-onready var add_action_dialog = find_node("AddActionDialog")
+@onready var add_condition_dialog = find_child("AddConditionDialog")
+@onready var add_action_dialog = find_child("AddActionDialog")
 
-onready var action_tabs = find_node("ActionsTabs")
+@onready var action_tabs = find_child("ActionsTabs")
 
 var command_list_item: PackedScene = preload("res://Scenes/GameEditor/CommandListItem.tscn")
 
 func _ready():
-	add_condition_dialog.connect("command_selected", self, "add_command", ["condition"])
-	add_action_dialog.connect("command_selected", self, "add_command", ["action"])
+	add_condition_dialog.connect("command_selected", Callable(self, "add_command").bind("condition"))
+	add_action_dialog.connect("command_selected", Callable(self, "add_command").bind("action"))
 
 func add_command(command_code: int, slot_id: int, destination: String) -> void:
-		var new_list_item = command_list_item.instance()
+		var new_list_item = command_list_item.instantiate()
 		new_list_item.set_slot(slot_id)
 		new_list_item.set_ui_data(command_code, Commands.Friendly[command_code])
 		

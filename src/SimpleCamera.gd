@@ -8,10 +8,10 @@ var extend_level_bounds: = 0
 var ent_center_offset = Vector2.ZERO
 
 func _ready():
-	EntityManager.connect("entity_list_updated", self, "find_entity_to_follow")
+	EntityManager.connect("entity_list_updated", Callable(self, "find_entity_to_follow"))
 	
 	respect_level_bounds = Utility.get_camera_setting("enable_limits")
-	MapManager.connect("level_size_changed", self, "update_bounds")
+	MapManager.connect("level_size_changed", Callable(self, "update_bounds"))
 	
 	var ext = Utility.get_camera_setting("extend_limits")
 	if ext:
@@ -39,7 +39,7 @@ func update_bounds() -> void:
 
 func activate():
 	active = true
-	current = true
+	make_current()
 	find_entity_to_follow()
 
 func deactivate():

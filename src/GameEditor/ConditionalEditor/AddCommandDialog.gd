@@ -2,8 +2,8 @@ extends ConfirmationDialog
 
 signal command_selected
 
-export var exclude_conditions: bool = false
-export var exclude_actions: bool = false
+@export var exclude_conditions: bool = false
+@export var exclude_actions: bool = false
 
 var names_to_ids: Dictionary = {}
 
@@ -11,7 +11,7 @@ func _ready():
 	build_base_list()
 
 func build_base_list() -> void:
-	var list = find_node("AllCommands")
+	var list = find_child("AllCommands")
 	
 	for comm in Commands.Friendly:
 		if exclude_actions and Commands.is_action(comm):
@@ -25,20 +25,20 @@ func build_base_list() -> void:
 		list.add_item(command_name)
 
 func set_items(new_list) -> void:
-	var list = find_node("AllCommands")
+	var list = find_child("AllCommands")
 	list.clear()
 	
 	for command_name in new_list:
 		list.add_item(command_name)
 
 func done() -> void:
-	var list = find_node("AllCommands")
+	var list = find_child("AllCommands")
 	if len(list.get_selected_items()) < 1:
 		return
 	var selected = list.get_item_text(list.get_selected_items()[0])
 	
 	var selected_id = names_to_ids[selected]
-	var slot = find_node("SlotSelectorButton").current_slot_id
+	var slot = find_child("SlotSelectorButton").current_slot_id
 	emit_signal("command_selected", selected_id, slot)
 
 

@@ -5,15 +5,15 @@ var vel_sprite = preload("res://src/VelocitySprite.gd")
 var tile_indexes = []
 var entity_indexes = []
 
-export var fall_speed: = 90.0
-export var max_objects: = 1000
-export var density: = 6.0
-export var size_factor: = 1.0
-export var max_brightness: = 1.0
+@export var fall_speed: = 90.0
+@export var max_objects: = 1000
+@export var density: = 6.0
+@export var size_factor: = 1.0
+@export var max_brightness: = 1.0
 
-export var fall_direction: = "y"
+@export var fall_direction: = "y"
 
-export var background_color_rect: NodePath
+@export var background_color_rect: NodePath
 var bg_color:Color
 
 var mouse_push_min = 80
@@ -27,7 +27,7 @@ func _ready() -> void:
 	bg_color = get_node(background_color_rect).color
 	
 	size_changed()
-	get_viewport().connect("size_changed", self, "size_changed")
+	get_viewport().connect("size_changed", Callable(self, "size_changed"))
 	
 	# Start with stuff already on the screen
 	start_fill()
@@ -72,18 +72,18 @@ func spawn_random_tile(delta) -> void:
 	spr.texture = Utility.atlas_texture_from_tile_index(tile_index)
 	spawn_common(spr, delta)
 	
-func spawn_common(spr: Sprite, delta) -> void:
-	spr.rotation = rand_range(0, PI * 2)
+func spawn_common(spr: Sprite2D, delta) -> void:
+	spr.rotation = randf_range(0, PI * 2)
 	
-	var scale_factor = rand_range(0, 1)
+	var scale_factor = randf_range(0, 1)
 	spr.scale = Vector2.ONE * (1 + (scale_factor * 1.4)) * size_factor
 	
-	spr.modulate = Color.white.linear_interpolate(bg_color, 1 - (scale_factor*max_brightness))
+	spr.modulate = Color.WHITE.lerp(bg_color, 1 - (scale_factor*max_brightness))
 	
 	spr.z_index = scale_factor * 100
 	
 	if "y" in fall_direction:
-		spr.position.x = rand_range(0, get_screen_width())
+		spr.position.x = randf_range(0, get_screen_width())
 		spr.position.y = -(MapManager.tile_width*1.5*spr.scale.x)
 		if delta:
 			spr.position.y += (get_screen_height() * delta) * spr.scale.x
@@ -91,7 +91,7 @@ func spawn_common(spr: Sprite, delta) -> void:
 		if fall_direction == "-y":
 			spr.position.y = get_screen_height() - spr.position.y
 	else:
-		spr.position.y = rand_range(0, get_screen_height())
+		spr.position.y = randf_range(0, get_screen_height())
 		spr.position.x = -(MapManager.tile_width*1.5*spr.scale.x)
 		if delta:
 			spr.position.x += (get_screen_width() * delta) * spr.scale.x
@@ -113,7 +113,7 @@ func spawn_common(spr: Sprite, delta) -> void:
 	spr.angular_velocity = 0.0
 	
 	if Utility.random_int_range(0, 2) == 0:
-		spr.angular_velocity = Utility.random_sign() * rand_range(0, PI)
+		spr.angular_velocity = Utility.random_sign() * randf_range(0, PI)
 	add_child(spr)
 	
 	
@@ -128,7 +128,7 @@ func _process(delta):
 	var fall_v = fall_speed * fall_sign
 	
 	for spr in get_children():
-		if not spr is Sprite:
+		if not spr is Sprite2D:
 			continue
 		
 		# Lerp proper axis to proper fall speed

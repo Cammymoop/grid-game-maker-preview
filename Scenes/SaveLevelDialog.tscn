@@ -1,15 +1,15 @@
 [gd_scene load_steps=3 format=2]
 
-[ext_resource path="res://assets/font/medium_font.tres" type="DynamicFont" id=1]
+[ext_resource path="res://assets/font/medium_font.tres" type="FontFile" id=1]
 [ext_resource path="res://src/SaveLevelDialog.gd" type="Script" id=2]
 
-[node name="SaveLevelDialog" type="WindowDialog"]
+[node name="SaveLevelDialog" type="Window"]
 visible = true
-margin_left = 311.0
-margin_top = 262.0
-margin_right = 570.0
-margin_bottom = 366.0
-popup_exclusive = true
+offset_left = 311.0
+offset_top = 262.0
+offset_right = 570.0
+offset_bottom = 366.0
+exclusive = true
 window_title = "Save Level"
 script = ExtResource( 2 )
 __meta__ = {
@@ -18,48 +18,48 @@ __meta__ = {
 
 [node name="MarginContainer" type="MarginContainer" parent="."]
 anchor_right = 1.0
-margin_bottom = 40.0
-custom_constants/margin_right = 8
-custom_constants/margin_top = 8
-custom_constants/margin_left = 8
-custom_constants/margin_bottom = 8
+offset_bottom = 40.0
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_bottom = 8
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
 [node name="PanelContainer" type="VBoxContainer" parent="MarginContainer"]
-margin_left = 8.0
-margin_top = 8.0
-margin_right = 252.0
-margin_bottom = 76.0
+offset_left = 8.0
+offset_top = 8.0
+offset_right = 252.0
+offset_bottom = 76.0
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
 [node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/PanelContainer"]
-margin_right = 244.0
-margin_bottom = 24.0
+offset_right = 244.0
+offset_bottom = 24.0
 alignment = 1
 
 [node name="Label" type="Label" parent="MarginContainer/PanelContainer/HBoxContainer"]
-margin_top = 5.0
-margin_right = 80.0
-margin_bottom = 19.0
+offset_top = 5.0
+offset_right = 80.0
+offset_bottom = 19.0
 text = "Level Name:"
 
 [node name="LevelNameInput" type="LineEdit" parent="MarginContainer/PanelContainer/HBoxContainer"]
-margin_left = 84.0
-margin_right = 244.0
-margin_bottom = 24.0
-rect_min_size = Vector2( 160, 0 )
+offset_left = 84.0
+offset_right = 244.0
+offset_bottom = 24.0
+custom_minimum_size = Vector2( 160, 0 )
 
 [node name="SaveFileButton" type="Button" parent="MarginContainer/PanelContainer"]
-margin_left = 57.0
-margin_top = 28.0
-margin_right = 186.0
-margin_bottom = 68.0
+offset_left = 57.0
+offset_top = 28.0
+offset_right = 186.0
+offset_bottom = 68.0
 size_flags_horizontal = 4
-custom_fonts/font = ExtResource( 1 )
+theme_override_fonts/font = ExtResource( 1 )
 text = "Save Level"
 
 [connection signal="pressed" from="MarginContainer/PanelContainer/SaveFileButton" to="." method="_on_SaveFileButton_pressed"]

@@ -22,22 +22,22 @@ func toggle():
 		GameManager.set_pause("pause_menu", false)
 
 func on_show() -> void:
-	var restart_button = find_node("RestartLevel")
+	var restart_button = find_child("RestartLevel")
 	restart_button.visible = bool(GameManager.loaded_level_name)
 
 
 func _on_QuitToMenu_pressed():
-	GameManager.change_scene("Menu")
+	GameManager.change_scene_to_file("Menu")
 
 
 func _on_SaveLevelButton_pressed():
-	var popup = save_dialog.instance()
+	var popup = save_dialog.instantiate()
 	add_child(popup)
 	popup.popup_centered()
 
 
 func _on_LoadLevelButton_pressed():
-	var popup = load_dialog.instance()
+	var popup = load_dialog.instantiate()
 	add_child(popup)
 	popup.popup_centered()
 

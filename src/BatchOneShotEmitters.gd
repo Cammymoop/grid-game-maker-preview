@@ -2,7 +2,7 @@ extends Node2D
 
 func emit_at(at_pos: Vector2) -> void:
 	for c in get_children():
-		var emitter = c as Particles2D
+		var emitter = c as GPUParticles2D
 		if not emitter:
 			continue
 		

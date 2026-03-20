@@ -13,7 +13,7 @@ corner_radius_bottom_right = 1
 corner_radius_bottom_left = 1
 
 [node name="HSeparator" type="HSeparator"]
-margin_top = 28.0
-margin_right = 484.0
-margin_bottom = 32.0
-custom_styles/separator = SubResource( 1 )
+offset_top = 28.0
+offset_right = 484.0
+offset_bottom = 32.0
+theme_override_styles/separator = SubResource( 1 )

@@ -1,4 +1,4 @@
-tool
+@tool
 extends Container
 
 # warning-ignore:unused_signal
@@ -13,8 +13,17 @@ var button: Button
 
 var small_font = preload("res://assets/font/pixel_font_white.tres")
 
-export var toggle_mode = false setget set_toggle_mode, get_toggle_mode
-export var pressed = false setget set_pressed, get_pressed
+@export var toggle_mode = false:
+	get:
+		return button.toggle_mode
+	set(value):
+		button.toggle_mode = value
+
+@export var button_pressed = false:
+	get:
+		return button.button_pressed
+	set(value):
+		button.button_pressed = value
 
 func _init():
 	button = Button.new()
@@ -23,25 +32,26 @@ func _init():
 	add_child(button)
 	button.anchor_right = 1
 	button.anchor_bottom = 1
-	button.margin_right = 0
-	button.margin_bottom = 0
+	button.offset_right = 0
+	button.offset_bottom = 0
 	
 	# slight hack to make the button have a shorter minimum size
-	button.add_font_override("font", small_font)
+	button.add_theme_font_override("font", small_font)
 	
-	button.connect("button_down", self, "emit_signal", ["button_down"])
-	button.connect("button_up", self, "emit_signal", ["button_up"])
-	button.connect("pressed", self, "emit_signal", ["pressed"])
-	button.connect("toggled", self, "_toggled_relay")
+	button.connect("button_down", Callable(self, "emit_signal").bind("button_down"))
+	button.connect("button_up", Callable(self, "emit_signal").bind("button_up"))
+	button.connect("pressed", Callable(self, "emit_signal").bind("pressed"))
+	button.connect("toggled", Callable(self, "_toggled_relay"))
 	
-	button.connect("mouse_entered", self, "emit_signal", ["mouse_entered"])
-	button.connect("mouse_exited", self, "emit_signal", ["mouse_exited"])
+	button.connect("mouse_entered", Callable(self, "emit_signal").bind("mouse_entered"))
+	button.connect("mouse_exited", Callable(self, "emit_signal").bind("mouse_exited"))
+	
+	child_entered_tree.connect(on_child_entered_tree)
 
 func set_disabled(new_disabled: bool) -> void:
 	button.disabled = new_disabled
 
-func add_child(child: Node, legible_unique_name=false):
-	.add_child(child, legible_unique_name)
+func on_child_entered_tree(child: Node) -> void:
 	if child == button:
 		return
 	recursive_set_container_mouse_ignore(child)
@@ -52,35 +62,18 @@ func recursive_set_container_mouse_ignore(node: Node) -> void:
 	
 	if node is Container:
 		node.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	
 	for child in node.get_children():
 		recursive_set_container_mouse_ignore(child)
 
 func _toggled_relay(is_on) -> void:
 	emit_signal("toggled", is_on)
 
-func set_pressed(new_pressed) -> void:
-	if not toggle_mode:
-		return
-	pressed = new_pressed
-	button.pressed = new_pressed
-func get_pressed() -> bool:
-	return pressed
-
-func set_toggle_mode(new_toggle_mode) -> void:
-	if not new_toggle_mode:
-		set_pressed(false)
-	toggle_mode = new_toggle_mode
-	button.toggle_mode = new_toggle_mode
-func get_toggle_mode() -> bool:
-	return toggle_mode
-
-func _notification(notification):
-	if notification == NOTIFICATION_SORT_CHILDREN:
+func _notification(the_notification: int):
+	if the_notification == NOTIFICATION_SORT_CHILDREN:
 		for c in get_children():
 			if c == button:
 				continue
-			fit_child_in_rect(c, Rect2(Vector2.ZERO, rect_size))
+			fit_child_in_rect(c, Rect2(Vector2.ZERO, size))
 
 func _get_minimum_size() -> Vector2:
 	var min_so_far: = Vector2(0, 0)
@@ -89,7 +82,7 @@ func _get_minimum_size() -> Vector2:
 			continue
 		if c == button:
 			continue
-		if c.is_set_as_toplevel():
+		if c.is_set_as_top_level():
 			continue
 		
 		var c_min = c.get_minimum_size()

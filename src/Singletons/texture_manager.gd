@@ -39,10 +39,11 @@ func setup() -> void:
 #	im_ready = true
 
 func grab_builtin_metadata() -> void:
-	var f = File.new()
-	f.open("res://assets/builtin_texture_meta.json", File.READ)
+	var f = FileAccess.open("res://assets/builtin_texture_meta.json", FileAccess.READ)
+	if not f:
+		print_debug("Error loading builtin texture meta")
+		return
 	var result = Utility.parse_json(f.get_as_text())
-	f.close()
 	
 	builtin_meta = fix_texture_metas(result)
 
@@ -92,8 +93,8 @@ func is_local_file_loaded(file_name: String) -> bool:
 func add_local_texture(file_name: String) -> void:
 	var spec = {type = "local_file", image_name = file_name, texture_id = get_new_texture_index(), filter = false}
 	add_texture(spec)
-func add_builtin_texture(name: String) -> void:
-	var spec = {type = "builtin", name = name, texture_id = get_new_texture_index()}
+func add_builtin_texture(tex_name: String) -> void:
+	var spec = {type = "builtin", name = tex_name, texture_id = get_new_texture_index()}
 	add_texture(spec)
 
 func set_default_textures() -> void:
@@ -134,10 +135,10 @@ func load_texture(tex: Dictionary):
 				metadata = placeholder_metadata
 			else:
 				texture = ImageTexture.new()
-				var flags = Texture.FLAG_MIPMAPS | Texture.FLAG_REPEAT
-				if "filter" in tex and tex["filter"]:
-					flags = Texture.FLAGS_DEFAULT
-				texture.create_from_image(img, flags)
+				#var flags = Texture.Flags.FLAG_MIPMAPS | Texture.Flags.FLAG_REPEAT
+				#if "filter" in tex and tex["filter"]:
+					#flags = Texture.FLAGS_DEFAULT
+				texture.create_from_image(img)
 				metadata = fix_texture_meta(FilesManager.get_local_image_metadata(tex['image_name']))
 			
 	elif tex['type'] == 'builtin':
@@ -177,8 +178,7 @@ func get_all_possible_textures() -> Dictionary:
 		if img.load("user://images/" + user_tex) != OK:
 			print_debug("Failed to load image: " + user_tex)
 			continue
-		var img_tex = ImageTexture.new()
-		img_tex.create_from_image(img)
+		var img_tex = ImageTexture.create_from_image(img)
 		texs[user_tex] = img_tex
 	
 	return texs
@@ -198,8 +198,7 @@ func get_all_user_textures() -> Dictionary:
 		if img.load("user://images/" + user_tex) != OK:
 			print_debug("Failed to load image: " + user_tex)
 			continue
-		var img_tex = ImageTexture.new()
-		img_tex.create_from_image(img)
+		var img_tex = ImageTexture.create_from_image(img)
 		texs[user_tex] = img_tex
 	
 	return texs

@@ -10,7 +10,7 @@ var absolute = true
 
 func _ready():
 	$AbsoluteModeSelect.set_items(["Absolute", "Relative to"])
-	$AbsoluteModeSelect.connect("changed", self, "absolute_changed")
+	$AbsoluteModeSelect.connect("changed", Callable(self, "absolute_changed"))
 	$EntityRelativeMode.set_items(["Moving", "Facing"])
 
 # Return all the info about the selected direction and relativeness as a single int value

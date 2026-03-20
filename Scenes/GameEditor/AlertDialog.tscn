@@ -1,9 +1,9 @@
 [gd_scene format=2]
 
 [node name="AcceptDialog" type="AcceptDialog"]
-margin_right = 83.0
-margin_bottom = 58.0
-popup_exclusive = true
+offset_right = 83.0
+offset_bottom = 58.0
+exclusive = true
 window_title = "Problem"
 dialog_text = "There's a problem!"
 __meta__ = {

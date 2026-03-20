@@ -8,7 +8,7 @@ func _ready():
 	list.add_item("name")
 	list.add_item("property")
 	
-	list.connect("index_pressed", self, "picked")
+	list.connect("index_pressed", Callable(self, "picked"))
 
 func picked(index) -> void:
 	var new_val = "property" if index == 1 else "name"

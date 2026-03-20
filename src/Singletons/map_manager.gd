@@ -66,7 +66,7 @@ var tile_defs = {
 		"properties": {},
 	},
 }
-onready var loaded_tile_defs = tile_defs
+@onready var loaded_tile_defs = tile_defs
 
 var tile_index_map = {}
 
@@ -77,7 +77,7 @@ var im_ready = false
 func setup() -> void:
 	fix_string_keys()
 	if not TextureManager.im_ready:
-		yield(TextureManager, "textures_loaded")
+		await TextureManager.textures_loaded
 	create_tileset()
 	find_blocking()
 	
@@ -122,9 +122,9 @@ func create_plain_layer():
 	emit_signal("level_size_changed")
 
 func create_empty_layer():
-	var map_layer = map_layer_template.instance()
-	var ents = Utility.get_world().get_node("Entities")
-	Utility.get_world().add_child_below_node(ents, map_layer)
+	var map_layer = map_layer_template.instantiate()
+	var ents = Utility.get_world_3d().get_node("Entities")
+	Utility.get_world_3d().add_sibling(ents, map_layer)
 	map_layer.tile_set = tileset
 	layers.append(map_layer)
 	return map_layer
@@ -162,7 +162,7 @@ func update_index_map() -> void:
 			print_debug("WARNING: tile name already in use: " + tname)
 		tile_index_map[tname] = tile_index
 
-func get_tile_texture(tile_index) -> Texture:
+func get_tile_texture(tile_index) -> Texture2D:
 	return TextureManager.get_texture(tile_defs[tile_index]['texture'])
 func get_tile_texture_rect(tile_index) -> Rect2:
 	return TextureManager.get_index_rect(tile_defs[tile_index]['texture'], tile_defs[tile_index]['tex_index'])

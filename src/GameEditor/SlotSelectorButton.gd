@@ -2,8 +2,8 @@ extends CenterContainer
 
 signal slot_changed(new_slot_id)
 
-onready var picker = find_node("PopupPicker")
-onready var cur_display = find_node("CurrentSlotDisplay")
+@onready var picker = find_child("PopupPicker")
+@onready var cur_display = find_child("CurrentSlotDisplay")
 
 var slot_textures: = {
 	Commands.Slot.RED:    preload("res://assets/img/button_icons/slot_icons/red_diamond.png"),
@@ -76,17 +76,17 @@ func set_valid_slot_categories(categories: Array) -> void:
 	
 	var all = "all" in show_categories
 	
-	find_node("EntitySlots").visible = all or "entity" in show_categories
-	find_node("TilePosSlots").visible = all or "tile_pos" in show_categories
+	find_child("EntitySlots").visible = all or "entity" in show_categories
+	find_child("TilePosSlots").visible = all or "tile_pos" in show_categories
 	
 	var value = all or "value" in show_categories
 	var number = all or "number" in show_categories
 	
-	find_node("IntSlots").visible = value or number or "int" in show_categories
-	find_node("FloatSlots").visible = value or number or "float" in show_categories
-	find_node("StringSlots").visible = value or "string" in show_categories
+	find_child("IntSlots").visible = value or number or "int" in show_categories
+	find_child("FloatSlots").visible = value or number or "float" in show_categories
+	find_child("StringSlots").visible = value or "string" in show_categories
 	
-	find_node("ArgSlots").visible = all or value or "argument" in show_categories
+	find_child("ArgSlots").visible = all or value or "argument" in show_categories
 	
 	if len(show_categories) == 0:
 		$ButtonContainer.set_disabled(true)
@@ -100,19 +100,19 @@ func show_picker() -> void:
 	picker.popup()
 	picker.set_as_minsize()
 	
-	var center_pos = $ButtonContainer.rect_global_position + ($ButtonContainer.rect_size / 2)
-	picker.rect_global_position = center_pos - (picker.rect_size/2)
+	var center_pos = $ButtonContainer.global_position + ($ButtonContainer.size / 2)
+	picker.global_position = center_pos - (picker.size/2)
 	
-	var picker_size = picker.rect_size
+	var picker_size = picker.size
 	var viewport_size = get_viewport().size
-	if picker.rect_global_position.x < PICKER_SCREEN_MARGIN_H:
-		picker.rect_global_position.x = PICKER_SCREEN_MARGIN_H
-	elif picker.rect_global_position.x + picker_size.x > viewport_size.x - PICKER_SCREEN_MARGIN_H:
-		picker.rect_global_position.x = (viewport_size.x - PICKER_SCREEN_MARGIN_H) - picker_size.x
-	if picker.rect_global_position.y < PICKER_SCREEN_MARGIN_V:
-		picker.rect_global_position.y = PICKER_SCREEN_MARGIN_V
-	elif picker.rect_global_position.y + picker_size.y > viewport_size.y - PICKER_SCREEN_MARGIN_V:
-		picker.rect_global_position.y = (viewport_size.y - PICKER_SCREEN_MARGIN_V) - picker_size.y
+	if picker.global_position.x < PICKER_SCREEN_MARGIN_H:
+		picker.global_position.x = PICKER_SCREEN_MARGIN_H
+	elif picker.global_position.x + picker_size.x > viewport_size.x - PICKER_SCREEN_MARGIN_H:
+		picker.global_position.x = (viewport_size.x - PICKER_SCREEN_MARGIN_H) - picker_size.x
+	if picker.global_position.y < PICKER_SCREEN_MARGIN_V:
+		picker.global_position.y = PICKER_SCREEN_MARGIN_V
+	elif picker.global_position.y + picker_size.y > viewport_size.y - PICKER_SCREEN_MARGIN_V:
+		picker.global_position.y = (viewport_size.y - PICKER_SCREEN_MARGIN_V) - picker_size.y
 
 func hide_picker() -> void:
 	picker_open = false
@@ -141,7 +141,7 @@ func _input(e):
 	if picker_open:
 		var panel = picker.get_node("PopupPanel")
 		var local_click = panel.make_input_local(click_event)
-		var bounds = Rect2(Vector2.ZERO, panel.rect_size)
+		var bounds = Rect2(Vector2.ZERO, panel.size)
 		if not bounds.has_point(local_click.position):
 			hide_picker()
 

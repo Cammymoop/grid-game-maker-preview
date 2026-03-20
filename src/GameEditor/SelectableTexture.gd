@@ -12,7 +12,7 @@ var is_selected = false
 var texture_name: String
 var built_in: bool = false
 
-func set_texture(t_name: String, texture: Texture, builtin: bool = false) -> void:
+func set_texture(t_name: String, texture: Texture2D, builtin: bool = false) -> void:
 	texture_name = t_name
 	$HB/Label.text = t_name
 	$HB/TextureRect.texture = texture
@@ -21,16 +21,16 @@ func set_texture(t_name: String, texture: Texture, builtin: bool = false) -> voi
 		built_in = true
 		$HB/Builtin.visible = true
 
-func get_texture() -> Texture:
+func get_texture() -> Texture2D:
 	return $HB/TextureRect.texture
 
 func set_enabled(selected: bool) -> void:
-	$HB/CheckButton.pressed = selected
+	$HB/CheckButton.button_pressed = selected
 
 func deselect() -> void:
 	is_selected = false
 	
-	add_stylebox_override("panel", lowbox)
+	add_theme_stylebox_override("panel", lowbox)
 
 
 func _on_CheckButton_toggled(on_off):
@@ -42,12 +42,12 @@ func _on_SelectableTexItem_gui_input(event):
 		return
 	
 	var button_event = event as InputEventMouseButton
-	if button_event.button_index in [BUTTON_LEFT, BUTTON_RIGHT] and button_event.is_pressed():
+	if button_event.button_index in [MOUSE_BUTTON_LEFT, MOUSE_BUTTON_RIGHT] and button_event.is_pressed():
 		if not is_selected:
 			is_selected = true
 			emit_signal("selected", self)
 			
-			add_stylebox_override("panel", hibox)
+			add_theme_stylebox_override("panel", hibox)
 			
 		if button_event.doubleclick:
 			emit_signal("double_clicked")

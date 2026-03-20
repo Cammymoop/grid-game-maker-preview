@@ -1,6 +1,6 @@
 [gd_scene load_steps=7 format=2]
 
-[ext_resource path="res://assets/img/tiles.png" type="Texture" id=1]
+[ext_resource path="res://assets/img/tiles.png" type="Texture2D" id=1]
 [ext_resource path="res://src/GameEditor/TileEntityButton.gd" type="Script" id=2]
 
 [sub_resource type="StyleBoxFlat" id=2]
@@ -17,14 +17,14 @@ atlas = ExtResource( 1 )
 region = Rect2( 0, 64, 32, 32 )
 
 [node name="TileEntityDisplay" type="Button"]
-margin_right = 60.0
-margin_bottom = 60.0
-rect_min_size = Vector2( 60, 60 )
-rect_clip_content = true
+offset_right = 60.0
+offset_bottom = 60.0
+custom_minimum_size = Vector2( 60, 60 )
+clip_contents = true
 mouse_default_cursor_shape = 2
-custom_styles/hover = SubResource( 2 )
-custom_styles/pressed = SubResource( 4 )
-custom_styles/normal = SubResource( 3 )
+theme_override_styles/hover = SubResource( 2 )
+theme_override_styles/pressed = SubResource( 4 )
+theme_override_styles/normal = SubResource( 3 )
 script = ExtResource( 2 )
 __meta__ = {
 "_edit_use_anchors_": false
@@ -34,7 +34,7 @@ __meta__ = {
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
-rect_min_size = Vector2( 60, 60 )
+custom_minimum_size = Vector2( 60, 60 )
 mouse_filter = 2
 alignment = 1
 __meta__ = {
@@ -42,17 +42,17 @@ __meta__ = {
 }
 
 [node name="TileName" type="Label" parent="VBox"]
-margin_top = 4.0
-margin_right = 60.0
-margin_bottom = 20.0
+offset_top = 4.0
+offset_right = 60.0
+offset_bottom = 20.0
 text = "floor"
 align = 1
 
 [node name="TileImage" type="TextureRect" parent="VBox"]
-margin_left = 14.0
-margin_top = 24.0
-margin_right = 46.0
-margin_bottom = 56.0
+offset_left = 14.0
+offset_top = 24.0
+offset_right = 46.0
+offset_bottom = 56.0
 mouse_filter = 2
 size_flags_horizontal = 4
 texture = SubResource( 1 )

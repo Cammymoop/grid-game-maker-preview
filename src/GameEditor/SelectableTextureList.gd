@@ -20,12 +20,12 @@ func add_texture(texture_name, texture, builtin: bool, enabled: bool):
 	if enabled:
 		enabled_textures.append(texture_name)
 	
-	var list_item = item_scene.instance()
+	var list_item = item_scene.instantiate()
 	list_item.set_texture(texture_name, texture, builtin)
 	list_item.set_enabled(enabled)
-	list_item.connect("selected", self, "list_item_selected")
-	list_item.connect("enabled", self, "list_item_enabled")
-	list_item.connect("double_clicked", images_editor, "_on_EditTexButton_pressed")
+	list_item.connect("selected", Callable(self, "list_item_selected"))
+	list_item.connect("enabled", Callable(self, "list_item_enabled"))
+	list_item.connect("double_clicked", Callable(images_editor, "_on_EditTexButton_pressed"))
 	
 	add_child(list_item)
 

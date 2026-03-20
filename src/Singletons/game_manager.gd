@@ -36,7 +36,7 @@ var transitioning = false
 var transition_anim_target: Node
 var scene_transition_duration = 0.6
 var transition_left = true
-export var scene_transition_curve: Curve = Curve.new()
+@export var scene_transition_curve: Curve = Curve.new()
 
 enum MovementMode {
 	MOVEMENT_CONTINUOUS, MOVEMENT_DISCRETE, MOVEMENT_DISCRETE_WAIT
@@ -44,7 +44,7 @@ enum MovementMode {
 
 func _ready():
 	# run _process even when the game is paused
-	pause_mode = PAUSE_MODE_PROCESS
+	process_mode = PROCESS_MODE_ALWAYS
 	cur_scene = get_tree().current_scene.name
 	FilesManager.init_folders()
 	
@@ -53,7 +53,7 @@ func _ready():
 	add_child(st_timer)
 	
 	st_timer.one_shot = true
-	st_timer.connect("timeout", self, "scene_transition_clear")
+	st_timer.timeout.connect(scene_transition_clear)
 	bake_scene_transition_curve()
 	
 	var default_game = FilesManager.get_default_game()
@@ -155,8 +155,8 @@ func load_serialized_play_state(serialized_state: Dictionary) -> void:
 	
 	get_tree().paused = true
 	
-	yield(get_tree(), "idle_frame")
-	yield(get_tree(), "idle_frame")
+	await get_tree().process_frame
+	await get_tree().process_frame
 	EntityManager.clear()
 	MapManager.clear_layers()
 	MapManager.deserialize(serialized_state['map'])
@@ -282,7 +282,7 @@ func show_scene_transition() -> void:
 	overlay_layer.layer = 128
 	get_viewport().add_child(overlay_layer)
 	overlay_layer.add_child(overlay)
-	overlay.set_anchors_and_margins_preset(Control.PRESET_WIDE)
+	overlay.set_anchors_and_margins_preset(Control.PRESET_VCENTER_WIDE)
 	overlay_layer.add_to_group("TransitionOverlay")
 	
 	transitioning = true
@@ -321,14 +321,15 @@ func set_game_view(width, height) -> void:
 	game_view = Vector2(width, height)
 
 func rescale_window() -> void:
-	if OS.window_fullscreen or OS.window_maximized:
+	var window: = get_window()
+	if window.mode == Window.MODE_FULLSCREEN or window.mode == Window.MODE_MAXIMIZED:
 		return
 	
-	OS.window_size = game_view * MapManager.tile_width * get_default_pixel_scale()
+	window.size = game_view * MapManager.tile_width * get_default_pixel_scale()
 	
 	# Re-center the window
-	var screen = OS.get_screen_size()
-	OS.window_position = Vector2(screen.x/2 - OS.window_size.x/2, screen.y/2 - OS.window_size.y/2)
+	var screen_size = DisplayServer.screen_get_size()
+	window.position = Vector2(screen_size.x/2 - window.size.x/2, screen_size.y/2 - window.size.y/2)
 
 func toggle_pause_menu():
 	if cur_scene != "Play":

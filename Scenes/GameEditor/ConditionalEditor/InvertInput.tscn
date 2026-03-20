@@ -7,10 +7,10 @@
 script = ExtResource( 2 )
 
 [node name="EasyMenuButton" parent="." instance=ExtResource( 1 )]
-margin_left = 0.0
-margin_top = 0.0
-margin_right = 33.0
-margin_bottom = 24.0
-rect_min_size = Vector2( 30, 0 )
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 33.0
+offset_bottom = 24.0
+custom_minimum_size = Vector2( 30, 0 )
 text = "Not"
 list_items = [ "", "Not" ]

@@ -1,23 +1,23 @@
 extends Camera2D
 
 var extend_limits = 0
-onready var vp = get_viewport()
+@onready var vp = get_viewport()
 
 func _ready():
 	extend_limits = MapManager.tile_width
-	MapManager.connect("level_size_changed", self, "update_bounds")
+	MapManager.connect("level_size_changed", Callable(self, "update_bounds"))
 	
 	update_bounds()
 
 func set_position_immediate(pos: Vector2) -> void:
-	smoothing_enabled = false
+	position_smoothing_enabled = false
 	outsize_bounds()
 	position = pos
 	force_update_scroll()
 	
 	# wait for a frame so the camera is positioned properly before we re-enable smoothing and the level bounds
-	yield(get_tree(), "idle_frame")
-	smoothing_enabled = true
+	await get_tree().idle_frame
+	position_smoothing_enabled = true
 	update_bounds()
 
 func get_limits() -> Rect2:

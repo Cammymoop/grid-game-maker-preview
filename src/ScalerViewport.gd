@@ -1,8 +1,8 @@
-extends Viewport
+extends SubViewport
 
 func _ready():
 	
-	get_texture().flags = Texture.FLAG_FILTER
+	get_texture().flags = Texture2D.FLAG_FILTER
 	get_parent().texture = get_texture()
 
 

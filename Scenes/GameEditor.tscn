@@ -1,6 +1,6 @@
 [gd_scene load_steps=19 format=2]
 
-[ext_resource path="res://assets/img/button_icons/plus.png" type="Texture" id=1]
+[ext_resource path="res://assets/img/button_icons/plus.png" type="Texture2D" id=1]
 [ext_resource path="res://Scenes/GameEditor/TileEntityEditorWindow.tscn" type="PackedScene" id=2]
 [ext_resource path="res://src/GameEditor/TilesEntitiesEditor.gd" type="Script" id=3]
 [ext_resource path="res://assets/ui/HorizontalSeparatorStylebox.tres" type="StyleBox" id=4]
@@ -8,12 +8,12 @@
 [ext_resource path="res://src/GameEditor/GameDefinitionEditor.gd" type="Script" id=6]
 [ext_resource path="res://assets/DefaultTheme.tres" type="Theme" id=7]
 [ext_resource path="res://Scenes/FallingEntitiesEffects.tscn" type="PackedScene" id=8]
-[ext_resource path="res://assets/font/medium_font.tres" type="DynamicFont" id=9]
+[ext_resource path="res://assets/font/medium_font.tres" type="FontFile" id=9]
 [ext_resource path="res://src/GameEditor/UIRoot.gd" type="Script" id=10]
 [ext_resource path="res://src/GameEditor/SelectableTextureList.gd" type="Script" id=11]
 [ext_resource path="res://src/GameEditor/PopupLayer.gd" type="Script" id=12]
 [ext_resource path="res://src/UI/list_background.tres" type="StyleBox" id=13]
-[ext_resource path="res://assets/font/small_font.tres" type="DynamicFont" id=14]
+[ext_resource path="res://assets/font/small_font.tres" type="FontFile" id=14]
 [ext_resource path="res://src/GameEditor/FollowBySelector.gd" type="Script" id=15]
 
 [sub_resource type="StyleBoxEmpty" id=4]
@@ -44,49 +44,49 @@ __meta__ = {
 [node name="MarginContainer" type="MarginContainer" parent="."]
 anchor_right = 1.0
 anchor_bottom = 1.0
-custom_constants/margin_right = 20
-custom_constants/margin_top = 35
-custom_constants/margin_left = 20
-custom_constants/margin_bottom = 35
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_top = 35
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_bottom = 35
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
 [node name="UIRoot" type="PanelContainer" parent="MarginContainer"]
-margin_left = 20.0
-margin_top = 35.0
-margin_right = 748.0
-margin_bottom = 733.0
-custom_styles/panel = SubResource( 4 )
+offset_left = 20.0
+offset_top = 35.0
+offset_right = 748.0
+offset_bottom = 733.0
+theme_override_styles/panel = SubResource( 4 )
 script = ExtResource( 10 )
 
 [node name="TabContainer" type="TabContainer" parent="MarginContainer/UIRoot"]
-margin_right = 728.0
-margin_bottom = 698.0
+offset_right = 728.0
+offset_bottom = 698.0
 
 [node name="Game" type="VBoxContainer" parent="MarginContainer/UIRoot/TabContainer"]
 anchor_right = 1.0
 anchor_bottom = 1.0
-margin_left = 4.0
-margin_top = 34.0
-margin_right = -4.0
-margin_bottom = -4.0
+offset_left = 4.0
+offset_top = 34.0
+offset_right = -4.0
+offset_bottom = -4.0
 script = ExtResource( 6 )
 
 [node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/UIRoot/TabContainer/Game"]
-margin_right = 720.0
-margin_bottom = 552.0
+offset_right = 720.0
+offset_bottom = 552.0
 size_flags_vertical = 3
 
 [node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/UIRoot/TabContainer/Game/VBoxContainer"]
-margin_right = 720.0
-margin_bottom = 28.0
+offset_right = 720.0
+offset_bottom = 28.0
 size_flags_horizontal = 3
 
 [node name="Label" type="Label" parent="MarginContainer/UIRoot/TabContainer/Game/VBoxContainer/HBoxContainer"]
-margin_right = 238.0
-margin_bottom = 28.0
-rect_min_size = Vector2( 0, 28 )
+offset_right = 238.0
+offset_bottom = 28.0
+custom_minimum_size = Vector2( 0, 28 )
 size_flags_horizontal = 3
 size_flags_stretch_ratio = 0.5
 text = "Name:"
@@ -94,281 +94,281 @@ align = 2
 valign = 1
 
 [node name="NameInput" type="LineEdit" parent="MarginContainer/UIRoot/TabContainer/Game/VBoxContainer/HBoxContainer"]
-margin_left = 242.0
-margin_right = 720.0
-margin_bottom = 28.0
+offset_left = 242.0
+offset_right = 720.0
+offset_bottom = 28.0
 size_flags_horizontal = 3
 
 [node name="HBoxContainer9" type="HBoxContainer" parent="MarginContainer/UIRoot/TabContainer/Game/VBoxContainer"]
-margin_top = 32.0
-margin_right = 720.0
-margin_bottom = 62.0
+offset_top = 32.0
+offset_right = 720.0
+offset_bottom = 62.0
 alignment = 2
 
 [node name="Label" type="Label" parent="MarginContainer/UIRoot/TabContainer/Game/VBoxContainer/HBoxContainer9"]
-margin_left = 433.0
-margin_top = 7.0
-margin_right = 556.0
-margin_bottom = 23.0
+offset_left = 433.0
+offset_top = 7.0
+offset_right = 556.0
+offset_bottom = 23.0
 text = "Movement Mode:"
 
 [node name="MovementModeMenuButton" type="MenuButton" parent="MarginContainer/UIRoot/TabContainer/Game/VBoxContainer/HBoxContainer9"]
-margin_left = 560.0
-margin_right = 720.0
-margin_bottom = 30.0
-rect_min_size = Vector2( 160, 30 )
+offset_left = 560.0
+offset_right = 720.0
+offset_bottom = 30.0
+custom_minimum_size = Vector2( 160, 30 )
 text = "Continuous"
 flat = false
 
 [node name="HBoxContainer3" type="HBoxContainer" parent="MarginContainer/UIRoot/TabContainer/Game/VBoxContainer"]
-margin_top = 66.0
-margin_right = 720.0
-margin_bottom = 92.0
+offset_top = 66.0
+offset_right = 720.0
+offset_bottom = 92.0
 alignment = 2
 
 [node name="Label" type="Label" parent="MarginContainer/UIRoot/TabContainer/Game/VBoxContainer/HBoxContainer3"]
-margin_left = 480.0
-margin_top = 5.0
-margin_right = 642.0
-margin_bottom = 21.0
+offset_left = 480.0
+offset_top = 5.0
+offset_right = 642.0
+offset_bottom = 21.0
 text = "Pixel Scale (windowed):"
 
 [node name="PixelScaleInput" type="SpinBox" parent="MarginContainer/UIRoot/TabContainer/Game/VBoxContainer/HBoxContainer3"]
-margin_left = 646.0
-margin_right = 720.0
-margin_bottom = 26.0
+offset_left = 646.0
+offset_right = 720.0
+offset_bottom = 26.0
 min_value = 0.1
 step = 0.1
 value = 1.0
 
 [node name="HBoxContainer2" type="HBoxContainer" parent="MarginContainer/UIRoot/TabContainer/Game/VBoxContainer"]
-margin_top = 96.0
-margin_right = 720.0
-margin_bottom = 122.0
+offset_top = 96.0
+offset_right = 720.0
+offset_bottom = 122.0
 alignment = 2
 
 [node name="Label" type="Label" parent="MarginContainer/UIRoot/TabContainer/Game/VBoxContainer/HBoxContainer2"]
-margin_top = 5.0
-margin_right = 510.0
-margin_bottom = 21.0
+offset_top = 5.0
+offset_right = 510.0
+offset_bottom = 21.0
 size_flags_horizontal = 3
 text = "Game View Size (In Tiles) Width:"
 align = 2
 
 [node name="SetWindowWidth" type="SpinBox" parent="MarginContainer/UIRoot/TabContainer/Game/VBoxContainer/HBoxContainer2"]
-margin_left = 514.0
-margin_right = 588.0
-margin_bottom = 26.0
+offset_left = 514.0
+offset_right = 588.0
+offset_bottom = 26.0
 min_value = 2.0
 value = 12.0
 
 [node name="Label2" type="Label" parent="MarginContainer/UIRoot/TabContainer/Game/VBoxContainer/HBoxContainer2"]
-margin_left = 592.0
-margin_top = 5.0
-margin_right = 642.0
-margin_bottom = 21.0
+offset_left = 592.0
+offset_top = 5.0
+offset_right = 642.0
+offset_bottom = 21.0
 text = "Height:"
 align = 2
 
 [node name="SetWindowHeight" type="SpinBox" parent="MarginContainer/UIRoot/TabContainer/Game/VBoxContainer/HBoxContainer2"]
-margin_left = 646.0
-margin_right = 720.0
-margin_bottom = 26.0
+offset_left = 646.0
+offset_right = 720.0
+offset_bottom = 26.0
 min_value = 2.0
 value = 12.0
 
 [node name="HBoxContainer8" type="HBoxContainer" parent="MarginContainer/UIRoot/TabContainer/Game/VBoxContainer"]
-margin_top = 126.0
-margin_right = 720.0
-margin_bottom = 166.0
+offset_top = 126.0
+offset_right = 720.0
+offset_bottom = 166.0
 alignment = 2
 
 [node name="AutoAspect" type="CheckButton" parent="MarginContainer/UIRoot/TabContainer/Game/VBoxContainer/HBoxContainer8"]
-margin_left = 354.0
-margin_right = 720.0
-margin_bottom = 40.0
+offset_left = 354.0
+offset_right = 720.0
+offset_bottom = 40.0
 pressed = true
 text = "Expand Game View To Fit Window Aspect"
 
 [node name="HBoxContainer4" type="HBoxContainer" parent="MarginContainer/UIRoot/TabContainer/Game/VBoxContainer"]
-margin_top = 170.0
-margin_right = 720.0
-margin_bottom = 194.0
+offset_top = 170.0
+offset_right = 720.0
+offset_bottom = 194.0
 alignment = 2
 
 [node name="UpdateWindow" type="Button" parent="MarginContainer/UIRoot/TabContainer/Game/VBoxContainer/HBoxContainer4"]
-margin_left = 570.0
-margin_right = 720.0
-margin_bottom = 24.0
+offset_left = 570.0
+offset_right = 720.0
+offset_bottom = 24.0
 text = "Update Window Size"
 
 [node name="HSeparator" type="HSeparator" parent="MarginContainer/UIRoot/TabContainer/Game/VBoxContainer"]
-margin_top = 198.0
-margin_right = 720.0
-margin_bottom = 202.0
-custom_styles/separator = ExtResource( 4 )
+offset_top = 198.0
+offset_right = 720.0
+offset_bottom = 202.0
+theme_override_styles/separator = ExtResource( 4 )
 
 [node name="HBoxContainer5" type="HBoxContainer" parent="MarginContainer/UIRoot/TabContainer/Game/VBoxContainer"]
-margin_top = 206.0
-margin_right = 720.0
-margin_bottom = 222.0
+offset_top = 206.0
+offset_right = 720.0
+offset_bottom = 222.0
 alignment = 1
 
 [node name="Label" type="Label" parent="MarginContainer/UIRoot/TabContainer/Game/VBoxContainer/HBoxContainer5"]
-margin_left = 275.0
-margin_right = 445.0
-margin_bottom = 16.0
-text = "Default Camera Settings:"
+offset_left = 275.0
+offset_right = 445.0
+offset_bottom = 16.0
+text = "Default Camera3D Settings:"
 
 [node name="HBoxContainer6" type="HBoxContainer" parent="MarginContainer/UIRoot/TabContainer/Game/VBoxContainer"]
-margin_top = 226.0
-margin_right = 720.0
-margin_bottom = 252.0
+offset_top = 226.0
+offset_right = 720.0
+offset_bottom = 252.0
 alignment = 2
 
 [node name="Label" type="Label" parent="MarginContainer/UIRoot/TabContainer/Game/VBoxContainer/HBoxContainer6"]
-margin_left = 371.0
-margin_top = 5.0
-margin_right = 485.0
-margin_bottom = 21.0
+offset_left = 371.0
+offset_top = 5.0
+offset_right = 485.0
+offset_bottom = 21.0
 text = "Follow Entity by:"
 
 [node name="FollowBy" type="MenuButton" parent="MarginContainer/UIRoot/TabContainer/Game/VBoxContainer/HBoxContainer6"]
-margin_left = 489.0
-margin_right = 536.0
-margin_bottom = 26.0
+offset_left = 489.0
+offset_right = 536.0
+offset_bottom = 26.0
 text = "name"
 flat = false
 script = ExtResource( 15 )
 
 [node name="FollowEntity" type="LineEdit" parent="MarginContainer/UIRoot/TabContainer/Game/VBoxContainer/HBoxContainer6"]
-margin_left = 540.0
-margin_right = 720.0
-margin_bottom = 26.0
-rect_min_size = Vector2( 180, 0 )
-custom_colors/font_color = Color( 0.698039, 0.419608, 0.419608, 1 )
+offset_left = 540.0
+offset_right = 720.0
+offset_bottom = 26.0
+custom_minimum_size = Vector2( 180, 0 )
+theme_override_colors/font_color = Color( 0.698039, 0.419608, 0.419608, 1 )
 
 [node name="HBoxContainer7" type="HBoxContainer" parent="MarginContainer/UIRoot/TabContainer/Game/VBoxContainer"]
-margin_top = 256.0
-margin_right = 720.0
-margin_bottom = 296.0
+offset_top = 256.0
+offset_right = 720.0
+offset_bottom = 296.0
 alignment = 2
 
 [node name="EnableLimitsToggle" type="CheckButton" parent="MarginContainer/UIRoot/TabContainer/Game/VBoxContainer/HBoxContainer7"]
-margin_left = 277.0
-margin_right = 484.0
-margin_bottom = 40.0
+offset_left = 277.0
+offset_right = 484.0
+offset_bottom = 40.0
 text = "Stop At Map Edge:"
 
 [node name="Label" type="Label" parent="MarginContainer/UIRoot/TabContainer/Game/VBoxContainer/HBoxContainer7"]
-margin_left = 488.0
-margin_top = 12.0
-margin_right = 642.0
-margin_bottom = 28.0
-text = "Extend Camera Limits:"
+offset_left = 488.0
+offset_top = 12.0
+offset_right = 642.0
+offset_bottom = 28.0
+text = "Extend Camera3D Limits:"
 
 [node name="ExtendCamLimits" type="SpinBox" parent="MarginContainer/UIRoot/TabContainer/Game/VBoxContainer/HBoxContainer7"]
-margin_left = 646.0
-margin_right = 720.0
-margin_bottom = 40.0
+offset_left = 646.0
+offset_right = 720.0
+offset_bottom = 40.0
 max_value = 300.0
 suffix = "px"
 
 [node name="HBoxContainer6" type="HBoxContainer" parent="MarginContainer/UIRoot/TabContainer/Game"]
-margin_top = 556.0
-margin_right = 720.0
-margin_bottom = 606.0
-rect_min_size = Vector2( 0, 50 )
+offset_top = 556.0
+offset_right = 720.0
+offset_bottom = 606.0
+custom_minimum_size = Vector2( 0, 50 )
 alignment = 2
 
 [node name="OpenGameDir" type="Button" parent="MarginContainer/UIRoot/TabContainer/Game/HBoxContainer6"]
-margin_left = 525.0
-margin_top = 13.0
-margin_right = 720.0
-margin_bottom = 37.0
+offset_left = 525.0
+offset_top = 13.0
+offset_right = 720.0
+offset_bottom = 37.0
 size_flags_vertical = 4
-text = "Open Game Save Directory"
+text = "Open Game Save DirAccess"
 
 [node name="HBoxContainer5" type="HBoxContainer" parent="MarginContainer/UIRoot/TabContainer/Game"]
-margin_top = 610.0
-margin_right = 720.0
-margin_bottom = 660.0
+offset_top = 610.0
+offset_right = 720.0
+offset_bottom = 660.0
 theme = SubResource( 3 )
-custom_constants/separation = 24
+theme_override_constants/separation = 24
 alignment = 1
 
 [node name="SaveButton" type="Button" parent="MarginContainer/UIRoot/TabContainer/Game/HBoxContainer5"]
-margin_left = 96.0
-margin_right = 196.0
-margin_bottom = 50.0
-rect_min_size = Vector2( 100, 50 )
+offset_left = 96.0
+offset_right = 196.0
+offset_bottom = 50.0
+custom_minimum_size = Vector2( 100, 50 )
 text = "Save"
 
 [node name="LoadButton" type="Button" parent="MarginContainer/UIRoot/TabContainer/Game/HBoxContainer5"]
-margin_left = 220.0
-margin_right = 320.0
-margin_bottom = 50.0
-rect_min_size = Vector2( 100, 50 )
+offset_left = 220.0
+offset_right = 320.0
+offset_bottom = 50.0
+custom_minimum_size = Vector2( 100, 50 )
 text = "Load"
 
 [node name="SetDefault" type="Button" parent="MarginContainer/UIRoot/TabContainer/Game/HBoxContainer5"]
-margin_left = 344.0
-margin_right = 624.0
-margin_bottom = 50.0
-rect_min_size = Vector2( 280, 50 )
+offset_left = 344.0
+offset_right = 624.0
+offset_bottom = 50.0
+custom_minimum_size = Vector2( 280, 50 )
 text = "Set As Default Game"
 
 [node name="Tiles" type="VBoxContainer" parent="MarginContainer/UIRoot/TabContainer"]
 visible = false
 anchor_right = 1.0
 anchor_bottom = 1.0
-margin_left = 4.0
-margin_top = 34.0
-margin_right = -4.0
-margin_bottom = -4.0
+offset_left = 4.0
+offset_top = 34.0
+offset_right = -4.0
+offset_bottom = -4.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
 script = ExtResource( 3 )
 the_grid_path = NodePath("HBoxContainer/PanelContainer/ScrollContainer/EditTilesGrid")
 
 [node name="Label" type="Label" parent="MarginContainer/UIRoot/TabContainer/Tiles"]
-margin_right = 706.0
-margin_bottom = 22.0
+offset_right = 706.0
+offset_bottom = 22.0
 text = "Tiles:"
 align = 1
 
 [node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/UIRoot/TabContainer/Tiles"]
-margin_top = 26.0
-margin_right = 706.0
-margin_bottom = 640.0
+offset_top = 26.0
+offset_right = 706.0
+offset_bottom = 640.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
 
 [node name="PanelContainer" type="PanelContainer" parent="MarginContainer/UIRoot/TabContainer/Tiles/HBoxContainer"]
-margin_right = 654.0
-margin_bottom = 614.0
+offset_right = 654.0
+offset_bottom = 614.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
-custom_styles/panel = SubResource( 1 )
+theme_override_styles/panel = SubResource( 1 )
 
 [node name="ScrollContainer" type="ScrollContainer" parent="MarginContainer/UIRoot/TabContainer/Tiles/HBoxContainer/PanelContainer"]
-margin_left = 1.0
-margin_top = 1.0
-margin_right = 653.0
-margin_bottom = 613.0
+offset_left = 1.0
+offset_top = 1.0
+offset_right = 653.0
+offset_bottom = 613.0
 
 [node name="EditTilesGrid" type="GridContainer" parent="MarginContainer/UIRoot/TabContainer/Tiles/HBoxContainer/PanelContainer/ScrollContainer"]
-margin_right = 652.0
-margin_bottom = 612.0
+offset_right = 652.0
+offset_bottom = 612.0
 size_flags_horizontal = 7
 size_flags_vertical = 3
 columns = 4
 
 [node name="NewTileButton" type="Button" parent="MarginContainer/UIRoot/TabContainer/Tiles/HBoxContainer"]
-margin_left = 658.0
-margin_top = 286.0
-margin_right = 706.0
-margin_bottom = 328.0
+offset_left = 658.0
+offset_top = 286.0
+offset_right = 706.0
+offset_bottom = 328.0
 size_flags_vertical = 4
 icon = ExtResource( 1 )
 
@@ -376,10 +376,10 @@ icon = ExtResource( 1 )
 visible = false
 anchor_right = 1.0
 anchor_bottom = 1.0
-margin_left = 4.0
-margin_top = 34.0
-margin_right = -4.0
-margin_bottom = -4.0
+offset_left = 4.0
+offset_top = 34.0
+offset_right = -4.0
+offset_bottom = -4.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
 script = ExtResource( 3 )
@@ -387,43 +387,43 @@ tile_entity_mode = "entity"
 the_grid_path = NodePath("HBoxContainer/PanelContainer/ScrollContainer/EditEntitiesGrid")
 
 [node name="Label" type="Label" parent="MarginContainer/UIRoot/TabContainer/Entities"]
-margin_right = 706.0
-margin_bottom = 22.0
+offset_right = 706.0
+offset_bottom = 22.0
 text = "Entities:"
 align = 1
 
 [node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/UIRoot/TabContainer/Entities"]
-margin_top = 26.0
-margin_right = 706.0
-margin_bottom = 640.0
+offset_top = 26.0
+offset_right = 706.0
+offset_bottom = 640.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
 
 [node name="PanelContainer" type="PanelContainer" parent="MarginContainer/UIRoot/TabContainer/Entities/HBoxContainer"]
-margin_right = 654.0
-margin_bottom = 614.0
+offset_right = 654.0
+offset_bottom = 614.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
-custom_styles/panel = SubResource( 1 )
+theme_override_styles/panel = SubResource( 1 )
 
 [node name="ScrollContainer" type="ScrollContainer" parent="MarginContainer/UIRoot/TabContainer/Entities/HBoxContainer/PanelContainer"]
-margin_left = 1.0
-margin_top = 1.0
-margin_right = 653.0
-margin_bottom = 613.0
+offset_left = 1.0
+offset_top = 1.0
+offset_right = 653.0
+offset_bottom = 613.0
 
 [node name="EditEntitiesGrid" type="GridContainer" parent="MarginContainer/UIRoot/TabContainer/Entities/HBoxContainer/PanelContainer/ScrollContainer"]
-margin_right = 652.0
-margin_bottom = 612.0
+offset_right = 652.0
+offset_bottom = 612.0
 size_flags_horizontal = 7
 size_flags_vertical = 3
 columns = 4
 
 [node name="NewEntityButton" type="Button" parent="MarginContainer/UIRoot/TabContainer/Entities/HBoxContainer"]
-margin_left = 658.0
-margin_top = 286.0
-margin_right = 706.0
-margin_bottom = 328.0
+offset_left = 658.0
+offset_top = 286.0
+offset_right = 706.0
+offset_bottom = 328.0
 size_flags_vertical = 4
 icon = ExtResource( 1 )
 
@@ -431,86 +431,86 @@ icon = ExtResource( 1 )
 visible = false
 anchor_right = 1.0
 anchor_bottom = 1.0
-margin_left = 4.0
-margin_top = 34.0
-margin_right = -4.0
-margin_bottom = -4.0
+offset_left = 4.0
+offset_top = 34.0
+offset_right = -4.0
+offset_bottom = -4.0
 script = ExtResource( 5 )
 
 [node name="HBoxContainer2" type="HBoxContainer" parent="MarginContainer/UIRoot/TabContainer/Images"]
-margin_right = 706.0
-margin_bottom = 32.0
+offset_right = 706.0
+offset_bottom = 32.0
 alignment = 2
 
 [node name="SetUsedImages" type="Button" parent="MarginContainer/UIRoot/TabContainer/Images/HBoxContainer2"]
 visible = false
-margin_left = 579.0
-margin_right = 706.0
-margin_bottom = 32.0
-rect_min_size = Vector2( 0, 32 )
+offset_left = 579.0
+offset_right = 706.0
+offset_bottom = 32.0
+custom_minimum_size = Vector2( 0, 32 )
 text = "Set Used Images"
 
 [node name="PanelContainer" type="PanelContainer" parent="MarginContainer/UIRoot/TabContainer/Images"]
-margin_top = 36.0
-margin_right = 706.0
-margin_bottom = 586.0
+offset_top = 36.0
+offset_right = 706.0
+offset_bottom = 586.0
 size_flags_vertical = 3
-custom_styles/panel = ExtResource( 13 )
+theme_override_styles/panel = ExtResource( 13 )
 
 [node name="ScrollContainer" type="ScrollContainer" parent="MarginContainer/UIRoot/TabContainer/Images/PanelContainer"]
-margin_left = 2.0
-margin_top = 2.0
-margin_right = 704.0
-margin_bottom = 548.0
+offset_left = 2.0
+offset_top = 2.0
+offset_right = 704.0
+offset_bottom = 548.0
 
 [node name="ListContainer" type="VBoxContainer" parent="MarginContainer/UIRoot/TabContainer/Images/PanelContainer/ScrollContainer"]
-margin_right = 702.0
+offset_right = 702.0
 size_flags_horizontal = 3
-custom_constants/separation = 5
+theme_override_constants/separation = 5
 script = ExtResource( 11 )
 
 [node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/UIRoot/TabContainer/Images"]
-margin_top = 590.0
-margin_right = 706.0
-margin_bottom = 640.0
+offset_top = 590.0
+offset_right = 706.0
+offset_bottom = 640.0
 alignment = 1
 
 [node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/UIRoot/TabContainer/Images/HBoxContainer"]
-margin_right = 583.0
-margin_bottom = 50.0
+offset_right = 583.0
+offset_bottom = 50.0
 size_flags_horizontal = 3
 alignment = 1
 
 [node name="NewTexButton" type="Button" parent="MarginContainer/UIRoot/TabContainer/Images/HBoxContainer/HBoxContainer"]
-margin_left = 189.0
-margin_right = 289.0
-margin_bottom = 50.0
-rect_min_size = Vector2( 100, 50 )
+offset_left = 189.0
+offset_right = 289.0
+offset_bottom = 50.0
+custom_minimum_size = Vector2( 100, 50 )
 text = "New Image"
 
 [node name="EditTexButton" type="Button" parent="MarginContainer/UIRoot/TabContainer/Images/HBoxContainer/HBoxContainer"]
-margin_left = 293.0
-margin_right = 393.0
-margin_bottom = 50.0
-rect_min_size = Vector2( 100, 50 )
+offset_left = 293.0
+offset_right = 393.0
+offset_bottom = 50.0
+custom_minimum_size = Vector2( 100, 50 )
 disabled = true
 text = "Edit Image"
 
 [node name="OpenImagesFolder" type="Button" parent="MarginContainer/UIRoot/TabContainer/Images/HBoxContainer"]
-margin_left = 587.0
-margin_top = 14.0
-margin_right = 706.0
-margin_bottom = 36.0
+offset_left = 587.0
+offset_top = 14.0
+offset_right = 706.0
+offset_bottom = 36.0
 size_flags_vertical = 4
-custom_fonts/font = ExtResource( 14 )
+theme_override_fonts/font = ExtResource( 14 )
 text = "Open Images Folder"
 
 [node name="TileEntityEditorWindow" parent="MarginContainer/UIRoot" instance=ExtResource( 2 )]
 
 [node name="BackButton" type="Button" parent="MarginContainer/UIRoot"]
-margin_left = 641.0
-margin_right = 728.0
-margin_bottom = 24.0
+offset_left = 641.0
+offset_right = 728.0
+offset_bottom = 24.0
 size_flags_horizontal = 8
 size_flags_vertical = 0
 text = "Main Menu"

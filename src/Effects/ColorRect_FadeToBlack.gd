@@ -1,15 +1,15 @@
 extends ColorRect
 
-onready var normal_color = color
+@onready var normal_color = color
 
-export var fade_length: float = 1
+@export var fade_length: float = 1
 var fading: bool = true
 var fade_timer: float = 0
 var fade: float = 1
 
 func _ready():
 	set_process(false)
-	get_viewport().connect("size_changed", self, "updated")
+	get_viewport().connect("size_changed", Callable(self, "updated"))
 
 func updated() -> void:
 	fade_timer = fade_length
@@ -28,7 +28,7 @@ func _process(delta):
 		if fade >= 1:
 			set_process(false)
 	
-	color = lerp(Color.black, normal_color, fade)
+	color = lerp(Color.BLACK, normal_color, fade)
 	
 	if fading:
 		fade_timer -= delta

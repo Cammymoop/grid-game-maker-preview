@@ -4,6 +4,6 @@
 
 [node name="GenericConfirm" type="ConfirmationDialog"]
 visible = true
-margin_right = 200.0
-margin_bottom = 70.0
+offset_right = 200.0
+offset_bottom = 70.0
 script = ExtResource( 1 )

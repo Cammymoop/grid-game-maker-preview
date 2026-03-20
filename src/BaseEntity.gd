@@ -14,7 +14,7 @@ var moving: = false
 var just_moved = false
 var steps_remaining:int = 0
 
-onready var sprite: = $Sprite
+@onready var sprite: = $Sprite
 
 # tiles per second
 var current_move_speed = 0
@@ -146,7 +146,7 @@ func deserialize(data: Dictionary) -> void:
 		add_child(new_controller)
 		set_controller(new_controller)
 	
-	yield(EntityManager, "post_deserialize")
+	await EntityManager.post_deserialize
 
 func set_active(new_active) -> void:
 	active = new_active
@@ -350,12 +350,12 @@ func die() -> void:
 
 func set_tailing(entity_to_tail) -> void:
 	tailing = entity_to_tail
-	tailing.connect("started_move", self, "tail_follow")
+	tailing.started_move.connect(tail_follow)
 
 func untail() -> void:
 	if tailing and is_instance_valid(tailing):
-		if tailing.is_connected("started_move", self, "tail_follow"):
-			tailing.disconnect("started_move", self, "tail_follow")
+		if tailing.started_move.is_connected(tail_follow):
+			tailing.started_move.disconnect(tail_follow)
 	tailing = null
 
 func tail_follow(_move_facing) -> void:

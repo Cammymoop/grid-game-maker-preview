@@ -1,7 +1,7 @@
 [gd_scene load_steps=5 format=2]
 
 [ext_resource path="res://src/GameEditor/TilePicker.gd" type="Script" id=1]
-[ext_resource path="res://assets/img/tiles.png" type="Texture" id=2]
+[ext_resource path="res://assets/img/tiles.png" type="Texture2D" id=2]
 
 [sub_resource type="AtlasTexture" id=2]
 atlas = ExtResource( 2 )
@@ -21,10 +21,10 @@ expand_margin_bottom = 2.0
 shadow_size = 5
 
 [node name="TilePicker" type="TextureRect"]
-margin_left = 98.0
-margin_top = 54.0
-margin_right = 386.0
-margin_bottom = 182.0
+offset_left = 98.0
+offset_top = 54.0
+offset_right = 386.0
+offset_bottom = 182.0
 mouse_filter = 0
 mouse_default_cursor_shape = 2
 size_flags_horizontal = 4
@@ -46,10 +46,10 @@ __meta__ = {
 }
 
 [node name="Cursor" type="Panel" parent="."]
-margin_right = 32.0
-margin_bottom = 32.0
+offset_right = 32.0
+offset_bottom = 32.0
 mouse_filter = 2
-custom_styles/panel = SubResource( 3 )
+theme_override_styles/panel = SubResource( 3 )
 __meta__ = {
 "_edit_use_anchors_": false
 }

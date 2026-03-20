@@ -2,7 +2,7 @@ extends MenuButton
 
 signal changed
 
-export var list_items: Array
+@export var list_items: Array
 var selected_value: String
 var selected_index: int = 0
 
@@ -26,7 +26,7 @@ func _ready():
 	
 	select_first()
 	
-	list.connect("index_pressed", self, "index_selected")
+	list.connect("index_pressed", Callable(self, "index_selected"))
 	
 func select_first() -> void:
 	var list: PopupMenu = get_popup()

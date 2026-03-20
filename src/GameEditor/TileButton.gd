@@ -12,7 +12,7 @@ func _ready():
 	set_the_texture(Utility.atlas_texture_from_tile_index(tile_index))
 
 func set_the_name(the_name: String):
-	hint_tooltip = tile_name
+	tooltip_text = tile_name
 	if len(tile_name) > NAME_CHARACTERS:
 		tile_name = tile_name.substr(0, NAME_CHARACTERS - 2) + '...'
 	$VBox/TileName.text = tile_name
