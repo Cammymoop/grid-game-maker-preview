@@ -23,7 +23,7 @@ var default_textures = [
 ]
 var texture_names = {}
 var textures = {}
-var tiles_per_row = {}
+var tiles_per_row = {0: 16}
 var texture_rows = {}
 var tile_sizes = {}
 var texture_meta = {}
@@ -33,6 +33,8 @@ var texture_spec: Array
 var im_ready = false
 
 func setup() -> void:
+	for t in builtin_textures:
+		add_builtin_texture(t)
 	reload_spec()
 #
 #	emit_signal("textures_loaded")

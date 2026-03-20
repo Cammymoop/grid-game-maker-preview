@@ -6,15 +6,14 @@ var move_mode = "direction"
 var stop_repeat_after_bonk = true
 var allow_wait = true
 
+var is_repeat = false
+
 var up_held: = false
 var down_held: = false
 var left_held: = false
 var right_held: = false
 
-var up_cancel: = false
-var down_cancel: = false
-var left_cancel: = false
-var right_cancel: = false
+var cancelled: = false
 
 var most_recent_is_horizontal: = false
 
@@ -37,29 +36,38 @@ func get_options() -> Dictionary:
 	return available_options
 
 func _process(_delta):
+	var is_pressed = false
+	
+	up_held = true
 	if Input.is_action_just_pressed("move_up"):
-		up_held = true
+		is_pressed = true
 		most_recent_is_horizontal = false
 	elif not Input.is_action_pressed("move_up"):
 		up_held = false
 	
+	down_held = true
 	if Input.is_action_just_pressed("move_down"):
-		down_held = true
+		is_pressed = true
 		most_recent_is_horizontal = false
 	elif not Input.is_action_pressed("move_down"):
 		down_held = false
-		
+	
+	left_held = true
 	if Input.is_action_just_pressed("move_left"):
-		left_held = true
+		is_pressed = true
 		most_recent_is_horizontal = true
 	elif not Input.is_action_pressed("move_left"):
 		left_held = false
-		
+	
+	
+	right_held = true
 	if Input.is_action_just_pressed("move_right"):
-		right_held = true
+		is_pressed = true
 		most_recent_is_horizontal = true
 	elif not Input.is_action_pressed("move_right"):
 		right_held = false
+	
+	is_repeat = not is_pressed
 	
 	if not EntityManager.movements_enabled:
 		if up_held or down_held or left_held or right_held:
@@ -74,14 +82,17 @@ func get_move():
 	var input_dir = "none"
 	var h_input_dir = "none"
 	
-	if up_held and not down_held and not up_cancel:
+	if not is_repeat:
+		cancelled = false
+	
+	if up_held and not down_held and not cancelled:
 		input_dir = "up"
-	elif down_held and not up_held and not down_cancel:
+	elif down_held and not up_held and not cancelled:
 		input_dir = "down"
 	
-	if left_held and not right_held and not left_cancel:
+	if left_held and not right_held and not cancelled:
 		h_input_dir = "left"
-	elif right_held and not left_held and not right_cancel:
+	elif right_held and not left_held and not cancelled:
 		h_input_dir = "right"
 	
 	if input_dir == "none":
@@ -90,22 +101,13 @@ func get_move():
 		if most_recent_is_horizontal:
 			input_dir = h_input_dir
 	
+	if input_dir == "none":
+		is_repeat = false
 	return input_dir
 
-func got_blocked(facing_dir) -> void:
+func got_blocked(_facing_dir) -> void:
 	if stop_repeat_after_bonk:
-		match facing_dir:
-			0:
-				up_cancel = true
-			1:
-				right_cancel = true
-			2:
-				down_cancel = true
-			3:
-				left_cancel = true
+		cancelled = true
 
 func on_start_move(_facing_dir) -> void:
-	up_cancel = false
-	down_cancel = false
-	left_cancel = false
-	right_cancel = false
+	cancelled = false

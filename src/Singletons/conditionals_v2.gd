@@ -29,6 +29,7 @@ func make_slots(owning_entity, target_entity, tile_position, arguments = []) -> 
 	slots[Slot.BLUE] = target_entity
 	slots[Slot.GREY] = [tile_position]
 	slots[Slot.BLACK] = []
+	slots[Slot.THIS_TILE] = tile_position
 	
 	if arguments:
 		var arg_slots = [Slot.DARK_RED, Slot.DARK_BLUE, Slot.DARK_GREEN, Slot.DARK_ORANGE,]
@@ -81,21 +82,21 @@ func resolve_conditional(conditional: Dictionary, slots: Dictionary):
 	var quit = false
 	
 	if final_result:
-		for action in conditional.true_actions:
+		for action in conditional.get("true_actions", []):
 			if do_command_data(action, slots):
 				quit = true
 		
 		if "true_result" in conditional:
 			final_result = conditional["true_result"]
 	else:
-		for action in conditional.false_actions:
+		for action in conditional.get("false_actions", []):
 			if do_command_data(action, slots):
 				quit = true
 		
 		if "false_result" in conditional:
 			final_result = conditional["false_result"]
 	
-	for action in conditional.always_actions:
+	for action in conditional.get("always_actions", []):
 		if do_command_data(action, slots):
 			quit = true
 	
@@ -142,12 +143,12 @@ func do_action(command_code: int, selected_slot: int, slots: Dictionary, command
 		CommandCodes.A_PROPERTY_ADD:
 			var existing_val = 0
 			if selected.has_local_property(command_options[0]):
-				existing_val = selected.get_local_property(command_options[0])
+				existing_val = int(selected.get_local_property(command_options[0]))
 			selected.set_local_property(command_options[0], existing_val + int(command_options[1])) # TODO support float or save actual type data to json
 		CommandCodes.A_PROPERTY_SUBTRACT:
 			var existing_val = 0
 			if selected.has_local_property(command_options[0]):
-				existing_val = selected.get_local_property(command_options[0])
+				existing_val = int(selected.get_local_property(command_options[0]))
 			var new_val = existing_val - int(command_options[1])
 			selected.set_local_property(command_options[0], new_val)
 			if command_options[2] and new_val <= 0:
@@ -214,6 +215,15 @@ func do_other(command_code: int, selected_slot: int, slots: Dictionary, command_
 			var tindex = MapManager.get_tile_index(command_options[0])
 			slots[selected_slot] = MapManager.get_all_positions_of_tile(tindex)
 			print(slot_value(slots, selected_slot))
+		CommandCodes.SELECT_TILES_RECT:
+			var top_position = Vector2(int(command_options[0]), int(command_options[1]))
+			top_position += slot_value(slots, Slot.THIS_TILE)
+			slots[selected_slot] = []
+			for xi in range(int(command_options[2])):
+				for yi in range(int(command_options[3])):
+					slots[selected_slot].append(top_position + Vector2(xi, yi))
+			print(slot_value(slots, selected_slot))
+			pass
 	
 	return true
 

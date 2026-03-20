@@ -17,6 +17,9 @@ enum Slot {
 	
 	# Argument slots
 	DARK_RED, DARK_BLUE, DARK_GREEN, DARK_ORANGE,
+	
+	# Vector slots?
+	THIS_TILE 
 }
 
 var InputTypes = InputTemplates.InputTypes
@@ -28,6 +31,7 @@ enum CC {
 	SELECT_NEAREST_ENTITY,
 	SELECT_ENTITY_AT,
 	SELECT_TILES_NAMED,
+	SELECT_TILES_RECT,
 	
 	# Conditions
 	C_HAS_PROPERTY = 4000,
@@ -82,6 +86,17 @@ var Friendly = {
 			"tile_name": {input_type= InputTypes.TileNameInput},
 		},
 		ui= ["<", "Select all the tiles named ", "[tile_name"]
+	},
+	CC.SELECT_TILES_RECT: {
+		display_name= "Select Tile Rectangle",
+		slot_types= ["tile_pos"],
+		options= {
+			"x": {input_type= InputTypes.ValueInput},
+			"y": {input_type= InputTypes.ValueInput},
+			"width": {input_type= InputTypes.ValueInput},
+			"height": {input_type= InputTypes.ValueInput},
+		},
+		ui= ["<", "Select tiles in a relative rectangle ", "br", "x/y", "[x", "[y", "w/h", "[width", "[height"]
 	},
 	
 	CC.C_HAS_PROPERTY: {
