@@ -72,6 +72,10 @@ var entity_instance_map = {}
 var entity_list = []
 var bond_groups = []
 
+# Custom signal system: replaces GD3's add_user_signal/has_user_signal/emit_signal for dynamic signals.
+# Each entry: signal_name -> Array of {object, method, bind_args}
+var _dynamic_signal_connections: Dictionary = {}
+
 var im_ready = false
 
 var instance_counter = 0
@@ -120,16 +124,33 @@ func setup():
 	
 	im_ready = true
 
-func create_signal(signal_name) -> void:
-	add_user_signal(signal_name)
+func create_signal(signal_name: String) -> void:
+	if not _dynamic_signal_connections.has(signal_name):
+		_dynamic_signal_connections[signal_name] = []
 
 
-func do_emit_signal(signal_name, owning_entity=null, args=null) -> void:
-	if not has_user_signal(signal_name):
-		add_user_signal(signal_name)
+func has_user_signal(signal_name: String) -> bool:
+	return _dynamic_signal_connections.has(signal_name)
+
+
+func connect_custom_signal(signal_name: String, target: Object, method: String, bind_args: Array = []) -> void:
+	if not _dynamic_signal_connections.has(signal_name):
+		_dynamic_signal_connections[signal_name] = []
+	_dynamic_signal_connections[signal_name].append({
+		"object": target,
+		"method": method,
+		"bind_args": bind_args,
+	})
+
+
+func do_emit_signal(signal_name: String, owning_entity = null, args = null) -> void:
+	if not _dynamic_signal_connections.has(signal_name):
+		return
 	if not args:
 		args = []
-	emit_signal(signal_name, owning_entity, args)
+	for conn in _dynamic_signal_connections[signal_name]:
+		if is_instance_valid(conn.object):
+			conn.object.callv(conn.method, [owning_entity, args] + conn.bind_args)
 
 func refresh_definition():
 	update_movement_mode()
@@ -185,6 +206,7 @@ func clear_entity_list():
 		entity.queue_free()
 	entity_list = []
 	entity_instance_map = {}
+	_dynamic_signal_connections.clear()
 	clear()
 
 # In discrete mode we wont update entities at all until a move is requested
@@ -649,6 +671,11 @@ func get_entity_definition(entity_index) -> Dictionary:
 	return entity_defs[entity_index].duplicate()
 
 func remove_entity(entity) -> void:
+	for signal_name in _dynamic_signal_connections:
+		var connections: Array = _dynamic_signal_connections[signal_name]
+		for i in range(len(connections) - 1, -1, -1):
+			if connections[i].object == entity:
+				connections.remove(i)
 	entity_list.remove(entity_list.find(entity))
 	if entity.bond_group:
 		unbond_entity(entity)

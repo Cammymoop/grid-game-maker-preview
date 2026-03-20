@@ -57,7 +57,7 @@ func edit_common(editor_window):
 	editor_window.fix_size()
 	#editor_window.center_self()
 	
-	editor_window.connect("popup_hide", self, "update_the_grid", [], CONNECT_ONESHOT)
+	editor_window.connect("popup_hide", self, "update_the_grid", [], CONNECT_ONE_SHOT)
 
 
 func _on_Tiles_resized():

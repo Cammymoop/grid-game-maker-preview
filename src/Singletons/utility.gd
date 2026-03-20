@@ -262,3 +262,12 @@ func resolve_full_direction_to_facing(full_direction: int, slots: Dictionary) ->
 		facing = entity.facing
 	
 	return facing_rotated(facing, get_full_direction_absolute(full_direction))
+
+
+# Central JSON parsing helper. In GD4, replace body with: return JSON.parse_string(text)
+func parse_json(text: String):
+	var parsed = JSON.parse(text)
+	if parsed.error != OK:
+		print_debug("JSON parse error at line %d: %s" % [parsed.error_line, parsed.error_string])
+		return null
+	return parsed.result

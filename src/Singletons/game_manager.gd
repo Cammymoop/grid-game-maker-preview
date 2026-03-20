@@ -291,7 +291,7 @@ func show_scene_transition() -> void:
 
 func scene_transisiton_update() -> void:
 	var progress = (scene_transition_duration - $SceneTransitionTimer.time_left)/scene_transition_duration
-	var curve_val = scene_transition_curve.interpolate_baked(progress)
+	var curve_val = scene_transition_curve.sample_baked(progress)
 	var transition_sign = -1 if transition_left else 1
 	transition_anim_target.rect_position.x = curve_val * get_viewport().size.x * transition_sign
 

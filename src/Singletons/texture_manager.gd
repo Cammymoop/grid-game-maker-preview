@@ -41,7 +41,7 @@ func setup() -> void:
 func grab_builtin_metadata() -> void:
 	var f = File.new()
 	f.open("res://assets/builtin_texture_meta.json", File.READ)
-	var result = JSON.parse(f.get_as_text()).result
+	var result = Utility.parse_json(f.get_as_text())
 	f.close()
 	
 	builtin_meta = fix_texture_metas(result)

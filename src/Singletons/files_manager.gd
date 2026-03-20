@@ -72,10 +72,10 @@ func get_game_definition(game_name) -> Dictionary:
 	var file_name = game_file_name(game_name) + ".json"
 	var f = File.new()
 	if f.open("user://games/" + file_name, File.READ) == OK:
-		var parsed = JSON.parse(f.get_as_text())
+		var result = Utility.parse_json(f.get_as_text())
 		f.close()
-		if parsed.error == OK:
-			return parsed.result
+		if result != null:
+			return result
 	print_debug("Error loading game: " + game_name)
 	return {}
 
@@ -96,10 +96,10 @@ func get_games_list() -> Array:
 					if not f.open(dir_path + fn, File.READ) == OK:
 						print_debug("Error opening file " + fn)
 					else:
-						var parsed = JSON.parse(f.get_as_text())
-						if parsed.error == OK:
-							if not parsed.result['game_name'] in games_list:
-								games_list.append(parsed.result['game_name'])
+						var result = Utility.parse_json(f.get_as_text())
+						if result != null:
+							if not result['game_name'] in games_list:
+								games_list.append(result['game_name'])
 						else:
 							print_debug("Error parsing game file " + fn)
 			fn = directory.get_next()
@@ -126,10 +126,10 @@ func _get_local_images_metadata() -> Dictionary:
 		print_debug("No local image meta")
 		return {}
 	if f.open("user://local_image_meta.json", File.READ) == OK:
-		var parsed = JSON.parse(f.get_as_text())
+		var result = Utility.parse_json(f.get_as_text())
 		f.close()
-		if parsed.error == OK:
-			return parsed.result
+		if result != null:
+			return result
 	print_debug("Error loading local image meta")
 	return {}
 	
@@ -178,10 +178,10 @@ func get_level_data(game_name, level_name):
 	var file_name = game_file_name(level_name) + ".json"
 	var f = File.new()
 	if f.open("user://levels/" + game_file_name(game_name) + "/" + file_name, File.READ) == OK:
-		var parsed = JSON.parse(f.get_as_text())
+		var result = Utility.parse_json(f.get_as_text())
 		f.close()
-		if parsed.error == OK:
-			return parsed.result
+		if result != null:
+			return result
 	print_debug("Error loading level: " + file_name)
 	return {}
 
@@ -203,10 +203,10 @@ func get_level_list(game_name) -> Array:
 					if not f.open(dir_path + fn, File.READ) == OK:
 						print_debug("Error opening file " + fn)
 					else:
-						var parsed = JSON.parse(f.get_as_text())
-						if parsed.error == OK:
-							if not parsed.result['name'] in levels_list:
-								levels_list.append(parsed.result['name'])
+						var result = Utility.parse_json(f.get_as_text())
+						if result != null:
+							if not result['name'] in levels_list:
+								levels_list.append(result['name'])
 						else:
 							print_debug("Error parsing level file " + fn)
 			fn = directory.get_next()
