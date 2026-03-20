@@ -19,6 +19,8 @@ func _ready():
 	parent.texture = get_texture()
 	parent.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
 	
+	canvas_item_default_texture_filter = Viewport.DEFAULT_CANVAS_ITEM_TEXTURE_FILTER_NEAREST
+
 	parent_vp = parent.get_viewport()
 	parent_vp.connect("size_changed", Callable(self, "rescale"))
 	
