@@ -27,6 +27,7 @@ ConditionalFunctions="*res://src/Singletons/conditional_functions.gd"
 FilesManager="*res://src/Singletons/files_manager.gd"
 InputTemplates="*res://src/Singletons/input_templates.gd"
 Commands="*res://src/Singletons/commands.gd"
+ConditionalsV3="*uid://bp02fk3ur8qi5"
 ConditionalsV2="*res://src/Singletons/conditionals_v2.gd"
 OldConditionalConverter="*res://src/Singletons/old_conditional_converter.gd"
 

@@ -7,7 +7,7 @@ func _ready():
 	await get_tree().process_frame
 	find_child("SetName").grab_focus()
 	
-	var all_events = ConditionalFunctions.get_all_events()
+	var all_events = ConditionalsV2.get_all_events()
 	var popup_list = find_child("SelectEvent").get_popup()
 	
 	for event in all_events:

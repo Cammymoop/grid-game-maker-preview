@@ -1,3 +1,4 @@
+## Deprecated: use conditionals_v2.gd
 extends Node
 
 var all_events = [
