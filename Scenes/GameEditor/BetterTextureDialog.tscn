@@ -1,60 +1,45 @@
-[gd_scene load_steps=4 format=2]
+[gd_scene format=3 uid="uid://dxfeh0ch76u8t"]
 
-[ext_resource path="res://Scenes/GameEditor/HSeparator.tscn" type="PackedScene" id=1]
-[ext_resource path="res://Scenes/GameEditor/TilePicker.tscn" type="PackedScene" id=2]
-[ext_resource path="res://src/GameEditor/BetterTextureDialog.gd" type="Script" id=3]
+[ext_resource type="PackedScene" path="res://Scenes/GameEditor/HSeparator.tscn" id="1"]
+[ext_resource type="PackedScene" path="res://Scenes/GameEditor/TilePicker.tscn" id="2"]
+[ext_resource type="Script" uid="uid://bl7p864bv7xks" path="res://src/GameEditor/BetterTextureDialog.gd" id="3"]
 
-[node name="BetterTextureDialog" type="ConfirmationDialog"]
+[node name="BetterTextureDialog" type="ConfirmationDialog" unique_id=17079518]
+oversampling_override = 1.0
+size = Vector2i(200, 127)
 visible = true
-offset_right = 500.0
-offset_bottom = 226.0
-exclusive = true
-window_title = "Set Texture2D"
-script = ExtResource( 3 )
-__meta__ = {
-"_edit_use_anchors_": false
-}
+script = ExtResource("3")
 
-[node name="VBoxContainer" type="VBoxContainer" parent="."]
+[node name="VBoxContainer" type="VBoxContainer" parent="." unique_id=1626039057]
 offset_left = 8.0
 offset_top = 8.0
-offset_right = 492.0
-offset_bottom = 190.0
-__meta__ = {
-"_edit_use_anchors_": false
-}
+offset_right = 192.0
+offset_bottom = 78.0
 
-[node name="HBoxContainer2" type="HBoxContainer" parent="VBoxContainer"]
-offset_right = 484.0
-offset_bottom = 24.0
-__meta__ = {
-"_edit_use_anchors_": false
-}
+[node name="HBoxContainer2" type="HBoxContainer" parent="VBoxContainer" unique_id=1856931541]
+layout_mode = 2
 
-[node name="Label" type="Label" parent="VBoxContainer/HBoxContainer2"]
-offset_top = 5.0
-offset_right = 52.0
-offset_bottom = 19.0
+[node name="Label" type="Label" parent="VBoxContainer/HBoxContainer2" unique_id=242841878]
+layout_mode = 2
 size_flags_stretch_ratio = 0.4
 text = "Texture2D:"
-align = 2
+horizontal_alignment = 2
 
-[node name="TextureSelector" type="MenuButton" parent="VBoxContainer/HBoxContainer2"]
-offset_left = 56.0
-offset_right = 484.0
-offset_bottom = 24.0
-custom_minimum_size = Vector2( 0, 24 )
+[node name="TextureSelector" type="MenuButton" parent="VBoxContainer/HBoxContainer2" unique_id=362343310]
+custom_minimum_size = Vector2(0, 24)
+layout_mode = 2
 size_flags_horizontal = 3
 text = "tiles.png"
 flat = false
 
-[node name="HSeparator" parent="VBoxContainer" instance=ExtResource( 1 )]
+[node name="HSeparator" parent="VBoxContainer" unique_id=539319678 instance=ExtResource("1")]
+layout_mode = 2
 
-[node name="Label2" type="Label" parent="VBoxContainer"]
-offset_top = 36.0
-offset_right = 484.0
-offset_bottom = 50.0
+[node name="Label2" type="Label" parent="VBoxContainer" unique_id=970904995]
+layout_mode = 2
 text = "Tile:"
-align = 1
+horizontal_alignment = 1
 
-[node name="TilePicker" parent="VBoxContainer" instance=ExtResource( 2 )]
+[node name="TilePicker" parent="VBoxContainer" unique_id=462342456 instance=ExtResource("2")]
+layout_mode = 2
+expand_mode = 1

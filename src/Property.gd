@@ -35,7 +35,7 @@ func resolve(owner, target, tile_position, args=[]):
 	var result = true
 	if typeof(internal_value) == TYPE_DICTIONARY:
 		if use_conditionalv3:
-			return ConditionalsV3.resolve_conditionals(internal_value, slots)['result']
+			return ConditionalsV3.resolve_conditional(internal_value, slots)['result']
 		elif use_conditionalv2:
 			return ConditionalsV2.resolve_conditional(internal_value, slots)['result']
 		else:

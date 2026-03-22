@@ -123,11 +123,11 @@ func get_v3_full_conditional_data() -> Dictionary:
 	for command_node in cond_list.get_children():
 		data.conditions.append(make_v3_command_data(command_node))
 	for command_node in true_actions_list.get_children():
-		data.true_actions.append(make_v3_command_data(command_node))
+		data["when true"].append(make_v3_command_data(command_node))
 	for command_node in false_actions_list.get_children():
-		data.false_actions.append(make_v3_command_data(command_node))
+		data["when false"].append(make_v3_command_data(command_node))
 	for command_node in always_actions_list.get_children():
-		data.always_actions.append(make_v3_command_data(command_node))
+		data["when always"].append(make_v3_command_data(command_node))
 	
 	return data
 
@@ -136,7 +136,7 @@ func make_v3_command_data(command_input_node) -> String:
 	var args: Array[String] = [str(data.slot)]
 	for opt in data.options:
 		args.append(str(opt))
-	return "%s:%s" % [ConditionalsV3.V3_CMD_MAP[data.code], ",".join(args)]
+	return "basic_default.%s:%s" % [ConditionalsV3.V3_CMD_MAP[data.code], ",".join(args)]
 
 func make_command_data(command_input_node) -> Dictionary:
 	return command_input_node.get_command_data()

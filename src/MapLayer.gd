@@ -6,6 +6,8 @@ func single_init(tile_index):
 	for i in range(width):
 		for j in range(height):
 			set_cell_i_source(i, j, tile_index)
+			if i == 2 and j == 1:
+				set_cell_i_source(i, j, 4)
 
 func set_cell_s(at_coord: Vector2i, tile_source: int) -> void:
 	if tile_source == -1:

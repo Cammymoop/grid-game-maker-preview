@@ -61,6 +61,7 @@ func _on_SaveButton_pressed():
 		var popup = generic_confirm.instantiate()
 		var title = "Do you want to override"
 		var text = "A game with this name already exists, do you want to override it?"
+		add_child(popup)
 		popup.confirm_with_callbacks(title, text, _real_save)
 	else:
 		_real_save()

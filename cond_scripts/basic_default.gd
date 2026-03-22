@@ -45,11 +45,8 @@ func call_command(resolver, command_name: String, slots: Dictionary, full_call_n
 
 # --- helpers ---
 
-func _slot(slot_str: String) -> int:
-	return Slot[slot_str.to_upper()]
-
 func _slot_val(slots: Dictionary, slot_str: String):
-	return slots.get(_slot(slot_str), null)
+	return slots[int(slot_str)]
 
 func _resolve_direction(dir_str: String, entity) -> int:
 	if Utility.is_absolute_direction(dir_str):
@@ -77,7 +74,7 @@ func cmd_quit(_slots: Dictionary) -> Dictionary:
 # Select: args = slot_str, tile_name
 func cmd_select_tiles_named(slots: Dictionary, slot_str: String, tile_name: String) -> void:
 	var tindex = MapManager.get_tile_index(tile_name)
-	slots[_slot(slot_str)] = MapManager.get_all_positions_of_tile(tindex)
+	slots[int(slot_str)] = MapManager.get_all_positions_of_tile(tindex)
 
 # Select: args = slot_str, rel_x, rel_y, width, height
 func cmd_select_tiles_rect(slots: Dictionary, slot_str: String, x: String, y: String, w: String, h: String) -> void:
@@ -87,12 +84,12 @@ func cmd_select_tiles_rect(slots: Dictionary, slot_str: String, x: String, y: St
 	for xi in range(_get_int(w)):
 		for yi in range(_get_int(h)):
 			positions.append(top + Vector2(xi, yi))
-	slots[_slot(slot_str)] = positions
+	slots[int(slot_str)] = positions
 
-# Condition: args = slot_str, property_name [, "true" to invert]
-func cmd_c_has_property(slots: Dictionary, slot_str: String, property_name: String, invert: String = "false") -> bool:
+# Condition: args = slot_str, invert, property_name
+func cmd_c_has_property(slots: Dictionary, slot_str: String, invert: String, property_name: String) -> bool:
 	var selected = _slot_val(slots, slot_str)
-	var slot_id = _slot(slot_str)
+	var slot_id = int(slot_str)
 	var result: bool
 	if Commands.slot_is_entity(slot_id):
 		result = EntityManager.entity_has_property(selected, property_name)
@@ -101,24 +98,25 @@ func cmd_c_has_property(slots: Dictionary, slot_str: String, property_name: Stri
 			result = false
 		else:
 			result = MapManager.get_tile_property_at(selected[0], property_name) != null
+	prints("has property:", slot_str, property_name, "result:", result)
 	return not result if invert == "true" else result
 
-# Condition: args = slot_str, name [, "true" to invert]
-func cmd_c_has_name(slots: Dictionary, slot_str: String, name: String, invert: String = "false") -> bool:
+# Condition: args = slot_str, invert, check_name
+func cmd_c_has_name(slots: Dictionary, slot_str: String, invert: String, check_name: String) -> bool:
 	var selected = _slot_val(slots, slot_str)
-	var result = selected.entity_name == name
+	var result = selected.entity_name == check_name
 	return not result if invert == "true" else result
 
-# Condition: args = slot_str, direction [, "true" to invert]
-func cmd_c_can_move(slots: Dictionary, slot_str: String, direction: String, invert: String = "false") -> bool:
+# Condition: args = slot_str, invert, direction
+func cmd_c_can_move(slots: Dictionary, slot_str: String, invert: String, direction: String) -> bool:
 	var selected = _slot_val(slots, slot_str)
 	var facing = _resolve_direction(direction, selected)
 	var result = selected.can_i_move(facing)
 	return not result if invert == "true" else result
 
 # Condition/Action: push selected entity in direction, returns whether move succeeded
-# args = slot_str, direction [, "true" to keep visual facing unchanged]
-func cmd_c_get_pushed(slots: Dictionary, slot_str: String, direction: String, keep_visual: String = "false") -> bool:
+# args = slot_str, keep_visual, direction
+func cmd_c_get_pushed(slots: Dictionary, slot_str: String, keep_visual: String, direction: String) -> bool:
 	var selected = _slot_val(slots, slot_str)
 	if selected.moving:
 		return false
@@ -149,6 +147,7 @@ func cmd_a_swap_tiles(slots: Dictionary, slot_str: String, tile1: String, tile2:
 
 # Action: args = slot_str, tile_name  (sets all positions in slot to the given tile)
 func cmd_a_set_tiles(slots: Dictionary, slot_str: String, tile: String) -> void:
+	prints("set tiles:", slot_str, tile)
 	var selected = _slot_val(slots, slot_str)
 	MapManager.replace_tiles_at_array(selected, MapManager.get_tile_index(tile))
 
