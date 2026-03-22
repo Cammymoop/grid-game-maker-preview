@@ -8,29 +8,29 @@ const V3_CMD_MAP: Dictionary = {
     CC.SELECT_DEFAULT: "",
     CC.SELECT_NEAREST_ENTITY: "",
     CC.SELECT_ENTITY_AT: "",
-    CC.SELECT_TILES_NAMED: "",
-    CC.SELECT_TILES_RECT: "",
-	
+    CC.SELECT_TILES_NAMED: "select_tiles_named",
+    CC.SELECT_TILES_RECT: "select_tiles_rect",
+
 	# Conditions
-    CC.C_HAS_PROPERTY: "",
-    CC.C_HAS_NAME: "",
-    CC.C_CAN_MOVE: "",
-    CC.C_GET_PUSHED: "",
-	
+    CC.C_HAS_PROPERTY: "c_has_property",
+    CC.C_HAS_NAME: "c_has_name",
+    CC.C_CAN_MOVE: "c_can_move",
+    CC.C_GET_PUSHED: "c_get_pushed",
+
 	# Actions
-    CC.A_DIE: "",
-    CC.A_MOVE: "",
-    CC.A_SWAP_TILES: "",
-    CC.A_SET_TILES: "",
+    CC.A_DIE: "a_die",
+    CC.A_MOVE: "a_move",
+    CC.A_SWAP_TILES: "a_swap_tiles",
+    CC.A_SET_TILES: "a_set_tiles",
     CC.A_QUIT: "quit",
-    CC.A_SET_PROPERTY: "",
-    CC.A_PROPERTY_ADD: "",
-    CC.A_PROPERTY_SUBTRACT: "",
-    CC.A_REMOVE_PROPERTY: "",
-	
-    CC.A_SAVE_CHECKPOINT: "",
-    CC.A_LOAD_CHECKPOINT: "",
-	
+    CC.A_SET_PROPERTY: "a_set_property",
+    CC.A_PROPERTY_ADD: "a_property_add",
+    CC.A_PROPERTY_SUBTRACT: "a_property_subtract",
+    CC.A_REMOVE_PROPERTY: "a_remove_property",
+
+    CC.A_SAVE_CHECKPOINT: "a_save_checkpoint",
+    CC.A_LOAD_CHECKPOINT: "a_load_checkpoint",
+
     CC.A_CREATE_ENTITY: "",
     CC.A_TURN: "",
     CC.A_SEND_SIGNAL: "",
