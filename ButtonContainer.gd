@@ -11,7 +11,7 @@ signal toggled(button_pressed)
 
 var button: Button
 
-var small_font = preload("res://assets/font/pixel_font_white.tres")
+var small_font = preload("res://assets/font/img_font_white_reformat.png")
 
 @export var toggle_mode = false:
 	get:

@@ -1,9 +1,14 @@
 extends ConfirmationDialog
 
+signal hidden
+
 var conditional_editor_scn = preload("res://Scenes/GameEditor/ConditionalEditor/ConditionalEditor.tscn")
 
 var conditional_val = {}
 var conditional_mode: = false
+
+func _ready():
+	visibility_changed.connect(Callable(self, "_on_vis_changed"))
 
 func set_info(prop_name, prop_val) -> void:
 	find_child("SetName").text = prop_name
@@ -24,7 +29,7 @@ func _on_EditConditional_pressed():
 		return
 	
 	ui_root.add_popup_layer_node(editor)
-	editor.popup()
+	editor.popup_centered()
 	if conditional_val:
 		editor.load_conditional_data(conditional_val)
 	
@@ -56,3 +61,7 @@ func _on_Button_pressed():
 		print("converted from old data")
 		print(str(result))
 		conditional_val = result
+
+func _on_vis_changed():
+	if not visible:
+		hidden.emit()

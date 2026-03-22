@@ -8,7 +8,6 @@ offset_left = 153.0
 offset_top = 267.0
 offset_right = 636.0
 offset_bottom = 467.0
-exclusive = true
 window_title = "Update Image Metadata"
 script = ExtResource( 1 )
 __meta__ = {

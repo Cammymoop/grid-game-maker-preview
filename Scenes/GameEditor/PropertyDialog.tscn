@@ -21,7 +21,6 @@ offset_top = 243.0
 offset_right = 637.0
 offset_bottom = 399.0
 custom_minimum_size = Vector2( 200, 140 )
-exclusive = true
 window_title = "Update Property"
 resizable = true
 script = ExtResource( 1 )

@@ -1,64 +1,62 @@
-[gd_scene load_steps=10 format=2]
+[gd_scene format=3 uid="uid://brj1yabyq8bpc"]
 
-[ext_resource path="res://src/UI/ConditionalEditorTheme.tres" type="Theme" id=1]
-[ext_resource path="res://Scenes/GameEditor/ConditionalEditor/AddCommandDialog.tscn" type="PackedScene" id=2]
-[ext_resource path="res://assets/img/button_icons/plus.png" type="Texture2D" id=3]
-[ext_resource path="res://src/UI/ConditionalEditorBGTexture.tres" type="StyleBox" id=4]
-[ext_resource path="res://src/GameEditor/ConditionalEditor/AnActionsTab.gd" type="Script" id=5]
-[ext_resource path="res://src/GameEditor/ConditionalEditor/ConditionalEditor.gd" type="Script" id=6]
-[ext_resource path="res://src/GameEditor/ConditionalEditor/ActionsTabs.gd" type="Script" id=7]
+[ext_resource type="Theme" uid="uid://daswi5ker7ml0" path="res://src/UI/ConditionalEditorTheme.tres" id="1"]
+[ext_resource type="PackedScene" path="res://Scenes/GameEditor/ConditionalEditor/AddCommandDialog.tscn" id="2"]
+[ext_resource type="Texture2D" uid="uid://cv8l7ymc05wg5" path="res://assets/img/button_icons/plus.png" id="3"]
+[ext_resource type="StyleBox" uid="uid://bks823xpsbs2q" path="res://src/UI/ConditionalEditorBGTexture.tres" id="4"]
+[ext_resource type="Script" uid="uid://bm1w1ctkp6sd7" path="res://src/GameEditor/ConditionalEditor/AnActionsTab.gd" id="5"]
+[ext_resource type="Script" uid="uid://d3yos0b24ft4f" path="res://src/GameEditor/ConditionalEditor/ConditionalEditor.gd" id="6"]
+[ext_resource type="Script" uid="uid://wr87ai1n4tcw" path="res://src/GameEditor/ConditionalEditor/ActionsTabs.gd" id="7"]
 
-[sub_resource type="StyleBoxFlat" id=3]
-bg_color = Color( 0.913725, 0.913725, 0.913725, 1 )
+[sub_resource type="StyleBoxFlat" id="3"]
+content_margin_top = 6.0
+bg_color = Color(0.913725, 0.913725, 0.913725, 1)
 corner_radius_top_left = 6
 corner_radius_top_right = 6
 expand_margin_left = 8.0
 expand_margin_right = 8.0
-expand_margin_top = 6.0
 
-[sub_resource type="StyleBoxFlat" id=2]
-bg_color = Color( 0.137255, 0.117647, 0.117647, 1 )
+[sub_resource type="StyleBoxFlat" id="2"]
+bg_color = Color(0.137255, 0.117647, 0.117647, 1)
 
-[node name="ConditionalEditor" type="Popup"]
+[node name="ConditionalEditor" type="Window" unique_id=557924117]
+transparent_bg = true
+oversampling_override = 1.0
+position = Vector2i(0, 36)
+size = Vector2i(570, 461)
+transparent = true
+theme = ExtResource("1")
+script = ExtResource("6")
+
+[node name="PanelContainer" type="PanelContainer" parent="." unique_id=643923339]
+anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-theme = ExtResource( 1 )
-exclusive = true
-script = ExtResource( 6 )
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = ExtResource("4")
 
-[node name="PanelContainer" type="PanelContainer" parent="."]
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = 22.0
-offset_top = 21.0
-offset_right = -22.0
-offset_bottom = -15.0
-theme_override_styles/panel = ExtResource( 4 )
-
-[node name="MarginContainer" type="MarginContainer" parent="PanelContainer"]
-offset_left = 4.0
-offset_right = 720.0
-offset_bottom = 728.0
-theme_override_constants/margin_right = 4
+[node name="MarginContainer" type="MarginContainer" parent="PanelContainer" unique_id=348729900]
+layout_mode = 2
 theme_override_constants/margin_left = 4
+theme_override_constants/margin_right = 4
 theme_override_constants/margin_bottom = 10
 
-[node name="VBoxContainer2" type="VBoxContainer" parent="PanelContainer/MarginContainer"]
-offset_left = 4.0
-offset_right = 712.0
-offset_bottom = 718.0
+[node name="VBoxContainer2" type="VBoxContainer" parent="PanelContainer/MarginContainer" unique_id=672802075]
+layout_mode = 2
 
-[node name="TitleBar" type="Control" parent="PanelContainer/MarginContainer/VBoxContainer2"]
-offset_right = 708.0
-offset_bottom = 24.0
-custom_minimum_size = Vector2( 0, 24 )
+[node name="TitleBar" type="Control" parent="PanelContainer/MarginContainer/VBoxContainer2" unique_id=192343188]
+custom_minimum_size = Vector2(0, 24)
+layout_mode = 2
 
-[node name="Panel" type="Panel" parent="PanelContainer/MarginContainer/VBoxContainer2/TitleBar"]
+[node name="Panel" type="Panel" parent="PanelContainer/MarginContainer/VBoxContainer2/TitleBar" unique_id=1044921035]
+layout_mode = 0
 anchor_right = 1.0
 anchor_bottom = 1.0
-theme_override_styles/panel = SubResource( 3 )
+theme_override_styles/panel = SubResource("3")
 
-[node name="Label" type="Label" parent="PanelContainer/MarginContainer/VBoxContainer2/TitleBar"]
+[node name="Label" type="Label" parent="PanelContainer/MarginContainer/VBoxContainer2/TitleBar" unique_id=221119014]
+layout_mode = 0
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
@@ -69,229 +67,171 @@ offset_right = 20.0
 offset_bottom = 11.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_colors/font_color = Color( 0, 0, 0, 1 )
+theme_override_colors/font_color = Color(0, 0, 0, 1)
 text = "Conditional Editor"
 
-[node name="VBoxContainer" type="VBoxContainer" parent="PanelContainer/MarginContainer/VBoxContainer2"]
-offset_top = 28.0
-offset_right = 708.0
-offset_bottom = 718.0
+[node name="VBoxContainer" type="VBoxContainer" parent="PanelContainer/MarginContainer/VBoxContainer2" unique_id=366886339]
+layout_mode = 2
 size_flags_vertical = 3
 theme_override_constants/separation = 12
 
-[node name="HBoxContainer" type="HBoxContainer" parent="PanelContainer/MarginContainer/VBoxContainer2/VBoxContainer"]
-offset_right = 708.0
-offset_bottom = 321.0
+[node name="HBoxContainer" type="HBoxContainer" parent="PanelContainer/MarginContainer/VBoxContainer2/VBoxContainer" unique_id=2097436952]
+layout_mode = 2
 size_flags_vertical = 3
 theme_override_constants/separation = 8
 
-[node name="TabContainer" type="TabContainer" parent="PanelContainer/MarginContainer/VBoxContainer2/VBoxContainer/HBoxContainer"]
-offset_right = 656.0
-offset_bottom = 321.0
+[node name="TabContainer" type="TabContainer" parent="PanelContainer/MarginContainer/VBoxContainer2/VBoxContainer/HBoxContainer" unique_id=972839437]
+layout_mode = 2
 size_flags_horizontal = 3
-tab_alignment = 0
+current_tab = 0
 
-[node name="Conditions" type="ScrollContainer" parent="PanelContainer/MarginContainer/VBoxContainer2/VBoxContainer/HBoxContainer/TabContainer"]
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = 4.0
-offset_top = 27.0
-offset_right = -4.0
-offset_bottom = -4.0
+[node name="Conditions" type="ScrollContainer" parent="PanelContainer/MarginContainer/VBoxContainer2/VBoxContainer/HBoxContainer/TabContainer" unique_id=1041244154]
+custom_minimum_size = Vector2(460, 120)
+layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
-scroll_horizontal_enabled = false
+metadata/_tab_index = 0
 
-[node name="Panel" type="PanelContainer" parent="PanelContainer/MarginContainer/VBoxContainer2/VBoxContainer/HBoxContainer/TabContainer/Conditions"]
-offset_right = 648.0
-offset_bottom = 290.0
+[node name="Panel" type="PanelContainer" parent="PanelContainer/MarginContainer/VBoxContainer2/VBoxContainer/HBoxContainer/TabContainer/Conditions" unique_id=168388457]
+layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
-theme_override_styles/panel = SubResource( 2 )
+theme_override_styles/panel = SubResource("2")
 
-[node name="MarginContainer" type="MarginContainer" parent="PanelContainer/MarginContainer/VBoxContainer2/VBoxContainer/HBoxContainer/TabContainer/Conditions/Panel"]
-offset_right = 648.0
-offset_bottom = 290.0
-theme_override_constants/margin_right = 2
-theme_override_constants/margin_top = 10
+[node name="MarginContainer" type="MarginContainer" parent="PanelContainer/MarginContainer/VBoxContainer2/VBoxContainer/HBoxContainer/TabContainer/Conditions/Panel" unique_id=516125257]
+layout_mode = 2
 theme_override_constants/margin_left = 2
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 2
 theme_override_constants/margin_bottom = 10
 
-[node name="ConditionsList" type="VBoxContainer" parent="PanelContainer/MarginContainer/VBoxContainer2/VBoxContainer/HBoxContainer/TabContainer/Conditions/Panel/MarginContainer"]
-offset_left = 2.0
-offset_top = 10.0
-offset_right = 646.0
-offset_bottom = 280.0
-custom_minimum_size = Vector2( 100, 20 )
+[node name="ConditionsList" type="VBoxContainer" parent="PanelContainer/MarginContainer/VBoxContainer2/VBoxContainer/HBoxContainer/TabContainer/Conditions/Panel/MarginContainer" unique_id=377614305]
+custom_minimum_size = Vector2(100, 20)
+layout_mode = 2
 
-[node name="NewConditionButton" type="Button" parent="PanelContainer/MarginContainer/VBoxContainer2/VBoxContainer/HBoxContainer"]
-offset_left = 664.0
-offset_top = 138.0
-offset_right = 708.0
-offset_bottom = 182.0
+[node name="NewConditionButton" type="Button" parent="PanelContainer/MarginContainer/VBoxContainer2/VBoxContainer/HBoxContainer" unique_id=195764754]
+layout_mode = 2
 size_flags_vertical = 4
-icon = ExtResource( 3 )
+icon = ExtResource("3")
 
-[node name="HBoxContainer2" type="HBoxContainer" parent="PanelContainer/MarginContainer/VBoxContainer2/VBoxContainer"]
-offset_top = 333.0
-offset_right = 708.0
-offset_bottom = 654.0
+[node name="HBoxContainer2" type="HBoxContainer" parent="PanelContainer/MarginContainer/VBoxContainer2/VBoxContainer" unique_id=549658762]
+layout_mode = 2
 size_flags_vertical = 3
 theme_override_constants/separation = 8
 
-[node name="ActionsTabs" type="TabContainer" parent="PanelContainer/MarginContainer/VBoxContainer2/VBoxContainer/HBoxContainer2"]
-offset_right = 656.0
-offset_bottom = 321.0
+[node name="ActionsTabs" type="TabContainer" parent="PanelContainer/MarginContainer/VBoxContainer2/VBoxContainer/HBoxContainer2" unique_id=1974950153]
+layout_mode = 2
 size_flags_horizontal = 3
-tab_alignment = 0
-script = ExtResource( 7 )
+current_tab = 0
+script = ExtResource("7")
 
-[node name="True Actions" type="ScrollContainer" parent="PanelContainer/MarginContainer/VBoxContainer2/VBoxContainer/HBoxContainer2/ActionsTabs"]
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = 4.0
-offset_top = 27.0
-offset_right = -4.0
-offset_bottom = -4.0
-scroll_horizontal_enabled = false
-script = ExtResource( 5 )
+[node name="True Actions" type="ScrollContainer" parent="PanelContainer/MarginContainer/VBoxContainer2/VBoxContainer/HBoxContainer2/ActionsTabs" unique_id=1758110469]
+custom_minimum_size = Vector2(460, 120)
+layout_mode = 2
+script = ExtResource("5")
 list = NodePath("Panel/MarginContainer/TrueActionsList")
+metadata/_tab_index = 0
 
-[node name="Panel" type="PanelContainer" parent="PanelContainer/MarginContainer/VBoxContainer2/VBoxContainer/HBoxContainer2/ActionsTabs/True Actions"]
-offset_right = 648.0
-offset_bottom = 290.0
+[node name="Panel" type="PanelContainer" parent="PanelContainer/MarginContainer/VBoxContainer2/VBoxContainer/HBoxContainer2/ActionsTabs/True Actions" unique_id=1895087873]
+layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
-theme_override_styles/panel = SubResource( 2 )
+theme_override_styles/panel = SubResource("2")
 
-[node name="MarginContainer" type="MarginContainer" parent="PanelContainer/MarginContainer/VBoxContainer2/VBoxContainer/HBoxContainer2/ActionsTabs/True Actions/Panel"]
-offset_right = 648.0
-offset_bottom = 290.0
-theme_override_constants/margin_right = 2
-theme_override_constants/margin_top = 10
+[node name="MarginContainer" type="MarginContainer" parent="PanelContainer/MarginContainer/VBoxContainer2/VBoxContainer/HBoxContainer2/ActionsTabs/True Actions/Panel" unique_id=996062562]
+layout_mode = 2
 theme_override_constants/margin_left = 2
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 2
 theme_override_constants/margin_bottom = 10
 
-[node name="TrueActionsList" type="VBoxContainer" parent="PanelContainer/MarginContainer/VBoxContainer2/VBoxContainer/HBoxContainer2/ActionsTabs/True Actions/Panel/MarginContainer"]
-offset_left = 2.0
-offset_top = 10.0
-offset_right = 646.0
-offset_bottom = 280.0
-custom_minimum_size = Vector2( 100, 20 )
+[node name="TrueActionsList" type="VBoxContainer" parent="PanelContainer/MarginContainer/VBoxContainer2/VBoxContainer/HBoxContainer2/ActionsTabs/True Actions/Panel/MarginContainer" unique_id=1044598477]
+custom_minimum_size = Vector2(100, 20)
+layout_mode = 2
 
-[node name="False Actions" type="ScrollContainer" parent="PanelContainer/MarginContainer/VBoxContainer2/VBoxContainer/HBoxContainer2/ActionsTabs"]
+[node name="False Actions" type="ScrollContainer" parent="PanelContainer/MarginContainer/VBoxContainer2/VBoxContainer/HBoxContainer2/ActionsTabs" unique_id=1765587463]
 visible = false
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_top = 20.0
-offset_bottom = -4.0
-scroll_horizontal_enabled = false
-script = ExtResource( 5 )
+custom_minimum_size = Vector2(460, 120)
+layout_mode = 2
+script = ExtResource("5")
 list = NodePath("Panel/MarginContainer/FalseActionsList")
+metadata/_tab_index = 1
 
-[node name="Panel" type="PanelContainer" parent="PanelContainer/MarginContainer/VBoxContainer2/VBoxContainer/HBoxContainer2/ActionsTabs/False Actions"]
-offset_right = 656.0
-offset_bottom = 297.0
+[node name="Panel" type="PanelContainer" parent="PanelContainer/MarginContainer/VBoxContainer2/VBoxContainer/HBoxContainer2/ActionsTabs/False Actions" unique_id=471248604]
+layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
-theme_override_styles/panel = SubResource( 2 )
+theme_override_styles/panel = SubResource("2")
 
-[node name="MarginContainer" type="MarginContainer" parent="PanelContainer/MarginContainer/VBoxContainer2/VBoxContainer/HBoxContainer2/ActionsTabs/False Actions/Panel"]
-offset_right = 484.0
-offset_bottom = 238.0
-theme_override_constants/margin_right = 2
-theme_override_constants/margin_top = 10
+[node name="MarginContainer" type="MarginContainer" parent="PanelContainer/MarginContainer/VBoxContainer2/VBoxContainer/HBoxContainer2/ActionsTabs/False Actions/Panel" unique_id=831435794]
+layout_mode = 2
 theme_override_constants/margin_left = 2
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 2
 theme_override_constants/margin_bottom = 10
 
-[node name="FalseActionsList" type="VBoxContainer" parent="PanelContainer/MarginContainer/VBoxContainer2/VBoxContainer/HBoxContainer2/ActionsTabs/False Actions/Panel/MarginContainer"]
-offset_left = 2.0
-offset_top = 10.0
-offset_right = 482.0
-offset_bottom = 228.0
-custom_minimum_size = Vector2( 100, 20 )
+[node name="FalseActionsList" type="VBoxContainer" parent="PanelContainer/MarginContainer/VBoxContainer2/VBoxContainer/HBoxContainer2/ActionsTabs/False Actions/Panel/MarginContainer" unique_id=144153354]
+custom_minimum_size = Vector2(100, 20)
+layout_mode = 2
 
-[node name="Always Actions" type="ScrollContainer" parent="PanelContainer/MarginContainer/VBoxContainer2/VBoxContainer/HBoxContainer2/ActionsTabs"]
+[node name="Always Actions" type="ScrollContainer" parent="PanelContainer/MarginContainer/VBoxContainer2/VBoxContainer/HBoxContainer2/ActionsTabs" unique_id=99594252]
 visible = false
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_top = 20.0
-offset_bottom = -4.0
-scroll_horizontal_enabled = false
-script = ExtResource( 5 )
+custom_minimum_size = Vector2(460, 120)
+layout_mode = 2
+script = ExtResource("5")
 list = NodePath("Panel/MarginContainer/AlwaysActionsList")
+metadata/_tab_index = 2
 
-[node name="Panel" type="PanelContainer" parent="PanelContainer/MarginContainer/VBoxContainer2/VBoxContainer/HBoxContainer2/ActionsTabs/Always Actions"]
-offset_right = 656.0
-offset_bottom = 297.0
+[node name="Panel" type="PanelContainer" parent="PanelContainer/MarginContainer/VBoxContainer2/VBoxContainer/HBoxContainer2/ActionsTabs/Always Actions" unique_id=1911882534]
+layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
-theme_override_styles/panel = SubResource( 2 )
+theme_override_styles/panel = SubResource("2")
 
-[node name="MarginContainer" type="MarginContainer" parent="PanelContainer/MarginContainer/VBoxContainer2/VBoxContainer/HBoxContainer2/ActionsTabs/Always Actions/Panel"]
-offset_right = 484.0
-offset_bottom = 238.0
-theme_override_constants/margin_right = 2
-theme_override_constants/margin_top = 10
+[node name="MarginContainer" type="MarginContainer" parent="PanelContainer/MarginContainer/VBoxContainer2/VBoxContainer/HBoxContainer2/ActionsTabs/Always Actions/Panel" unique_id=939838264]
+layout_mode = 2
 theme_override_constants/margin_left = 2
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 2
 theme_override_constants/margin_bottom = 10
 
-[node name="AlwaysActionsList" type="VBoxContainer" parent="PanelContainer/MarginContainer/VBoxContainer2/VBoxContainer/HBoxContainer2/ActionsTabs/Always Actions/Panel/MarginContainer"]
-offset_left = 2.0
-offset_top = 10.0
-offset_right = 482.0
-offset_bottom = 228.0
-custom_minimum_size = Vector2( 100, 20 )
+[node name="AlwaysActionsList" type="VBoxContainer" parent="PanelContainer/MarginContainer/VBoxContainer2/VBoxContainer/HBoxContainer2/ActionsTabs/Always Actions/Panel/MarginContainer" unique_id=1072969222]
+custom_minimum_size = Vector2(100, 20)
+layout_mode = 2
 
-[node name="NewActionButton" type="Button" parent="PanelContainer/MarginContainer/VBoxContainer2/VBoxContainer/HBoxContainer2"]
-offset_left = 664.0
-offset_top = 138.0
-offset_right = 708.0
-offset_bottom = 182.0
+[node name="NewActionButton" type="Button" parent="PanelContainer/MarginContainer/VBoxContainer2/VBoxContainer/HBoxContainer2" unique_id=591077197]
+layout_mode = 2
 size_flags_vertical = 4
-icon = ExtResource( 3 )
+icon = ExtResource("3")
 
-[node name="HBoxContainer3" type="HBoxContainer" parent="PanelContainer/MarginContainer/VBoxContainer2/VBoxContainer"]
-offset_top = 666.0
-offset_right = 708.0
-offset_bottom = 690.0
+[node name="HBoxContainer3" type="HBoxContainer" parent="PanelContainer/MarginContainer/VBoxContainer2/VBoxContainer" unique_id=306755744]
+layout_mode = 2
 
-[node name="Control" type="Control" parent="PanelContainer/MarginContainer/VBoxContainer2/VBoxContainer/HBoxContainer3"]
-offset_right = 199.0
-offset_bottom = 24.0
+[node name="Control" type="Control" parent="PanelContainer/MarginContainer/VBoxContainer2/VBoxContainer/HBoxContainer3" unique_id=131909025]
+layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="SaveButton" type="Button" parent="PanelContainer/MarginContainer/VBoxContainer2/VBoxContainer/HBoxContainer3"]
-offset_left = 203.0
-offset_right = 243.0
-offset_bottom = 24.0
+[node name="SaveButton" type="Button" parent="PanelContainer/MarginContainer/VBoxContainer2/VBoxContainer/HBoxContainer3" unique_id=87317381]
+layout_mode = 2
 text = "Save"
 
-[node name="Control2" type="Control" parent="PanelContainer/MarginContainer/VBoxContainer2/VBoxContainer/HBoxContainer3"]
-offset_left = 247.0
-offset_right = 447.0
-offset_bottom = 24.0
+[node name="Control2" type="Control" parent="PanelContainer/MarginContainer/VBoxContainer2/VBoxContainer/HBoxContainer3" unique_id=1972202422]
+layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="CancelButton" type="Button" parent="PanelContainer/MarginContainer/VBoxContainer2/VBoxContainer/HBoxContainer3"]
-offset_left = 451.0
-offset_right = 504.0
-offset_bottom = 24.0
+[node name="CancelButton" type="Button" parent="PanelContainer/MarginContainer/VBoxContainer2/VBoxContainer/HBoxContainer3" unique_id=1456315739]
+layout_mode = 2
 text = "Cancel"
 
-[node name="Control3" type="Control" parent="PanelContainer/MarginContainer/VBoxContainer2/VBoxContainer/HBoxContainer3"]
-offset_left = 508.0
-offset_right = 708.0
-offset_bottom = 24.0
+[node name="Control3" type="Control" parent="PanelContainer/MarginContainer/VBoxContainer2/VBoxContainer/HBoxContainer3" unique_id=1212957850]
+layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="AddActionDialog" parent="." instance=ExtResource( 2 )]
+[node name="AddActionDialog" parent="." unique_id=646307895 instance=ExtResource("2")]
 exclude_conditions = true
 
-[node name="AddConditionDialog" parent="." instance=ExtResource( 2 )]
+[node name="AddConditionDialog" parent="." unique_id=24360205 instance=ExtResource("2")]
 exclude_actions = true
-
-[node name="Sprite2D" type="Sprite2D" parent="."]
 
 [connection signal="pressed" from="PanelContainer/MarginContainer/VBoxContainer2/VBoxContainer/HBoxContainer/NewConditionButton" to="." method="_on_NewConditionButton_pressed"]
 [connection signal="pressed" from="PanelContainer/MarginContainer/VBoxContainer2/VBoxContainer/HBoxContainer2/NewActionButton" to="." method="_on_NewActionButton_pressed"]

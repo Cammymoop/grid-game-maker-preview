@@ -98,21 +98,21 @@ func set_valid_slot_categories(categories: Array) -> void:
 func show_picker() -> void:
 	picker_open = true
 	picker.popup()
-	picker.set_as_minsize()
+	picker.size = Vector2.ZERO
 	
 	var center_pos = $ButtonContainer.global_position + ($ButtonContainer.size / 2)
-	picker.global_position = center_pos - (picker.size/2)
+	picker.position = center_pos - (Vector2(picker.size)/2)
 	
 	var picker_size = picker.size
 	var viewport_size = get_viewport().size
-	if picker.global_position.x < PICKER_SCREEN_MARGIN_H:
-		picker.global_position.x = PICKER_SCREEN_MARGIN_H
-	elif picker.global_position.x + picker_size.x > viewport_size.x - PICKER_SCREEN_MARGIN_H:
-		picker.global_position.x = (viewport_size.x - PICKER_SCREEN_MARGIN_H) - picker_size.x
-	if picker.global_position.y < PICKER_SCREEN_MARGIN_V:
-		picker.global_position.y = PICKER_SCREEN_MARGIN_V
-	elif picker.global_position.y + picker_size.y > viewport_size.y - PICKER_SCREEN_MARGIN_V:
-		picker.global_position.y = (viewport_size.y - PICKER_SCREEN_MARGIN_V) - picker_size.y
+	if picker.position.x < PICKER_SCREEN_MARGIN_H:
+		picker.position.x = PICKER_SCREEN_MARGIN_H
+	elif picker.position.x + picker_size.x > viewport_size.x - PICKER_SCREEN_MARGIN_H:
+		picker.position.x = (viewport_size.x - PICKER_SCREEN_MARGIN_H) - picker_size.x
+	if picker.position.y < PICKER_SCREEN_MARGIN_V:
+		picker.position.y = PICKER_SCREEN_MARGIN_V
+	elif picker.position.y + picker_size.y > viewport_size.y - PICKER_SCREEN_MARGIN_V:
+		picker.position.y = (viewport_size.y - PICKER_SCREEN_MARGIN_V) - picker_size.y
 
 func hide_picker() -> void:
 	picker_open = false

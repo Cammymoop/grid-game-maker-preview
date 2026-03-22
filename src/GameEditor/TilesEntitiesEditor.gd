@@ -16,6 +16,9 @@ func _ready():
 	ui_root = find_parent("UIRoot")
 	the_grid = get_node(the_grid_path)
 	grid_scroll_container = the_grid.get_parent()
+
+	var editor_window: Window = ui_root.find_child("TileEntityEditorWindow")
+	editor_window.hidden.connect(update_the_grid)
 	
 	im_ready = true
 
@@ -62,8 +65,6 @@ func edit_common(editor_window):
 	editor_window.popup_centered()
 	editor_window.fix_size()
 	#editor_window.center_self()
-	
-	editor_window.hidden.connect(Callable(self, "update_the_grid"), CONNECT_ONE_SHOT)
 
 
 func _on_Tiles_resized():

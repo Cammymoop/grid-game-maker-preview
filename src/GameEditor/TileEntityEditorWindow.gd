@@ -114,10 +114,10 @@ func fix_size():
 	size = Vector2.ZERO
 	var panel = $PanelContainer
 	size = panel.size
-	size.x += panel.offset_left
-	size.x -= panel.offset_right
-	size.y += panel.offset_top
-	size.y -= panel.offset_bottom
+	#size.x += panel.offset_left
+	#size.x -= panel.offset_right
+	#size.y += panel.offset_top
+	#size.y -= panel.offset_bottom
 	
 	the_min_size = size
 	
@@ -205,7 +205,8 @@ func add_prop(new_prop_popup) -> void:
 	show_property_list()
 	await get_tree().process_frame
 	fix_size()
-	new_prop_popup.queue_free()
+	if new_prop_popup and not new_prop_popup.is_queued_for_deletion():
+		new_prop_popup.queue_free()
 
 func _on_AddPropertyButton_pressed():
 	var new_prop_popup = new_prop_popup_scene.instantiate()
@@ -247,7 +248,8 @@ func update_property_to(prop_key, update_property_popup):
 	show_property_list()
 	await get_tree().process_frame
 	fix_size()
-	update_property_popup.queue_free()
+	if update_property_popup and not update_property_popup.is_queued_for_deletion():
+		update_property_popup.queue_free()
 
 func _on_PropertyList_item_activated(index):
 	var prop_list:ItemList = find_child("PropertyList")
@@ -275,10 +277,10 @@ func _on_EditMoveSpeed_value_changed(value):
 		return
 	the_definition['intended_move_speed'] = value
 
-func update_controller_options(popup):
-	the_definition["controller_options"] = popup.option_values.duplicate()
+func update_controller_options(the_popup):
+	the_definition["controller_options"] = the_popup.option_values.duplicate()
 	
-	popup.queue_free()
+	the_popup.queue_free()
 
 func _on_ControllerOptionsShow_pressed():
 	if not "controller" in the_definition:

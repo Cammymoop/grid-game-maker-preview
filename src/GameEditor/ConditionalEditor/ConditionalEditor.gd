@@ -1,4 +1,4 @@
-extends Popup
+extends Window
 
 # warning-ignore:unused_signal
 signal save_conditional
@@ -70,21 +70,16 @@ func load_v3_conditional_data(from_data: Dictionary) -> void:
 		var old_sublist = old_sublists[sublists.find(sublist)]
 		for command in from_data[sublist]:
 			var split_cmd = command.split(":")
-			if len(split_cmd) < 2:
-				var code = ConditionalsV3.V3_CMD_MAP.find_key(split_cmd[0])
-				if not code:
-					push_error("Unknown command: %s" % split_cmd[0])
-				else:
-					add_command(code, Commands.Slot.RED, old_sublist, [])
+			var code = ConditionalsV3.V3_CMD_MAP.find_key(split_cmd[0].trim_prefix("basic_default."))
+			if not code:
+				push_error("Unknown command: %s" % split_cmd[0])
+			elif len(split_cmd) < 2:
+				add_command(code, Commands.Slot.RED, old_sublist, [])
 			else:
-				var code = ConditionalsV3.V3_CMD_MAP.find_key(split_cmd[0])
-				if not code:
-					push_error("Unknown command: %s" % split_cmd[0])
-				else:
-					var split_args = split_cmd[1].split(",", true)
-					var slot_id: int = int(split_args[0].split("|")[0])
-					var options = [] if len(split_args) < 2 else split_args.slice(1)
-					add_command(code, slot_id, old_sublist, options)
+				var split_args = split_cmd[1].split(",", true)
+				var slot_id: int = int(split_args[0].split("|")[0])
+				var options = [] if len(split_args) < 2 else split_args.slice(1)
+				add_command(code, slot_id, old_sublist, options)
 
 func _is_raw_data_v3(the_data: Dictionary) -> bool:
 	return the_data.get("v", "") == "3"

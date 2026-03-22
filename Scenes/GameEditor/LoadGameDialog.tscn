@@ -24,6 +24,7 @@ horizontal_alignment = 1
 [node name="GamesList" type="ItemList" parent="VBoxContainer" unique_id=1658591457]
 layout_mode = 2
 size_flags_vertical = 3
+auto_width = true
 auto_height = true
 
 [connection signal="item_activated" from="VBoxContainer/GamesList" to="." method="_on_GamesList_item_activated"]

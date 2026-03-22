@@ -3,7 +3,6 @@
 [node name="TextureDialog" type="ConfirmationDialog"]
 offset_right = 239.0
 offset_bottom = 70.0
-exclusive = true
 window_title = "Set Texture2D"
 __meta__ = {
 "_edit_use_anchors_": false

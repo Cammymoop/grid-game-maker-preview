@@ -6,7 +6,6 @@
 visible = true
 offset_right = 299.0
 offset_bottom = 124.0
-exclusive = true
 window_title = "New Property"
 script = ExtResource( 1 )
 __meta__ = {

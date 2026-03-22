@@ -9,7 +9,6 @@ offset_left = 347.0
 offset_top = 265.0
 offset_right = 570.0
 offset_bottom = 366.0
-exclusive = true
 window_title = "Load Level"
 script = ExtResource( 2 )
 __meta__ = {

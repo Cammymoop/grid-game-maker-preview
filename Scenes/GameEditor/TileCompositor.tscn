@@ -78,7 +78,6 @@ region = Rect2(18, 18, 18, 18)
 [node name="TileCompositor" type="Window" unique_id=1495846052]
 oversampling_override = 1.0
 position = Vector2i(0, 36)
-exclusive = true
 script = ExtResource("1")
 loaded_texture = ExtResource("2")
 make_tex_with_size = Vector2(16, 16)
