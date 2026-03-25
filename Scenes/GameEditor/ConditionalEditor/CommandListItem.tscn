@@ -9,7 +9,9 @@
 [ext_resource type="FontFile" uid="uid://2xjy2wed66ei" path="res://assets/font/my_font.tres" id="7"]
 
 [sub_resource type="Theme" id="Theme_njb7s"]
+resource_local_to_scene = true
 default_font_size = 14
+Label/colors/font_color = Color(1, 1, 1, 1)
 
 [node name="Command" type="PanelContainer" unique_id=530826284]
 custom_minimum_size = Vector2(0, 45)

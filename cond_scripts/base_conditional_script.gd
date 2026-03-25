@@ -1,5 +1,5 @@
-extends Node
 class_name BaseConditionalScript
+extends Node
 
 const CondResolver = preload("res://src/Singletons/conditionals_v3.gd")
 const Slot = Commands.Slot
@@ -20,10 +20,14 @@ func list_commands() -> Array[Dictionary]:
 			var cmd_name = method_name.trim_prefix(CMD_FUNC_PREFIX)
 			cmd_infos.append({
 				"name": cmd_name,
+				"display_name": get_command_display_name(cmd_name),
 				"usage": get_command_usage(cmd_name),
 				"args": get_command_arg_list(cmd_name, method_info),
 			})
 	return cmd_infos
+
+func get_command_display_name(cmd_name: String) -> String:
+	return cmd_name.capitalize()
 
 func get_command_usage(cmd: String) -> String:
 	if not has_method(DESC_FUNC_PREFIX + cmd):

@@ -11,7 +11,7 @@ const V3_CMD_MAP: Dictionary = {
     CC.SELECT_TILES_NAMED: "select_tiles_named",
     CC.SELECT_TILES_RECT: "select_tiles_rect",
 
-	# Conditions
+    # Conditions
     CC.C_HAS_PROPERTY: "c_has_property",
     CC.C_HAS_NAME: "c_is_named",
     CC.C_CAN_MOVE: "c_can_move",
@@ -19,7 +19,7 @@ const V3_CMD_MAP: Dictionary = {
     
     CC.C_IS_FACING: "c_is_facing",
 
-	# Actions
+    # Actions
     CC.A_DIE: "a_die",
     CC.A_MOVE: "a_move",
     CC.A_SWAP_TILES: "a_swap_tiles",
@@ -45,6 +45,8 @@ var all_commands: Dictionary[String, Dictionary] = {}
 
 const DEFAULT_SCRIPTS: = [ "basic_default" ]
 
+var add_orch_scripts: Array[String] = ["res://cond_scripts/orch_cmds.torch"]
+
 const BUILTIN_COMMANDS: Array[String] = ["and", "or", "not", "false", "true"]
 
 var verbose = false
@@ -53,7 +55,14 @@ var reset_slots: Dictionary = {}
 
 func _ready() -> void:
     for script_name in DEFAULT_SCRIPTS:
-        add_conditional_script(script_name, ScriptType.GDSCRIPT, null)
+        add_command_script_auto(script_name, ScriptType.GDSCRIPT, null)
+    for orch_script_path in add_orch_scripts:
+        var script_name: String = orch_script_path.get_file().get_basename()
+        var orch_script_inst: Node = load(orch_script_path).new()
+        add_command_script(script_name, ScriptType.ORCHESTRATOR, orch_script_inst)
+        for command in all_commands:
+            if command.begins_with(script_name + "."):
+                prints("Added orch command: %s" % command)
 
 func make_slots(owning_entity, target_entity, tile_position, arguments = []) -> Dictionary:
     var slots = {}
@@ -78,15 +87,11 @@ func slots_copy(slots: Dictionary) -> Dictionary:
     slots[Slot.BLACK] = slots[Slot.BLACK].duplicate()
     return slots_duplicate
 
-func add_conditional_script(script_name: String, script_type: int, script_inst: Object = null) -> void:
+func add_command_script_auto(script_name: String, script_type: int, script_inst: Object = null) -> void:
     if not script_inst:
         if script_type == ScriptType.GDSCRIPT:
             script_inst = load(_find_gdscript_file(script_name)).new()
-    add_conditional_script_info({
-        "name": script_name,
-        "type": script_type,
-        "instance": script_inst,
-    })
+    add_command_script(script_name, script_type, script_inst)
 
 func _find_gdscript_file(script_name: String) -> String:
     return "res://cond_scripts/" + script_name + ".gd"
@@ -125,12 +130,28 @@ func get_command_info(qualified_name: String) -> Dictionary:
         return {}
     return all_commands[qualified_name]
 
-func add_conditional_script_info(script_info: Dictionary) -> void:
+func get_command_slot_type_hint(qualified_name: String) -> Array:
+    if not all_commands.has(qualified_name):
+        return ["all"]
+    var usage_str = all_commands[qualified_name].usage
+    if not usage_str.contains("|"):
+        return ["all"]
+    var slot_type_hint = usage_str.split("|", true, 1)[0]
+    return slot_type_hint.split(",", false)
+
+func add_command_script(script_name: String, script_type: int, script_inst: Object = null) -> void:
+    add_command_script_info({
+        "name": script_name,
+        "type": script_type,
+        "instance": script_inst,
+    })
+
+func add_command_script_info(script_info: Dictionary) -> void:
     var script_index = scripts.size()
     scripts.append(script_info)
-    register_script_conditionals(script_index)
+    register_script_commands(script_index)
 
-func register_script_conditionals(script_index: int) -> void:
+func register_script_commands(script_index: int) -> void:
     var script_inst = scripts[script_index]["instance"]
     if script_inst.has_method("set_cond_resolver"):
         script_inst.set_cond_resolver(self)

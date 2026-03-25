@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://brj1yabyq8bpc"]
 
 [ext_resource type="Theme" uid="uid://daswi5ker7ml0" path="res://src/UI/ConditionalEditorTheme.tres" id="1"]
-[ext_resource type="PackedScene" path="res://Scenes/GameEditor/ConditionalEditor/AddCommandDialog.tscn" id="2"]
+[ext_resource type="PackedScene" uid="uid://cu2ce0nvkbwvu" path="res://Scenes/GameEditor/ConditionalEditor/AddCommandDialog.tscn" id="2"]
 [ext_resource type="Texture2D" uid="uid://cv8l7ymc05wg5" path="res://assets/img/button_icons/plus.png" id="3"]
 [ext_resource type="StyleBox" uid="uid://bks823xpsbs2q" path="res://src/UI/ConditionalEditorBGTexture.tres" id="4"]
 [ext_resource type="Script" uid="uid://c8wy06ic8wik5" path="res://Scenes/GameEditor/ConditionalEditor/steps.gd" id="4_k14si"]
@@ -272,9 +272,11 @@ layout_mode = 2
 size_flags_horizontal = 3
 
 [node name="AddActionDialog" parent="." unique_id=646307895 instance=ExtResource("2")]
+visible = false
 exclude_conditions = true
 
 [node name="AddConditionDialog" parent="." unique_id=24360205 instance=ExtResource("2")]
+visible = false
 exclude_actions = true
 
 [connection signal="pressed" from="PanelContainer/MarginContainer/VBoxContainer2/VBoxContainer/HBoxContainer/NewConditionButton" to="." method="_on_NewConditionButton_pressed"]

@@ -25,6 +25,26 @@ enum Slot {
 	THIS_TILE 
 }
 
+const SLOT_CATEGORIES: = {
+	Slot.RED: "entity",
+	Slot.BLUE: "entity",
+	Slot.GREY: "pos",
+	Slot.BLACK: "pos",
+	Slot.A: "int",
+	Slot.B: "int",
+	Slot.C: "int",
+	Slot.X: "float",
+	Slot.Y: "float",
+	Slot.Z: "float",
+	Slot.I: "string",
+	Slot.II: "string",
+	Slot.III: "string",
+	Slot.DARK_RED: "argument",
+	Slot.DARK_BLUE: "argument",
+	Slot.DARK_GREEN: "argument",
+	Slot.DARK_ORANGE: "argument",
+}
+
 var InputTypes = InputTemplates.InputTypes
 
 # Define command codes

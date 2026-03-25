@@ -1,0 +1,219 @@
+[orchestration type="OScript" load_steps=10 format=3 uid="uid://ddpvp3oyucpxg"]
+
+[obj type="OScriptFunction" id="OScriptFunction_bqdlh"]
+guid = "4AF79E18-8699-4760-B07A-04E775769F58"
+method = {
+"name": &"cmd_orch_die",
+"args": [{
+"name": &"slots",
+"type": 27
+}, {
+"name": &"chosen_slot",
+"type": 2
+}]
+}
+user_defined = true
+id = 0
+
+[obj type="OScriptGraph" id="OScriptGraph_orolp"]
+graph_name = &"EventGraph"
+flags = 8
+
+[obj type="OScriptGraph" id="OScriptGraph_xybwn"]
+graph_name = &"cmd_orch_die"
+flags = 22
+nodes = Array[int]([0, 2, 4, 5, 6, 11])
+functions = Array[int]([0])
+
+[obj type="OScriptNodeFunctionEntry" id="OScriptNodeFunctionEntry_fyiwe"]
+function_id = "4AF79E18-8699-4760-B07A-04E775769F58"
+id = 0
+position = Vector2(-440, 0)
+pin_data = Array[Dictionary]([{
+"pin_name": &"ExecOut",
+"dir": 1,
+"flags": 4
+}, {
+"pin_name": &"slots",
+"type": 27,
+"dir": 1,
+"flags": 2
+}, {
+"pin_name": &"chosen_slot",
+"type": 2,
+"dir": 1,
+"flags": 2
+}])
+
+[obj type="OScriptNodeCallMemberFunction" id="OScriptNodeCallMemberFunction_0s034"]
+function_name = &"get_slot_entity"
+target_class_name = "BaseOrchCmdScript"
+target_type = 24
+flags = 520
+method = {
+"name": &"get_slot_entity",
+"return": {
+"type": 24,
+"class_name": &"BaseEntity",
+"usage": 0
+},
+"args": [{
+"name": &"slots",
+"type": 27,
+"usage": 0
+}, {
+"name": &"slot_id",
+"type": 2,
+"usage": 0
+}]
+}
+chain = false
+id = 2
+size = Vector2(272, 126)
+position = Vector2(100, -20)
+pin_data = Array[Dictionary]([{
+"pin_name": &"ExecIn",
+"flags": 4
+}, {
+"pin_name": &"ExecOut",
+"dir": 1,
+"flags": 4
+}, {
+"pin_name": &"target",
+"type": 24,
+"flags": 2050,
+"label": "BaseOrchCmdScript",
+"target_class": "BaseOrchCmdScript"
+}, {
+"pin_name": &"slots",
+"type": 27,
+"flags": 2,
+"dv": {},
+"usage": 0
+}, {
+"pin_name": &"slot_id",
+"type": 2,
+"flags": 2,
+"dv": 0,
+"usage": 0
+}, {
+"pin_name": &"return_value",
+"type": 24,
+"dir": 1,
+"flags": 2,
+"label": "BaseEntity",
+"target_class": "BaseEntity",
+"usage": 0
+}])
+
+[obj type="OScriptNodeComposeFrom" id="OScriptNodeComposeFrom_0s034"]
+id = 4
+position = Vector2(440, 40)
+pin_data = Array[Dictionary]([{
+"pin_name": &"object",
+"type": 24,
+"flags": 2
+}, {
+"pin_name": &"method",
+"type": 21,
+"flags": 2,
+"dv": "die"
+}, {
+"pin_name": &"value",
+"type": 25,
+"dir": 1,
+"flags": 2,
+"dv": Callable()
+}])
+
+[obj type="OScriptNodeCallMemberFunction" id="OScriptNodeCallMemberFunction_dhtv6"]
+function_name = &"call"
+target_type = 25
+flags = 554
+method = {
+"name": &"call",
+"return": {
+"usage": 131078
+},
+"flags": 21
+}
+variable_arg_count = 0
+chain = false
+id = 5
+size = Vector2(141, 106)
+position = Vector2(700, -20)
+pin_data = Array[Dictionary]([{
+"pin_name": &"ExecIn",
+"flags": 4
+}, {
+"pin_name": &"ExecOut",
+"dir": 1,
+"flags": 4
+}, {
+"pin_name": &"target",
+"type": 25,
+"flags": 2058,
+"label": "Callable"
+}, {
+"pin_name": &"return_value",
+"dir": 1,
+"flags": 1026,
+"usage": 131078
+}])
+
+[obj type="OScriptNodeSelf" id="OScriptNodeSelf_n4y2n"]
+id = 6
+position = Vector2(-40, 0)
+pin_data = Array[Dictionary]([{
+"pin_name": &"self",
+"type": 24,
+"dir": 1,
+"flags": 2,
+"target_class": "BaseOrchCmdScript"
+}])
+
+[obj type="OScriptNodePrintString" id="OScriptNodePrintString_0owtg"]
+id = 11
+size = Vector2(187, 177)
+position = Vector2(-260, -240)
+pin_data = Array[Dictionary]([{
+"pin_name": &"ExecIn",
+"flags": 4
+}, {
+"pin_name": &"Text",
+"type": 4,
+"flags": 2,
+"dv": "called orch command"
+}, {
+"pin_name": &"PrintToScreen",
+"type": 1,
+"flags": 2,
+"dv": true
+}, {
+"pin_name": &"PrintToLog",
+"type": 1,
+"flags": 2,
+"dv": true
+}, {
+"pin_name": &"TextColor",
+"type": 20,
+"flags": 2,
+"dv": Color(0.4655637741088867, 0.8509804010391235, 0.27058830857276917, 1)
+}, {
+"pin_name": &"Duration",
+"type": 3,
+"flags": 2,
+"dv": 2,
+"gdv": 0
+}, {
+"pin_name": &"ExecOut",
+"dir": 1,
+"flags": 4
+}])
+
+[resource]
+base_type = &"BaseOrchCmdScript"
+functions = Array[OScriptFunction]([SubResource("OScriptFunction_bqdlh")])
+connections = Array[int]([11, 0, 2, 0, 2, 1, 4, 0, 2, 0, 5, 0, 0, 0, 11, 0, 6, 0, 2, 1, 4, 0, 5, 1, 0, 1, 2, 2, 0, 2, 2, 3])
+nodes = Array[OScriptNode]([SubResource("OScriptNodeFunctionEntry_fyiwe"), SubResource("OScriptNodeCallMemberFunction_0s034"), SubResource("OScriptNodeComposeFrom_0s034"), SubResource("OScriptNodeCallMemberFunction_dhtv6"), SubResource("OScriptNodeSelf_n4y2n"), SubResource("OScriptNodePrintString_0owtg")])
+graphs = Array[OScriptGraph]([SubResource("OScriptGraph_orolp"), SubResource("OScriptGraph_xybwn")])

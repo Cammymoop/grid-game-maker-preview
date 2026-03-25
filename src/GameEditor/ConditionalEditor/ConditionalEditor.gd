@@ -32,271 +32,274 @@ var step_count: int = 1
 var current_step: int = 0
 
 func _ready():
-	add_condition_dialog.connect("command_selected", Callable(self, "add_new_command").bind("conditions"))
-	add_action_dialog.connect("command_selected", Callable(self, "add_new_command").bind("actions"))
-	
-	if not use_conditionalv3:
-		steps_ui.hide()
-	else:
-		for tab_node in action_tabs.get_children():
-			tab_node.queue_free()
-		true_actions_list = null
-		false_actions_list = null
-		always_actions_list = null
-		add_when_list("always")
-		steps_ui.show()
-	
-	steps_ui.step_changed.connect(on_step_changed)
-	steps_ui.add_step_after.connect(on_add_step_after)
-	steps_ui.remove_step.connect(on_remove_step)
-	
-	popup()
+    var add_new_command_func = add_new_v3_command if use_conditionalv3 else add_v2_command
+    add_condition_dialog.connect("command_selected", add_new_command_func.bind("conditions"))
+    add_action_dialog.connect("command_selected", add_new_command_func.bind("actions"))
+    
+    if not use_conditionalv3:
+        steps_ui.hide()
+    else:
+        for tab_node in action_tabs.get_children():
+            tab_node.queue_free()
+        true_actions_list = null
+        false_actions_list = null
+        always_actions_list = null
+        add_when_list("always")
+        steps_ui.show()
+    
+    steps_ui.step_changed.connect(on_step_changed)
+    steps_ui.add_step_after.connect(on_add_step_after)
+    steps_ui.remove_step.connect(on_remove_step)
+    
+    popup()
 
 func add_new_command(command_code: int, slot_id: int, destination: String) -> void:
-	if use_conditionalv3:
-		add_new_v3_command(command_code, slot_id, destination)
-	else:
-		add_v2_command(command_code, slot_id, destination, [])
+    if use_conditionalv3:
+        push_error("adding new v3 command with old method")
+        return
+    add_v2_command(command_code, slot_id, destination, [])
 
 func add_v2_command(command_code: int, slot_id: int, destination: String, option_values: Array = []) -> void:
-	var new_list_item = command_list_item.instantiate()
-	new_list_item.set_ui_data(command_code, Commands.Friendly[command_code])
-	new_list_item.set_slot(slot_id)
+    var new_list_item = command_list_item.instantiate()
+    new_list_item.set_ui_data(command_code, Commands.Friendly[command_code])
+    new_list_item.set_slot(slot_id)
 
-	var to_list = cond_list
-	match destination:
-		"actions":
-			to_list = action_tabs.get_current_list()
-		"conditions":
-			to_list = cond_list
-		"true_actions":
-			to_list = true_actions_list
-		"false_actions":
-			to_list = false_actions_list
-		"always_actions":
-			to_list = always_actions_list
-		_:
-			print_debug("unkown command list: %s" % destination)
-	
-	to_list.add_child(new_list_item)
-	
-	if option_values:
-		new_list_item.generate_ui()
-		new_list_item.set_option_values(option_values)
+    var to_list = cond_list
+    match destination:
+        "actions":
+            to_list = action_tabs.get_current_list()
+        "conditions":
+            to_list = cond_list
+        "true_actions":
+            to_list = true_actions_list
+        "false_actions":
+            to_list = false_actions_list
+        "always_actions":
+            to_list = always_actions_list
+        _:
+            print_debug("unkown command list: %s" % destination)
+    
+    to_list.add_child(new_list_item)
+    
+    if option_values:
+        new_list_item.generate_ui()
+        new_list_item.set_option_values(option_values)
 
-func add_new_v3_command(command_code: int, slot_id: int, destination: String) -> void:
-	var short_name = ConditionalsV3.V3_CMD_MAP[command_code]
-	var qualified_name = ConditionalsV3.find_command_by_name(short_name)
-	if not qualified_name:
-		push_error("Command not found: %s" % short_name)
-		return
-	var new_list_item = create_v3_command_item(qualified_name)
-	new_list_item.set_slot(slot_id)
-	var list_name: String = destination
-	if destination == "actions":
-		var cur_list_node = action_tabs.get_current_tab_control()
-		if not cur_list_node in when_lists.values():
-			push_error("Current action list is not a when list")
-			return
-		list_name = when_lists.find_key(cur_list_node)
-	append_item_to_command_list(new_list_item, list_name)
+func add_new_v3_command(qualified_cmd: String, slot_id: int, destination: String) -> void:
+    var short_name = ConditionalsV3.command_short_name(qualified_cmd)
+    if not qualified_cmd:
+        push_error("Command not found: %s" % short_name)
+        return
+    var new_list_item = create_v3_command_item(qualified_cmd)
+    if slot_id >= 0:
+        new_list_item.set_slot(slot_id)
+    else:
+        new_list_item.current_slot = -1
+    var list_name: String = destination
+    if destination == "actions":
+        var cur_list_node = action_tabs.get_current_tab_control()
+        if not cur_list_node in when_lists.values():
+            push_error("Current action list is not a when list")
+            return
+        list_name = when_lists.find_key(cur_list_node)
+    append_item_to_command_list(new_list_item, list_name)
 
 func create_v3_command_item(qualified_name: String, arg_string: String = "") -> CommandListItem:
-	var short_name = ConditionalsV3.command_short_name(qualified_name)
-	var new_list_item = command_list_item.instantiate()
-	new_list_item.set_v3_data(qualified_name, short_name, ConditionalsV3.get_command_info(qualified_name))
-	new_list_item.set_arg_values(ConditionalsV3.arg_string_to_arg_values(arg_string))
-	
-	return new_list_item
+    var short_name = ConditionalsV3.command_short_name(qualified_name)
+    var new_list_item = command_list_item.instantiate()
+    new_list_item.set_v3_data(qualified_name, short_name, ConditionalsV3.get_command_info(qualified_name))
+    new_list_item.set_arg_values(ConditionalsV3.arg_string_to_arg_values(arg_string))
+    
+    return new_list_item
 
 func load_conditional_data(from_data: Variant) -> void:
-	if _is_raw_data_v3(from_data):
-		load_v3_conditional_data(from_data)
-		return
+    if _is_raw_data_v3(from_data):
+        load_v3_conditional_data(from_data)
+        return
 
-	for sublist in from_data:
-		if not sublist in ["conditions", "true_actions", "false_actions", "always_actions"]:
-			continue
-		for command in from_data[sublist]:
-			var opts = command.options if command.has("options") else []
-			add_v2_command(command.code, command.slot, sublist, opts)
+    for sublist in from_data:
+        if not sublist in ["conditions", "true_actions", "false_actions", "always_actions"]:
+            continue
+        for command in from_data[sublist]:
+            var opts = command.options if command.has("options") else []
+            add_v2_command(command.code, command.slot, sublist, opts)
 
 func load_v3_conditional_data(from_data: Variant) -> void:
-	if typeof(from_data) == TYPE_DICTIONARY:
-		from_data = [from_data]
-	var arr_data = from_data as Array
-	if not arr_data:
-		push_error("Invalid v3 conditional data type")
-		return
+    if typeof(from_data) == TYPE_DICTIONARY:
+        from_data = [from_data]
+    var arr_data = from_data as Array
+    if not arr_data:
+        push_error("Invalid v3 conditional data type")
+        return
 
-	setup_step_count(len(arr_data))
-	set_v3_full_data(arr_data)
-	prints("loading step %s" % arr_data[current_step])
-	load_v3_conditional_data_step(arr_data[current_step])
+    setup_step_count(len(arr_data))
+    set_v3_full_data(arr_data)
+    prints("loading step %s" % arr_data[current_step])
+    load_v3_conditional_data_step(arr_data[current_step])
 
 func set_v3_full_data(new_data: Array) -> void:
-	current_conditional.clear()
-	for cond_step in new_data:
-		if cond_step is Dictionary:
-			current_conditional.append(cond_step)
-		else:
-			push_warning("Non-dictionary step data: %s" % str(cond_step))
+    current_conditional.clear()
+    for cond_step in new_data:
+        if cond_step is Dictionary:
+            current_conditional.append(cond_step)
+        else:
+            push_warning("Non-dictionary step data: %s" % str(cond_step))
 
 func load_v3_conditional_data_step(from_data: Dictionary) -> void:
-	if not "always" in when_lists:
-		add_when_list("always")
-	if not "when true" in when_lists:
-		add_when_list("when true")
+    if not "always" in when_lists:
+        add_when_list("always")
+    if not "when true" in when_lists:
+        add_when_list("when true")
 
-	for key in from_data:
-		if key != "conditions" and not key.begins_with("when "):
-			continue
-		for call_string in from_data[key]:
-			if ConditionalsV3.is_builtin(call_string):
-				# TODO implement UI for condition builtins
-				continue
-			var qualified_name = ConditionalsV3.callstring_to_qualified_name(call_string)
-			var arg_string = ConditionalsV3.callstring_to_arg_string(call_string)
-			var new_list_item = create_v3_command_item(qualified_name, arg_string)
-			append_item_to_command_list(new_list_item, key)
+    for key in from_data:
+        if key != "conditions" and not key.begins_with("when "):
+            continue
+        for call_string in from_data[key]:
+            if ConditionalsV3.is_builtin(call_string):
+                # TODO implement UI for condition builtins
+                continue
+            var qualified_name = ConditionalsV3.callstring_to_qualified_name(call_string)
+            var arg_string = ConditionalsV3.callstring_to_arg_string(call_string)
+            var new_list_item = create_v3_command_item(qualified_name, arg_string)
+            append_item_to_command_list(new_list_item, key)
 
 func append_item_to_command_list(new_list_item: CommandListItem, command_list_name: String) -> void:
-	if command_list_name == "conditions":
-		cond_list.add_child(new_list_item)
-	else:
-		if command_list_name == "when always":
-			command_list_name = "always"
-		if command_list_name not in when_lists:
-			add_when_list(command_list_name)
-		when_lists[command_list_name].get_list().add_child(new_list_item)
+    if command_list_name == "conditions":
+        cond_list.add_child(new_list_item)
+    else:
+        if command_list_name == "when always":
+            command_list_name = "always"
+        if command_list_name not in when_lists:
+            add_when_list(command_list_name)
+        when_lists[command_list_name].get_list().add_child(new_list_item)
 
 func add_when_list(command_list_name: String) -> void:
-	var new_list = when_list_scn.instantiate()
-	new_list.name = command_list_name.capitalize()
-	when_list_container.add_child(new_list, true)
-	when_lists[command_list_name] = new_list
+    var new_list = when_list_scn.instantiate()
+    new_list.name = command_list_name.capitalize()
+    when_list_container.add_child(new_list, true)
+    when_lists[command_list_name] = new_list
 
 func remove_when_list(command_list_name: String) -> void:
-	if command_list_name in when_lists:
-		var when_list = when_lists[command_list_name]
-		when_list_container.remove_child(when_list)
-		when_list.queue_free()
-		when_lists.erase(command_list_name)
+    if command_list_name in when_lists:
+        var when_list = when_lists[command_list_name]
+        when_list_container.remove_child(when_list)
+        when_list.queue_free()
+        when_lists.erase(command_list_name)
 
 func _is_raw_data_v3(the_data: Variant) -> bool:
-	if typeof(the_data) == TYPE_DICTIONARY:
-		return the_data.get("v", "") == "3"
-	elif typeof(the_data) == TYPE_ARRAY:
-		return the_data.size() > 0 and the_data[0].get("v", "") == "3"
-	else:
-		return false
+    if typeof(the_data) == TYPE_DICTIONARY:
+        return the_data.get("v", "") == "3"
+    elif typeof(the_data) == TYPE_ARRAY:
+        return the_data.size() > 0 and the_data[0].get("v", "") == "3"
+    else:
+        return false
 
 func get_full_conditional_data() -> Variant:
-	if use_conditionalv3:
-		return get_v3_full_conditional_data()
+    if use_conditionalv3:
+        return get_v3_full_conditional_data()
 
-	var data = {
-		"conditions": [],
-		"true_actions": [],
-		"false_actions": [],
-		"always_actions": [],
-	}
-	
-	for command_node in cond_list.get_children():
-		data.conditions.append(make_command_data(command_node))
-	for command_node in true_actions_list.get_children():
-		data.true_actions.append(make_command_data(command_node))
-	for command_node in false_actions_list.get_children():
-		data.false_actions.append(make_command_data(command_node))
-	for command_node in always_actions_list.get_children():
-		data.always_actions.append(make_command_data(command_node))
-	
-	return data
+    var data = {
+        "conditions": [],
+        "true_actions": [],
+        "false_actions": [],
+        "always_actions": [],
+    }
+    
+    for command_node in cond_list.get_children():
+        data.conditions.append(make_command_data(command_node))
+    for command_node in true_actions_list.get_children():
+        data.true_actions.append(make_command_data(command_node))
+    for command_node in false_actions_list.get_children():
+        data.false_actions.append(make_command_data(command_node))
+    for command_node in always_actions_list.get_children():
+        data.always_actions.append(make_command_data(command_node))
+    
+    return data
 
 func get_v3_full_conditional_data() -> Variant:
-	update_current_step()
-	if step_count == 1:
-		return get_v3_conditional_step_data(0)
-	return current_conditional.duplicate(true)
+    update_current_step()
+    if step_count == 1:
+        return get_v3_conditional_step_data(0)
+    return current_conditional.duplicate(true)
 
 func get_v3_conditional_step_data(step_num: int) -> Dictionary:
-	return current_conditional[step_num].duplicate()
+    return current_conditional[step_num].duplicate()
 
 func update_current_step() -> void:
-	var data = {
-		"v": "3",
-		"conditions": [],
-	}
-	
-	for command_node in cond_list.get_children():
-		data.conditions.append(make_v3_command_data(command_node))
-	for when_list_name in when_lists:
-		var data_key: String = when_list_name
-		if when_list_name == "always":
-			data_key = "when always"
-		data[data_key] = []
-		for command_node in when_lists[when_list_name].get_list().get_children():
-			data[data_key].append(make_v3_command_data(command_node))
-	
-	current_conditional[current_step] = data
+    var data = {
+        "v": "3",
+        "conditions": [],
+    }
+    
+    for command_node in cond_list.get_children():
+        data.conditions.append(make_v3_command_data(command_node))
+    for when_list_name in when_lists:
+        var data_key: String = when_list_name
+        if when_list_name == "always":
+            data_key = "when always"
+        data[data_key] = []
+        for command_node in when_lists[when_list_name].get_list().get_children():
+            data[data_key].append(make_v3_command_data(command_node))
+    
+    current_conditional[current_step] = data
 
 func make_v3_command_data(command_input_node) -> String:
-	return command_input_node.get_v3_call_string()
+    return command_input_node.get_v3_call_string()
 
 func make_command_data(command_input_node) -> Dictionary:
-	return command_input_node.get_command_data()
+    return command_input_node.get_command_data()
 
 func _on_NewConditionButton_pressed():
-	add_condition_dialog.popup_centered()
-	
+    add_condition_dialog.popup_centered()
+    
 func _on_NewActionButton_pressed():
-	add_action_dialog.popup_centered()
+    add_action_dialog.popup_centered()
 
 func _on_SaveButton_pressed():
-	emit_signal("save_conditional", get_full_conditional_data())
-	queue_free()
+    emit_signal("save_conditional", get_full_conditional_data())
+    queue_free()
 
 func _on_CancelButton_pressed():
-	queue_free()
+    queue_free()
 
 func setup_step_count(new_step_count: int) -> void:
-	step_count = new_step_count
-	current_step = 0
-	steps_ui.set_step(step_count, current_step)
-	current_conditional.resize(step_count)
+    step_count = new_step_count
+    current_step = 0
+    steps_ui.set_step(step_count, current_step)
+    current_conditional.resize(step_count)
 
 func on_step_changed(new_step_num: int) -> void:
-	update_current_step()
-	current_step = new_step_num
-	load_current_step()
+    update_current_step()
+    current_step = new_step_num
+    load_current_step()
 
 func on_add_step_after(after_step_num: int) -> void:
-	update_current_step()
-	current_conditional.insert(after_step_num + 1, {"v": "3"})
-	step_count = current_conditional.size()
-	current_step = after_step_num + 1
-	steps_ui.set_step(step_count, current_step)
-	load_current_step()
+    update_current_step()
+    current_conditional.insert(after_step_num + 1, {"v": "3"})
+    step_count = current_conditional.size()
+    current_step = after_step_num + 1
+    steps_ui.set_step(step_count, current_step)
+    load_current_step()
 
 func on_remove_step(step_num: int) -> void:
-	if step_count < 2:
-		return
-	current_conditional.remove_at(step_num)
-	step_count = current_conditional.size()
-	current_step = clampi(current_step, 0, step_count - 1)
-	steps_ui.set_step(step_count, current_step)
-	load_current_step()
+    if step_count < 2:
+        return
+    current_conditional.remove_at(step_num)
+    step_count = current_conditional.size()
+    current_step = clampi(current_step, 0, step_count - 1)
+    steps_ui.set_step(step_count, current_step)
+    load_current_step()
 
 func load_current_step() -> void:
-	clear_edited_step()
-	load_v3_conditional_data_step(current_conditional[current_step])
+    clear_edited_step()
+    load_v3_conditional_data_step(current_conditional[current_step])
 
 func clear_edited_step() -> void:
-	_clear_list(cond_list)
-	for when_list_name in when_lists:
-		remove_when_list(when_list_name)
+    _clear_list(cond_list)
+    for when_list_name in when_lists:
+        remove_when_list(when_list_name)
 
 func _clear_list(list_node: Node) -> void:
-	for child in list_node.get_children():
-		list_node.remove_child(child)
-		child.queue_free()
+    for child in list_node.get_children():
+        list_node.remove_child(child)
+        child.queue_free()

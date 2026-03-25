@@ -1,73 +1,66 @@
-[gd_scene load_steps=4 format=2]
+[gd_scene format=3 uid="uid://cu2ce0nvkbwvu"]
 
-[ext_resource path="res://src/GameEditor/ConditionalEditor/AddCommandDialog.gd" type="Script" id=1]
-[ext_resource path="res://Scenes/GameEditor/SlotSelectorButton.tscn" type="PackedScene" id=2]
-[ext_resource path="res://src/UI/ConditionalEditorTheme.tres" type="Theme" id=3]
+[ext_resource type="Script" uid="uid://cmbp3rgm0gvv1" path="res://src/GameEditor/ConditionalEditor/AddCommandDialog.gd" id="1"]
+[ext_resource type="PackedScene" uid="uid://bh1w4w8i5hk66" path="res://Scenes/GameEditor/SlotSelectorButton.tscn" id="2"]
+[ext_resource type="Theme" uid="uid://daswi5ker7ml0" path="res://src/UI/ConditionalEditorTheme.tres" id="3"]
 
-[node name="AddActionDialog" type="ConfirmationDialog"]
-offset_left = 278.0
-offset_top = 201.0
-offset_right = 630.0
-offset_bottom = 437.0
-theme = ExtResource( 3 )
-window_title = "Add a Condition"
-script = ExtResource( 1 )
-__meta__ = {
-"_edit_use_anchors_": false
-}
+[node name="AddActionDialog" type="ConfirmationDialog" unique_id=1838505494]
+oversampling_override = 1.0
+title = "Add Command"
+position = Vector2i(0, 36)
+size = Vector2i(336, 394)
+visible = true
+theme = ExtResource("3")
+script = ExtResource("1")
 
-[node name="VBoxContainer" type="VBoxContainer" parent="."]
+[node name="VBoxContainer" type="VBoxContainer" parent="." unique_id=1060331235]
+custom_minimum_size = Vector2(320, 0)
+anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 offset_left = 8.0
 offset_top = 8.0
 offset_right = -8.0
-offset_bottom = -40.0
-__meta__ = {
-"_edit_use_anchors_": false
-}
+offset_bottom = -49.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 6
 
-[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer"]
-offset_right = 336.0
-offset_bottom = 28.0
+[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer" unique_id=440947546]
+layout_mode = 2
 
-[node name="SlotSelectorButton" parent="VBoxContainer/HBoxContainer" instance=ExtResource( 2 )]
-anchor_right = 0.0
-anchor_bottom = 0.0
-offset_right = 28.0
-offset_bottom = 28.0
+[node name="SlotSelectorButton" parent="VBoxContainer/HBoxContainer" unique_id=207602168 instance=ExtResource("2")]
+layout_mode = 2
+show_any_option = true
+default_slot_id = -2
 
-[node name="Filter" type="LineEdit" parent="VBoxContainer/HBoxContainer"]
-offset_left = 32.0
-offset_top = 1.0
-offset_right = 336.0
-offset_bottom = 27.0
+[node name="FilterInput" type="LineEdit" parent="VBoxContainer/HBoxContainer" unique_id=948938634]
+layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 4
-clear_button_enabled = true
 placeholder_text = "filter"
-placeholder_alpha = 0.25
+clear_button_enabled = true
 
-[node name="AllCommands" type="ItemList" parent="VBoxContainer"]
-offset_top = 32.0
-offset_right = 336.0
-offset_bottom = 188.0
+[node name="AllCommands" type="ItemList" parent="VBoxContainer" unique_id=2020200961]
+custom_minimum_size = Vector2(0, 300)
+layout_mode = 2
 size_flags_vertical = 3
-__meta__ = {
-"_edit_use_anchors_": false
-}
 
-[node name="Control" type="Control" parent="."]
+[node name="Control" type="Control" parent="." unique_id=1993017353]
 visible = false
+layout_mode = 3
+anchors_preset = 0
 offset_left = 8.0
 offset_top = 8.0
-offset_right = 344.0
-offset_bottom = 196.0
+offset_right = 328.0
+offset_bottom = 345.0
 
-[node name="Button" type="Button" parent="Control"]
+[node name="Button" type="Button" parent="Control" unique_id=841003041]
+layout_mode = 0
 anchor_right = 1.0
 anchor_bottom = 1.0
 
 [connection signal="confirmed" from="." to="." method="_on_AddConditionDialog_confirmed"]
-[connection signal="text_changed" from="VBoxContainer/HBoxContainer/Filter" to="." method="_on_Filter_text_changed"]
+[connection signal="slot_changed" from="VBoxContainer/HBoxContainer/SlotSelectorButton" to="." method="_on_slot_selector_button_slot_changed"]
+[connection signal="text_changed" from="VBoxContainer/HBoxContainer/FilterInput" to="." method="_on_Filter_text_changed"]
 [connection signal="item_activated" from="VBoxContainer/AllCommands" to="." method="_on_AllCommands_item_activated"]

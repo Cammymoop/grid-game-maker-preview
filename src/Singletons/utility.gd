@@ -270,3 +270,6 @@ func parse_json(text: String):
 		print_debug("JSON parse error at line %d: %s" % [parser.get_error_line(), parser.get_error_message()])
 		return null
 	return parser.data
+
+func callv_with_errors(callable: Callable, args: Array) -> Variant:
+	return callable.bindv(args).call()

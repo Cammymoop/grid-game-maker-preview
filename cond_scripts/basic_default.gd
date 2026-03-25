@@ -1,5 +1,10 @@
 extends BaseConditionalScript
 
+
+func get_command_display_name(cmd_name: String) -> String:
+	cmd_name = cmd_name.trim_prefix("a_").trim_prefix("c_")
+	return cmd_name.capitalize()
+
 # --- COMMANDS ---
 
 func desc_select_defaults() -> String:
