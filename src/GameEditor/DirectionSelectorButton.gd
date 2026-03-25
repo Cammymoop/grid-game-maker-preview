@@ -30,10 +30,11 @@ func _ready():
 func show_picker() -> void:
 	picker_open = true
 	#picker.visible = true
-	picker.popup()
-	var center = $ButtonContainer.get_global_rect().get_center()
+	picker.popup_centered()
+	var center = $ButtonContainer.get_screen_position() + ($ButtonContainer.size/2)
 	picker.size = picker.get_node("PopupPickerPanel").size
-	picker.global_position = center - (picker.size/2)
+	await get_tree().process_frame
+	picker.position = center - Vector2(picker.size/2)
 
 func hide_picker() -> void:
 	picker_open = false

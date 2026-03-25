@@ -58,9 +58,9 @@ func undo(undo_name, current_value = null):
 		_push_redo(undo_name, current_value)
 	if len(stack.undos) == 0:
 		return null
-	var undo = stack.undos.pop_back()
+	var popped_undo = stack.undos.pop_back()
 	_update_undo_redo_buttons(undo_name)
-	return undo
+	return popped_undo
 
 func _push_redo(undo_name: String, value) -> void:
 	undo_stacks[undo_name].redos.append(value)
@@ -73,6 +73,6 @@ func redo(undo_name, current_value):
 	stack.undos.append(current_value)
 	if len(stack.redos) == 0:
 		return null
-	var redo = stack.redos.pop_back()
+	var popped_redo = stack.redos.pop_back()
 	_update_undo_redo_buttons(undo_name)
-	return redo
+	return popped_redo

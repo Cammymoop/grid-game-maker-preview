@@ -308,6 +308,16 @@ func get_tile_property_at(tile_position, property_name) -> Property:
 				return_val = tprop
 	return return_val
 
+func set_tile_property_at(tile_position, property_name, value) -> void:
+	var tile_ids: Array[int] = []
+	for l in layers:
+		var ti = l.get_cell_s(tile_position)
+		if ti != -1:
+			tile_ids.append(ti)
+	
+	for ti in tile_ids:
+		set_tile_property(ti, property_name, value)
+
 func get_tile_index_at(tile_position):
 	var tile_index = -1
 	for l in layers:
@@ -324,6 +334,10 @@ func get_tile_property(tile_index, property_name) -> Property:
 	property.set_value(props[property_name])
 	property.set_name(property_name)
 	return property
+
+func set_tile_property(tile_index, property_name, value) -> void:
+	var props = tile_defs[tile_index]["properties"]
+	props[property_name] = value
 
 func can_move_to(entity, tile_position) -> bool:
 	if not EntityManager.can_move_to(entity, tile_position):

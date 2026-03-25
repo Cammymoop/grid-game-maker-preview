@@ -313,6 +313,10 @@ func set_visual_facing(new_facing):
 func set_facing(new_facing):
 	facing = new_facing
 
+func turn_to_facing(new_facing):
+	set_facing(new_facing)
+	set_visual_facing(new_facing)
+
 func set_intended_move_speed(intended) -> void:
 	var fps = ProjectSettings.get("physics/common/physics_ticks_per_second")
 	

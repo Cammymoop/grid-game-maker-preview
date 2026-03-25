@@ -601,8 +601,8 @@ func _on_CornerButtonHover():
 func _on_CornerButtonUnHover():
 	show_tile_brush_crosshair(false)
 
-func show_tile_brush_crosshair(show: bool) -> void:
-	tile_brush_canvas.get_node("Crosshair").visible = show
+func show_tile_brush_crosshair(show_crosshair: bool) -> void:
+	tile_brush_canvas.get_node("Crosshair").visible = show_crosshair
 	
 
 

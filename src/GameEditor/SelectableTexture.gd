@@ -7,6 +7,8 @@ signal enabled
 signal selected
 signal double_clicked
 
+@onready var display_tex_rect: TextureRect = find_child("TextureRect")
+
 var is_selected = false
 
 var texture_name: String
@@ -15,7 +17,10 @@ var built_in: bool = false
 func set_texture(t_name: String, texture: Texture2D, builtin: bool = false) -> void:
 	texture_name = t_name
 	$HB/Label.text = t_name
-	$HB/TextureRect.texture = texture
+	if not display_tex_rect:
+		display_tex_rect = find_child("TextureRect")
+	display_tex_rect.texture = texture
+	set_filter_mode()
 	
 	if builtin:
 		built_in = true
@@ -24,8 +29,8 @@ func set_texture(t_name: String, texture: Texture2D, builtin: bool = false) -> v
 func get_texture() -> Texture2D:
 	return $HB/TextureRect.texture
 
-func set_enabled(selected: bool) -> void:
-	$HB/CheckButton.button_pressed = selected
+func set_enabled(new_enabled: bool) -> void:
+	$HB/CheckButton.button_pressed = new_enabled
 
 func deselect() -> void:
 	is_selected = false
@@ -51,3 +56,16 @@ func _on_SelectableTexItem_gui_input(event):
 			
 		if button_event.double_click:
 			emit_signal("double_clicked")
+
+
+func _on_texture_rect_resized() -> void:
+	set_filter_mode()
+
+func set_filter_mode() -> void:
+	if not display_tex_rect:
+		display_tex_rect = find_child("TextureRect")
+	var texture = display_tex_rect.texture
+	if texture.get_width() > display_tex_rect.size.x or texture.get_height() > display_tex_rect.size.y:
+		display_tex_rect.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
+	else:
+		display_tex_rect.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST

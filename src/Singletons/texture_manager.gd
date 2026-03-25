@@ -93,9 +93,13 @@ func is_local_file_loaded(file_name: String) -> bool:
 	return false
 
 func add_local_texture(file_name: String) -> void:
+	if is_local_file_loaded(file_name):
+		return
 	var spec = {type = "local_file", image_name = file_name, texture_id = get_new_texture_index(), filter = false}
 	add_texture(spec)
 func add_builtin_texture(tex_name: String) -> void:
+	if is_builtin_loaded(tex_name):
+		return
 	var spec = {type = "builtin", name = tex_name, texture_id = get_new_texture_index()}
 	add_texture(spec)
 

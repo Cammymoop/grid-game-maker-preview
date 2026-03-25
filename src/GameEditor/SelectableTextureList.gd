@@ -53,8 +53,4 @@ func list_item_enabled(on_off: bool, is_builtin: bool, texture_name, checkbox) -
 #		elif not texture_name in enabled_builtin_tex:
 #				enabled_builtin_tex.append(texture_name)
 	else:
-		checkbox.set_pressed_no_signal(true)
-#		if is_builtin:
-#			enabled_builtin_tex.remove(texture_name)
-#		else:
-#			enabled_textures.remove(texture_name)
+		checkbox.set_pressed_no_signal(false)

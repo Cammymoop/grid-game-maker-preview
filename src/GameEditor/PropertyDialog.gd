@@ -4,7 +4,7 @@ signal hidden
 
 var conditional_editor_scn = preload("res://Scenes/GameEditor/ConditionalEditor/ConditionalEditor.tscn")
 
-var conditional_val = {}
+var conditional_val: Variant = {}
 var conditional_mode: = false
 
 func _ready():
@@ -32,6 +32,9 @@ func _on_EditConditional_pressed():
 	editor.popup_centered()
 	if conditional_val:
 		editor.load_conditional_data(conditional_val)
+	elif editor.use_conditionalv3:
+		prints("loading empty v3 conditional")
+		editor.load_conditional_data({"v": "3", "conditions": []})
 	
 	editor.connect("save_conditional", Callable(self, "on_save_conditional"))
 

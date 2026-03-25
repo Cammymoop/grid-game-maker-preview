@@ -1,61 +1,47 @@
-[gd_scene load_steps=5 format=2]
+[gd_scene format=3 uid="uid://cj8u25mhjg6n8"]
 
-[ext_resource path="res://assets/img/tiles.png" type="Texture2D" id=1]
-[ext_resource path="res://src/GameEditor/SelectableTexture.gd" type="Script" id=2]
-[ext_resource path="res://src/UI/selectable_list_item_low.tres" type="StyleBox" id=3]
-[ext_resource path="res://assets/img/button_icons/builtin.png" type="Texture2D" id=4]
+[ext_resource type="Texture2D" uid="uid://b6lj5qghhre2t" path="res://assets/img/tiles.png" id="1"]
+[ext_resource type="Script" uid="uid://brdx6c4wcqmh6" path="res://src/GameEditor/SelectableTexture.gd" id="2"]
+[ext_resource type="StyleBox" path="res://src/UI/selectable_list_item_low.tres" id="3"]
+[ext_resource type="Texture2D" uid="uid://b45r57rptl5tq" path="res://assets/img/button_icons/builtin.png" id="4"]
 
-[node name="SelectableTexItem" type="PanelContainer"]
+[node name="SelectableTexItem" type="PanelContainer" unique_id=1682877327]
 offset_left = 196.0
 offset_right = 770.0
 offset_bottom = 142.0
-theme_override_styles/panel = ExtResource( 3 )
-script = ExtResource( 2 )
-__meta__ = {
-"_edit_use_anchors_": false
-}
+theme_override_styles/panel = ExtResource("3")
+script = ExtResource("2")
 
-[node name="HB" type="HBoxContainer" parent="."]
-offset_right = 574.0
-offset_bottom = 142.0
+[node name="HB" type="HBoxContainer" parent="." unique_id=166247145]
+layout_mode = 2
 size_flags_horizontal = 3
 theme_override_constants/separation = 10
-__meta__ = {
-"_edit_use_anchors_": false
-}
 
-[node name="TextureRect" type="TextureRect" parent="HB"]
-offset_right = 200.0
-offset_bottom = 142.0
-custom_minimum_size = Vector2( 200, 128 )
+[node name="TextureRect" type="TextureRect" parent="HB" unique_id=1233836781]
+texture_filter = 1
 clip_contents = true
-texture = ExtResource( 1 )
-expand = true
-stretch_mode = 4
+custom_minimum_size = Vector2(200, 128)
+layout_mode = 2
+texture = ExtResource("1")
+expand_mode = 1
+stretch_mode = 5
 
-[node name="Builtin" type="TextureRect" parent="HB"]
+[node name="Builtin" type="TextureRect" parent="HB" unique_id=1120489335]
 visible = false
-offset_left = 210.0
-offset_top = 57.0
-offset_right = 238.0
-offset_bottom = 85.0
+layout_mode = 2
 size_flags_horizontal = 4
 size_flags_vertical = 4
-texture = ExtResource( 4 )
+texture = ExtResource("4")
 
-[node name="Label" type="Label" parent="HB"]
-offset_left = 210.0
-offset_top = 64.0
-offset_right = 447.0
-offset_bottom = 78.0
+[node name="Label" type="Label" parent="HB" unique_id=1340523356]
+layout_mode = 2
 size_flags_horizontal = 3
 text = "tiles.png"
 
-[node name="CheckButton" type="CheckButton" parent="HB"]
-offset_left = 457.0
-offset_right = 574.0
-offset_bottom = 142.0
+[node name="CheckButton" type="CheckButton" parent="HB" unique_id=1506435098]
+layout_mode = 2
 text = "Used:"
 
 [connection signal="gui_input" from="." to="." method="_on_SelectableTexItem_gui_input"]
+[connection signal="resized" from="HB/TextureRect" to="." method="_on_texture_rect_resized"]
 [connection signal="toggled" from="HB/CheckButton" to="." method="_on_CheckButton_toggled"]

@@ -24,7 +24,8 @@ func facing_vector(what_facing) -> Vector2:
 			return Vector2(0, 1)
 		3:
 			return Vector2(-1, 0)
-	print_debug("bad facing")
+	print_debug("bad facing: %s" % str(what_facing))
+	print_stack()
 	return Vector2(0, 0)
 
 func facing_rotated(what_facing: int, what_rotation: int) -> int:
@@ -266,6 +267,6 @@ func resolve_full_direction_to_facing(full_direction: int, slots: Dictionary) ->
 func parse_json(text: String):
 	var parser: = JSON.new()
 	if parser.parse(text) != OK:
-		print_debug("JSON parse error at line %d: %s" % [parser.get_error_line(), parser.get_error_string()])
+		print_debug("JSON parse error at line %d: %s" % [parser.get_error_line(), parser.get_error_message()])
 		return null
 	return parser.data

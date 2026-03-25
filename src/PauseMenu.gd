@@ -23,7 +23,7 @@ func toggle():
 
 func on_show() -> void:
 	var restart_button = find_child("RestartLevel")
-	restart_button.visible = bool(GameManager.loaded_level_name)
+	restart_button.visible = GameManager.loaded_level_name != ""
 
 
 func _on_QuitToMenu_pressed():

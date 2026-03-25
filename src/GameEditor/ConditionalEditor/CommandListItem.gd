@@ -27,20 +27,39 @@ const TAB_INTERNAL_MARGIN = 10
 
 var inputs = []
 
+var is_v3 = false
+
 var current_slot: int = Commands.Slot.RED
 
+# v2 data:
 var command_code: int
 var ui_data: Dictionary
 
-var ungenerated = true
+# v3 data:
+var qualified_command_name: String
+var short_command_name: String
+var command_info: Dictionary
+
+var _ungenerated = true
+var _pre_set_arg_values: Array = []
 
 func _ready():
-	if ungenerated:
+	if _ungenerated:
 		generate_ui()
 
 func set_ui_data(the_command_code: int, command_data: Dictionary) -> void:
 	command_code = the_command_code
 	ui_data = command_data
+
+func set_v3_data(qualified_name: String, short_name: String, new_command_info: Dictionary) -> void:
+	is_v3 = true
+	qualified_command_name = qualified_name
+	short_command_name = short_name
+	command_info = new_command_info
+	ui_data = {"display_name": short_command_name}
+	if short_name in ConditionalsV3.V3_CMD_MAP.values():
+		var cmd_code = ConditionalsV3.V3_CMD_MAP.find_key(short_name)
+		ui_data["display_name"] = Commands.Friendly[cmd_code]["display_name"]
 
 func set_slot(slot_id: int) -> void:
 	current_slot = slot_id
@@ -63,10 +82,13 @@ func add_generated_row() -> HBoxContainer:
 	return new_row
 
 func generate_ui() -> void:
-	ungenerated = false
+	_ungenerated = false
 	for child in generated_content.get_children():
 		generated_content.remove_child(child)
 		child.queue_free()
+	if is_v3:
+		generate_v3_ui()
+		return
 	
 	var current_row = add_generated_row()
 	
@@ -107,8 +129,67 @@ func generate_ui() -> void:
 		find_child("CommandSlot").set_valid_slot_categories(ui_data.slot_types)
 	
 	set_slot(current_slot)
+
+func generate_v3_ui() -> void:
+	title_label.text = ui_data.display_name
+	tab_panel.size.x = title_label.get_minimum_size().x + TAB_INTERNAL_MARGIN
 	
-	await get_tree().process_frame
+	var split_str: = (command_info.usage as String).split("|", true, 1)
+	var slot_type_hint: String = split_str[0]
+
+	var command_slot_selector = find_child("CommandSlot")
+	if slot_type_hint == "none":
+		command_slot_selector.set_valid_slot_categories([])
+	else:
+		var valid_categories: = Array(slot_type_hint.split(",", true))
+		command_slot_selector.set_valid_slot_categories(valid_categories)
+	set_slot(current_slot)
+	
+	var ui_template_string: = split_str[1]
+	var template_split: = Array(ui_template_string.split("[", true))
+	var prefix_str: String = template_split.pop_front()
+	
+	var current_row = add_generated_row()
+	# add the text before the first input template value if there is any
+	if prefix_str:
+		var prefix_text = Label.new()
+		prefix_text.text = prefix_str
+		current_row.add_child(prefix_text)
+
+	var arg_names: = command_info.args as Array
+
+	# each part is now a input template value followed by ] and 0 or more chars of plain text/newlines
+	for split_part: String in template_split:
+		var subsplit: = split_part.split("]", true, 1)
+		var input_info: = subsplit[0].split(":", true)
+		if input_info.size() >= 2 and input_info[1] in InputTemplates.InputTypes:
+			if input_info[0] not in arg_names:
+				push_error("arg name %s not found in arg list for command %s" % [input_info[0], qualified_command_name])
+			var input_type: InputTemplates.InputTypes = InputTemplates.InputTypes[input_info[1]]
+			var input_node: Control = InputTemplates.templates[input_type].instantiate()
+			input_node.set_arg_name(input_info[0])
+			current_row.add_child(input_node)
+			inputs.append(input_node)
+		else:
+			push_error("invalid input template value: %s in command %s" % [input_info, qualified_command_name])
+		
+		if subsplit.size() > 1 and subsplit[1]:
+			var just_text: String = subsplit[1]
+			while just_text.contains("\n"):
+				var split_on_newline: = just_text.split("\n", true, 1)
+				if split_on_newline[0]:
+					var pre_newline_text = Label.new()
+					pre_newline_text.text = split_on_newline[0]
+					current_row.add_child(pre_newline_text)
+				current_row = add_generated_row()
+				just_text = split_on_newline[1]
+			var text_node = Label.new()
+			text_node.text = just_text
+			current_row.add_child(text_node)
+	
+	if _pre_set_arg_values:
+		set_arg_values(_pre_set_arg_values)
+		_pre_set_arg_values = []
 
 func get_command_code() -> int:
 	return command_code
@@ -136,6 +217,66 @@ func get_command_data() -> Dictionary:
 		slot= get_slot_id(),
 		options= get_option_values(),
 	}
+
+func get_v3_call_string() -> String:
+	var arg_string: = get_arg_string()
+	if arg_string:
+		return qualified_command_name + "::" + arg_string
+	else:
+		return qualified_command_name
+
+func get_arg_string() -> String:
+	var arg_names: = command_info.args as Array
+
+	var arg_list: Array = [current_slot]
+	var ui_values: = get_v3_ui_values()
+	for ui_val_key in ui_values:
+		if ui_val_key not in arg_names:
+			push_error("UI arg key %s not found in arg list for command %s" % [ui_val_key, qualified_command_name])
+
+	for arg_name in arg_names:
+		if arg_name in ui_values:
+			arg_list.append(ui_values[arg_name])
+		else:
+			push_error("Arg %s not found in UI values for command %s" % [arg_name, qualified_command_name])
+			arg_list.append(0)
+
+	return ConditionalsV3.arg_values_to_arg_string(arg_list)
+
+func set_arg_values(arg_values: Array) -> void:
+	if _ungenerated:
+		_pre_set_arg_values = arg_values.duplicate()
+		return
+	var in_arg_values: = arg_values.duplicate()
+	if len(arg_values) < 1:
+		return
+	else:
+		set_slot(arg_values.pop_front())
+
+	var arg_names: = command_info.args as Array
+	if len(arg_names) != len(inputs):
+		push_error("Command UI has the wrong number of inputs for arguments: %d/%d for command %s" % [len(inputs), len(arg_names), qualified_command_name])
+		return
+	if not arg_names:
+		return
+	if len(arg_names) != len(arg_values):
+		push_error("Wrong number of values for required arguments for command %d/%d: %s" % [len(arg_values), len(arg_names), qualified_command_name])
+		return
+	
+	var input_names: Array[String] = []
+	for input_item in inputs:
+		input_names.append(input_item.get_arg_name())
+
+	for i in range(len(arg_names)):
+		var arg_name = arg_names[i]
+		var input_item = inputs[input_names.find(arg_name)]
+		input_item.set_value(arg_values[i])
+
+func get_v3_ui_values() -> Dictionary:
+	var ui_values: = {}
+	for input_item in inputs:
+		ui_values[input_item.get_arg_name()] = input_item.get_value()
+	return ui_values
 
 func _on_TextureRect_gui_input(event):
 	var e = event as InputEventMouseButton

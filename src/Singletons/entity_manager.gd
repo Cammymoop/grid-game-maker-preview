@@ -243,7 +243,7 @@ func new_entity(definition) -> int:
 
 func create_defaults() -> void:
 	create_default_player()
-	#create_default_box()
+	create_default_box()
 	
 func create_randoms() -> void:
 	create_default_player()
@@ -253,8 +253,9 @@ func create_randoms() -> void:
 
 func create_default_player() -> void:
 	create_entity(get_entity_index("player"), Vector2(2, 2))
+	create_entity(get_entity_index("pickaxe"), Vector2(0, 0))
 func create_default_box() -> void:
-	create_entity(get_entity_index("green_box"), Vector2(2, 1))
+	create_entity(get_entity_index("geode"), Vector2(2, 1))
 
 func create_random_entity(entity_name) -> void:
 	var tries = 20
@@ -434,7 +435,7 @@ func bond_entity(entity, bond_group) -> void:
 func unbond_entity(entity, cull_empty=true) -> void:
 	if entity.bond_group:
 		var bg = entity.bond_group
-		bg.remove(bg.find(entity.instance_id))
+		bg.remove_at(bg.find(entity.instance_id))
 		entity.bond_group = null
 		if cull_empty:
 			bond_group_update()
@@ -448,7 +449,7 @@ func bond_group_update() -> void:
 	# Reverse so we delete starting from the end and the indexes still hold after each delete
 	to_remove.invert()
 	for index in to_remove:
-		bond_groups.remove(index)
+		bond_groups.remove_at(index)
 
 func get_bond_group(entity):
 	for bg in bond_groups:
@@ -679,7 +680,7 @@ func remove_entity(entity) -> void:
 				if (sig_conn.callable as Callable).get_object() == entity:
 					sig_conn.signal.disconnect(sig_conn.callable)
 		entity_signal_connections.erase(entity)
-	entity_list.remove(entity_list.find(entity))
+	entity_list.erase(entity)
 	if entity.bond_group:
 		unbond_entity(entity)
 	entity.remove_from_group("_entity_")

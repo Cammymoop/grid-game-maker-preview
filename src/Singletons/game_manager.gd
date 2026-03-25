@@ -9,7 +9,7 @@ var checkpoint_save = {}
 var editor_save = {}
 var loaded_level = {}
 
-var loaded_level_name = ""
+var loaded_level_name: = ""
 
 var loaded = false
 

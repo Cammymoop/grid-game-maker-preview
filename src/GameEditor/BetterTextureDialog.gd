@@ -18,7 +18,8 @@ func setup(texture_index, sub_index):
 	tex_menu.connect("index_pressed", Callable(self, "set_texture"))
 	hidden.connect(queue_free)
 
-	await ready
+	if not is_inside_tree():
+		await ready
 	set_texture(texture_index)
 	find_child("TilePicker").set_selected_index(sub_index)
 	

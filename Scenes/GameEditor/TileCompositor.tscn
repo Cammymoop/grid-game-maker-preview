@@ -78,6 +78,8 @@ region = Rect2(18, 18, 18, 18)
 [node name="TileCompositor" type="Window" unique_id=1495846052]
 oversampling_override = 1.0
 position = Vector2i(0, 36)
+size = Vector2i(557, 604)
+wrap_controls = true
 script = ExtResource("1")
 loaded_texture = ExtResource("2")
 make_tex_with_size = Vector2(16, 16)
@@ -103,6 +105,7 @@ layout_mode = 2
 alignment = 1
 
 [node name="TilePickerLocal" parent="MarginContainer/VBoxContainer/HBoxContainer2" unique_id=1340752865 instance=ExtResource("3")]
+texture_filter = 1
 layout_mode = 2
 size_flags_vertical = 4
 expand_mode = 1
@@ -113,7 +116,7 @@ layout_mode = 0
 anchor_right = 1.0
 anchor_bottom = 1.0
 texture = ExtResource("17")
-stretch_mode = 2
+stretch_mode = 1
 
 [node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/VBoxContainer/HBoxContainer2" unique_id=1413458073]
 layout_mode = 2
@@ -293,6 +296,7 @@ theme_override_constants/margin_top = 13
 theme_override_constants/margin_right = 13
 
 [node name="BrushView" type="TextureRect" parent="MarginContainer/VBoxContainer/HBoxContainer/Panel/VBoxContainer/MarginContainer" unique_id=1920304989]
+texture_filter = 1
 custom_minimum_size = Vector2(96, 96)
 layout_mode = 2
 texture = SubResource("1")
@@ -306,7 +310,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 texture = ExtResource("18")
 expand_mode = 1
-stretch_mode = 2
+stretch_mode = 1
 
 [node name="BrushSlideH" type="HSlider" parent="MarginContainer/VBoxContainer/HBoxContainer/Panel/VBoxContainer/MarginContainer/BrushView" unique_id=772688292]
 layout_mode = 0
@@ -566,10 +570,12 @@ mouse_filter = 2
 alignment = 1
 
 [node name="Icon" type="TextureRect" parent="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer2/PickBrushButton/MarginContainer/VBoxContainer" unique_id=1754737844]
+texture_filter = 1
 custom_minimum_size = Vector2(64, 64)
 layout_mode = 2
 size_flags_horizontal = 4
 mouse_filter = 2
+expand_mode = 1
 stretch_mode = 6
 
 [node name="PickedCrosshair" type="Control" parent="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer2/PickBrushButton/MarginContainer/VBoxContainer/Icon" unique_id=582362494]
@@ -683,7 +689,7 @@ layout_mode = 2
 theme_override_constants/margin_left = 4
 theme_override_constants/margin_top = 4
 theme_override_constants/margin_right = 4
-theme_override_constants/margin_bottom = 4
+theme_override_constants/margin_bottom = 8
 
 [node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer/CollapsableSection/HBoxContainer5/PanelContainer2/MarginContainer" unique_id=962455936]
 layout_mode = 2
@@ -718,11 +724,13 @@ button_group = SubResource("ButtonGroup_63ggb")
 text = "Colorize"
 
 [node name="BrushColorPicker" type="ColorPickerButton" parent="MarginContainer/VBoxContainer/CollapsableSection/HBoxContainer5/PanelContainer2/MarginContainer/HBoxContainer/VBoxContainer2" unique_id=311281832]
+custom_minimum_size = Vector2(0, 28)
 layout_mode = 2
 color = Color(1, 1, 1, 1)
 edit_alpha = false
 
 [node name="BrushColorPreview" type="TextureRect" parent="MarginContainer/VBoxContainer/CollapsableSection/HBoxContainer5/PanelContainer2/MarginContainer/HBoxContainer" unique_id=1787369423]
+texture_filter = 1
 custom_minimum_size = Vector2(64, 64)
 layout_mode = 2
 size_flags_vertical = 4

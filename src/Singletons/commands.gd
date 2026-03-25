@@ -19,6 +19,9 @@ enum Slot {
 	DARK_RED, DARK_BLUE, DARK_GREEN, DARK_ORANGE,
 	
 	# Vector slots?
+	# ...
+	
+	# Internal use slot to keep track of the contextual tile position
 	THIS_TILE 
 }
 
@@ -38,6 +41,8 @@ enum CC {
 	C_HAS_NAME,
 	C_CAN_MOVE,
 	C_GET_PUSHED,
+	
+	C_IS_FACING,
 	
 	# Actions
 	A_DIE = 8000,
@@ -72,6 +77,9 @@ func is_action(command_id) -> bool:
 
 func slot_is_entity(slot_id) -> bool:
 	return slot_id >= Slot.RED and slot_id <= Slot.PINK
+
+func slot_is_positions(slot_id) -> bool:
+	return slot_id >= Slot.GREY and slot_id <= Slot.BLACK
 
 var Friendly = {
 	CC.SELECT_DEFAULTS: {
@@ -153,11 +161,26 @@ var Friendly = {
 				input_type= InputTypes.InvertInput,
 				template_options= {
 					regular_text= "",
-					inverted_text= " and doesn't change which way it's facing",
+					inverted_text= " and doesn't turn",
 				},
 			},
 		},
 		ui= ["This Entity gets pushed this way ", "[direction", " if it can", "br", "[visual_facing"]
+	},
+	CC.C_IS_FACING: {
+		display_name= "Is Facing",
+		slot_types= ["entity"],
+		options= {
+			"direction": {input_type= InputTypes.DirectionInput},
+			"invert": {
+				input_type= InputTypes.InvertInput,
+				template_options= {
+					regular_text= "is",
+					inverted_text= "is not",
+				},
+			},
+		},
+		ui= ["This Entity ", "[invert", " facing this way ", "[direction",]
 	},
 	
 	CC.A_DIE: {
@@ -247,4 +270,37 @@ var Friendly = {
 		options= {},
 		ui= ["Load the saved checkpoint",]
 	},
+	
+	CC.A_CREATE_ENTITY: {
+		display_name= "Create Entity",
+		slot_types= ["tile_pos"],
+		options= {
+			"entity_name": {input_type= InputTypes.EntityNameInput},
+			"facing": {input_type= InputTypes.DirectionInput},
+			"is_moving": {input_type= InputTypes.InvertInput,
+				template_options= {
+					regular_text= "stationary",
+					inverted_text= "moving",
+				},
+			},
+		},
+		ui= ["Create a new ", "[entity_name", " entity at this location", "br",
+		"facing ", "[facing", " which is ", "[is_moving"]
+	},
+	
+	CC.A_TURN: {
+		display_name= "Turn",
+		slot_types= ["entity"],
+		options= {
+			"direction": {input_type= InputTypes.DirectionInput},
+		},
+		ui= ["Turn this Entity to face this way ", "[direction",]
+	},
+	
+	CC.A_QUIT: {
+		display_name= "Quit",
+		slot_types= [],
+		options= {},
+		ui= ["Quit"]
+	}
 }

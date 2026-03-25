@@ -13,9 +13,11 @@ const V3_CMD_MAP: Dictionary = {
 
 	# Conditions
     CC.C_HAS_PROPERTY: "c_has_property",
-    CC.C_HAS_NAME: "c_has_name",
+    CC.C_HAS_NAME: "c_is_named",
     CC.C_CAN_MOVE: "c_can_move",
     CC.C_GET_PUSHED: "c_get_pushed",
+    
+    CC.C_IS_FACING: "c_is_facing",
 
 	# Actions
     CC.A_DIE: "a_die",
@@ -31,17 +33,19 @@ const V3_CMD_MAP: Dictionary = {
     CC.A_SAVE_CHECKPOINT: "a_save_checkpoint",
     CC.A_LOAD_CHECKPOINT: "a_load_checkpoint",
 
-    CC.A_CREATE_ENTITY: "",
-    CC.A_TURN: "",
+    CC.A_CREATE_ENTITY: "a_create_entity",
+    CC.A_TURN: "a_turn",
     CC.A_SEND_SIGNAL: "",
 }
 
 enum ScriptType { GDSCRIPT, ORCHESTRATOR }
 
 var scripts: Array[Dictionary] = []
-var all_conditionals: Dictionary[String, Dictionary] = {}
+var all_commands: Dictionary[String, Dictionary] = {}
 
 const DEFAULT_SCRIPTS: = [ "basic_default" ]
+
+const BUILTIN_COMMANDS: Array[String] = ["and", "or", "not", "false", "true"]
 
 var verbose = false
 
@@ -65,6 +69,9 @@ func make_slots(owning_entity, target_entity, tile_position, arguments = []) -> 
             slots[arg_slots[i]] = arguments[i]
     return slots
 
+func is_builtin(call_string: String) -> bool:
+    return call_string in BUILTIN_COMMANDS
+
 func slots_copy(slots: Dictionary) -> Dictionary:
     var slots_duplicate = slots.duplicate()
     slots[Slot.GREY] = slots[Slot.GREY].duplicate()
@@ -84,6 +91,40 @@ func add_conditional_script(script_name: String, script_type: int, script_inst: 
 func _find_gdscript_file(script_name: String) -> String:
     return "res://cond_scripts/" + script_name + ".gd"
 
+func callstring_to_qualified_name(call_string: String) -> String:
+    if call_string.contains("::"):
+        return call_string.split("::", true, 1)[0]
+    return call_string
+
+func callstring_to_arg_string(call_string: String) -> String:
+    if call_string.contains("::"):
+        return call_string.split("::", true, 1)[1]
+    return ""
+
+func command_short_name(command_name: String) -> String:
+    return command_name.rsplit(".")[-1]
+
+func arg_values_to_arg_string(arg_values: Array) -> String:
+    if arg_values.size() == 0:
+        return ""
+    return JSON.stringify(JSON.from_native(arg_values, false))
+
+func arg_string_to_arg_values(arg_string: String) -> Array:
+    if arg_string == "":
+        return []
+    return JSON.to_native(JSON.parse_string(arg_string), false)
+
+func find_command_by_name(command_name: String) -> String:
+    for qualified_name in all_commands:
+        if qualified_name == command_name or qualified_name.ends_with("." + command_name):
+            return qualified_name
+    return ""
+
+func get_command_info(qualified_name: String) -> Dictionary:
+    if not all_commands.has(qualified_name):
+        return {}
+    return all_commands[qualified_name]
+
 func add_conditional_script_info(script_info: Dictionary) -> void:
     var script_index = scripts.size()
     scripts.append(script_info)
@@ -94,12 +135,12 @@ func register_script_conditionals(script_index: int) -> void:
     if script_inst.has_method("set_cond_resolver"):
         script_inst.set_cond_resolver(self)
     var script_name = scripts[script_index]["name"]
-    for conditional in script_inst.list_conditionals():
-        var full_name = script_name + "." + conditional["name"]
-        if full_name in all_conditionals:
-            push_warning("Overriding registered conditional: %s" % [full_name])
-        all_conditionals[full_name] = conditional.duplicate()
-        all_conditionals[full_name]["script_index"] = script_index
+    for command in script_inst.list_commands():
+        var qualified_name = script_name + "." + command["name"]
+        if qualified_name in all_commands:
+            push_warning("Overriding registered command: %s" % [qualified_name])
+        all_commands[qualified_name] = command.duplicate()
+        all_commands[qualified_name]["script_index"] = script_index
 
 func conditions_collapse(condition_stack: Array) -> bool:
     var result = true
@@ -110,12 +151,30 @@ func conditions_collapse(condition_stack: Array) -> bool:
         result = i_res
     return result
 
-func resolve_conditional(conditional: Dictionary, slots: Dictionary) -> Dictionary:
+func resolve_conditional(conditional: Variant, slots: Dictionary) -> Dictionary:
+    var regularized_conditional: Array[Dictionary] = []
+    if typeof(conditional) == TYPE_ARRAY:
+        regularized_conditional.assign(conditional)
+    else:
+        regularized_conditional.append(conditional)
+    return _resolve_conditional(regularized_conditional, slots)
+
+func _resolve_conditional(conditional: Array[Dictionary], slots: Dictionary) -> Dictionary:
     reset_slots = slots_copy(slots)
+    
     var overall_result = {"result": true, "quit": false}
+    for step in conditional:
+        overall_result = _resolve_conditional_step(step, overall_result, slots)
+        if overall_result["quit"]:
+            break
+    return overall_result
+    
+func _resolve_conditional_step(cond_step: Dictionary, overall_result: Dictionary, slots: Dictionary) -> Dictionary:
+    var step_result = overall_result.duplicate()
+    var break_step = false
     
     if verbose:
-        for key: String in conditional:
+        for key: String in cond_step:
             if key == "v":
                 continue
             var other_keys: Array[String] = []
@@ -124,8 +183,8 @@ func resolve_conditional(conditional: Dictionary, slots: Dictionary) -> Dictiona
             print_debug("ConditionalV3, found other keys: %s" % [other_keys])
 
     var condition_stack = []
-    for cond_call in conditional.get("conditions", []):
-        if overall_result["quit"]:
+    for cond_call in cond_step.get("conditions", []):
+        if step_result["quit"] or break_step:
             break
         if typeof(cond_call) != TYPE_STRING:
             push_error("Conditional command is not a string: " + str(cond_call))
@@ -134,40 +193,49 @@ func resolve_conditional(conditional: Dictionary, slots: Dictionary) -> Dictiona
             var a = condition_stack.pop_back()
             var b = condition_stack.pop_back()
             condition_stack.append(a and b if cond_call == "and" else a or b)
+        elif cond_call == "false" or cond_call == "true":
+            condition_stack.append(cond_call == "true")
         elif cond_call == "not":
             var top = condition_stack.pop_back()
             condition_stack.append(not top)
         else:
             var cmd_result = call_conditional_command(cond_call, slots)
             if cmd_result['quit']:
-                overall_result["quit"] = true
+                step_result["quit"] = true
+            elif cmd_result.get("break", false):
+                break_step = true
             condition_stack.append(cmd_result["result"])
     
     if len(condition_stack) > 1:
-        overall_result["result"] = conditions_collapse(condition_stack)
+        step_result["result"] = conditions_collapse(condition_stack)
     elif len(condition_stack) == 1:
-        overall_result["result"] = condition_stack[0]
+        step_result["result"] = condition_stack[0]
     
-    if overall_result["quit"]:
-        return overall_result
+    if step_result["quit"] or break_step:
+        return step_result
     
     var cases: Array[String] = []
-    for key: String in conditional:
+    for key: String in cond_step:
         if key.begins_with("when "):
             cases.append(key.trim_prefix("when "))
     
     for case in cases:
-        if overall_result["quit"]:
+        if step_result["quit"] or break_step:
             break
-        if not check_against_case(case, overall_result["result"]):
+        if not check_against_case(case, step_result["result"]):
             continue
-        var cmds: Array = conditional["when " + case]
+        var cmds: Array = cond_step["when " + case]
         for cmd in cmds:
+            if cmd == "true" or cmd == "false":
+                step_result["result"] = cmd == "true"
+                continue
             var cmd_result = call_conditional_command(cmd, slots)
             if cmd_result['quit']:
-                overall_result["quit"] = true
+                step_result["quit"] = true
+            elif cmd_result.get("break", false):
+                break_step = true
 
-    return overall_result
+    return step_result
 
 func check_against_case(case: String, result_val: Variant) -> bool:
     case = case.strip_edges()
@@ -189,17 +257,25 @@ func check_against_case(case: String, result_val: Variant) -> bool:
     
     return float(case) == float(result_val)
 
-func call_conditional_command(command_name: String, slots: Dictionary) -> Dictionary:
-    if not command_name:
-        push_error("Conditional command name is empty")
+func call_conditional_command(call_str: String, slots: Dictionary) -> Dictionary:
+    if not call_str:
+        push_error("Conditional command name/call string is empty")
         return {"result": false, "quit": true}
 
-    var main_name = command_name.split(":")[0]
-    if not all_conditionals.has(main_name):
-        push_error("Conditional Script not found for command: %s (%s)" % [main_name, command_name])
-        return {"result": false, "quit": true}
+    var command_qualified_name: String = ""
+    if call_str.contains("::"):
+        command_qualified_name = call_str.split("::", true, 1)[0]
+    else:
+        command_qualified_name = call_str
 
-    var raw_result = _call_conditional_command(main_name, command_name, slots)
+    if not all_commands.has(command_qualified_name):
+        push_error("Conditional Script not found for command: %s (%s)" % [command_qualified_name, call_str])
+        return {"result": false, "quit": true}
+    
+    var cmd_script = scripts[all_commands[command_qualified_name]["script_index"]]["instance"]
+    var command_name = command_qualified_name.rsplit(".", true, 1)[-1]
+
+    var raw_result = _call_conditional_command(cmd_script, command_name, slots, call_str)
     var result_type = typeof(raw_result)
     if result_type == TYPE_BOOL:
         return {"result": raw_result, "quit": false}
@@ -207,17 +283,18 @@ func call_conditional_command(command_name: String, slots: Dictionary) -> Dictio
         return {"result": raw_result, "quit": false}
     elif result_type == TYPE_DICTIONARY:
         if not raw_result:
-            push_warning("command returned empty dictionary: %s" % [command_name])
+            push_warning("command returned empty dictionary: %s" % [call_str])
         return raw_result
     else:
         # default return in case of command with no return value etc
         return {"result": true, "quit": false}
 
-func _call_conditional_command(main_cmd_name: String, full_call_name: String, slots: Dictionary) -> Dictionary:
-    var script_index = all_conditionals[main_cmd_name]["script_index"]
-    var script_inst = scripts[script_index]["instance"]
-    return script_inst.call_command(self, main_cmd_name, slots, full_call_name)
+func _call_conditional_command(cmd_script: Node, main_cmd_name: String, slots: Dictionary, full_call_str: String) -> Variant:
+    return cmd_script.call_command(main_cmd_name, slots, full_call_str)
 
 func select_reset(slots: Dictionary) -> void:
     slots.clear()
     slots.merge(reset_slots)
+
+func select_reset_slot(slots: Dictionary, slot_id: Slot) -> void:
+    slots[slot_id] = reset_slots[slot_id]

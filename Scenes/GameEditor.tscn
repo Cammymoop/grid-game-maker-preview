@@ -167,7 +167,7 @@ alignment = 1
 
 [node name="Label" type="Label" parent="MarginContainer/UIRoot/TabContainer/Game/VBoxContainer/HBoxContainer5" unique_id=1905247433]
 layout_mode = 2
-text = "Default Camera3D Settings:"
+text = "Default Camera Settings:"
 
 [node name="HBoxContainer6" type="HBoxContainer" parent="MarginContainer/UIRoot/TabContainer/Game/VBoxContainer" unique_id=1658482809]
 layout_mode = 2
@@ -198,7 +198,7 @@ text = "Stop At Map Edge:"
 
 [node name="Label" type="Label" parent="MarginContainer/UIRoot/TabContainer/Game/VBoxContainer/HBoxContainer7" unique_id=1502058678]
 layout_mode = 2
-text = "Extend Camera3D Limits:"
+text = "Extend Camera Limits:"
 
 [node name="ExtendCamLimits" type="SpinBox" parent="MarginContainer/UIRoot/TabContainer/Game/VBoxContainer/HBoxContainer7" unique_id=1741488458]
 layout_mode = 2

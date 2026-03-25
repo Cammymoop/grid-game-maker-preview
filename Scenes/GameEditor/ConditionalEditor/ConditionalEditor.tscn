@@ -4,8 +4,11 @@
 [ext_resource type="PackedScene" path="res://Scenes/GameEditor/ConditionalEditor/AddCommandDialog.tscn" id="2"]
 [ext_resource type="Texture2D" uid="uid://cv8l7ymc05wg5" path="res://assets/img/button_icons/plus.png" id="3"]
 [ext_resource type="StyleBox" uid="uid://bks823xpsbs2q" path="res://src/UI/ConditionalEditorBGTexture.tres" id="4"]
+[ext_resource type="Script" uid="uid://c8wy06ic8wik5" path="res://Scenes/GameEditor/ConditionalEditor/steps.gd" id="4_k14si"]
 [ext_resource type="Script" uid="uid://bm1w1ctkp6sd7" path="res://src/GameEditor/ConditionalEditor/AnActionsTab.gd" id="5"]
+[ext_resource type="Texture2D" uid="uid://dn7c2cihicbkd" path="res://assets/img/button_icons/direction_icons/left.png" id="5_wqvmh"]
 [ext_resource type="Script" uid="uid://d3yos0b24ft4f" path="res://src/GameEditor/ConditionalEditor/ConditionalEditor.gd" id="6"]
+[ext_resource type="Texture2D" uid="uid://wo7nayhwkk8y" path="res://assets/img/button_icons/direction_icons/right.png" id="6_1yhi8"]
 [ext_resource type="Script" uid="uid://wr87ai1n4tcw" path="res://src/GameEditor/ConditionalEditor/ActionsTabs.gd" id="7"]
 
 [sub_resource type="StyleBoxFlat" id="3"]
@@ -19,14 +22,16 @@ expand_margin_right = 8.0
 [sub_resource type="StyleBoxFlat" id="2"]
 bg_color = Color(0.137255, 0.117647, 0.117647, 1)
 
-[node name="ConditionalEditor" type="Window" unique_id=557924117]
+[node name="ConditionalEditor" type="Window" unique_id=557924117 node_paths=PackedStringArray("when_list_container")]
 transparent_bg = true
 oversampling_override = 1.0
+title = "Conditional Editor"
 position = Vector2i(0, 36)
 size = Vector2i(570, 461)
 transparent = true
 theme = ExtResource("1")
 script = ExtResource("6")
+when_list_container = NodePath("PanelContainer/MarginContainer/VBoxContainer2/VBoxContainer/HBoxContainer2/ActionsTabs")
 
 [node name="PanelContainer" type="PanelContainer" parent="." unique_id=643923339]
 anchors_preset = 15
@@ -46,6 +51,7 @@ theme_override_constants/margin_bottom = 10
 layout_mode = 2
 
 [node name="TitleBar" type="Control" parent="PanelContainer/MarginContainer/VBoxContainer2" unique_id=192343188]
+visible = false
 custom_minimum_size = Vector2(0, 24)
 layout_mode = 2
 
@@ -69,6 +75,44 @@ grow_horizontal = 2
 grow_vertical = 2
 theme_override_colors/font_color = Color(0, 0, 0, 1)
 text = "Conditional Editor"
+
+[node name="StepsUI" type="HBoxContainer" parent="PanelContainer/MarginContainer/VBoxContainer2" unique_id=690913947]
+layout_mode = 2
+theme_override_constants/separation = 8
+alignment = 1
+script = ExtResource("4_k14si")
+
+[node name="PrevStepButton" type="Button" parent="PanelContainer/MarginContainer/VBoxContainer2/StepsUI" unique_id=274209237]
+layout_mode = 2
+size_flags_vertical = 4
+icon = ExtResource("5_wqvmh")
+
+[node name="Label" type="Label" parent="PanelContainer/MarginContainer/VBoxContainer2/StepsUI" unique_id=1076519550]
+layout_mode = 2
+text = "Step"
+
+[node name="StepNumLabel" type="Label" parent="PanelContainer/MarginContainer/VBoxContainer2/StepsUI" unique_id=1633701069]
+layout_mode = 2
+text = "1/2"
+
+[node name="NextStepButton" type="Button" parent="PanelContainer/MarginContainer/VBoxContainer2/StepsUI" unique_id=2066052586]
+layout_mode = 2
+size_flags_vertical = 4
+icon = ExtResource("6_1yhi8")
+
+[node name="Control" type="Control" parent="PanelContainer/MarginContainer/VBoxContainer2/StepsUI" unique_id=2002603441]
+custom_minimum_size = Vector2(20, 0)
+layout_mode = 2
+
+[node name="AddStepButton" type="Button" parent="PanelContainer/MarginContainer/VBoxContainer2/StepsUI" unique_id=441413060]
+layout_mode = 2
+size_flags_vertical = 4
+text = "Add Step"
+
+[node name="RemoveStepButton" type="Button" parent="PanelContainer/MarginContainer/VBoxContainer2/StepsUI" unique_id=1188796391]
+layout_mode = 2
+size_flags_vertical = 4
+text = "Remove Step"
 
 [node name="VBoxContainer" type="VBoxContainer" parent="PanelContainer/MarginContainer/VBoxContainer2" unique_id=366886339]
 layout_mode = 2
@@ -122,10 +166,11 @@ theme_override_constants/separation = 8
 [node name="ActionsTabs" type="TabContainer" parent="PanelContainer/MarginContainer/VBoxContainer2/VBoxContainer/HBoxContainer2" unique_id=1974950153]
 layout_mode = 2
 size_flags_horizontal = 3
-current_tab = 0
+current_tab = 2
 script = ExtResource("7")
 
 [node name="True Actions" type="ScrollContainer" parent="PanelContainer/MarginContainer/VBoxContainer2/VBoxContainer/HBoxContainer2/ActionsTabs" unique_id=1758110469]
+visible = false
 custom_minimum_size = Vector2(460, 120)
 layout_mode = 2
 script = ExtResource("5")
@@ -175,7 +220,6 @@ custom_minimum_size = Vector2(100, 20)
 layout_mode = 2
 
 [node name="Always Actions" type="ScrollContainer" parent="PanelContainer/MarginContainer/VBoxContainer2/VBoxContainer/HBoxContainer2/ActionsTabs" unique_id=99594252]
-visible = false
 custom_minimum_size = Vector2(460, 120)
 layout_mode = 2
 script = ExtResource("5")

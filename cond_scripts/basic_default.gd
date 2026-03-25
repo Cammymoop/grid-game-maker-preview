@@ -1,186 +1,186 @@
-extends Node
-
-const CondResolver = preload("res://src/Singletons/conditionals_v3.gd")
-const Slot = Commands.Slot
-
-var cond_resolver: CondResolver = null
-
-func list_conditionals() -> Array[Dictionary]:
-	var cmd_infos: Array[Dictionary] = []
-	for method_info in get_method_list():
-		var method_name = method_info.name
-		if method_name.begins_with("cmd_"):
-			cmd_infos.append({"name": method_name.trim_prefix("cmd_")})
-	return cmd_infos
-
-func set_cond_resolver(cond: CondResolver) -> void:
-	cond_resolver = cond
-
-func call_command(resolver, command_name: String, slots: Dictionary, full_call_name: String) -> Dictionary:
-	cond_resolver = resolver
-	var parts = command_name.split(".", false, 1)
-	var cmd = parts[1] if parts.size() > 1 else command_name
-	if not has_method("cmd_" + cmd):
-		print_debug("basic default: command not found: %s" % [cmd])
-		return {"result": false, "quit": false}
-
-	var args: Array = []
-	var colon_idx = full_call_name.find(":")
-	if colon_idx >= 0:
-		args = Array(full_call_name.substr(colon_idx + 1).split(",", true))
-
-	var callable = Callable(self, "cmd_" + cmd)
-	var raw_result
-	if callable.get_argument_count() == 1:
-		raw_result = callable.call(slots)
-	else:
-		raw_result = callable.callv([slots] + args)
-
-	if typeof(raw_result) == TYPE_BOOL:
-		return {"result": raw_result, "quit": false}
-	elif typeof(raw_result) == TYPE_DICTIONARY:
-		return raw_result
-	else:
-		return {"result": true, "quit": false}
-
-# --- helpers ---
-
-func _slot_val(slots: Dictionary, slot_str: String):
-	return slots[int(slot_str)]
-
-func _resolve_direction(dir_str: String, entity) -> int:
-	if Utility.is_absolute_direction(dir_str):
-		return Utility.direction_to_facing(dir_str)
-	if entity:
-		return Utility.resolve_relative_direction(dir_str, entity.facing)
-	return 0
-
-func _get_int(input: String) -> int:
-	match input:
-		"level_x":     return int(MapManager.get_map_size().position.x)
-		"level_y":     return int(MapManager.get_map_size().position.y)
-		"level_width": return int(MapManager.get_map_size().size.x)
-		"level_height":return int(MapManager.get_map_size().size.y)
-	return int(input)
+extends BaseConditionalScript
 
 # --- COMMANDS ---
 
+func desc_select_defaults() -> String:
+	return "none|Reset all slots selections"
 func cmd_select_defaults(slots: Dictionary) -> void:
 	cond_resolver.select_reset(slots)
 
+func desc_quit() -> String:
+	return "none|Skip the rest of the conditional"
 func cmd_quit(_slots: Dictionary) -> Dictionary:
 	return {"result": true, "quit": true}
 
-# Select: args = slot_str, tile_name
-func cmd_select_tiles_named(slots: Dictionary, slot_str: String, tile_name: String) -> void:
+func desc_select_tiles_named() -> String:
+	return "pos|<= Select all positions where the tile [tile_name:TileNameInput] is found"
+func cmd_select_tiles_named(slots: Dictionary, chosen_slot: Slot, tile_name: String) -> void:
 	var tindex = MapManager.get_tile_index(tile_name)
-	slots[int(slot_str)] = MapManager.get_all_positions_of_tile(tindex)
+	slots[chosen_slot] = MapManager.get_all_positions_of_tile(tindex)
 
-# Select: args = slot_str, rel_x, rel_y, width, height
-func cmd_select_tiles_rect(slots: Dictionary, slot_str: String, x: String, y: String, w: String, h: String) -> void:
-	var origin = slots[Slot.THIS_TILE]
-	var top = origin + Vector2(_get_int(x), _get_int(y))
-	var positions = []
-	for xi in range(_get_int(w)):
-		for yi in range(_get_int(h)):
-			positions.append(top + Vector2(xi, yi))
-	slots[int(slot_str)] = positions
+func desc_select_tiles_rect() -> String:
+	return "pos|<= Select positions within a rectangle starting at [top_left:PositionInput] with size [size:PositionInput]"
+func cmd_select_tiles_rect(slots: Dictionary, chosen_slot: Slot, top_left: Vector2i, size: Vector2i) -> void:
+	top_left = get_rel_position_arg(top_left, slots)
+	var positions: Array = []
+	for xi in range(size.x):
+		for yi in range(size.y):
+			positions.append(top_left + Vector2i(xi, yi))
+	slots[chosen_slot] = positions
 
-# Condition: args = slot_str, invert, property_name
-func cmd_c_has_property(slots: Dictionary, slot_str: String, invert: String, property_name: String) -> bool:
-	var selected = _slot_val(slots, slot_str)
-	var slot_id = int(slot_str)
+func desc_select_tiles_around() -> String:
+	return "pos|<= Select positions within [radius:ValueInput] (full square)"
+func cmd_select_tiles_around(slots: Dictionary, chosen_slot: int, radius: int) -> void:
+	var top_left = get_context_position(slots) - Vector2i(radius, radius)
+	var width: = radius * 2 + 1
+	var positions: Array = []
+	for xi in range(width):
+		for yi in range(width):
+			positions.append(top_left + Vector2i(xi, yi))
+	slots[chosen_slot] = positions
+
+func desc_c_has_property() -> String:
+	return "entity,pos|If the entity/tile [invert:InvertInput:has,doesn't have] a [property_name:PropertyInput] property"
+func cmd_c_has_property(slots: Dictionary, chosen_slot: int, invert: bool, property_name: String) -> bool:
+	var selected = slots[chosen_slot]
 	var result: bool
-	if Commands.slot_is_entity(slot_id):
+	if Commands.slot_is_entity(chosen_slot):
 		result = EntityManager.entity_has_property(selected, property_name)
 	else:
 		if not selected or len(selected) < 1:
 			result = false
 		else:
 			result = MapManager.get_tile_property_at(selected[0], property_name) != null
-	prints("has property:", slot_str, property_name, "result:", result)
-	return not result if invert == "true" else result
+	return not result if invert else result
 
-# Condition: args = slot_str, invert, check_name
-func cmd_c_has_name(slots: Dictionary, slot_str: String, invert: String, check_name: String) -> bool:
-	var selected = _slot_val(slots, slot_str)
-	var result = selected.entity_name == check_name
-	return not result if invert == "true" else result
+func desc_c_is_named() -> String:
+	return "entity|If the entity [invert:InvertInput:is,is not] named [check_name:EntityNameInput]"
+func cmd_c_is_named(slots: Dictionary, chosen_slot: int, invert: bool, check_name: String) -> bool:
+	var result = slots[chosen_slot].entity_name == check_name
+	return not result if invert else result
 
-# Condition: args = slot_str, invert, direction
-func cmd_c_can_move(slots: Dictionary, slot_str: String, invert: String, direction: String) -> bool:
-	var selected = _slot_val(slots, slot_str)
-	var facing = _resolve_direction(direction, selected)
-	var result = selected.can_i_move(facing)
-	return not result if invert == "true" else result
+func desc_c_can_move() -> String:
+	return "entity|If the entity [invert:InvertInput:can,cannot] move this way [direction:DirectionInput]"
+func cmd_c_can_move(slots: Dictionary, chosen_slot: int, invert: bool, direction: int) -> bool:
+	var selected = slots[chosen_slot]
+	var result = selected.can_i_move(resolve_direction_value(direction, slots))
+	return not result if invert else result
 
-# Condition/Action: push selected entity in direction, returns whether move succeeded
-# args = slot_str, keep_visual, direction
-func cmd_c_get_pushed(slots: Dictionary, slot_str: String, keep_visual: String, direction: String) -> bool:
-	var selected = _slot_val(slots, slot_str)
+func desc_c_get_pushed() -> String:
+	return "entity|If the entity successfully gets pushed this way [direction:DirectionInput]\n" \
+	     + "[keep_visual:BoolChoice:true,without turning,]"
+func cmd_c_get_pushed(slots: Dictionary, chosen_slot: int, direction: int, keep_visual: bool) -> bool:
+	var selected = slots[chosen_slot]
 	if selected.moving:
 		return false
 	var blue_entity = slots[Slot.BLUE]
 	selected.set_current_speed(blue_entity.steps_per_tile)
-	var facing = _resolve_direction(direction, selected)
-	var visual_turn = keep_visual != "true"
-	return selected.start_move(facing, visual_turn)
+	var facing = resolve_direction_value(direction, slots)
+	return selected.start_move(facing, not keep_visual)
 
-# Action: args = slot_str
-func cmd_a_die(slots: Dictionary, slot_str: String) -> void:
-	_slot_val(slots, slot_str).die()
+func desc_c_is_facing() -> String:
+	return "entity|If the entity [invert:InvertInput:is,is not] facing this way [direction:DirectionInput]"
+func cmd_c_is_facing(slots: Dictionary, chosen_slot: int, invert: bool, direction: int) -> bool:
+	if not Commands.slot_is_entity(chosen_slot):
+		return false
+	var selected = slots[chosen_slot]
 
-# Action: args = slot_str, direction
-func cmd_a_move(slots: Dictionary, slot_str: String, direction: String) -> void:
-	var selected = _slot_val(slots, slot_str)
-	selected.start_move(_resolve_direction(direction, selected))
+	var entity_facing = selected.visual_facing
+	var result = entity_facing == resolve_direction_value(direction, slots)
+	return not result if invert else result
 
-# Action: args = slot_str, tile1_name, tile2_name  (swaps all tile1 ↔ tile2 within the slot's positions)
-func cmd_a_swap_tiles(slots: Dictionary, slot_str: String, tile1: String, tile2: String) -> void:
-	var position_filter = _slot_val(slots, slot_str)
-	var tid_0 = MapManager.get_tile_index(tile1)
-	var tid_1 = MapManager.get_tile_index(tile2)
-	var positions_a = MapManager.get_all_positions_of_tile(tid_0, position_filter)
-	var positions_b = MapManager.get_all_positions_of_tile(tid_1, position_filter)
-	MapManager.replace_tiles_at_array(positions_a, tid_1)
-	MapManager.replace_tiles_at_array(positions_b, tid_0)
+func desc_a_die() -> String:
+	return "entity|The entity dies now"
+func cmd_a_die(slots: Dictionary, chosen_slot: int) -> void:
+	if Commands.slot_is_entity(chosen_slot):
+		slots[chosen_slot].die()
 
-# Action: args = slot_str, tile_name  (sets all positions in slot to the given tile)
-func cmd_a_set_tiles(slots: Dictionary, slot_str: String, tile: String) -> void:
-	prints("set tiles:", slot_str, tile)
-	var selected = _slot_val(slots, slot_str)
-	MapManager.replace_tiles_at_array(selected, MapManager.get_tile_index(tile))
+func desc_a_move() -> String:
+	return "entity|The entity starts moving this way [direction:DirectionInput]"
+func cmd_a_move(slots: Dictionary, chosen_slot: int, direction: int) -> void:
+	if Commands.slot_is_entity(chosen_slot):
+		var selected = slots[chosen_slot]
+		selected.start_move(resolve_direction_value(direction, slots))
 
-# Action: args = slot_str, property_name, value
-func cmd_a_set_property(slots: Dictionary, slot_str: String, property_name: String, value: String) -> void:
-	_slot_val(slots, slot_str).set_local_property(property_name, value)
+func desc_a_swap_tiles() -> String:
+	return "pos|Swap the tiles here, switching [a_name:TileNameInput] and [b_name:TileNameInput]"
+func cmd_a_swap_tiles(slots: Dictionary, chosen_slot: int, a_name: String, b_name: String) -> void:
+	var position_filter = slots[chosen_slot]
+	var tile_a = MapManager.get_tile_index(a_name)
+	var tile_b = MapManager.get_tile_index(b_name)
+	var positions_a = MapManager.get_all_positions_of_tile(tile_a, position_filter)
+	var positions_b = MapManager.get_all_positions_of_tile(tile_b, position_filter)
+	MapManager.replace_tiles_at_array(positions_a, tile_b)
+	MapManager.replace_tiles_at_array(positions_b, tile_a)
 
-# Action: args = slot_str, property_name, amount
-func cmd_a_property_add(slots: Dictionary, slot_str: String, property_name: String, amount: String) -> void:
-	var selected = _slot_val(slots, slot_str)
-	var existing = 0
-	if selected.has_local_property(property_name):
-		existing = int(selected.get_local_property(property_name))
-	selected.set_local_property(property_name, existing + int(amount))
+func desc_a_set_tiles() -> String:
+	return "pos|Change the tile(s) here to [tile_name:TileNameInput]"
+func cmd_a_set_tiles(slots: Dictionary, chosen_slot: int, tile_name: String) -> void:
+	MapManager.replace_tiles_at_array(slots[chosen_slot], MapManager.get_tile_index(tile_name))
 
-# Action: args = slot_str, property_name, amount [, "true" to auto-remove when <= 0]
-func cmd_a_property_subtract(slots: Dictionary, slot_str: String, property_name: String, amount: String, autoremove: String = "false") -> void:
-	var selected = _slot_val(slots, slot_str)
-	var existing = 0
-	if selected.has_local_property(property_name):
-		existing = int(selected.get_local_property(property_name))
-	var new_val = existing - int(amount)
-	selected.set_local_property(property_name, new_val)
-	if autoremove == "true" and new_val <= 0:
-		selected.remove_local_property(property_name)
+func desc_a_set_property() -> String:
+	return "entity|Set the entity's [property_name:PropertyInput] property to [value:ValueInput]"
+func cmd_a_set_property(slots: Dictionary, chosen_slot: int, property_name: String, value: Variant) -> void:
+	if Commands.slot_is_entity(chosen_slot):
+		slots[chosen_slot].set_local_property(property_name, value)
+	elif Commands.slot_is_positions(chosen_slot):
+		for pos in slots[chosen_slot]:
+			MapManager.set_tile_property_at(pos, property_name, value)
 
-# Action: args = slot_str, property_name
-func cmd_a_remove_property(slots: Dictionary, slot_str: String, property_name: String) -> void:
-	_slot_val(slots, slot_str).remove_local_property(property_name)
+func desc_a_property_add() -> String:
+	return "entity|Add [amount:ValueInput] to the entity's [property_name:PropertyInput] property"
+func cmd_a_property_add(slots: Dictionary, chosen_slot: int, property_name: String, amount: Variant) -> void:
+	if Commands.slot_is_entity(chosen_slot):
+		var selected = slots[chosen_slot]
+		var existing = 0
+		if selected.has_local_property(property_name):
+			existing = int(selected.get_local_property(property_name))
+		selected.set_local_property(property_name, existing + int(amount))
 
+func desc_a_property_subtract() -> String:
+	return "entity|Subtract [amount:ValueInput] from the entity's [property_name:PropertyInput] property\n" \
+	     + "[autoremove:BoolChoice:true,remove the property if it reaches zero,allow values less than and including zero]"
+func cmd_a_property_subtract(slots: Dictionary, chosen_slot: int, property_name: String, amount: Variant, autoremove: bool) -> void:
+	if Commands.slot_is_entity(chosen_slot):
+		var selected = slots[chosen_slot]
+		var new_val = -float(amount)
+		if selected.has_local_property(property_name):
+			new_val += float(selected.get_local_property(property_name))
+
+		if autoremove and (new_val <= 0 or is_zero_approx(new_val)):
+			selected.remove_local_property(property_name)
+		else:
+			selected.set_local_property(property_name, new_val)
+
+func desc_a_remove_property() -> String:
+	return "entity|Remove the entity's [property_name:PropertyInput] property"
+func cmd_a_remove_property(slots: Dictionary, chosen_slot: int, property_name: String) -> void:
+	if Commands.slot_is_entity(chosen_slot):
+		slots[chosen_slot].remove_local_property(property_name)
+
+func desc_a_save_checkpoint() -> String:
+	return "none|Save the current state as a checkpoint"
 func cmd_a_save_checkpoint(_slots: Dictionary) -> void:
 	GameManager.save_checkpoint()
 
+func desc_a_load_checkpoint() -> String:
+	return "none|Load the last saved checkpoint"
 func cmd_a_load_checkpoint(_slots: Dictionary) -> void:
 	GameManager.load_checkpoint()
 
+func desc_a_create_entity() -> String:
+	return "pos|Create a new [entity_name:EntityNameInput] entity here\n" \
+	     + "facing this way [direction:DirectionInput] which is [is_moving:BoolChoice:false,moving,stationary]"
+func cmd_a_create_entity(slots: Dictionary, chosen_slot: int, entity_name: String, direction: int, is_moving: bool) -> void:
+	var entity_index = EntityManager.get_entity_index(entity_name)
+	var facing = Utility.resolve_full_direction_to_facing(direction, slots)
+	for pos in slots[chosen_slot]:
+		var new_entity = EntityManager.create_entity(entity_index, pos, facing)
+		if is_moving:
+			new_entity.start_move(facing)
+
+func desc_a_turn() -> String:
+	return "entity|Turn the entity to face this way [direction:DirectionInput]"
+func cmd_a_turn(slots: Dictionary, chosen_slot: int, direction: int) -> void:
+	if Commands.slot_is_entity(chosen_slot):
+		slots[chosen_slot].turn_to_facing(resolve_direction_value(direction, slots))

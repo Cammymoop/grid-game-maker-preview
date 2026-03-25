@@ -8,10 +8,18 @@ const DIRECTION_ONLY = 3
 
 var absolute = true
 
+var arg_name: String = ""
+
 func _ready():
 	$AbsoluteModeSelect.set_items(["Absolute", "Relative to"])
 	$AbsoluteModeSelect.connect("changed", Callable(self, "absolute_changed"))
 	$EntityRelativeMode.set_items(["Moving", "Facing"])
+
+func set_arg_name(new_arg_name: String) -> void:
+	arg_name = new_arg_name
+
+func get_arg_name() -> String:
+	return arg_name
 
 # Return all the info about the selected direction and relativeness as a single int value
 func get_value():

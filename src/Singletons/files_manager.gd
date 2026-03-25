@@ -1,5 +1,7 @@
 extends Node
 
+var format_game_json: = true
+
 func init_folders():
 	ensure_dir_exists("games")
 	ensure_dir_exists("images")
@@ -32,7 +34,8 @@ func save_default_game(game_name) -> void:
 		f.store_string(game_name)
 
 func save_game_info(game_info) -> void:
-	var serialized = JSON.stringify(game_info)
+	var indent_str = "  " if format_game_json else ""
+	var serialized = JSON.stringify(game_info, indent_str, false)
 	save_json(serialized, "games", game_file_name(game_info['game_name']))
 
 func game_file_name(game_name) -> String:

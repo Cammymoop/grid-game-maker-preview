@@ -1,0 +1,13 @@
+[gd_scene format=3 uid="uid://ttyssfpsg0mg"]
+
+[ext_resource type="PackedScene" path="res://Scenes/UI/EasyMenuButton.tscn" id="1"]
+[ext_resource type="Script" uid="uid://dn7ajfwrdxb7o" path="res://src/GameEditor/ConditionalEditor/InvertInput.gd" id="2"]
+
+[node name="BoolChoiceInput" type="CenterContainer" unique_id=2091394986]
+script = ExtResource("2")
+
+[node name="EasyMenuButton" parent="." unique_id=1947179017 instance=ExtResource("1")]
+custom_minimum_size = Vector2(30, 0)
+layout_mode = 2
+text = "Not"
+list_items = ["", "Not"]
