@@ -7,7 +7,7 @@ var move_mode = "facing"
 func get_options() -> Dictionary:
 	return {}
 
-func get_move():
+func get_move(_secondary: bool = false):
 	if not EntityManager.controller_frame:
 		return -1
 	

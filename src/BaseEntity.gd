@@ -188,7 +188,7 @@ func entity_process() -> void:
 			var first_try = start_move(intended)
 			
 			if not first_try:
-				var second_intended = get_intended_move()
+				var second_intended = get_intended_move(true)
 				if second_intended != intended and second_intended > -1:
 					start_move(second_intended)
 	if moving:
@@ -218,14 +218,14 @@ func set_local_property(property_name, value) -> void:
 func remove_local_property(property_name) -> void:
 	local_properties.erase(property_name)
 
-func get_intended_move():
+func get_intended_move(secondary: bool = false):
 	if not controller:
 		return -1
 	
 	if controller.move_mode == "direction":
-		return Utility.direction_to_facing(controller.get_move())
+		return Utility.direction_to_facing(controller.get_move(secondary))
 	else:
-		return controller.get_move()
+		return controller.get_move(secondary)
 
 func finish_move() -> void:
 	position = Vector2(int(round(position.x)), int(round(position.y)))
@@ -265,6 +265,7 @@ func start_move(move_facing, change_visual_facing=true, group_move=false) -> boo
 		else:
 			next_tile_pos = tile_position
 			if not group_move:
+				prints("I was blocked")
 				emit_signal("blocked", move_facing)
 			return false
 	return false

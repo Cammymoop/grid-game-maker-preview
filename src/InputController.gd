@@ -76,7 +76,9 @@ func _process(_delta):
 			if not get_parent().moving:
 				EntityManager.request_move(get_parent())
 
-func get_move():
+func get_move(secondary: bool = false):
+	if secondary:
+		return "none"
 	if not EntityManager.controller_frame:
 		return "none"
 	var input_dir = "none"
