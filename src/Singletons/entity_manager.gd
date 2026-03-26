@@ -695,12 +695,6 @@ func get_all_entity_indexes() -> Array:
     keys.sort()
     return keys
 
-func get_all_entity_names() -> Array:
-    var names = []
-    for e in entity_defs:
-        names.append(entity_defs[e]["name"])
-    return names
-
 func get_entity_index(entity_name) -> int:
     return entity_index_map[entity_name]
 
@@ -709,3 +703,11 @@ func entity_name_exists(entity_name) -> bool:
 
 func get_entity_name(entity_index) -> String:
     return entity_defs[entity_index]['name']
+
+func get_all_entity_names() -> Array[String]:
+    var names: Array[String] = []
+    for e in entity_defs.values():
+        var e_name: String = e["name"]
+        if not e_name in names:
+            names.append(e_name)
+    return names

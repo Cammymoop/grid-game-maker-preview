@@ -403,3 +403,11 @@ func get_used_positions_in_all_layers() -> Array[Vector2i]:
             if not pos in used_positions:
                 used_positions.append(pos)
     return used_positions
+
+func get_all_tile_names() -> Array[String]:
+    var names: Array[String] = []
+    for t in tile_defs.values():
+        var t_name: String = t["name"]
+        if not t_name in names:
+            names.append(t_name)
+    return names

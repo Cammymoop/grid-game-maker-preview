@@ -6,6 +6,23 @@
 [sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_qwhev"]
 blend_mode = 3
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_qwhev"]
+content_margin_left = 8.0
+content_margin_top = 8.0
+content_margin_right = 8.0
+content_margin_bottom = 8.0
+bg_color = Color(0.1480327, 0.19372559, 0.25265306, 0.7254902)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.334955, 0.31812483, 0.44406027, 1)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+corner_detail = 7
+
 [node name="PauseMenu" type="Control" unique_id=1906408289 groups=["PauseMenu"]]
 process_mode = 3
 layout_mode = 3
@@ -39,6 +56,7 @@ anchor_bottom = 1.0
 
 [node name="Panel" type="PanelContainer" parent="CenterContainer" unique_id=819996639]
 layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_qwhev")
 
 [node name="MarginContainer" type="MarginContainer" parent="CenterContainer/Panel" unique_id=542551305]
 layout_mode = 2
@@ -53,36 +71,60 @@ theme_override_constants/separation = 16
 
 [node name="Label" type="Label" parent="CenterContainer/Panel/MarginContainer/VBoxContainer" unique_id=592081580]
 layout_mode = 2
+theme_override_font_sizes/font_size = 24
 text = "Paused"
 horizontal_alignment = 1
 
 [node name="ResumeButton" type="Button" parent="CenterContainer/Panel/MarginContainer/VBoxContainer" unique_id=1023823849]
 layout_mode = 2
+size_flags_horizontal = 4
 theme_override_fonts/font = ExtResource("2")
 text = "Resume"
 
 [node name="RestartLevel" type="Button" parent="CenterContainer/Panel/MarginContainer/VBoxContainer" unique_id=1345456108]
 layout_mode = 2
+size_flags_horizontal = 4
 theme_override_fonts/font = ExtResource("2")
 text = "Restart Level"
 
-[node name="Control" type="Control" parent="CenterContainer/Panel/MarginContainer/VBoxContainer" unique_id=2049283454]
+[node name="Spacer" type="Control" parent="CenterContainer/Panel/MarginContainer/VBoxContainer" unique_id=2049283454]
 layout_mode = 2
 
 [node name="QuitToMenu" type="Button" parent="CenterContainer/Panel/MarginContainer/VBoxContainer" unique_id=658198740]
 layout_mode = 2
+size_flags_horizontal = 4
 theme_override_fonts/font = ExtResource("2")
 text = "Return to Main Menu"
 
+[node name="Spacer2" type="Control" parent="CenterContainer/Panel/MarginContainer/VBoxContainer" unique_id=1644758777]
+layout_mode = 2
+
+[node name="HBoxContainer2" type="HBoxContainer" parent="CenterContainer/Panel/MarginContainer/VBoxContainer" unique_id=318746137]
+layout_mode = 2
+size_flags_horizontal = 4
+
+[node name="Label" type="Label" parent="CenterContainer/Panel/MarginContainer/VBoxContainer/HBoxContainer2" unique_id=215894139]
+layout_mode = 2
+text = "Editor Live Mode Enabled:"
+
+[node name="LiveEditModeToggle" type="CheckButton" parent="CenterContainer/Panel/MarginContainer/VBoxContainer/HBoxContainer2" unique_id=867509530]
+layout_mode = 2
+mouse_default_cursor_shape = 2
+
 [node name="HBoxContainer" type="HBoxContainer" parent="CenterContainer/Panel/MarginContainer/VBoxContainer" unique_id=1941901720]
 layout_mode = 2
-theme_override_constants/separation = 10
+theme_override_constants/separation = 14
 alignment = 1
 
 [node name="SaveLevelButton" type="Button" parent="CenterContainer/Panel/MarginContainer/VBoxContainer/HBoxContainer" unique_id=118268892]
 custom_minimum_size = Vector2(0, 30)
 layout_mode = 2
 text = "Save Level"
+
+[node name="NewLevelButton" type="Button" parent="CenterContainer/Panel/MarginContainer/VBoxContainer/HBoxContainer" unique_id=1370810588]
+custom_minimum_size = Vector2(0, 30)
+layout_mode = 2
+text = "New Level"
 
 [node name="LoadLevelButton" type="Button" parent="CenterContainer/Panel/MarginContainer/VBoxContainer/HBoxContainer" unique_id=522059445]
 layout_mode = 2
@@ -91,5 +133,7 @@ text = "Load Level"
 [connection signal="pressed" from="CenterContainer/Panel/MarginContainer/VBoxContainer/ResumeButton" to="." method="_on_resume_button_pressed"]
 [connection signal="pressed" from="CenterContainer/Panel/MarginContainer/VBoxContainer/RestartLevel" to="." method="_on_RestartLevel_pressed"]
 [connection signal="pressed" from="CenterContainer/Panel/MarginContainer/VBoxContainer/QuitToMenu" to="." method="_on_QuitToMenu_pressed"]
+[connection signal="toggled" from="CenterContainer/Panel/MarginContainer/VBoxContainer/HBoxContainer2/LiveEditModeToggle" to="." method="_on_live_edit_mode_toggle_toggled"]
 [connection signal="pressed" from="CenterContainer/Panel/MarginContainer/VBoxContainer/HBoxContainer/SaveLevelButton" to="." method="_on_SaveLevelButton_pressed"]
+[connection signal="pressed" from="CenterContainer/Panel/MarginContainer/VBoxContainer/HBoxContainer/NewLevelButton" to="." method="_on_new_level_button_pressed"]
 [connection signal="pressed" from="CenterContainer/Panel/MarginContainer/VBoxContainer/HBoxContainer/LoadLevelButton" to="." method="_on_LoadLevelButton_pressed"]

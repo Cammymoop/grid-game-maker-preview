@@ -40,10 +40,8 @@ func set_v3_data(qualified_name: String, short_name: String, new_command_info: D
     ui_data = {"display_name": command_info["display_name"]}
 
 func set_slot(slot_id: int) -> void:
-    prints("command list item setting slot to %s" % slot_id)
     if slot_id < 0:
         slot_id = find_child("CommandSlot").get_first_valid_slot_id()
-        prints("command list item finding first valid slot, got %s" % slot_id)
     current_slot = slot_id
     if is_inside_tree():
         find_child("CommandSlot").set_current_slot(slot_id)
@@ -134,12 +132,16 @@ func generate_v3_ui() -> void:
     var template_split: = Array(ui_template_string.split("[", true))
     var prefix_str: String = template_split.pop_front()
     
-    var current_row = add_generated_row()
+    var current_row: HBoxContainer = null
     # add the text before the first input template value if there is any
     if prefix_str:
-        var prefix_text = Label.new()
-        prefix_text.text = prefix_str
-        current_row.add_child(prefix_text)
+        for line in prefix_str.split("\n"):
+            current_row = add_generated_row()
+            var prefix_text = Label.new()
+            prefix_text.text = line
+            current_row.add_child(prefix_text)
+    else:
+        current_row = add_generated_row()
 
     var arg_names: = command_info.args as Array
 

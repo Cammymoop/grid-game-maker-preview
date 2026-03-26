@@ -6,7 +6,7 @@
 [node name="LoadLevelDialog" type="Window" unique_id=348474084]
 oversampling_override = 1.0
 position = Vector2i(0, 36)
-size = Vector2i(176, 96)
+size = Vector2i(224, 96)
 wrap_controls = true
 script = ExtResource("2")
 
@@ -28,10 +28,14 @@ layout_mode = 2
 layout_mode = 2
 alignment = 1
 
+[node name="Label" type="Label" parent="MarginContainer/PanelContainer/HBoxContainer" unique_id=236118785]
+layout_mode = 2
+text = "Level:"
+
 [node name="SelectLevelButton" type="MenuButton" parent="MarginContainer/PanelContainer/HBoxContainer" unique_id=427921855]
 custom_minimum_size = Vector2(160, 0)
 layout_mode = 2
-text = "Select Level:"
+text = "(choose level)"
 flat = false
 
 [node name="Spacer" type="Control" parent="MarginContainer/PanelContainer" unique_id=1254891034]

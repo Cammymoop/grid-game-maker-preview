@@ -1,6 +1,6 @@
 extends Window
 
-var selected_level = null
+var selected_level: = ""
 var all_levels = []
 
 func _ready():
@@ -17,7 +17,6 @@ func level_picked(index) -> void:
 	var list_popup = find_child("SelectLevelButton").get_popup()
 	selected_level = list_popup.get_item_text(index)
 	find_child("SelectLevelButton").text = selected_level
-
 
 func _on_LoadFileButton_pressed():
 	if not selected_level:

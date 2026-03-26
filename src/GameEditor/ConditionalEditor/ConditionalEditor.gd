@@ -134,7 +134,6 @@ func load_v3_conditional_data(from_data: Variant) -> void:
 
     setup_step_count(len(arr_data))
     set_v3_full_data(arr_data)
-    prints("loading step %s" % arr_data[current_step])
     load_v3_conditional_data_step(arr_data[current_step])
 
 func set_v3_full_data(new_data: Array) -> void:

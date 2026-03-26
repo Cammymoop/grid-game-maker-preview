@@ -46,6 +46,8 @@ func set_resolution(new_resolution: Vector2) -> void:
 	resolution = new_resolution
 	if update_aspect:
 		resolution = fit_resolution_into_aspect()
+		var window_size = Vector2(get_window().size)
+		prints("fitting", new_resolution, "into aspect", window_size.x/window_size.y, "result:", resolution)
 	size = resolution * scale_factor
 	size_2d_override = resolution
 	
@@ -55,7 +57,7 @@ func set_resolution(new_resolution: Vector2) -> void:
 	tex_rect.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
 
 func fit_resolution_into_aspect() -> Vector2:
-	var window_size = get_window().size
+	var window_size: Vector2 = Vector2(get_window().size)
 	var intended_aspect = intended_resolution.x/intended_resolution.y
 	var window_aspect = window_size.x/window_size.y
 	

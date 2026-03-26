@@ -13,6 +13,8 @@ var loaded_level_name: = ""
 
 var loaded = false
 
+var editor_live_edit_mode: = true
+
 var scenes: = {
 	"Menu": "res://Scenes/Menu.tscn",
 	"Loading": "res://Scenes/Loading.tscn",
@@ -153,7 +155,7 @@ func load_serialized_play_state(serialized_state: Dictionary) -> void:
 	if not serialized_state:
 		return
 	
-	get_tree().paused = true
+	set_pause("gm_loading_state", true)
 	
 	await get_tree().process_frame
 	await get_tree().process_frame
@@ -162,7 +164,7 @@ func load_serialized_play_state(serialized_state: Dictionary) -> void:
 	MapManager.deserialize(serialized_state['map'])
 	EntityManager.deserialize(serialized_state['entities'])
 	
-	get_tree().paused = false
+	set_pause("gm_loading_state", false)
 
 func create_game_camera() -> void:
 	var cam = cameras["SimpleCamera"].instantiate()
@@ -225,14 +227,14 @@ func load_level_data(level_data):
 	checkpoint_save = editor_save
 
 func level_start():
-	EntityManager.clear()
+	EntityManager.clear_entity_list()
 	MapManager.create_plain_layer()
 	EntityManager.create_defaults()
 	
 	save_checkpoint()
 
 func load_random_level():
-	EntityManager.clear()
+	EntityManager.clear_entity_list()
 	MapManager.create_random_layer()
 	EntityManager.create_randoms()
 	
@@ -378,3 +380,19 @@ func _process(_delta):
 			get_tree().quit()
 		elif cur_scene == "Play":
 			toggle_pause_menu()
+
+func get_all_used_prop_names() -> Array[String]:
+	var prop_names: Array[String] = []
+	
+	var tile_entity_defs: Array[Dictionary] = []
+	tile_entity_defs.append_array(EntityManager.entity_defs.values())
+	tile_entity_defs.append_array(MapManager.tile_defs.values())
+	for tile_or_entity_def in tile_entity_defs:
+		for prop_name in tile_or_entity_def["properties"].keys():
+			if not typeof(prop_name) == TYPE_STRING:
+				push_error("Property name is not a string: " + str(prop_name))
+				continue
+			if not prop_name in prop_names:
+				prop_names.append(prop_name)
+
+	return prop_names

@@ -102,7 +102,9 @@
           "v": "3",
           "conditions": [],
           "when always": [
-            "basic_default.a_set_tiles::[\"i:4\",\"s:floor\"]"
+            "basic_default.a_set_tiles::[\"i:4\",\"s:floor\"]",
+            "basic_default.select_tiles_rect::[\"i:4\",{\"args\":[-1,-1],\"type\":\"Vector2i\"},{\"args\":[3,1],\"type\":\"Vector2i\"}]",
+            "basic_default.a_set_tiles::[\"i:4\",\"s:water\"]"
           ],
           "when true": [],
           "when false": []
@@ -136,7 +138,19 @@
       "properties": {
         "treads": true,
         "player": true,
-        "pushes": true
+        "pushes": true,
+        "i_finish_move_onto": {
+          "v": "3",
+          "conditions": [
+            "basic_default.c_has_property::[\"i:1\",false,\"s:kills\"]"
+          ],
+          "when always": [],
+          "when true": [
+            "basic_default.a_die::[\"i:0\"]",
+            "basic_default.a_die::[\"i:1\"]"
+          ],
+          "when false": []
+        }
       },
       "groups": [
         "Player"
@@ -308,10 +322,10 @@
           "v": "3",
           "conditions": [],
           "when always": [
-            "orch_cmds.select_all::[\"i:4\"]",
-            "basic_default.a_swap_tiles::[\"i:4\",\"s:toggle_wall\",\"s:toggle_floor\"]"
+            "basic_default.a_swap_tiles::[\"i:5\",\"s:toggle_wall\",\"s:toggle_floor\"]"
           ],
-          "when true": []
+          "when true": [],
+          "when false": []
         }
       }
     },
@@ -327,11 +341,12 @@
           ],
           "when always": [],
           "when true": [
-            "basic_default.a_property_add::[\"i:0\",\"s:moves_remaining\",\"s:2\"]"
+            "basic_default.a_property_add::[\"i:0\",\"s:moves_remaining\",\"s:2\"]",
+            "basic_default.a_move::[\"i:0\",\"i:20\"]"
           ],
           "when false": []
         },
-        "finish_move_onto_tile": {
+        "i_finish_move_onto_tile": {
           "v": "3",
           "conditions": [
             "basic_default.c_has_property::[\"i:0\",false,\"s:moves_reaining\"]"

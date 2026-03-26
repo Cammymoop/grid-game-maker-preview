@@ -14,18 +14,26 @@ func set_arg_name(new_arg_name: String) -> void:
     arg_name = new_arg_name
 
 func set_input_args(new_args: Array) -> void:
+    prints("set vec input args: ", new_args)
     if new_args.size() < 1:
         return
     if typeof(new_args[0]) in [TYPE_VECTOR2, TYPE_VECTOR2I, TYPE_VECTOR3, TYPE_VECTOR3I]:
-        set_value(Vector2i(new_args[0].x, new_args[0].y))
+        starting_value = Vector2i(new_args[0].x, new_args[0].y)
+        if is_inside_tree():
+            set_value(starting_value)
         return
 
     var x_val: int = Utility.any_to_int(new_args[0])
-    x_input.value = x_val
+    prints("x_val:", x_val)
+    starting_value.x = x_val
     if new_args.size() < 2:
-        y_input.value = x_val
-        return
-    y_input.value = Utility.any_to_int(new_args[1])
+        prints("using x for y value")
+        starting_value.y = x_val
+    else:
+        prints("y_val:", new_args[1])
+        starting_value.y = Utility.any_to_int(new_args[1])
+    if is_inside_tree():
+        set_value(starting_value)
     
 
 func get_arg_name() -> String:

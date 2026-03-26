@@ -1,0 +1,10 @@
+[gd_scene format=3 uid="uid://7hv1rvsy2a8f"]
+
+[ext_resource type="Script" uid="uid://bgrcxdoa3c0cb" path="res://src/GameEditor/ConditionalEditor/entity_name_input.gd" id="1_wmbb6"]
+
+[node name="EntityNameInput" type="LineEdit" unique_id=261520105]
+custom_minimum_size = Vector2(140, 0)
+offset_right = 58.0
+offset_bottom = 24.0
+size_flags_vertical = 4
+script = ExtResource("1_wmbb6")

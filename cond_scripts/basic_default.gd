@@ -90,8 +90,17 @@ func cmd_c_is_facing(slots: Dictionary, chosen_slot: int, invert: bool, directio
 		return false
 	var selected = slots[chosen_slot]
 
-	var entity_facing = selected.visual_facing
-	var result = entity_facing == resolve_direction_value(direction, slots)
+	var result = selected.visual_facing == resolve_direction_value(direction, slots)
+	return not result if invert else result
+
+func desc_c_is_moving() -> String:
+	return "entity|If the entity [invert:InvertInput:is,is not] moving this way [direction:DirectionInput]"
+func cmd_c_is_moving(slots: Dictionary, chosen_slot: int, invert: bool, direction: int) -> bool:
+	if not Commands.slot_is_entity(chosen_slot):
+		return false
+	var selected = slots[chosen_slot]
+
+	var result = selected.facing == resolve_direction_value(direction, slots)
 	return not result if invert else result
 
 func desc_a_die() -> String:

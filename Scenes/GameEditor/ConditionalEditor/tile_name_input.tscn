@@ -1,0 +1,10 @@
+[gd_scene format=3 uid="uid://bq1aynugce1eb"]
+
+[ext_resource type="Script" uid="uid://cnp612ps4wcfm" path="res://src/GameEditor/ConditionalEditor/tile_name_input.gd" id="1_0uw1w"]
+
+[node name="TileNameInput" type="LineEdit" unique_id=261520105]
+custom_minimum_size = Vector2(140, 0)
+offset_right = 58.0
+offset_bottom = 24.0
+size_flags_vertical = 4
+script = ExtResource("1_0uw1w")

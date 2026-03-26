@@ -1,192 +1,193 @@
-[gd_scene load_steps=15 format=2]
+[gd_scene format=3 uid="uid://byt0p1dxwdwb3"]
 
-[ext_resource path="res://src/MapEditor.gd" type="Script" id=1]
-[ext_resource path="res://assets/img/cursor.png" type="Texture2D" id=2]
-[ext_resource path="res://assets/img/entityTiles.png" type="Texture2D" id=3]
-[ext_resource path="res://src/EditorCam.gd" type="Script" id=4]
-[ext_resource path="res://src/TileEntityPreview.gd" type="Script" id=5]
-[ext_resource path="res://src/BatchOneShotEmitters.gd" type="Script" id=7]
-[ext_resource path="res://assets/img/particle_textures/soft_cloud.png" type="Texture2D" id=8]
+[ext_resource type="Script" uid="uid://qcqrvqer8atl" path="res://src/MapEditor.gd" id="1"]
+[ext_resource type="Texture2D" uid="uid://btgru437sa11w" path="res://assets/img/cursor.png" id="2"]
+[ext_resource type="Texture2D" uid="uid://d0uyc2rshryrj" path="res://assets/img/entityTiles.png" id="3"]
+[ext_resource type="Script" uid="uid://038xoi2u4itl" path="res://src/EditorCam.gd" id="4"]
+[ext_resource type="Script" uid="uid://b7r4llrey36xo" path="res://src/TileEntityPreview.gd" id="5"]
+[ext_resource type="Script" uid="uid://do6dnbr5vck5i" path="res://src/BatchOneShotEmitters.gd" id="7"]
+[ext_resource type="Texture2D" uid="uid://dxq70fd10q5pp" path="res://assets/img/particle_textures/soft_cloud.png" id="8"]
 
-[sub_resource type="Animation" id=14]
+[sub_resource type="Animation" id="14"]
 length = 0.001
 tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
 tracks/0/path = NodePath(".:self_modulate")
 tracks/0/interp = 1
 tracks/0/loop_wrap = true
-tracks/0/imported = false
-tracks/0/enabled = true
 tracks/0/keys = {
-"times": PackedFloat32Array( 0 ),
-"transitions": PackedFloat32Array( 1 ),
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
 "update": 0,
-"values": [ Color( 1, 1, 1, 0.388235 ) ]
+"values": [Color(1, 1, 1, 0.388235)]
 }
 
-[sub_resource type="Animation" id=15]
+[sub_resource type="Animation" id="15"]
 resource_name = "alpha_pulse"
-loop = true
+loop_mode = 1
 tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
 tracks/0/path = NodePath(".:self_modulate")
 tracks/0/interp = 2
 tracks/0/loop_wrap = true
-tracks/0/imported = false
-tracks/0/enabled = true
 tracks/0/keys = {
-"times": PackedFloat32Array( 0, 0.2, 1 ),
-"transitions": PackedFloat32Array( 1, 1, 1 ),
+"times": PackedFloat32Array(0, 0.2, 1),
+"transitions": PackedFloat32Array(1, 1, 1),
 "update": 0,
-"values": [ Color( 1, 1, 1, 0.388235 ), Color( 1, 1, 1, 0.686275 ), Color( 1, 1, 1, 0.388235 ) ]
+"values": [Color(1, 1, 1, 0.388235), Color(1, 1, 1, 0.686275), Color(1, 1, 1, 0.388235)]
 }
 
-[sub_resource type="Gradient" id=16]
-offsets = PackedFloat32Array( 0, 0.180124, 1 )
-colors = PackedColorArray( 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0 )
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_3jorg"]
+_data = {
+&"RESET": SubResource("14"),
+&"alpha_pulse": SubResource("15")
+}
 
-[sub_resource type="GradientTexture2D" id=17]
-gradient = SubResource( 16 )
+[sub_resource type="Gradient" id="16"]
+offsets = PackedFloat32Array(0, 0.052197803, 0.180124, 0.5467033, 1)
+colors = PackedColorArray(1, 1, 1, 0.3254902, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0.4188519, 1, 1, 1, 0)
 
-[sub_resource type="Curve" id=18]
-_data = [ Vector2( 0, 0 ), 0.0, 0.0, 0, 0, Vector2( 0.282609, 1 ), 0.0, 0.0, 0, 0, Vector2( 0.434783, 1 ), 0.0, 0.0, 0, 0, Vector2( 0.978261, 0.456818 ), 0.0, 0.0, 0, 0 ]
+[sub_resource type="GradientTexture2D" id="17"]
+gradient = SubResource("16")
 
-[sub_resource type="CurveTexture" id=19]
-curve = SubResource( 18 )
+[sub_resource type="Curve" id="18"]
+_data = [Vector2(0, 0), 0.0, 0.0, 0, 0, Vector2(0.282609, 1), 0.0, 0.0, 0, 0, Vector2(0.434783, 1), 0.0, 0.0, 0, 0, Vector2(0.978261, 0.456818), 0.0, 0.0, 0, 0]
+point_count = 4
 
-[sub_resource type="ParticleProcessMaterial" id=20]
-emission_shape = 2
-emission_box_extents = Vector3( 8, 8, 1 )
-flag_disable_z = true
+[sub_resource type="CurveTexture" id="19"]
+curve = SubResource("18")
+
+[sub_resource type="ParticleProcessMaterial" id="20"]
+emission_shape = 6
+emission_ring_axis = Vector3(0, 0, 1)
+emission_ring_height = 1.0
+emission_ring_radius = 12.0
+emission_ring_inner_radius = 4.0
+emission_ring_cone_angle = 90.0
+angle_min = 1.0728835e-05
+angle_max = 90.000015
 spread = 180.0
-gravity = Vector3( 0, 0, 0 )
-initial_velocity = 100.0
-orbit_velocity = 0.0
-orbit_velocity_random = 0.0
-damping = 200.0
-angle = 720.0
-angle_random = 1.0
-scale = 0.7
-scale_curve = SubResource( 19 )
-color_ramp = SubResource( 17 )
+initial_velocity_min = 18.0
+initial_velocity_max = 26.0
+gravity = Vector3(0, 0, 0)
+scale_min = 0.7
+scale_max = 1.5
+scale_curve = SubResource("19")
+color = Color(1, 1, 1, 0.65882355)
+color_ramp = SubResource("17")
 
-[node name="MapEditor" type="Node2D"]
+[node name="MapEditor" type="Node2D" unique_id=188513453]
 process_mode = 1
 z_index = 10
-script = ExtResource( 1 )
+script = ExtResource("1")
 
-[node name="Cursor" type="Sprite2D" parent="."]
-texture = ExtResource( 2 )
+[node name="Cursor" type="Sprite2D" parent="." unique_id=1992386502]
+texture = ExtResource("2")
 centered = false
-offset = Vector2( -2.3, -2 )
+offset = Vector2(-2.3, -2)
 
-[node name="TileEntityPreview" type="Sprite2D" parent="Cursor"]
-modulate = Color( 1.2, 1.2, 1.2, 1 )
-self_modulate = Color( 1, 1, 1, 0.388235 )
-position = Vector2( 16, 16 )
-texture = ExtResource( 3 )
+[node name="TileEntityPreview" type="Sprite2D" parent="Cursor" unique_id=810208557]
+modulate = Color(1.2, 1.2, 1.2, 1)
+self_modulate = Color(1, 1, 1, 0.388235)
+position = Vector2(16, 16)
+texture = ExtResource("3")
 region_enabled = true
-region_rect = Rect2( 0, 0, 32, 32 )
-script = ExtResource( 5 )
+region_rect = Rect2(0, 0, 32, 32)
+script = ExtResource("5")
 
-[node name="AnimationPlayer" type="AnimationPlayer" parent="Cursor/TileEntityPreview"]
-anims/RESET = SubResource( 14 )
-anims/alpha_pulse = SubResource( 15 )
+[node name="AnimationPlayer" type="AnimationPlayer" parent="Cursor/TileEntityPreview" unique_id=605507271]
+libraries/ = SubResource("AnimationLibrary_3jorg")
 
-[node name="EditorCam" type="Camera2D" parent="."]
+[node name="EditorCam" type="Camera2D" parent="." unique_id=268862736]
 limit_smoothed = true
 position_smoothing_enabled = true
-script = ExtResource( 4 )
+script = ExtResource("4")
 
-[node name="DustParticles" type="Node2D" parent="."]
+[node name="DustParticles" type="Node2D" parent="." unique_id=166193024]
 z_index = -3
 z_as_relative = false
-script = ExtResource( 7 )
+script = ExtResource("7")
 
-[node name="ColorRect" type="ColorRect" parent="DustParticles"]
+[node name="ColorRect" type="ColorRect" parent="DustParticles" unique_id=929757855]
 visible = false
 show_behind_parent = true
 offset_left = -41.0
 offset_top = -30.0
 offset_right = 71.0
 offset_bottom = 135.0
-color = Color( 0, 0, 0, 1 )
-__meta__ = {
-"_edit_use_anchors_": false
-}
+color = Color(0, 0, 0, 1)
 
-[node name="Emitter" type="GPUParticles2D" parent="DustParticles"]
-self_modulate = Color( 1, 1, 1, 0.658824 )
-position = Vector2( 16, 48 )
+[node name="Emitter" type="GPUParticles2D" parent="DustParticles" unique_id=1726511025]
+position = Vector2(16, 48)
 emitting = false
 amount = 20
+texture = ExtResource("8")
+lifetime = 0.75
+one_shot = true
+speed_scale = 1.4
+explosiveness = 0.87
+use_fixed_seed = true
+seed = 2120327664
+process_material = SubResource("20")
+
+[node name="Emitter2" type="GPUParticles2D" parent="DustParticles" unique_id=552845999]
+self_modulate = Color(1, 1, 1, 0.658824)
+position = Vector2(16, 48)
+emitting = false
+amount = 20
+texture = ExtResource("8")
 lifetime = 0.6
 one_shot = true
 speed_scale = 1.4
 explosiveness = 0.9
-local_coords = false
-process_material = SubResource( 20 )
-texture = ExtResource( 8 )
+process_material = SubResource("20")
 
-[node name="Emitter2" type="GPUParticles2D" parent="DustParticles"]
-self_modulate = Color( 1, 1, 1, 0.658824 )
-position = Vector2( 16, 48 )
+[node name="Emitter3" type="GPUParticles2D" parent="DustParticles" unique_id=918270934]
+self_modulate = Color(1, 1, 1, 0.658824)
+position = Vector2(16, 48)
 emitting = false
 amount = 20
+texture = ExtResource("8")
 lifetime = 0.6
 one_shot = true
 speed_scale = 1.4
 explosiveness = 0.9
-local_coords = false
-process_material = SubResource( 20 )
-texture = ExtResource( 8 )
+process_material = SubResource("20")
 
-[node name="Emitter3" type="GPUParticles2D" parent="DustParticles"]
-self_modulate = Color( 1, 1, 1, 0.658824 )
-position = Vector2( 16, 48 )
+[node name="Emitter4" type="GPUParticles2D" parent="DustParticles" unique_id=1961476843]
+self_modulate = Color(1, 1, 1, 0.658824)
+position = Vector2(16, 48)
 emitting = false
 amount = 20
+texture = ExtResource("8")
 lifetime = 0.6
 one_shot = true
 speed_scale = 1.4
 explosiveness = 0.9
-local_coords = false
-process_material = SubResource( 20 )
-texture = ExtResource( 8 )
+process_material = SubResource("20")
 
-[node name="Emitter4" type="GPUParticles2D" parent="DustParticles"]
-self_modulate = Color( 1, 1, 1, 0.658824 )
-position = Vector2( 16, 48 )
+[node name="Emitter5" type="GPUParticles2D" parent="DustParticles" unique_id=1975799109]
+self_modulate = Color(1, 1, 1, 0.658824)
+position = Vector2(16, 48)
 emitting = false
 amount = 20
+texture = ExtResource("8")
 lifetime = 0.6
 one_shot = true
 speed_scale = 1.4
 explosiveness = 0.9
-local_coords = false
-process_material = SubResource( 20 )
-texture = ExtResource( 8 )
+process_material = SubResource("20")
 
-[node name="Emitter5" type="GPUParticles2D" parent="DustParticles"]
-self_modulate = Color( 1, 1, 1, 0.658824 )
-position = Vector2( 16, 48 )
+[node name="Emitter6" type="GPUParticles2D" parent="DustParticles" unique_id=416997174]
+self_modulate = Color(1, 1, 1, 0.658824)
+position = Vector2(16, 48)
 emitting = false
 amount = 20
+texture = ExtResource("8")
 lifetime = 0.6
 one_shot = true
 speed_scale = 1.4
 explosiveness = 0.9
-local_coords = false
-process_material = SubResource( 20 )
-texture = ExtResource( 8 )
-
-[node name="Emitter6" type="GPUParticles2D" parent="DustParticles"]
-self_modulate = Color( 1, 1, 1, 0.658824 )
-position = Vector2( 16, 48 )
-emitting = false
-amount = 20
-lifetime = 0.6
-one_shot = true
-speed_scale = 1.4
-explosiveness = 0.9
-local_coords = false
-process_material = SubResource( 20 )
-texture = ExtResource( 8 )
+process_material = SubResource("20")

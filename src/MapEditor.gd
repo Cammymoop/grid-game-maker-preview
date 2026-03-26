@@ -1,5 +1,7 @@
 extends Node2D
 
+@export var do_autosave: = true
+
 var edit_mode = false
 
 var cur_ent_i = 0
@@ -13,8 +15,6 @@ var current_tile_index = 0
 
 var all_tiles = []
 var all_entities = []
-
-var live_edit_mode: = true
 
 @onready var cursor = get_node("Cursor")
 @onready var preview = get_node("Cursor/TileEntityPreview")
@@ -31,6 +31,8 @@ var delete_held_on_entity = false
 var cursor_tile_pos = Vector2(0, 0)
 
 var last_mouse = Vector2(0, 0)
+
+var has_edited_something = false
 
 func _ready() -> void:
 	if not edit_mode:
@@ -54,10 +56,16 @@ func enable_edit_mode(on, save_state=true):
 		if save_state:
 			GameManager.save_edited()
 			GameManager.checkpoint_save = GameManager.editor_save
+			if do_autosave and has_edited_something:
+				_auto_save(GameManager.editor_save)
 		#GameManager.position_gameplay_camera($EditorCam.position)
 		GameManager.activate_gameplay_camera()
 	else:
-		if not live_edit_mode:
+		has_edited_something = false
+		var vp = get_viewport()
+		if vp.has_method("rescale"):
+			vp.rescale()
+		if not GameManager.editor_live_edit_mode:
 			GameManager.load_edited()
 		var cam_position = GameManager.get_gameplay_camera_position()
 		move_cursor(MapManager.world_to_tile_position(cam_position))
@@ -134,6 +142,7 @@ func move_cursor(new_position) -> void:
 		_place(true)
 
 func _place(holding=false):
+	has_edited_something = true
 	if placing == "tile":
 		MapManager.replace_tiles_at(cursor_tile_pos, current_tile_index)
 	elif placing == "entity":
@@ -281,3 +290,11 @@ func _process(delta):
 	if Input.is_action_just_pressed("editor_toggle_delete"):
 		if placing != "delete":
 			place_mode("delete")
+
+func _auto_save(level_state: Dictionary) -> void:
+	var autosave_name: = "editor autosave"
+	var level_data = {
+		"name": autosave_name,
+		"state": level_state,
+	}
+	FilesManager.save_level(GameManager.cur_game_name, level_data)
