@@ -45,3 +45,8 @@ func _on_LoadLevelButton_pressed():
 func _on_RestartLevel_pressed():
 	GameManager.load_edited()
 	toggle()
+
+
+func _on_resume_button_pressed() -> void:
+	if active:
+		toggle()

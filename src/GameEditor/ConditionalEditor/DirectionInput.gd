@@ -38,9 +38,9 @@ func set_value(new_val) -> void:
 	var rel_slot = (new_val >> SLOT_SHIFT)
 	
 	$DirectionSelectorButton.set_direction(new_val & DIRECTION_ONLY)
-	$AbsoluteModeSelect.index_selected(1 if is_relative else 0)
+	$AbsoluteModeSelect.select_index(1 if is_relative else 0)
 	if is_relative:
-		$EntityRelativeMode.index_selected(1 if rel_mode else 0)
+		$EntityRelativeMode.select_index(1 if rel_mode else 0)
 		$SlotSelectorButton.set_current_slot(rel_slot)
 
 func absolute_changed(new_value: String) -> void:

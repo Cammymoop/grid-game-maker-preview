@@ -1,0 +1,358 @@
+{
+  "game_name": "Basic v3",
+  "textures": [
+    {
+      "type": "builtin",
+      "name": "tiles.png",
+      "texture_id": 0.0
+    },
+    {
+      "type": "builtin",
+      "name": "entityTiles.png",
+      "texture_id": 1.0
+    },
+    {
+      "type": "builtin",
+      "name": "shapes32x.png",
+      "texture_id": 2.0
+    }
+  ],
+  "tile_definitions": {
+    "0": {
+      "name": "floor",
+      "texture": 0,
+      "tex_index": 18,
+      "properties": {
+        "f1": true
+      }
+    },
+    "1": {
+      "name": "wall",
+      "texture": 0,
+      "tex_index": 19,
+      "properties": {
+        "blocks": true
+      }
+    },
+    "2": {
+      "name": "floor2",
+      "texture": 0,
+      "tex_index": 22,
+      "properties": {
+        "f2": true
+      }
+    },
+    "3": {
+      "name": "water",
+      "texture": 0,
+      "tex_index": 15,
+      "properties": {
+        "finish_move_onto_tile": {
+          "v": "3",
+          "conditions": [
+            "basic_default.c_has_property::[\"i:1\",true,\"s:floats\"]"
+          ],
+          "when always": [],
+          "when true": [
+            "basic_default.a_die::[\"i:1\"]"
+          ]
+        },
+        "wet": true
+      }
+    },
+    "4": {
+      "name": "greenery",
+      "texture": 0,
+      "tex_index": 27,
+      "properties": {
+        "blocks": {
+          "v": "3",
+          "conditions": [
+            "basic_default.c_has_property::[\"i:1\",true,\"s:treads\"]"
+          ],
+          "when always": [],
+          "when true": []
+        },
+        "finish_move_onto_tile": {
+          "v": "3",
+          "conditions": [
+            "basic_default.c_has_property::[\"i:1\",false,\"s:treads\"]"
+          ],
+          "when always": [
+            "basic_default.a_set_tiles::[\"i:4\",\"s:was_greenery\"]"
+          ],
+          "when true": []
+        }
+      }
+    },
+    "5": {
+      "name": "was_greenery",
+      "texture": 0,
+      "tex_index": 28,
+      "properties": {
+
+      }
+    },
+    "6": {
+      "name": "tile_",
+      "texture": 0,
+      "tex_index": 13,
+      "properties": {
+        "finish_move_onto_tile": {
+          "v": "3",
+          "conditions": [],
+          "when always": [
+            "basic_default.a_set_tiles::[\"i:4\",\"s:floor\"]"
+          ],
+          "when true": [],
+          "when false": []
+        }
+      }
+    },
+    "7": {
+      "name": "toggle_wall",
+      "texture": 0,
+      "tex_index": 12,
+      "properties": {
+        "blocks": true
+      }
+    },
+    "8": {
+      "name": "toggle_floor",
+      "texture": 0,
+      "tex_index": 11,
+      "properties": {
+
+      }
+    }
+  },
+  "entity_definitions": {
+    "0": {
+      "name": "player",
+      "texture": 1,
+      "tex_index": 0,
+      "intended_move_speed": 6.0,
+      "controller": "InputController",
+      "properties": {
+        "treads": true,
+        "player": true,
+        "pushes": true
+      },
+      "groups": [
+        "Player"
+      ],
+      "controller_options": {
+        "stop_repeat_after_bonk": true,
+        "allow_wait": false
+      }
+    },
+    "1": {
+      "name": "green_box",
+      "texture": 1,
+      "tex_index": 1,
+      "properties": {
+        "blocks": {
+          "v": "3",
+          "conditions": [
+            "basic_default.c_has_property::[\"i:1\",true,\"s:pushes\"]"
+          ],
+          "when always": [],
+          "when true": []
+        },
+        "move_onto": {
+          "v": "3",
+          "conditions": [
+            "basic_default.c_get_pushed::[\"i:0\",\"i:20\",false]"
+          ],
+          "when always": [],
+          "when true": [],
+          "when false": []
+        },
+        "i_finish_move_onto_tile": {
+          "v": "3",
+          "conditions": [
+            "basic_default.c_has_property::[\"i:4\",false,\"s:wet\"]"
+          ],
+          "when always": [],
+          "when true": [
+            "basic_default.a_die::[\"i:0\"]",
+            "basic_default.a_set_tiles::[\"i:4\",\"s:greenery\"]"
+          ],
+          "when false": []
+        }
+      },
+      "intended_move_speed": 0.0
+    },
+    "2": {
+      "name": "bouncer",
+      "texture": 1,
+      "tex_index": 6,
+      "intended_move_speed": 6.0,
+      "properties": {
+        "kills": true
+      }
+    },
+    "3": {
+      "name": "swap_box",
+      "texture": 1,
+      "tex_index": 8,
+      "properties": {
+        "blocks": {
+          "v": "3",
+          "conditions": [
+            "basic_default.c_has_property::[\"i:1\",true,\"s:pushes\"]"
+          ],
+          "when always": [],
+          "when true": []
+        },
+        "move_onto": {
+          "v": "3",
+          "conditions": [
+            "basic_default.c_get_pushed::[\"i:0\",\"i:22\",false]"
+          ],
+          "when always": [],
+          "when true": []
+        }
+      },
+      "intended_move_speed": 0.0
+    },
+    "4": {
+      "name": "rotate_box",
+      "texture": 1,
+      "tex_index": 13,
+      "properties": {
+        "no_rotation": true,
+        "blocks": {
+          "v": "3",
+          "conditions": [
+            "basic_default.c_has_property::[\"i:1\",true,\"s:pushes\"]"
+          ],
+          "when always": [],
+          "when true": []
+        },
+        "move_onto": {
+          "v": "3",
+          "conditions": [
+            "basic_default.c_get_pushed::[\"i:0\",\"i:21\",false]"
+          ],
+          "when always": [],
+          "when true": []
+        },
+        "pushes": true
+      }
+    },
+    "5": {
+      "name": "multiblock",
+      "texture": 1,
+      "tex_index": 15,
+      "properties": {
+        "auto_bond": true,
+        "move_onto": {
+          "v": "3",
+          "conditions": [
+            "basic_default.c_get_pushed::[\"i:0\",\"i:20\",true]"
+          ],
+          "when always": [],
+          "when true": [],
+          "when false": []
+        },
+        "blocks": {
+          "v": "3",
+          "conditions": [
+            "basic_default.c_has_property::[\"i:0\",true,\"s:pushes\"]"
+          ],
+          "when always": [],
+          "when true": [],
+          "when false": []
+        }
+      },
+      "intended_move_speed": 0.0
+    },
+    "6": {
+      "name": "bomb",
+      "texture": 1,
+      "tex_index": 10,
+      "properties": {
+        "kills": true
+      },
+      "intended_move_speed": 0.0
+    },
+    "7": {
+      "name": "entity1",
+      "texture": 1,
+      "tex_index": 7,
+      "properties": {
+        "move_onto": {
+          "v": "3",
+          "conditions": [
+            "basic_default.c_can_move::[\"i:0\",false,\"i:20\"]"
+          ],
+          "when always": [],
+          "when true": [
+            "basic_default.a_move::[\"i:0\",\"i:20\"]"
+          ],
+          "when false": [
+            "basic_default.a_move::[\"i:0\",\"i:23\"]"
+          ]
+        }
+      },
+      "intended_move_speed": 12.0
+    },
+    "8": {
+      "name": "toggle_button",
+      "texture": 1,
+      "tex_index": 18,
+      "properties": {
+        "z-index": -1.0,
+        "finish_move_onto": {
+          "v": "3",
+          "conditions": [],
+          "when always": [
+            "orch_cmds.select_all::[\"i:4\"]",
+            "basic_default.a_swap_tiles::[\"i:4\",\"s:toggle_wall\",\"s:toggle_floor\"]"
+          ],
+          "when true": []
+        }
+      }
+    },
+    "9": {
+      "name": "entity2",
+      "texture": 1,
+      "tex_index": 4,
+      "properties": {
+        "move_onto": {
+          "v": "3",
+          "conditions": [
+            "basic_default.c_has_property::[\"i:1\",false,\"s:player\"]"
+          ],
+          "when always": [],
+          "when true": [
+            "basic_default.a_property_add::[\"i:0\",\"s:moves_remaining\",\"s:2\"]"
+          ],
+          "when false": []
+        },
+        "finish_move_onto_tile": {
+          "v": "3",
+          "conditions": [
+            "basic_default.c_has_property::[\"i:0\",false,\"s:moves_reaining\"]"
+          ],
+          "when always": [],
+          "when true": [
+            "basic_default.a_property_subtract::[\"i:0\",\"s:moves_remaining\",\"s:1\",false]",
+            "basic_default.a_move::[\"i:0\",\"i:12\"]"
+          ],
+          "when false": []
+        }
+      },
+      "intended_move_speed": 6.0
+    }
+  },
+  "window_width": 18.0,
+  "window_height": 14.0,
+  "game_settings": {
+    "pixel_scale": 2.0,
+    "camera_settings": {
+      "follow_entity": "player"
+    }
+  }
+}

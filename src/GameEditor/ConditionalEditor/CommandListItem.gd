@@ -152,6 +152,12 @@ func generate_v3_ui() -> void:
                 push_error("arg name %s not found in arg list for command %s" % [input_info[0], qualified_command_name])
             var input_type: InputTemplates.InputTypes = InputTemplates.InputTypes[input_info[1]]
             var input_node: Control = InputTemplates.templates[input_type].instantiate()
+            if input_info.size() > 2:
+                var input_args: = input_info[2].split(",", true)
+                if not input_node.has_method("set_input_args"):
+                    push_error("%s passed input args but %s does not have a set_input_args method" % [qualified_command_name, input_info[1]])
+                else:
+                    input_node.set_input_args(input_args)
             input_node.set_arg_name(input_info[0])
             current_row.add_child(input_node)
             inputs.append(input_node)

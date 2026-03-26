@@ -9,7 +9,9 @@ func _ready():
 	var list_popup = find_child("SelectLevelButton").get_popup()
 	for l in all_levels:
 		list_popup.add_item(l)
-	list_popup.connect("index_pressed", Callable(self, "level_picked"))
+	list_popup.connect("index_pressed", level_picked)
+	
+	close_requested.connect(queue_free)
 
 func level_picked(index) -> void:
 	var list_popup = find_child("SelectLevelButton").get_popup()
@@ -22,4 +24,8 @@ func _on_LoadFileButton_pressed():
 		return
 	var parsed_level = FilesManager.get_level_data(GameManager.cur_game_name, selected_level)
 	GameManager.load_level_data(parsed_level)
+	queue_free()
+
+
+func _on_cancel_button_pressed() -> void:
 	queue_free()

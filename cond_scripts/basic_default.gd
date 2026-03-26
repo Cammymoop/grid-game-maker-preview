@@ -24,7 +24,7 @@ func cmd_select_tiles_named(slots: Dictionary, chosen_slot: Slot, tile_name: Str
 	slots[chosen_slot] = MapManager.get_all_positions_of_tile(tindex)
 
 func desc_select_tiles_rect() -> String:
-	return "pos|<= Select positions within a rectangle starting at [top_left:PositionInput] with size [size:PositionInput]"
+	return "pos|<= Select positions within a rectangle\nstarting at [top_left:PositionInput:0,0]\nwith size [size:PositionInput:1,1]"
 func cmd_select_tiles_rect(slots: Dictionary, chosen_slot: Slot, top_left: Vector2i, size: Vector2i) -> void:
 	top_left = get_rel_position_arg(top_left, slots)
 	var positions: Array = []
@@ -73,7 +73,7 @@ func cmd_c_can_move(slots: Dictionary, chosen_slot: int, invert: bool, direction
 
 func desc_c_get_pushed() -> String:
 	return "entity|If the entity successfully gets pushed this way [direction:DirectionInput]\n" \
-	     + "[keep_visual:BoolChoice:true,without turning,]"
+	     + "[keep_visual:BoolChoice:true,without turning,turning] to face that direction"
 func cmd_c_get_pushed(slots: Dictionary, chosen_slot: int, direction: int, keep_visual: bool) -> bool:
 	var selected = slots[chosen_slot]
 	if selected.moving:

@@ -1,6 +1,11 @@
 extends CenterContainer
 
+@export var default_value: bool = true
+
 var arg_name: String = ""
+
+func _ready() -> void:
+	set_value(default_value)
 
 func set_arg_name(new_arg_name: String) -> void:
 	arg_name = new_arg_name
@@ -8,21 +13,13 @@ func set_arg_name(new_arg_name: String) -> void:
 func get_arg_name() -> String:
 	return arg_name
 
-func apply_template_options(options: Dictionary) -> void:
-	var texts = ["", "Not"]
-	if options.has("regular_text"):
-		texts[0] = options["regular_text"]
-	
-	if options.has("inverted_text"):
-		texts[1] = options["inverted_text"]
-	
-	$EasyMenuButton.set_items(texts)
+func set_input_args(new_args: Array) -> void:
+	default_value = new_args[0] == "true"
+	$EasyMenuButton.set_items([new_args[1], new_args[2]])
 
 func get_value() -> bool:
-	if $EasyMenuButton.selected_index == 1:
-		return true
-	return false
+	return $EasyMenuButton.selected_index == 0
 
-func set_value(new_val) -> void:
-	var index = 1 if new_val else 0
-	$EasyMenuButton.index_selected(index)
+func set_value(new_val: bool) -> void:
+	var index = 0 if new_val else 1
+	$EasyMenuButton.select_index(index)

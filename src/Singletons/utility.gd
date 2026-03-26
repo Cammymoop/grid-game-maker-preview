@@ -273,3 +273,16 @@ func parse_json(text: String):
 
 func callv_with_errors(callable: Callable, args: Array) -> Variant:
 	return callable.bindv(args).call()
+
+func any_to_int(value: Variant) -> int:
+	if typeof(value) == TYPE_INT:
+		return value
+	elif typeof(value) == TYPE_FLOAT:
+		return int(value)
+	
+	var str_val: = str(value)
+	if str_val.is_valid_hex_number(true):
+		return str_val.hex_to_int()
+	elif str_val.is_valid_float():
+		return int(float(str_val))
+	return 0

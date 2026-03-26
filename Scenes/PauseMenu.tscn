@@ -56,15 +56,23 @@ layout_mode = 2
 text = "Paused"
 horizontal_alignment = 1
 
-[node name="QuitToMenu" type="Button" parent="CenterContainer/Panel/MarginContainer/VBoxContainer" unique_id=1023823849]
+[node name="ResumeButton" type="Button" parent="CenterContainer/Panel/MarginContainer/VBoxContainer" unique_id=1023823849]
 layout_mode = 2
 theme_override_fonts/font = ExtResource("2")
-text = "Return to Menu"
+text = "Resume"
 
 [node name="RestartLevel" type="Button" parent="CenterContainer/Panel/MarginContainer/VBoxContainer" unique_id=1345456108]
 layout_mode = 2
 theme_override_fonts/font = ExtResource("2")
 text = "Restart Level"
+
+[node name="Control" type="Control" parent="CenterContainer/Panel/MarginContainer/VBoxContainer" unique_id=2049283454]
+layout_mode = 2
+
+[node name="QuitToMenu" type="Button" parent="CenterContainer/Panel/MarginContainer/VBoxContainer" unique_id=658198740]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("2")
+text = "Return to Main Menu"
 
 [node name="HBoxContainer" type="HBoxContainer" parent="CenterContainer/Panel/MarginContainer/VBoxContainer" unique_id=1941901720]
 layout_mode = 2
@@ -80,7 +88,8 @@ text = "Save Level"
 layout_mode = 2
 text = "Load Level"
 
-[connection signal="pressed" from="CenterContainer/Panel/MarginContainer/VBoxContainer/QuitToMenu" to="." method="_on_QuitToMenu_pressed"]
+[connection signal="pressed" from="CenterContainer/Panel/MarginContainer/VBoxContainer/ResumeButton" to="." method="_on_resume_button_pressed"]
 [connection signal="pressed" from="CenterContainer/Panel/MarginContainer/VBoxContainer/RestartLevel" to="." method="_on_RestartLevel_pressed"]
+[connection signal="pressed" from="CenterContainer/Panel/MarginContainer/VBoxContainer/QuitToMenu" to="." method="_on_QuitToMenu_pressed"]
 [connection signal="pressed" from="CenterContainer/Panel/MarginContainer/VBoxContainer/HBoxContainer/SaveLevelButton" to="." method="_on_SaveLevelButton_pressed"]
 [connection signal="pressed" from="CenterContainer/Panel/MarginContainer/VBoxContainer/HBoxContainer/LoadLevelButton" to="." method="_on_LoadLevelButton_pressed"]

@@ -11,6 +11,7 @@ enum InputTypes {
 	DirectionInput,
 	BoolChoice,
 	InvertInput,
+	PositionInput,
 }
 
 var templates: = {
@@ -23,4 +24,6 @@ var templates: = {
 	InputTypes.DirectionInput: preload("res://Scenes/GameEditor/ConditionalEditor/DirectionInput.tscn"),
 	InputTypes.BoolChoice: preload("res://Scenes/GameEditor/ConditionalEditor/bool_choice_input.tscn"),
 	InputTypes.InvertInput: preload("res://Scenes/GameEditor/ConditionalEditor/InvertInput.tscn"),
+
+	InputTypes.PositionInput: preload("res://Scenes/GameEditor/ConditionalEditor/vector2i_input.tscn"),
 }

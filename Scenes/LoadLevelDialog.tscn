@@ -1,60 +1,62 @@
-[gd_scene load_steps=3 format=2]
+[gd_scene format=3 uid="uid://cjvjjnj6ehj4d"]
 
-[ext_resource path="res://assets/font/medium_font.tres" type="FontFile" id=1]
-[ext_resource path="res://src/LoadLevelDialog.gd" type="Script" id=2]
+[ext_resource type="FontFile" uid="uid://biuf4hpin33j3" path="res://assets/font/medium_font.tres" id="1"]
+[ext_resource type="Script" uid="uid://bkdeamgvbbvod" path="res://src/LoadLevelDialog.gd" id="2"]
 
-[node name="SaveLevelDialog" type="Window"]
-visible = true
-offset_left = 347.0
-offset_top = 265.0
-offset_right = 570.0
-offset_bottom = 366.0
-window_title = "Load Level"
-script = ExtResource( 2 )
-__meta__ = {
-"_edit_use_anchors_": false
-}
+[node name="LoadLevelDialog" type="Window" unique_id=348474084]
+oversampling_override = 1.0
+position = Vector2i(0, 36)
+size = Vector2i(176, 96)
+wrap_controls = true
+script = ExtResource("2")
 
-[node name="MarginContainer" type="MarginContainer" parent="."]
+[node name="MarginContainer" type="MarginContainer" parent="." unique_id=520468244]
+anchors_preset = 15
 anchor_right = 1.0
-offset_bottom = 40.0
-theme_override_constants/margin_right = 8
-theme_override_constants/margin_top = 8
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 8
 theme_override_constants/margin_bottom = 8
-__meta__ = {
-"_edit_use_anchors_": false
-}
 
-[node name="PanelContainer" type="VBoxContainer" parent="MarginContainer"]
-offset_left = 8.0
-offset_top = 8.0
-offset_right = 215.0
-offset_bottom = 72.0
-__meta__ = {
-"_edit_use_anchors_": false
-}
+[node name="PanelContainer" type="VBoxContainer" parent="MarginContainer" unique_id=1806502740]
+layout_mode = 2
 
-[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/PanelContainer"]
-offset_right = 207.0
-offset_bottom = 20.0
+[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/PanelContainer" unique_id=1147609918]
+layout_mode = 2
 alignment = 1
 
-[node name="SelectLevelButton" type="MenuButton" parent="MarginContainer/PanelContainer/HBoxContainer"]
-offset_left = 23.0
-offset_right = 183.0
-offset_bottom = 20.0
-custom_minimum_size = Vector2( 160, 0 )
+[node name="SelectLevelButton" type="MenuButton" parent="MarginContainer/PanelContainer/HBoxContainer" unique_id=427921855]
+custom_minimum_size = Vector2(160, 0)
+layout_mode = 2
 text = "Select Level:"
 flat = false
 
-[node name="LoadFileButton" type="Button" parent="MarginContainer/PanelContainer"]
-offset_left = 69.0
-offset_top = 24.0
-offset_right = 137.0
-offset_bottom = 64.0
+[node name="Spacer" type="Control" parent="MarginContainer/PanelContainer" unique_id=1254891034]
+custom_minimum_size = Vector2(0, 10)
+layout_mode = 2
+
+[node name="HBoxContainer2" type="HBoxContainer" parent="MarginContainer/PanelContainer" unique_id=2144319630]
+layout_mode = 2
+alignment = 1
+
+[node name="LoadFileButton" type="Button" parent="MarginContainer/PanelContainer/HBoxContainer2" unique_id=306620814]
+layout_mode = 2
 size_flags_horizontal = 4
-theme_override_fonts/font = ExtResource( 1 )
+theme_override_fonts/font = ExtResource("1")
 text = "Load"
 
-[connection signal="pressed" from="MarginContainer/PanelContainer/LoadFileButton" to="." method="_on_LoadFileButton_pressed"]
+[node name="Spacer" type="Control" parent="MarginContainer/PanelContainer/HBoxContainer2" unique_id=8064137]
+custom_minimum_size = Vector2(10, 0)
+layout_mode = 2
+
+[node name="CancelButton" type="Button" parent="MarginContainer/PanelContainer/HBoxContainer2" unique_id=1322954934]
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_fonts/font = ExtResource("1")
+text = "Cancel"
+
+[connection signal="pressed" from="MarginContainer/PanelContainer/HBoxContainer2/LoadFileButton" to="." method="_on_LoadFileButton_pressed"]
+[connection signal="pressed" from="MarginContainer/PanelContainer/HBoxContainer2/CancelButton" to="." method="_on_cancel_button_pressed"]

@@ -150,6 +150,8 @@ func load_v3_conditional_data_step(from_data: Dictionary) -> void:
         add_when_list("always")
     if not "when true" in when_lists:
         add_when_list("when true")
+    if not "when false" in when_lists:
+        add_when_list("when false")
 
     for key in from_data:
         if key != "conditions" and not key.begins_with("when "):

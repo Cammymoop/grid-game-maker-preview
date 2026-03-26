@@ -1,6 +1,6 @@
 extends MenuButton
 
-signal changed
+signal changed(value: String)
 
 @export var list_items: Array
 var selected_value: String
@@ -26,22 +26,26 @@ func _ready():
 	
 	select_first()
 	
-	list.connect("index_pressed", Callable(self, "index_selected"))
+	list.connect("index_pressed", Callable(self, "select_index"))
 	
 func select_first() -> void:
-	var list: PopupMenu = get_popup()
 	if not list_items:
 		text = ""
 		selected_value = ""
 		selected_index = 0
 	else:
-		text = list.get_item_text(0)
-		selected_value = text
-		selected_index = 0
+		select_index(0)
 
-func index_selected(index: int) -> void:
+func select_index(index: int) -> void:
 	var list: PopupMenu = get_popup()
+	var cur_item_count: = list.get_item_count()
+	if cur_item_count == 0:
+		return
+	if index < 0:
+		index = cur_item_count - index
+	index = clampi(index, 0, cur_item_count - 1)
+
 	text = list.get_item_text(index)
 	selected_value = text
 	selected_index = index
-	emit_signal("changed", selected_value)
+	changed.emit(selected_value)
