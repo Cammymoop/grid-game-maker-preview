@@ -28,6 +28,8 @@ func _ready():
 	get_viewport().connect("size_changed", Callable(self, "update_size"))
 
 func _process(delta):
+	if is_zero_approx(smooth_amount_reset):
+		return
 	if fading:
 		fade -= delta / smooth_amount_reset
 		fade = max(0, fade)

@@ -1,0 +1,70 @@
+[gd_scene format=3 uid="uid://ccr48mbb8s5et"]
+
+[ext_resource type="Texture2D" uid="uid://bifiewni3u0on" path="res://assets/img/particle_textures/puff.png" id="1_nkw3m"]
+[ext_resource type="Script" uid="uid://15x5jg4jwyc5" path="res://src/Effects/VoidParticles.gd" id="2_g4usv"]
+[ext_resource type="Script" uid="uid://c2ksw4bcxmkvq" path="res://src/Effects/ColorRect_FadeToBlack.gd" id="4_rdi2w"]
+
+[sub_resource type="Curve" id="Curve_gkcwl"]
+_data = [Vector2(0, 0), 0.0, 0.0, 0, 0, Vector2(0.5070093, 1), 0.0, 0.0, 0, 0, Vector2(1, 0), 0.0, 0.0, 0, 0]
+point_count = 3
+
+[sub_resource type="CurveTexture" id="CurveTexture_nkw3m"]
+curve = SubResource("Curve_gkcwl")
+
+[sub_resource type="ParticleProcessMaterial" id="18"]
+particle_flag_disable_z = true
+emission_shape = 3
+emission_box_extents = Vector3(400, 400, 1)
+angle_min = -179.99998
+angle_max = 180.00002
+spread = 180.0
+initial_velocity_min = 2.0
+initial_velocity_max = 4.0
+gravity = Vector3(0, 0, 0)
+scale_min = 4.0
+scale_max = 6.0
+alpha_curve = SubResource("CurveTexture_nkw3m")
+hue_variation_min = -0.010000022
+hue_variation_max = 0.009999977
+
+[node name="BGEffects" type="Node" unique_id=1203754819]
+process_mode = 3
+
+[node name="CanvasLayer2" type="CanvasLayer" parent="." unique_id=131351098]
+layer = -2
+
+[node name="SubViewportContainer" type="SubViewportContainer" parent="CanvasLayer2" unique_id=1971214824]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+stretch = true
+
+[node name="SubViewport" type="SubViewport" parent="CanvasLayer2/SubViewportContainer" unique_id=1347613943]
+handle_input_locally = false
+size = Vector2i(768, 768)
+render_target_update_mode = 4
+
+[node name="Darks" type="GPUParticles2D" parent="CanvasLayer2/SubViewportContainer/SubViewport" unique_id=201630246]
+self_modulate = Color(0.49770868, 0.37841958, 0.26097438, 1)
+position = Vector2(384, 384)
+amount = 40
+texture = ExtResource("1_nkw3m")
+lifetime = 28.0
+preprocess = 30.0
+visibility_rect = Rect2(-1000, -1000, 2000, 2000)
+process_material = SubResource("18")
+script = ExtResource("2_g4usv")
+
+[node name="CanvasLayer" type="CanvasLayer" parent="CanvasLayer2/SubViewportContainer/SubViewport" unique_id=51442697]
+layer = -3
+
+[node name="ColorRect" type="ColorRect" parent="CanvasLayer2/SubViewportContainer/SubViewport/CanvasLayer" unique_id=601981259]
+show_behind_parent = true
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+color = Color(0.109804, 0.0862745, 0.0901961, 1)
+script = ExtResource("4_rdi2w")
+fade_length = 0.2

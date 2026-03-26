@@ -265,7 +265,6 @@ func start_move(move_facing, change_visual_facing=true, group_move=false) -> boo
 		else:
 			next_tile_pos = tile_position
 			if not group_move:
-				prints("I was blocked")
 				emit_signal("blocked", move_facing)
 			return false
 	return false
