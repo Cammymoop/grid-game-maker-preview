@@ -7,8 +7,22 @@ var conditional_editor_scn = preload("res://Scenes/GameEditor/ConditionalEditor/
 var conditional_val: Variant = {}
 var conditional_mode: = false
 
+var autoshow_conditional_editor: = true
+
 func _ready():
 	visibility_changed.connect(Callable(self, "_on_vis_changed"))
+	
+	check_autoshow_conditional_editor()
+
+func check_autoshow_conditional_editor() -> void:
+	if autoshow_conditional_editor and is_v3_conditional():
+		open_conditional_editor()
+	
+func is_v3_conditional() -> bool:
+	if not conditional_val:
+		return false
+	var val = [conditional_val] if typeof(conditional_val) == TYPE_DICTIONARY else conditional_val
+	return val[0].get("v", "") == "3"
 
 func set_info(prop_name, prop_val) -> void:
 	find_child("SetName").text = prop_name
@@ -21,6 +35,9 @@ func set_info(prop_name, prop_val) -> void:
 
 
 func _on_EditConditional_pressed():
+	open_conditional_editor()
+
+func open_conditional_editor() -> void:
 	var editor = conditional_editor_scn.instantiate()
 	
 	var ui_root = find_parent("UIRoot")
@@ -36,10 +53,12 @@ func _on_EditConditional_pressed():
 		prints("loading empty v3 conditional")
 		editor.load_conditional_data({"v": "3", "conditions": []})
 	
-	editor.connect("save_conditional", Callable(self, "on_save_conditional"))
+	editor.save_conditional.connect(on_save_conditional)
+	editor.cancelled.connect(hide)
 
 func on_save_conditional(new_conditional) -> void:
 	conditional_val = new_conditional
+	save_prop()
 
 func get_value():
 	if conditional_mode:
@@ -68,3 +87,7 @@ func _on_Button_pressed():
 func _on_vis_changed():
 	if not visible:
 		hidden.emit()
+
+func save_prop() -> void:
+	confirmed.emit()
+	hide()

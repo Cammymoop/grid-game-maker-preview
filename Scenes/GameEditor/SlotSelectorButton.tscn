@@ -61,7 +61,6 @@ texture = ExtResource("2")
 [node name="PopupPicker" type="Popup" parent="." unique_id=1988138473]
 oversampling_override = 1.0
 size = Vector2i(240, 145)
-visible = true
 
 [node name="PopupPanel" type="PanelContainer" parent="PopupPicker" unique_id=1003956299]
 anchors_preset = 15

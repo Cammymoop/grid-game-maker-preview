@@ -1,7 +1,7 @@
 extends Window
 
-# warning-ignore:unused_signal
-signal save_conditional
+signal cancelled
+signal save_conditional(conditional_data: Variant)
 
 @onready var cond_list = find_child("ConditionsList")
 @onready var cond_list_tab = find_child("Conditions")
@@ -50,6 +50,8 @@ func _ready():
     steps_ui.step_changed.connect(on_step_changed)
     steps_ui.add_step_after.connect(on_add_step_after)
     steps_ui.remove_step.connect(on_remove_step)
+    
+    close_requested.connect(cancel)
     
     popup()
 
@@ -257,11 +259,11 @@ func _on_NewActionButton_pressed():
     add_action_dialog.popup_centered()
 
 func _on_SaveButton_pressed():
-    emit_signal("save_conditional", get_full_conditional_data())
+    save_conditional.emit(get_full_conditional_data())
     queue_free()
 
 func _on_CancelButton_pressed():
-    queue_free()
+    cancel()
 
 func setup_step_count(new_step_count: int) -> void:
     step_count = new_step_count
@@ -304,3 +306,7 @@ func _clear_list(list_node: Node) -> void:
     for child in list_node.get_children():
         list_node.remove_child(child)
         child.queue_free()
+
+func cancel() -> void:
+    emit_signal("cancelled")
+    queue_free()

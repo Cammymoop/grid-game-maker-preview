@@ -204,7 +204,8 @@
       "intended_move_speed": 6.0,
       "properties": {
         "kills": true
-      }
+      },
+      "controller": "BounceController"
     },
     "3": {
       "name": "swap_box",
@@ -273,7 +274,7 @@
         "blocks": {
           "v": "3",
           "conditions": [
-            "basic_default.c_has_property::[\"i:0\",true,\"s:pushes\"]"
+            "basic_default.c_has_property::[\"i:1\",true,\"s:pushes\"]"
           ],
           "when always": [],
           "when true": [],
@@ -349,17 +350,25 @@
         "i_finish_move_onto_tile": {
           "v": "3",
           "conditions": [
-            "basic_default.c_has_property::[\"i:0\",false,\"s:moves_reaining\"]"
+            "basic_default.c_has_property::[\"i:0\",false,\"s:moves_remaining\"]"
           ],
           "when always": [],
           "when true": [
-            "basic_default.a_property_subtract::[\"i:0\",\"s:moves_remaining\",\"s:1\",false]",
+            "basic_default.a_property_subtract::[\"i:0\",\"s:moves_remaining\",\"s:1\",true]",
             "basic_default.a_move::[\"i:0\",\"i:12\"]"
           ],
           "when false": []
         }
       },
       "intended_move_speed": 6.0
+    },
+    "10": {
+      "name": "props",
+      "texture": 2,
+      "tex_index": 11,
+      "properties": {
+        "moves_remaining": true
+      }
     }
   },
   "window_width": 18.0,

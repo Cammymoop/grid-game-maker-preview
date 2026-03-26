@@ -239,7 +239,6 @@ func finish_move() -> void:
 
 func start_move(move_facing, change_visual_facing=true, group_move=false) -> bool:
 	if moving:
-		print_debug("Tried to start move when already moving")
 		return false
 	if change_visual_facing and visual_turn_on_move:
 		set_visual_facing(move_facing)
