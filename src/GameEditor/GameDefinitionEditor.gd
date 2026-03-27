@@ -44,17 +44,17 @@ func init_movement_modes() -> void:
 	for mode in GameManager.MovementMode.values():
 		popup_menu.add_item(GameManager.describe_movement_mode(mode), mode)
 	
-	popup_menu.connect("index_pressed", Callable(self, "movement_mode_picked"))
+	popup_menu.id_pressed.connect(movement_mode_picked)
 
 func change_follow_by(val: String) -> void:
 	set_camera_settings("follow_entity_by", val)
 
-func movement_mode_picked(index) -> void:
+func movement_mode_picked(mode_id: int) -> void:
 	var popup_menu: PopupMenu = find_child("MovementModeMenuButton").get_popup()
+	var index = popup_menu.get_item_index(mode_id)
 	find_child("MovementModeMenuButton").text = popup_menu.get_item_text(index)
-	var mode = popup_menu.get_item_id(index)
 	
-	game_settings["movement_mode"] = mode
+	game_settings["movement_mode"] = mode_id
 
 func _on_SaveButton_pressed():
 	if FilesManager.game_definition_exists(GameManager.get_game_name()):

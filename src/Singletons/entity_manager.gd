@@ -254,13 +254,12 @@ func create_randoms() -> void:
 func create_default_player() -> void:
     if entity_index_map.has("player"):
         create_entity(get_entity_index("player"), Vector2(2, 2))
-    if entity_index_map.has("pickaxe"):
-        create_entity(get_entity_index("pickaxe"), Vector2(0, 0))
 func create_default_box() -> void:
-    if entity_index_map.has("geode"):
-        create_entity(get_entity_index("geode"), Vector2(2, 1))
+    pass
 
 func create_random_entity(entity_name) -> void:
+    if not entity_index_map.has(entity_name):
+        return
     var tries = 20
     
     while tries > 0:

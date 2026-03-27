@@ -198,3 +198,5 @@ func desc_a_turn() -> String:
 func cmd_a_turn(slots: Dictionary, chosen_slot: int, direction: int) -> void:
 	if Commands.slot_is_entity(chosen_slot):
 		slots[chosen_slot].turn_to_facing(resolve_direction_value(direction, slots))
+	elif Commands.slot_is_positions(chosen_slot):
+		set_tiles_to_facing(slots, chosen_slot, resolve_direction_value(direction, slots))

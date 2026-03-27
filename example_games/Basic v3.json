@@ -126,6 +126,22 @@
       "properties": {
 
       }
+    },
+    "9": {
+      "name": "force",
+      "texture": 0,
+      "tex_index": 8,
+      "properties": {
+        "finish_move_onto_tile": {
+          "v": "3",
+          "conditions": [],
+          "when always": [
+            "basic_default.a_move::[\"i:1\",\"i:68\"]"
+          ],
+          "when true": [],
+          "when false": []
+        }
+      }
     }
   },
   "entity_definitions": {

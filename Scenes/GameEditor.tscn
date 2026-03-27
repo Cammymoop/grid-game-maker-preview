@@ -8,7 +8,7 @@
 [ext_resource type="Script" uid="uid://cakuc61ui0t57" path="res://src/GameEditor/ImagesEditor.gd" id="5"]
 [ext_resource type="Script" uid="uid://benwn44a0nm5f" path="res://src/GameEditor/GameDefinitionEditor.gd" id="6"]
 [ext_resource type="Theme" uid="uid://cqr0a0fienc2" path="res://assets/DefaultTheme.tres" id="7"]
-[ext_resource type="PackedScene" path="res://Scenes/FallingEntitiesEffects.tscn" id="8"]
+[ext_resource type="PackedScene" uid="uid://csm4i61la0olb" path="res://Scenes/FallingEntitiesEffects.tscn" id="8"]
 [ext_resource type="FontFile" uid="uid://biuf4hpin33j3" path="res://assets/font/medium_font.tres" id="9"]
 [ext_resource type="Script" uid="uid://b067pb4uemc40" path="res://src/GameEditor/UIRoot.gd" id="10"]
 [ext_resource type="Script" uid="uid://bihb1rg68jci5" path="res://src/GameEditor/SelectableTextureList.gd" id="11"]
@@ -108,7 +108,7 @@ alignment = 2
 
 [node name="Label" type="Label" parent="MarginContainer/UIRoot/TabContainer/Game/VBoxContainer/HBoxContainer3" unique_id=674785261]
 layout_mode = 2
-text = "Pixel Scale (windowed):"
+text = " Default Zoom Level (windowed):"
 
 [node name="PixelScaleInput" type="SpinBox" parent="MarginContainer/UIRoot/TabContainer/Game/VBoxContainer/HBoxContainer3" unique_id=235024528]
 layout_mode = 2
@@ -213,7 +213,7 @@ alignment = 2
 [node name="OpenGameDir" type="Button" parent="MarginContainer/UIRoot/TabContainer/Game/HBoxContainer6" unique_id=1310730974]
 layout_mode = 2
 size_flags_vertical = 4
-text = "Open Game Save Directory"
+text = "Open Game Info Folder"
 
 [node name="HBoxContainer5" type="HBoxContainer" parent="MarginContainer/UIRoot/TabContainer/Game" unique_id=33989943]
 layout_mode = 2
@@ -405,12 +405,11 @@ layer = 10
 
 [node name="FallingEntities" parent="." unique_id=1697529902 instance=ExtResource("8")]
 
-[node name="ColorRect" parent="FallingEntities/CanvasLayer" index="0"]
-anchors_preset = 15
+[node name="ColorRect" parent="FallingEntities/CanvasLayer" parent_id_path=PackedInt32Array(1697529902, 996671454) index="0" unique_id=1372251819]
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="Effects" parent="FallingEntities/CanvasLayer2" index="0"]
+[node name="Effects" parent="FallingEntities/CanvasLayer2" parent_id_path=PackedInt32Array(1697529902, 1037858481) index="0" unique_id=477139096]
 size_factor = 0.5
 max_brightness = 0.3
 

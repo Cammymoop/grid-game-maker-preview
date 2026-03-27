@@ -98,6 +98,10 @@ func load_game_definition_from_file(game_name) -> void:
 	
 	set_game_name(definition['game_name'])
 	
+	editor_save = {}
+	checkpoint_save = {}
+	loaded_level = {}
+	
 	TextureManager.clear()
 	if "textures" in definition:
 		TextureManager.set_textures(definition['textures'])
@@ -126,9 +130,9 @@ func load_game_definition_from_file(game_name) -> void:
 			loaded = true
 
 func get_game_setting(setting_name, default):
-	if not setting_name in game_definition["game_settings"]:
+	if not "game_settings" in game_definition:
 		return default
-	return game_definition["game_settings"][setting_name]
+	return game_definition["game_settings"].get(setting_name, default)
 
 func get_default_pixel_scale() -> float:
 	return get_game_setting("pixel_scale", 1)
@@ -334,7 +338,7 @@ func rescale_window() -> void:
 	# Re-center the window
 	var screen_size = DisplayServer.screen_get_size()
 	@warning_ignore("integer_division")
-	window.position = Vector2(screen_size.x/2 - window.size.x/2, screen_size.y/2 - window.size.y/2)
+	window.position = screen_size/2 - window.size/2 + DisplayServer.screen_get_position()
 
 func toggle_pause_menu():
 	if cur_scene != "Play":

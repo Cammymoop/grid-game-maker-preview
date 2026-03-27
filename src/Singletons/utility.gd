@@ -1,5 +1,28 @@
 extends Node
 
+const TILE_TANSFORM_MASK: int = TileSetAtlasSource.TRANSFORM_FLIP_H | TileSetAtlasSource.TRANSFORM_FLIP_V | TileSetAtlasSource.TRANSFORM_TRANSPOSE
+
+const FACING_TO_TILE_TRANSFORMS: Dictionary = {
+	0: 0,
+	1: TileSetAtlasSource.TRANSFORM_FLIP_H | TileSetAtlasSource.TRANSFORM_TRANSPOSE,
+	2: TileSetAtlasSource.TRANSFORM_FLIP_H | TileSetAtlasSource.TRANSFORM_FLIP_V,
+	3: TileSetAtlasSource.TRANSFORM_FLIP_V | TileSetAtlasSource.TRANSFORM_TRANSPOSE,
+}
+
+const TILE_TRANSFORM_TO_FACING: Dictionary = {
+	0: 0,
+	TileSetAtlasSource.TRANSFORM_FLIP_H | TileSetAtlasSource.TRANSFORM_TRANSPOSE: 1,
+	TileSetAtlasSource.TRANSFORM_FLIP_H | TileSetAtlasSource.TRANSFORM_FLIP_V: 2,
+	TileSetAtlasSource.TRANSFORM_FLIP_V | TileSetAtlasSource.TRANSFORM_TRANSPOSE: 3,
+}
+
+const FACING_TO_VECTOR: Dictionary = {
+	0: Vector2.UP,
+	1: Vector2.RIGHT,
+	2: Vector2.DOWN,
+	3: Vector2.LEFT,
+}
+
 func _ready():
 	randomize()
 
@@ -12,26 +35,19 @@ func exclusive_randf() -> float:
 	return 0.0 if r == 1.0 else r
 
 func random_int_range(start: int, end_exclusive: int) -> int:
-	return start + int(floor(exclusive_randf() * (end_exclusive - start)))
+	return randi_range(start, end_exclusive - 1)
 
-func facing_vector(what_facing) -> Vector2:
-	match what_facing:
-		0:
-			return Vector2(0, -1)
-		1:
-			return Vector2(1, 0)
-		2:
-			return Vector2(0, 1)
-		3:
-			return Vector2(-1, 0)
+func facing_vector(what_facing: int) -> Vector2:
+	if FACING_TO_VECTOR.has(what_facing):
+		return FACING_TO_VECTOR[what_facing]
 	print_debug("bad facing: %s" % str(what_facing))
 	print_stack()
-	return Vector2(0, 0)
+	return Vector2.ZERO
 
 func facing_rotated(what_facing: int, what_rotation: int) -> int:
 	return posmod(what_facing + what_rotation, 4)
 
-func facing_rotation(what_facing) -> float:
+func facing_rotation(what_facing: int) -> float:
 	return (what_facing * PI) / 2.0
 
 func direction_to_facing(direction: String) -> int:
@@ -249,17 +265,26 @@ func resolve_full_direction_to_facing(full_direction: int, slots: Dictionary) ->
 	if full_direction_is_absolute(full_direction):
 		return get_full_direction_absolute(full_direction)
 	
-	# TODO needs to know if the slot is a tile_pos and resolve direction relative to the tiles facing
-	var entity = slots[get_full_direction_slot(full_direction)]
-	if not entity:
-		print_debug("Slot for relative direction is empty")
-		return get_full_direction_absolute(full_direction)
-	
 	var facing: int
-	if is_full_dir_relative_to_visual_facing(full_direction):
-		facing = entity.visual_facing
-	else:
-		facing = entity.facing
+
+	var relative_to_slot_id: = get_full_direction_slot(full_direction)
+	if Commands.slot_is_entity(relative_to_slot_id):
+		var entity = slots[relative_to_slot_id]
+		if not entity:
+			push_warning("Slot for relative direction (entity) is empty")
+			return get_full_direction_absolute(full_direction)
+		
+		if is_full_dir_relative_to_visual_facing(full_direction):
+			facing = entity.visual_facing
+		else:
+			facing = entity.facing
+	elif Commands.slot_is_positions(relative_to_slot_id):
+		var positions: Array = slots[relative_to_slot_id]
+		if not positions:
+			push_warning("Slot for relative direction (tile positions) is empty")
+			facing = 0
+		else:
+			facing = MapManager.get_tile_facing_at(positions[0])
 	
 	return facing_rotated(facing, get_full_direction_absolute(full_direction))
 
@@ -286,3 +311,9 @@ func any_to_int(value: Variant) -> int:
 	elif str_val.is_valid_float():
 		return int(float(str_val))
 	return 0
+
+func tile_transform_from_facing(facing: int) -> int:
+	return FACING_TO_TILE_TRANSFORMS.get(facing, 0)
+
+func facing_from_tile_alt_id(alt_id: int) -> int:
+	return TILE_TRANSFORM_TO_FACING.get(alt_id & TILE_TANSFORM_MASK, 0)

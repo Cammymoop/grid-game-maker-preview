@@ -81,7 +81,6 @@ func set_save_path(file_name: String) -> void:
 
 func _ready():
 	close_requested.connect(hide)
-	close_requested.connect(hide)
 	visibility_changed.connect(Callable(self, "_on_vis_changed"))
 	if get_parent() is SubViewport:
 		# Running scene in standalone mode

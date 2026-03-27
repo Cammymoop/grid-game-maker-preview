@@ -117,7 +117,9 @@ func create_random_layer():
 func create_plain_layer():
     clear_layers()
     var map_layer = create_empty_layer()
-    map_layer.single_init(get_tile_index("floor"))
+    if tile_defs.size() > 0:
+        var floor_tile_index = 0 if not tile_name_exists("floor") else get_tile_index("floor")
+        map_layer.single_init(floor_tile_index)
     
     emit_signal("level_size_changed")
 
@@ -146,10 +148,12 @@ func create_tileset():
         
         var tile_native_size = TextureManager.get_texture_tile_size(tile_info['texture'])
         atlas_source.texture_region_size = tile_native_size
-        atlas_source.create_tile(TextureManager.get_index_atlas_coords(tile_info['texture'], tile_info['tex_index']))
+        var atlas_coords: = TextureManager.get_index_atlas_coords(tile_info['texture'], tile_info['tex_index'])
+        atlas_source.create_tile(atlas_coords)
         
         if "z-index" in tile_info['properties']:
-            new_tileset.tile_set_z_index(tile_index, tile_info['properties']['z-index'])
+            var tile_data: = atlas_source.get_tile_data(atlas_coords, 0)
+            tile_data.z_index = int(tile_info['properties']['z-index'])
             
     tileset = new_tileset
 
@@ -158,7 +162,7 @@ func update_index_map() -> void:
     for tile_index in tile_defs:
         var tname = tile_defs[tile_index]['name']
         if tname in tile_index_map:
-            print_debug("WARNING: tile name already in use: " + tname)
+            push_warning("WARNING: tile name already in use: " + tname)
         tile_index_map[tname] = tile_index
 
 func get_tile_texture(tile_index) -> Texture2D:
@@ -251,11 +255,11 @@ func replace_tiles_at_array(position_list, new_tile):
 func is_pos_out_of_bounds(tile_position) -> bool:
     return Utility.position_in_rect_inclusive(tile_position, get_map_size())
 
-func replace_tiles_at(tile_position, new_tile) -> void:
+func replace_tiles_at(tile_position, new_tile, facing: int = 0) -> void:
     var old_bounds = get_map_size()
     clear_all_at(tile_position)
     if new_tile != -1:
-        layers[0].set_cell_s(tile_position, new_tile)
+        layers[0].set_cell_s(tile_position, new_tile, facing)
     
     if new_tile == -1:
         if get_map_size() != old_bounds:
@@ -357,8 +361,16 @@ func check_blocks(entity, tile_position) -> bool:
                 return false
     return true
 
-func get_tile_facing_at(_tile_position) -> int:
-    return 0 # TODO do this
+func get_tile_facing_at(tile_position: Vector2i) -> int:
+    for l in layers:
+        if l.get_cell_s(tile_position) != -1:
+            return l.get_cell_facing(tile_position)
+    return 0
+
+func set_tile_facing_at(tile_position: Vector2i, facing: int) -> void:
+    for l in layers:
+        if l.get_cell_s(tile_position) != -1:
+            l.set_cell_facing(tile_position, facing)
 
 func finish_move(moving_entity, tile_position) -> void:
     EntityManager.finish_move(moving_entity, tile_position)

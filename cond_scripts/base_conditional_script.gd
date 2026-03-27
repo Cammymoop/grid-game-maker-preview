@@ -104,3 +104,11 @@ func get_context_position(slots: Dictionary) -> Vector2i:
 
 func resolve_direction_value(dir_value: int, slots: Dictionary) -> int:
 	return Utility.resolve_full_direction_to_facing(dir_value, slots)
+
+func set_tiles_to_facing(slots: Dictionary, slot_id: int, facing: int) -> void:
+	if not Commands.slot_is_positions(slot_id):
+		push_warning("set_tiles_to_facing: Slot is not a tile position: %s" % [slot_id])
+		return
+	
+	for pos in slots[slot_id]:
+		MapManager.set_tile_facing_at(pos, facing)

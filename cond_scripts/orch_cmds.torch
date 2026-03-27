@@ -124,7 +124,6 @@ pin_data = Array[Dictionary]([{
 "flags": 2,
 "label": "BaseEntity",
 "target_class": "BaseEntity",
-"dv": null,
 "usage": 0
 }])
 
@@ -134,8 +133,7 @@ position = Vector2(420, 60)
 pin_data = Array[Dictionary]([{
 "pin_name": &"object",
 "type": 24,
-"flags": 2,
-"dv": null
+"flags": 2
 }, {
 "pin_name": &"method",
 "type": 21,
@@ -246,14 +244,12 @@ pin_data = Array[Dictionary]([{
 "pin_name": &"slots",
 "type": 27,
 "dir": 1,
-"flags": 2,
-"dv": {}
+"flags": 2
 }, {
 "pin_name": &"chosen_slot",
 "type": 2,
 "dir": 1,
-"flags": 2,
-"dv": 0
+"flags": 2
 }])
 
 [obj type="OScriptNodeFunctionResult" id="OScriptNodeFunctionResult_gfcfa"]
@@ -275,8 +271,7 @@ pin_data = Array[Dictionary]([{
 "dir": 1,
 "flags": 2050,
 "label": "MapManager",
-"target_class": "Node",
-"dv": null
+"target_class": "Node"
 }])
 
 [obj type="OScriptNodeCallMemberFunction" id="OScriptNodeCallMemberFunction_n4y2n"]
@@ -302,14 +297,12 @@ pin_data = Array[Dictionary]([{
 "type": 24,
 "flags": 2050,
 "label": "Node",
-"target_class": "Node",
-"dv": null
+"target_class": "Node"
 }, {
 "pin_name": &"return_value",
 "type": 28,
 "dir": 1,
 "flags": 1026,
-"dv": [],
 "hint": 31,
 "hint_string": "Vector2i",
 "usage": 0
@@ -347,8 +340,7 @@ pin_data = Array[Dictionary]([{
 "pin_name": &"target",
 "type": 27,
 "flags": 2058,
-"label": "Dictionary",
-"dv": {}
+"label": "Dictionary"
 }, {
 "pin_name": &"key",
 "flags": 2,

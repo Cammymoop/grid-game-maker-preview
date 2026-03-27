@@ -1,32 +1,30 @@
-[gd_scene load_steps=2 format=2]
+[gd_scene format=3 uid="uid://csm4i61la0olb"]
 
-[ext_resource path="res://src/MainMenuEffects.gd" type="Script" id=1]
+[ext_resource type="Script" uid="uid://bhmxevfjtudok" path="res://src/MainMenuEffects.gd" id="1"]
 
-[node name="FallingEntities" type="Node"]
+[node name="FallingEntities" type="Node" unique_id=78353452]
 
-[node name="CanvasLayer" type="CanvasLayer" parent="."]
+[node name="CanvasLayer" type="CanvasLayer" parent="." unique_id=996671454]
 layer = -3
 
-[node name="ColorRect" type="ColorRect" parent="CanvasLayer"]
+[node name="ColorRect" type="ColorRect" parent="CanvasLayer" unique_id=1372251819]
 show_behind_parent = true
+anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-color = Color( 0.12549, 0.105882, 0.168627, 1 )
-__meta__ = {
-"_edit_use_anchors_": false,
-"_editor_description_": ""
-}
+color = Color(0.12549, 0.105882, 0.168627, 1)
 
-[node name="CanvasLayer2" type="CanvasLayer" parent="."]
+[node name="CanvasLayer2" type="CanvasLayer" parent="." unique_id=1037858481]
 layer = -2
 
-[node name="Effects" type="Node2D" parent="CanvasLayer2"]
+[node name="Effects" type="Node2D" parent="CanvasLayer2" unique_id=477139096]
 process_mode = 3
-script = ExtResource( 1 )
+texture_filter = 1
+script = ExtResource("1")
 density = 1.5
 background_color_rect = NodePath("../../CanvasLayer/ColorRect")
 
-[node name="NewObjTimer" type="Timer" parent="CanvasLayer2/Effects"]
+[node name="NewObjTimer" type="Timer" parent="CanvasLayer2/Effects" unique_id=867933495]
 autostart = true
 
 [connection signal="timeout" from="CanvasLayer2/Effects/NewObjTimer" to="CanvasLayer2/Effects" method="_on_NewObjTimer_timeout"]

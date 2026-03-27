@@ -12,6 +12,7 @@ const CAMERA_MOVE_SPEED: = 400
 
 var cur_tile_i = 0
 var current_tile_index = 0
+var current_tile_facing = 0
 
 var all_tiles = []
 var all_entities = []
@@ -144,7 +145,7 @@ func move_cursor(new_position) -> void:
 func _place(holding=false):
 	has_edited_something = true
 	if placing == "tile":
-		MapManager.replace_tiles_at(cursor_tile_pos, current_tile_index)
+		MapManager.replace_tiles_at(cursor_tile_pos, current_tile_index, current_tile_facing)
 	elif placing == "entity":
 		var entities_here = EntityManager.get_entities_at(cursor_tile_pos)
 		# remove existing entities of the same index
@@ -224,28 +225,33 @@ func _process(delta):
 	if Input.is_action_just_pressed("editor_next_tile"):
 		if placing != "tile":
 			place_mode("tile")
+			current_tile_facing = 0
 		else:
 			advance_tile(1)
 	if Input.is_action_just_pressed("editor_prev_tile"):
 		if placing != "tile":
 			place_mode("tile")
+			current_tile_facing = 0
 		else:
 			advance_tile(-1)
 	
 	if Input.is_action_just_released("scroll_up") or Input.is_action_just_released("scroll_down"):
 		var direction = 1 if Input.is_action_just_released("scroll_up") else -1
-		if placing == "delete":
-			place_mode("tile")
-		
-		if placing == "tile":
-			advance_tile(direction)
-		elif placing == "entity":
-			advance_entity(direction)
+		if Input.is_key_pressed(KEY_SHIFT):
+			if placing == "entity" or placing == "tile":
+				set_current_facing(posmod(get_current_facing() + direction, 4))
+		else:
+			if placing == "delete":
+				place_mode("tile")
+			
+			if placing == "tile":
+				advance_tile(direction)
+			elif placing == "entity":
+				advance_entity(direction)
 	
 	if Input.is_action_just_pressed("editor_rotate_entity"):
-		if placing == "entity":
-			current_entity_facing = Utility.resolve_relative_direction("turn_right", current_entity_facing)
-			preview.rotation = Utility.facing_rotation(current_entity_facing)
+		if placing == "entity" or placing == "tile":
+			set_current_facing(posmod(get_current_facing() + 1, 4))
 	
 	if Input.is_action_just_pressed("editor_place_entity"):
 		_place()
@@ -254,16 +260,18 @@ func _process(delta):
 		if len(entities_here) > 0:
 			if placing != "entity":
 				place_mode("entity")
-			var new_index = entities_here[-1].entity_index
-			if len(entities_here) > 1 and new_index == current_entity_index:
-				set_entity_to(entities_here[-2].entity_index)
-			else:
-				set_entity_to(new_index)
+			var picked_entity = entities_here[-1]
+			if len(entities_here) > 1 and entities_here[-1].entity_index == current_entity_index:
+				picked_entity = entities_here[-2]
+			set_entity_to(picked_entity.entity_index)
+			set_current_facing(picked_entity.visual_facing)
 		else:
 			var tile_here = MapManager.get_tile_index_at(cursor_tile_pos)
 			if tile_here > -1:
+				var tile_facing = MapManager.get_tile_facing_at(cursor_tile_pos)
 				place_mode("tile")
 				set_tile_to(tile_here)
+				current_tile_facing = tile_facing
 			else:
 				place_mode("delete")
 	
@@ -271,11 +279,13 @@ func _process(delta):
 	if Input.is_action_just_pressed("editor_next_entity"):
 		if placing != "entity":
 			place_mode("entity")
+			set_current_facing(0)
 		else:
 			advance_entity(1)
 	if Input.is_action_just_pressed("editor_prev_entity"):
 		if placing != "entity":
 			place_mode("entity")
+			set_current_facing(0)
 		else:
 			advance_entity(-1)
 	
@@ -298,3 +308,17 @@ func _auto_save(level_state: Dictionary) -> void:
 		"state": level_state,
 	}
 	FilesManager.save_level(GameManager.cur_game_name, level_data)
+
+func get_current_facing() -> int:
+	if placing == "entity":
+		return current_entity_facing
+	elif placing == "tile":
+		return current_tile_facing
+	return 0
+
+func set_current_facing(facing: int) -> void:
+	if placing == "entity":
+		current_entity_facing = facing
+	elif placing == "tile":
+		current_tile_facing = facing
+	preview.rotation = Utility.facing_rotation(facing)
