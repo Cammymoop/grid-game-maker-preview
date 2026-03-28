@@ -1,8 +1,8 @@
 [gd_resource type="Theme" format=3 uid="uid://bk4glgf60oqjr"]
 
 [ext_resource type="StyleBox" path="res://src/UI/ButtonHighlightBG.tres" id="1"]
-[ext_resource type="StyleBox" path="res://src/UI/ButtonDisabledBG.tres" id="2"]
-[ext_resource type="StyleBox" path="res://src/UI/ButtonNormalBG.tres" id="3"]
+[ext_resource type="StyleBox" uid="uid://cnjuypb4ppt15" path="res://src/UI/ButtonDisabledBG.tres" id="2"]
+[ext_resource type="StyleBox" uid="uid://dv2bynxqebkbe" path="res://src/UI/ButtonNormalBG.tres" id="3"]
 [ext_resource type="StyleBox" path="res://src/UI/ButtonPressedBG.tres" id="4"]
 [ext_resource type="StyleBox" uid="uid://besih0ptcojgl" path="res://assets/ui/base_panel.tres" id="5_8mgp1"]
 [ext_resource type="FontFile" uid="uid://cxxr3l22y0327" path="res://assets/font/NotoSans-Regular.ttf" id="5_mgbrl"]
@@ -13,7 +13,7 @@ content_margin_top = 4.0
 content_margin_right = 4.0
 content_margin_bottom = 4.0
 
-[sub_resource type="Image" id="Image_8mgp1"]
+[sub_resource type="Image" id="Image_mgbrl"]
 data = {
 "data": PackedByteArray(71, 140, 191, 14, 71, 140, 191, 57, 71, 140, 191, 104, 71, 140, 191, 122, 71, 140, 191, 123, 71, 140, 191, 123, 71, 140, 191, 123, 71, 140, 191, 123, 71, 140, 191, 122, 71, 140, 191, 104, 71, 140, 191, 57, 71, 140, 191, 14, 71, 140, 191, 58, 71, 140, 191, 116, 71, 140, 191, 16, 71, 140, 191, 8, 71, 140, 191, 8, 71, 140, 191, 8, 71, 140, 191, 8, 71, 140, 191, 8, 71, 140, 191, 8, 71, 140, 191, 16, 71, 140, 191, 116, 71, 140, 191, 58, 71, 140, 191, 105, 71, 140, 191, 15, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 71, 140, 191, 15, 71, 140, 191, 105, 71, 140, 191, 123, 71, 140, 191, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 71, 140, 191, 6, 71, 140, 191, 123, 71, 140, 191, 123, 71, 140, 191, 8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 71, 140, 191, 8, 71, 140, 191, 123, 71, 140, 191, 123, 71, 140, 191, 8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 71, 140, 191, 8, 71, 140, 191, 123, 71, 140, 191, 123, 71, 140, 191, 8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 71, 140, 191, 8, 71, 140, 191, 123, 71, 140, 191, 123, 71, 140, 191, 8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 71, 140, 191, 8, 71, 140, 191, 123, 71, 140, 191, 123, 71, 140, 191, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 71, 140, 191, 6, 71, 140, 191, 123, 71, 140, 191, 105, 71, 140, 191, 15, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 71, 140, 191, 14, 71, 140, 191, 105, 71, 140, 191, 58, 71, 140, 191, 117, 71, 140, 191, 15, 71, 140, 191, 8, 71, 140, 191, 8, 71, 140, 191, 8, 71, 140, 191, 8, 71, 140, 191, 8, 71, 140, 191, 8, 71, 140, 191, 17, 71, 140, 191, 116, 71, 140, 191, 58, 71, 140, 191, 14, 71, 140, 191, 58, 71, 140, 191, 104, 71, 140, 191, 122, 71, 140, 191, 123, 71, 140, 191, 123, 71, 140, 191, 123, 71, 140, 191, 123, 71, 140, 191, 122, 71, 140, 191, 104, 71, 140, 191, 57, 71, 140, 191, 14),
 "format": "RGBA8",
@@ -23,7 +23,7 @@ data = {
 }
 
 [sub_resource type="ImageTexture" id="11"]
-image = SubResource("Image_8mgp1")
+image = SubResource("Image_mgbrl")
 
 [sub_resource type="StyleBoxTexture" id="12"]
 content_margin_left = 4.0
@@ -42,6 +42,52 @@ content_margin_left = 6.0
 content_margin_top = 4.0
 content_margin_right = 6.0
 content_margin_bottom = 4.0
+
+[sub_resource type="DPITexture" id="DPITexture_qnfc8"]
+_source = "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"16\" height=\"16\"><path fill=\"#fff\" fill-opacity=\"1\" d=\"m1 3 2-2 5 5 5-5 2 2-5 5 5 5-2 2-5-5-5 5-2-2 5-5z\"/></svg>
+"
+color_map = {
+Color(1, 1, 1, 1): Color(0, 0, 0, 1)
+}
+
+[sub_resource type="DPITexture" id="DPITexture_swlsm"]
+_source = "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"16\" height=\"16\"><path fill=\"#fff\" fill-opacity=\".5\" d=\"m1 3 2-2 5 5 5-5 2 2-5 5 5 5-2 2-5-5-5 5-2-2 5-5z\"/></svg>
+"
+color_map = {
+Color(1, 1, 1, 1): Color(0, 0, 0, 1)
+}
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_qnfc8"]
+content_margin_left = 4.0
+content_margin_top = 4.0
+content_margin_right = 4.0
+content_margin_bottom = 4.0
+bg_color = Color(0.1584563, 0.15998647, 0.18717912, 1)
+border_width_top = 24
+border_color = Color(0.7708395, 0.77083945, 0.7708396, 1)
+expand_margin_left = 2.0
+expand_margin_top = 24.0
+expand_margin_right = 2.0
+expand_margin_bottom = 2.0
+shadow_color = Color(0, 0, 0, 0.5529412)
+shadow_size = 2
+shadow_offset = Vector2(0, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_8mgp1"]
+content_margin_left = 4.0
+content_margin_top = 4.0
+content_margin_right = 4.0
+content_margin_bottom = 4.0
+bg_color = Color(0.18782914, 0.1922988, 0.22356096, 1)
+border_width_top = 24
+border_color = Color(0.62152386, 0.62152386, 0.6215238, 1)
+expand_margin_left = 2.0
+expand_margin_top = 24.0
+expand_margin_right = 2.0
+expand_margin_bottom = 2.0
+shadow_color = Color(0, 0, 0, 0.5529412)
+shadow_size = 2
+shadow_offset = Vector2(0, 1)
 
 [resource]
 default_font = ExtResource("5_mgbrl")
@@ -66,3 +112,12 @@ MenuButton/styles/hover = ExtResource("1")
 MenuButton/styles/normal = ExtResource("3")
 MenuButton/styles/pressed = ExtResource("4")
 PanelContainer/styles/panel = ExtResource("5_8mgp1")
+Window/colors/title_color = Color(0, 0, 0, 1)
+Window/constants/close_h_offset = 18
+Window/constants/close_v_offset = 20
+Window/constants/resize_margin = 4
+Window/constants/title_height = 25
+Window/icons/close = SubResource("DPITexture_qnfc8")
+Window/icons/close_pressed = SubResource("DPITexture_swlsm")
+Window/styles/embedded_border = SubResource("StyleBoxFlat_qnfc8")
+Window/styles/embedded_unfocused_border = SubResource("StyleBoxFlat_8mgp1")

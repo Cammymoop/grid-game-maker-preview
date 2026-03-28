@@ -1,46 +1,29 @@
-[gd_scene format=2]
+[gd_scene format=3 uid="uid://iqbroadoe8mc"]
 
-[node name="TextureDialog" type="ConfirmationDialog"]
-offset_right = 239.0
-offset_bottom = 70.0
-window_title = "Set Texture2D"
-__meta__ = {
-"_edit_use_anchors_": false
-}
+[node name="TextureDialog" type="ConfirmationDialog" unique_id=1599569430]
+oversampling_override = 1.0
+size = Vector2i(293, 100)
 
-[node name="HBoxContainer2" type="HBoxContainer" parent="."]
+[node name="HBoxContainer2" type="HBoxContainer" parent="." unique_id=749214729]
+anchors_preset = 10
 anchor_right = 1.0
 offset_left = 8.0
 offset_top = 8.0
 offset_right = -8.0
-offset_bottom = 34.0
-__meta__ = {
-"_edit_use_anchors_": false
-}
+offset_bottom = 51.0
 
-[node name="Label" type="Label" parent="HBoxContainer2"]
-offset_top = 6.0
-offset_right = 52.0
-offset_bottom = 20.0
+[node name="Label" type="Label" parent="HBoxContainer2" unique_id=133248905]
+layout_mode = 2
 text = "Texture2D:"
 
-[node name="SetTexture" type="LineEdit" parent="HBoxContainer2"]
-offset_left = 56.0
-offset_top = 1.0
-offset_right = 114.0
-offset_bottom = 25.0
+[node name="SetTexture" type="LineEdit" parent="HBoxContainer2" unique_id=1274545182]
+layout_mode = 2
 size_flags_vertical = 4
 
-[node name="Label2" type="Label" parent="HBoxContainer2"]
-offset_left = 118.0
-offset_top = 6.0
-offset_right = 158.0
-offset_bottom = 20.0
+[node name="Label2" type="Label" parent="HBoxContainer2" unique_id=35719708]
+layout_mode = 2
 text = "Index:"
 
-[node name="SetIndex" type="LineEdit" parent="HBoxContainer2"]
-offset_left = 162.0
-offset_top = 1.0
-offset_right = 220.0
-offset_bottom = 25.0
+[node name="SetIndex" type="LineEdit" parent="HBoxContainer2" unique_id=106914696]
+layout_mode = 2
 size_flags_vertical = 4

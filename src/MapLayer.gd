@@ -59,21 +59,28 @@ func serialize() -> Dictionary:
 	for y in range(start_y, rect.end.y):
 		var row = []
 		for x in x_range:
-			row.append(get_cell_i_source(x, y))
+			var coords: = Vector2i(x, y)
+			row.append([get_cell_s(coords), get_cell_alternative_tile(coords)])
 		rows.append(row)
 	
-	return {"start_x": start_x, "start_y": start_y, "tiles": rows}
+	return {"start_x": start_x, "start_y": start_y, "has_alt_ids": true, "tiles": rows}
 
 func deserialize(data: Dictionary) -> void:
 	clear()
 	
-	var tile_data = data['tiles']
-	var sx = data['start_x']
-	var sy = data['start_y']
+	var tile_data: = data['tiles'] as Array
+	var sx: = int(data['start_x'])
+	var sy: = int(data['start_y'])
+	
+	var has_alt_ids: bool = data.get("has_alt_ids", false)
 	
 	var j_range = range(len(tile_data[0]))
 	var i_range = range(len(tile_data))
 	for i in i_range:
 		var row = tile_data[i]
 		for j in j_range:
-			set_cell_i_source(j + sx, i + sy, row[j])
+			var coords: = Vector2i(j + sx, i + sy)
+			if has_alt_ids:
+				set_cell_s(coords, int(row[j][0]), Utility.facing_from_tile_alt_id(int(row[j][1])))
+			else:
+				set_cell_s(coords, int(row[j]))

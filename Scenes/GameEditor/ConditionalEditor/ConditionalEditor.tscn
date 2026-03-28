@@ -1,6 +1,5 @@
 [gd_scene format=3 uid="uid://brj1yabyq8bpc"]
 
-[ext_resource type="Theme" uid="uid://daswi5ker7ml0" path="res://src/UI/ConditionalEditorTheme.tres" id="1"]
 [ext_resource type="PackedScene" uid="uid://cu2ce0nvkbwvu" path="res://Scenes/GameEditor/ConditionalEditor/AddCommandDialog.tscn" id="2"]
 [ext_resource type="Texture2D" uid="uid://cv8l7ymc05wg5" path="res://assets/img/button_icons/plus.png" id="3"]
 [ext_resource type="StyleBox" uid="uid://bks823xpsbs2q" path="res://src/UI/ConditionalEditorBGTexture.tres" id="4"]
@@ -30,7 +29,6 @@ position = Vector2i(0, 36)
 size = Vector2i(700, 461)
 wrap_controls = true
 transparent = true
-theme = ExtResource("1")
 script = ExtResource("6")
 when_list_container = NodePath("PanelContainer/MarginContainer/VBoxContainer2/VBoxContainer/HBoxContainer2/ActionsTabs")
 

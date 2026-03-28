@@ -1,10 +1,6 @@
-[gd_scene format=2]
+[gd_scene format=3 uid="uid://cdcn4hescyjge"]
 
-[node name="AcceptDialog" type="AcceptDialog"]
-offset_right = 83.0
-offset_bottom = 58.0
-window_title = "Problem"
+[node name="AcceptDialog" type="AcceptDialog" unique_id=238110466]
+oversampling_override = 1.0
+size = Vector2i(160, 100)
 dialog_text = "There's a problem!"
-__meta__ = {
-"_edit_use_anchors_": false
-}

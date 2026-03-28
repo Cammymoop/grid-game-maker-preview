@@ -1,18 +1,21 @@
-[gd_resource type="StyleBoxFlat" format=2]
+[gd_resource type="StyleBoxFlat" format=3 uid="uid://cnjuypb4ppt15"]
 
 [resource]
 content_margin_left = 4.0
-content_margin_right = 4.0
 content_margin_top = 4.0
+content_margin_right = 4.0
 content_margin_bottom = 4.0
-bg_color = Color( 0.235294, 0.215686, 0.215686, 1 )
-border_width_left = 3
-border_width_top = 3
-border_width_right = 3
-border_width_bottom = 3
-border_color = Color( 0.0470588, 0.0470588, 0.0470588, 1 )
+bg_color = Color(0.23443538, 0.22453266, 0.2202641, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 6
+border_color = Color(0.09182116, 0.09757214, 0.10450701, 1)
 corner_radius_top_left = 4
 corner_radius_top_right = 4
 corner_radius_bottom_right = 4
 corner_radius_bottom_left = 4
-shadow_offset = Vector2( 0, 1 )
+expand_margin_bottom = 4.0
+shadow_color = Color(0, 0, 0, 0.2901961)
+shadow_size = 2
+shadow_offset = Vector2(0, 1)

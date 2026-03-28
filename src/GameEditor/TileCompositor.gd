@@ -16,7 +16,10 @@ var image_meta: Dictionary
 
 var tile_brush_image: Image
 var temp_tile_brush_image: Image
-var tile_brush_texture: Texture2D
+
+var tile_brush_preview_image: Image
+var showing_tile_brush_preview: bool = false
+
 @export var picked_brush_tex: AtlasTexture
 var picked_brush_image: Image
 var picked_colored_preview: ImageTexture
@@ -37,7 +40,7 @@ const PICKED_BRUSH_MAX: Vector2 = Vector2(70, 70)
 var ltp_target_height: = 200
 var ltp_margin: = 120
 
-var brush_wrap: = true
+@export var brush_wrap: = true
 
 var picked_texture_index = 0
 var picked_texture_sub_index = 0
@@ -55,11 +58,11 @@ var brush_sliding_v: = 0
 var transparent_img: Image
 
 var corner_size: Vector2
-var tl_corner: Rect2
-var tr_corner: Rect2
-var bl_corner: Rect2
-var br_corner: Rect2
-var whole_brush: Rect2
+var tl_corner: Rect2i
+var tr_corner: Rect2i
+var bl_corner: Rect2i
+var br_corner: Rect2i
+var whole_brush: Rect2i
 
 func set_texture(tex: Texture2D) -> void:
 	loaded_texture = tex
@@ -80,6 +83,7 @@ func set_save_path(file_name: String) -> void:
 		
 
 func _ready():
+	find_child("BrushWrap").set_pressed_no_signal(brush_wrap)
 	close_requested.connect(hide)
 	visibility_changed.connect(Callable(self, "_on_vis_changed"))
 	if get_parent() is SubViewport:
@@ -140,14 +144,14 @@ func rescale_tile_picker() -> void:
 
 
 func set_tile_brush_size(tile_size: Vector2) -> void:
-	whole_brush = Rect2(Vector2.ZERO, tile_size)
+	whole_brush = Rect2i(Vector2.ZERO, tile_size)
 	corner_size = Vector2(ceil(tile_size.x/2), ceil(tile_size.y/2))
-	tl_corner = Rect2(Vector2.ZERO, corner_size)
+	tl_corner = Rect2i(Vector2.ZERO, corner_size)
 	var odd_x = int(tile_size.x) % 2
 	var odd_y = int(tile_size.y) % 2
-	tr_corner = Rect2(Vector2(corner_size.x - odd_x, 0), corner_size)
-	bl_corner = Rect2(Vector2(0, corner_size.y - odd_y), corner_size)
-	br_corner = Rect2(Vector2(corner_size.x - odd_x, corner_size.y - odd_y), corner_size)
+	tr_corner = Rect2i(Vector2(corner_size.x - odd_x, 0), corner_size)
+	bl_corner = Rect2i(Vector2(0, corner_size.y - odd_y), corner_size)
+	br_corner = Rect2i(Vector2(corner_size.x - odd_x, corner_size.y - odd_y), corner_size)
 	
 	tile_brush_image = Image.create(tile_size.x, tile_size.y, false, Image.FORMAT_RGBA8)
 	tile_brush_image.fill(Color.TRANSPARENT)
@@ -223,38 +227,40 @@ func color_brush() -> void:
 		
 
 func update_tile_brush_preview() -> void:
-	tile_brush_texture = ImageTexture.create_from_image(tile_brush_image)
-	#tile_brush_texture.flags = 0
-	
-	find_child("BrushView").texture = tile_brush_texture
+	var img = tile_brush_image if not showing_tile_brush_preview else tile_brush_preview_image
+	find_child("BrushView").texture = ImageTexture.create_from_image(img)
 
 func repaint() -> void:
 	edited_texture = ImageTexture.create_from_image(edited_image)
 	local_tile_picker.set_raw_texture(edited_texture, image_meta)
 
-func corner_toggled(corner) -> void:
+func paint_corner_to_tile_brush(corner: Rect2i) -> void:
 	undoer.save_current_image("tile_brush", tile_brush_image)
-	var src_rect = corner
-	src_rect.position += picked_brush_offset
-	if brush_creator_mode == "erase":
-		tile_brush_image.blit_rect(transparent_img, src_rect, corner.position)
-	elif brush_creator_mode == "replace":
-		tile_brush_image.blit_rect(picked_colored_brush_image, src_rect, corner.position)
-	elif brush_creator_mode == "over":
-		tile_brush_image.blend_rect(picked_colored_brush_image, src_rect, corner.position)
-	elif brush_creator_mode == "under":
-		var old_brush = Image.new()
-		old_brush.copy_from(tile_brush_image)
-		tile_brush_image.blit_rect(picked_colored_brush_image, src_rect, corner.position)
-		tile_brush_image.blend_rect(old_brush, whole_brush, Vector2.ZERO)
-	elif brush_creator_mode == "stencil":
-		stencil_blit(picked_colored_brush_image, tile_brush_image, src_rect, corner.position)
-	elif brush_creator_mode == "cut":
-		alpha_subtract(picked_colored_brush_image, tile_brush_image, src_rect, corner.position)
+	do_corner_paint(corner, tile_brush_image)
+	showing_tile_brush_preview = false
 	
 	update_tile_brush_preview()
 
-func alpha_subtract(from_image: Image, to_image, src_rect: Rect2, dest_offset: Vector2) -> void:
+func do_corner_paint(corner: Rect2i, dest_image: Image) -> void:
+	var src_rect: = corner
+	src_rect.position += Vector2i(picked_brush_offset)
+	if brush_creator_mode == "erase":
+		dest_image.blit_rect(transparent_img, src_rect, corner.position)
+	elif brush_creator_mode == "replace":
+		dest_image.blit_rect(picked_colored_brush_image, src_rect, corner.position)
+	elif brush_creator_mode == "over":
+		dest_image.blend_rect(picked_colored_brush_image, src_rect, corner.position)
+	elif brush_creator_mode == "under":
+		var old_brush = Image.new()
+		old_brush.copy_from(dest_image)
+		dest_image.blit_rect(picked_colored_brush_image, src_rect, corner.position)
+		dest_image.blend_rect(old_brush, whole_brush, Vector2.ZERO)
+	elif brush_creator_mode == "stencil":
+		stencil_blit(picked_colored_brush_image, dest_image, src_rect, corner.position)
+	elif brush_creator_mode == "cut":
+		alpha_subtract(picked_colored_brush_image, dest_image, src_rect, corner.position)
+
+func alpha_subtract(from_image: Image, to_image, src_rect: Rect2i, dest_offset: Vector2) -> void:
 	var w = src_rect.size.x
 	var h = src_rect.size.y
 	var src_offset = src_rect.position
@@ -267,7 +273,7 @@ func alpha_subtract(from_image: Image, to_image, src_rect: Rect2, dest_offset: V
 			to_image.set_pixel(dest_offset.x + x, dest_offset.y + y, cur_pixel)
 
 # paints the specified region onto to_image, while leaving the alpha channel unmodified
-func stencil_blit(from_image: Image, to_image: Image, src_rect: Rect2, dest_offset: Vector2) -> void:
+func stencil_blit(from_image: Image, to_image: Image, src_rect: Rect2i, dest_offset: Vector2) -> void:
 	var w = src_rect.size.x
 	var h = src_rect.size.y
 	var src_offset = src_rect.position
@@ -282,15 +288,25 @@ func stencil_blit(from_image: Image, to_image: Image, src_rect: Rect2, dest_offs
 			to_image.set_pixel(dest_offset.x + x, dest_offset.y + y, color)
 
 func _on_TLButton_pressed() -> void:
-	corner_toggled(tl_corner)
+	paint_corner_to_tile_brush(tl_corner)
 func _on_TRButton_pressed() -> void:
-	corner_toggled(tr_corner)
+	paint_corner_to_tile_brush(tr_corner)
 func _on_BLButton_pressed() -> void:
-	corner_toggled(bl_corner)
+	paint_corner_to_tile_brush(bl_corner)
 func _on_BRButton_pressed() -> void:
-	corner_toggled(br_corner)
+	paint_corner_to_tile_brush(br_corner)
 func _on_AllButton_pressed() -> void:
-	corner_toggled(whole_brush)
+	paint_corner_to_tile_brush(whole_brush)
+
+func _on_paint_corner_hovered(corner: Rect2i) -> void:
+	tile_brush_preview_image = tile_brush_image.duplicate()
+	do_corner_paint(corner, tile_brush_preview_image)
+	showing_tile_brush_preview = true
+	update_tile_brush_preview()
+
+func _on_paint_corner_unhovered() -> void:
+	showing_tile_brush_preview = false
+	update_tile_brush_preview()
 
 # not assumes square img
 func make_transposed_img(from_img: Image) -> Image:
@@ -331,8 +347,8 @@ func make_v_shifted_img_by(from_img: Image, amount: int, do_wrap: bool) -> Image
 			img_a = transparent_img
 		else:
 			img_b = transparent_img
-	copy.blit_rect(img_a, Rect2(Vector2.ZERO, size_a), offset_b)
-	copy.blit_rect(img_b, Rect2(offset_a, size_b), Vector2.ZERO)
+	copy.blit_rect(img_a, Rect2i(Vector2.ZERO, size_a), offset_b)
+	copy.blit_rect(img_b, Rect2i(offset_a, size_b), Vector2.ZERO)
 	return copy
 
 var alternate_half_shift_h: = false
@@ -363,8 +379,8 @@ func make_h_shifted_img_by(from_img: Image, amount: int, do_wrap: bool) -> Image
 			img_a = transparent_img
 		else:
 			img_b = transparent_img
-	copy.blit_rect(img_a, Rect2(Vector2.ZERO, size_a), offset_b)
-	copy.blit_rect(img_b, Rect2(offset_a, size_b), Vector2.ZERO)
+	copy.blit_rect(img_a, Rect2i(Vector2.ZERO, size_a), offset_b)
+	copy.blit_rect(img_b, Rect2i(offset_a, size_b), Vector2.ZERO)
 	return copy
 
 
@@ -377,8 +393,8 @@ func make_half_v_shifted_img(from_img: Image, do_wrap: bool) -> Image:
 	var half_size = Vector2(from_img.get_width(), floor(from_img.get_height()/2.0))
 	var half_offset = Vector2(0, half_size.y)
 	
-	copy.blit_rect(from_img, Rect2(Vector2.ZERO, half_size), half_offset)
-	copy.blit_rect(from_img if do_wrap else transparent_img, Rect2(half_offset, half_size), Vector2.ZERO)
+	copy.blit_rect(from_img, Rect2i(Vector2.ZERO, half_size), half_offset)
+	copy.blit_rect(from_img if do_wrap else transparent_img, Rect2i(half_offset, half_size), Vector2.ZERO)
 	
 	return copy
 func make_half_h_shifted_img(from_img: Image, do_wrap: bool) -> Image:
@@ -390,8 +406,8 @@ func make_half_h_shifted_img(from_img: Image, do_wrap: bool) -> Image:
 	var half_size = Vector2(floor(from_img.get_width()/2.0), from_img.get_height())
 	var half_offset = Vector2(half_size.x, 0)
 	
-	copy.blit_rect(from_img, Rect2(Vector2.ZERO, half_size), half_offset)
-	copy.blit_rect(from_img if do_wrap else transparent_img, Rect2(half_offset, half_size), Vector2.ZERO)
+	copy.blit_rect(from_img, Rect2i(Vector2.ZERO, half_size), half_offset)
+	copy.blit_rect(from_img if do_wrap else transparent_img, Rect2i(half_offset, half_size), Vector2.ZERO)
 	
 	return copy
 
@@ -409,7 +425,7 @@ func rotated_cw(from_img: Image) -> Image:
 
 func _on_PaintButton_pressed():
 	undoer.save_current_image("texture", edited_image)
-	var src_rect = Rect2(Vector2.ZERO, tile_brush_image.get_size())
+	var src_rect: = Rect2i(Vector2.ZERO, tile_brush_image.get_size())
 	var dest = local_tile_picker.get_picked_offset()
 	edited_image.blend_rect(tile_brush_image, src_rect, dest)
 	repaint()
@@ -428,14 +444,14 @@ func _on_PickFromEditedButton_pressed():
 func _on_PickTileFromEditedButton_pressed():
 	var tex = AtlasTexture.new()
 	tex.atlas = edited_texture
-	tex.region.size = tile_brush_image.get_size()
+	tex.region.size = Vector2(tile_brush_image.get_size())
 	tex.region.position = local_tile_picker.get_picked_offset()
 	undoer.save_current_image("tile_brush", tile_brush_image)
 	tile_brush_image = tex.get_image()
 	update_tile_brush_preview()
 
 func _on_TileToBrushButton_pressed():
-	picked_brush_tex.atlas = tile_brush_texture
+	picked_brush_tex.atlas = ImageTexture.create_from_image(tile_brush_image)
 	picked_brush_tex.region.position = Vector2.ZERO
 	update_picked_brush()
 
@@ -594,11 +610,21 @@ func _on_SaveFileButton_pressed():
 	find_parent("UIRoot").show_message("Saved")
 	
 
+func get_corner_from_button(corner_button: ButtonContainer) -> Rect2i:
+	if corner_button.name.to_lower().begins_with("All"):
+		return whole_brush
+	var corner_val: = corner_button.name.to_lower().substr(0, 2)
+	if not corner_val in ["tl", "tr", "bl", "br"]:
+		return whole_brush
+	return get(corner_val + "_corner") as Rect2i
 
-func _on_CornerButtonHover():
+func _on_CornerButtonHover(corner_button: ButtonContainer):
 	show_tile_brush_crosshair(true)
+	var corner: = get_corner_from_button(corner_button)
+	_on_paint_corner_hovered(corner)
 func _on_CornerButtonUnHover():
 	show_tile_brush_crosshair(false)
+	_on_paint_corner_unhovered()
 
 func show_tile_brush_crosshair(show_crosshair: bool) -> void:
 	tile_brush_canvas.get_node("Crosshair").visible = show_crosshair
@@ -611,7 +637,7 @@ func _on_vis_changed():
 		hidden.emit()
 
 func _on_margin_container_resized() -> void:
-	var min_content_size = get_node("MarginContainer").get_minimum_size()
+	var min_content_size = get_child(0).get_minimum_size()
 	if size.x < min_content_size.x:
 		size.x = min_content_size.x
 	if size.y < min_content_size.y:

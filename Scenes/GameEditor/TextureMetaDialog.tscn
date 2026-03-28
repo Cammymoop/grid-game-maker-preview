@@ -1,179 +1,119 @@
-[gd_scene load_steps=2 format=2]
+[gd_scene format=3 uid="uid://c04dlt6snybs7"]
 
-[ext_resource path="res://src/GameEditor/TextureMetaDialog.gd" type="Script" id=1]
+[ext_resource type="Script" uid="uid://ck6l6jqps4gc6" path="res://src/GameEditor/TextureMetaDialog.gd" id="1"]
 
-[node name="TextureMetaDialog" type="ConfirmationDialog"]
+[node name="TextureMetaDialog" type="ConfirmationDialog" unique_id=668637704]
+oversampling_override = 1.0
+title = "New Image"
+size = Vector2i(503, 213)
 visible = true
-offset_left = 153.0
-offset_top = 267.0
-offset_right = 636.0
-offset_bottom = 467.0
-window_title = "Update Image Metadata"
-script = ExtResource( 1 )
-__meta__ = {
-"_edit_use_anchors_": false
-}
+ok_button_text = "Create Image"
+script = ExtResource("1")
 
-[node name="MarginContainer" type="MarginContainer" parent="."]
+[node name="MarginContainer" type="MarginContainer" parent="." unique_id=324907220]
 offset_left = 8.0
 offset_top = 8.0
-offset_right = 475.0
+offset_right = 495.0
 offset_bottom = 164.0
-theme_override_constants/margin_right = 10
-theme_override_constants/margin_top = 10
 theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 10
 theme_override_constants/margin_bottom = 10
-__meta__ = {
-"_edit_use_anchors_": false
-}
 
-[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer"]
-offset_left = 10.0
-offset_top = 10.0
-offset_right = 457.0
-offset_bottom = 146.0
-__meta__ = {
-"_edit_use_anchors_": false
-}
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer" unique_id=2126677588]
+layout_mode = 2
 
-[node name="HBoxContainer5" type="HBoxContainer" parent="MarginContainer/VBoxContainer"]
-offset_right = 447.0
-offset_bottom = 24.0
+[node name="HBoxContainer5" type="HBoxContainer" parent="MarginContainer/VBoxContainer" unique_id=1284692437]
+layout_mode = 2
 alignment = 2
 
-[node name="Label" type="Label" parent="MarginContainer/VBoxContainer/HBoxContainer5"]
-offset_left = 92.0
-offset_top = 5.0
-offset_right = 241.0
-offset_bottom = 19.0
-text = "Vidusal Tile Size Width:"
+[node name="Label" type="Label" parent="MarginContainer/VBoxContainer/HBoxContainer5" unique_id=1799555766]
+layout_mode = 2
+text = "Tile Size Width:"
 
-[node name="TileWidth" type="SpinBox" parent="MarginContainer/VBoxContainer/HBoxContainer5"]
-offset_left = 245.0
-offset_right = 319.0
-offset_bottom = 24.0
+[node name="TileWidth" type="SpinBox" parent="MarginContainer/VBoxContainer/HBoxContainer5" unique_id=138750835]
+layout_mode = 2
 min_value = 1.0
 max_value = 256.0
 value = 32.0
 suffix = "px"
 
-[node name="Label2" type="Label" parent="MarginContainer/VBoxContainer/HBoxContainer5"]
-offset_left = 323.0
-offset_top = 5.0
-offset_right = 369.0
-offset_bottom = 19.0
+[node name="Label2" type="Label" parent="MarginContainer/VBoxContainer/HBoxContainer5" unique_id=723912692]
+layout_mode = 2
 text = "Height:"
 
-[node name="TileHeight" type="SpinBox" parent="MarginContainer/VBoxContainer/HBoxContainer5"]
-offset_left = 373.0
-offset_right = 447.0
-offset_bottom = 24.0
+[node name="TileHeight" type="SpinBox" parent="MarginContainer/VBoxContainer/HBoxContainer5" unique_id=1475662719]
+layout_mode = 2
 min_value = 1.0
 max_value = 256.0
 value = 32.0
 suffix = "px"
 
-[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer"]
-offset_top = 28.0
-offset_right = 447.0
-offset_bottom = 52.0
+[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer" unique_id=1343549064]
+layout_mode = 2
 alignment = 2
 
-[node name="Label" type="Label" parent="MarginContainer/VBoxContainer/HBoxContainer"]
-offset_left = 61.0
-offset_top = 5.0
-offset_right = 241.0
-offset_bottom = 19.0
-text = "Texture2D Size (in tiles) Width:"
+[node name="Label" type="Label" parent="MarginContainer/VBoxContainer/HBoxContainer" unique_id=1504287985]
+layout_mode = 2
+text = "Image Size (in tiles) Width:"
 
-[node name="TexWidth" type="SpinBox" parent="MarginContainer/VBoxContainer/HBoxContainer"]
-offset_left = 245.0
-offset_right = 319.0
-offset_bottom = 24.0
+[node name="TexWidth" type="SpinBox" parent="MarginContainer/VBoxContainer/HBoxContainer" unique_id=1227029025]
+layout_mode = 2
 min_value = 1.0
 max_value = 50.0
 value = 10.0
 
-[node name="Label2" type="Label" parent="MarginContainer/VBoxContainer/HBoxContainer"]
-offset_left = 323.0
-offset_top = 5.0
-offset_right = 369.0
-offset_bottom = 19.0
+[node name="Label2" type="Label" parent="MarginContainer/VBoxContainer/HBoxContainer" unique_id=1281953896]
+layout_mode = 2
 text = "Height:"
 
-[node name="TexHeight" type="SpinBox" parent="MarginContainer/VBoxContainer/HBoxContainer"]
-offset_left = 373.0
-offset_right = 447.0
-offset_bottom = 24.0
+[node name="TexHeight" type="SpinBox" parent="MarginContainer/VBoxContainer/HBoxContainer" unique_id=171604941]
+layout_mode = 2
 min_value = 1.0
 max_value = 50.0
 value = 4.0
 
-[node name="HBoxContainer2" type="HBoxContainer" parent="MarginContainer/VBoxContainer"]
-offset_top = 56.0
-offset_right = 447.0
-offset_bottom = 80.0
+[node name="HBoxContainer2" type="HBoxContainer" parent="MarginContainer/VBoxContainer" unique_id=1277054848]
+layout_mode = 2
 alignment = 2
 
-[node name="Label" type="Label" parent="MarginContainer/VBoxContainer/HBoxContainer2"]
-offset_left = 111.0
-offset_top = 5.0
-offset_right = 235.0
-offset_bottom = 19.0
+[node name="Label" type="Label" parent="MarginContainer/VBoxContainer/HBoxContainer2" unique_id=1298671873]
+layout_mode = 2
 text = "Borders Horizontal:"
 
-[node name="HBorder" type="SpinBox" parent="MarginContainer/VBoxContainer/HBoxContainer2"]
-offset_left = 239.0
-offset_right = 313.0
-offset_bottom = 24.0
+[node name="HBorder" type="SpinBox" parent="MarginContainer/VBoxContainer/HBoxContainer2" unique_id=1632281060]
+layout_mode = 2
 max_value = 50.0
 suffix = "px"
 
-[node name="Label2" type="Label" parent="MarginContainer/VBoxContainer/HBoxContainer2"]
-offset_left = 317.0
-offset_top = 5.0
-offset_right = 369.0
-offset_bottom = 19.0
+[node name="Label2" type="Label" parent="MarginContainer/VBoxContainer/HBoxContainer2" unique_id=492281492]
+layout_mode = 2
 text = "Vertical:"
 
-[node name="VBorder" type="SpinBox" parent="MarginContainer/VBoxContainer/HBoxContainer2"]
-offset_left = 373.0
-offset_right = 447.0
-offset_bottom = 24.0
+[node name="VBorder" type="SpinBox" parent="MarginContainer/VBoxContainer/HBoxContainer2" unique_id=465637811]
+layout_mode = 2
 max_value = 50.0
 suffix = "px"
 
-[node name="HBoxContainer4" type="HBoxContainer" parent="MarginContainer/VBoxContainer"]
-offset_top = 84.0
-offset_right = 447.0
-offset_bottom = 108.0
+[node name="HBoxContainer4" type="HBoxContainer" parent="MarginContainer/VBoxContainer" unique_id=1869922957]
+layout_mode = 2
 alignment = 2
 
-[node name="Label" type="Label" parent="MarginContainer/VBoxContainer/HBoxContainer4"]
-offset_left = 94.0
-offset_top = 5.0
-offset_right = 235.0
-offset_bottom = 19.0
+[node name="Label" type="Label" parent="MarginContainer/VBoxContainer/HBoxContainer4" unique_id=1945661192]
+layout_mode = 2
 text = "Separation Horizontal:"
 
-[node name="HSep" type="SpinBox" parent="MarginContainer/VBoxContainer/HBoxContainer4"]
-offset_left = 239.0
-offset_right = 313.0
-offset_bottom = 24.0
+[node name="HSep" type="SpinBox" parent="MarginContainer/VBoxContainer/HBoxContainer4" unique_id=1581967740]
+layout_mode = 2
 max_value = 50.0
 suffix = "px"
 
-[node name="Label2" type="Label" parent="MarginContainer/VBoxContainer/HBoxContainer4"]
-offset_left = 317.0
-offset_top = 5.0
-offset_right = 369.0
-offset_bottom = 19.0
+[node name="Label2" type="Label" parent="MarginContainer/VBoxContainer/HBoxContainer4" unique_id=1862280127]
+layout_mode = 2
 text = "Vertical:"
 
-[node name="VSep" type="SpinBox" parent="MarginContainer/VBoxContainer/HBoxContainer4"]
-offset_left = 373.0
-offset_right = 447.0
-offset_bottom = 24.0
+[node name="VSep" type="SpinBox" parent="MarginContainer/VBoxContainer/HBoxContainer4" unique_id=201768953]
+layout_mode = 2
 max_value = 50.0
 suffix = "px"
 

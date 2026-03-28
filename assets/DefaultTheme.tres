@@ -1,8 +1,0 @@
-[gd_resource type="Theme" format=3 uid="uid://cqr0a0fienc2"]
-
-[ext_resource type="StyleBox" uid="uid://besih0ptcojgl" path="res://assets/ui/base_panel.tres" id="1_qnfc8"]
-[ext_resource type="FontFile" uid="uid://cxxr3l22y0327" path="res://assets/font/NotoSans-Regular.ttf" id="1_wvxrd"]
-
-[resource]
-default_font = ExtResource("1_wvxrd")
-PanelContainer/styles/panel = ExtResource("1_qnfc8")

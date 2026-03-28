@@ -47,10 +47,10 @@ func set_controller(list_index) -> void:
 	
 	controller_button.text = controller
 
-func load_entity_info(ti):
+func load_entity_info(entity_index: int):
 	set_tile_entity_mode("entity")
-	the_index = ti
-	the_definition = EntityManager.get_entity_definition(ti)
+	the_index = entity_index
+	the_definition = EntityManager.get_entity_definition(entity_index)
 	
 	find_child("NameInput").text = EntityManager.get_entity_name(the_index)
 	if "intended_move_speed" in the_definition:
@@ -68,12 +68,12 @@ func load_entity_info(ti):
 	
 	load_common()
 
-func load_tile_info(ti):
+func load_tile_info(tile_index: int):
 	set_tile_entity_mode("tile")
-	the_index = ti
-	the_definition = MapManager.get_tile_definition(ti)
+	the_index = tile_index
+	the_definition = MapManager.get_tile_definition(tile_index)
 	
-	find_child("NameInput").text = MapManager.get_tile_name(the_index)
+	find_child("NameInput").text = MapManager.get_tile_name(tile_index)
 	load_common()
 
 func load_common():
@@ -82,9 +82,9 @@ func load_common():
 	show_property_list()
 
 
-func set_tile_entity_mode(te: String) -> void:
-	tile_entity_mode = te
-	title = "Edit " + Utility.ucfirst(te)
+func set_tile_entity_mode(tile_or_entity: String) -> void:
+	tile_entity_mode = tile_or_entity
+	title = "Edit " + Utility.ucfirst(tile_or_entity)
 	
 	if tile_entity_mode == "entity":
 		find_child("Controller").visible = true
@@ -163,10 +163,8 @@ func _on_NameInput_text_changed(new_text):
 func _on_UpdateButton_pressed():
 	if tile_entity_mode == "tile":
 		MapManager.update_tile_definition(the_index, the_definition)
-		print('updated tile ' + the_definition['name'])
 	else:
 		EntityManager.update_entity_definition(the_index, the_definition)
-		print('updated entity ' + the_definition['name'])
 	close_window()
 
 func _on_RemovePropertyButton_pressed():

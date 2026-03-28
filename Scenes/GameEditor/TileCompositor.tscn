@@ -4,8 +4,8 @@
 [ext_resource type="Texture2D" uid="uid://d0uyc2rshryrj" path="res://assets/img/entityTiles.png" id="2"]
 [ext_resource type="PackedScene" path="res://Scenes/GameEditor/TilePicker.tscn" id="3"]
 [ext_resource type="PackedScene" path="res://Scenes/GameEditor/HSeparator.tscn" id="4"]
+[ext_resource type="Texture2D" uid="uid://lrqeyxjmk22w" path="res://assets/img/tile_composer_bg.png" id="4_63ggb"]
 [ext_resource type="PackedScene" path="res://Scenes/UI/ButtonContainer.tscn" id="5"]
-[ext_resource type="Theme" uid="uid://cqr0a0fienc2" path="res://assets/DefaultTheme.tres" id="6"]
 [ext_resource type="Script" uid="uid://ebmthipspiak" path="res://Scenes/GameEditor/UndoRedoer.gd" id="7"]
 [ext_resource type="Script" uid="uid://0abn2dhvmqsq" path="res://src/GameEditor/BrushSlideH.gd" id="8"]
 [ext_resource type="Script" uid="uid://ducwobvfknb7v" path="res://src/GameEditor/BrushSlideV.gd" id="9"]
@@ -25,6 +25,15 @@
 atlas = ExtResource("2")
 region = Rect2(0, 0, 32, 32)
 
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_fd7wg"]
+content_margin_left = 4.0
+content_margin_right = 4.0
+content_margin_bottom = 4.0
+texture = ExtResource("4_63ggb")
+axis_stretch_horizontal = 1
+axis_stretch_vertical = 1
+region_rect = Rect2(0, 0, 64, 64)
+
 [sub_resource type="StyleBoxFlat" id="10"]
 bg_color = Color(0.0901961, 0.0901961, 0.0941176, 1)
 border_width_left = 2
@@ -36,6 +45,15 @@ corner_radius_top_left = 4
 corner_radius_top_right = 4
 corner_radius_bottom_right = 4
 corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_xpogs"]
+content_margin_left = 3.0
+content_margin_right = 3.0
+bg_color = Color(0.25929368, 0.25929374, 0.2592936, 1)
+corner_radius_top_left = 2
+corner_radius_top_right = 2
+corner_radius_bottom_right = 2
+corner_radius_bottom_left = 2
 
 [sub_resource type="AtlasTexture" id="1"]
 atlas = ExtResource("2")
@@ -51,9 +69,6 @@ corner_radius_top_left = 4
 corner_radius_top_right = 4
 corner_radius_bottom_right = 4
 corner_radius_bottom_left = 4
-
-[sub_resource type="Theme" id="9"]
-default_font = ExtResource("19")
 
 [sub_resource type="ButtonGroup" id="ButtonGroup_xpogs"]
 
@@ -73,44 +88,54 @@ region = Rect2(0, 18, 18, 18)
 atlas = ExtResource("14")
 region = Rect2(18, 18, 18, 18)
 
+[sub_resource type="Theme" id="9"]
+default_font = ExtResource("19")
+
 [sub_resource type="ButtonGroup" id="ButtonGroup_63ggb"]
 
 [node name="TileCompositor" type="Window" unique_id=1495846052]
 oversampling_override = 1.0
-position = Vector2i(0, 36)
-size = Vector2i(557, 604)
+title = "Tile Compositor"
+position = Vector2i(2, 26)
+size = Vector2i(566, 608)
 wrap_controls = true
 script = ExtResource("1")
 loaded_texture = ExtResource("2")
 make_tex_with_size = Vector2(16, 16)
 picked_brush_tex = SubResource("3")
 
-[node name="MarginContainer" type="MarginContainer" parent="." unique_id=1516945752]
+[node name="PanelContainer" type="PanelContainer" parent="." unique_id=337641331]
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxTexture_fd7wg")
+
+[node name="MarginContainer" type="MarginContainer" parent="PanelContainer" unique_id=1516945752]
+layout_mode = 2
 theme_override_constants/margin_top = 10
 theme_override_constants/margin_bottom = 10
 
-[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer" unique_id=746206108]
+[node name="VBoxContainer" type="VBoxContainer" parent="PanelContainer/MarginContainer" unique_id=746206108]
 layout_mode = 2
 
-[node name="Label" type="Label" parent="MarginContainer/VBoxContainer" unique_id=1913660894]
+[node name="Label" type="Label" parent="PanelContainer/MarginContainer/VBoxContainer" unique_id=1913660894]
 layout_mode = 2
 text = "Image:"
 horizontal_alignment = 1
 
-[node name="HBoxContainer2" type="HBoxContainer" parent="MarginContainer/VBoxContainer" unique_id=938632384]
+[node name="HBoxContainer2" type="HBoxContainer" parent="PanelContainer/MarginContainer/VBoxContainer" unique_id=938632384]
 layout_mode = 2
 alignment = 1
 
-[node name="TilePickerLocal" parent="MarginContainer/VBoxContainer/HBoxContainer2" unique_id=1340752865 instance=ExtResource("3")]
+[node name="TilePickerLocal" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer2" unique_id=1340752865 instance=ExtResource("3")]
 texture_filter = 1
 layout_mode = 2
 size_flags_vertical = 4
 expand_mode = 1
 
-[node name="TransparencyHelp" type="TextureRect" parent="MarginContainer/VBoxContainer/HBoxContainer2/TilePickerLocal" unique_id=145934514]
+[node name="TransparencyHelp" type="TextureRect" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer2/TilePickerLocal" unique_id=145934514]
 show_behind_parent = true
 layout_mode = 0
 anchor_right = 1.0
@@ -118,168 +143,168 @@ anchor_bottom = 1.0
 texture = ExtResource("17")
 stretch_mode = 1
 
-[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/VBoxContainer/HBoxContainer2" unique_id=1413458073]
+[node name="VBoxContainer" type="VBoxContainer" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer2" unique_id=1413458073]
 layout_mode = 2
 
-[node name="PaintButton" parent="MarginContainer/VBoxContainer/HBoxContainer2/VBoxContainer" unique_id=418160410 instance=ExtResource("5")]
+[node name="PaintButton" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer2/VBoxContainer" unique_id=418160410 instance=ExtResource("5")]
 layout_mode = 2
 size_flags_vertical = 3
 
-[node name="CenterContainer" type="CenterContainer" parent="MarginContainer/VBoxContainer/HBoxContainer2/VBoxContainer/PaintButton" unique_id=1440451598]
+[node name="CenterContainer" type="CenterContainer" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer2/VBoxContainer/PaintButton" unique_id=1440451598]
 layout_mode = 2
 mouse_filter = 2
 
-[node name="Label" type="Label" parent="MarginContainer/VBoxContainer/HBoxContainer2/VBoxContainer/PaintButton/CenterContainer" unique_id=1941434194]
+[node name="Label" type="Label" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer2/VBoxContainer/PaintButton/CenterContainer" unique_id=1941434194]
 layout_mode = 2
 text = "Paint
 Tile"
 horizontal_alignment = 1
 
-[node name="EraseButton" type="Button" parent="MarginContainer/VBoxContainer/HBoxContainer2/VBoxContainer" unique_id=1498718782]
+[node name="EraseButton" type="Button" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer2/VBoxContainer" unique_id=1498718782]
 layout_mode = 2
 size_flags_vertical = 3
 text = "Erase"
 
-[node name="VBoxContainer2" type="VBoxContainer" parent="MarginContainer/VBoxContainer/HBoxContainer2" unique_id=313145195]
+[node name="VBoxContainer2" type="VBoxContainer" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer2" unique_id=313145195]
 layout_mode = 2
 
-[node name="PickFromEditedButton" type="Button" parent="MarginContainer/VBoxContainer/HBoxContainer2/VBoxContainer2" unique_id=14884531]
+[node name="PickFromEditedButton" type="Button" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer2/VBoxContainer2" unique_id=14884531]
 layout_mode = 2
 size_flags_vertical = 3
 size_flags_stretch_ratio = 2.0
 text = "To Brush"
 
-[node name="PickTileFromEditedButton" type="Button" parent="MarginContainer/VBoxContainer/HBoxContainer2/VBoxContainer2" unique_id=1979555084]
+[node name="PickTileFromEditedButton" type="Button" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer2/VBoxContainer2" unique_id=1979555084]
 layout_mode = 2
 size_flags_vertical = 3
 size_flags_stretch_ratio = 2.0
 text = "To Tile"
 
-[node name="UndoTextureButton" type="Button" parent="MarginContainer/VBoxContainer/HBoxContainer2/VBoxContainer2" unique_id=1273409912]
+[node name="UndoTextureButton" type="Button" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer2/VBoxContainer2" unique_id=1273409912]
 layout_mode = 2
 size_flags_vertical = 3
 text = "Undo"
 
-[node name="RedoTextureButton" type="Button" parent="MarginContainer/VBoxContainer/HBoxContainer2/VBoxContainer2" unique_id=1236680542]
+[node name="RedoTextureButton" type="Button" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer2/VBoxContainer2" unique_id=1236680542]
 layout_mode = 2
 size_flags_vertical = 3
 text = "Redo"
 
-[node name="HSeparator" parent="MarginContainer/VBoxContainer" unique_id=1190585491 instance=ExtResource("4")]
+[node name="HSeparator" parent="PanelContainer/MarginContainer/VBoxContainer" unique_id=1190585491 instance=ExtResource("4")]
 layout_mode = 2
 
-[node name="TileSectionLabel" type="Label" parent="MarginContainer/VBoxContainer" unique_id=323786355]
+[node name="TileSectionLabel" type="Label" parent="PanelContainer/MarginContainer/VBoxContainer" unique_id=323786355]
 layout_mode = 2
 text = "Create Tile:"
 horizontal_alignment = 1
 
-[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer" unique_id=112489453]
+[node name="HBoxContainer" type="HBoxContainer" parent="PanelContainer/MarginContainer/VBoxContainer" unique_id=112489453]
 layout_mode = 2
 alignment = 1
 
-[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/VBoxContainer/HBoxContainer" unique_id=1348378428]
+[node name="VBoxContainer" type="VBoxContainer" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer" unique_id=1348378428]
 layout_mode = 2
 
-[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer" unique_id=451568870]
+[node name="HBoxContainer" type="HBoxContainer" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer" unique_id=451568870]
 custom_minimum_size = Vector2(160, 0)
 layout_mode = 2
 size_flags_vertical = 3
 
-[node name="ShiftDownButton" parent="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer/HBoxContainer" unique_id=1342951359 instance=ExtResource("5")]
+[node name="ShiftDownButton" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer/HBoxContainer" unique_id=1342951359 instance=ExtResource("5")]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="CenterContainer" type="CenterContainer" parent="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer/HBoxContainer/ShiftDownButton" unique_id=678226192]
+[node name="CenterContainer" type="CenterContainer" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer/HBoxContainer/ShiftDownButton" unique_id=678226192]
 layout_mode = 2
 mouse_filter = 2
 
-[node name="TextureRect" type="TextureRect" parent="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer/HBoxContainer/ShiftDownButton/CenterContainer" unique_id=901506729]
+[node name="TextureRect" type="TextureRect" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer/HBoxContainer/ShiftDownButton/CenterContainer" unique_id=901506729]
 layout_mode = 2
 mouse_filter = 2
 texture = ExtResource("11")
 stretch_mode = 3
 
-[node name="CCWButton" parent="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer/HBoxContainer" unique_id=342255315 instance=ExtResource("5")]
+[node name="CCWButton" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer/HBoxContainer" unique_id=342255315 instance=ExtResource("5")]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="CenterContainer" type="CenterContainer" parent="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer/HBoxContainer/CCWButton" unique_id=1673843942]
+[node name="CenterContainer" type="CenterContainer" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer/HBoxContainer/CCWButton" unique_id=1673843942]
 layout_mode = 2
 mouse_filter = 2
 
-[node name="TextureRect" type="TextureRect" parent="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer/HBoxContainer/CCWButton/CenterContainer" unique_id=1261795474]
+[node name="TextureRect" type="TextureRect" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer/HBoxContainer/CCWButton/CenterContainer" unique_id=1261795474]
 layout_mode = 2
 mouse_filter = 2
 texture = ExtResource("10")
 stretch_mode = 3
 
-[node name="CWButton" parent="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer/HBoxContainer" unique_id=1432049302 instance=ExtResource("5")]
+[node name="CWButton" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer/HBoxContainer" unique_id=1432049302 instance=ExtResource("5")]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="CenterContainer" type="CenterContainer" parent="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer/HBoxContainer/CWButton" unique_id=353655931]
+[node name="CenterContainer" type="CenterContainer" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer/HBoxContainer/CWButton" unique_id=353655931]
 layout_mode = 2
 mouse_filter = 2
 
-[node name="TextureRect" type="TextureRect" parent="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer/HBoxContainer/CWButton/CenterContainer" unique_id=224396497]
+[node name="TextureRect" type="TextureRect" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer/HBoxContainer/CWButton/CenterContainer" unique_id=224396497]
 layout_mode = 2
 mouse_filter = 2
 texture = ExtResource("16")
 stretch_mode = 3
 
-[node name="HBoxContainer2" type="HBoxContainer" parent="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer" unique_id=1891774864]
+[node name="HBoxContainer2" type="HBoxContainer" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer" unique_id=1891774864]
 custom_minimum_size = Vector2(100, 0)
 layout_mode = 2
 size_flags_vertical = 3
 
-[node name="ShiftRightButton" parent="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer/HBoxContainer2" unique_id=1414172700 instance=ExtResource("5")]
+[node name="ShiftRightButton" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer/HBoxContainer2" unique_id=1414172700 instance=ExtResource("5")]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="CenterContainer" type="CenterContainer" parent="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer/HBoxContainer2/ShiftRightButton" unique_id=1434265984]
+[node name="CenterContainer" type="CenterContainer" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer/HBoxContainer2/ShiftRightButton" unique_id=1434265984]
 layout_mode = 2
 mouse_filter = 2
 
-[node name="TextureRect" type="TextureRect" parent="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer/HBoxContainer2/ShiftRightButton/CenterContainer" unique_id=2136351020]
+[node name="TextureRect" type="TextureRect" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer/HBoxContainer2/ShiftRightButton/CenterContainer" unique_id=2136351020]
 layout_mode = 2
 mouse_filter = 2
 texture = ExtResource("13")
 stretch_mode = 3
 
-[node name="HFlipButton" parent="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer/HBoxContainer2" unique_id=1803497065 instance=ExtResource("5")]
+[node name="HFlipButton" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer/HBoxContainer2" unique_id=1803497065 instance=ExtResource("5")]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="CenterContainer" type="CenterContainer" parent="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer/HBoxContainer2/HFlipButton" unique_id=699094363]
+[node name="CenterContainer" type="CenterContainer" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer/HBoxContainer2/HFlipButton" unique_id=699094363]
 layout_mode = 2
 mouse_filter = 2
 
-[node name="TextureRect" type="TextureRect" parent="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer/HBoxContainer2/HFlipButton/CenterContainer" unique_id=1779284952]
+[node name="TextureRect" type="TextureRect" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer/HBoxContainer2/HFlipButton/CenterContainer" unique_id=1779284952]
 layout_mode = 2
 mouse_filter = 2
 texture = ExtResource("15")
 stretch_mode = 3
 
-[node name="VFlipButton" parent="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer/HBoxContainer2" unique_id=750417917 instance=ExtResource("5")]
+[node name="VFlipButton" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer/HBoxContainer2" unique_id=750417917 instance=ExtResource("5")]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="CenterContainer" type="CenterContainer" parent="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer/HBoxContainer2/VFlipButton" unique_id=827982788]
+[node name="CenterContainer" type="CenterContainer" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer/HBoxContainer2/VFlipButton" unique_id=827982788]
 layout_mode = 2
 mouse_filter = 2
 
-[node name="TextureRect" type="TextureRect" parent="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer/HBoxContainer2/VFlipButton/CenterContainer" unique_id=591696066]
+[node name="TextureRect" type="TextureRect" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer/HBoxContainer2/VFlipButton/CenterContainer" unique_id=591696066]
 layout_mode = 2
 mouse_filter = 2
 texture = ExtResource("12")
 stretch_mode = 3
 
-[node name="Panel" type="Panel" parent="MarginContainer/VBoxContainer/HBoxContainer" unique_id=1040660696]
+[node name="Panel" type="Panel" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer" unique_id=1040660696]
 custom_minimum_size = Vector2(140, 175)
 layout_mode = 2
 theme_override_styles/panel = SubResource("10")
 
-[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/VBoxContainer/HBoxContainer/Panel" unique_id=423919233]
+[node name="VBoxContainer" type="VBoxContainer" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/Panel" unique_id=423919233]
 layout_mode = 0
 anchor_left = 0.5
 anchor_top = 0.5
@@ -289,13 +314,27 @@ grow_horizontal = 2
 grow_vertical = 2
 alignment = 1
 
-[node name="MarginContainer" type="MarginContainer" parent="MarginContainer/VBoxContainer/HBoxContainer/Panel/VBoxContainer" unique_id=1490630763]
+[node name="BrushWrap" type="CheckButton" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/Panel/VBoxContainer" unique_id=525458573]
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_fonts/font = ExtResource("19")
+theme_override_font_sizes/font_size = 12
+theme_override_styles/normal = SubResource("StyleBoxFlat_xpogs")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_xpogs")
+theme_override_styles/hover = SubResource("StyleBoxFlat_xpogs")
+theme_override_styles/hover_pressed = SubResource("StyleBoxFlat_xpogs")
+text = "Wraps Around"
+
+[node name="MarginContainer" type="MarginContainer" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/Panel/VBoxContainer" unique_id=1490630763]
 layout_mode = 2
 theme_override_constants/margin_left = 13
 theme_override_constants/margin_top = 13
 theme_override_constants/margin_right = 13
 
-[node name="BrushView" type="TextureRect" parent="MarginContainer/VBoxContainer/HBoxContainer/Panel/VBoxContainer/MarginContainer" unique_id=1920304989]
+[node name="AspectRatioContainer" type="AspectRatioContainer" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/Panel/VBoxContainer/MarginContainer" unique_id=676508865]
+layout_mode = 2
+
+[node name="BrushView" type="TextureRect" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/Panel/VBoxContainer/MarginContainer/AspectRatioContainer" unique_id=1920304989]
 texture_filter = 1
 custom_minimum_size = Vector2(96, 96)
 layout_mode = 2
@@ -303,7 +342,7 @@ texture = SubResource("1")
 expand_mode = 1
 stretch_mode = 6
 
-[node name="TransparencyHelp" type="TextureRect" parent="MarginContainer/VBoxContainer/HBoxContainer/Panel/VBoxContainer/MarginContainer/BrushView" unique_id=1116231975]
+[node name="TransparencyHelp" type="TextureRect" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/Panel/VBoxContainer/MarginContainer/AspectRatioContainer/BrushView" unique_id=1116231975]
 show_behind_parent = true
 layout_mode = 0
 anchor_right = 1.0
@@ -312,7 +351,7 @@ texture = ExtResource("18")
 expand_mode = 1
 stretch_mode = 1
 
-[node name="BrushSlideH" type="HSlider" parent="MarginContainer/VBoxContainer/HBoxContainer/Panel/VBoxContainer/MarginContainer/BrushView" unique_id=772688292]
+[node name="BrushSlideH" type="HSlider" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/Panel/VBoxContainer/MarginContainer/AspectRatioContainer/BrushView" unique_id=772688292]
 layout_mode = 0
 anchor_right = 1.0
 offset_left = -8.0
@@ -325,7 +364,7 @@ tick_count = 1
 ticks_on_borders = true
 script = ExtResource("8")
 
-[node name="BrushSlideV" type="VSlider" parent="MarginContainer/VBoxContainer/HBoxContainer/Panel/VBoxContainer/MarginContainer/BrushView" unique_id=1505397335]
+[node name="BrushSlideV" type="VSlider" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/Panel/VBoxContainer/MarginContainer/AspectRatioContainer/BrushView" unique_id=1505397335]
 layout_mode = 0
 anchor_bottom = 1.0
 offset_left = -16.0
@@ -336,13 +375,13 @@ max_value = 50.0
 value = 25.0
 script = ExtResource("9")
 
-[node name="Crosshair" type="Control" parent="MarginContainer/VBoxContainer/HBoxContainer/Panel/VBoxContainer/MarginContainer/BrushView" unique_id=2098867417]
+[node name="Crosshair" type="Control" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/Panel/VBoxContainer/MarginContainer/AspectRatioContainer/BrushView" unique_id=2098867417]
 visible = false
 anchors_preset = 0
 anchor_right = 1.0
 anchor_bottom = 1.0
 
-[node name="ColorRect" type="ColorRect" parent="MarginContainer/VBoxContainer/HBoxContainer/Panel/VBoxContainer/MarginContainer/BrushView/Crosshair" unique_id=2097596003]
+[node name="ColorRect" type="ColorRect" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/Panel/VBoxContainer/MarginContainer/AspectRatioContainer/BrushView/Crosshair" unique_id=2097596003]
 custom_minimum_size = Vector2(2, 0)
 layout_mode = 0
 anchor_left = 0.5
@@ -351,7 +390,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 color = Color(0, 0, 0, 0.658824)
 
-[node name="ColorRect2" type="ColorRect" parent="MarginContainer/VBoxContainer/HBoxContainer/Panel/VBoxContainer/MarginContainer/BrushView/Crosshair" unique_id=1133031071]
+[node name="ColorRect2" type="ColorRect" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/Panel/VBoxContainer/MarginContainer/AspectRatioContainer/BrushView/Crosshair" unique_id=1133031071]
 custom_minimum_size = Vector2(0, 2)
 layout_mode = 0
 anchor_top = 0.5
@@ -360,177 +399,177 @@ anchor_bottom = 0.5
 grow_vertical = 2
 color = Color(0, 0, 0, 0.658824)
 
-[node name="BrushWrap" type="CheckBox" parent="MarginContainer/VBoxContainer/HBoxContainer/Panel/VBoxContainer" unique_id=906797272]
-layout_mode = 2
-size_flags_horizontal = 4
-theme_override_fonts/font = ExtResource("19")
-text = "Wrap"
-
-[node name="TileToBrushButton" type="Button" parent="MarginContainer/VBoxContainer/HBoxContainer/Panel/VBoxContainer" unique_id=397932245]
+[node name="TileToBrushButton" type="Button" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/Panel/VBoxContainer" unique_id=397932245]
 layout_mode = 2
 size_flags_horizontal = 4
 text = "To Brush"
 
-[node name="PanelContainer" type="PanelContainer" parent="MarginContainer/VBoxContainer/HBoxContainer" unique_id=1345428254]
+[node name="PanelContainer" type="PanelContainer" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer" unique_id=1345428254]
 layout_mode = 2
 theme_override_styles/panel = SubResource("8")
 
-[node name="MarginContainer" type="MarginContainer" parent="MarginContainer/VBoxContainer/HBoxContainer/PanelContainer" unique_id=74420666]
+[node name="MarginContainer" type="MarginContainer" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/PanelContainer" unique_id=74420666]
 layout_mode = 2
 theme_override_constants/margin_bottom = 4
 
-[node name="VBoxContainer2" type="VBoxContainer" parent="MarginContainer/VBoxContainer/HBoxContainer/PanelContainer/MarginContainer" unique_id=19785670]
+[node name="VBoxContainer2" type="VBoxContainer" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/PanelContainer/MarginContainer" unique_id=19785670]
 layout_mode = 2
 
-[node name="BrushCreatorModes" type="GridContainer" parent="MarginContainer/VBoxContainer/HBoxContainer/PanelContainer/MarginContainer/VBoxContainer2" unique_id=753531230]
+[node name="BrushCreatorModes" type="GridContainer" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/PanelContainer/MarginContainer/VBoxContainer2" unique_id=753531230]
 layout_mode = 2
-theme = SubResource("9")
 theme_override_constants/h_separation = -4
 theme_override_constants/v_separation = -2
 columns = 2
 
-[node name="replace" type="CheckBox" parent="MarginContainer/VBoxContainer/HBoxContainer/PanelContainer/MarginContainer/VBoxContainer2/BrushCreatorModes" unique_id=881599246]
+[node name="replace" type="CheckBox" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/PanelContainer/MarginContainer/VBoxContainer2/BrushCreatorModes" unique_id=881599246]
 layout_mode = 2
 button_group = SubResource("ButtonGroup_xpogs")
 text = "Replace"
 
-[node name="over" type="CheckBox" parent="MarginContainer/VBoxContainer/HBoxContainer/PanelContainer/MarginContainer/VBoxContainer2/BrushCreatorModes" unique_id=840782667]
+[node name="over" type="CheckBox" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/PanelContainer/MarginContainer/VBoxContainer2/BrushCreatorModes" unique_id=840782667]
 layout_mode = 2
 button_group = SubResource("ButtonGroup_xpogs")
 text = "Over"
 
-[node name="erase" type="CheckBox" parent="MarginContainer/VBoxContainer/HBoxContainer/PanelContainer/MarginContainer/VBoxContainer2/BrushCreatorModes" unique_id=824100355]
+[node name="erase" type="CheckBox" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/PanelContainer/MarginContainer/VBoxContainer2/BrushCreatorModes" unique_id=824100355]
 layout_mode = 2
 button_group = SubResource("ButtonGroup_xpogs")
 text = "Erase"
 
-[node name="under" type="CheckBox" parent="MarginContainer/VBoxContainer/HBoxContainer/PanelContainer/MarginContainer/VBoxContainer2/BrushCreatorModes" unique_id=1495429227]
+[node name="under" type="CheckBox" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/PanelContainer/MarginContainer/VBoxContainer2/BrushCreatorModes" unique_id=1495429227]
 layout_mode = 2
 button_group = SubResource("ButtonGroup_xpogs")
 text = "Under"
 
-[node name="stencil" type="CheckBox" parent="MarginContainer/VBoxContainer/HBoxContainer/PanelContainer/MarginContainer/VBoxContainer2/BrushCreatorModes" unique_id=127162555]
+[node name="stencil" type="CheckBox" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/PanelContainer/MarginContainer/VBoxContainer2/BrushCreatorModes" unique_id=127162555]
 layout_mode = 2
 button_group = SubResource("ButtonGroup_xpogs")
 text = "Stencil"
 
-[node name="cut" type="CheckBox" parent="MarginContainer/VBoxContainer/HBoxContainer/PanelContainer/MarginContainer/VBoxContainer2/BrushCreatorModes" unique_id=167959719]
+[node name="cut" type="CheckBox" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/PanelContainer/MarginContainer/VBoxContainer2/BrushCreatorModes" unique_id=167959719]
 layout_mode = 2
 button_group = SubResource("ButtonGroup_xpogs")
 text = "Cut"
 
-[node name="ButtonGroup" type="MarginContainer" parent="MarginContainer/VBoxContainer/HBoxContainer/PanelContainer/MarginContainer/VBoxContainer2" unique_id=1787514242]
+[node name="ButtonGroup" type="MarginContainer" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/PanelContainer/MarginContainer/VBoxContainer2" unique_id=1787514242]
 layout_mode = 2
+size_flags_vertical = 3
 
-[node name="GridContainer" type="GridContainer" parent="MarginContainer/VBoxContainer/HBoxContainer/PanelContainer/MarginContainer/VBoxContainer2/ButtonGroup" unique_id=803146631]
+[node name="GridContainer" type="GridContainer" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/PanelContainer/MarginContainer/VBoxContainer2/ButtonGroup" unique_id=803146631]
 custom_minimum_size = Vector2(60, 60)
 layout_mode = 2
 size_flags_horizontal = 4
-size_flags_vertical = 3
+size_flags_vertical = 4
 mouse_filter = 2
 columns = 2
 
-[node name="TLButton" parent="MarginContainer/VBoxContainer/HBoxContainer/PanelContainer/MarginContainer/VBoxContainer2/ButtonGroup/GridContainer" unique_id=2050173264 instance=ExtResource("5")]
-custom_minimum_size = Vector2(44, 44)
+[node name="TLButton" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/PanelContainer/MarginContainer/VBoxContainer2/ButtonGroup/GridContainer" unique_id=2050173264 instance=ExtResource("5")]
+custom_minimum_size = Vector2(34, 34)
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 
-[node name="Control" type="Control" parent="MarginContainer/VBoxContainer/HBoxContainer/PanelContainer/MarginContainer/VBoxContainer2/ButtonGroup/GridContainer/TLButton" unique_id=440684389]
+[node name="Control" type="Control" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/PanelContainer/MarginContainer/VBoxContainer2/ButtonGroup/GridContainer/TLButton" unique_id=440684389]
 layout_mode = 2
 mouse_filter = 2
 
-[node name="TextureRect" type="TextureRect" parent="MarginContainer/VBoxContainer/HBoxContainer/PanelContainer/MarginContainer/VBoxContainer2/ButtonGroup/GridContainer/TLButton/Control" unique_id=257902339]
-layout_mode = 0
-offset_left = 7.0
-offset_top = 7.0
-offset_right = 25.0
-offset_bottom = 25.0
+[node name="TextureRect" type="TextureRect" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/PanelContainer/MarginContainer/VBoxContainer2/ButtonGroup/GridContainer/TLButton/Control" unique_id=257902339]
+layout_mode = 1
+anchors_preset = -1
+offset_left = 3.0
+offset_top = 3.0
 pivot_offset = Vector2(15, 15)
 mouse_filter = 2
 texture = SubResource("4")
 stretch_mode = 3
 
-[node name="TRButton" parent="MarginContainer/VBoxContainer/HBoxContainer/PanelContainer/MarginContainer/VBoxContainer2/ButtonGroup/GridContainer" unique_id=488486536 instance=ExtResource("5")]
-custom_minimum_size = Vector2(44, 44)
+[node name="TRButton" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/PanelContainer/MarginContainer/VBoxContainer2/ButtonGroup/GridContainer" unique_id=488486536 instance=ExtResource("5")]
+custom_minimum_size = Vector2(34, 34)
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 
-[node name="Control" type="Control" parent="MarginContainer/VBoxContainer/HBoxContainer/PanelContainer/MarginContainer/VBoxContainer2/ButtonGroup/GridContainer/TRButton" unique_id=2049762808]
+[node name="Control" type="Control" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/PanelContainer/MarginContainer/VBoxContainer2/ButtonGroup/GridContainer/TRButton" unique_id=2049762808]
 layout_mode = 2
 mouse_filter = 2
 
-[node name="TextureRect" type="TextureRect" parent="MarginContainer/VBoxContainer/HBoxContainer/PanelContainer/MarginContainer/VBoxContainer2/ButtonGroup/GridContainer/TRButton/Control" unique_id=1513609297]
-layout_mode = 0
+[node name="TextureRect" type="TextureRect" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/PanelContainer/MarginContainer/VBoxContainer2/ButtonGroup/GridContainer/TRButton/Control" unique_id=1513609297]
+layout_mode = 1
+anchors_preset = -1
 anchor_left = 1.0
 anchor_right = 1.0
-offset_left = -25.0
-offset_top = 7.0
-offset_right = -7.0
-offset_bottom = 25.0
+offset_left = -21.0
+offset_top = 3.0
+offset_right = -3.0
+offset_bottom = 18.0
+grow_horizontal = 0
 pivot_offset = Vector2(15, 15)
 mouse_filter = 2
 texture = SubResource("5")
 stretch_mode = 3
 
-[node name="BLButton" parent="MarginContainer/VBoxContainer/HBoxContainer/PanelContainer/MarginContainer/VBoxContainer2/ButtonGroup/GridContainer" unique_id=488967074 instance=ExtResource("5")]
-custom_minimum_size = Vector2(44, 44)
+[node name="BLButton" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/PanelContainer/MarginContainer/VBoxContainer2/ButtonGroup/GridContainer" unique_id=488967074 instance=ExtResource("5")]
+custom_minimum_size = Vector2(34, 34)
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 
-[node name="Control" type="Control" parent="MarginContainer/VBoxContainer/HBoxContainer/PanelContainer/MarginContainer/VBoxContainer2/ButtonGroup/GridContainer/BLButton" unique_id=1491325541]
+[node name="Control" type="Control" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/PanelContainer/MarginContainer/VBoxContainer2/ButtonGroup/GridContainer/BLButton" unique_id=1491325541]
 layout_mode = 2
 mouse_filter = 2
 
-[node name="TextureRect" type="TextureRect" parent="MarginContainer/VBoxContainer/HBoxContainer/PanelContainer/MarginContainer/VBoxContainer2/ButtonGroup/GridContainer/BLButton/Control" unique_id=741787687]
-layout_mode = 0
+[node name="TextureRect" type="TextureRect" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/PanelContainer/MarginContainer/VBoxContainer2/ButtonGroup/GridContainer/BLButton/Control" unique_id=741787687]
+layout_mode = 1
+anchors_preset = -1
 anchor_top = 1.0
 anchor_bottom = 1.0
-offset_left = 7.0
-offset_top = -25.0
-offset_right = 25.0
-offset_bottom = -7.0
+offset_left = 3.0
+offset_bottom = -3.0
+grow_vertical = 0
 pivot_offset = Vector2(15, 15)
 mouse_filter = 2
 texture = SubResource("6")
 stretch_mode = 3
 
-[node name="BRButton" parent="MarginContainer/VBoxContainer/HBoxContainer/PanelContainer/MarginContainer/VBoxContainer2/ButtonGroup/GridContainer" unique_id=232116540 instance=ExtResource("5")]
-custom_minimum_size = Vector2(44, 44)
+[node name="BRButton" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/PanelContainer/MarginContainer/VBoxContainer2/ButtonGroup/GridContainer" unique_id=232116540 instance=ExtResource("5")]
+custom_minimum_size = Vector2(34, 34)
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 
-[node name="Control" type="Control" parent="MarginContainer/VBoxContainer/HBoxContainer/PanelContainer/MarginContainer/VBoxContainer2/ButtonGroup/GridContainer/BRButton" unique_id=1820304775]
+[node name="Control" type="Control" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/PanelContainer/MarginContainer/VBoxContainer2/ButtonGroup/GridContainer/BRButton" unique_id=1820304775]
 layout_mode = 2
 mouse_filter = 2
 
-[node name="TextureRect2" type="TextureRect" parent="MarginContainer/VBoxContainer/HBoxContainer/PanelContainer/MarginContainer/VBoxContainer2/ButtonGroup/GridContainer/BRButton/Control" unique_id=25279671]
-layout_mode = 0
+[node name="TextureRect2" type="TextureRect" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/PanelContainer/MarginContainer/VBoxContainer2/ButtonGroup/GridContainer/BRButton/Control" unique_id=25279671]
+layout_mode = 1
+anchors_preset = -1
 anchor_left = 1.0
 anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = -25.0
-offset_top = -25.0
-offset_right = -7.0
-offset_bottom = -7.0
+offset_right = -3.0
+offset_bottom = -3.0
+grow_horizontal = 0
+grow_vertical = 0
 pivot_offset = Vector2(15, 15)
 mouse_filter = 2
 texture = SubResource("7")
 stretch_mode = 3
 
-[node name="CenterContainer" type="CenterContainer" parent="MarginContainer/VBoxContainer/HBoxContainer/PanelContainer/MarginContainer/VBoxContainer2/ButtonGroup" unique_id=1225524030]
+[node name="CenterContainer" type="CenterContainer" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/PanelContainer/MarginContainer/VBoxContainer2/ButtonGroup" unique_id=1225524030]
 layout_mode = 2
 mouse_filter = 2
 
-[node name="AllButton" parent="MarginContainer/VBoxContainer/HBoxContainer/PanelContainer/MarginContainer/VBoxContainer2/ButtonGroup/CenterContainer" unique_id=1044560127 instance=ExtResource("5")]
+[node name="MarginContainer" type="MarginContainer" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/PanelContainer/MarginContainer/VBoxContainer2/ButtonGroup/CenterContainer" unique_id=639804709]
+layout_mode = 2
+theme_override_constants/margin_bottom = 4
+
+[node name="AllButton" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/PanelContainer/MarginContainer/VBoxContainer2/ButtonGroup/CenterContainer/MarginContainer" unique_id=1044560127 instance=ExtResource("5")]
 layout_mode = 2
 mouse_filter = 2
 
-[node name="MarginContainer2" type="MarginContainer" parent="MarginContainer/VBoxContainer/HBoxContainer/PanelContainer/MarginContainer/VBoxContainer2/ButtonGroup/CenterContainer/AllButton" unique_id=1898895762]
+[node name="MarginContainer2" type="MarginContainer" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/PanelContainer/MarginContainer/VBoxContainer2/ButtonGroup/CenterContainer/MarginContainer/AllButton" unique_id=1898895762]
 layout_mode = 2
 mouse_filter = 2
 theme_override_constants/margin_left = 2
@@ -538,25 +577,25 @@ theme_override_constants/margin_top = 2
 theme_override_constants/margin_right = 2
 theme_override_constants/margin_bottom = 2
 
-[node name="TextureRect" type="TextureRect" parent="MarginContainer/VBoxContainer/HBoxContainer/PanelContainer/MarginContainer/VBoxContainer2/ButtonGroup/CenterContainer/AllButton/MarginContainer2" unique_id=1777442141]
+[node name="TextureRect" type="TextureRect" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/PanelContainer/MarginContainer/VBoxContainer2/ButtonGroup/CenterContainer/MarginContainer/AllButton/MarginContainer2" unique_id=1777442141]
 layout_mode = 2
 mouse_filter = 2
 texture = ExtResource("14")
 
-[node name="VBoxContainer2" type="VBoxContainer" parent="MarginContainer/VBoxContainer/HBoxContainer" unique_id=13648585]
+[node name="VBoxContainer2" type="VBoxContainer" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer" unique_id=13648585]
 layout_mode = 2
 alignment = 1
 
-[node name="Label" type="Label" parent="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer2" unique_id=10671766]
+[node name="Label" type="Label" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer2" unique_id=10671766]
 layout_mode = 2
 text = "Brush:"
 horizontal_alignment = 1
 
-[node name="PickBrushButton" parent="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer2" unique_id=635175632 instance=ExtResource("5")]
+[node name="PickBrushButton" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer2" unique_id=635175632 instance=ExtResource("5")]
 layout_mode = 2
 size_flags_vertical = 4
 
-[node name="MarginContainer" type="MarginContainer" parent="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer2/PickBrushButton" unique_id=4719670]
+[node name="MarginContainer" type="MarginContainer" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer2/PickBrushButton" unique_id=4719670]
 layout_mode = 2
 mouse_filter = 2
 theme_override_constants/margin_left = 4
@@ -564,12 +603,12 @@ theme_override_constants/margin_top = 4
 theme_override_constants/margin_right = 4
 theme_override_constants/margin_bottom = 4
 
-[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer2/PickBrushButton/MarginContainer" unique_id=1836099596]
+[node name="VBoxContainer" type="VBoxContainer" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer2/PickBrushButton/MarginContainer" unique_id=1836099596]
 layout_mode = 2
 mouse_filter = 2
 alignment = 1
 
-[node name="Icon" type="TextureRect" parent="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer2/PickBrushButton/MarginContainer/VBoxContainer" unique_id=1754737844]
+[node name="Icon" type="TextureRect" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer2/PickBrushButton/MarginContainer/VBoxContainer" unique_id=1754737844]
 texture_filter = 1
 custom_minimum_size = Vector2(64, 64)
 layout_mode = 2
@@ -578,7 +617,7 @@ mouse_filter = 2
 expand_mode = 1
 stretch_mode = 6
 
-[node name="PickedCrosshair" type="Control" parent="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer2/PickBrushButton/MarginContainer/VBoxContainer/Icon" unique_id=582362494]
+[node name="PickedCrosshair" type="Control" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer2/PickBrushButton/MarginContainer/VBoxContainer/Icon" unique_id=582362494]
 clip_contents = true
 anchors_preset = 0
 anchor_right = 1.0
@@ -586,13 +625,13 @@ anchor_bottom = 1.0
 mouse_filter = 2
 script = ExtResource("20")
 
-[node name="CrosshairCenter" type="Control" parent="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer2/PickBrushButton/MarginContainer/VBoxContainer/Icon/PickedCrosshair" unique_id=2081820647]
+[node name="CrosshairCenter" type="Control" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer2/PickBrushButton/MarginContainer/VBoxContainer/Icon/PickedCrosshair" unique_id=2081820647]
 anchors_preset = 0
 anchor_right = 1.0
 anchor_bottom = 1.0
 mouse_filter = 2
 
-[node name="ColorRect" type="ColorRect" parent="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer2/PickBrushButton/MarginContainer/VBoxContainer/Icon/PickedCrosshair/CrosshairCenter" unique_id=1029605099]
+[node name="ColorRect" type="ColorRect" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer2/PickBrushButton/MarginContainer/VBoxContainer/Icon/PickedCrosshair/CrosshairCenter" unique_id=1029605099]
 custom_minimum_size = Vector2(1, 0)
 layout_mode = 0
 anchor_left = 0.5
@@ -602,7 +641,7 @@ grow_horizontal = 2
 mouse_filter = 2
 color = Color(0, 0, 0, 0.658824)
 
-[node name="ColorRect2" type="ColorRect" parent="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer2/PickBrushButton/MarginContainer/VBoxContainer/Icon/PickedCrosshair/CrosshairCenter" unique_id=1350802974]
+[node name="ColorRect2" type="ColorRect" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer2/PickBrushButton/MarginContainer/VBoxContainer/Icon/PickedCrosshair/CrosshairCenter" unique_id=1350802974]
 custom_minimum_size = Vector2(0, 1)
 layout_mode = 0
 anchor_top = 0.5
@@ -612,20 +651,20 @@ grow_vertical = 2
 mouse_filter = 2
 color = Color(0, 0, 0, 0.658824)
 
-[node name="CrosshairBorder" type="Control" parent="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer2/PickBrushButton/MarginContainer/VBoxContainer/Icon/PickedCrosshair" unique_id=197015729]
+[node name="CrosshairBorder" type="Control" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer2/PickBrushButton/MarginContainer/VBoxContainer/Icon/PickedCrosshair" unique_id=197015729]
 anchors_preset = 0
 anchor_right = 1.0
 anchor_bottom = 1.0
 mouse_filter = 2
 
-[node name="BorderLeft" type="ColorRect" parent="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer2/PickBrushButton/MarginContainer/VBoxContainer/Icon/PickedCrosshair/CrosshairBorder" unique_id=947370308]
+[node name="BorderLeft" type="ColorRect" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer2/PickBrushButton/MarginContainer/VBoxContainer/Icon/PickedCrosshair/CrosshairBorder" unique_id=947370308]
 custom_minimum_size = Vector2(1, 0)
 layout_mode = 0
 anchor_bottom = 1.0
 mouse_filter = 2
 color = Color(0, 0, 0, 0.658824)
 
-[node name="BorderRight" type="ColorRect" parent="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer2/PickBrushButton/MarginContainer/VBoxContainer/Icon/PickedCrosshair/CrosshairBorder" unique_id=400228282]
+[node name="BorderRight" type="ColorRect" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer2/PickBrushButton/MarginContainer/VBoxContainer/Icon/PickedCrosshair/CrosshairBorder" unique_id=400228282]
 custom_minimum_size = Vector2(1, 0)
 layout_mode = 0
 anchor_left = 1.0
@@ -635,7 +674,7 @@ grow_horizontal = 0
 mouse_filter = 2
 color = Color(0, 0, 0, 0.658824)
 
-[node name="BorderBottom" type="ColorRect" parent="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer2/PickBrushButton/MarginContainer/VBoxContainer/Icon/PickedCrosshair/CrosshairBorder" unique_id=1217469261]
+[node name="BorderBottom" type="ColorRect" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer2/PickBrushButton/MarginContainer/VBoxContainer/Icon/PickedCrosshair/CrosshairBorder" unique_id=1217469261]
 custom_minimum_size = Vector2(0, 1)
 layout_mode = 0
 anchor_top = 1.0
@@ -645,131 +684,130 @@ grow_vertical = 0
 mouse_filter = 2
 color = Color(0, 0, 0, 0.658824)
 
-[node name="BorderTop" type="ColorRect" parent="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer2/PickBrushButton/MarginContainer/VBoxContainer/Icon/PickedCrosshair/CrosshairBorder" unique_id=1491831093]
+[node name="BorderTop" type="ColorRect" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer2/PickBrushButton/MarginContainer/VBoxContainer/Icon/PickedCrosshair/CrosshairBorder" unique_id=1491831093]
 custom_minimum_size = Vector2(0, 1)
 layout_mode = 0
 anchor_right = 1.0
 mouse_filter = 2
 color = Color(0, 0, 0, 0.658824)
 
-[node name="Label" type="Label" parent="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer2/PickBrushButton/MarginContainer/VBoxContainer" unique_id=303656405]
+[node name="Label" type="Label" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer2/PickBrushButton/MarginContainer/VBoxContainer" unique_id=303656405]
 layout_mode = 2
 text = "Pick Brush"
 
-[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer2" unique_id=1551664942]
+[node name="HBoxContainer" type="HBoxContainer" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer2" unique_id=1551664942]
 layout_mode = 2
 size_flags_vertical = 3
 
-[node name="UndoBrushButton" type="Button" parent="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer2" unique_id=1004810667]
+[node name="UndoBrushButton" type="Button" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer2" unique_id=1004810667]
 layout_mode = 2
 disabled = true
 text = "Undo"
 
-[node name="RedoBrushButton" type="Button" parent="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer2" unique_id=928052712]
+[node name="RedoBrushButton" type="Button" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer2" unique_id=928052712]
 layout_mode = 2
 disabled = true
 text = "Redo"
 
-[node name="HSeparator2" parent="MarginContainer/VBoxContainer" unique_id=1475251668 instance=ExtResource("4")]
+[node name="HSeparator2" parent="PanelContainer/MarginContainer/VBoxContainer" unique_id=1475251668 instance=ExtResource("4")]
 layout_mode = 2
 
-[node name="CollapsableSection" type="MarginContainer" parent="MarginContainer/VBoxContainer" unique_id=2004231072]
+[node name="CollapsableSection" type="MarginContainer" parent="PanelContainer/MarginContainer/VBoxContainer" unique_id=2004231072]
 layout_mode = 2
 
-[node name="HBoxContainer5" type="HBoxContainer" parent="MarginContainer/VBoxContainer/CollapsableSection" unique_id=1788338574]
+[node name="HBoxContainer5" type="HBoxContainer" parent="PanelContainer/MarginContainer/VBoxContainer/CollapsableSection" unique_id=1788338574]
 layout_mode = 2
 alignment = 1
 
-[node name="PanelContainer2" type="PanelContainer" parent="MarginContainer/VBoxContainer/CollapsableSection/HBoxContainer5" unique_id=426467448]
+[node name="PanelContainer2" type="PanelContainer" parent="PanelContainer/MarginContainer/VBoxContainer/CollapsableSection/HBoxContainer5" unique_id=426467448]
 layout_mode = 2
 theme_override_styles/panel = SubResource("8")
 
-[node name="MarginContainer" type="MarginContainer" parent="MarginContainer/VBoxContainer/CollapsableSection/HBoxContainer5/PanelContainer2" unique_id=716310425]
+[node name="MarginContainer" type="MarginContainer" parent="PanelContainer/MarginContainer/VBoxContainer/CollapsableSection/HBoxContainer5/PanelContainer2" unique_id=716310425]
 layout_mode = 2
 theme_override_constants/margin_left = 4
 theme_override_constants/margin_top = 4
 theme_override_constants/margin_right = 4
 theme_override_constants/margin_bottom = 8
 
-[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer/CollapsableSection/HBoxContainer5/PanelContainer2/MarginContainer" unique_id=962455936]
+[node name="HBoxContainer" type="HBoxContainer" parent="PanelContainer/MarginContainer/VBoxContainer/CollapsableSection/HBoxContainer5/PanelContainer2/MarginContainer" unique_id=962455936]
 layout_mode = 2
 
-[node name="VBoxContainer2" type="VBoxContainer" parent="MarginContainer/VBoxContainer/CollapsableSection/HBoxContainer5/PanelContainer2/MarginContainer/HBoxContainer" unique_id=1193202064]
+[node name="VBoxContainer2" type="VBoxContainer" parent="PanelContainer/MarginContainer/VBoxContainer/CollapsableSection/HBoxContainer5/PanelContainer2/MarginContainer/HBoxContainer" unique_id=1193202064]
 layout_mode = 2
 
-[node name="Label" type="Label" parent="MarginContainer/VBoxContainer/CollapsableSection/HBoxContainer5/PanelContainer2/MarginContainer/HBoxContainer/VBoxContainer2" unique_id=1745256308]
+[node name="Label" type="Label" parent="PanelContainer/MarginContainer/VBoxContainer/CollapsableSection/HBoxContainer5/PanelContainer2/MarginContainer/HBoxContainer/VBoxContainer2" unique_id=1745256308]
 layout_mode = 2
 text = "Brush Color Mode:"
 
-[node name="BrushColorModes" type="GridContainer" parent="MarginContainer/VBoxContainer/CollapsableSection/HBoxContainer5/PanelContainer2/MarginContainer/HBoxContainer/VBoxContainer2" unique_id=1942775214]
+[node name="BrushColorModes" type="GridContainer" parent="PanelContainer/MarginContainer/VBoxContainer/CollapsableSection/HBoxContainer5/PanelContainer2/MarginContainer/HBoxContainer/VBoxContainer2" unique_id=1942775214]
 layout_mode = 2
 theme = SubResource("9")
 theme_override_constants/h_separation = -4
 theme_override_constants/v_separation = -2
 columns = 2
 
-[node name="source" type="CheckBox" parent="MarginContainer/VBoxContainer/CollapsableSection/HBoxContainer5/PanelContainer2/MarginContainer/HBoxContainer/VBoxContainer2/BrushColorModes" unique_id=682610527]
+[node name="source" type="CheckBox" parent="PanelContainer/MarginContainer/VBoxContainer/CollapsableSection/HBoxContainer5/PanelContainer2/MarginContainer/HBoxContainer/VBoxContainer2/BrushColorModes" unique_id=682610527]
 layout_mode = 2
 button_group = SubResource("ButtonGroup_63ggb")
 text = "Source"
 
-[node name="flat" type="CheckBox" parent="MarginContainer/VBoxContainer/CollapsableSection/HBoxContainer5/PanelContainer2/MarginContainer/HBoxContainer/VBoxContainer2/BrushColorModes" unique_id=2011919235]
+[node name="flat" type="CheckBox" parent="PanelContainer/MarginContainer/VBoxContainer/CollapsableSection/HBoxContainer5/PanelContainer2/MarginContainer/HBoxContainer/VBoxContainer2/BrushColorModes" unique_id=2011919235]
 layout_mode = 2
 button_group = SubResource("ButtonGroup_63ggb")
 text = "Flat"
 
-[node name="colorize" type="CheckBox" parent="MarginContainer/VBoxContainer/CollapsableSection/HBoxContainer5/PanelContainer2/MarginContainer/HBoxContainer/VBoxContainer2/BrushColorModes" unique_id=767266201]
+[node name="colorize" type="CheckBox" parent="PanelContainer/MarginContainer/VBoxContainer/CollapsableSection/HBoxContainer5/PanelContainer2/MarginContainer/HBoxContainer/VBoxContainer2/BrushColorModes" unique_id=767266201]
 layout_mode = 2
 button_group = SubResource("ButtonGroup_63ggb")
 text = "Colorize"
 
-[node name="BrushColorPicker" type="ColorPickerButton" parent="MarginContainer/VBoxContainer/CollapsableSection/HBoxContainer5/PanelContainer2/MarginContainer/HBoxContainer/VBoxContainer2" unique_id=311281832]
+[node name="BrushColorPicker" type="ColorPickerButton" parent="PanelContainer/MarginContainer/VBoxContainer/CollapsableSection/HBoxContainer5/PanelContainer2/MarginContainer/HBoxContainer/VBoxContainer2" unique_id=311281832]
 custom_minimum_size = Vector2(0, 28)
 layout_mode = 2
 color = Color(1, 1, 1, 1)
 edit_alpha = false
 
-[node name="BrushColorPreview" type="TextureRect" parent="MarginContainer/VBoxContainer/CollapsableSection/HBoxContainer5/PanelContainer2/MarginContainer/HBoxContainer" unique_id=1787369423]
+[node name="BrushColorPreview" type="TextureRect" parent="PanelContainer/MarginContainer/VBoxContainer/CollapsableSection/HBoxContainer5/PanelContainer2/MarginContainer/HBoxContainer" unique_id=1787369423]
 texture_filter = 1
 custom_minimum_size = Vector2(64, 64)
 layout_mode = 2
 size_flags_vertical = 4
 
-[node name="HBoxContainer4" type="HBoxContainer" parent="MarginContainer/VBoxContainer" unique_id=1360618899]
+[node name="HBoxContainer4" type="HBoxContainer" parent="PanelContainer/MarginContainer/VBoxContainer" unique_id=1360618899]
 layout_mode = 2
 size_flags_vertical = 3
 
-[node name="HBoxContainer3" type="HBoxContainer" parent="MarginContainer/VBoxContainer" unique_id=1495926298]
+[node name="HBoxContainer3" type="HBoxContainer" parent="PanelContainer/MarginContainer/VBoxContainer" unique_id=1495926298]
 layout_mode = 2
-theme = ExtResource("6")
 theme_override_constants/separation = 16
 alignment = 1
 
-[node name="Control2" type="Control" parent="MarginContainer/VBoxContainer/HBoxContainer3" unique_id=1141276257]
+[node name="Control2" type="Control" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer3" unique_id=1141276257]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="SaveFileButton" type="Button" parent="MarginContainer/VBoxContainer/HBoxContainer3" unique_id=717827855]
+[node name="SaveFileButton" type="Button" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer3" unique_id=717827855]
 custom_minimum_size = Vector2(80, 30)
 layout_mode = 2
 disabled = true
 text = "Save"
 
-[node name="SaveAsFileButton" type="Button" parent="MarginContainer/VBoxContainer/HBoxContainer3" unique_id=1587495055]
+[node name="SaveAsFileButton" type="Button" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer3" unique_id=1587495055]
 custom_minimum_size = Vector2(80, 30)
 layout_mode = 2
 text = "Save As"
 
-[node name="Control" type="Control" parent="MarginContainer/VBoxContainer/HBoxContainer3" unique_id=208632194]
+[node name="Control" type="Control" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer3" unique_id=208632194]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="DiscardButton" type="Button" parent="MarginContainer/VBoxContainer/HBoxContainer3" unique_id=627951835]
+[node name="DiscardButton" type="Button" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer3" unique_id=627951835]
 custom_minimum_size = Vector2(80, 0)
 layout_mode = 2
 text = "Cancel"
 
-[node name="Control3" type="Control" parent="MarginContainer/VBoxContainer/HBoxContainer3" unique_id=2084738060]
+[node name="Control3" type="Control" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer3" unique_id=2084738060]
 layout_mode = 2
 size_flags_horizontal = 3
 
@@ -782,47 +820,48 @@ access = 1
 filters = PackedStringArray("*.png")
 
 [connection signal="size_changed" from="." to="." method="_on_margin_container_resized"]
-[connection signal="resized" from="MarginContainer" to="." method="_on_margin_container_resized"]
-[connection signal="pressed" from="MarginContainer/VBoxContainer/HBoxContainer2/VBoxContainer/PaintButton" to="." method="_on_PaintButton_pressed"]
-[connection signal="pressed" from="MarginContainer/VBoxContainer/HBoxContainer2/VBoxContainer/EraseButton" to="." method="_on_EraseButton_pressed"]
-[connection signal="pressed" from="MarginContainer/VBoxContainer/HBoxContainer2/VBoxContainer2/PickFromEditedButton" to="." method="_on_PickFromEditedButton_pressed"]
-[connection signal="pressed" from="MarginContainer/VBoxContainer/HBoxContainer2/VBoxContainer2/PickTileFromEditedButton" to="." method="_on_PickTileFromEditedButton_pressed"]
-[connection signal="pressed" from="MarginContainer/VBoxContainer/HBoxContainer2/VBoxContainer2/UndoTextureButton" to="." method="_on_UndoTextureButton_pressed"]
-[connection signal="pressed" from="MarginContainer/VBoxContainer/HBoxContainer2/VBoxContainer2/RedoTextureButton" to="." method="_on_RedoTextureButton_pressed"]
-[connection signal="pressed" from="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer/HBoxContainer/ShiftDownButton" to="." method="_on_ShiftDownButton_pressed"]
-[connection signal="pressed" from="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer/HBoxContainer/CCWButton" to="." method="_on_CCWButton_pressed"]
-[connection signal="pressed" from="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer/HBoxContainer/CWButton" to="." method="_on_CWButton_pressed"]
-[connection signal="pressed" from="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer/HBoxContainer2/ShiftRightButton" to="." method="_on_ShiftRightButton_pressed"]
-[connection signal="pressed" from="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer/HBoxContainer2/HFlipButton" to="." method="_on_HFlipButton_pressed"]
-[connection signal="pressed" from="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer/HBoxContainer2/VFlipButton" to="." method="_on_VFlipButton_pressed"]
-[connection signal="gui_input" from="MarginContainer/VBoxContainer/HBoxContainer/Panel/VBoxContainer/MarginContainer/BrushView/BrushSlideH" to="MarginContainer/VBoxContainer/HBoxContainer/Panel/VBoxContainer/MarginContainer/BrushView/BrushSlideH" method="_on_BrushSlide_gui_input"]
-[connection signal="mouse_pressed" from="MarginContainer/VBoxContainer/HBoxContainer/Panel/VBoxContainer/MarginContainer/BrushView/BrushSlideH" to="." method="_on_BrushSlideH_mouse_pressed"]
-[connection signal="mouse_released" from="MarginContainer/VBoxContainer/HBoxContainer/Panel/VBoxContainer/MarginContainer/BrushView/BrushSlideH" to="." method="_on_BrushSlideH_mouse_released"]
-[connection signal="value_changed" from="MarginContainer/VBoxContainer/HBoxContainer/Panel/VBoxContainer/MarginContainer/BrushView/BrushSlideH" to="." method="_on_BrushSlideH_value_changed"]
-[connection signal="gui_input" from="MarginContainer/VBoxContainer/HBoxContainer/Panel/VBoxContainer/MarginContainer/BrushView/BrushSlideV" to="MarginContainer/VBoxContainer/HBoxContainer/Panel/VBoxContainer/MarginContainer/BrushView/BrushSlideV" method="_on_BrushSlide_gui_input"]
-[connection signal="mouse_pressed" from="MarginContainer/VBoxContainer/HBoxContainer/Panel/VBoxContainer/MarginContainer/BrushView/BrushSlideV" to="." method="_on_BrushSlideV_mouse_pressed"]
-[connection signal="mouse_released" from="MarginContainer/VBoxContainer/HBoxContainer/Panel/VBoxContainer/MarginContainer/BrushView/BrushSlideV" to="." method="_on_BrushSlideV_mouse_released"]
-[connection signal="value_changed" from="MarginContainer/VBoxContainer/HBoxContainer/Panel/VBoxContainer/MarginContainer/BrushView/BrushSlideV" to="." method="_on_BrushSlideV_value_changed"]
-[connection signal="toggled" from="MarginContainer/VBoxContainer/HBoxContainer/Panel/VBoxContainer/BrushWrap" to="." method="_on_BrushWrap_toggled"]
-[connection signal="pressed" from="MarginContainer/VBoxContainer/HBoxContainer/Panel/VBoxContainer/TileToBrushButton" to="." method="_on_TileToBrushButton_pressed"]
-[connection signal="mouse_entered" from="MarginContainer/VBoxContainer/HBoxContainer/PanelContainer/MarginContainer/VBoxContainer2/ButtonGroup/GridContainer/TLButton" to="." method="_on_CornerButtonHover"]
-[connection signal="mouse_exited" from="MarginContainer/VBoxContainer/HBoxContainer/PanelContainer/MarginContainer/VBoxContainer2/ButtonGroup/GridContainer/TLButton" to="." method="_on_CornerButtonUnHover"]
-[connection signal="pressed" from="MarginContainer/VBoxContainer/HBoxContainer/PanelContainer/MarginContainer/VBoxContainer2/ButtonGroup/GridContainer/TLButton" to="." method="_on_TLButton_pressed"]
-[connection signal="mouse_entered" from="MarginContainer/VBoxContainer/HBoxContainer/PanelContainer/MarginContainer/VBoxContainer2/ButtonGroup/GridContainer/TRButton" to="." method="_on_CornerButtonHover"]
-[connection signal="mouse_exited" from="MarginContainer/VBoxContainer/HBoxContainer/PanelContainer/MarginContainer/VBoxContainer2/ButtonGroup/GridContainer/TRButton" to="." method="_on_CornerButtonUnHover"]
-[connection signal="pressed" from="MarginContainer/VBoxContainer/HBoxContainer/PanelContainer/MarginContainer/VBoxContainer2/ButtonGroup/GridContainer/TRButton" to="." method="_on_TRButton_pressed"]
-[connection signal="mouse_entered" from="MarginContainer/VBoxContainer/HBoxContainer/PanelContainer/MarginContainer/VBoxContainer2/ButtonGroup/GridContainer/BLButton" to="." method="_on_CornerButtonHover"]
-[connection signal="mouse_exited" from="MarginContainer/VBoxContainer/HBoxContainer/PanelContainer/MarginContainer/VBoxContainer2/ButtonGroup/GridContainer/BLButton" to="." method="_on_CornerButtonUnHover"]
-[connection signal="pressed" from="MarginContainer/VBoxContainer/HBoxContainer/PanelContainer/MarginContainer/VBoxContainer2/ButtonGroup/GridContainer/BLButton" to="." method="_on_BLButton_pressed"]
-[connection signal="mouse_entered" from="MarginContainer/VBoxContainer/HBoxContainer/PanelContainer/MarginContainer/VBoxContainer2/ButtonGroup/GridContainer/BRButton" to="." method="_on_CornerButtonHover"]
-[connection signal="mouse_exited" from="MarginContainer/VBoxContainer/HBoxContainer/PanelContainer/MarginContainer/VBoxContainer2/ButtonGroup/GridContainer/BRButton" to="." method="_on_CornerButtonUnHover"]
-[connection signal="pressed" from="MarginContainer/VBoxContainer/HBoxContainer/PanelContainer/MarginContainer/VBoxContainer2/ButtonGroup/GridContainer/BRButton" to="." method="_on_BRButton_pressed"]
-[connection signal="pressed" from="MarginContainer/VBoxContainer/HBoxContainer/PanelContainer/MarginContainer/VBoxContainer2/ButtonGroup/CenterContainer/AllButton" to="." method="_on_AllButton_pressed"]
-[connection signal="pressed" from="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer2/PickBrushButton" to="." method="_on_PickBrushButton_pressed"]
-[connection signal="pressed" from="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer2/UndoBrushButton" to="." method="_on_UndoBrushButton_pressed"]
-[connection signal="pressed" from="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer2/RedoBrushButton" to="." method="_on_RedoBrushButton2_pressed"]
-[connection signal="color_changed" from="MarginContainer/VBoxContainer/CollapsableSection/HBoxContainer5/PanelContainer2/MarginContainer/HBoxContainer/VBoxContainer2/BrushColorPicker" to="." method="_on_BrushColorPicker_color_changed"]
-[connection signal="pressed" from="MarginContainer/VBoxContainer/HBoxContainer3/SaveFileButton" to="." method="_on_SaveFileButton_pressed"]
-[connection signal="pressed" from="MarginContainer/VBoxContainer/HBoxContainer3/SaveAsFileButton" to="." method="_on_SaveAsFileButton_pressed"]
-[connection signal="pressed" from="MarginContainer/VBoxContainer/HBoxContainer3/DiscardButton" to="." method="_on_DiscardButton_pressed"]
+[connection signal="resized" from="PanelContainer/MarginContainer" to="." method="_on_margin_container_resized"]
+[connection signal="pressed" from="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer2/VBoxContainer/PaintButton" to="." method="_on_PaintButton_pressed"]
+[connection signal="pressed" from="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer2/VBoxContainer/EraseButton" to="." method="_on_EraseButton_pressed"]
+[connection signal="pressed" from="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer2/VBoxContainer2/PickFromEditedButton" to="." method="_on_PickFromEditedButton_pressed"]
+[connection signal="pressed" from="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer2/VBoxContainer2/PickTileFromEditedButton" to="." method="_on_PickTileFromEditedButton_pressed"]
+[connection signal="pressed" from="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer2/VBoxContainer2/UndoTextureButton" to="." method="_on_UndoTextureButton_pressed"]
+[connection signal="pressed" from="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer2/VBoxContainer2/RedoTextureButton" to="." method="_on_RedoTextureButton_pressed"]
+[connection signal="pressed" from="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer/HBoxContainer/ShiftDownButton" to="." method="_on_ShiftDownButton_pressed"]
+[connection signal="pressed" from="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer/HBoxContainer/CCWButton" to="." method="_on_CCWButton_pressed"]
+[connection signal="pressed" from="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer/HBoxContainer/CWButton" to="." method="_on_CWButton_pressed"]
+[connection signal="pressed" from="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer/HBoxContainer2/ShiftRightButton" to="." method="_on_ShiftRightButton_pressed"]
+[connection signal="pressed" from="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer/HBoxContainer2/HFlipButton" to="." method="_on_HFlipButton_pressed"]
+[connection signal="pressed" from="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer/HBoxContainer2/VFlipButton" to="." method="_on_VFlipButton_pressed"]
+[connection signal="toggled" from="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/Panel/VBoxContainer/BrushWrap" to="." method="_on_BrushWrap_toggled"]
+[connection signal="gui_input" from="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/Panel/VBoxContainer/MarginContainer/AspectRatioContainer/BrushView/BrushSlideH" to="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/Panel/VBoxContainer/MarginContainer/AspectRatioContainer/BrushView/BrushSlideH" method="_on_BrushSlide_gui_input"]
+[connection signal="mouse_pressed" from="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/Panel/VBoxContainer/MarginContainer/AspectRatioContainer/BrushView/BrushSlideH" to="." method="_on_BrushSlideH_mouse_pressed"]
+[connection signal="mouse_released" from="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/Panel/VBoxContainer/MarginContainer/AspectRatioContainer/BrushView/BrushSlideH" to="." method="_on_BrushSlideH_mouse_released"]
+[connection signal="value_changed" from="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/Panel/VBoxContainer/MarginContainer/AspectRatioContainer/BrushView/BrushSlideH" to="." method="_on_BrushSlideH_value_changed"]
+[connection signal="gui_input" from="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/Panel/VBoxContainer/MarginContainer/AspectRatioContainer/BrushView/BrushSlideV" to="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/Panel/VBoxContainer/MarginContainer/AspectRatioContainer/BrushView/BrushSlideV" method="_on_BrushSlide_gui_input"]
+[connection signal="mouse_pressed" from="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/Panel/VBoxContainer/MarginContainer/AspectRatioContainer/BrushView/BrushSlideV" to="." method="_on_BrushSlideV_mouse_pressed"]
+[connection signal="mouse_released" from="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/Panel/VBoxContainer/MarginContainer/AspectRatioContainer/BrushView/BrushSlideV" to="." method="_on_BrushSlideV_mouse_released"]
+[connection signal="value_changed" from="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/Panel/VBoxContainer/MarginContainer/AspectRatioContainer/BrushView/BrushSlideV" to="." method="_on_BrushSlideV_value_changed"]
+[connection signal="pressed" from="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/Panel/VBoxContainer/TileToBrushButton" to="." method="_on_TileToBrushButton_pressed"]
+[connection signal="mouse_entered" from="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/PanelContainer/MarginContainer/VBoxContainer2/ButtonGroup/GridContainer/TLButton" to="." method="_on_CornerButtonHover" flags=18]
+[connection signal="mouse_exited" from="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/PanelContainer/MarginContainer/VBoxContainer2/ButtonGroup/GridContainer/TLButton" to="." method="_on_CornerButtonUnHover"]
+[connection signal="pressed" from="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/PanelContainer/MarginContainer/VBoxContainer2/ButtonGroup/GridContainer/TLButton" to="." method="_on_TLButton_pressed"]
+[connection signal="mouse_entered" from="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/PanelContainer/MarginContainer/VBoxContainer2/ButtonGroup/GridContainer/TRButton" to="." method="_on_CornerButtonHover" flags=18]
+[connection signal="mouse_exited" from="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/PanelContainer/MarginContainer/VBoxContainer2/ButtonGroup/GridContainer/TRButton" to="." method="_on_CornerButtonUnHover"]
+[connection signal="pressed" from="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/PanelContainer/MarginContainer/VBoxContainer2/ButtonGroup/GridContainer/TRButton" to="." method="_on_TRButton_pressed"]
+[connection signal="mouse_entered" from="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/PanelContainer/MarginContainer/VBoxContainer2/ButtonGroup/GridContainer/BLButton" to="." method="_on_CornerButtonHover" flags=18]
+[connection signal="mouse_exited" from="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/PanelContainer/MarginContainer/VBoxContainer2/ButtonGroup/GridContainer/BLButton" to="." method="_on_CornerButtonUnHover"]
+[connection signal="pressed" from="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/PanelContainer/MarginContainer/VBoxContainer2/ButtonGroup/GridContainer/BLButton" to="." method="_on_BLButton_pressed"]
+[connection signal="mouse_entered" from="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/PanelContainer/MarginContainer/VBoxContainer2/ButtonGroup/GridContainer/BRButton" to="." method="_on_CornerButtonHover" flags=18]
+[connection signal="mouse_exited" from="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/PanelContainer/MarginContainer/VBoxContainer2/ButtonGroup/GridContainer/BRButton" to="." method="_on_CornerButtonUnHover"]
+[connection signal="pressed" from="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/PanelContainer/MarginContainer/VBoxContainer2/ButtonGroup/GridContainer/BRButton" to="." method="_on_BRButton_pressed"]
+[connection signal="mouse_entered" from="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/PanelContainer/MarginContainer/VBoxContainer2/ButtonGroup/CenterContainer/MarginContainer/AllButton" to="." method="_on_CornerButtonHover" flags=18]
+[connection signal="pressed" from="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/PanelContainer/MarginContainer/VBoxContainer2/ButtonGroup/CenterContainer/MarginContainer/AllButton" to="." method="_on_AllButton_pressed"]
+[connection signal="pressed" from="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer2/PickBrushButton" to="." method="_on_PickBrushButton_pressed"]
+[connection signal="pressed" from="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer2/UndoBrushButton" to="." method="_on_UndoBrushButton_pressed"]
+[connection signal="pressed" from="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer2/RedoBrushButton" to="." method="_on_RedoBrushButton2_pressed"]
+[connection signal="color_changed" from="PanelContainer/MarginContainer/VBoxContainer/CollapsableSection/HBoxContainer5/PanelContainer2/MarginContainer/HBoxContainer/VBoxContainer2/BrushColorPicker" to="." method="_on_BrushColorPicker_color_changed"]
+[connection signal="pressed" from="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer3/SaveFileButton" to="." method="_on_SaveFileButton_pressed"]
+[connection signal="pressed" from="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer3/SaveAsFileButton" to="." method="_on_SaveAsFileButton_pressed"]
+[connection signal="pressed" from="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer3/DiscardButton" to="." method="_on_DiscardButton_pressed"]
 [connection signal="file_selected" from="SaveAsDialog" to="." method="_on_SaveAsDialog_file_selected"]

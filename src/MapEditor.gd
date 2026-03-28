@@ -2,13 +2,13 @@ extends Node2D
 
 @export var do_autosave: = true
 
+@export var camera_move_speed: = 400
+
 var edit_mode = false
 
 var cur_ent_i = 0
 var current_entity_index = 0
 var current_entity_facing = 0
-
-const CAMERA_MOVE_SPEED: = 400
 
 var cur_tile_i = 0
 var current_tile_index = 0
@@ -19,6 +19,9 @@ var all_entities = []
 
 @onready var cursor = get_node("Cursor")
 @onready var preview = get_node("Cursor/TileEntityPreview")
+
+@onready var cursor_mode_text = find_child("CursorModeText")
+@onready var cursor_mode_text_animator = cursor_mode_text.get_node("AnimationPlayer")
 
 var cursor_tex = preload("res://assets/img/cursor.png")
 var entity_cursor_tex = preload("res://assets/img/cursor_entity.png")
@@ -114,6 +117,11 @@ func preview_tile(tile_index):
 	preview.region_rect = MapManager.get_tile_texture_rect(tile_index)
 
 func place_mode(mode):
+	if mode != "none":
+		cursor_mode_text.text = mode.capitalize()
+		cursor_mode_text.size = Vector2.ZERO
+		if placing != mode:
+			cursor_mode_text_animator.play("show_fade")
 	delete_held_on_entity = false
 	placing = mode
 	if placing == "entity":
@@ -201,8 +209,8 @@ func _process(delta):
 	var horiz_camera_move = Input.get_axis("editor_camera_left", "editor_camera_right")
 	var vert_camera_move = Input.get_axis("editor_camera_up", "editor_camera_down")
 	
-	var hscroll = horiz_camera_move * delta * CAMERA_MOVE_SPEED
-	var vscroll = vert_camera_move * delta * CAMERA_MOVE_SPEED
+	var hscroll = horiz_camera_move * delta * camera_move_speed
+	var vscroll = vert_camera_move * delta * camera_move_speed
 	$EditorCam.do_scroll(hscroll, vscroll)
 	
 	var input_dir = "none"

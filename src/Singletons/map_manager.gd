@@ -278,6 +278,7 @@ func is_tile_at(tile_index, tile_position) -> bool:
     return found
 
 func update_tile_definition(tile_index, definition) -> void:
+    print("update_tile_definition", tile_index, definition)
     if not tile_index in tile_defs:
         print("ERROR tried to update non-existing tile: " + str(tile_index))
         return

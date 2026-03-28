@@ -1,5 +1,6 @@
 @tool
 extends Container
+class_name ButtonContainer
 
 @warning_ignore("unused_signal")
 signal button_down

@@ -20,9 +20,16 @@ var ui_data: Dictionary
 var qualified_command_name: String
 var short_command_name: String
 var command_info: Dictionary
+var no_slot: bool = false
+var is_builtin: bool = false
 
 var _ungenerated = true
 var _pre_set_arg_values: Array = []
+
+const builtin_descriptions: = {
+    "true": "Change the result to true",
+    "false": "Change the result to false",
+}
 
 func _ready():
     if _ungenerated:
@@ -37,7 +44,12 @@ func set_v3_data(qualified_name: String, short_name: String, new_command_info: D
     qualified_command_name = qualified_name
     short_command_name = short_name
     command_info = new_command_info
-    ui_data = {"display_name": command_info["display_name"]}
+    if qualified_name in builtin_descriptions:
+        no_slot = true
+        is_builtin = true
+        ui_data = {"display_name": qualified_name.capitalize()}
+    else:
+        ui_data = {"display_name": command_info["display_name"]}
 
 func set_slot(slot_id: int) -> void:
     if slot_id < 0:
@@ -115,12 +127,22 @@ func generate_v3_ui() -> void:
     title_label.text = ui_data.display_name
     tab_panel.size.x = title_label.get_minimum_size().x + TAB_INTERNAL_MARGIN
     
+    var command_slot_selector = find_child("CommandSlot")
+    if no_slot:
+        command_slot_selector.hide()
+
+    if is_builtin:
+        var row: HBoxContainer = add_generated_row()
+        var label: Label = Label.new()
+        label.text = builtin_descriptions[qualified_command_name]
+        row.add_child(label)
+        return
+    
     var split_str: = (command_info.usage as String).split("|", true, 1)
     if split_str.size() == 1:
         split_str = ["all", split_str[0]]
     var slot_type_hint: String = split_str[0]
 
-    var command_slot_selector = find_child("CommandSlot")
     if slot_type_hint == "none":
         command_slot_selector.set_valid_slot_categories([])
     else:

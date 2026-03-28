@@ -5,6 +5,7 @@
 
 [node name="LoadLevelDialog" type="Window" unique_id=348474084]
 oversampling_override = 1.0
+title = "Load Level"
 position = Vector2i(0, 36)
 size = Vector2i(224, 96)
 wrap_controls = true
