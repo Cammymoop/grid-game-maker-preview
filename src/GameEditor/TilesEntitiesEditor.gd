@@ -9,6 +9,8 @@ var ui_root
 
 var im_ready = false
 
+var grid_item_width: float = 60
+
 func _ready():
 	assert(tile_grid and entity_grid, "TilesEntitiesEditor must have tile_grid and entity_grid")
 	visibility_changed.connect(_on_vis_changed)
@@ -17,17 +19,23 @@ func _ready():
 	var editor_window: Window = ui_root.find_child("TileEntityEditorWindow")
 	editor_window.hidden.connect(update_all_grids)
 	
+	var temp_grid_item = TileEntityButton.instantiate()
+	prints("temp grid item min size:", temp_grid_item.get_combined_minimum_size(), "min size vec:", temp_grid_item.custom_minimum_size)
+	grid_item_width = temp_grid_item.get_combined_minimum_size().x
+	temp_grid_item.queue_free()
+	
 	im_ready = true
 	_on_vis_changed()
 
 func set_grid_columns(the_grid: GridContainer) -> void:
 	var scroll_container: = the_grid.get_parent() as ScrollContainer
 	var grid_width = scroll_container.size.x
-	if grid_width < 61:
+	if grid_width < grid_item_width + 1:
 		the_grid.columns = 1
 		return
 	var hsep: = the_grid.get_theme_constant("h_separation")
-	the_grid.columns = floor((grid_width + hsep - 1) / (60.0 + hsep))
+	prints("width in terms of columns:", (grid_width + hsep - 1) / (grid_item_width + hsep), "grid_width:", grid_width, "column width:", grid_item_width + hsep)
+	the_grid.columns = floor((grid_width + hsep - 1) / (grid_item_width + hsep))
 
 func update_all_grids() -> void:
 	update_the_grid(true)

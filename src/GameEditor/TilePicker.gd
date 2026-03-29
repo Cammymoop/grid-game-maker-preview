@@ -1,5 +1,9 @@
 extends TextureRect
 
+signal confirmed
+
+@export var confirm_on_dbl_click: = true
+
 var index_of_texture
 var tile_size: Vector2
 var origin: Vector2
@@ -22,8 +26,11 @@ func _gui_input(event):
 		var index = tile_pos_to_index(local_pos_to_tile_pos(event.position))
 		highlight_index(index)
 	elif event is InputEventMouseButton:
-		var index = tile_pos_to_index(local_pos_to_tile_pos(event.position))
-		set_selected_index(index)
+		if event.is_pressed():
+			var index = tile_pos_to_index(local_pos_to_tile_pos(event.position))
+			set_selected_index(index)
+			if event.double_click and confirm_on_dbl_click:
+				confirmed.emit()
 
 func set_view_scale(new_scale) -> void:
 	view_scale = new_scale

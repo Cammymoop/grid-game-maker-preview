@@ -51,3 +51,7 @@ func _on_TilePicker_resized():
 func _on_vis_changed():
 	if not visible:
 		hidden.emit()
+
+func _on_tile_picker_confirmed() -> void:
+	confirmed.emit()
+	hide()

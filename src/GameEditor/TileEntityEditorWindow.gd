@@ -24,6 +24,8 @@ func _ready():
 		controller_list.add_item(controller)
 	
 	controller_list.connect("index_pressed", Callable(self, "set_controller"))
+	
+	close_requested.connect(close_window)
 
 func set_controller(list_index) -> void:
 	if tile_entity_mode != "entity":
@@ -77,9 +79,14 @@ func load_tile_info(tile_index: int):
 	load_common()
 
 func load_common():
-	find_child("ImageButton").icon = Utility.atlas_texture_from_texture_index(the_definition['texture'], the_definition['tex_index'])
+	update_image_button()
 	
 	show_property_list()
+
+func update_image_button():
+	var image_tex_rect: = find_child("ImageButton").find_child("TextureRect") as TextureRect
+	image_tex_rect.texture = Utility.atlas_texture_from_texture_index(the_definition['texture'], the_definition['tex_index'])
+	image_tex_rect.custom_minimum_size = image_tex_rect.texture.get_size() * 2
 
 
 func set_tile_entity_mode(tile_or_entity: String) -> void:
@@ -144,7 +151,7 @@ func update_texture(tex_popup):
 	the_definition['texture'] = tex_popup.get_selected_texture()
 	the_definition['tex_index'] = tex_popup.get_selected_sub_index()
 	
-	find_child("ImageButton").icon = Utility.atlas_texture_from_texture_index(the_definition['texture'], the_definition['tex_index'])
+	update_image_button()
 	tex_popup.queue_free()
 
 func _on_ImageButton_pressed():
@@ -152,7 +159,7 @@ func _on_ImageButton_pressed():
 	add_child(tex_popup)
 	tex_popup.setup(the_definition['texture'], the_definition['tex_index'])
 	
-	tex_popup.connect("confirmed", Callable(self, "update_texture").bind(tex_popup))
+	tex_popup.confirmed.connect(update_texture.bind(tex_popup))
 	tex_popup.popup_centered()
 
 
