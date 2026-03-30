@@ -317,3 +317,10 @@ func tile_transform_from_facing(facing: int) -> int:
 
 func facing_from_tile_alt_id(alt_id: int) -> int:
 	return TILE_TRANSFORM_TO_FACING.get(alt_id & TILE_TANSFORM_MASK, 0)
+
+func insert_array_at(into_array: Array, insert_at_index: int, inserted_array: Array) -> void:
+	if insert_at_index == into_array.size():
+		into_array.append_array(inserted_array)
+		return
+	for i in range(inserted_array.size() - 1, -1, -1):
+		into_array.insert(insert_at_index, inserted_array[i])

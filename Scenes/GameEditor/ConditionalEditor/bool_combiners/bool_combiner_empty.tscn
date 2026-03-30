@@ -1,0 +1,11 @@
+[gd_scene format=3 uid="uid://clp1tv5754nty"]
+
+[ext_resource type="Script" uid="uid://cqvk4rdk76ogw" path="res://Scenes/GameEditor/ConditionalEditor/bool_combiners/bool_combiner_piece.gd" id="1_i8tki"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_ik41f"]
+
+[node name="BoolCombinerEmpty" type="Panel" unique_id=1104590151]
+custom_minimum_size = Vector2(12, 45)
+theme_override_styles/panel = SubResource("StyleBoxEmpty_ik41f")
+script = ExtResource("1_i8tki")
+is_empty = true

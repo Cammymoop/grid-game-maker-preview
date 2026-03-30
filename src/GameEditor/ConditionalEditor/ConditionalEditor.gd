@@ -3,7 +3,7 @@ extends Window
 signal cancelled
 signal save_conditional(conditional_data: Variant)
 
-@onready var cond_list = find_child("ConditionsList")
+@onready var cond_list: = find_child("ConditionsList") as ConditionsCommandList
 @onready var cond_list_tab = find_child("Conditions")
 @onready var true_actions_list = find_child("TrueActionsList")
 @onready var false_actions_list = find_child("FalseActionsList")
@@ -168,7 +168,7 @@ func load_v3_conditional_data_step(from_data: Dictionary) -> void:
 
 func append_item_to_command_list(new_list_item: CommandListItem, command_list_name: String) -> void:
     if command_list_name == "conditions":
-        cond_list.add_child(new_list_item)
+        cond_list.append_command(new_list_item)
     else:
         if command_list_name == "when always":
             command_list_name = "always"
@@ -234,8 +234,7 @@ func update_current_step() -> void:
         "conditions": [],
     }
     
-    for command_node in cond_list.get_children():
-        data.conditions.append(make_v3_command_data(command_node))
+    data.conditions = cond_list.get_v3_command_data()
     for when_list_name in when_lists:
         var data_key: String = when_list_name
         if when_list_name == "always":

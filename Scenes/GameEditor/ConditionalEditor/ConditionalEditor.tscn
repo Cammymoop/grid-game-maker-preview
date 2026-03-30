@@ -8,6 +8,7 @@
 [ext_resource type="Texture2D" uid="uid://dn7c2cihicbkd" path="res://assets/img/button_icons/direction_icons/left.png" id="5_wqvmh"]
 [ext_resource type="Script" uid="uid://d3yos0b24ft4f" path="res://src/GameEditor/ConditionalEditor/ConditionalEditor.gd" id="6"]
 [ext_resource type="Texture2D" uid="uid://wo7nayhwkk8y" path="res://assets/img/button_icons/direction_icons/right.png" id="6_1yhi8"]
+[ext_resource type="PackedScene" uid="uid://b42u3p3nqtalk" path="res://Scenes/GameEditor/ConditionalEditor/conditions_command_list.tscn" id="6_k14si"]
 [ext_resource type="Script" uid="uid://wr87ai1n4tcw" path="res://src/GameEditor/ConditionalEditor/ActionsTabs.gd" id="7"]
 
 [sub_resource type="StyleBoxFlat" id="3"]
@@ -149,8 +150,7 @@ theme_override_constants/margin_top = 10
 theme_override_constants/margin_right = 2
 theme_override_constants/margin_bottom = 10
 
-[node name="ConditionsList" type="VBoxContainer" parent="PanelContainer/MarginContainer/VBoxContainer2/VBoxContainer/HBoxContainer/TabContainer/Conditions/Panel/MarginContainer" unique_id=377614305]
-custom_minimum_size = Vector2(100, 20)
+[node name="ConditionsList" parent="PanelContainer/MarginContainer/VBoxContainer2/VBoxContainer/HBoxContainer/TabContainer/Conditions/Panel/MarginContainer" unique_id=291498835 instance=ExtResource("6_k14si")]
 layout_mode = 2
 
 [node name="NewConditionButton" type="Button" parent="PanelContainer/MarginContainer/VBoxContainer2/VBoxContainer/HBoxContainer" unique_id=195764754]

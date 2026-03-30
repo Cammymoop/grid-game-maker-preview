@@ -1,0 +1,17 @@
+[gd_scene format=3 uid="uid://dq20pc0v1012r"]
+
+[ext_resource type="Script" uid="uid://cqvk4rdk76ogw" path="res://Scenes/GameEditor/ConditionalEditor/bool_combiners/bool_combiner_piece.gd" id="1_73e12"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_vtp3k"]
+bg_color = Color(0.505882, 0.254902, 0.254902, 1)
+border_width_left = 2
+border_width_right = 2
+border_color = Color(0.14902, 0.0509804, 0.0509804, 1)
+expand_margin_top = 3.0
+expand_margin_right = 2.0
+expand_margin_bottom = 2.0
+
+[node name="BoolCombinerMiddle" type="Panel" unique_id=897264441]
+custom_minimum_size = Vector2(12, 45)
+theme_override_styles/panel = SubResource("StyleBoxFlat_vtp3k")
+script = ExtResource("1_73e12")

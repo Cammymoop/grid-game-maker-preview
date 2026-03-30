@@ -1,0 +1,58 @@
+[gd_scene format=3 uid="uid://b42u3p3nqtalk"]
+
+[ext_resource type="Script" uid="uid://vwn7mvdufg0l" path="res://Scenes/GameEditor/ConditionalEditor/conditions_command_list.gd" id="1_ik41f"]
+[ext_resource type="PackedScene" uid="uid://clp1tv5754nty" path="res://Scenes/GameEditor/ConditionalEditor/bool_combiners/bool_combiner_empty.tscn" id="2_acsll"]
+[ext_resource type="PackedScene" uid="uid://bn46y1vvjv8b7" path="res://Scenes/GameEditor/ConditionalEditor/bool_combiners/bool_combiner_top.tscn" id="3_8fjbh"]
+[ext_resource type="PackedScene" uid="uid://csg5mnkdgm8el" path="res://Scenes/GameEditor/ConditionalEditor/bool_combiners/bool_combiner_bottom.tscn" id="4_j5c2p"]
+[ext_resource type="PackedScene" uid="uid://dq20pc0v1012r" path="res://Scenes/GameEditor/ConditionalEditor/bool_combiners/bool_combiner_middle.tscn" id="5_fbqva"]
+
+[node name="ConditionsCommandList" type="GridContainer" unique_id=174729381]
+custom_minimum_size = Vector2(100, 20)
+offset_right = 100.0
+offset_bottom = 20.0
+columns = 3
+script = ExtResource("1_ik41f")
+
+[node name="BoolCombinerEmpty" parent="." unique_id=1104590151 instance=ExtResource("2_acsll")]
+layout_mode = 2
+
+[node name="BoolCombinerTop" parent="." unique_id=596260297 instance=ExtResource("3_8fjbh")]
+layout_mode = 2
+
+[node name="Panel" type="Panel" parent="." unique_id=438714563]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="BoolCombinerTop2" parent="." unique_id=1808164904 instance=ExtResource("3_8fjbh")]
+layout_mode = 2
+
+[node name="BoolCombinerBottom" parent="." unique_id=1493959378 instance=ExtResource("4_j5c2p")]
+layout_mode = 2
+
+[node name="Panel2" type="Panel" parent="." unique_id=196707560]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="BoolCombinerMiddle" parent="." unique_id=897264441 instance=ExtResource("5_fbqva")]
+layout_mode = 2
+
+[node name="BoolCombinerEmpty2" parent="." unique_id=1092123818 instance=ExtResource("2_acsll")]
+layout_mode = 2
+
+[node name="Panel3" type="Panel" parent="." unique_id=1939685933]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="BoolCombinerBottom2" parent="." unique_id=516376285 instance=ExtResource("4_j5c2p")]
+layout_mode = 2
+
+[node name="BoolCombinerEmpty3" parent="." unique_id=1807479669 instance=ExtResource("2_acsll")]
+layout_mode = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="." unique_id=1250163528]
+layout_mode = 2
+theme_override_constants/margin_left = -16
+
+[node name="Panel4" type="Panel" parent="MarginContainer" unique_id=1741309018]
+layout_mode = 2
+size_flags_horizontal = 3
