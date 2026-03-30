@@ -297,7 +297,7 @@ func load_current_step() -> void:
     load_v3_conditional_data_step(current_conditional[current_step])
 
 func clear_edited_step() -> void:
-    _clear_list(cond_list)
+    cond_list.clear_commands()
     for when_list_name in when_lists:
         remove_when_list(when_list_name)
 

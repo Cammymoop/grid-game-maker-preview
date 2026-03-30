@@ -13,5 +13,6 @@ expand_margin_bottom = 2.0
 
 [node name="BoolCombinerMiddle" type="Panel" unique_id=897264441]
 custom_minimum_size = Vector2(12, 45)
+mouse_filter = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_vtp3k")
 script = ExtResource("1_73e12")

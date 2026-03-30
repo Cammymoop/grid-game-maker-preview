@@ -25,6 +25,7 @@ expand_margin_right = 4.0
 
 [node name="BoolCombinerSingle" type="Panel" unique_id=260586109]
 custom_minimum_size = Vector2(12, 45)
+mouse_filter = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_ik41f")
 script = ExtResource("1_ggb2d")
 
@@ -36,6 +37,7 @@ anchor_left = 1.0
 anchor_right = 1.0
 offset_bottom = 2.0
 grow_horizontal = 0
+mouse_filter = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_vq6ei")
 
 [node name="Panel3" type="Panel" parent="." unique_id=2073658718]
@@ -49,4 +51,5 @@ anchor_bottom = 1.0
 offset_top = -2.0
 grow_horizontal = 0
 grow_vertical = 0
+mouse_filter = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_vq6ei")

@@ -6,6 +6,7 @@
 
 [node name="BoolCombinerEmpty" type="Panel" unique_id=1104590151]
 custom_minimum_size = Vector2(12, 45)
+mouse_filter = 2
 theme_override_styles/panel = SubResource("StyleBoxEmpty_ik41f")
 script = ExtResource("1_i8tki")
 is_empty = true

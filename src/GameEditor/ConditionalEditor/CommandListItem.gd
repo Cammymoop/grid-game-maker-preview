@@ -12,6 +12,8 @@ var is_v3 = false
 
 var current_slot: int = Commands.Slot.RED
 
+var parent_list: Control = null
+
 # v2 data:
 var command_code: int
 var ui_data: Dictionary
@@ -298,6 +300,14 @@ func _on_TextureRect_gui_input(event):
     if not e:
         return
     if e.button_mask == MOUSE_BUTTON_MASK_LEFT and e.is_pressed():
+        delete_self()
+
+func delete_self() -> void:
+    if not parent_list:
+        parent_list = get_parent()
+    if parent_list is ConditionsCommandList:
+        parent_list.remove_command(self)
+    else:
         queue_free()
 
 

@@ -22,6 +22,7 @@ expand_margin_right = 4.0
 
 [node name="BoolCombinerTop" type="Panel" unique_id=596260297]
 custom_minimum_size = Vector2(12, 45)
+mouse_filter = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_bdexe")
 script = ExtResource("1_3f8ks")
 
@@ -32,4 +33,5 @@ anchors_preset = 1
 anchor_left = 1.0
 anchor_right = 1.0
 grow_horizontal = 0
+mouse_filter = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_vq6ei")
