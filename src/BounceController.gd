@@ -7,14 +7,14 @@ var move_mode = "facing"
 func get_options() -> Dictionary:
 	return {}
 
-func get_move(_secondary: bool = false):
+func get_max_move_intentions() -> int:
+	return 1
+
+func get_move(_attempt_num: int):
 	if not EntityManager.controller_frame:
 		return -1
 	
 	if parent.can_i_move_relative("forward"):
 		return parent.facing
-	
-	if parent.can_i_move_relative("reverse"):
-		return Utility.resolve_relative_direction("reverse", parent.facing)
-	
-	return -1
+	else:
+		return Utility.facing_opposite(parent.facing)

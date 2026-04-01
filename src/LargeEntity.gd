@@ -3,86 +3,112 @@ class_name LargeEntity
 
 #var shape: Rect2 = Rect2(0, 0, 2, 2)
 var entity_size: Vector2 = Vector2(2, 2)
+var use_mask: bool = false
+var shape_mask: Dictionary[Vector2, bool] = {}
 
-# At least for now in 3.0 parent class _ready is auto called before this
 func _ready() -> void:
+	super._ready()
 	#var grid_size = Vector2(MapManager.tile_width, MapManager.tile_width)
-	$Sprite2D.position = Vector2(MapManager.tile_width * entity_size.x, MapManager.tile_width * entity_size.y) / 2
-	$Sprite2D.scale = entity_size
+
+func update_sprite_pos_scale() -> void:
+	sprite.position = Vector2(MapManager.tile_width * entity_size.x, MapManager.tile_width * entity_size.y) / 2
+	if EntityManager.get_entity_prop_with_default(self, "auto_scale", true):
+		sprite.scale = entity_size
+	else:
+		sprite.scale = Vector2.ONE
 
 func serialize() -> Dictionary:
 	var serialized = super.serialize()
 	serialized["entity_class"] = "LargeEntity"
 	return serialized
 
-func is_at(check_position: Vector2) -> bool:
-	var at_pos = tile_position
+func is_at(check_position: Vector2i, include_moving_away: bool = false) -> bool:
 	if moving:
-		at_pos = next_tile_pos
-	
-	if check_position.x >= at_pos.x and check_position.x < at_pos.x + entity_size.x:
-		if check_position.y >= at_pos.y and check_position.y < at_pos.y + entity_size.y:
+		if is_at_relative(check_position - Vector2i(next_tile_pos)):
 			return true
-	return false
+		elif not include_moving_away:
+			return false
+	
+	return is_at_relative(check_position - Vector2i(tile_position))
 
-func get_frontier(in_facing: int) -> Dictionary:
-	var frontier = []
-	var fromtier = []
-	if in_facing == 1 or in_facing == 3:
-		var x = -1 if in_facing == 3 else int(entity_size.x)
-		var x2 = int(entity_size.x - 1) if in_facing == 3 else 0
-		for y in range(0, entity_size.y):
-			frontier.append(tile_position + Vector2(x, y))
-			fromtier.append(tile_position + Vector2(x2, y))
-	elif in_facing == 0 or in_facing == 2:
-		var y = -1 if in_facing == 0 else int(entity_size.y)
-		var y2 = int(entity_size.y - 1) if in_facing == 0 else 0
-		for x in range(0, entity_size.x):
-			frontier.append(tile_position + Vector2(x, y))
-			fromtier.append(tile_position + Vector2(x, y2))
+func is_at_relative(check_relative: Vector2i) -> bool:
+	if use_mask:
+		return check_mask(check_relative)
+	else:
+		return check_relative.x >= 0 and check_relative.x < entity_size.x and check_relative.y >= 0 and check_relative.y < entity_size.y
+
+func check_mask(check_offset: Vector2i) -> bool:
+	return shape_mask.get(mask_offset_rotated_by(check_offset, visual_facing), false)
+
+func mask_offset_rotated_by(offset: Vector2i, by_facing: int) -> Vector2i:
+	if by_facing == 0 or entity_size == Vector2.ONE:
+		return offset
+	var mask_pivot: = entity_size / 2 - Vector2(.5, .5)
+	var radians: = Utility.facing_rotation(by_facing)
+	return Vector2i((Vector2(offset) - mask_pivot).rotated(radians) + mask_pivot)
+
+func get_positions_at(at_tile_position: Vector2i) -> Array[Vector2i]:
+	var base_positions: = Utility.get_width_height_position_list(entity_size.x, entity_size.y)
+	var offset_positions: Array[Vector2i] = []
+	for base_pos in base_positions:
+		if not use_mask or check_mask(base_pos):
+			offset_positions.append(at_tile_position + base_pos)
+	return offset_positions
+
+func get_frontier(in_facing_dir: int) -> Dictionary:
+	var from_positions: = get_positions_at(tile_position)
+	var to_positions: = get_positions_at(tile_position + Utility.facing_vector(in_facing_dir))
+	var fromtier: Array[Vector2i] = []
+	var frontier: Array[Vector2i] = []
+	for from_pos in from_positions:
+		if from_pos not in to_positions:
+			fromtier.append(from_pos)
+	for to_pos in to_positions:
+		if to_pos not in from_positions:
+			frontier.append(to_pos)
 	return {to = frontier, from = fromtier}
 
 # Override start_move because I'm too thicc
-func start_move(move_facing, change_visual_facing=true, group_move=false) -> bool:
+func start_move(move_facing: int, change_visual_facing: bool = true, group_move: bool = false) -> bool:
 	if moving:
-		print_debug("Tried to start move when already moving")
+		push_warning("Tried to start move when already moving")
 		return false
+	if  current_move_speed <= 0:
+		return false
+
 	if change_visual_facing and visual_turn_on_move:
 		set_visual_facing(move_facing)
 	set_facing(move_facing)
 	
-	if current_move_speed > 0:
-		if not group_move and bond_group:
-			# TODO entity managers bond group move checking doesnt take large entities into account yet
-			return EntityManager.bond_group_start_move(bond_group, steps_per_tile, move_facing)
-		
-		next_tile_pos = tile_position + Utility.facing_vector(facing)
-		var not_stopped = true
-		
-		var frontier = get_frontier(move_facing)
-		for moving_to in frontier.to:
-			not_stopped = not_stopped and MapManager.attempt_move(self, moving_to, group_move)
-		
-		if not_stopped:
-			moving = true
-			steps_remaining = steps_per_tile
-			if not bond_group:
-				# during a bonded move, entity manager handles calling post_move_actions and actually_started_move
-				# they wont get called unless the move succeeds
-				for i in range(len(frontier.to)):
-					EntityManager.post_move_actions(self, frontier.from[i], frontier.to[i])
-				actually_started_move()
-			else:
-				emit_signal("started_move")
-			return true
+	if not group_move and bond_group:
+		# TODO entity managers bond group move checking doesnt take large entities into account yet
+		return EntityManager.bond_group_start_move(bond_group, steps_per_tile, move_facing)
+	
+	next_tile_pos = tile_position + Utility.facing_vector(facing)
+	var not_stopped = true
+	
+	var frontier = get_frontier(move_facing)
+	for moving_to in frontier.to:
+		not_stopped = not_stopped and MapManager.attempt_move(self, moving_to, group_move)
+	
+	if not_stopped:
+		moving = true
+		steps_remaining = steps_per_tile
+		if not bond_group:
+			# during a bonded move, entity manager handles calling post_move_actions and actually_started_move
+			# they wont get called unless the move succeeds
+			EntityManager.post_move_multi_pos(self, frontier.from, frontier.to, bond_group)
+			actually_started_move()
 		else:
-			next_tile_pos = tile_position
-			emit_signal("blocked")
-			return false
-	return false
+			emit_signal("started_move")
+		return true
+	else:
+		next_tile_pos = tile_position
+		emit_signal("blocked")
+		return false
 
 func finish_move() -> void:
-	position = Vector2(int(round(position.x)), int(round(position.y)))
+	position = position.round()
 	#tile_position = next_tile_pos
 	var frontier = get_frontier(facing)
 	tile_position = MapManager.world_to_tile_position(global_position)
@@ -91,5 +117,4 @@ func finish_move() -> void:
 		print_debug("???")
 	moving = false
 	
-	for moved_to in frontier.to:
-		MapManager.finish_move(self, moved_to)
+	MapManager.finish_move(self, frontier.to)

@@ -81,27 +81,30 @@ var instance_counter = 0
 var frame_counter = 0
 
 var movements_enabled: bool = true
-var movement_requested: bool = false
-var requested_move_frames = 0
+var turn_requested: bool = false
+var requested_turn_frames: int = 0
+var turn_frames_remaining = 0
 var controller_frame: bool = true
 var movement_mode: int
+
+var default_move_speed: float = 6
 
 func _physics_process(_delta):
     if movements_enabled:
         frame_counter += 1
     
     if movement_mode != GameManager.MovementMode.MOVEMENT_CONTINUOUS:
-        await get_tree().physics_frame
         controller_frame = false
         if movements_enabled:
             if movement_mode == GameManager.MovementMode.MOVEMENT_DISCRETE:
-                requested_move_frames -= 1
-                if requested_move_frames <= 0:
+                turn_frames_remaining -= 1
+                if turn_frames_remaining <= 0:
                     movements_enabled = false
             elif movement_mode == GameManager.MovementMode.MOVEMENT_DISCRETE_WAIT and all_entities_settled():
                 movements_enabled = false
-        elif movement_requested:
-            movement_requested = false
+        elif turn_requested:
+            turn_requested = false
+            turn_frames_remaining = requested_turn_frames
             movements_enabled = true
             controller_frame = true
 
@@ -113,6 +116,7 @@ func all_entities_settled() -> bool:
 
 func _ready():
     preload_controller_templates()
+    process_physics_priority = 10
 
 func setup():
     fix_string_keys()
@@ -215,8 +219,8 @@ func clear_entity_list():
 # In discrete mode we wont update entities at all until a move is requested
 func request_move(entity) -> void:
     if movement_mode == GameManager.MovementMode.MOVEMENT_DISCRETE:
-        requested_move_frames = entity.steps_per_tile
-    movement_requested = true
+        requested_turn_frames = entity.steps_per_tile
+    turn_requested = true
 
 func get_instance(instance_id):
     if not instance_id in entity_instance_map:
@@ -301,7 +305,10 @@ func create_entity(entity_index, tile_position, facing=0, activate=true) -> Node
     else: 
         entity = entity_template.instantiate()
     if "intended_move_speed" in entity_info:
-        entity.set_intended_move_speed(entity_info['intended_move_speed'])
+        var intended_move_speed: = float(entity_info['intended_move_speed'])
+        if intended_move_speed <= 0:
+            intended_move_speed = default_move_speed
+        entity.set_intended_move_speed(intended_move_speed)
     if "controller" in entity_info:
         if entity_info["controller"] in controller_templates:
             var controller = get_new_controller(entity_info["controller"])
@@ -442,7 +449,7 @@ func unbond_entity(entity, cull_empty=true) -> void:
     if entity.bond_group:
         var bg = entity.bond_group
         bg.remove_at(bg.find(entity.instance_id))
-        entity.bond_group = null
+        entity.bond_group = []
         if cull_empty:
             bond_group_update()
 
@@ -463,7 +470,7 @@ func get_bond_group(entity):
             return bg
     return null
 
-func bond_group_start_move(bond_group, steps_per_tile, move_facing) -> bool:
+func bond_group_start_move(bond_group: Array, steps_per_tile: int, move_facing: int) -> bool:
     var instances = []
     for entity_instance_id in bond_group:
         instances.append(get_instance(entity_instance_id))
@@ -477,7 +484,7 @@ func bond_group_start_move(bond_group, steps_per_tile, move_facing) -> bool:
     for entity in instances:
         # set change visual facing to false for group moves for now
         # good default but should be configurable somehow
-        entity.set_current_speed(steps_per_tile)
+        entity.set_current_steps_per_tile(steps_per_tile)
         if not entity.start_move(move_facing, false, true):
             move_allowed = false
     
@@ -492,12 +499,10 @@ func bond_group_start_move(bond_group, steps_per_tile, move_facing) -> bool:
             entity.actually_started_move()
     return move_allowed
 
-func get_entities_at(tile_position, exclude_entity=null, exclude_bond_group=null, include_moving_away=false) -> Array:
+func get_entities_at(tile_position: Vector2, exclude_entity=null, exclude_list: Array = [], include_moving_away: bool = false) -> Array:
     var entities_here = []
     for e in entity_list:
-        if e == exclude_entity:
-            continue
-        if exclude_bond_group and e.instance_id in exclude_bond_group:
+        if e == exclude_entity or (exclude_list and e.instance_id in exclude_list):
             continue
         if e is LargeEntity:
             if e.is_at(tile_position):
@@ -553,16 +558,34 @@ func preload_controller_templates() -> void:
         var controller_name = fname.get_basename()
         controller_templates[controller_name] = load(controllers_path + fname)
 
-func finish_move(moving_entity, tile_position) -> void:
-    var entities_here = get_entities_at(tile_position, moving_entity)
-    for e in entities_here:
-        var ifmot: = get_entity_property(moving_entity, "i_finish_move_onto")
-        if ifmot and ifmot.is_conditional():
-            ifmot.resolve(moving_entity, e, tile_position)
-        var fmot: = get_entity_property(e, "finish_move_onto")
-        if fmot and fmot.is_conditional():
-            fmot.resolve(e, moving_entity, tile_position)
+func finish_move(moving_entity, onto_positions: Array) -> void:
+    var entities_here: Array = []
+    var entities_overlapped_at: Array = []
+    for onto_position in onto_positions:
+        for entity_here in get_entities_at(onto_position, moving_entity):
+            if not entity_here in entities_here:
+                entities_here.append(entity_here)
+                entities_overlapped_at.append(onto_position)
 
+    for i in entities_here.size():
+        var e = entities_here[i]
+        var tile_position = entities_overlapped_at[i]
+        resolve_entity_interaction_event("i_finish_move_onto", moving_entity, e, tile_position)
+        resolve_entity_interaction_event("finish_move_onto", e, moving_entity, tile_position)
+
+func resolve_entity_interaction_event(event_name: String, actor, interactee, at_tile_position: Vector2) -> void:
+    var event_prop: = get_entity_property(actor, event_name)
+    if event_prop and event_prop.is_conditional():
+        event_prop.resolve(actor, interactee, at_tile_position)
+
+func get_entity_interaction_bool_result(event_name: String, defualt_result: bool, actor, interactee, at_tile_position: Vector2) -> bool:
+    var event_prop: = get_entity_property(actor, event_name)
+    if not event_prop:
+        return defualt_result
+    if event_prop.is_conditional():
+        return event_prop.resolve(actor, interactee, at_tile_position)
+    else:
+        return event_prop.get_value()
 
 func attempt_move(moving_entity, tile_position, group_move=false) -> bool:
     var entities_here: = []
@@ -571,13 +594,8 @@ func attempt_move(moving_entity, tile_position, group_move=false) -> bool:
     else:
         entities_here = get_entities_at(moving_entity.tile_position, moving_entity)
     for e in entities_here:
-        var move_off_of: = get_entity_property(e, "move_off_of")
-        if move_off_of:
-            if move_off_of.is_conditional():
-                if not move_off_of.resolve(e, moving_entity, tile_position):
-                    return false
-            elif not move_off_of.get_value():
-                return false
+        if not get_entity_interaction_bool_result("move_off_of", true, e, moving_entity, tile_position):
+            return false
     
     var entities_there: = []
     if group_move:
@@ -595,28 +613,42 @@ func attempt_move(moving_entity, tile_position, group_move=false) -> bool:
             elif blocks.get_value():
                 return false
         
-        var move_onto: = get_entity_property(e, "move_onto")
-        if move_onto:
-            if move_onto.is_conditional():
-                if not move_onto.resolve(e, moving_entity, tile_position):
-                    return false
-            elif not move_onto.get_value():
-                return false
+        if not get_entity_interaction_bool_result("move_onto", true, e, moving_entity, tile_position):
+            return false
         
     return true
 
-func post_move_actions(moving_entity, from_position, to_position, exclude_group=null) -> void:
+func post_move_actions(moving_entity, from_position, to_position, exclude_group: Array = []) -> void:
     var entities_start = get_entities_at(from_position, moving_entity, exclude_group)
     for e in entities_start:
-        var pmove_off_of: = get_entity_property(e, "post_move_off_of")
-        if pmove_off_of and pmove_off_of.is_conditional():
-            pmove_off_of.resolve(e, moving_entity, from_position)
+        resolve_entity_interaction_event("post_move_off_of", e, moving_entity, from_position)
     
     var entities_destination = get_entities_at(to_position, moving_entity, exclude_group)
     for e in entities_destination:
-        var pmove_onto: = get_entity_property(e, "post_move_onto")
-        if pmove_onto and pmove_onto.is_conditional():
-            pmove_onto.resolve(e, moving_entity, to_position)
+        resolve_entity_interaction_event("post_move_onto", e, moving_entity, to_position)
+
+func post_move_multi_pos(moving_entity, moved_off_positions: Array, moved_onto_positions: Array, exclude_group: Array = []) -> void:
+    var entities_moved_off: Array = []
+    var entities_moved_off_at: Array = []
+    for moved_off_position in moved_off_positions:
+        for entity_here in get_entities_at(moved_off_position, moving_entity, exclude_group):
+            if not entity_here in entities_moved_off:
+                entities_moved_off.append(entity_here)
+                entities_moved_off_at.append(moved_off_position)
+    for i in entities_moved_off.size():
+        var e = entities_moved_off[i]
+        resolve_entity_interaction_event("post_move_off_of", e, moving_entity, entities_moved_off_at[i])
+    
+    var entities_moved_onto: Array = []
+    var entities_moved_onto_at: Array = []
+    for moved_onto_position in moved_onto_positions:
+        for entity_there in get_entities_at(moved_onto_position, moving_entity, exclude_group):
+            if not entity_there in entities_moved_onto:
+                entities_moved_onto.append(entity_there)
+                entities_moved_onto_at.append(moved_onto_position)
+    for i in entities_moved_onto.size():
+        var e = entities_moved_onto[i]
+        resolve_entity_interaction_event("post_move_onto", e, moving_entity, entities_moved_onto_at[i])
 
 func can_move_to(moving_entity, tile_position) -> bool:
     var entities_here = get_entities_at(tile_position, moving_entity)
@@ -654,6 +686,15 @@ func get_entity_property(entity, property_name) -> Property:
     property.set_value(value)
     property.set_name(property_name)
     return property
+
+func get_entity_prop_with_default(entity, property_name, default_value) -> Variant:
+    if not entity.has_property(property_name):
+        return default_value
+    var prop: Property = get_entity_property(entity, property_name)
+    if prop.is_conditional():
+        return prop.resolve(entity, null, entity.tile_position)
+    else:
+        return prop.get_value()
 
 func entity_has_property(entity, property_name: String) -> bool:
     var entity_props = entity_defs[entity.entity_index]["properties"]

@@ -164,7 +164,7 @@ func resolve_conditional(conditional_name, conditional_data, owning_entity, targ
 				if owning_entity.moving:
 					condition_stack.append(false)
 				else:
-					owning_entity.set_current_speed(target_entity.steps_per_tile)
+					owning_entity.set_current_steps_per_tile(target_entity.steps_per_tile)
 					var move_facing = Utility.resolve_relative_direction(split_condition[1], target_entity.facing)
 					var visual_turn = true
 					if 2 <= len(split_condition) - 1:
@@ -226,7 +226,7 @@ func do_action(action_data, owning_entity, target_entity, tile_position, argumen
 		"copy_move_speed", "send_move_speed":
 			var to_ent = owning_entity if a == "copy_move_speed" else target_entity
 			var from_ent = target_entity if a == "copy_move_speed" else owning_entity
-			to_ent.set_current_speed(from_ent.steps_per_tile)
+			to_ent.set_current_steps_per_tile(from_ent.steps_per_tile)
 		"move", "you_move":
 			var mover = owning_entity if a == "move" else target_entity
 			if mover.moving:

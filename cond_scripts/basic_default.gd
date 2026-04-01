@@ -79,7 +79,7 @@ func cmd_c_get_pushed(slots: Dictionary, chosen_slot: int, direction: int, keep_
 	if selected.moving:
 		return false
 	var blue_entity = slots[Slot.BLUE]
-	selected.set_current_speed(blue_entity.steps_per_tile)
+	selected.set_current_steps_per_tile(blue_entity.steps_per_tile)
 	var facing = resolve_direction_value(direction, slots)
 	return selected.start_move(facing, not keep_visual)
 

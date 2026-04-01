@@ -47,6 +47,9 @@ func facing_vector(what_facing: int) -> Vector2:
 func facing_rotated(what_facing: int, what_rotation: int) -> int:
 	return posmod(what_facing + what_rotation, 4)
 
+func facing_opposite(what_facing: int) -> int:
+	return posmod(what_facing + 2, 4)
+
 func facing_rotation(what_facing: int) -> float:
 	return (what_facing * PI) / 2.0
 
@@ -347,3 +350,10 @@ func get_number_suffix(of_string: String) -> int:
 	if got_match:
 		return got_match.get_string(1).to_int()
 	return 0
+
+func get_width_height_position_list(width: int, height: int) -> Array[Vector2i]:
+	var positions: Array[Vector2i] = []
+	for y in height:
+		for x in width:
+			positions.append(Vector2i(x, y))
+	return positions

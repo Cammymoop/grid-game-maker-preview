@@ -26,6 +26,9 @@ func _ready():
 	get_parent().connect("blocked", Callable(self, "got_blocked"))
 	get_parent().connect("started_move", Callable(self, "on_start_move"))
 
+func get_max_move_intentions() -> int:
+	return 1
+
 func set_options(options: Dictionary) -> void:
 	if "stop_repeat_after_bonk" in options:
 		stop_repeat_after_bonk = options["stop_repeat_after_bonk"]
@@ -35,7 +38,7 @@ func set_options(options: Dictionary) -> void:
 func get_options() -> Dictionary:
 	return available_options
 
-func _process(_delta):
+func _physics_process(_delta):
 	var is_pressed = false
 	
 	up_held = true
@@ -72,12 +75,12 @@ func _process(_delta):
 	if not EntityManager.movements_enabled:
 		if up_held or down_held or left_held or right_held:
 			EntityManager.request_move(get_parent())
-		if allow_wait and Input.is_action_just_pressed("wait"):
+		elif allow_wait and Input.is_action_just_pressed("wait_turn"):
 			if not get_parent().moving:
 				EntityManager.request_move(get_parent())
 
-func get_move(secondary: bool = false):
-	if secondary:
+func get_move(attempt_num: int = 0):
+	if attempt_num > 0:
 		return "none"
 	if not EntityManager.controller_frame:
 		return "none"

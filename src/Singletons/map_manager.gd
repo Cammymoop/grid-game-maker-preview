@@ -295,6 +295,12 @@ func is_tile_at(tile_index, tile_position) -> bool:
             found = true
     return found
 
+func tile_exists_at(tile_position) -> bool:
+    for l in layers:
+        if l.get_cell_s(tile_position) != -1:
+            return true
+    return false
+
 func update_tile_definition(tile_index, definition) -> void:
     if not tile_index in tile_defs:
         print("ERROR tried to update non-existing tile: " + str(tile_index))
@@ -395,20 +401,22 @@ func set_tile_facing_at(tile_position: Vector2i, facing: int) -> void:
         if l.get_cell_s(tile_position) != -1:
             l.set_cell_facing(tile_position, facing)
 
-func finish_move(moving_entity, tile_position) -> void:
-    EntityManager.finish_move(moving_entity, tile_position)
+func finish_move(moving_entity, onto_positions: Array) -> void:
+    EntityManager.finish_move(moving_entity, onto_positions)
     
     var ifmot: = EntityManager.get_entity_property(moving_entity, "i_finish_move_onto_tile")
     if ifmot and ifmot.is_conditional():
-        ifmot.resolve(moving_entity, null, tile_position)
+        for onto_position in onto_positions:
+            ifmot.resolve(moving_entity, null, onto_position)
     
+    resolve_tile_event(onto_positions, "finish_move_onto_tile", moving_entity)
+
+func resolve_tile_event(at_tile_positions: Array, tile_event_name: String, context_entity) -> void:
     for l in layers:
-        var ti = l.get_cell_s(tile_position)
-        if ti == -1:
-            continue
-        var fmot: = get_tile_property(ti, "finish_move_onto_tile")
-        if fmot and fmot.is_conditional():
-            fmot.resolve(null, moving_entity, tile_position)
+        for at_pos in at_tile_positions:
+            var event_property: = get_tile_property_at(l.get_cell_s(at_pos), tile_event_name)
+            if event_property and event_property.is_conditional():
+                event_property.resolve(null, context_entity, at_pos)
 
 func attempt_move(moving_entity, tile_position, group_move=false) -> bool:
     var entity_move_allow = EntityManager.attempt_move(moving_entity, tile_position, group_move)
@@ -416,10 +424,11 @@ func attempt_move(moving_entity, tile_position, group_move=false) -> bool:
     var tile_move_allow = check_blocks(moving_entity, tile_position)
     return tile_move_allow and entity_move_allow
 
-func is_blocked(tile_position) -> bool:
+func is_blocked(tile_position, empty_blocks: bool = true) -> bool:
+    if empty_blocks and not tile_exists_at(tile_position):
+        return false
     for layer in layers:
-        var tile_here = layer.get_cell_s(tile_position)
-        if tile_here in blocking_tiles:
+        if layer.get_cell_s(tile_position) in blocking_tiles:
             return true
     return false
 
