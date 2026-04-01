@@ -234,12 +234,16 @@ func get_all_controllers() -> Array:
     return controller_templates.keys()
 
 func new_entity(definition) -> int:
-    var try_index = 0
-    while try_index in entity_defs:
-        try_index += 1
-    entity_defs[try_index] = definition
+    var new_index = max_entity_index() + 1
+    entity_defs[new_index] = definition
     refresh_definition()
-    return try_index
+    return new_index
+
+func max_entity_index() -> int:
+    var max_index = 0
+    for e in entity_defs.keys():
+        max_index = maxi(max_index, e)
+    return max_index
 
 func create_defaults() -> void:
     create_default_player()
@@ -672,7 +676,7 @@ func get_entity_property_list(entity) -> Array:
     return props.keys()
 
 func get_entity_definition(entity_index) -> Dictionary:
-    return entity_defs[entity_index].duplicate()
+    return entity_defs[entity_index].duplicate(true)
 
 func remove_entity_definition(entity_index) -> void:
     erase_all_entities_with_id(entity_index)

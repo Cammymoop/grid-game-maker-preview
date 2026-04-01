@@ -12,6 +12,9 @@ var im_ready = false
 
 var grid_item_width: float = 60
 
+const CONTEXT_MENU_DELETE = 0
+const CONTEXT_MENU_DUPLICATE = 1
+
 func _ready():
 	assert(tile_grid and entity_grid, "TilesEntitiesEditor must have tile_grid and entity_grid")
 	visibility_changed.connect(_on_vis_changed)
@@ -116,15 +119,35 @@ func _on_vis_changed():
 
 func do_context_menu_for_item(the_item: TileEntityButton) -> void:
 	var is_entity = the_item.tile_entity_mode == "entity"
-	var context_menu = PopupMenu.new()
-	context_menu.add_item("Delete", 0)
+	var context_menu = Utility.get_empty_context_menu()
+	context_menu.add_item("Duplicate", CONTEXT_MENU_DUPLICATE)
+	context_menu.add_item("Delete", CONTEXT_MENU_DELETE)
 	context_menu.id_pressed.connect(on_context_menu_id_pressed.bind(is_entity, the_item.the_index))
 	Utility.popup_context_menu_at_mouse(context_menu)
 
 func on_context_menu_id_pressed(context_menu_id: int, is_entity: bool, item_index: int) -> void:
-	if context_menu_id == 0:
+	if context_menu_id == CONTEXT_MENU_DELETE:
 		if is_entity:
 			EntityManager.remove_entity_definition(item_index)
 		else:
 			MapManager.remove_tile_definition(item_index)
 		update_all_grids()
+	elif context_menu_id == CONTEXT_MENU_DUPLICATE:
+		if is_entity:
+			var entity_def: Dictionary = EntityManager.get_entity_definition(item_index)
+			entity_def["name"] = get_renumbered_name(true, entity_def["name"])
+			EntityManager.new_entity(entity_def)
+		else:
+			var tile_def: Dictionary = MapManager.get_tile_definition(item_index)
+			tile_def["name"] = get_renumbered_name(false, tile_def["name"])
+			MapManager.make_new_tile(tile_def.duplicate(true))
+		update_all_grids()
+
+func get_renumbered_name(is_entity: bool, old_name: String) -> String:
+	var check_name: Callable = EntityManager.entity_name_exists if is_entity else MapManager.tile_name_exists
+	var name_number = Utility.get_number_suffix(old_name)
+	old_name = old_name.trim_suffix(str(name_number))
+	name_number += 1
+	while check_name.call(old_name + str(name_number)):
+		name_number += 1
+	return old_name + str(name_number)

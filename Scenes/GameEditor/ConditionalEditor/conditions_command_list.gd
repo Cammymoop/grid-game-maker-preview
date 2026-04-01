@@ -882,7 +882,7 @@ func _resize_smart_up(resized_node: Dictionary, new_range: Array[int], parent_ra
         resized_node["last_command_index"] = new_range[1]
 
 func do_combiner_context_menu(local_row: int, local_column: int) -> void:
-    var context_menu = PopupMenu.new()
+    var context_menu = Utility.get_empty_context_menu()
     context_menu.add_item("And", CONTEXT_MENU_CHANGE_TO_AND) 
     context_menu.add_item("Or", CONTEXT_MENU_CHANGE_TO_OR)
     context_menu.add_item("Not", CONTEXT_MENU_CHANGE_TO_NOT)

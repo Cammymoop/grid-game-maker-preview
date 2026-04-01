@@ -416,6 +416,7 @@ max_brightness = 0.3
 [connection signal="pressed" from="MarginContainer/UIRoot/TabContainer/Game/HBoxContainer5/LoadButton" to="MarginContainer/UIRoot/TabContainer/Game" method="_on_LoadButton_pressed"]
 [connection signal="pressed" from="MarginContainer/UIRoot/TabContainer/Game/HBoxContainer5/SetDefault" to="MarginContainer/UIRoot/TabContainer/Game" method="_on_SetDefault_pressed"]
 [connection signal="resized" from="MarginContainer/UIRoot/TabContainer/Tiles & Entities" to="MarginContainer/UIRoot/TabContainer/Tiles & Entities" method="_on_Tiles_resized"]
+[connection signal="pressed" from="MarginContainer/UIRoot/TabContainer/Tiles & Entities/EntitiesHBoxContainer/NewEntityButton" to="MarginContainer/UIRoot/TabContainer/Tiles & Entities" method="_on_NewEntityButton_pressed"]
 [connection signal="pressed" from="MarginContainer/UIRoot/TabContainer/Tiles & Entities/TilesHBoxContainer/NewTileButton" to="MarginContainer/UIRoot/TabContainer/Tiles & Entities" method="_on_NewTileButton_pressed"]
 [connection signal="pressed" from="MarginContainer/UIRoot/TabContainer/Images/HBoxContainer/HBoxContainer/NewTexButton" to="MarginContainer/UIRoot/TabContainer/Images" method="_on_NewTexButton_pressed"]
 [connection signal="pressed" from="MarginContainer/UIRoot/TabContainer/Images/HBoxContainer/HBoxContainer/EditTexButton" to="MarginContainer/UIRoot/TabContainer/Images" method="_on_EditTexButton_pressed"]

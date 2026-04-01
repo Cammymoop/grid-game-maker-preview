@@ -341,7 +341,7 @@ func _gui_input(event: InputEvent) -> void:
             do_context_menu()
 
 func do_context_menu() -> void:
-    var context_menu = PopupMenu.new()
+    var context_menu = Utility.get_empty_context_menu()
     context_menu.add_item("Move up", CONTEXT_MENU_MOVE_UP)
     context_menu.add_item("Move down", CONTEXT_MENU_MOVE_DOWN)
     context_menu.add_item("Move to top", CONTEXT_MENU_MOVE_TOP)

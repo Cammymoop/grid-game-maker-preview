@@ -268,7 +268,7 @@ func replace_tiles_at(tile_position, new_tile, facing: int = 0) -> void:
         emit_signal("level_size_changed")
 
 func get_tile_definition(tile_index):
-    return tile_defs[tile_index].duplicate()
+    return tile_defs[tile_index].duplicate(true)
 
 func is_tile_at(tile_index, tile_position) -> bool:
     var found = false
@@ -285,12 +285,16 @@ func update_tile_definition(tile_index, definition) -> void:
     update_index_map()
 
 func make_new_tile(definition) -> int:
-    var try_index = 0
-    while try_index in tile_defs:
-        try_index += 1
-    tile_defs[try_index] = definition
+    var new_index = max_tile_index() + 1
+    tile_defs[new_index] = definition
     update_index_map()
-    return try_index
+    return new_index
+
+func max_tile_index() -> int:
+    var max_index = 0
+    for t in tile_defs.keys():
+        max_index = maxi(max_index, t)
+    return max_index
 
 func add_new_tile_definition(definition) -> int:
     var index = 0

@@ -325,6 +325,11 @@ func insert_array_at(into_array: Array, insert_at_index: int, inserted_array: Ar
 	for i in range(inserted_array.size() - 1, -1, -1):
 		into_array.insert(insert_at_index, inserted_array[i])
 
+func get_empty_context_menu() -> PopupMenu:
+	var context_menu = PopupMenu.new()
+	context_menu.popup_hide.connect(context_menu.queue_free)
+	return context_menu
+
 func popup_context_menu_at_mouse(the_context_menu: PopupMenu) -> void:
 	var window: = get_window()
 	var popup_at_pos: = Vector2i(window.get_mouse_position())
@@ -334,3 +339,11 @@ func popup_context_menu_at_mouse(the_context_menu: PopupMenu) -> void:
 		window.add_child(the_context_menu)
 	the_context_menu.position = popup_at_pos
 	the_context_menu.popup()
+
+func get_number_suffix(of_string: String) -> int:
+	var regex: = RegEx.new()
+	regex.compile("(\\d+)$")
+	var got_match = regex.search(of_string)
+	if got_match:
+		return got_match.get_string(1).to_int()
+	return 0
