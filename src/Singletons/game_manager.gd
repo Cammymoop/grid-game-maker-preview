@@ -222,13 +222,28 @@ func save_edited() -> void:
 func load_edited() -> void:
 	load_serialized_play_state(editor_save)
 
+func change_level_metadata(new_metadata: Dictionary) -> void:
+	if not loaded_level_name or not editor_save:
+		return
+	
+	editor_save["map"]["metadata"] = new_metadata
+
+
 func load_level_data(level_data):
 	loaded_level_name = level_data["name"]
 	editor_save = level_data["state"]
 	load_edited()
-	toggle_pause_menu()
+	close_pause_menu()
 	
 	checkpoint_save = editor_save
+
+func try_load_next_level():
+	if not MapManager.has_next_level():
+		return
+	
+	var next_level_name = MapManager.get_next_level_name()
+	var next_level_data = FilesManager.get_level_data(cur_game_name, next_level_name)
+	load_level_data(next_level_data)
 
 func level_start():
 	EntityManager.clear_entity_list()
@@ -347,6 +362,11 @@ func toggle_pause_menu():
 	var pause_menu = get_tree().get_nodes_in_group("PauseMenu")
 	for p in pause_menu:
 		p.toggle()
+
+func close_pause_menu() -> void:
+	var pause_menus: = get_tree().get_nodes_in_group("PauseMenu")
+	for p in pause_menus:
+		p.close_pause_menu()
 	
 func start_on_ready() -> bool:
 	if TextureManager.im_ready and MapManager.im_ready and EntityManager.im_ready:

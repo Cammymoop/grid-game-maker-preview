@@ -1,0 +1,230 @@
+{
+  "game_name": "GeodeClone",
+  "textures": [
+    {
+      "type": "builtin",
+      "name": "tiles.png",
+      "texture_id": 0.0
+    },
+    {
+      "type": "builtin",
+      "name": "entityTiles.png",
+      "texture_id": 1.0
+    },
+    {
+      "type": "builtin",
+      "name": "shapes32x.png",
+      "texture_id": 2.0
+    }
+  ],
+  "tile_definitions": {
+    "0": {
+      "name": "floor",
+      "texture": 0,
+      "tex_index": 18,
+      "properties": {
+        "f1": true
+      }
+    }
+  },
+  "entity_definitions": {
+    "0": {
+      "name": "player",
+      "texture": 1,
+      "tex_index": 5,
+      "intended_move_speed": 6.0,
+      "controller": "InputController",
+      "properties": {
+        "player": true,
+        "pusher": true,
+        "i_finish_move_onto": {
+          "v": "3",
+          "conditions": [
+            "basic_default.c_is_named::[\"i:1\",false,\"s:pickaxe\"]"
+          ],
+          "when true": [
+            "basic_default.a_die::[\"i:0\"]",
+            "basic_default.a_die::[\"i:1\"]",
+            "basic_default.a_create_entity::[\"i:4\",\"s:player-pickaxe\",\"i:12\",false]"
+          ],
+          "when false": [],
+          "when always": []
+        },
+        "cutter": true,
+        "blocks": true
+      },
+      "groups": [
+        "Player"
+      ],
+      "controller_options": {
+        "stop_repeat_after_bonk": true,
+        "allow_wait": false
+      }
+    },
+    "1": {
+      "name": "geode",
+      "texture": 1,
+      "tex_index": 24,
+      "properties": {
+        "blocks": {
+          "v": "3",
+          "conditions": [
+            "basic_default.c_has_property::[\"i:1\",true,\"s:cutter\"]"
+          ],
+          "when always": [],
+          "when true": [],
+          "when false": []
+        },
+        "move_onto": [
+          {
+            "v": "3",
+            "conditions": [
+              "basic_default.c_has_property::[\"i:1\",false,\"s:cutter\"]"
+            ],
+            "when true": [
+              "basic_default.a_turn::[\"i:0\",\"i:20\"]",
+              "basic_default.a_create_entity::[\"i:4\",\"s:split-geode\",\"i:12\",false]",
+              "basic_default.a_die::[\"i:0\"]"
+            ],
+            "when false": [],
+            "when always": []
+          },
+          {
+            "v": "3",
+            "conditions": [
+              "basic_default.c_has_property::[\"i:0\",false,\"s:impossible\"]"
+            ],
+            "when true": [],
+            "when false": [],
+            "when always": []
+          }
+        ]
+      },
+      "intended_move_speed": 0.0
+    },
+    "3": {
+      "name": "split-geode",
+      "texture": 1,
+      "tex_index": 25,
+      "properties": {
+        "blocks": true,
+        "idle_update": {
+          "v": "3",
+          "conditions": [
+            "basic_default.c_can_move::[\"i:0\",false,\"i:13\"]",
+            "basic_default.c_can_move::[\"i:0\",false,\"i:15\"]",
+            "or"
+          ],
+          "when true": [
+            "basic_default.a_create_entity::[\"i:4\",\"s:geode-piece\",\"i:13\",true]",
+            "basic_default.a_create_entity::[\"i:4\",\"s:geode-piece\",\"i:15\",true]",
+            "basic_default.a_die::[\"i:0\"]"
+          ],
+          "when false": [],
+          "when always": []
+        }
+      },
+      "intended_move_speed": 0.0
+    },
+    "4": {
+      "name": "geode-piece",
+      "texture": 1,
+      "tex_index": 26,
+      "properties": {
+        "blocks": {
+          "v": "3",
+          "conditions": [
+            "basic_default.c_has_property::[\"i:1\",false,\"s:breaker\"]",
+            "basic_default.c_is_facing::[\"i:0\",false,\"i:20\"]",
+            "and",
+            "basic_default.c_has_property::[\"i:1\",false,\"s:pusher\"]",
+            "basic_default.c_is_facing::[\"i:0\",true,\"i:20\"]",
+            "and",
+            "or",
+            "not"
+          ],
+          "when true": [],
+          "when false": [],
+          "when always": []
+        },
+        "move_onto": [
+          {
+            "v": "3",
+            "conditions": [
+              "basic_default.c_has_property::[\"i:1\",true,\"s:breaker\"]"
+            ],
+            "when true": [],
+            "when false": [
+              "basic_default.a_die::[\"i:0\"]",
+              "basic_default.quit::[\"i:0\"]"
+            ],
+            "when always": []
+          },
+          {
+            "v": "3",
+            "conditions": [
+              "basic_default.c_get_pushed::[\"i:0\",\"i:20\",true]"
+            ],
+            "when true": [],
+            "when false": [],
+            "when always": []
+          }
+        ]
+      },
+      "intended_move_speed": 6.0
+    },
+    "5": {
+      "name": "pickaxe",
+      "texture": 1,
+      "tex_index": 23,
+      "properties": {
+        "z-index": -1.0,
+        "blocks": {
+          "v": "3",
+          "conditions": [
+            "basic_default.c_has_property::[\"i:1\",true,\"s:player\"]"
+          ],
+          "when true": [],
+          "when false": [],
+          "when always": []
+        }
+      },
+      "intended_move_speed": 0.0
+    },
+    "7": {
+      "name": "player-pickaxe",
+      "texture": 1,
+      "tex_index": 3,
+      "properties": {
+        "breaker": true,
+        "cutter": true,
+        "blocks": true,
+        "player": true
+      },
+      "intended_move_speed": 6.0,
+      "controller": "InputController",
+      "controller_options": {
+        "stop_repeat_after_bonk": true,
+        "allow_wait": false
+      }
+    },
+    "10": {
+      "name": "props",
+      "texture": 2,
+      "tex_index": 11,
+      "properties": {
+        "cutter": true,
+        "pusher": true,
+        "breaker": true
+      }
+    }
+  },
+  "window_width": 18.0,
+  "window_height": 14.0,
+  "game_settings": {
+    "pixel_scale": 2.0,
+    "camera_settings": {
+      "follow_entity": "player"
+    }
+  }
+}

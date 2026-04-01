@@ -5,6 +5,7 @@ signal level_size_changed
 var map_layer_template = preload("res://Scenes/MapLayer.tscn")
 
 var layers = []
+var map_metadata = {}
 
 var blocking_tiles = []
 
@@ -175,7 +176,12 @@ func serialize() -> Dictionary:
     for l in layers:
         serialized_layers.append(l.serialize())
     
-    return {"layers": serialized_layers}
+    prints(map_metadata)
+    prints(map_metadata.duplicate(true))
+
+    var serialized_stuff = {"layers": serialized_layers, "metadata": map_metadata.duplicate(true)}
+    prints("map serialized stuff:", serialized_stuff)
+    return serialized_stuff
 
 func deserialize(data: Dictionary) -> void:
     clear_layers()
@@ -184,7 +190,19 @@ func deserialize(data: Dictionary) -> void:
         var new_layer = create_empty_layer()
         new_layer.deserialize(layer_data)
     
+    map_metadata = data.get("metadata", {}).duplicate(true)
+    
     emit_signal("level_size_changed")
+
+func has_next_level() -> bool:
+    var next_level_name = map_metadata.get("next_level", "") as String
+    return next_level_name != "" and FilesManager.level_exists(GameManager.cur_game_name, next_level_name)
+
+func set_next_level_name(next_level_name: String) -> void:
+    map_metadata["next_level"] = next_level_name
+
+func get_next_level_name() -> String:
+    return map_metadata.get("next_level", "") as String
 
 func get_all_tile_indexes() -> Array:
     var keys = tile_defs.keys()

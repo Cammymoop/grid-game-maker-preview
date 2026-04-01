@@ -200,3 +200,13 @@ func cmd_a_turn(slots: Dictionary, chosen_slot: int, direction: int) -> void:
 		slots[chosen_slot].turn_to_facing(resolve_direction_value(direction, slots))
 	elif Commands.slot_is_positions(chosen_slot):
 		set_tiles_to_facing(slots, chosen_slot, resolve_direction_value(direction, slots))
+
+func desc_next_level_exists() -> String:
+	return "none|If the next level exists"
+func cmd_next_level_exists(_slots: Dictionary) -> bool:
+	return MapManager.has_next_level()
+
+func desc_load_next_level() -> String:
+	return "none|Load the next level"
+func cmd_load_next_level(_slots: Dictionary) -> void:
+	GameManager.try_load_next_level()

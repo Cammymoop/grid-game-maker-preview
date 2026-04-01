@@ -23,13 +23,16 @@ corner_radius_bottom_right = 3
 corner_radius_bottom_left = 3
 corner_detail = 7
 
-[node name="PauseMenu" type="Control" unique_id=1906408289 groups=["PauseMenu"]]
+[node name="PauseMenu" type="Control" unique_id=1906408289 node_paths=PackedStringArray("next_level_list") groups=["PauseMenu"]]
 process_mode = 3
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 script = ExtResource("1")
+next_level_list = NodePath("CenterContainer/Panel/MarginContainer/VBoxContainer/HBoxContainer3/NextLevelChooser")
 
 [node name="ColorRect" type="ColorRect" parent="." unique_id=1335268905]
 visible = false
@@ -45,6 +48,8 @@ layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 mouse_filter = 2
 color = Color(0.7784455, 0.7784455, 0.7784455, 1)
 
@@ -53,6 +58,8 @@ layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 
 [node name="Panel" type="PanelContainer" parent="CenterContainer" unique_id=819996639]
 layout_mode = 2
@@ -110,6 +117,21 @@ text = "Editor Live Mode Enabled:"
 [node name="LiveEditModeToggle" type="CheckButton" parent="CenterContainer/Panel/MarginContainer/VBoxContainer/HBoxContainer2" unique_id=867509530]
 layout_mode = 2
 mouse_default_cursor_shape = 2
+
+[node name="HBoxContainer3" type="HBoxContainer" parent="CenterContainer/Panel/MarginContainer/VBoxContainer" unique_id=1678799866]
+layout_mode = 2
+size_flags_horizontal = 4
+
+[node name="Label" type="Label" parent="CenterContainer/Panel/MarginContainer/VBoxContainer/HBoxContainer3" unique_id=867618154]
+layout_mode = 2
+text = "Set Next Level:"
+
+[node name="NextLevelChooser" type="OptionButton" parent="CenterContainer/Panel/MarginContainer/VBoxContainer/HBoxContainer3" unique_id=677048469]
+layout_mode = 2
+selected = 0
+item_count = 1
+popup/item_0/text = "None"
+popup/item_0/id = 0
 
 [node name="HBoxContainer" type="HBoxContainer" parent="CenterContainer/Panel/MarginContainer/VBoxContainer" unique_id=1941901720]
 layout_mode = 2

@@ -7,8 +7,12 @@ var load_dialog = preload("res://Scenes/LoadLevelDialog.tscn")
 
 var active = false
 
+@export var next_level_list: OptionButton
+
 func _ready():
 	visible = false
+	if next_level_list:
+		next_level_list.item_selected.connect(next_level_picked)
 
 func toggle():
 	active = not active
@@ -32,6 +36,8 @@ func on_show() -> void:
 	
 	var live_edit_mode_toggle: CheckButton = find_child("LiveEditModeToggle")
 	live_edit_mode_toggle.set_pressed_no_signal(GameManager.editor_live_edit_mode)
+	
+	refresh_next_level_list()
 
 func close_pause_menu() -> void:
 	if active:
@@ -63,3 +69,28 @@ func _on_resume_button_pressed() -> void:
 
 func _on_live_edit_mode_toggle_toggled(toggled_on: bool) -> void:
 	GameManager.editor_live_edit_mode = toggled_on
+
+func refresh_next_level_list() -> void:
+	if not next_level_list:
+		return
+	
+	next_level_list.clear()
+
+	var level_list: = FilesManager.get_level_list(GameManager.cur_game_name)
+	level_list.push_front("[None]")
+
+	for level in level_list:
+		next_level_list.add_item(level)
+
+	if MapManager.has_next_level():
+		var index = level_list.find(MapManager.get_next_level_name())
+		next_level_list.selected = index
+	else:
+		next_level_list.selected = 0
+
+func next_level_picked(index: int) -> void:
+	var level_name = next_level_list.get_item_text(index)
+	if level_name == "[None]":
+		level_name = ""
+	MapManager.set_next_level_name(level_name)
+	GameManager.change_level_metadata(MapManager.map_metadata)

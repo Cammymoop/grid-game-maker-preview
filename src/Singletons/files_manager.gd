@@ -154,6 +154,11 @@ func save_level(game_name, level_data) -> void:
 	ensure_dir_exists(levels_dir)
 	save_json(serialized, levels_dir, game_file_name(level_name))
 
+func level_exists(game_name, level_name) -> bool:
+	var file_name = game_file_name(level_name) + ".json"
+	var dir_path = "user://levels/" + game_file_name(game_name) + "/"
+	return FileAccess.file_exists(dir_path + file_name)
+
 func get_level_data(game_name, level_name):
 	var file_name = game_file_name(level_name) + ".json"
 	var f = FileAccess.open("user://levels/" + game_file_name(game_name) + "/" + file_name, FileAccess.READ)
