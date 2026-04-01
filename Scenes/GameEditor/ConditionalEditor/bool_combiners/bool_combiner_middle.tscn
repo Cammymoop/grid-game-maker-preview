@@ -3,6 +3,7 @@
 [ext_resource type="Script" uid="uid://cqvk4rdk76ogw" path="res://Scenes/GameEditor/ConditionalEditor/bool_combiners/bool_combiner_piece.gd" id="1_73e12"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_vtp3k"]
+resource_local_to_scene = true
 bg_color = Color(0.505882, 0.254902, 0.254902, 1)
 border_width_left = 2
 border_width_right = 2

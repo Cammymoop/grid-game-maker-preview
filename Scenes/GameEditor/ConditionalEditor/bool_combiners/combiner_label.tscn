@@ -1,0 +1,21 @@
+[gd_scene format=3 uid="uid://c1sdke6h6fr10"]
+
+[node name="combiner_label" type="Control" unique_id=189991928]
+layout_mode = 3
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+grow_horizontal = 0
+mouse_filter = 2
+
+[node name="Label" type="Label" parent="." unique_id=1703757975]
+z_index = 1
+layout_mode = 0
+offset_left = 2.0
+offset_right = 46.905235
+offset_bottom = 14.0
+rotation = 1.5707964
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 10
+text = "AND"
+horizontal_alignment = 1

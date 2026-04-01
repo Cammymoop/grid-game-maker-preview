@@ -1,6 +1,7 @@
 [gd_scene format=3 uid="uid://brj1yabyq8bpc"]
 
 [ext_resource type="PackedScene" uid="uid://cu2ce0nvkbwvu" path="res://Scenes/GameEditor/ConditionalEditor/AddCommandDialog.tscn" id="2"]
+[ext_resource type="Theme" uid="uid://daswi5ker7ml0" path="res://src/UI/ConditionalEditorTheme.tres" id="2_wqvmh"]
 [ext_resource type="Texture2D" uid="uid://cv8l7ymc05wg5" path="res://assets/img/button_icons/plus.png" id="3"]
 [ext_resource type="StyleBox" uid="uid://bks823xpsbs2q" path="res://src/UI/ConditionalEditorBGTexture.tres" id="4"]
 [ext_resource type="Script" uid="uid://c8wy06ic8wik5" path="res://Scenes/GameEditor/ConditionalEditor/steps.gd" id="4_k14si"]
@@ -27,7 +28,7 @@ transparent_bg = true
 oversampling_override = 1.0
 title = "Conditional Editor"
 position = Vector2i(0, 36)
-size = Vector2i(700, 461)
+size = Vector2i(700, 640)
 wrap_controls = true
 transparent = true
 script = ExtResource("6")
@@ -39,6 +40,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+theme = ExtResource("2_wqvmh")
 theme_override_styles/panel = ExtResource("4")
 
 [node name="MarginContainer" type="MarginContainer" parent="PanelContainer" unique_id=348729900]
@@ -50,6 +52,7 @@ theme_override_constants/margin_bottom = 10
 
 [node name="VBoxContainer2" type="VBoxContainer" parent="PanelContainer/MarginContainer" unique_id=672802075]
 layout_mode = 2
+theme_override_constants/separation = 12
 
 [node name="TitleBar" type="Control" parent="PanelContainer/MarginContainer/VBoxContainer2" unique_id=192343188]
 visible = false
@@ -128,6 +131,7 @@ theme_override_constants/separation = 8
 [node name="TabContainer" type="TabContainer" parent="PanelContainer/MarginContainer/VBoxContainer2/VBoxContainer/HBoxContainer" unique_id=972839437]
 layout_mode = 2
 size_flags_horizontal = 3
+tab_alignment = 1
 current_tab = 0
 
 [node name="Conditions" type="ScrollContainer" parent="PanelContainer/MarginContainer/VBoxContainer2/VBoxContainer/HBoxContainer/TabContainer" unique_id=1041244154]
@@ -166,6 +170,8 @@ theme_override_constants/separation = 8
 [node name="ActionsTabs" type="TabContainer" parent="PanelContainer/MarginContainer/VBoxContainer2/VBoxContainer/HBoxContainer2" unique_id=1974950153]
 layout_mode = 2
 size_flags_horizontal = 3
+theme_override_constants/tab_separation = 20
+tab_alignment = 1
 current_tab = 2
 script = ExtResource("7")
 

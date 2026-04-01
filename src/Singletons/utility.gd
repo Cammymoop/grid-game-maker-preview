@@ -324,3 +324,13 @@ func insert_array_at(into_array: Array, insert_at_index: int, inserted_array: Ar
 		return
 	for i in range(inserted_array.size() - 1, -1, -1):
 		into_array.insert(insert_at_index, inserted_array[i])
+
+func popup_context_menu_at_mouse(the_context_menu: PopupMenu) -> void:
+	var window: = get_window()
+	var popup_at_pos: = Vector2i(window.get_mouse_position())
+	if not window.gui_embed_subwindows:
+		popup_at_pos += window.position
+	if not the_context_menu.is_inside_tree():
+		window.add_child(the_context_menu)
+	the_context_menu.position = popup_at_pos
+	the_context_menu.popup()

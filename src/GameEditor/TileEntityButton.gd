@@ -29,3 +29,7 @@ func _on_TileDisplay_pressed():
 		parent_editor.edit_tile(the_index)
 	else:
 		parent_editor.edit_entity(the_index)
+
+func _gui_input(event: InputEvent) -> void:
+	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_RIGHT and not event.pressed:
+		parent_editor.do_context_menu_for_item(self)

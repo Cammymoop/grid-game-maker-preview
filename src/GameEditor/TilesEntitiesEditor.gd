@@ -1,6 +1,7 @@
 extends VBoxContainer
 
-var TileEntityButton = preload("res://Scenes/GameEditor/TileEntityDisplay.tscn")
+const TileEntityButton = preload("res://src/GameEditor/TileEntityButton.gd")
+var tile_entity_button = preload("res://Scenes/GameEditor/TileEntityDisplay.tscn")
 
 var ui_root
 
@@ -19,8 +20,7 @@ func _ready():
 	var editor_window: Window = ui_root.find_child("TileEntityEditorWindow")
 	editor_window.hidden.connect(update_all_grids)
 	
-	var temp_grid_item = TileEntityButton.instantiate()
-	prints("temp grid item min size:", temp_grid_item.get_combined_minimum_size(), "min size vec:", temp_grid_item.custom_minimum_size)
+	var temp_grid_item = tile_entity_button.instantiate()
 	grid_item_width = temp_grid_item.get_combined_minimum_size().x
 	temp_grid_item.queue_free()
 	
@@ -34,7 +34,6 @@ func set_grid_columns(the_grid: GridContainer) -> void:
 		the_grid.columns = 1
 		return
 	var hsep: = the_grid.get_theme_constant("h_separation")
-	prints("width in terms of columns:", (grid_width + hsep - 1) / (grid_item_width + hsep), "grid_width:", grid_width, "column width:", grid_item_width + hsep)
 	the_grid.columns = floor((grid_width + hsep - 1) / (grid_item_width + hsep))
 
 func update_all_grids() -> void:
@@ -54,7 +53,7 @@ func update_the_grid(is_tile_update: bool) -> void:
 		objects = EntityManager.get_all_entity_indexes()
 	
 	for obj_index in objects:
-		var instance = TileEntityButton.instantiate()
+		var instance = tile_entity_button.instantiate()
 		instance.parent_editor = self
 		instance.tile_entity_mode = "tile" if is_tile_update else "entity"
 		instance.the_index = obj_index
@@ -114,3 +113,18 @@ func _on_vis_changed():
 		return
 	await get_tree().process_frame
 	update_all_grids()
+
+func do_context_menu_for_item(the_item: TileEntityButton) -> void:
+	var is_entity = the_item.tile_entity_mode == "entity"
+	var context_menu = PopupMenu.new()
+	context_menu.add_item("Delete", 0)
+	context_menu.id_pressed.connect(on_context_menu_id_pressed.bind(is_entity, the_item.the_index))
+	Utility.popup_context_menu_at_mouse(context_menu)
+
+func on_context_menu_id_pressed(context_menu_id: int, is_entity: bool, item_index: int) -> void:
+	if context_menu_id == 0:
+		if is_entity:
+			EntityManager.remove_entity_definition(item_index)
+		else:
+			MapManager.remove_tile_definition(item_index)
+		update_all_grids()

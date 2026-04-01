@@ -31,10 +31,16 @@ var current_conditional: Array[Dictionary] = []
 var step_count: int = 1
 var current_step: int = 0
 
+var replace_to_index: int = -1
+var is_new_command_replace: bool = false
+var replace_from_list: Control = null
+
 func _ready():
     var add_new_command_func = add_new_v3_command if use_conditionalv3 else add_v2_command
     add_condition_dialog.connect("command_selected", add_new_command_func.bind("conditions"))
+    add_condition_dialog.hidden.connect(on_add_condition_hidden)
     add_action_dialog.connect("command_selected", add_new_command_func.bind("actions"))
+    add_action_dialog.hidden.connect(on_add_action_hidden)
     
     if not use_conditionalv3:
         steps_ui.hide()
@@ -44,7 +50,6 @@ func _ready():
         true_actions_list = null
         false_actions_list = null
         always_actions_list = null
-        add_when_list("always")
         steps_ui.show()
     
     steps_ui.step_changed.connect(on_step_changed)
@@ -88,6 +93,7 @@ func add_v2_command(command_code: int, slot_id: int, destination: String, option
         new_list_item.set_option_values(option_values)
 
 func add_new_v3_command(qualified_cmd: String, slot_id: int, destination: String) -> void:
+
     var short_name = ConditionalsV3.command_short_name(qualified_cmd)
     if not qualified_cmd:
         push_error("Command not found: %s" % short_name)
@@ -97,6 +103,12 @@ func add_new_v3_command(qualified_cmd: String, slot_id: int, destination: String
         new_list_item.set_slot(slot_id)
     else:
         new_list_item.current_slot = -1
+
+    if is_new_command_replace:
+        replace_with_new_command(replace_from_list, replace_to_index, new_list_item)
+        is_new_command_replace = false
+        return
+
     var list_name: String = destination
     if destination == "actions":
         var cur_list_node = action_tabs.get_current_tab_control()
@@ -105,6 +117,16 @@ func add_new_v3_command(qualified_cmd: String, slot_id: int, destination: String
             return
         list_name = when_lists.find_key(cur_list_node)
     append_item_to_command_list(new_list_item, list_name)
+
+func replace_with_new_command(command_list: Control, command_index: int, new_command: CommandListItem) -> void:
+    if command_list == cond_list:
+        cond_list.replace_command_at(command_index, new_command)
+    else:
+        var old_command = command_list.get_child(command_index)
+        command_list.remove_child(old_command)
+        old_command.queue_free()
+        command_list.add_child(new_command)
+        command_list.move_child(new_command, command_index)
 
 func create_v3_command_item(qualified_name: String, arg_string: String = "") -> CommandListItem:
     var short_name = ConditionalsV3.command_short_name(qualified_name)
@@ -147,24 +169,38 @@ func set_v3_full_data(new_data: Array) -> void:
             push_warning("Non-dictionary step data: %s" % str(cond_step))
 
 func load_v3_conditional_data_step(from_data: Dictionary) -> void:
-    if not "always" in when_lists:
-        add_when_list("always")
-    if not "when true" in when_lists:
-        add_when_list("when true")
-    if not "when false" in when_lists:
-        add_when_list("when false")
+    clear_edited_step()
+    add_when_list("when true")
+    add_when_list("when false")
+    add_when_list("always")
+    var show_when_list: String = "when true"
+    if not "when true" in from_data:
+        if "when false" in from_data:
+            show_when_list = "when false"
+        elif "when always" in from_data:
+            show_when_list = "always"
+    action_tabs.set_current_list(show_when_list)
 
     for key in from_data:
         if key != "conditions" and not key.begins_with("when "):
             continue
+        var new_list_items: Array = []
         for call_string in from_data[key]:
             if ConditionalsV3.is_builtin(call_string):
-                # TODO implement UI for condition builtins
-                continue
-            var qualified_name = ConditionalsV3.callstring_to_qualified_name(call_string)
-            var arg_string = ConditionalsV3.callstring_to_arg_string(call_string)
-            var new_list_item = create_v3_command_item(qualified_name, arg_string)
-            append_item_to_command_list(new_list_item, key)
+                new_list_items.append(call_string)
+            else:
+                var qualified_name = ConditionalsV3.callstring_to_qualified_name(call_string)
+                var arg_string = ConditionalsV3.callstring_to_arg_string(call_string)
+                var new_list_item = create_v3_command_item(qualified_name, arg_string)
+                new_list_items.append(new_list_item)
+        set_command_list_items(new_list_items, key)
+
+func set_command_list_items(new_list_items: Array, command_list_name: String) -> void:
+    if command_list_name == "conditions":
+        cond_list.set_command_list(new_list_items)
+    else:
+        for new_list_item in new_list_items:
+            append_item_to_command_list(new_list_item, command_list_name)
 
 func append_item_to_command_list(new_list_item: CommandListItem, command_list_name: String) -> void:
     if command_list_name == "conditions":
@@ -173,6 +209,7 @@ func append_item_to_command_list(new_list_item: CommandListItem, command_list_na
         if command_list_name == "when always":
             command_list_name = "always"
         if command_list_name not in when_lists:
+            prints("when list: %s not found, adding" % command_list_name)
             add_when_list(command_list_name)
         when_lists[command_list_name].get_list().add_child(new_list_item)
 
@@ -298,14 +335,36 @@ func load_current_step() -> void:
 
 func clear_edited_step() -> void:
     cond_list.clear_commands()
-    for when_list_name in when_lists:
-        remove_when_list(when_list_name)
+    clear_when_lists()
 
 func _clear_list(list_node: Node) -> void:
     for child in list_node.get_children():
         list_node.remove_child(child)
         child.queue_free()
 
+func clear_when_lists() -> void:
+    for when_list_name in when_lists.keys():
+        remove_when_list(when_list_name)
+
 func cancel() -> void:
     emit_signal("cancelled")
     queue_free()
+
+func open_new_command_for_replace(command_list: Control, command_index: int) -> void:
+    is_new_command_replace = true
+    replace_to_index = command_index
+    replace_from_list = command_list
+    if command_list == cond_list:
+        add_condition_dialog.popup_centered()
+    else:
+        add_action_dialog.popup_centered()
+
+func on_add_condition_hidden() -> void:
+    await get_tree().process_frame
+    if is_new_command_replace:
+        is_new_command_replace = false
+
+func on_add_action_hidden() -> void:
+    await get_tree().process_frame
+    if is_new_command_replace:
+        is_new_command_replace = false

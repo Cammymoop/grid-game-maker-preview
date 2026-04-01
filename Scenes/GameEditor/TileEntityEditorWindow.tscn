@@ -14,7 +14,8 @@ region = Rect2(0, 64, 32, 32)
 [node name="TileEntityEditorWindow" type="Window" unique_id=1467937022]
 oversampling_override = 1.0
 title = "Edit"
-size = Vector2i(441, 435)
+position = Vector2i(0, 25)
+size = Vector2i(441, 439)
 wrap_controls = true
 popup_window = true
 script = ExtResource("2")
@@ -168,7 +169,6 @@ layout_mode = 2
 icon = ExtResource("3")
 
 [node name="RemovePropertyButton" type="Button" parent="PanelContainer/VBoxContainer/VBoxContainer/HBoxContainer4/VBoxContainer" unique_id=1407681144]
-visible = false
 custom_minimum_size = Vector2(0, 50)
 layout_mode = 2
 icon = ExtResource("4")

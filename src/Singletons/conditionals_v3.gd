@@ -47,7 +47,7 @@ const DEFAULT_SCRIPTS: = [ "basic_default" ]
 
 var add_orch_scripts: Array[String] = ["res://cond_scripts/orch_cmds.torch"]
 
-const BUILTIN_COMMANDS: Array[String] = ["and", "or", "not", "false", "true"]
+const BUILTIN_COMMANDS: Array[String] = ["and", "or", "xor", "not", "false", "true"]
 
 var verbose = false
 

@@ -1,5 +1,7 @@
 extends PanelContainer
 
+const ConditionalEditor = preload("res://src/GameEditor/ConditionalEditor/ConditionalEditor.gd")
+
 const TAB_INTERNAL_MARGIN = 10
 
 @onready var generated_content = find_child("GeneratedContent")
@@ -33,9 +35,30 @@ const builtin_descriptions: = {
     "false": "Change the result to false",
 }
 
+const CONTEXT_MENU_MOVE_UP = 10
+const CONTEXT_MENU_MOVE_DOWN = 11
+const CONTEXT_MENU_MOVE_TOP = 12
+const CONTEXT_MENU_MOVE_BOTTOM = 13
+
+const CONTEXT_MENU_DUPLICATE = 20
+const CONTEXT_MENU_REPLACE = 21
+const CONTEXT_MENU_DELETE = 22
+
 func _ready():
     if _ungenerated:
         generate_ui()
+
+func get_parent_list() -> Control:
+    if not parent_list:
+        parent_list = get_parent()
+    return parent_list
+
+func _get_duplicate_item() -> Control:
+    var duplicate_item: Control = duplicate(Node.DUPLICATE_USE_INSTANTIATION)
+    duplicate_item.parent_list = parent_list
+    duplicate_item.set_v3_data(qualified_command_name, short_command_name, command_info)
+    duplicate_item.set_arg_values(get_v3_arg_values())
+    return duplicate_item
 
 func set_ui_data(the_command_code: int, command_data: Dictionary) -> void:
     command_code = the_command_code
@@ -260,6 +283,9 @@ func get_arg_string() -> String:
 
     return ConditionalsV3.arg_values_to_arg_string(arg_list)
 
+func get_v3_arg_values() -> Array:
+    return ConditionalsV3.arg_string_to_arg_values(get_arg_string())
+
 func set_arg_values(arg_values: Array) -> void:
     if _ungenerated:
         _pre_set_arg_values = arg_values.duplicate()
@@ -303,14 +329,93 @@ func _on_TextureRect_gui_input(event):
         delete_self()
 
 func delete_self() -> void:
-    if not parent_list:
-        parent_list = get_parent()
-    if parent_list is ConditionsCommandList:
-        parent_list.remove_command(self)
+    if get_parent_list() is ConditionsCommandList:
+        get_parent_list().remove_command(self)
+        queue_free()
     else:
         queue_free()
 
+func _gui_input(event: InputEvent) -> void:
+    if event is InputEventMouseButton:
+        if event.button_index == MOUSE_BUTTON_RIGHT and not event.is_pressed():
+            do_context_menu()
+
+func do_context_menu() -> void:
+    var context_menu = PopupMenu.new()
+    context_menu.add_item("Move up", CONTEXT_MENU_MOVE_UP)
+    context_menu.add_item("Move down", CONTEXT_MENU_MOVE_DOWN)
+    context_menu.add_item("Move to top", CONTEXT_MENU_MOVE_TOP)
+    context_menu.add_item("Move to bottom", CONTEXT_MENU_MOVE_BOTTOM)
+    context_menu.add_separator()
+    context_menu.add_item("Duplicate", CONTEXT_MENU_DUPLICATE)
+    context_menu.add_item("Replace", CONTEXT_MENU_REPLACE)
+    context_menu.add_item("Delete", CONTEXT_MENU_DELETE)
+    context_menu.id_pressed.connect(on_context_menu_id_pressed)
+    get_window().add_child(context_menu)
+    Utility.popup_context_menu_at_mouse(context_menu)
+
+func on_context_menu_id_pressed(context_menu_id: int) -> void:
+    match context_menu_id:
+        CONTEXT_MENU_MOVE_UP:
+            move_relative(-1)
+        CONTEXT_MENU_MOVE_DOWN:
+            move_relative(1)
+        CONTEXT_MENU_MOVE_TOP:
+            move_to_top()
+        CONTEXT_MENU_MOVE_BOTTOM:
+            move_to_bottom()
+        CONTEXT_MENU_DUPLICATE:
+            duplicate_self()
+        CONTEXT_MENU_REPLACE:
+            replace_with_new_command()
+        CONTEXT_MENU_DELETE:
+            delete_self()
+
+func move_relative(relative_index: int) -> void:
+    var my_index: int = get_my_index()
+    _move_to_index(my_index + relative_index)
+
+func move_to_top() -> void:
+    _move_to_index(0)
+
+func move_to_bottom() -> void:
+    var total_items: int = get_parent_list().get_child_count()
+    if get_parent_list() is ConditionsCommandList:
+        total_items = get_parent_list().get_command_count()
+    _move_to_index(total_items)
+
+func get_my_index() -> int:
+    if get_parent_list() is ConditionsCommandList:
+        return get_parent_list().get_command_index(self)
+    else:
+        return get_index()
+
+func _move_to_index(new_index: int) -> void:
+    new_index = maxi(0, new_index)
+    if get_parent_list() is ConditionsCommandList:
+        if new_index > get_my_index():
+            new_index += 1
+        new_index = mini(new_index, get_parent_list().get_command_count())
+        get_parent_list().move_command_to_before_index(self, new_index)
+    else:
+        new_index = mini(new_index, get_parent_list().get_child_count())
+        get_parent_list().move_child(self, new_index)
+
+func duplicate_self() -> void:
+    var duplicate_item: Control = _get_duplicate_item()
+    var my_index: int = get_my_index()
+    if get_parent_list() is ConditionsCommandList:
+        get_parent_list().insert_command_at(duplicate_item, my_index + 1)
+    else:
+        get_parent_list().add_child(duplicate_item)
+        get_parent_list().move_child(duplicate_item, my_index + 1)
 
 func _on_CommandSlot_slot_changed(new_slot_id):
     current_slot = new_slot_id
     update_panel_background()
+
+func replace_with_new_command() -> void:
+    var conditional_editor: ConditionalEditor = get_window() as ConditionalEditor
+    if not conditional_editor:
+        push_error("CommandListItem is not in a ConditionalEditor window")
+    conditional_editor.open_new_command_for_replace(get_parent_list(), get_my_index())

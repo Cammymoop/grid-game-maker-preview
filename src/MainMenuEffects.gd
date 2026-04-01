@@ -2,8 +2,10 @@ extends Node2D
 
 var vel_sprite = preload("res://src/VelocitySprite.gd")
 
-var tile_indexes = []
-var entity_indexes = []
+var tile_indexes: = []
+var tile_defs: = {}
+var entity_indexes: = []
+var entity_defs: = {}
 
 @export var fall_speed: = 90.0
 @export var max_objects: = 1000
@@ -22,7 +24,9 @@ const ROTATION_FACTOR = 20
 
 func _ready() -> void:
 	tile_indexes = MapManager.get_all_tile_indexes()
+	tile_defs = MapManager.tile_defs.duplicate_deep()
 	entity_indexes = EntityManager.get_all_entity_indexes()
+	entity_defs = EntityManager.entity_defs.duplicate_deep()
 	
 	bg_color = get_node(background_color_rect).color
 	
@@ -62,14 +66,14 @@ func spawn_random_entity(delta) -> void:
 	var spr = vel_sprite.new()
 	spr.centered = true
 	var entity_index = Utility.random_list_element(entity_indexes)
-	spr.texture = Utility.atlas_texture_from_entity_index(entity_index)
+	spr.texture = Utility.atlas_texture_from_texture_index(entity_defs[entity_index]['texture'], entity_defs[entity_index]['tex_index'])
 	spawn_common(spr, delta)
 
 func spawn_random_tile(delta) -> void:
 	var spr = vel_sprite.new()
 	spr.centered = true
 	var tile_index = Utility.random_list_element(tile_indexes)
-	spr.texture = Utility.atlas_texture_from_tile_index(tile_index)
+	spr.texture = Utility.atlas_texture_from_texture_index(tile_defs[tile_index]['texture'], tile_defs[tile_index]['tex_index'])
 	spawn_common(spr, delta)
 	
 func spawn_common(spr: Sprite2D, delta) -> void:

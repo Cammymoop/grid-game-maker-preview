@@ -1,6 +1,7 @@
 extends ConfirmationDialog
 
 signal command_selected(command_id: int, slot_id: int)
+signal hidden
 
 @export var exclude_conditions: bool = false
 @export var exclude_actions: bool = false
@@ -11,6 +12,8 @@ var names_to_categories: Dictionary = {}
 var use_v3: bool = true
 
 func _ready():
+	visibility_changed.connect(_on_vis_changed)
+	close_requested.connect(close_dialog)
 	if use_v3:
 		build_v3_list()
 	else:
@@ -18,6 +21,7 @@ func _ready():
 
 func build_base_list() -> void:
 	var list = find_child("AllCommands")
+	list.clear()
 	
 	for comm in Commands.Friendly:
 		if exclude_actions and Commands.is_action(comm):
@@ -32,6 +36,7 @@ func build_base_list() -> void:
 
 func build_v3_list() -> void:
 	var list: = find_child("AllCommands") as ItemList
+	list.clear()
 	
 	names_to_ids = {}
 	names_to_categories = {}
@@ -66,6 +71,7 @@ func done() -> void:
 	var selected_id = names_to_ids[selected]
 	var slot = find_child("SlotSelectorButton").current_slot_id
 	emit_signal("command_selected", selected_id, slot)
+	close_dialog()
 
 
 func _on_AddConditionDialog_confirmed():
@@ -117,8 +123,6 @@ func apply_text_filter(list: Array, filter_str: String) -> Array:
 
 
 func _on_AllCommands_item_activated(_index):
-	print("item activated")
-	close_dialog()
 	done()
 
 func close_dialog():
@@ -126,3 +130,7 @@ func close_dialog():
 
 func _on_slot_selector_button_slot_changed(_new_slot_id: Variant) -> void:
 	reapply_filters()
+
+func _on_vis_changed():
+	if not visible:
+		hidden.emit()

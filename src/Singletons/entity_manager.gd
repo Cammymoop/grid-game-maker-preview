@@ -674,6 +674,17 @@ func get_entity_property_list(entity) -> Array:
 func get_entity_definition(entity_index) -> Dictionary:
     return entity_defs[entity_index].duplicate()
 
+func remove_entity_definition(entity_index) -> void:
+    erase_all_entities_with_id(entity_index)
+    var entity_name = entity_defs[entity_index]["name"]
+    entity_index_map.erase(entity_name)
+    entity_defs.erase(entity_index)
+
+func erase_all_entities_with_id(entity_index) -> void:
+    for entity in entity_list:
+        if entity.entity_index == entity_index:
+            remove_entity(entity)
+
 func remove_entity(entity) -> void:
     if entity in entity_signal_connections:
         for connected_sig in entity_signal_connections.get(entity, []):

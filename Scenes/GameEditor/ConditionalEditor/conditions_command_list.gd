@@ -10,6 +10,8 @@ var bool_top: PackedScene = preload("res://Scenes/GameEditor/ConditionalEditor/b
 var bool_middle: PackedScene = preload("res://Scenes/GameEditor/ConditionalEditor/bool_combiners/bool_combiner_middle.tscn")
 var bool_bottom: PackedScene = preload("res://Scenes/GameEditor/ConditionalEditor/bool_combiners/bool_combiner_bottom.tscn")
 
+var combiner_label: PackedScene = preload("res://Scenes/GameEditor/ConditionalEditor/bool_combiners/combiner_label.tscn")
+
 var command_list_items: Array[CommandListItem] = []
 
 var combiner_tree: Dictionary = {
@@ -17,6 +19,8 @@ var combiner_tree: Dictionary = {
     "function": "and",
     "children": [],
 }
+
+@export var combiner_label_h_offset: float = 0
 
 var drag_move_threshold: float = 6
 
@@ -30,11 +34,17 @@ var resizing_last_index: int = 0
 
 const UNARY_FUNCTIONS = ["not"]
 
-var resizer_margin: float = 4
+var resizer_margin: float = 8
 
 var combiner_column_width: int = 16
 
 var _dirty: bool = false
+
+const CONTEXT_MENU_CHANGE_TO_AND = 1
+const CONTEXT_MENU_CHANGE_TO_OR = 2
+const CONTEXT_MENU_CHANGE_TO_NOT = 3
+const CONTEXT_MENU_ADD_COMBINER = 10
+const CONTEXT_MENU_REMOVE = 90
 
 func _ready():
     var temp_bool_single: = bool_single.instantiate()
@@ -46,6 +56,122 @@ func _ready():
 func _process(_delta: float) -> void:
     if visible and _dirty:
         rebuild_grid()
+
+func set_command_list(new_list_items: Array) -> void:
+    clear_commands()
+    var just_commands: Array[CommandListItem] = []
+    var command_index: int = -1
+    var incoming_combiners: Dictionary[int, Array] = {}
+    for new_list_item in new_list_items:
+        if new_list_item is CommandListItem:
+            command_index += 1
+            just_commands.append(new_list_item)
+        else:
+            if command_index == -1:
+                push_error("got a combiner before any commands")
+                continue
+            if not incoming_combiners.has(command_index):
+                incoming_combiners[command_index] = []
+            incoming_combiners[command_index].append(new_list_item)
+
+    for command_item in just_commands:
+        command_item.parent_list = self
+    command_list_items = just_commands
+    
+    combiner_tree = build_combiner_tree_for_incoming_combiners(incoming_combiners, get_command_count())
+    unset_explicit_top_level_end()
+
+func build_combiner_tree_for_incoming_combiners(incoming_combiners: Dictionary[int, Array], total_commands: int) -> Dictionary:
+    var top_level_combiners: Array[Dictionary] = []
+    var to_check_indices: Array = []
+    to_check_indices.append_array(incoming_combiners.keys())
+    to_check_indices.sort()
+    
+    var safety: int = 10000
+    while to_check_indices.size() > 0:
+        var build_combiner_tree_at: int = to_check_indices.pop_back()
+        var new_combiner: Dictionary = build_combiner_for_incoming_at(incoming_combiners, build_combiner_tree_at, 0)
+        prints("new combiner before collapse: %s" % [new_combiner])
+        new_combiner = collapse_redundant_combiners(new_combiner)
+        var combiner_range: Array[int] = [new_combiner["first_command_index"], build_combiner_tree_at]
+        to_check_indices = to_check_indices.filter(func(index: int): return not index_in_range(index, combiner_range))
+        top_level_combiners.append(new_combiner)
+        
+        safety -= 1
+        if safety <= 0:
+            push_error("Safety limit reached, aborting combiner tree build")
+            return {}
+    
+    var top_level_count: int = top_level_combiners.size()
+    var add_top_level_default: bool = top_level_count == 0 or top_level_count > 1
+    if top_level_count == 1:
+        if top_level_combiners[0]["first_command_index"] > 0:
+            add_top_level_default = true
+        elif top_level_combiners[0].get("last_command_index", total_commands - 1) != total_commands - 1:
+            add_top_level_default = true
+    
+    if add_top_level_default:
+        return get_default_top_level_combiner(top_level_combiners)
+    else:
+        return top_level_combiners[0]
+
+func get_default_top_level_combiner(with_children: Array) -> Dictionary:
+    return {
+        "first_command_index": 0,
+        "function": "and",
+        "children": with_children,
+    }
+
+
+func build_combiner_for_incoming_at(incoming_combiners: Dictionary[int, Array], at_command_index: int, stack_level: int) -> Dictionary:
+    var stack_depth: int = 0
+    if incoming_combiners.has(at_command_index):
+        stack_depth = incoming_combiners[at_command_index].size()
+    if stack_level + 1 > stack_depth:
+        return {}
+    
+
+    var combiner_func: String = incoming_combiners[at_command_index][-(stack_level + 1)]
+    var new_combiner: Dictionary = {
+        "first_command_index": -1,
+        "last_command_index": at_command_index,
+        "function": combiner_func,
+        "children": [],
+    }
+    var add_operands: int = 1 if combiner_func in UNARY_FUNCTIONS else 2
+    var current_command_index: int = at_command_index
+    for op_i in add_operands:
+        var current_stack_level: int = stack_level + 1 if current_command_index == at_command_index else 0
+        var next_combiner_here: Dictionary = build_combiner_for_incoming_at(incoming_combiners, current_command_index, current_stack_level)
+        if next_combiner_here:
+            new_combiner["children"].push_front(next_combiner_here)
+            current_command_index = next_combiner_here["first_command_index"]
+            new_combiner["first_command_index"] = current_command_index
+        else:
+            new_combiner["first_command_index"] = current_command_index
+        current_command_index -= 1
+    return new_combiner
+
+func collapse_redundant_combiners(in_combiner_subtree: Dictionary) -> Dictionary:
+    var my_func: String = in_combiner_subtree["function"]
+    if in_combiner_subtree["children"].size() == 1 and my_func not in UNARY_FUNCTIONS:
+        if _is_combiner_tree_redundant(in_combiner_subtree["children"][0], my_func):
+            in_combiner_subtree["children"] = []
+    
+    for child_combiner in in_combiner_subtree["children"]:
+        collapse_redundant_combiners(child_combiner)
+    return in_combiner_subtree
+
+func _is_combiner_tree_redundant(combiner_subtree: Dictionary, parent_func: String) -> bool:
+    if parent_func in UNARY_FUNCTIONS:
+        return false
+    if combiner_subtree["function"] != parent_func or combiner_subtree["children"].size() > 1:
+        return false
+
+    if combiner_subtree["children"].size() == 0:
+        return true
+    else:
+        return _is_combiner_tree_redundant(combiner_subtree["children"][0], parent_func)
 
 func _gui_input(event: InputEvent) -> void:
     if event is InputEventMouseButton:
@@ -83,44 +209,88 @@ func _handle_click(event: InputEventMouseButton) -> void:
             return
         
         if event.button_index == MOUSE_BUTTON_RIGHT:
-            remove_combiner(combiner_list[click_column]["root_node"])
+            do_combiner_context_menu(click_row, click_column)
+        elif event.button_index == MOUSE_BUTTON_MIDDLE:
+            test_change_combiner_func(combiner_list[click_column]["root_node"])
         elif event.button_index == MOUSE_BUTTON_LEFT and event.double_click:
             add_child_combiner(combiner_list[click_column]["root_node"])
         elif event.button_index == MOUSE_BUTTON_LEFT:
             handle_start_click_hold(click_row, click_column, local_pos, combiner_list)
 
+func get_combiner_node_at_grid_location(local_row: int, local_column: int) -> Dictionary:
+    var all_ranges: = calculate_all_index_ranges()
+    var combiner_list: Array[Dictionary] = []
+    get_row_combiner_list(all_ranges, local_row, combiner_list)
+    if local_column >= combiner_list.size():
+        return {}
+    return combiner_list[local_column]["root_node"]
+
+func test_change_combiner_func(combiner_node: Dictionary) -> void:
+    var funcs: Array[String] = ["and", "or", "not"]
+    var next: int = posmod(funcs.find(combiner_node["function"]) + 1, funcs.size())
+    change_combiner_func(combiner_node, funcs[next])
+
 func handle_start_click_hold(click_row: int, click_column: int, local_pos: Vector2, combiner_list: Array[Dictionary]) -> void:
     if click_column == 0:
         return
-    prints("click down in row %d, column %d" % [click_row, click_column])
-    var in_row_pos: Vector2 = local_pos - get_child(click_row * columns).position + Vector2(0, vsep()/2.0)
-    var row_height: float = get_child(click_row * columns).size.y + vsep()
-    var combiner_range: Array = combiner_list[click_column]["index_range"]
-    if combiner_range[0] == click_row and in_row_pos.y < resizer_margin:
-        prints("clicked top resizer")
+    var in_resizer_area: String = is_local_pos_in_resizer_area(click_row, click_column, local_pos, combiner_list)
+    if in_resizer_area:
         resizing_click_hold = true
-        is_resizing_bottom = false
-        resizing_hold_movement = Vector2.ZERO
-        resizing_combiner_node = combiner_list[click_column]["root_node"]
-    elif combiner_range[1] == click_row and in_row_pos.y > row_height - resizer_margin:
-        prints("clicked bottom resizer")
-        resizing_click_hold = true
-        is_resizing_bottom = true
+        is_resizing_bottom = in_resizer_area == "bottom"
         resizing_hold_movement = Vector2.ZERO
         resizing_combiner_node = combiner_list[click_column]["root_node"]
 
+func is_local_pos_in_resizer_area(local_row: int, local_column: int, local_pos: Vector2, combiner_list: Array[Dictionary]) -> String:
+    if local_column < 0 or local_column >= combiner_list.size():
+        return ""
+
+    var in_row_pos: Vector2 = local_pos - get_child(local_row * columns).position + Vector2(0, vsep()/2.0)
+    var row_height: float = get_child(local_row * columns).size.y + vsep()
+    var combiner_range: Array = combiner_list[local_column]["index_range"]
+    if combiner_range[0] == local_row and in_row_pos.y < resizer_margin:
+        return "top"
+    elif combiner_range[1] == local_row and in_row_pos.y > row_height - resizer_margin:
+        return "bottom"
+    return ""
+
 func _handle_drag(event: InputEventMouseMotion) -> void:
+    var set_mouse_cursor_shape: = Control.CURSOR_ARROW
     if resizing_click_hold:
         resizing_hold_movement += (event as InputEventMouseMotion).relative
         if resizing_hold_movement.length() > drag_move_threshold:
             start_resizing_combiner(event.position)
     elif is_resizing_combiner:
+        set_mouse_cursor_shape = Control.CURSOR_VSIZE
         update_resizing_combiner(event.position)
+    else:
+        var local_row: int = get_row_from_local_pos(event.position)
+        var local_column: int = floori((event.position.x + hsep()/2.0) / float(combiner_column_width))
+        if not (local_column < 0 or local_column >= columns - 1):
+            var all_ranges: = calculate_all_index_ranges()
+            var combiner_list: Array[Dictionary] = []
+            get_row_combiner_list(all_ranges, local_row, combiner_list)
+            
+            var in_resizer_area: String = is_local_pos_in_resizer_area(local_row, local_column, event.position, combiner_list)
+            if in_resizer_area:
+                set_mouse_cursor_shape = Control.CURSOR_VSIZE
+            else:
+                set_mouse_cursor_shape = Control.CURSOR_ARROW
+    
+    if set_mouse_cursor_shape != mouse_default_cursor_shape:
+        mouse_default_cursor_shape = set_mouse_cursor_shape
 
+func change_combiner_func(combiner_node: Dictionary, new_func: String) -> void:
+    combiner_node["function"] = new_func
+    _dirty = true
 
 func remove_combiner(combiner_node: Dictionary) -> void:
+    if is_same(combiner_node, combiner_tree):
+        return
     var parent_combiner: Dictionary = get_parent_combiner(combiner_node)
     parent_combiner["children"].erase(combiner_node)
+    if combiner_node["children"].size() > 0:
+        parent_combiner["children"].append_array(combiner_node["children"])
+        sort_combiner_children(parent_combiner)
     _dirty = true
 
 func add_child_combiner(parent_combiner: Dictionary) -> void:
@@ -135,11 +305,16 @@ func add_child_combiner(parent_combiner: Dictionary) -> void:
     _dirty = true
 
 func get_v3_command_data() -> Array:
+    if command_list_items.size() == 0:
+        return []
     var commands: Array = []
     for command_item in command_list_items:
         commands.append(command_item.get_v3_call_string())
     var inserted_operations: Dictionary[int, Array] = {}
-    insert_combiner_operations(calculate_all_index_ranges(), inserted_operations)
+    var all_ranges: = calculate_all_index_ranges()
+    normalize_combiner_tree(all_ranges)
+    all_ranges = calculate_all_index_ranges()
+    insert_combiner_operations(all_ranges, inserted_operations, true)
     var insert_after_indices: Array = inserted_operations.keys()
     insert_after_indices.sort()
     insert_after_indices.reverse()
@@ -147,14 +322,52 @@ func get_v3_command_data() -> Array:
         Utility.insert_array_at(commands, insert_after_index + 1, inserted_operations[insert_after_index])
     return commands
 
-func insert_combiner_operations(index_ranges_subtree: Dictionary, inserted_operations: Dictionary[int, Array]) -> void:
+# remove all single-operand binary operator based combiners without removing their children
+func normalize_combiner_tree(combiner_range: Dictionary) -> void:
+    var child_count: int = combiner_range["children"].size()
+    if child_count == 0:
+        return
+    var combiner_node: Dictionary = combiner_range["root_node"]
+    for child_range in combiner_range["children"]:
+        if child_range["root_node"]["function"] in UNARY_FUNCTIONS:
+            normalize_combiner_tree(child_range)
+            continue
+        
+        var is_redundant: bool = false
+        if child_range["index_range"][0] == child_range["index_range"][1]:
+            is_redundant = true
+        elif child_range["children"].size() == 1:
+            var child_child_index_range: Array[int] = child_range["children"][0]["index_range"]
+            if range_contains_range(child_child_index_range, child_range["index_range"]):
+                is_redundant = true
+        
+        if is_redundant:
+            combiner_node["children"].append_array(child_range["root_node"]["children"])
+            combiner_node["children"].erase(child_range["root_node"])
+    
+    sort_combiner_children(combiner_node)
+
+
+func insert_combiner_operations(index_ranges_subtree: Dictionary, inserted_operations: Dictionary[int, Array], is_top_level: bool = false) -> void:
     for child_range in index_ranges_subtree["children"]:
         insert_combiner_operations(child_range, inserted_operations)
+
+    if is_top_level:
+        # AND behavior is implicit at the top level
+        if index_ranges_subtree["root_node"]["function"] == "and":
+            return
+        # special case exit needed because the top level combiner isn't normalized away
+        # even if it takes two operands and there's only one command
+        if command_list_items.size() == 1:
+            if index_ranges_subtree["root_node"]["function"] not in UNARY_FUNCTIONS:
+                return
 
     var last_index: int = index_ranges_subtree["index_range"][1]
     if not inserted_operations.has(last_index):
         inserted_operations[last_index] = []
     var num_ops: int = last_index - index_ranges_subtree["index_range"][0]
+    for child_combiner in index_ranges_subtree["children"]:
+        num_ops -= child_combiner["index_range"][1] - child_combiner["index_range"][0]
     var combiner_func: String = index_ranges_subtree["root_node"]["function"]
     if UNARY_FUNCTIONS.has(combiner_func):
         if num_ops != 0:
@@ -182,6 +395,8 @@ func rebuild_grid() -> void:
 
     var index_ranges: Dictionary = calculate_all_index_ranges()
     
+    var row_heights: Array[int] = []
+    var combiner_top_pieces: Array[Dictionary] = []
     for row_index in command_count:
         if max_depth == 0:
             add_child(command_list_items[row_index])
@@ -206,13 +421,54 @@ func rebuild_grid() -> void:
                 combiner_piece = bool_bottom.instantiate()
             else:
                 combiner_piece = bool_middle.instantiate()
-            #combiner_piece.set_border_and_bg_color(Color.WHITE, Color.WHITE)
-            combiner_piece.tooltip_text = combiner_list[column_index]["root_node"]["function"].capitalize()
+
+            var combiner: = combiner_list[column_index]["root_node"] as Dictionary
+            set_combiner_piece_style(combiner_piece, combiner["function"])
+            combiner_piece.tooltip_text = combiner["function"].capitalize()
             add_child(combiner_piece)
+            
+            if is_top_edge:
+                combiner_top_pieces.append({
+                    "top_piece": combiner_piece,
+                    "combiner": combiner,
+                    "row_span": combiner_list[column_index]["index_range"][1] - combiner_list[column_index]["index_range"][0] + 1,
+                })
         
         var margin_container: = get_list_item_margin_container(max_depth - combiner_list.size())
-        margin_container.add_child(command_list_items[row_index])
+        var command_node: CommandListItem = command_list_items[row_index] as CommandListItem
+        margin_container.add_child(command_node)
         add_child(margin_container)
+
+        row_heights.append(command_node.size.y)
+    
+    for combiner_top_piece in combiner_top_pieces:
+        var combiner: Dictionary = combiner_top_piece["combiner"]
+        var start_row_index: int = combiner["first_command_index"]
+        
+        var total_height: int = 0
+        for row_index in range(start_row_index, start_row_index + combiner_top_piece["row_span"]):
+            total_height += row_heights[row_index]
+        total_height += vsep() * (combiner_top_piece["row_span"] - 1)
+        
+        var new_label_anchor: Control = combiner_label.instantiate()
+        var the_label: Label = new_label_anchor.get_node("Label")
+        the_label.text = combiner["function"].to_upper()
+        the_label.custom_minimum_size.x = total_height
+        the_label.size.x = total_height
+        combiner_top_piece["top_piece"].add_child(new_label_anchor)
+        new_label_anchor.set_anchors_and_offsets_preset(Control.PRESET_TOP_RIGHT)
+        new_label_anchor.position.x += combiner_label_h_offset
+
+func set_combiner_piece_style(combiner_piece: BoolCombinerPiece, combiner_func: String) -> void:
+    var base_colors: Dictionary = {
+        "and": Color(0.8, 0.4, 0.4),
+        "or": Color(0.4, 0.8, 0.4),
+        "not": Color(0.9, 0.9, 0.9),
+    }
+    var func_base_color: Color = base_colors.get(combiner_func, Color.MAGENTA)
+    var func_border_color: Color = func_base_color.darkened(0.5)
+    
+    combiner_piece.set_border_and_bg_color(func_border_color, func_base_color)
 
 func get_list_item_margin_container(negative_column_count: int) -> MarginContainer:
     var margin_container: = MarginContainer.new()
@@ -227,6 +483,7 @@ func clear_commands() -> void:
     clear_children()
     for command_item in command_list_items:
         command_item.queue_free()
+    command_list_items = []
     _dirty = true
 
 func clear_children() -> void:
@@ -267,9 +524,12 @@ func combiner_subtree_index_range(combiner_subtree: Dictionary, last_available_i
     var index_range: Array[int] = [combiner_subtree["first_command_index"], combiner_subtree.get("last_command_index", last_available_index)]
     return index_range
 
-func calculate_all_index_ranges() -> Dictionary:
-    if combiner_tree.has("last_command_index"):
+func unset_explicit_top_level_end() -> void:
+    if combiner_tree.has("last_command_index") and combiner_tree["function"] not in UNARY_FUNCTIONS:
         combiner_tree.erase("last_command_index")
+
+func calculate_all_index_ranges() -> Dictionary:
+    unset_explicit_top_level_end()
     return index_ranges_recursive(combiner_tree, get_command_count() - 1)
 
 func calculate_combiner_subtree_index_ranges(combiner_subtree: Dictionary, last_available_index: int) -> Dictionary:
@@ -302,13 +562,17 @@ func index_ranges_recursive(combiner_subtree: Dictionary, last_available_index: 
     var children: Array = combiner_subtree["children"]
     var result: Dictionary = {"root_node": combiner_subtree, "index_range": [], "children": []}
     result["index_range"] = combiner_subtree_index_range(combiner_subtree, last_available_index)
+    var last_index: int = result["index_range"][1]
 
     for child_index in children.size():
-        var child_last_index: int = last_available_index
+        var child_last_index: int = last_index
         if child_index < children.size() - 1:
             child_last_index = children[child_index + 1]["first_command_index"] - 1
         result["children"].append(index_ranges_recursive(children[child_index], child_last_index))
     return result
+
+func get_command_index(command_item: CommandListItem) -> int:
+    return command_list_items.find(command_item)
 
 func remove_command(command_item: CommandListItem) -> void:
     var command_index: int = command_list_items.find(command_item)
@@ -329,6 +593,15 @@ func remove_command_at(command_index: int) -> void:
     command_list_items.remove_at(command_index)
     prints("command list:", command_list_items)
     _dirty = true
+
+func move_command_to_before_index(command_item: CommandListItem, new_index: int) -> void:
+    var from_index: int = command_list_items.find(command_item)
+    if new_index == from_index or new_index - 1 == from_index:
+        return
+    elif new_index > from_index:
+        new_index -= 1
+    remove_command_at(from_index)
+    insert_command_at(command_item, new_index)
 
 func combiner_remove_all_commands() -> void:
     combiner_tree["children"] = []
@@ -364,12 +637,28 @@ func combiner_remove_index_recursive(index_ranges_subtree: Dictionary, removed_i
     return true
 
 func insert_command_at(new_command: CommandListItem, insert_at_index: int) -> void:
+    if insert_at_index == get_command_count():
+        append_command(new_command)
+        return
     new_command.parent_list = self
     command_list_items.insert(insert_at_index, new_command)
     combiner_insert_index(calculate_all_index_ranges(), insert_at_index)
     _dirty = true
 
+func replace_command_at(command_index: int, new_command: CommandListItem) -> void:
+    if command_index < 0 or command_index >= get_command_count():
+        push_error("Command index out of bounds: %s" % [command_index])
+    new_command.parent_list = self
+    var replaced_command = command_list_items[command_index]
+    replaced_command.queue_free()
+    command_list_items[command_index] = new_command
+    _dirty = true
+
 func append_command(new_command: CommandListItem) -> void:
+    var top_level_combiner_command: String = combiner_tree["function"]
+    if top_level_combiner_command in UNARY_FUNCTIONS:
+        combiner_tree = get_default_top_level_combiner([combiner_tree])
+    unset_explicit_top_level_end()
     new_command.parent_list = self
     command_list_items.append(new_command)
     _dirty = true
@@ -392,7 +681,7 @@ func combiner_insert_index(index_ranges_subtree: Dictionary, inserted_index: int
     for child_range in index_ranges_subtree["children"]:
         combiner_insert_index(child_range, inserted_index)
 
-    if inserted_index <= index_start:
+    if inserted_index <= index_start and not is_same(combiner_node, combiner_tree):
         combiner_node["first_command_index"] += 1
     if combiner_node.has("last_command_index"):
         combiner_node["last_command_index"] += 1
@@ -430,6 +719,9 @@ func sort_combiner_children(combiner: Dictionary) -> void:
 
 # Utility
 
+func index_in_range(index: int, the_range: Array[int]) -> bool:
+    return index >= the_range[0] and index <= the_range[1]
+
 func ranges_overlap(range_a: Array[int], range_b: Array[int]) -> bool:
     return range_a[0] <= range_b[1] and range_a[1] >= range_b[0]
 
@@ -453,9 +745,11 @@ func get_row_from_local_pos(local_pos: Vector2) -> int:
     for row_index in num_rows:
         var row_element: Control = get_child(row_index * columns)
         var row_start_y: int = int(row_element.position.y)
-        if row_index == 0:
+        if row_index != 0:
             row_start_y -= vsep()/2.0
-        var row_end_y: int = row_start_y + row_element.size.y + vsep()/2.0
+        var row_end_y: int = row_start_y + row_element.size.y + vsep()
+        if row_index == 0:
+            row_end_y -= vsep()/2.0
         if local_pos.y >= row_start_y and local_pos.y < row_end_y:
             return row_index
     return -1
@@ -517,6 +811,10 @@ func resize_combiner_smart(resized_node: Dictionary, new_range: Array[int], curr
     var parent_range: Dictionary = calculate_combiner_subtree_index_ranges(parent_combiner, current_last_index)
     var this_range: Dictionary = parent_range["children"][parent_combiner["children"].find(resized_node)]
     var old_range: Array[int] = this_range["index_range"]
+
+    new_range[0] = maxi(new_range[0], maxi(0, parent_range["index_range"][0]))
+    new_range[1] = mini(new_range[1], mini(get_command_count() - 1, parent_range["index_range"][1]))
+
     if old_range == new_range:
         return
     
@@ -566,11 +864,47 @@ func _resize_smart_down(resized_node: Dictionary, new_range: Array[int], subtree
         resized_node["last_command_index"] = new_range[1]
 
 func _resize_smart_up(resized_node: Dictionary, new_range: Array[int], parent_range: Dictionary) -> void:
+    var old_range: Array[int] = []
     for sibling_range_info in parent_range["children"]:
+        if is_same(sibling_range_info["root_node"], resized_node):
+            old_range = sibling_range_info["index_range"]
+            continue
         var sibling_range: Array[int] = sibling_range_info["index_range"]
         if range_contains_range(new_range, sibling_range):
             resized_node["children"].append(sibling_range_info["root_node"])
-            parent_range["root_node"]["children"].erase(sibling_range_info)
+            parent_range["root_node"]["children"].erase(sibling_range_info["root_node"])
         elif ranges_overlap(new_range, sibling_range):
             var new_sibling_range: Array[int] = remove_range_overlap(sibling_range, new_range)
             _resize_smart_down(sibling_range_info["root_node"], new_sibling_range, sibling_range_info, resized_node)
+
+    resized_node["first_command_index"] = new_range[0]
+    if new_range[1] != old_range[1]:
+        resized_node["last_command_index"] = new_range[1]
+
+func do_combiner_context_menu(local_row: int, local_column: int) -> void:
+    var context_menu = PopupMenu.new()
+    context_menu.add_item("And", CONTEXT_MENU_CHANGE_TO_AND) 
+    context_menu.add_item("Or", CONTEXT_MENU_CHANGE_TO_OR)
+    context_menu.add_item("Not", CONTEXT_MENU_CHANGE_TO_NOT)
+    context_menu.add_separator()
+    context_menu.add_item("Add sub-group", CONTEXT_MENU_ADD_COMBINER)
+    context_menu.add_item("Remove", CONTEXT_MENU_REMOVE)
+    context_menu.id_pressed.connect(on_combiner_context_id_pressed.bind(local_row, local_column))
+    get_window().add_child(context_menu)
+    Utility.popup_context_menu_at_mouse(context_menu)
+
+func on_combiner_context_id_pressed(context_id: int, local_row: int, local_column: int) -> void:
+    var combiner_node: = get_combiner_node_at_grid_location(local_row, local_column)
+    if not combiner_node:
+        return
+    if context_id == CONTEXT_MENU_REMOVE:
+        remove_combiner(combiner_node)
+    elif context_id == CONTEXT_MENU_ADD_COMBINER:
+        add_child_combiner(combiner_node)
+    elif context_id == CONTEXT_MENU_CHANGE_TO_AND:
+        change_combiner_func(combiner_node, "and")
+    elif context_id == CONTEXT_MENU_CHANGE_TO_OR:
+        change_combiner_func(combiner_node, "or")
+    elif context_id == CONTEXT_MENU_CHANGE_TO_NOT:
+        change_combiner_func(combiner_node, "not")
+    
