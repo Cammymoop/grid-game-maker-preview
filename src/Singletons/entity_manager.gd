@@ -123,22 +123,32 @@ func setup():
     if not TextureManager.im_ready:
         await TextureManager.textures_loaded
     create_index_map()
+    create_defined_custom_signals()
     
     im_ready = true
+
+func create_defined_custom_signals() -> void:
+    for entity_id in entity_defs.keys():
+        var entity_def = entity_defs[entity_id]
+        for prop_name in entity_def["properties"].keys():
+            _create_signal_for_prop(prop_name)
+
+func _create_signal_for_prop(prop_name: String) -> void:
+    if not prop_name.begins_with("when_signal_"):
+        return
+    var signal_name = prop_name.trim_prefix("when_signal_")
+    if not has_user_signal(signal_name):
+        create_signal(signal_name)
 
 func create_signal(signal_name: StringName) -> void:
     add_user_signal(signal_name)
 
-func connect_custom_signal(signal_name: String, target: Object, method: String, bind_args: Array = []) -> void:
+func connect_custom_signal(signal_name: String, callable: Callable) -> void:
     if not has_user_signal(signal_name):
-        print_debug("ERROR: custom signal not found: " + signal_name)
+        push_error("ERROR: custom signal not found: " + signal_name)
         return
-    if target and not target.is_queued_for_deletion():
-        if target not in entity_signal_connections:
-            entity_signal_connections[target] = []
-        if signal_name not in entity_signal_connections[target]:
-            entity_signal_connections[target].append(signal_name)
-        connect(signal_name, Callable(target, method).bind(bind_args))
+    if callable.is_valid():
+        connect(signal_name, callable)
 
 func do_emit_signal(signal_name: String, owning_entity = null, args = null) -> void:
     if not has_user_signal(signal_name):
@@ -163,6 +173,7 @@ func refresh_definition():
     update_movement_mode()
     fix_string_keys()
     create_index_map()
+    create_defined_custom_signals()
 
 func update_movement_mode():
     movement_mode = GameManager.get_game_setting("movement_mode", GameManager.MovementMode.MOVEMENT_CONTINUOUS)

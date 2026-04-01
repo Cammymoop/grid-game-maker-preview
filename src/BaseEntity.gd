@@ -83,10 +83,10 @@ func get_center_offset() -> Vector2:
 func connect_to_signals() -> void:
 	var all_props = EntityManager.get_entity_property_list(self)
 
-	for prop in all_props:
-		if prop.substr(0, 12) == "when_signal_":
-			var signal_name = prop.substr(12)
-			EntityManager.connect_custom_signal(signal_name, self, "entity_manager_signal", [signal_name])
+	for prop_name in all_props:
+		if prop_name.begins_with("when_signal_"):
+			var signal_name = prop_name.trim_prefix("when_signal_")
+			EntityManager.connect_custom_signal(signal_name, entity_manager_signal.bind(signal_name))
 
 	
 func check_for_idle_update_conditional() -> void:

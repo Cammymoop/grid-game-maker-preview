@@ -210,3 +210,15 @@ func desc_load_next_level() -> String:
 	return "none|Load the next level"
 func cmd_load_next_level(_slots: Dictionary) -> void:
 	GameManager.try_load_next_level()
+
+func desc_take_a_turn() -> String:
+	return "entity|The entity takes a turn"
+func cmd_take_a_turn(slots: Dictionary, chosen_slot: int) -> void:
+	if Commands.slot_is_entity(chosen_slot):
+		EntityManager.request_move(slots[chosen_slot])
+
+func desc_send_signal() -> String:
+	return "entity|The entity sends a [signal_name:SignalInput] signal"
+func cmd_send_signal(slots: Dictionary, chosen_slot: int, signal_name: String) -> void:
+	if Commands.slot_is_entity(chosen_slot):
+		EntityManager.do_emit_signal(signal_name, slots[chosen_slot])

@@ -5,6 +5,7 @@ enum InputTypes {
 	PropertyInput,
 	TileNameInput,
 	EntityNameInput,
+	SignalInput,
 	
 	ValueInput,
 	
@@ -18,8 +19,10 @@ var templates: = {
 	InputTypes.PropertyInput: preload("res://Scenes/GameEditor/ConditionalEditor/PropertyInput.tscn"),
 	InputTypes.TileNameInput: preload("res://Scenes/GameEditor/ConditionalEditor/tile_name_input.tscn"),
 	InputTypes.EntityNameInput: preload("res://Scenes/GameEditor/ConditionalEditor/entity_name_input.tscn"),
+	InputTypes.SignalInput: preload("res://Scenes/GameEditor/ConditionalEditor/generic_input.tscn"),
 	
 	InputTypes.ValueInput: preload("res://Scenes/GameEditor/ConditionalEditor/generic_input.tscn"),
+
 	
 	InputTypes.DirectionInput: preload("res://Scenes/GameEditor/ConditionalEditor/DirectionInput.tscn"),
 	InputTypes.BoolChoice: preload("res://Scenes/GameEditor/ConditionalEditor/bool_choice_input.tscn"),
