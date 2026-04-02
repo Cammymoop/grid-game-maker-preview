@@ -414,7 +414,7 @@ func finish_move(moving_entity, onto_positions: Array) -> void:
 func resolve_tile_event(at_tile_positions: Array, tile_event_name: String, context_entity) -> void:
     for l in layers:
         for at_pos in at_tile_positions:
-            var event_property: = get_tile_property_at(l.get_cell_s(at_pos), tile_event_name)
+            var event_property: = get_tile_property(l.get_cell_s(at_pos), tile_event_name)
             if event_property and event_property.is_conditional():
                 event_property.resolve(null, context_entity, at_pos)
 

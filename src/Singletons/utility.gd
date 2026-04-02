@@ -54,19 +54,17 @@ func facing_rotation(what_facing: int) -> float:
 	return (what_facing * PI) / 2.0
 
 func direction_to_facing(direction: String) -> int:
-	match direction:
-		"up":
-			return 0
-		"right":
-			return 1
-		"down":
-			return 2
-		"left":
-			return 3
-		"none":
-			return -1
+	if direction == "up" or direction == "forward":
+		return 0
+	elif direction == "right":
+		return 1
+	elif direction == "down" or direction == "backward":
+		return 2
+	elif direction == "left":
+		return 3
+	elif direction == "none":
+		return -1
 	print_debug("bad direction: " + str(direction))
-	print_stack()
 	return -1
 
 func is_absolute_direction(direction: String) -> bool:

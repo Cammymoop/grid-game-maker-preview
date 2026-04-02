@@ -54,6 +54,7 @@ func _ready() -> void:
 func initialize() -> void:
 	check_for_idle_update_conditional()
 	check_visual_turn_on_move()
+	EntityManager.setup_entity_controller(self)
 	
 	connect_to_signals()
 	
@@ -114,8 +115,6 @@ func serialize() -> Dictionary:
 	important_stuff['position'] = [position.x, position.y]
 	if moving:
 		important_stuff['steps_remaining'] = steps_remaining
-	if controller_name:
-		important_stuff['controller_name'] = controller_name
 	
 	if tailing and is_instance_valid(tailing):
 		important_stuff['tailing'] = tailing.instance_id
@@ -143,12 +142,6 @@ func deserialize(data: Dictionary) -> void:
 	next_tile_pos = Vector2(data['next_tile_pos'][0], data['next_tile_pos'][1])
 	if "steps_remaining" in data:
 		steps_remaining = int(data["steps_remaining"])
-	
-	if "controller_name" in data:
-		controller_name = data['controller_name']
-		var new_controller = EntityManager.get_new_controller(controller_name)
-		add_child(new_controller)
-		set_controller(new_controller)
 	
 	await EntityManager.post_deserialize
 
@@ -183,7 +176,13 @@ func entity_process() -> void:
 					return
 		
 		var max_intentions: int = get_max_move_intentions()
+		var current_v_facing: = visual_facing
+		var current_move_facing: = facing
 		for attempt in max_intentions:
+			# if a previous attempt failed, reset the visual facing and move facing
+			if attempt > 0:
+				set_visual_facing(current_v_facing)
+				set_facing(current_move_facing)
 			var intended_move_facing = get_intended_move(attempt)
 			if intended_move_facing > -1:
 				set_current_steps_per_tile(self_steps_per_tile)

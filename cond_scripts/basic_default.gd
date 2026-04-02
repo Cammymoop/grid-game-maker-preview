@@ -228,22 +228,21 @@ func desc_compare_property() -> String:
 func cmd_compare_property(slots: Dictionary, chosen_slot: int, property_name: String, comparison: String, value: Variant) -> bool:
 	var selected = slots[chosen_slot]
 	if Commands.slot_is_entity(chosen_slot) and selected:
-		var prop_value = EntityManager.get_entity_property(selected, property_name)
-		var number_result = 0
-		if prop_value.is_conditional():
-			number_result = float(prop_value.resolve(selected, selected, selected.tile_position))
-		else:
-			number_result = float(prop_value.get_value())
-		return Utility.check_comparison(number_result, float(value), comparison)
-	elif Commands.slot_is_positions(chosen_slot):
-		var positions = slots[chosen_slot]
-		if len(positions) > 0:
-			var prop: Property = MapManager.get_tile_property_at(positions[0], property_name)
+		var prop: Property = EntityManager.get_entity_property(selected, property_name)
+		if prop:
 			var number_result = 0
 			if prop.is_conditional():
-				number_result = float(prop.resolve(null, null, positions[0]))
+				number_result = float(prop.resolve(selected, slots[Slot.RED], selected.tile_position))
+				prints("number_result: ", number_result)
 			else:
 				number_result = float(prop.get_value())
 			return Utility.check_comparison(number_result, float(value), comparison)
-		return false
+	elif Commands.slot_is_positions(chosen_slot) and selected:
+		var prop: Property = MapManager.get_tile_property_at(selected[0], property_name)
+		var number_result = 0
+		if prop.is_conditional():
+			number_result = float(prop.resolve(null, slots[Slot.RED], selected[0]))
+		else:
+			number_result = float(prop.get_value())
+		return Utility.check_comparison(number_result, float(value), comparison)
 	return false

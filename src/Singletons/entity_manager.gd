@@ -320,12 +320,7 @@ func create_entity(entity_index, tile_position, facing=0, activate=true) -> Node
         if intended_move_speed <= 0:
             intended_move_speed = default_move_speed
         entity.set_intended_move_speed(intended_move_speed)
-    if "controller" in entity_info:
-        if entity_info["controller"] in controller_templates:
-            var controller = get_new_controller(entity_info["controller"])
-            entity.controller_name = entity_info['controller']
-            entity.add_child(controller)
-            entity.set_controller(controller)
+    setup_entity_controller(entity)
     entity.entity_index = entity_index
     entity.position = MapManager.tile_to_world_position(tile_position)
     add_entity_to_world(entity)
@@ -351,6 +346,15 @@ func create_entity(entity_index, tile_position, facing=0, activate=true) -> Node
     refresh_entity_list()
     
     return entity
+
+func setup_entity_controller(entity: BaseEntity) -> void:
+    var entity_index = entity.entity_index
+    if entity_index in entity_defs and "controller" in entity_defs[entity_index]:
+        var controller_name = entity_defs[entity_index]["controller"]
+        if controller_name in controller_templates:
+            var controller = get_new_controller(controller_name)
+            entity.add_child(controller)
+            entity.set_controller(controller)
 
 func auto_tail_handler(entity: BaseEntity) -> void:
     var auto_tail = get_entity_property(entity, "auto_tail")
@@ -475,11 +479,11 @@ func bond_group_update() -> void:
     for index in to_remove:
         bond_groups.remove_at(index)
 
-func get_bond_group(entity):
+func get_bond_group(entity) -> Array:
     for bg in bond_groups:
         if bg.has(entity.instance_id):
             return bg
-    return null
+    return []
 
 func bond_group_start_move(bond_group: Array, steps_per_tile: int, move_facing: int) -> bool:
     var instances = []
