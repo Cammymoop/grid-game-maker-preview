@@ -222,3 +222,28 @@ func desc_send_signal() -> String:
 func cmd_send_signal(slots: Dictionary, chosen_slot: int, signal_name: String) -> void:
 	if Commands.slot_is_entity(chosen_slot):
 		EntityManager.do_emit_signal(signal_name, slots[chosen_slot])
+
+func desc_compare_property() -> String:
+	return "entity,pos|If the entity/tile's [property_name:PropertyInput] property [comparison:OrderComparison] [value:ValueInput]"
+func cmd_compare_property(slots: Dictionary, chosen_slot: int, property_name: String, comparison: String, value: Variant) -> bool:
+	var selected = slots[chosen_slot]
+	if Commands.slot_is_entity(chosen_slot) and selected:
+		var prop_value = EntityManager.get_entity_property(selected, property_name)
+		var number_result = 0
+		if prop_value.is_conditional():
+			number_result = float(prop_value.resolve(selected, selected, selected.tile_position))
+		else:
+			number_result = float(prop_value.get_value())
+		return Utility.check_comparison(number_result, float(value), comparison)
+	elif Commands.slot_is_positions(chosen_slot):
+		var positions = slots[chosen_slot]
+		if len(positions) > 0:
+			var prop: Property = MapManager.get_tile_property_at(positions[0], property_name)
+			var number_result = 0
+			if prop.is_conditional():
+				number_result = float(prop.resolve(null, null, positions[0]))
+			else:
+				number_result = float(prop.get_value())
+			return Utility.check_comparison(number_result, float(value), comparison)
+		return false
+	return false

@@ -357,3 +357,18 @@ func get_width_height_position_list(width: int, height: int) -> Array[Vector2i]:
 		for x in width:
 			positions.append(Vector2i(x, y))
 	return positions
+
+func check_comparison(value_a: float, value_b: float, comparison: String) -> bool:
+	if comparison == ">":
+		return value_a > value_b
+	elif comparison == "<":
+		return value_a < value_b
+	elif comparison == "=":
+		return value_a == value_b
+	elif comparison == "!=":
+		return value_a != value_b
+	elif comparison == ">=":
+		return value_a >= value_b
+	elif comparison == "<=":
+		return value_a <= value_b
+	return false

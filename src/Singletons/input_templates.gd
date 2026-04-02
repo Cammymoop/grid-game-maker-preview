@@ -9,6 +9,8 @@ enum InputTypes {
 	
 	ValueInput,
 	
+	OrderComparison,
+	
 	DirectionInput,
 	BoolChoice,
 	InvertInput,
@@ -22,7 +24,8 @@ var templates: = {
 	InputTypes.SignalInput: preload("res://Scenes/GameEditor/ConditionalEditor/generic_input.tscn"),
 	
 	InputTypes.ValueInput: preload("res://Scenes/GameEditor/ConditionalEditor/generic_input.tscn"),
-
+	
+	InputTypes.OrderComparison: preload("res://Scenes/GameEditor/ConditionalEditor/order_comparison_input.tscn"),
 	
 	InputTypes.DirectionInput: preload("res://Scenes/GameEditor/ConditionalEditor/DirectionInput.tscn"),
 	InputTypes.BoolChoice: preload("res://Scenes/GameEditor/ConditionalEditor/bool_choice_input.tscn"),
