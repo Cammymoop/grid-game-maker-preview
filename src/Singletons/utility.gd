@@ -37,6 +37,40 @@ func exclusive_randf() -> float:
 func random_int_range(start: int, end_exclusive: int) -> int:
 	return randi_range(start, end_exclusive - 1)
 
+func vector_to_facing(vector: Vector2) -> int:
+	if abs(vector.x) == abs(vector.y):
+		return -1
+	elif abs(vector.x) > abs(vector.y):
+		return 1 if vector.x > 0 else 3
+	else:
+		return 2 if vector.y > 0 else 0
+
+func biased_vector_to_facing(vector: Vector2, bias_vertical: bool) -> int:
+	if vector == Vector2.ZERO:
+		return -1
+	if abs(vector.x) == abs(vector.y):
+		if bias_vertical:
+			vector.x = 0
+		else:
+			vector.y = 0
+	return vector_to_facing(vector)
+
+func vector_to_facing_alternate(vector: Vector2, with_bias: bool = false, bias_vertical: bool = true) -> int:
+	if vector == Vector2.ZERO:
+		return -1
+	if abs(vector.x) == abs(vector.y):
+		if with_bias:
+			var axis_index: int = 1 if bias_vertical else 0
+			vector[axis_index] = 0
+			return vector_to_facing(vector)
+		else:
+			return -1
+	
+	vector[vector.abs().max_axis_index()] = 0
+	if vector == Vector2.ZERO:
+		return -1
+	return vector_to_facing(vector)
+
 func facing_vector(what_facing: int) -> Vector2:
 	if FACING_TO_VECTOR.has(what_facing):
 		return FACING_TO_VECTOR[what_facing]

@@ -572,6 +572,16 @@
         }
       },
       "intended_move_speed": 0.0
+    },
+    "15": {
+      "name": "chaser",
+      "texture": 1,
+      "tex_index": 7,
+      "properties": {
+        "creature": true
+      },
+      "controller": "direct_chase_controller",
+      "intended_move_speed": 3.0
     }
   },
   "window_width": 18.0,

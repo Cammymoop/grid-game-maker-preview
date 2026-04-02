@@ -37,20 +37,20 @@ func set_controller(list_index) -> void:
 	var controller_list: PopupMenu = controller_button.get_popup()
 	var controller_name: = controller_list.get_item_text(list_index)
 	if controller_name == "None":
-		if the_definition.has("controller_name"):
-			the_definition.erase("controller_name")
+		if the_definition.has("controller"):
+			the_definition.erase("controller")
 		return
-	elif the_definition.has("controller_name") and controller_name == the_definition["controller_name"]:
+	elif the_definition.has("controller") and controller_name == the_definition["controller"]:
 		return
 	
 	if "controller_options" in the_definition:
 		the_definition.erase("controller_options")
 	
 	if controller_name != "None":
-		the_definition['controller_name'] = controller_name
+		the_definition['controller'] = controller_name
 		find_child("ControllerOpContainer").visible = true
 	else:
-		the_definition.erase('controller_name')
+		the_definition.erase('controller')
 		find_child("ControllerOpContainer").visible = false
 	
 	controller_button.text = controller_name
@@ -134,14 +134,7 @@ func fix_size():
 	
 	the_min_size = size
 	
-	center_self()
-
-# assumes parent is centered
-func center_self():
-	var p_pos = get_parent().position
-	var p_size = get_parent().size
-	position.x = (p_pos.x + (p_size.x / 2)) - (size.x / 2)
-	position.y = (p_pos.y + (p_size.y / 2)) - (size.y / 2)
+	move_to_center()
 
 func _on_TileEntityEditorWindow_resized():
 	if size.x < the_min_size.x:

@@ -544,6 +544,18 @@ func find_entity_with_property(prop_name, first=true):
             return entity_list[i]
     return null
 
+func find_closest_entity_with_property(prop_name: String, from_position: Vector2i, exclude_list: Array = []) -> BaseEntity:
+    var closest_dist: float = -1
+    var closest_entity: BaseEntity = null
+    for entity in entity_list:
+        if entity in exclude_list or not entity_has_property(entity, prop_name):
+            continue
+        var euclidean_dist: = from_position.distance_to(entity.tile_position)
+        if closest_dist < 0 or euclidean_dist < closest_dist:
+            closest_dist = euclidean_dist
+            closest_entity = entity
+    return closest_entity
+
 func create_index_map() -> void:
     entity_index_map = {}
     
@@ -783,3 +795,13 @@ func get_all_entity_names() -> Array[String]:
         if not e_name in names:
             names.append(e_name)
     return names
+
+func is_valid_entity(entity: Object) -> bool:
+    if not entity or not is_instance_valid(entity):
+        return false
+    return entity is BaseEntity
+
+func is_valid_entity_in_world(entity: Object) -> bool:
+    if not is_valid_entity(entity):
+        return false
+    return entity in entity_list

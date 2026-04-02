@@ -34,5 +34,4 @@ func get_move(attempt_num: int):
 	if not EntityManager.controller_frame:
 		return -1
 	
-	prints("creature controller attempt:", attempt_num, "facing:", parent.visual_facing, "priority:", _facing_priority[attempt_num]) 
 	return posmod(parent.visual_facing + _facing_priority[attempt_num], 4)
