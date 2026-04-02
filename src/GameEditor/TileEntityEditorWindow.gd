@@ -20,6 +20,8 @@ var the_definition: = {}
 func _ready():
 	visibility_changed.connect(_on_vis_changed)
 	var controller_list = find_child("EditController").get_popup()
+	controller_list.clear()
+	controller_list.add_item("None")
 	for controller in EntityManager.get_all_controllers():
 		controller_list.add_item(controller)
 	
@@ -32,22 +34,26 @@ func set_controller(list_index) -> void:
 		return
 	
 	var controller_button = find_child("EditController")
-	var controller_list:PopupMenu = controller_button.get_popup()
-	var controller = controller_list.get_item_text(list_index)
-	if the_definition.has("controller") and controller == the_definition["controller"]:
+	var controller_list: PopupMenu = controller_button.get_popup()
+	var controller_name: = controller_list.get_item_text(list_index)
+	if controller_name == "None":
+		if the_definition.has("controller_name"):
+			the_definition.erase("controller_name")
+		return
+	elif the_definition.has("controller_name") and controller_name == the_definition["controller_name"]:
 		return
 	
 	if "controller_options" in the_definition:
 		the_definition.erase("controller_options")
 	
-	if controller != "None":
-		the_definition['controller'] = controller
+	if controller_name != "None":
+		the_definition['controller_name'] = controller_name
 		find_child("ControllerOpContainer").visible = true
 	else:
-		the_definition.erase('controller')
+		the_definition.erase('controller_name')
 		find_child("ControllerOpContainer").visible = false
 	
-	controller_button.text = controller
+	controller_button.text = controller_name
 
 func load_entity_info(entity_index: int):
 	set_tile_entity_mode("entity")
@@ -291,16 +297,18 @@ func _on_ControllerOptionsShow_pressed():
 	if not "controller" in the_definition:
 		return
 	var controller_instance = EntityManager.get_new_controller(the_definition["controller"])
-	var set_options = {}
+	var current_option_values: Dictionary = {}
 	if "controller_options" in the_definition:
-		set_options = the_definition["controller_options"].duplicate()
+		current_option_values = the_definition["controller_options"].duplicate()
+	elif controller_instance.has_method("get_default_options"):
+		current_option_values = controller_instance.get_default_options()
 	
-	var available_options = controller_instance.get_options()
+	var available_options: Dictionary = controller_instance.get_options()
 	if available_options:
 		var controller_popup = controller_options_popup_scene.instantiate()
 		
 		add_child(controller_popup)
-		controller_popup.init(controller_instance.get_options(), set_options)
+		controller_popup.init(controller_instance.get_options(), current_option_values)
 		controller_popup.hidden.connect(Callable(self, "update_controller_options").bind(controller_popup))
 		controller_popup.popup_centered()
 	else:

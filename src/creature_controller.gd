@@ -5,7 +5,7 @@ var move_mode = "facing"
 @onready var parent = get_parent()
 
 var options: Dictionary = {
-	"direction_priority": {"display_name": "Direction priority", "type": "orderable_list", "list_items": ["forward", "backward", "left", "right"]},
+	"direction_priority": {"display_name": "Direction priority", "type": "reorderable_list", "list_items": ["forward", "left", "right", "backward"]},
 }
 
 var direction_priority: Array = ["forward", "left", "right", "backward"]

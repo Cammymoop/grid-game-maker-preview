@@ -2,15 +2,18 @@ extends AcceptDialog
 
 signal hidden
 
-var bool_opt = preload("res://Scenes/GameEditor/ControllerOptions/BoolControllerOption.tscn")
+var bool_opt: PackedScene = preload("res://Scenes/GameEditor/ControllerOptions/BoolControllerOption.tscn")
+var reorderable_list_scn: PackedScene = preload("res://Scenes/GameEditor/ControllerOptions/controller_options_reorderable_list.tscn")
 
-var option_values = {}
+var option_meta: Dictionary = {}
+var option_values: Dictionary = {}
 
-func init(available_options, current_options) -> void:
+func init(available_options: Dictionary, current_options: Dictionary) -> void:
+	option_meta = available_options.duplicate_deep()
 	visibility_changed.connect(_on_vis_changed)
-	for option_name in available_options:
-		var option = available_options[option_name]
-		var opt
+	for option_name in option_meta:
+		var option = option_meta[option_name]
+		var opt: Control = null
 		match option["type"]:
 			"bool":
 				opt = bool_opt.instantiate()
@@ -18,14 +21,32 @@ func init(available_options, current_options) -> void:
 				
 				opt.get_node("BoolOptionValue").connect("toggled", Callable(self, "option_updated").bind(option_name))
 				option_values[option_name] = false
+			"reorderable_list":
+				opt = reorderable_list_scn.instantiate()
+				$VBoxContainer.add_child(opt)
+				
+				opt.order_changed.connect(option_updated.bind(option_name))
+				var default_list: Array = option.get("list_items", [])
+				option_values[option_name] = default_list.duplicate()
+				opt.set_items(default_list)
 		
 		opt.get_node("Label").text = option["display_name"]
+		option_meta[option_name]["node"] = opt
+	
+	set_current_options(current_options)
 		
-		if option_name in current_options:
-			option_values[option_name] = current_options[option_name]
-			match option["type"]:
-				"bool":
-					opt.get_node("BoolOptionValue").button_pressed = current_options[option_name]
+func set_current_options(current_options: Dictionary) -> void:
+	for option_name in current_options:
+		if not option_name in option_meta:
+			push_warning("Option '%s' not found in available options %s" % [option_name, option_meta.keys()])
+			continue
+		option_values[option_name] = current_options[option_name]
+		var opt: Control = option_meta[option_name]["node"]
+		match option_meta[option_name]["type"]:
+			"bool":
+				opt.get_node("BoolOptionValue").set_pressed_no_signal(current_options[option_name])
+			"reorderable_list":
+				opt.set_items(current_options[option_name])
 
 func option_updated(value, option_name) -> void:
 	option_values[option_name] = value

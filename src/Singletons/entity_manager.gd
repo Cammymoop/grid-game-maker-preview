@@ -353,6 +353,8 @@ func setup_entity_controller(entity: BaseEntity) -> void:
         var controller_name = entity_defs[entity_index]["controller"]
         if controller_name in controller_templates:
             var controller = get_new_controller(controller_name)
+            if entity_defs[entity_index].has("controller_options"):
+                controller.set_options(entity_defs[entity_index]["controller_options"])
             entity.add_child(controller)
             entity.set_controller(controller)
 
