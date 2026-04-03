@@ -215,8 +215,13 @@ func get_game_levels_dir(game_name: String) -> String:
 func get_game_assets_dir(game_name: String) -> String:
 	return get_game_gamedata_dir(game_name).path_join("assets")
 
+
 func get_shared_images_dir() -> String:
 	return _data_path(shared_assets_subdir, images_asset_subdir)
+
+func get_games_dir() -> String:
+	return _data_path(games_subdir)
+
 
 func ensure_data_dir_exists(...path_parts: Array) -> bool:
 	if not DirAccess.dir_exists_absolute(_data_path_from_arr(path_parts)):
@@ -400,7 +405,7 @@ func update_local_image_metadata(local_image_name: String, data: Dictionary, for
 		return
 	var existing_data = _get_local_images_metadata()
 	existing_data[local_image_name] = Utility.dict_vectors_to_lists(data)
-	var f: = FileAccess.open("user://local_image_meta.json", FileAccess.WRITE)
+	var f: = FileAccess.open(_data_path("local_image_meta.json"), FileAccess.WRITE)
 	if f:
 		f.store_string(JSON.stringify(existing_data))
 
@@ -423,6 +428,34 @@ func get_all_image_names() -> Array:
 	var images_directory: = get_shared_images_dir()
 	return iterate_directory_flat_filelist(images_directory, "png")
 
+func save_shared_image(image_to_save: Image, as_name: String) -> void:
+	var img_filename: = Utility.sanitize_for_filename(as_name.trim_suffix(".png")) + ".png"
+	var img_path: = get_shared_images_dir().path_join(img_filename)
+	var save_success: = image_to_save.save_png(img_path)
+	if save_success != OK:
+		push_error("Error saving shared image %s to %s: %s" % [as_name, img_path, error_string(save_success)])
+		return
+
+func save_image_to_path(image_to_save: Image, abs_path: String) -> void:
+	var base_dir: = abs_path.get_base_dir()
+	var filename: = abs_path.get_file()
+	var extension: = "." + filename.get_extension()
+	filename = Utility.sanitize_for_filename(filename.trim_suffix(extension)) + extension
+	
+	var save_success: = image_to_save.save_png(base_dir.path_join(filename))
+	if save_success != OK:
+		push_error("Error saving image to %s: %s" % [base_dir.path_join(filename), error_string(save_success)])
+		return
+
+func load_shared_image_as_texture(image_name: String) -> Texture:
+	return load_file_as_texture(get_shared_images_dir().path_join(image_name))
+
+func load_file_as_texture(file_path: String) -> Texture:
+	if not FileAccess.file_exists(file_path):
+		push_error("File %s does not exist" % [file_path])
+		return null
+	var loaded_img: = Image.load_from_file(file_path)
+	return ImageTexture.create_from_image(loaded_img)
 
 func _level_filename(level_name: String) -> String:
 	return Utility.sanitize_for_filename(level_name) + ".json"

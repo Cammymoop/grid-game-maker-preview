@@ -7,7 +7,7 @@ var texture_dialog = preload("res://Scenes/GameEditor/BetterTextureDialog.tscn")
 @onready var local_tile_picker = find_child("TilePickerLocal")
 @export var loaded_texture: Texture2D
 @export var make_tex_with_size: Vector2
-var save_to_file: = ""
+var save_as_name: = ""
 
 var edited_image: Image
 var edited_texture: Texture2D
@@ -75,8 +75,8 @@ func set_metadata(metadata: Dictionary) -> void:
 	image_meta = metadata
 
 func set_save_path(file_name: String) -> void:
-	save_to_file = file_name
-	if save_to_file:
+	save_as_name = file_name
+	if save_as_name:
 		find_child("SaveFileButton").disabled = false
 	else:
 		find_child("SaveFileButton").disabled = true
@@ -583,18 +583,23 @@ func _on_DiscardButton_pressed():
 
 
 func _on_SaveAsFileButton_pressed():
-	if not save_to_file:
-		save_to_file = Utility.random_animal() + ".png"
-	$SaveAsDialog.current_path = "user://images/" + save_to_file
+	if not save_as_name:
+		save_as_name = Utility.random_animal() + ".png"
+	$SaveAsDialog.current_path = FilesManager.get_shared_images_dir() + save_as_name
 	$SaveAsDialog.popup_centered()
 	$SaveAsDialog.deselect_all()
 
 
-func _on_SaveAsDialog_file_selected(path):
-	edited_image.save_png(path)
+func _on_SaveAsDialog_file_selected(path: String):
+	var base_path: = path.get_base_dir()
+	if base_path == FilesManager.get_shared_images_dir():
+		FilesManager.save_shared_image(edited_image, path.get_file())
+	else:
+		find_parent("UIRoot").show_message("Please save to shared images directory")
+		return
 	find_parent("UIRoot").show_message("Saved")
-	set_save_path($SaveAsDialog.current_file)
-	FilesManager.update_local_image_metadata(save_to_file, image_meta)
+	set_save_path(path.get_file())
+	FilesManager.update_local_image_metadata(save_as_name, image_meta)
 
 
 func _on_BrushColorPicker_color_changed(color):
@@ -603,10 +608,10 @@ func _on_BrushColorPicker_color_changed(color):
 
 
 func _on_SaveFileButton_pressed():
-	if save_to_file == "":
+	if save_as_name == "":
 		return
-	edited_image.save_png("user://images/" + save_to_file)
-	FilesManager.update_local_image_metadata(save_to_file, image_meta)
+	FilesManager.save_shared_image(edited_image, save_as_name)
+	FilesManager.update_local_image_metadata(save_as_name, image_meta)
 	find_parent("UIRoot").show_message("Saved")
 	
 

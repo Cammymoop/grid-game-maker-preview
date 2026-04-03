@@ -32,6 +32,8 @@ var texture_spec: Array
 
 var im_ready = false
 
+const BUILTIN_IMAGE_DIR: = "res://assets/img/"
+
 func setup() -> void:
     for t in builtin_textures:
         add_builtin_texture(t)
@@ -47,19 +49,20 @@ func grab_builtin_metadata() -> void:
         return
     var result = Utility.parse_json(f.get_as_text())
     
-    builtin_meta = fix_texture_metas(result)
+    builtin_meta = fix_vecs_texture_metas(result)
 
-func fix_texture_metas(metas: Dictionary) -> Dictionary:
+func fix_vecs_texture_metas(metas: Dictionary) -> Dictionary:
     var new_dict = {}
     for key in metas:
-        new_dict[key] = fix_texture_meta(metas[key])
+        new_dict[key] = fix_vecs_texture_meta(metas[key])
     return new_dict
 
-func fix_texture_meta(meta: Dictionary) -> Dictionary:
+func fix_vecs_texture_meta(meta: Dictionary) -> Dictionary:
     var new_dict = {}
     for key in meta:
         if not meta[key] is Array or len(meta[key]) != 2:
             new_dict[key] = meta[key]
+            continue
         new_dict[key] = Vector2(meta[key][0], meta[key][1])
     return new_dict
 
@@ -124,28 +127,21 @@ func reload_spec() -> void:
     im_ready = true
 
 func load_texture(tex: Dictionary):
-    var texture
-    var texture_name = ""
-    var metadata = {}
+    var texture: Texture
+    var texture_name: = ""
+    var metadata: = {}
     if tex['type'] == 'local_file':
         texture_name = tex['image_name']
-        if not FilesManager.user_file_exists("images/" + tex['image_name']):
-            print_debug("File " + tex["image_name"] + " does not exist")
+        texture = FilesManager.load_shared_image_as_texture(tex['image_name'])
+        if texture:
+            metadata = fix_vecs_texture_meta(FilesManager.get_local_image_metadata(tex['image_name']))
+        else:
+            push_warning("Failed to load shared image: " + tex['image_name'])
             texture = placeholder
             metadata = placeholder_metadata
-        else:
-            var img = Image.new()
-            if img.load("user://images/" + tex["image_name"]) != OK:
-                print_debug("Failed to load image: " + tex["image_name"])
-                texture = placeholder
-                metadata = placeholder_metadata
-            else:
-                texture = ImageTexture.create_from_image(img)
-                metadata = fix_texture_meta(FilesManager.get_local_image_metadata(tex['image_name']))
-            
     elif tex['type'] == 'builtin':
         texture_name = tex['name']
-        texture = load("res://assets/img/" + texture_name)
+        texture = load(BUILTIN_IMAGE_DIR + texture_name)
         if not builtin_meta:
             grab_builtin_metadata()
         metadata = builtin_meta[tex["name"]]
@@ -155,7 +151,7 @@ func load_texture(tex: Dictionary):
     
     _set_texture(int(tex['texture_id']), texture, texture_name, metadata)
 
-func _set_texture(texture_id, texture, texture_name, metadata) -> void:
+func _set_texture(texture_id: int, texture: Texture, texture_name: String, metadata: Dictionary) -> void:
         texture_names[texture_id] = texture_name
         textures[texture_id] = texture
         texture_meta[texture_id] = metadata
@@ -164,31 +160,30 @@ func _set_texture(texture_id, texture, texture_name, metadata) -> void:
         tiles_per_row[texture_id] = int(texture.get_width() / tile_size.x)
         texture_rows[texture_id] = int(texture.get_height() / tile_size.y)
 
-func get_unloaded_texture(texture_name, builtin=false) -> Texture:
+func get_unloaded_texture(texture_name: String, builtin: bool = false) -> Texture:
     if builtin:
-        return load("res://assets/img/" + texture_name) as Texture
+        return load(BUILTIN_IMAGE_DIR + texture_name) as Texture
     
-    return load("user://images/" + texture_name) as Texture
+    return FilesManager.load_shared_image_as_texture(texture_name)
 
 func get_all_possible_textures() -> Dictionary:
     var texs: = {}
     for tex in builtin_textures:
-        texs[tex] = load("res://assets/img/" + tex)
+        texs[tex] = load(BUILTIN_IMAGE_DIR+ tex)
     
     for user_tex in FilesManager.get_all_image_names():
-        var img = Image.new()
-        if img.load("user://images/" + user_tex) != OK:
-            print_debug("Failed to load image: " + user_tex)
-            continue
-        var img_tex = ImageTexture.create_from_image(img)
-        texs[user_tex] = img_tex
+        var loaded_tex: = FilesManager.load_shared_image_as_texture(user_tex)
+        if loaded_tex:
+            texs[user_tex] = loaded_tex
+        else:
+            push_warning("Failed to load shared image: " + user_tex)
     
     return texs
 
 func get_all_builtin_textures() -> Dictionary:
     var texs: = {}
     for tex in builtin_textures:
-        texs[tex] = load("res://assets/img/" + tex)
+        texs[tex] = load(BUILTIN_IMAGE_DIR + tex)
     
     return texs
 
@@ -196,12 +191,11 @@ func get_all_user_textures() -> Dictionary:
     var texs: = {}
     
     for user_tex in FilesManager.get_all_image_names():
-        var img = Image.new()
-        if img.load("user://images/" + user_tex) != OK:
-            print_debug("Failed to load image: " + user_tex)
-            continue
-        var img_tex = ImageTexture.create_from_image(img)
-        texs[user_tex] = img_tex
+        var loaded_tex: = FilesManager.load_shared_image_as_texture(user_tex)
+        if loaded_tex:
+            texs[user_tex] = loaded_tex
+        else:
+            push_warning("Failed to load shared image: " + user_tex)
     
     return texs
     

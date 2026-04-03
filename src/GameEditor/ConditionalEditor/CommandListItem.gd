@@ -290,7 +290,6 @@ func set_arg_values(arg_values: Array) -> void:
     if _ungenerated:
         _pre_set_arg_values = arg_values.duplicate()
         return
-    var in_arg_values: = arg_values.duplicate()
     if len(arg_values) < 1:
         return
     else:

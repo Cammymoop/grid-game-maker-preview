@@ -44,7 +44,7 @@ func _on_EditTexButton_pressed() -> void:
 	if selected_item.built_in:
 		meta = TextureManager.builtin_meta[selected_item.texture_name]
 	else:
-		meta = TextureManager.fix_texture_meta(FilesManager.get_local_image_metadata(selected_item.texture_name))
+		meta = TextureManager.fix_vecs_texture_meta(FilesManager.get_local_image_metadata(selected_item.texture_name))
 	
 	if not meta:
 		var dialog = metadata_dialog.instantiate()

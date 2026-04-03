@@ -23,7 +23,10 @@ func _on_BackButton_pressed():
 
 
 func _on_OpenGameDir_pressed():
-	OS.shell_open(ProjectSettings.globalize_path("user://games"))
+	if GameManager.cur_game_name:
+		OS.shell_open(FilesManager.get_game_base_dir(GameManager.cur_game_name))
+	else:
+		OS.shell_open(FilesManager.get_games_dir())
 
 func _on_OpenImagesFolder_pressed():
-	OS.shell_open(ProjectSettings.globalize_path("user://images"))
+	OS.shell_open(FilesManager.get_shared_images_dir())
