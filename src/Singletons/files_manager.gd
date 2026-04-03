@@ -93,9 +93,7 @@ func _do_game_data_migration() -> void:
 			return
 
 	print_debug("Checking for game data migration, looking for %s" % [_data_path(games_subdir, "please_migrate")])
-	print_debug("Globalized: %s" % [ProjectSettings.globalize_path(_data_path(games_subdir, "please_migrate"))])
 	if not FileAccess.file_exists(_data_path(games_subdir, "please_migrate")):
-		print_debug("No migration trigger file")
 		return
 	print_debug("Starting migration of old game data directory structure...")
 	var from_games_dir_path: = _data_path(games_subdir)
@@ -428,8 +426,13 @@ func get_all_image_names() -> Array:
 	var images_directory: = get_shared_images_dir()
 	return iterate_directory_flat_filelist(images_directory, "png")
 
+func _sanitize_image_filename(image_filename: String) -> String:
+	var extension: = "." + image_filename.get_extension()
+	var just_filename: = image_filename.trim_suffix(extension)
+	return Utility.sanitize_for_filename(just_filename, true) + extension
+
 func save_shared_image(image_to_save: Image, as_name: String) -> void:
-	var img_filename: = Utility.sanitize_for_filename(as_name.trim_suffix(".png")) + ".png"
+	var img_filename: = _sanitize_image_filename(as_name)
 	var img_path: = get_shared_images_dir().path_join(img_filename)
 	var save_success: = image_to_save.save_png(img_path)
 	if save_success != OK:
@@ -438,10 +441,7 @@ func save_shared_image(image_to_save: Image, as_name: String) -> void:
 
 func save_image_to_path(image_to_save: Image, abs_path: String) -> void:
 	var base_dir: = abs_path.get_base_dir()
-	var filename: = abs_path.get_file()
-	var extension: = "." + filename.get_extension()
-	filename = Utility.sanitize_for_filename(filename.trim_suffix(extension)) + extension
-	
+	var filename: = _sanitize_image_filename(abs_path.get_file())
 	var save_success: = image_to_save.save_png(base_dir.path_join(filename))
 	if save_success != OK:
 		push_error("Error saving image to %s: %s" % [base_dir.path_join(filename), error_string(save_success)])

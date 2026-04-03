@@ -585,7 +585,7 @@ func _on_DiscardButton_pressed():
 func _on_SaveAsFileButton_pressed():
 	if not save_as_name:
 		save_as_name = Utility.random_animal() + ".png"
-	$SaveAsDialog.current_path = FilesManager.get_shared_images_dir() + save_as_name
+	$SaveAsDialog.current_path = FilesManager.get_shared_images_dir().path_join(save_as_name)
 	$SaveAsDialog.popup_centered()
 	$SaveAsDialog.deselect_all()
 

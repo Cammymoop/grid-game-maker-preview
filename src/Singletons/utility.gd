@@ -405,9 +405,10 @@ func check_comparison(value_a: float, value_b: float, comparison: String) -> boo
 		return value_a <= value_b
 	return false
 
-func sanitize_for_filename(the_str: String) -> String:
+func sanitize_for_filename(the_str: String, allow_uppercase: bool = false) -> String:
 	the_str = the_str.strip_edges()
-	the_str = the_str.to_lower()
+	if not allow_uppercase:
+		the_str = the_str.to_lower()
 	the_str = the_str.replace(" ", "_")
 	the_str = the_str.replace('"', "'")
 	the_str = the_str.remove_chars('\\/|*?<>:')
