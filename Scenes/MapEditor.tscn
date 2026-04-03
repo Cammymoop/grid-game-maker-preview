@@ -173,6 +173,30 @@ vertical_alignment = 1
 [node name="AnimationPlayer" type="AnimationPlayer" parent="Cursor/Center/CenterContainer/CursorModeText" unique_id=188200045]
 libraries/ = SubResource("AnimationLibrary_kdxsy")
 
+[node name="CenterContainer2" type="CenterContainer" parent="Cursor/Center" unique_id=116963099]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -17.5
+offset_top = 20.0
+offset_right = 17.5
+offset_bottom = 34.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="ItemNameText" type="Label" parent="Cursor/Center/CenterContainer2" unique_id=638490330]
+modulate = Color(1, 1, 1, 0)
+layout_mode = 2
+theme_override_font_sizes/font_size = 10
+theme_override_styles/normal = SubResource("StyleBoxFlat_3jorg")
+text = "Entity"
+vertical_alignment = 1
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="Cursor/Center/CenterContainer2/ItemNameText" unique_id=1974689617]
+libraries/ = SubResource("AnimationLibrary_kdxsy")
+
 [node name="Shadow" type="Sprite2D" parent="Cursor" unique_id=2011759003]
 self_modulate = Color(1, 1, 1, 0.14117648)
 show_behind_parent = true

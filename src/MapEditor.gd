@@ -4,18 +4,18 @@ extends Node2D
 
 @export var camera_move_speed: = 400
 
-var edit_mode = false
+var edit_mode: = false
 
-var cur_ent_i = 0
-var current_entity_index = 0
-var current_entity_facing = 0
+var cur_ent_i: int = 0
+var current_entity_index: int = 0
+var current_entity_facing: int = 0
 
-var cur_tile_i = 0
-var current_tile_index = 0
-var current_tile_facing = 0
+var cur_tile_i: int = 0
+var current_tile_index: int = 0
+var current_tile_facing: int = 0
 
-var all_tiles = []
-var all_entities = []
+var all_tiles: = []
+var all_entities: = []
 
 @onready var cursor = get_node("Cursor")
 @onready var preview = get_node("Cursor/TileEntityPreview")
@@ -23,20 +23,23 @@ var all_entities = []
 @onready var cursor_mode_text = find_child("CursorModeText")
 @onready var cursor_mode_text_animator = cursor_mode_text.get_node("AnimationPlayer")
 
-var cursor_tex = preload("res://assets/img/cursor.png")
-var entity_cursor_tex = preload("res://assets/img/cursor_entity.png")
-var tile_cursor_tex = preload("res://assets/img/cursor_tile.png")
-var delete_cursor_tex = preload("res://assets/img/cursor_delete.png")
+@onready var item_name_text = find_child("ItemNameText")
+@onready var item_name_text_animator = item_name_text.get_node("AnimationPlayer")
 
-var placing = "none"
+var cursor_tex: = preload("res://assets/img/cursor.png")
+var entity_cursor_tex: = preload("res://assets/img/cursor_entity.png")
+var tile_cursor_tex: = preload("res://assets/img/cursor_tile.png")
+var delete_cursor_tex: = preload("res://assets/img/cursor_delete.png")
 
-var delete_held_on_entity = false
+var placing: = "none"
 
-var cursor_tile_pos = Vector2(0, 0)
+var delete_held_on_entity: = false
 
-var last_mouse = Vector2(0, 0)
+var cursor_tile_pos: = Vector2(0, 0)
 
-var has_edited_something = false
+var last_mouse: = Vector2(0, 0)
+
+var has_edited_something: = false
 
 func _ready() -> void:
 	if not edit_mode:
@@ -79,13 +82,19 @@ func enable_edit_mode(on, save_state=true):
 		current_entity_index = all_entities[cur_ent_i]
 		all_tiles = MapManager.get_all_tile_indexes()
 		current_tile_index = all_tiles[cur_tile_i]
+		if placing in ["entity", "tile"]:
+			show_item_name()
 
-func set_entity_to(index) -> void:
+func set_entity_to(index: int) -> void:
+	var prev_i: = cur_ent_i
 	current_entity_index = index
 	cur_ent_i = all_entities.find(index)
 	preview_entity(index)
+	if prev_i != cur_ent_i:
+		show_item_name()
 
-func advance_entity(delta) -> void:
+func advance_entity(delta: int) -> void:
+	var prev_i: = cur_ent_i
 	cur_ent_i += delta
 	if cur_ent_i < 0:
 		cur_ent_i += len(all_entities)
@@ -93,13 +102,19 @@ func advance_entity(delta) -> void:
 		cur_ent_i = 0
 	current_entity_index = all_entities[cur_ent_i]
 	preview_entity(current_entity_index)
+	if prev_i != cur_ent_i:
+		show_item_name()
 
-func set_tile_to(index) -> void:
+func set_tile_to(index: int) -> void:
+	var prev_i: = cur_tile_i
 	current_tile_index = index
 	cur_tile_i = all_tiles.find(index)
 	preview_tile(index)
+	if prev_i != cur_tile_i:
+		show_item_name()
 
-func advance_tile(delta) -> void:
+func advance_tile(delta: int) -> void:
+	var prev_i: = cur_tile_i
 	cur_tile_i += delta
 	if cur_tile_i < 0:
 		cur_tile_i += len(all_tiles)
@@ -107,6 +122,8 @@ func advance_tile(delta) -> void:
 		cur_tile_i = 0
 	current_tile_index = all_tiles[cur_tile_i]
 	preview_tile(current_tile_index)
+	if prev_i != cur_tile_i:
+		show_item_name()
 
 func preview_entity(entity_index):
 	preview.texture = EntityManager.get_entity_texture(entity_index)
@@ -116,13 +133,14 @@ func preview_tile(tile_index):
 	preview.texture = MapManager.get_tile_texture(tile_index)
 	preview.region_rect = MapManager.get_tile_texture_rect(tile_index)
 
-func place_mode(mode):
+func place_mode(mode: String):
 	if mode != "none":
 		cursor_mode_text.text = mode.capitalize()
-		cursor_mode_text.size = Vector2.ZERO
+		cursor_mode_text.reset_size()
 		if placing != mode:
 			cursor_mode_text_animator.play("show_fade")
 	delete_held_on_entity = false
+	var item_name_changed: bool = mode != placing and mode in ["entity", "tile"]
 	placing = mode
 	if placing == "entity":
 		cursor.texture = entity_cursor_tex
@@ -138,6 +156,21 @@ func place_mode(mode):
 	else:
 		cursor.texture = cursor_tex
 		preview.visible = false
+	
+	if item_name_changed:
+		show_item_name()
+
+func get_item_name() -> String:
+	if placing not in ["entity", "tile"]:
+		return ""
+	return MapManager.get_tile_name(current_tile_index) if placing == "tile" else EntityManager.get_entity_name(current_entity_index)
+
+func show_item_name() -> void:
+	item_name_text.text = get_item_name()
+	item_name_text.reset_size()
+	if item_name_text_animator.is_playing():
+		item_name_text_animator.stop()
+	item_name_text_animator.play("show_fade")
 
 func mouse_moved(new_mouse) -> void:
 	move_cursor(MapManager.world_to_tile_position(new_mouse))

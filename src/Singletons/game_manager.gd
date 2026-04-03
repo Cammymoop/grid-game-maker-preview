@@ -93,7 +93,7 @@ func describe_movement_mode(mode: int) -> String:
 		MovementMode.MOVEMENT_DISCRETE:
 			return "Discrete"
 		MovementMode.MOVEMENT_DISCRETE_WAIT:
-			return "Discrete, wait for all moves to finish"
+			return "Discrete+ (wait for all moves to stop)"
 	return ""
 
 func load_game_definition_from_file(game_name) -> void:
