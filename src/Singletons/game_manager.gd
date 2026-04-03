@@ -5,6 +5,8 @@ var cur_scene = null
 
 var cur_game_name: = ""
 
+var game_creators: Array[String] = []
+
 var checkpoint_save = {}
 var editor_save = {}
 var loaded_level = {}
@@ -13,7 +15,7 @@ var loaded_level_name: = ""
 
 var loaded = false
 
-var editor_live_edit_mode: = true
+var editor_live_edit_mode: = false
 
 var scenes: = {
 	"Menu": "res://Scenes/Menu.tscn",
@@ -25,6 +27,9 @@ var scenes: = {
 var cameras = {
 	"SimpleCamera": preload("res://Scenes/SimpleCamera.tscn"),
 }
+
+@export_file("*.json") var builtin_default_game_file: String = ""
+var builtin_default_game_definition: Dictionary = {}
 
 var pauses = {}
 
@@ -59,9 +64,12 @@ func _ready():
 	bake_scene_transition_curve()
 	
 	var default_game = FilesManager.get_default_game()
-	if len(default_game) > 0:
+	if default_game and FilesManager.game_exists(default_game):
 		load_game_definition_from_file(default_game)
 		start_managers()
+	elif builtin_default_game_file:
+		builtin_default_game_definition = FilesManager._get_dict_from_json_file(builtin_default_game_file)
+		load_game_definition_data(builtin_default_game_definition)
 	else:
 		set_game_name("Basic")
 		game_definition["game_settings"] = {"pixel_scale": 2}
@@ -90,33 +98,35 @@ func describe_movement_mode(mode: int) -> String:
 
 func load_game_definition_from_file(game_name) -> void:
 	var definition = FilesManager.get_game_definition(game_name)
-	
+	load_game_definition_data(definition)
+
+func load_game_definition_data(definition_data: Dictionary) -> void:
 	# required section, but older saves didn't have it, remove this once they all do
-	if not "game_settings" in definition:
-		definition["game_settings"] = {}
-	game_definition = definition
+	if not "game_settings" in definition_data:
+		definition_data["game_settings"] = {}
+	game_definition = definition_data
 	
-	set_game_name(definition['game_name'])
+	set_game_name(definition_data['game_name'])
 	
 	editor_save = {}
 	checkpoint_save = {}
 	loaded_level = {}
 	
 	TextureManager.clear()
-	if "textures" in definition:
-		TextureManager.set_textures(definition['textures'])
+	if "textures" in definition_data:
+		TextureManager.set_textures(definition_data['textures'])
 	else:
 		TextureManager.set_default_textures()
 	
-	MapManager.tile_defs = definition['tile_definitions']
+	MapManager.tile_defs = definition_data['tile_definitions']
 	if MapManager.im_ready:
 		MapManager.refresh_definition()
-	EntityManager.entity_defs = definition['entity_definitions']
+	EntityManager.entity_defs = definition_data['entity_definitions']
 	if EntityManager.im_ready:
 		EntityManager.refresh_definition()
 	
-	if "window_width" in definition:
-		set_game_view(definition['window_width'], definition['window_height'])
+	if "window_width" in definition_data:
+		set_game_view(definition_data['window_width'], definition_data['window_height'])
 	else:
 		set_game_view(12, 12)
 	
@@ -141,7 +151,7 @@ func get_game_name() -> String:
 	return cur_game_name
 
 func set_game_name(new_name: String) -> void:
-	cur_game_name = new_name
+	cur_game_name = new_name.strip_edges()
 
 func get_serialized_play_state() -> Dictionary:
 	if cur_scene != "Play":

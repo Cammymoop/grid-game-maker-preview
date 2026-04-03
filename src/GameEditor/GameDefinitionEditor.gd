@@ -57,7 +57,7 @@ func movement_mode_picked(mode_id: int) -> void:
 	game_settings["movement_mode"] = mode_id
 
 func _on_SaveButton_pressed():
-	if FilesManager.game_definition_exists(GameManager.get_game_name()):
+	if FilesManager.game_exists(GameManager.get_game_name()):
 		var popup = generic_confirm.instantiate()
 		var title = "Do you want to override"
 		var text = "A game with this name already exists, do you want to override it?"

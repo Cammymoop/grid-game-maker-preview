@@ -404,3 +404,16 @@ func check_comparison(value_a: float, value_b: float, comparison: String) -> boo
 	elif comparison == "<=":
 		return value_a <= value_b
 	return false
+
+func sanitize_for_filename(the_str: String) -> String:
+	the_str = the_str.strip_edges()
+	the_str = the_str.to_lower()
+	the_str = the_str.replace(" ", "_")
+	the_str = the_str.replace('"', "'")
+	the_str = the_str.remove_chars('\\/|*?<>:')
+	while the_str.begins_with("."):
+		the_str = the_str.substr(1)
+	if not the_str:
+		return "OOPS"
+	return the_str
+	
