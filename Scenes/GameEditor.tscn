@@ -7,6 +7,7 @@
 [ext_resource type="StyleBox" path="res://assets/ui/HorizontalSeparatorStylebox.tres" id="4"]
 [ext_resource type="Script" uid="uid://cakuc61ui0t57" path="res://src/GameEditor/ImagesEditor.gd" id="5"]
 [ext_resource type="Script" uid="uid://benwn44a0nm5f" path="res://src/GameEditor/GameDefinitionEditor.gd" id="6"]
+[ext_resource type="PackedScene" uid="uid://rkgymu7xdnvf" path="res://Scenes/GameEditor/ConditionalEditor/PropertyInput.tscn" id="6_32qri"]
 [ext_resource type="PackedScene" uid="uid://b6fax3dpo74i4" path="res://Scenes/GameEditor/credits_list.tscn" id="6_qrjoe"]
 [ext_resource type="PackedScene" uid="uid://csm4i61la0olb" path="res://Scenes/FallingEntitiesEffects.tscn" id="8"]
 [ext_resource type="FontFile" uid="uid://biuf4hpin33j3" path="res://assets/font/medium_font.tres" id="9"]
@@ -204,7 +205,7 @@ text = "Default Camera Settings:"
 layout_mode = 2
 alignment = 2
 
-[node name="Label" type="Label" parent="MarginContainer/UIRoot/TabContainer/Game/ScrollContainer/VBoxContainer/HBoxContainer6" unique_id=625328399]
+[node name="LabelLabelLabel" type="Label" parent="MarginContainer/UIRoot/TabContainer/Game/ScrollContainer/VBoxContainer/HBoxContainer6" unique_id=625328399]
 layout_mode = 2
 text = "Follow Entity by:"
 
@@ -214,10 +215,8 @@ text = "property"
 flat = false
 script = ExtResource("15")
 
-[node name="FollowEntity" type="LineEdit" parent="MarginContainer/UIRoot/TabContainer/Game/ScrollContainer/VBoxContainer/HBoxContainer6" unique_id=925346091]
-custom_minimum_size = Vector2(180, 0)
+[node name="FollowEntity" parent="MarginContainer/UIRoot/TabContainer/Game/ScrollContainer/VBoxContainer/HBoxContainer6" unique_id=19759728 instance=ExtResource("6_32qri")]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.698039, 0.419608, 0.419608, 1)
 
 [node name="HBoxContainer7" type="HBoxContainer" parent="MarginContainer/UIRoot/TabContainer/Game/ScrollContainer/VBoxContainer" unique_id=733011440]
 layout_mode = 2
@@ -443,6 +442,7 @@ layer = 10
 [node name="ColorRect" parent="FallingEntities/CanvasLayer" parent_id_path=PackedInt32Array(1697529902, 996671454) index="0" unique_id=1372251819]
 grow_horizontal = 2
 grow_vertical = 2
+metadata/_edit_lock_ = true
 
 [node name="Effects" parent="FallingEntities/CanvasLayer2" parent_id_path=PackedInt32Array(1697529902, 1037858481) index="0" unique_id=477139096]
 size_factor = 0.5
@@ -455,7 +455,6 @@ max_brightness = 0.3
 [connection signal="value_changed" from="MarginContainer/UIRoot/TabContainer/Game/ScrollContainer/VBoxContainer/HBoxContainer2/SetWindowHeight" to="MarginContainer/UIRoot/TabContainer/Game" method="_on_SetWindowHeight_value_changed"]
 [connection signal="toggled" from="MarginContainer/UIRoot/TabContainer/Game/ScrollContainer/VBoxContainer/HBoxContainer8/AutoAspect" to="MarginContainer/UIRoot/TabContainer/Game" method="_on_AutoAspect_toggled"]
 [connection signal="pressed" from="MarginContainer/UIRoot/TabContainer/Game/ScrollContainer/VBoxContainer/HBoxContainer4/UpdateWindow" to="MarginContainer/UIRoot/TabContainer/Game" method="_on_UpdateWindow_pressed"]
-[connection signal="text_changed" from="MarginContainer/UIRoot/TabContainer/Game/ScrollContainer/VBoxContainer/HBoxContainer6/FollowEntity" to="MarginContainer/UIRoot/TabContainer/Game" method="_on_FollowEntity_text_changed"]
 [connection signal="toggled" from="MarginContainer/UIRoot/TabContainer/Game/ScrollContainer/VBoxContainer/HBoxContainer7/EnableLimitsToggle" to="MarginContainer/UIRoot/TabContainer/Game" method="_on_EnableLimitsToggle_toggled"]
 [connection signal="value_changed" from="MarginContainer/UIRoot/TabContainer/Game/ScrollContainer/VBoxContainer/HBoxContainer7/ExtendCamLimits" to="MarginContainer/UIRoot/TabContainer/Game" method="_on_ExtendCamLimits_value_changed"]
 [connection signal="pressed" from="MarginContainer/UIRoot/TabContainer/Game/HBoxContainer6/OpenGameDir" to="MarginContainer/UIRoot" method="_on_OpenGameDir_pressed"]

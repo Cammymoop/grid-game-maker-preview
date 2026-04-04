@@ -1,10 +1,10 @@
-[gd_scene load_steps=2 format=2]
+[gd_scene format=3 uid="uid://rkgymu7xdnvf"]
 
-[ext_resource path="res://src/GameEditor/ConditionalEditor/PropertyInput.gd" type="Script" id=1]
+[ext_resource type="Script" uid="uid://di2eyvsiqwsee" path="res://src/GameEditor/ConditionalEditor/PropertyInput.gd" id="1"]
 
-[node name="PropertyInput" type="LineEdit"]
+[node name="PropertyInput" type="LineEdit" unique_id=19759728]
+custom_minimum_size = Vector2(140, 0)
 offset_right = 58.0
 offset_bottom = 24.0
-custom_minimum_size = Vector2( 140, 0 )
 size_flags_vertical = 4
-script = ExtResource( 1 )
+script = ExtResource("1")

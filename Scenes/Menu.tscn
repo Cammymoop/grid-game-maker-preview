@@ -46,13 +46,9 @@ theme_override_constants/margin_bottom = 50
 layout_mode = 2
 mouse_filter = 2
 
-[node name="Spacer" type="Control" parent="MarginContainer/VBoxContainer" unique_id=2063836387]
-layout_mode = 2
-size_flags_vertical = 3
-
 [node name="PanelContainer" type="PanelContainer" parent="MarginContainer/VBoxContainer" unique_id=89228053]
 layout_mode = 2
-size_flags_horizontal = 4
+size_flags_horizontal = 0
 theme_override_styles/panel = SubResource("StyleBoxFlat_syfuq")
 
 [node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/VBoxContainer/PanelContainer" unique_id=714919006]
@@ -61,13 +57,13 @@ layout_mode = 2
 [node name="GGMLabel" type="Label" parent="MarginContainer/VBoxContainer/PanelContainer/VBoxContainer" unique_id=160729093]
 layout_mode = 2
 size_flags_horizontal = 4
-theme_override_font_sizes/font_size = 24
-text = "Grid Game Maker"
+theme_override_font_sizes/font_size = 18
+text = "Grid Game Maker Preview"
 
 [node name="GGMLabel2" type="Label" parent="MarginContainer/VBoxContainer/PanelContainer/VBoxContainer" unique_id=447752656]
 layout_mode = 2
-size_flags_horizontal = 4
-theme_override_font_sizes/font_size = 14
+size_flags_horizontal = 0
+theme_override_font_sizes/font_size = 11
 text = "by Cammymoop Games"
 
 [node name="Spacer2" type="Control" parent="MarginContainer/VBoxContainer" unique_id=971559223]
