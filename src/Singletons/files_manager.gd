@@ -242,7 +242,7 @@ func _serialize_dict_to_json_string(data: Dictionary, with_formatting: bool = fa
 func serialize_and_save_data_to_json(data: Dictionary, directory: String, file_name: String, with_formatting: bool = false) -> void:
 	var serialized_json_string: = _serialize_dict_to_json_string(data, with_formatting)
 	if serialized_json_string:
-		_save_json_in_data_dir_path(serialized_json_string, directory, file_name)
+		_save_json_string_absolute(serialized_json_string, directory, file_name)
 
 func _save_json_in_data_dir_path(json_string: String, directory: String, file_name: String) -> void:
 	# just in case sanitization
@@ -278,7 +278,7 @@ func save_default_game(game_name) -> void:
 
 func save_game_info(game_info: Dictionary) -> void:
 	create_game_directory_if_not_exists(game_info)
-	var game_dir: = get_game_dir_from_name(game_info['game_name'])
+	var game_dir: = get_game_base_dir(game_info['game_name'])
 	serialize_and_save_data_to_json(game_info, game_dir, GAME_DEF_FILENAME, FORMAT_GAME_JSON)
 
 func create_game_directory_if_not_exists(game_info: Dictionary) -> void:
@@ -475,14 +475,14 @@ func level_exists(game_name: String, level_name: String) -> bool:
 		push_error("Invalid game or level name: %s, %s" % [game_name, level_name])
 		return false
 	var level_filename: = _level_filename(level_name)
-	return FileAccess.file_exists(_data_path(get_game_levels_dir(game_name), level_filename))
+	return FileAccess.file_exists(get_game_levels_dir(game_name).path_join(level_filename))
 
 func get_level_data(game_name: String, level_name: String) -> Dictionary:
 	if not level_name or not game_exists(game_name):
 		push_error("Invalid game or level name: %s, %s" % [game_name, level_name])
 		return {}
 	var level_filename: = _level_filename(level_name)
-	return _get_dict_from_json_file(_data_path(get_game_levels_dir(game_name), level_filename))
+	return _get_dict_from_json_file(get_game_levels_dir(game_name).path_join(level_filename))
 
 func get_level_list(game_name: String) -> Array:
 	if not game_exists(game_name):

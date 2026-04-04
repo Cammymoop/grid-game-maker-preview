@@ -1,0 +1,24 @@
+[gd_scene format=3 uid="uid://cwk5ku3hwjwrx"]
+
+[ext_resource type="Script" uid="uid://bivr1ggtbhl43" path="res://src/GameEditor/credits_list_item.gd" id="1_2c1en"]
+[ext_resource type="Texture2D" uid="uid://dx8arqf2lcidg" path="res://assets/img/button_icons/minus_small.png" id="1_jmlwx"]
+
+[node name="CreditsListItem" type="HBoxContainer" unique_id=647526226]
+offset_right = 178.0
+offset_bottom = 31.0
+script = ExtResource("1_2c1en")
+
+[node name="RoleInput" type="LineEdit" parent="." unique_id=1597938675]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 4
+
+[node name="NameInput" type="LineEdit" parent="." unique_id=1378843724]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 4
+
+[node name="RemoveCreditItemButton" type="Button" parent="." unique_id=1689946817]
+layout_mode = 2
+size_flags_vertical = 4
+icon = ExtResource("1_jmlwx")

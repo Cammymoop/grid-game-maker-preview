@@ -30,3 +30,4 @@ func _on_OpenGameDir_pressed():
 
 func _on_OpenImagesFolder_pressed():
 	OS.shell_open(FilesManager.get_shared_images_dir())
+

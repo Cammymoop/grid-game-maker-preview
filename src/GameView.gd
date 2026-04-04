@@ -46,8 +46,8 @@ func set_resolution(new_resolution: Vector2) -> void:
 	resolution = new_resolution
 	if update_aspect:
 		resolution = fit_resolution_into_aspect()
-		var window_size = Vector2(get_window().size)
-		prints("fitting", new_resolution, "into aspect", window_size.x/window_size.y, "result:", resolution)
+		#var window_size = Vector2(get_window().size)
+		#prints("fitting", new_resolution, "into aspect", window_size.x/window_size.y, "result:", resolution)
 	size = resolution * scale_factor
 	size_2d_override = resolution
 	

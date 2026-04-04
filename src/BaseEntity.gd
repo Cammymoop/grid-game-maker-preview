@@ -8,48 +8,54 @@ signal blocked
 var facing: = 0
 var visual_facing: = 0
 
-var visual_turn_on_move = true
+var visual_turn_on_move: = true
 
 var moving: = false
-var just_moved = false
-var steps_remaining:int = 0
+var just_moved: = false
+var steps_remaining: int = 0
 
-@onready var sprite: = $Sprite2D
+var sprite: Node2D
 
 # tiles per second
-var current_move_speed = 0
+var current_move_speed: float = 0
 var steps_per_tile: int = 0
 var self_steps_per_tile: int = 0
 
 var controller: Node = null
-var controller_name = null
+var controller_name: String = ""
 
 var tile_position = Vector2(0, 0)
 var next_tile_pos = Vector2(0, 0)
 
-var entity_index = 0
-var entity_name = null
+var entity_index: int = 0
+var entity_name: String = ""
 
 var bond_group: Array = []
 var tailing: Node = null
 
-var has_idle_update_conditional = false
-var idle_update_cache = null
-var idle_update_sleep: = 1
+var has_idle_update_conditional: = false
+var idle_update_cache: Property = null
+var idle_update_sleep: int = 1
 
-var active = false
+var active: = false
 
-var local_properties = {}
+var local_properties: = {}
 
-var instance_id = 0
+var instance_id: int = 0
 
-# pre initialization setup
 func _ready() -> void:
+	pre_init()
+	setup_initial_position()
+
+func pre_init() -> void:
+	entity_name = EntityManager.get_entity_name(entity_index)
+	sprite = $Sprite2D
+	offset_center()
+
+func setup_initial_position() -> void:
 	tile_position = MapManager.world_to_tile_position(global_position)
 	next_tile_pos = tile_position
-	entity_name = EntityManager.get_entity_name(entity_index)
 	
-	offset_center()
 
 func initialize() -> void:
 	check_for_idle_update_conditional()
@@ -71,15 +77,10 @@ func update_z():
 		z_index = 0
 
 func offset_center() -> void:
-	if not sprite:
-		sprite = $Sprite2D
-	sprite.position.x = floor(MapManager.tile_width/2.0)
-	sprite.position.y = floor(MapManager.tile_width/2.0)
+	sprite.position = get_center_offset()
 
 func get_center_offset() -> Vector2:
-	if not sprite:
-		sprite = $Sprite2D
-	return sprite.position
+	return Vector2(floor(MapManager.tile_width/2.0), floor(MapManager.tile_width/2.0))
 
 func connect_to_signals() -> void:
 	var all_props = EntityManager.get_entity_property_list(self)
@@ -91,7 +92,7 @@ func connect_to_signals() -> void:
 
 	
 func check_for_idle_update_conditional() -> void:
-	var update_prop = EntityManager.get_entity_property(self, "idle_update")
+	var update_prop: Property = EntityManager.get_entity_property(self, "idle_update")
 	if update_prop and update_prop.is_conditional():
 		has_idle_update_conditional = true
 	
@@ -132,7 +133,7 @@ func deserialize(data: Dictionary) -> void:
 	entity_name = EntityManager.get_entity_name(entity_index)
 	local_properties = data['local_properties']
 	
-	bond_group = EntityManager.get_bond_group(self)
+	bond_group = EntityManager.find_bond_group_of_entity(self)
 	
 	set_facing(int(data['facing']))
 	set_visual_facing(int(data['visual_facing']))
@@ -145,7 +146,7 @@ func deserialize(data: Dictionary) -> void:
 	
 	await EntityManager.post_deserialize
 
-func set_active(new_active) -> void:
+func set_active(new_active: bool) -> void:
 	active = new_active
 
 func _physics_process(_delta) -> void:
@@ -172,7 +173,7 @@ func entity_process() -> void:
 			if idle_update_sleep == 1 or EntityManager.frame_counter % idle_update_sleep == 0:
 				idle_update_cache.resolve(self, null, tile_position)
 				if not active:
-					# we died in idle update
+					# we died or were deactivated in idle update
 					return
 		
 		var max_intentions: int = get_max_move_intentions()

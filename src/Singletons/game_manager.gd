@@ -4,6 +4,7 @@ var started = false
 var cur_scene = null
 
 var cur_game_name: = ""
+var loaded_from_game_name: = ""
 
 var game_creators: Array[String] = []
 
@@ -72,6 +73,7 @@ func _ready():
 		load_game_definition_data(builtin_default_game_definition)
 	else:
 		set_game_name("Basic")
+		loaded_from_game_name = cur_game_name
 		game_definition["game_settings"] = {"pixel_scale": 2}
 		start_managers()
 	
@@ -107,6 +109,7 @@ func load_game_definition_data(definition_data: Dictionary) -> void:
 	game_definition = definition_data
 	
 	set_game_name(definition_data['game_name'])
+	loaded_from_game_name = cur_game_name
 	
 	editor_save = {}
 	checkpoint_save = {}
@@ -139,6 +142,16 @@ func load_game_definition_data(definition_data: Dictionary) -> void:
 		if cur_scene == "GameEditor":
 			loaded = true
 
+func get_serialized_game_definition() -> Dictionary:
+	var serialized_def: = game_definition.duplicate_deep()
+	serialized_def["game_name"] = get_game_name()
+	serialized_def["textures"] = TextureManager.get_texture_spec()
+	serialized_def["entity_definitions"] = EntityManager.entity_defs
+	serialized_def["tile_definitions"] = MapManager.tile_defs
+	serialized_def["window_width"] = game_view.x
+	serialized_def["window_height"] = game_view.y
+	return serialized_def
+
 func get_game_setting(setting_name, default):
 	if not "game_settings" in game_definition:
 		return default
@@ -150,8 +163,20 @@ func get_default_pixel_scale() -> float:
 func get_game_name() -> String:
 	return cur_game_name
 
+func get_game_title() -> String:
+	var cur_title: String = get_game_setting("title", "")
+	return cur_title if cur_title else cur_game_name
+
 func set_game_name(new_name: String) -> void:
 	cur_game_name = new_name.strip_edges()
+
+func get_credits_info() -> Dictionary:
+	return game_definition.get("game_metadata", {}).get("credits", {})
+
+func set_credits_info(credits_info: Dictionary) -> void:
+	if not "game_metadata" in game_definition:
+		game_definition["game_metadata"] = {}
+	game_definition["game_metadata"]["credits"] = credits_info
 
 func get_serialized_play_state() -> Dictionary:
 	if cur_scene != "Play":
@@ -232,6 +257,7 @@ func save_edited() -> void:
 func load_edited() -> void:
 	load_serialized_play_state(editor_save)
 
+# hack
 func change_level_metadata(new_metadata: Dictionary) -> void:
 	if not loaded_level_name or not editor_save:
 		return
@@ -380,16 +406,6 @@ func close_pause_menu() -> void:
 	
 func start_on_ready() -> bool:
 	if TextureManager.im_ready and MapManager.im_ready and EntityManager.im_ready:
-		
-#		var default_game = FilesManager.get_default_game()
-#		if len(default_game) > 0:
-#			load_game_definition_from_file(default_game)
-#		else:
-#			set_game_name("Basic")
-#			game_definition["game_settings"] = {"pixel_scale": 2}
-
-		# Set the window size for the default game
-#		rescale_window()
 		
 		started = true
 		if cur_scene == "Loading":

@@ -9,12 +9,17 @@ var invalid_field_color = Color(0.7, 0.4, 0.4)
 
 func _ready():
 	var name_box = find_child("NameInput")
-	name_box.text = GameManager.get_game_name()
+	var game_name = GameManager.get_game_name()
+	name_box.text = game_name
 	find_child("SetWindowWidth").value = GameManager.game_view.x
 	find_child("SetWindowHeight").value = GameManager.game_view.y
 	init_movement_modes()
 	
 	game_settings = GameManager.game_definition["game_settings"]
+	
+	var title_input: LineEdit = find_child("TitleInput")
+	title_input.text = GameManager.get_game_setting("title", "")
+	title_input.placeholder_text = game_name
 	
 	if "pixel_scale" in game_settings:
 		find_child("PixelScaleInput").value = game_settings["pixel_scale"]
@@ -57,31 +62,29 @@ func movement_mode_picked(mode_id: int) -> void:
 	game_settings["movement_mode"] = mode_id
 
 func _on_SaveButton_pressed():
-	if FilesManager.game_exists(GameManager.get_game_name()):
+	var is_resave: = GameManager.loaded_from_game_name == GameManager.get_game_name()
+	if is_resave or not FilesManager.game_exists(GameManager.get_game_name()):
+		_real_save()
+	else:
 		var popup = generic_confirm.instantiate()
 		var title = "Do you want to override"
 		var text = "A game with this name already exists, do you want to override it?"
 		add_child(popup)
 		popup.confirm_with_callbacks(title, text, _real_save)
-	else:
-		_real_save()
 
 func _real_save():
-	var game_data = {"game_name": GameManager.get_game_name()}
-	game_data['textures'] = TextureManager.get_texture_spec()
-	game_data['tile_definitions'] = MapManager.tile_defs
-	game_data['entity_definitions'] = EntityManager.entity_defs
-	game_data['window_width'] = GameManager.game_view.x
-	game_data['window_height'] = GameManager.game_view.y
-	game_data["game_settings"] = game_settings
-	
-	FilesManager.save_game_info(game_data)
+	var def_data: = GameManager.get_serialized_game_definition()
+	FilesManager.save_game_info(def_data)
+	GameManager.loaded_from_game_name = GameManager.get_game_name()
 	
 	find_parent("UIRoot").show_message("Saved")
 
 
-func _on_NameInput_text_changed(new_text):
-	GameManager.set_game_name(new_text)
+func _on_NameInput_text_changed(new_name: String) -> void:
+	GameManager.set_game_name(new_name)
+
+	var title_input: LineEdit = find_child("TitleInput")
+	title_input.placeholder_text = new_name
 
 func load_game_file(dialog) -> void:
 	var game_name = dialog.get_selected_game()
@@ -145,3 +148,7 @@ func _on_PixelScaleInput_value_changed(value):
 
 func _on_AutoAspect_toggled(button_pressed):
 	game_settings["auto_aspect"] = button_pressed
+
+func _on_title_input_text_changed(new_text: String) -> void:
+	game_settings["title"] = new_text
+	

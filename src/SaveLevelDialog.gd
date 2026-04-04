@@ -5,10 +5,9 @@ func _ready():
 	close_requested.connect(queue_free)
 
 func _on_SaveFileButton_pressed():
-	var level_name = find_child("LevelNameInput").text
+	var level_name = find_child("LevelNameInput").text.strip_edges()
 	var level_data = {}
 	level_data["name"] = level_name
-	level_data["title"] = level_name
 	level_data["state"] = GameManager.editor_save
 	
 	FilesManager.save_level(GameManager.cur_game_name, level_data)

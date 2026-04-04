@@ -180,7 +180,6 @@ func serialize() -> Dictionary:
     prints(map_metadata.duplicate(true))
 
     var serialized_stuff = {"layers": serialized_layers, "metadata": map_metadata.duplicate(true)}
-    prints("map serialized stuff:", serialized_stuff)
     return serialized_stuff
 
 func deserialize(data: Dictionary) -> void:
