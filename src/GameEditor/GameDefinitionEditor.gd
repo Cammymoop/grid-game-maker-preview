@@ -1,5 +1,7 @@
 extends VBoxContainer
 
+const PropOrEntityNameInput = preload("res://src/GameEditor/ConditionalEditor/prop_or_entity_name_input.gd")
+
 var generic_confirm = preload("res://Scenes/GameEditor/GenericConfirm.tscn")
 var load_dialog = preload("res://Scenes/GameEditor/LoadGameDialog.tscn")
 
@@ -33,11 +35,10 @@ func _ready():
 		cam_settings = game_settings["camera_settings"]
 	
 	var follow_by_button = find_child("FollowBy")
-	follow_by_button.connect("changed", Callable(self, "change_follow_by"))
+	follow_by_button.changed.connect(change_follow_by)
 	
 	if "follow_entity" in cam_settings:
-		find_child("FollowEntity").text = cam_settings["follow_entity"]
-		follow_entity_validate()
+		find_child("FollowEntity").set_value(cam_settings["follow_entity"])
 	if "follow_entity_by" in cam_settings:
 		follow_by_button.text = cam_settings["follow_entity_by"]
 	if "enable_limits" in cam_settings:
@@ -53,6 +54,15 @@ func init_movement_modes() -> void:
 
 func change_follow_by(val: String) -> void:
 	set_camera_settings("follow_entity_by", val)
+	
+	var prop_entity_name_input: PropOrEntityNameInput = find_child("FollowEntity") as PropOrEntityNameInput
+	if prop_entity_name_input:
+		var mode: String = PropOrEntityNameInput.PROP_NAME
+		if val == "name":
+			mode = PropOrEntityNameInput.ENTITY_NAME
+		elif val == "name or property":
+			mode = PropOrEntityNameInput.BOTH
+		prop_entity_name_input.set_hint_mode(mode)
 
 func movement_mode_picked(mode_id: int) -> void:
 	var popup_menu: PopupMenu = find_child("MovementModeMenuButton").get_popup()
@@ -91,11 +101,6 @@ func load_game_file(dialog) -> void:
 	GameManager.load_game_definition_from_file(game_name)
 	#show_settings(GameManager.game_definition)
 
-# TODO with this I dont have to reload this scene on game change
-#func show_settings(new_game_defintion) -> void:
-#   #show settings here and on other tabs
-#	pass
-
 func _on_LoadButton_pressed():
 	var dialog = load_dialog.instantiate()
 	
@@ -122,21 +127,8 @@ func set_camera_settings(setting: String, value) -> void:
 		game_settings["camera_settings"] = {}
 	game_settings["camera_settings"][setting] = value
 
-func follow_entity_validate() -> void:
-	var follow_by = Utility.get_camera_setting("follow_entity_by")
-	var input = find_child("FollowEntity")
-	if follow_by and follow_by != "name":
-		input.add_theme_color_override("font_color", Color.WHITE)
-		return
-	var entity_list = EntityManager.get_all_entity_names()
-	if not input.text in entity_list:
-		input.add_theme_color_override("font_color", invalid_field_color)
-	else:
-		input.add_theme_color_override("font_color", Color.WHITE)
-
 func _on_FollowEntity_text_changed(new_text):
 	set_camera_settings("follow_entity", new_text)
-	follow_entity_validate()
 func _on_EnableLimitsToggle_toggled(button_pressed):
 	set_camera_settings("enable_limits", button_pressed)
 func _on_ExtendCamLimits_value_changed(value):

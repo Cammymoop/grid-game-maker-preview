@@ -18,10 +18,10 @@ enum InputTypes {
 }
 
 var templates: = {
-	InputTypes.PropertyInput: preload("res://Scenes/GameEditor/ConditionalEditor/PropertyInput.tscn"),
-	InputTypes.TileNameInput: preload("res://Scenes/GameEditor/ConditionalEditor/tile_name_input.tscn"),
-	InputTypes.EntityNameInput: preload("res://Scenes/GameEditor/ConditionalEditor/entity_name_input.tscn"),
-	InputTypes.SignalInput: preload("res://Scenes/GameEditor/ConditionalEditor/generic_input.tscn"),
+	InputTypes.PropertyInput: preload("res://src/GameEditor/ConditionalEditor/PropertyInput.gd"),
+	InputTypes.TileNameInput: preload("res://src/GameEditor/ConditionalEditor/tile_name_input.gd"),
+	InputTypes.EntityNameInput: preload("res://src/GameEditor/ConditionalEditor/entity_name_input.gd"),
+	InputTypes.SignalInput: preload("res://src/GameEditor/ConditionalEditor/generic_input.gd"),
 	
 	InputTypes.ValueInput: preload("res://Scenes/GameEditor/ConditionalEditor/generic_input.tscn"),
 	
@@ -33,3 +33,22 @@ var templates: = {
 
 	InputTypes.PositionInput: preload("res://Scenes/GameEditor/ConditionalEditor/vector2i_input.tscn"),
 }
+
+var default_min_size: Dictionary[InputTypes, Vector2] = {
+}
+
+func get_template(input_type: InputTypes) -> PackedScene:
+	if not input_type in templates:
+		if input_type < 0 or input_type >= InputTypes.size():
+			push_error("Invalid input type: %s" % [input_type])
+		else:
+			push_error("Missing input template for %s" % [InputTypes.keys()[input_type]])
+	
+	var template: Object = templates[input_type]
+	if template is PackedScene:
+		return template.instantiate()
+	elif template is Script:
+		return template.new()
+	else:
+		push_error("Input template is not a scene or script: %s (%s)" % [template, template.get_class()])
+		return null

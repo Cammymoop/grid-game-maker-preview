@@ -7,8 +7,8 @@
 [ext_resource type="StyleBox" path="res://assets/ui/HorizontalSeparatorStylebox.tres" id="4"]
 [ext_resource type="Script" uid="uid://cakuc61ui0t57" path="res://src/GameEditor/ImagesEditor.gd" id="5"]
 [ext_resource type="Script" uid="uid://benwn44a0nm5f" path="res://src/GameEditor/GameDefinitionEditor.gd" id="6"]
-[ext_resource type="PackedScene" uid="uid://rkgymu7xdnvf" path="res://Scenes/GameEditor/ConditionalEditor/PropertyInput.tscn" id="6_32qri"]
 [ext_resource type="PackedScene" uid="uid://b6fax3dpo74i4" path="res://Scenes/GameEditor/credits_list.tscn" id="6_qrjoe"]
+[ext_resource type="Script" uid="uid://bh535vdhldxn6" path="res://src/GameEditor/ConditionalEditor/prop_or_entity_name_input.gd" id="7_73cj6"]
 [ext_resource type="PackedScene" uid="uid://csm4i61la0olb" path="res://Scenes/FallingEntitiesEffects.tscn" id="8"]
 [ext_resource type="FontFile" uid="uid://biuf4hpin33j3" path="res://assets/font/medium_font.tres" id="9"]
 [ext_resource type="Script" uid="uid://b067pb4uemc40" path="res://src/GameEditor/UIRoot.gd" id="10"]
@@ -215,8 +215,10 @@ text = "property"
 flat = false
 script = ExtResource("15")
 
-[node name="FollowEntity" parent="MarginContainer/UIRoot/TabContainer/Game/ScrollContainer/VBoxContainer/HBoxContainer6" unique_id=19759728 instance=ExtResource("6_32qri")]
+[node name="FollowEntity" type="LineEdit" parent="MarginContainer/UIRoot/TabContainer/Game/ScrollContainer/VBoxContainer/HBoxContainer6" unique_id=482357832]
+custom_minimum_size = Vector2(140, 0)
 layout_mode = 2
+script = ExtResource("7_73cj6")
 
 [node name="HBoxContainer7" type="HBoxContainer" parent="MarginContainer/UIRoot/TabContainer/Game/ScrollContainer/VBoxContainer" unique_id=733011440]
 layout_mode = 2
