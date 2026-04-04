@@ -6,10 +6,8 @@
 [ext_resource type="Script" uid="uid://ch4u8x2lf07ik" path="res://src/GameEditor/ConditionalEditor/DirectionInput.gd" id="4"]
 
 [node name="DirectionInput" type="HBoxContainer" unique_id=2062565202]
-offset_left = 142.0
-offset_top = 56.0
-offset_right = 411.0
-offset_bottom = 87.0
+offset_right = 269.0
+offset_bottom = 31.0
 script = ExtResource("4")
 
 [node name="DirectionSelectorButton" parent="." unique_id=1002943204 instance=ExtResource("3")]

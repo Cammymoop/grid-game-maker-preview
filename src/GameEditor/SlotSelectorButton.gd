@@ -66,6 +66,8 @@ var slot_ids: = {
     any= -2,
 }
 
+var disabled_slots: Array = []
+
 var current_slot_id: int = Commands.Slot.RED
 
 var picker_open: = false
@@ -80,6 +82,38 @@ func _ready():
     if default_slot_id != current_slot_id and default_slot_id in slot_textures.keys():
         current_slot_id = default_slot_id
         update_texture()
+    update_disabled_slots()
+
+func update_disabled_slots() -> void:
+    var category_container: Control = find_child("CategoryContainer")
+    for category_child in category_container.get_children():
+        if not category_child is Control:
+            continue
+        for button_child in category_child.get_children():
+            if not button_child is ButtonContainer:
+                continue
+            var button_slot_id: int = get_slot_id_from_button_texture(button_child)
+            if button_slot_id != -1:
+                set_button_is_disabled(button_child, button_slot_id in disabled_slots)
+
+func set_button_is_disabled(the_button: ButtonContainer, is_disabled: bool) -> void:
+    if the_button.disabled == is_disabled:
+        return
+    the_button.disabled = is_disabled
+    var texture_rect: TextureRect = the_button.find_child("TextureRect")
+    if texture_rect:
+        texture_rect.modulate.a = 0.5 if is_disabled else 1.0
+
+func set_disabled_slots(new_disabled_slots: Array) -> void:
+    disabled_slots = new_disabled_slots
+    update_disabled_slots()
+
+func get_slot_id_from_button_texture(button_node: ButtonContainer) -> int:
+    var texture_rect: TextureRect = button_node.find_child("TextureRect")
+    if not texture_rect or not texture_rect.texture in slot_textures.values():
+        return -1
+    
+    return slot_textures.find_key(texture_rect.texture)
 
 func set_valid_slot_categories(categories: Array) -> void:
     show_categories = categories
@@ -133,9 +167,13 @@ func get_first_valid_slot_id() -> int:
         var slot_list: Node = find_child(category_name + "Slots")
         if not slot_list.visible or slot_list.get_child_count() == 0:
             continue
-        var first_slot_texture_rect: TextureRect = slot_list.get_child(0).find_child("TextureRect")
-        if first_slot_texture_rect and slot_textures.values().has(first_slot_texture_rect.texture):
-            return slot_textures.find_key(first_slot_texture_rect.texture)
+        for i in range(slot_list.get_child_count()):
+            var slot_button: ButtonContainer = slot_list.get_child(i)
+            if slot_button.disabled:
+                continue
+            var slot_id: int = get_slot_id_from_button_texture(slot_button)
+            if slot_id != -1:
+                return slot_id
     return Commands.Slot.RED
 
 func show_picker() -> void:

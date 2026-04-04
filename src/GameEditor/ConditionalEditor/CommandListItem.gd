@@ -76,6 +76,11 @@ func set_v3_data(qualified_name: String, short_name: String, new_command_info: D
     else:
         ui_data = {"display_name": command_info["display_name"]}
 
+func set_disabled_slots(disabled_slots: Array) -> void:
+    var command_slot_selector: Control = find_child("CommandSlot")
+    if command_slot_selector:
+        command_slot_selector.set_disabled_slots(disabled_slots)
+
 func set_slot(slot_id: int) -> void:
     if slot_id < 0:
         slot_id = find_child("CommandSlot").get_first_valid_slot_id()
@@ -131,7 +136,7 @@ func generate_ui() -> void:
                 continue
             
             var input_type = ui_data.options[input_name].input_type
-            var input = InputTemplates.templates[input_type].instantiate()
+            var input = InputTemplates.get_template(input_type)
             current_row.add_child(input)
             if ui_data.options[input_name].has("template_options"):
                 if input.has_method("apply_template_options"):
@@ -163,19 +168,10 @@ func generate_v3_ui() -> void:
         row.add_child(label)
         return
     
-    var split_str: = (command_info.usage as String).split("|", true, 1)
-    if split_str.size() == 1:
-        split_str = ["all", split_str[0]]
-    var slot_type_hint: String = split_str[0]
-
-    if slot_type_hint == "none":
-        command_slot_selector.set_valid_slot_categories([])
-    else:
-        var valid_categories: = Array(slot_type_hint.split(",", true))
-        command_slot_selector.set_valid_slot_categories(valid_categories)
+    command_slot_selector.set_valid_slot_categories(ConditionalsV3.get_command_slot_type_hint(qualified_command_name))
     set_slot(current_slot)
     
-    var ui_template_string: = split_str[1]
+    var ui_template_string: String = command_info.get("template_text", "") as String
     var template_split: = Array(ui_template_string.split("[", true))
     var prefix_str: String = template_split.pop_front()
     
@@ -200,7 +196,7 @@ func generate_v3_ui() -> void:
             if input_info[0] not in arg_names:
                 push_error("arg name %s not found in arg list for command %s" % [input_info[0], qualified_command_name])
             var input_type: InputTemplates.InputTypes = InputTemplates.InputTypes[input_info[1]]
-            var input_node: Control = InputTemplates.templates[input_type].instantiate()
+            var input_node: Control = InputTemplates.get_template(input_type)
             if input_info.size() > 2:
                 var input_args: = input_info[2].split(",", true)
                 if not input_node.has_method("set_input_args"):

@@ -17,6 +17,7 @@ enum InputTypes {
 	PositionInput,
 }
 
+# either scene or a script
 var templates: = {
 	InputTypes.PropertyInput: preload("res://src/GameEditor/ConditionalEditor/PropertyInput.gd"),
 	InputTypes.TileNameInput: preload("res://src/GameEditor/ConditionalEditor/tile_name_input.gd"),
@@ -34,10 +35,7 @@ var templates: = {
 	InputTypes.PositionInput: preload("res://Scenes/GameEditor/ConditionalEditor/vector2i_input.tscn"),
 }
 
-var default_min_size: Dictionary[InputTypes, Vector2] = {
-}
-
-func get_template(input_type: InputTypes) -> PackedScene:
+func get_template(input_type: InputTypes) -> Control:
 	if not input_type in templates:
 		if input_type < 0 or input_type >= InputTypes.size():
 			push_error("Invalid input type: %s" % [input_type])

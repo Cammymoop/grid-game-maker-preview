@@ -33,7 +33,7 @@ func init(available_options: Dictionary, current_options: Dictionary) -> void:
 				label.name = "Label"
 				opt.add_child(label, true)
 				
-				var property_select = InputTemplates.templates[InputTemplates.InputTypes.PropertyInput].instantiate()
+				var property_select = InputTemplates.get_template(InputTemplates.InputTypes.PropertyInput)
 				property_select.name = "InputControl"
 				property_select.set_arg_name(option_name)
 				opt.add_child(property_select, true)

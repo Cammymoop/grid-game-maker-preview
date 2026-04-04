@@ -133,11 +133,13 @@ func get_command_info(qualified_name: String) -> Dictionary:
 func get_command_slot_type_hint(qualified_name: String) -> Array:
     if not all_commands.has(qualified_name):
         return ["all"]
-    var usage_str = all_commands[qualified_name].usage
-    if not usage_str.contains("|"):
+    elif "slot_type_hint" in all_commands[qualified_name]:
+        var slot_type_hint: Array = all_commands[qualified_name]["slot_type_hint"].split(",", false)
+        if "none" in slot_type_hint:
+            return []
+        return slot_type_hint
+    else:
         return ["all"]
-    var slot_type_hint = usage_str.split("|", true, 1)[0]
-    return slot_type_hint.split(",", false)
 
 func add_command_script(script_name: String, script_type: int, script_inst: Object = null) -> void:
     add_command_script_info({

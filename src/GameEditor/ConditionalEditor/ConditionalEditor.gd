@@ -35,6 +35,9 @@ var replace_to_index: int = -1
 var is_new_command_replace: bool = false
 var replace_from_list: Control = null
 
+var has_me_entity_slot: bool = true
+var has_them_entity_slot: bool = true
+
 func _ready():
     var add_new_command_func = add_new_v3_command if use_conditionalv3 else add_v2_command
     add_condition_dialog.connect("command_selected", add_new_command_func.bind("conditions"))
@@ -131,6 +134,15 @@ func replace_with_new_command(command_list: Control, command_index: int, new_com
 func create_v3_command_item(qualified_name: String, arg_string: String = "") -> CommandListItem:
     var short_name = ConditionalsV3.command_short_name(qualified_name)
     var new_list_item = command_list_item.instantiate()
+
+    var disabled_slots: Array = []
+    if not has_me_entity_slot:
+        disabled_slots.append(Commands.Slot.RED)
+    if not has_them_entity_slot:
+        disabled_slots.append(Commands.Slot.BLUE)
+    if disabled_slots:
+        new_list_item.set_disabled_slots(disabled_slots)
+
     new_list_item.set_v3_data(qualified_name, short_name, ConditionalsV3.get_command_info(qualified_name))
     new_list_item.set_arg_values(ConditionalsV3.arg_string_to_arg_values(arg_string))
     

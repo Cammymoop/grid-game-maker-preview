@@ -26,6 +26,12 @@ var small_font = preload("res://assets/font/img_font_white_reformat.png")
 	set(value):
 		button.button_pressed = value
 
+@export var disabled: bool = false:
+	get:
+		return button.disabled
+	set(value):
+		button.disabled = value
+
 func _init():
 	button = Button.new()
 	button.name = "BGButton"

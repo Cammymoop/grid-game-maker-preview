@@ -18,21 +18,41 @@ func list_commands() -> Array[Dictionary]:
 		var method_name = method_info.name
 		if method_name.begins_with(CMD_FUNC_PREFIX):
 			var cmd_name = method_name.trim_prefix(CMD_FUNC_PREFIX)
-			cmd_infos.append({
+			var meta_info: Dictionary = {
 				"name": cmd_name,
 				"display_name": get_command_display_name(cmd_name),
-				"usage": get_command_usage(cmd_name),
 				"args": get_command_arg_list(cmd_name, method_info),
-			})
+				"template_text": "",
+				"slot_type_hint": "all",
+			}
+			meta_info.merge(get_command_meta_info(cmd_name), true)
+			cmd_infos.append(meta_info)
 	return cmd_infos
 
 func get_command_display_name(cmd_name: String) -> String:
 	return cmd_name.capitalize()
 
-func get_command_usage(cmd: String) -> String:
+func get_command_meta_info(cmd: String) -> Dictionary:
 	if not has_method(DESC_FUNC_PREFIX + cmd):
-		return cmd.capitalize()
-	return Callable(self, DESC_FUNC_PREFIX + cmd).call()
+		return {
+			"template_text": cmd.capitalize(),
+		}
+	var result: Variant = Callable(self, DESC_FUNC_PREFIX + cmd).call()
+	if typeof(result) == TYPE_STRING:
+		if result.contains("|"):
+			return {
+				"slot_type_hint": result.split("|", true, 1)[0],
+				"template_text": result.split("|", true, 1)[1],
+			}
+		else:
+			return {
+				"template_text": result,
+			}
+	elif typeof(result) == TYPE_DICTIONARY:
+		return result
+	else:
+		push_error("Invalid result type for command meta info: %s (for command %s)" % [result, cmd])
+		return {}
 
 func get_command_arg_list(cmd: String, method_info: Dictionary) -> Array[String]:
 	if not has_method(CMD_FUNC_PREFIX + cmd):

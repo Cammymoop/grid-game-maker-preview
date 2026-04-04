@@ -2,12 +2,20 @@ extends ConfirmationDialog
 
 signal hidden
 
+const ConditionalEditor = preload("res://src/GameEditor/ConditionalEditor/ConditionalEditor.gd")
 var conditional_editor_scn = preload("res://Scenes/GameEditor/ConditionalEditor/ConditionalEditor.tscn")
+
+var is_entity: bool = false
 
 var conditional_val: Variant = {}
 var conditional_mode: = false
 
 var autoshow_conditional_editor: = true
+
+# events that have no triggering entity
+const NO_OTHER_EVENTS: = [
+	"i_finish_move_onto_tile", "post_move", "idle_update", "dying",
+]
 
 func _ready():
 	visibility_changed.connect(Callable(self, "_on_vis_changed"))
@@ -39,6 +47,7 @@ func _on_EditConditional_pressed():
 
 func open_conditional_editor() -> void:
 	var editor = conditional_editor_scn.instantiate()
+	set_conditional_editor_smart_slot_enable(editor, find_child("SetName").text)
 	
 	var ui_root = find_parent("UIRoot")
 	if not ui_root:
@@ -55,6 +64,12 @@ func open_conditional_editor() -> void:
 	
 	editor.save_conditional.connect(on_save_conditional)
 	editor.cancelled.connect(hide)
+
+func set_conditional_editor_smart_slot_enable(condtional_editor: ConditionalEditor, prop_name: String) -> void:
+	if prop_name in NO_OTHER_EVENTS:
+		condtional_editor.has_them_entity_slot = false
+	if not is_entity:
+		condtional_editor.has_me_entity_slot = false
 
 func on_save_conditional(new_conditional) -> void:
 	conditional_val = new_conditional

@@ -267,6 +267,7 @@ func _on_PropertyList_item_activated(index):
 		current_val = str(current_val)
 	
 	var update_property_popup = update_prop_popup_scene.instantiate()
+	update_property_popup.is_entity = tile_entity_mode == "entity"
 	update_property_popup.set_info(prop_key, current_val)
 	
 	add_child(update_property_popup)
