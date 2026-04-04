@@ -333,8 +333,8 @@ func create_entity(entity_index: int, tile_position: Vector2i, facing: int = 0, 
         intended_move_speed = default_move_speed
     entity.set_intended_move_speed(intended_move_speed)
 
-    setup_entity_controller(entity)
     entity.entity_index = entity_index
+    setup_entity_controller(entity)
     entity.position = MapManager.tile_to_world_position(tile_position)
     add_entity_to_world(entity)
     entity.initialize()

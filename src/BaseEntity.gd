@@ -125,6 +125,7 @@ func serialize() -> Dictionary:
 	return important_stuff
 
 func deserialize(data: Dictionary) -> void:
+	data = data.duplicate_deep()
 	active = data['active']
 	set_self_speed(data['self_steps_per_tile'])
 	set_current_steps_per_tile(data['steps_per_tile'])
