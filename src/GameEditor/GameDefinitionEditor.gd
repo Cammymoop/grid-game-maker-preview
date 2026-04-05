@@ -87,7 +87,7 @@ func _real_save():
 	FilesManager.save_game_info(def_data)
 	GameManager.loaded_from_game_name = GameManager.get_game_name()
 	
-	find_parent("UIRoot").show_message("Saved")
+	GlobalToaster.show_message("Saved Game Definition")
 
 
 func _on_NameInput_text_changed(new_name: String) -> void:
@@ -111,7 +111,7 @@ func _on_LoadButton_pressed():
 
 func _on_SetDefault_pressed():
 	FilesManager.save_default_game(GameManager.cur_game_name)
-	find_parent("UIRoot").show_message("Default Game Set")
+	GlobalToaster.show_message("Default Game Set")
 
 
 func _on_SetWindowWidth_value_changed(value):

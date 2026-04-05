@@ -33,6 +33,7 @@ ConditionalsV2="*res://src/Singletons/conditionals_v2.gd"
 OldConditionalConverter="*res://src/Singletons/old_conditional_converter.gd"
 UiUtil="*uid://bk2amu7jaulpw"
 Autocomplete="*uid://ucb851a8s6xk"
+GlobalToaster="*uid://dyjhlku4kgqkm"
 
 [debug]
 

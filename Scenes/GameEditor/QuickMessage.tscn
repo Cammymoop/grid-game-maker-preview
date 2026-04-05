@@ -1,25 +1,18 @@
-[gd_scene load_steps=5 format=2]
+[gd_scene format=3 uid="uid://covymx6qlcmmp"]
 
-[ext_resource path="res://src/GameEditor/QuickMessage.gd" type="Script" id=1]
-[ext_resource path="res://assets/font/medium_font.tres" type="FontFile" id=2]
+[ext_resource type="Script" uid="uid://iiwplplymwfh" path="res://src/GameEditor/QuickMessage.gd" id="1"]
+[ext_resource type="StyleBox" uid="uid://dow5oaitp4p4q" path="res://src/UI/toast_message_panel.tres" id="1_wvwjr"]
+[ext_resource type="FontFile" uid="uid://biuf4hpin33j3" path="res://assets/font/medium_font.tres" id="2"]
 
-[sub_resource type="StyleBoxFlat" id=1]
-bg_color = Color( 0.215686, 0.207843, 0.266667, 1 )
-border_width_bottom = 4
-border_color = Color( 0.0901961, 0.0901961, 0.168627, 1 )
-corner_radius_top_left = 3
-corner_radius_top_right = 3
-corner_radius_bottom_right = 3
-corner_radius_bottom_left = 3
-
-[sub_resource type="StyleBoxEmpty" id=2]
+[sub_resource type="StyleBoxEmpty" id="2"]
 content_margin_left = 25.0
-content_margin_right = 25.0
 content_margin_top = 6.0
+content_margin_right = 25.0
 content_margin_bottom = 6.0
 
-[node name="QuickMessage" type="PanelContainer"]
+[node name="QuickMessage" type="PanelContainer" unique_id=1775822403]
 process_mode = 3
+anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
@@ -28,19 +21,12 @@ grow_horizontal = 2
 grow_vertical = 2
 size_flags_horizontal = 4
 size_flags_vertical = 4
-theme_override_styles/panel = SubResource( 1 )
-script = ExtResource( 1 )
-__meta__ = {
-"_edit_use_anchors_": false
-}
+theme_override_styles/panel = ExtResource("1_wvwjr")
+script = ExtResource("1")
 
-[node name="Text" type="Label" parent="."]
-offset_right = 103.0
-offset_bottom = 46.0
+[node name="Text" type="Label" parent="." unique_id=464787207]
+layout_mode = 2
 size_flags_horizontal = 4
-theme_override_fonts/font = ExtResource( 2 )
-theme_override_styles/normal = SubResource( 2 )
+theme_override_fonts/font = ExtResource("2")
+theme_override_styles/normal = SubResource("2")
 text = "Hey!"
-__meta__ = {
-"_edit_use_anchors_": false
-}

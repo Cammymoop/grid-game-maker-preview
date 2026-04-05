@@ -426,11 +426,11 @@ func setup_entity_texture(entity: BaseEntity) -> void:
     sprite.region_rect = TextureManager.get_index_rect(texture_index, texture_sub_index)
 
 func serialize() -> Dictionary:
-    var serialized_entities = []
+    var serialized_entities: Array = []
     for e in entity_list:
         serialized_entities.append(e.serialize())
     
-    return {"entity_list": serialized_entities, "bond_groups": bond_groups}
+    return {"entity_list": serialized_entities, "bond_groups": bond_groups.duplicate_deep()}
 
 func deserialize(data: Dictionary) -> void:
     clear_entity_list()
@@ -620,7 +620,7 @@ func attempt_move(moving_entity, tile_position, group_move=false) -> bool:
     else:
         entities_here = get_entities_at(moving_entity.tile_position, moving_entity)
     for e in entities_here:
-        if not get_entity_interaction_bool_result("move_off_of", true, e, moving_entity, tile_position):
+        if not get_entity_interaction_bool_result("move_off_of", true, e, moving_entity, moving_entity.tile_position):
             return false
     
     var entities_there: = []

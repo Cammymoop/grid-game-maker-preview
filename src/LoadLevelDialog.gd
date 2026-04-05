@@ -1,9 +1,12 @@
 extends Window
 
+signal hidden
+
 var selected_level: = ""
 var all_levels = []
 
 func _ready():
+	visibility_changed.connect(_on_vis_changed)
 	all_levels = FilesManager.get_level_list(GameManager.cur_game_name)
 	
 	var list_popup = find_child("SelectLevelButton").get_popup()
@@ -11,7 +14,7 @@ func _ready():
 		list_popup.add_item(l)
 	list_popup.connect("index_pressed", level_picked)
 	
-	close_requested.connect(queue_free)
+	close_requested.connect(close_dialog)
 
 func level_picked(index) -> void:
 	var list_popup = find_child("SelectLevelButton").get_popup()
@@ -23,8 +26,16 @@ func _on_LoadFileButton_pressed():
 		return
 	var parsed_level = FilesManager.get_level_data(GameManager.cur_game_name, selected_level)
 	GameManager.load_level_data(parsed_level)
-	queue_free()
-
+	close_dialog()
 
 func _on_cancel_button_pressed() -> void:
+	close_dialog()
+
+func close_dialog() -> void:
+	if visible:
+		hide()
 	queue_free()
+
+func _on_vis_changed():
+	if not visible:
+		hidden.emit()

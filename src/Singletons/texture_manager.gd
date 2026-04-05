@@ -73,7 +73,7 @@ func clear() -> void:
     texture_names = {}
 
 func get_texture_spec() -> Array:
-    return texture_spec
+    return texture_spec.duplicate_deep()
 
 func add_texture(tex_spec: Dictionary) -> void:
     texture_spec.append(tex_spec)

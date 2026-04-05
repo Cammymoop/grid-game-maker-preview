@@ -595,9 +595,9 @@ func _on_SaveAsDialog_file_selected(path: String):
 	if base_path == FilesManager.get_shared_images_dir():
 		FilesManager.save_shared_image(edited_image, path.get_file())
 	else:
-		find_parent("UIRoot").show_message("Please save to shared images directory")
+		GlobalToaster.show_message("Please save to shared images directory")
 		return
-	find_parent("UIRoot").show_message("Saved")
+	GlobalToaster.show_message("Saved Image")
 	set_save_path(path.get_file())
 	FilesManager.update_local_image_metadata(save_as_name, image_meta)
 
@@ -612,7 +612,7 @@ func _on_SaveFileButton_pressed():
 		return
 	FilesManager.save_shared_image(edited_image, save_as_name)
 	FilesManager.update_local_image_metadata(save_as_name, image_meta)
-	find_parent("UIRoot").show_message("Saved")
+	GlobalToaster.show_message("Saved Image")
 	
 
 func get_corner_from_button(corner_button: ButtonContainer) -> Rect2i:

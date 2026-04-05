@@ -10,7 +10,7 @@ var _session_list: Panel
 
 func acquire_menu(anchor: Control) -> Panel:
 	var host := _resolve_host(anchor)
-	var overlay: Control = _ensure_overlay_for_host(host)
+	var overlay: OVERLAY_SCRIPT = _ensure_overlay_for_host(host)
 	return overlay.acquire_menu(anchor)
 
 

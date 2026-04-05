@@ -46,7 +46,7 @@ func _ready() -> void:
 		enable_edit_mode(false, false)
 	
 	var pause_menu = Utility.get_pause_menu()
-	pause_menu.connect("gameplay_paused", Callable(self, "save_current_level_state"))
+	pause_menu.gameplay_paused.connect(save_current_level_state)
 
 func save_current_level_state() -> void:
 	if not edit_mode:
@@ -62,7 +62,6 @@ func enable_edit_mode(on, save_state=true):
 		place_mode("none")
 		if save_state:
 			GameManager.save_edited()
-			GameManager.checkpoint_save = GameManager.editor_save
 			if do_autosave and has_edited_something:
 				_auto_save(GameManager.editor_save)
 		#GameManager.position_gameplay_camera($EditorCam.position)

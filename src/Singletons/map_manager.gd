@@ -265,14 +265,16 @@ func remove_positioned_prop_value(at_pos: Vector2i, for_tile_index: int, propert
     pos_prop["local_properties"].erase(property_name)
 
 func has_next_level() -> bool:
-    var next_level_name = map_metadata.get("next_level", "") as String
+    var next_level_name: = map_metadata.get("next_level", "") as String
     return next_level_name != "" and FilesManager.level_exists(GameManager.cur_game_name, next_level_name)
 
-func set_next_level_name(next_level_name: String) -> void:
-    map_metadata["next_level"] = next_level_name
-
-func get_next_level_name() -> String:
-    return map_metadata.get("next_level", "") as String
+func set_metadata_value(key: String, value: Variant) -> void:
+    map_metadata[key] = value
+    GameManager.update_saved_level_metadata(map_metadata)
+func has_metadata_value(key: String) -> bool:
+    return map_metadata.has(key)
+func get_metadata_value(key: String) -> Variant:
+    return map_metadata.get(key, null)
 
 func get_all_tile_indexes() -> Array:
     var keys = tile_defs.keys()
@@ -575,17 +577,38 @@ func resolve_tile_event(at_tile_positions: Array, tile_event_name: String, conte
         var resolved_indices: Array[int] = []
         for l in layers:
             var ti = l.get_cell_s(at_pos)
-            if ti in resolved_indices:
+            if ti == -1 or ti in resolved_indices:
                 continue
             resolved_indices.append(ti)
             var event_property: = get_tile_property_for_index_at(at_pos, tile_event_name, ti)
             if event_property and event_property.is_conditional():
                 event_property.resolve(null, context_entity, at_pos)
 
+func conditional_tile_event(at_tile_positions: Array, tile_event_name: String, context_entity: BaseEntity, is_all: bool = false) -> bool:
+    for at_pos in at_tile_positions:
+        var resolved_indices: Array[int] = []
+        for l in layers:
+            var ti = l.get_cell_s(at_pos)
+            if ti == -1 or ti in resolved_indices:
+                continue
+            resolved_indices.append(ti)
+            var event_property: = get_tile_property_for_index_at(at_pos, tile_event_name, ti)
+            if not event_property:
+                continue
+            var result: Variant = event_property.get_or_resolve(null, context_entity, at_pos)
+            if not is_all and result:
+                return true
+            if is_all and not result:
+                return false
+    # If all, then yes all passed, if any, then no, none passed
+    return is_all
+
 func attempt_move(moving_entity, tile_position, group_move=false) -> bool:
     var entity_move_allow = EntityManager.attempt_move(moving_entity, tile_position, group_move)
     
     var tile_move_allow = check_blocks(moving_entity, tile_position)
+    if tile_move_allow:
+        tile_move_allow = conditional_tile_event([moving_entity.tile_position], "move_off_of", moving_entity, true)
     return tile_move_allow and entity_move_allow
 
 func is_blocked(tile_position, empty_blocks: bool = true) -> bool:

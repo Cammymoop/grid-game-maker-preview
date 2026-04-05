@@ -70,6 +70,8 @@ func set_anchor_control(anchor: Control) -> void:
 	else:
 		_anchor = null
 
+func drop_anchor_control() -> void:
+	_anchor = null
 
 func get_anchor_control() -> Control:
 	if _anchor == null:

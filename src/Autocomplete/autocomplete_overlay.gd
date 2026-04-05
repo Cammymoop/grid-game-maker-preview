@@ -2,7 +2,7 @@ extends Control
 
 const LIST_SCRIPT := preload("res://src/Autocomplete/autocomplete_list.gd")
 
-var _list: Panel
+var _list: LIST_SCRIPT
 
 func _ready() -> void:
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)

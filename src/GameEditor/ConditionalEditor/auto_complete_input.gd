@@ -11,6 +11,8 @@ const MAX_SUGGESTIONS_VISIBLE := 20
 @export var highlight_unknown_color: Color = Color.RED
 @export var highlight_known_color: Color = Color(0.83, 0.87, 0.39)
 
+@export var default_show_clear_button: bool = true
+
 @export var override_default_min_size: Vector2 = Vector2(140, -1)
 
 var arg_name: String = ""
@@ -26,6 +28,7 @@ var _typed_this_focus: bool = false
 var _ignore_menu_sync: bool = false
 
 func _ready() -> void:
+	clear_button_enabled = default_show_clear_button
 	if override_default_min_size.x >= 0:
 		custom_minimum_size.x = override_default_min_size.x
 	if override_default_min_size.y >= 0:
@@ -37,12 +40,18 @@ func _ready() -> void:
 	focus_entered.connect(_on_focus_entered)
 	focus_exited.connect(_on_focus_exited)
 	text_submitted.connect(_on_text_submitted)
+	
 	if use_autocomplete_menu:
-		_ac_list = Autocomplete.acquire_menu(self)
-		_ac_list.item_clicked.connect(_on_ac_item_clicked)
+		_create_autocomplete_menu()
 
 	if _fetched:
 		update_highlight()
+
+func _create_autocomplete_menu() -> void:
+	if not use_autocomplete_menu:
+		return
+	_ac_list = Autocomplete.acquire_menu(self)
+	_ac_list.item_clicked.connect(_on_ac_item_clicked)
 
 func fetch_now() -> void:
 	all_values = fetch_values_func.call()
@@ -110,17 +119,22 @@ func _on_text_changed(_new_text: String) -> void:
 
 
 func _on_focus_entered() -> void:
-	if text.is_empty():
-		_typed_this_focus = false
-	else:
-		_typed_this_focus = true
+	_typed_this_focus = not text.is_empty()
 	if use_autocomplete_menu:
+		if _ac_list:
+			_drop_autocomplete_menu()
+		_create_autocomplete_menu()
 		_sync_autocomplete_menu.call_deferred()
 
 
 func _on_focus_exited() -> void:
 	_hide_autocomplete()
+	_drop_autocomplete_menu()
 
+func _drop_autocomplete_menu() -> void:
+	if _ac_list:
+		_ac_list.item_clicked.disconnect(_on_ac_item_clicked)
+		_ac_list = null
 
 func _on_ac_item_clicked(_index: int, choice: String) -> void:
 	_apply_autocomplete_choice(choice)

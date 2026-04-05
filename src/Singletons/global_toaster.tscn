@@ -1,0 +1,86 @@
+[gd_scene format=3 uid="uid://dyjhlku4kgqkm"]
+
+[ext_resource type="Script" uid="uid://buhqvkrp2rsk6" path="res://src/Singletons/global_toaster.gd" id="1_gtjgp"]
+[ext_resource type="StyleBox" uid="uid://dow5oaitp4p4q" path="res://src/UI/toast_message_panel.tres" id="2_4a857"]
+
+[sub_resource type="Animation" id="Animation_4a857"]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:visible")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [false]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath(".:modulate")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Color(1, 1, 1, 1)]
+}
+
+[sub_resource type="Animation" id="Animation_nv1dx"]
+resource_name = "show"
+length = 0.7667
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:visible")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.76666665),
+"transitions": PackedFloat32Array(1, 1),
+"update": 1,
+"values": [true, false]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath(".:modulate")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0, 0.36666667, 0.7666667),
+"transitions": PackedFloat32Array(1, 0.18926272, 1),
+"update": 0,
+"values": [Color(1, 1, 1, 1), Color(1, 1, 1, 1), Color(1, 1, 1, 0)]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_tjcgs"]
+_data = {
+&"RESET": SubResource("Animation_4a857"),
+&"show": SubResource("Animation_nv1dx")
+}
+
+[node name="GlobalToaster" type="CanvasLayer" unique_id=1620797928]
+layer = 500
+script = ExtResource("1_gtjgp")
+
+[node name="CenterContainer" type="CenterContainer" parent="." unique_id=1938691223]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="ToastMessageLabel" type="Label" parent="CenterContainer" unique_id=1376014116]
+visible = false
+layout_mode = 2
+theme_override_styles/normal = ExtResource("2_4a857")
+text = "Message!"
+
+[node name="ToastAnimator" type="AnimationPlayer" parent="CenterContainer/ToastMessageLabel" unique_id=1575414229]
+libraries/ = SubResource("AnimationLibrary_tjcgs")

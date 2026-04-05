@@ -239,10 +239,12 @@ func _serialize_dict_to_json_string(data: Dictionary, with_formatting: bool = fa
 		return ""
 	return serialized
 
-func serialize_and_save_data_to_json(data: Dictionary, directory: String, file_name: String, with_formatting: bool = false) -> void:
+func serialize_and_save_data_to_json(data: Dictionary, directory: String, file_name: String, with_formatting: bool = false) -> bool:
 	var serialized_json_string: = _serialize_dict_to_json_string(data, with_formatting)
 	if serialized_json_string:
-		_save_json_string_absolute(serialized_json_string, directory, file_name)
+		return _save_json_string_absolute(serialized_json_string, directory, file_name)
+	else:
+		return false
 
 func _save_json_in_data_dir_path(json_string: String, directory: String, file_name: String) -> void:
 	# just in case sanitization
@@ -250,18 +252,22 @@ func _save_json_in_data_dir_path(json_string: String, directory: String, file_na
 	var save_to_path = _data_path(directory, file_name)
 	_save_file(json_string, save_to_path)
 
-func _save_json_string_absolute(json_string: String, abs_directory: String, file_name: String) -> void:
+func _save_json_string_absolute(json_string: String, abs_directory: String, file_name: String) -> bool:
 	# just in case sanitization
 	file_name = Utility.sanitize_for_filename(file_name.trim_suffix(".json")) + ".json"
 	var save_to_path = abs_directory.path_join(file_name)
-	_save_file(json_string, save_to_path)
+	return _save_file(json_string, save_to_path)
 
-func _save_file(file_data: String, abs_file_path: String) -> void:
+func _save_file(file_data: String, abs_file_path: String) -> bool:
 	var f: = FileAccess.open(abs_file_path, FileAccess.WRITE)
 	if not f:
 		push_error("Error saving to file. file path: %s" % [abs_file_path])
-		return
-	f.store_string(file_data)
+		return false
+	var success: = f.store_string(file_data)
+	if not success:
+		push_error("Error saving to file. file path: %s" % [abs_file_path])
+	return success
+
 
 func get_default_game() -> String:
 	var f = FileAccess.open(_data_path("default_game"), FileAccess.READ)
@@ -279,7 +285,7 @@ func save_default_game(game_name) -> void:
 func save_game_info(game_info: Dictionary) -> void:
 	create_game_directory_if_not_exists(game_info)
 	var game_dir: = get_game_base_dir(game_info['game_name'])
-	serialize_and_save_data_to_json(game_info, game_dir, GAME_DEF_FILENAME, FORMAT_GAME_JSON)
+	return serialize_and_save_data_to_json(game_info, game_dir, GAME_DEF_FILENAME, FORMAT_GAME_JSON)
 
 func create_game_directory_if_not_exists(game_info: Dictionary) -> void:
 	var game_data_path: = get_game_base_dir(game_info['game_name'])
@@ -460,15 +466,16 @@ func load_file_as_texture(file_path: String) -> Texture:
 func _level_filename(level_name: String) -> String:
 	return Utility.sanitize_for_filename(level_name) + ".json"
 
-func save_level(game_name: String, level_data: Dictionary) -> void:
+func save_level(game_name: String, level_data: Dictionary) -> bool:
 	if not game_exists(game_name):
 		push_error("Game %s does not exist" % [game_name])
-		return
+		return false
 	if not level_data.get("name", ""):
 		push_error("Level data does not contain a name" % [game_name])
-		return
+		return false
 	var level_filename: = _level_filename(level_data["name"])
 	serialize_and_save_data_to_json(level_data, get_game_levels_dir(game_name), level_filename)
+	return true
 
 func level_exists(game_name: String, level_name: String) -> bool:
 	if not level_name or not game_exists(game_name):

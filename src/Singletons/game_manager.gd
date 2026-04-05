@@ -1,5 +1,7 @@
 extends Node
 
+signal level_state_loaded
+
 var started = false
 var cur_scene = null
 
@@ -8,9 +10,9 @@ var loaded_from_game_name: = ""
 
 var game_creators: Array[String] = []
 
-var checkpoint_save = {}
-var editor_save = {}
-var loaded_level = {}
+var checkpoint_save: = {}
+var editor_save: = {}
+var loaded_level: = {}
 
 var loaded_level_name: = ""
 
@@ -146,8 +148,8 @@ func get_serialized_game_definition() -> Dictionary:
 	var serialized_def: = game_definition.duplicate_deep()
 	serialized_def["game_name"] = get_game_name()
 	serialized_def["textures"] = TextureManager.get_texture_spec()
-	serialized_def["entity_definitions"] = EntityManager.entity_defs
-	serialized_def["tile_definitions"] = MapManager.tile_defs
+	serialized_def["entity_definitions"] = EntityManager.entity_defs.duplicate_deep()
+	serialized_def["tile_definitions"] = MapManager.tile_defs.duplicate_deep()
 	serialized_def["window_width"] = game_view.x
 	serialized_def["window_height"] = game_view.y
 	return serialized_def
@@ -203,6 +205,7 @@ func load_serialized_play_state(serialized_state: Dictionary) -> void:
 	MapManager.deserialize(serialized_state['map'])
 	EntityManager.deserialize(serialized_state['entities'])
 	
+	level_state_loaded.emit()
 	set_pause("gm_loading_state", false)
 
 func create_game_camera() -> void:
@@ -246,6 +249,8 @@ func save_checkpoint() -> void:
 	checkpoint_save = get_serialized_play_state()
 func load_checkpoint() -> void:
 	if not checkpoint_save:
+		if loaded_level_name and editor_save:
+			load_serialized_play_state(editor_save)
 		return
 	load_serialized_play_state(checkpoint_save)
 func clear_checkpoint() -> void:
@@ -254,15 +259,19 @@ func clear_checkpoint() -> void:
 func save_edited() -> void:
 	print_debug("setting editor_save")
 	editor_save = get_serialized_play_state()
+	clear_checkpoint()
 func load_edited() -> void:
 	load_serialized_play_state(editor_save)
+	clear_checkpoint()
 
 # hack
-func change_level_metadata(new_metadata: Dictionary) -> void:
+func update_saved_level_metadata(new_metadata: Dictionary) -> void:
 	if not loaded_level_name or not editor_save:
 		return
 	
-	editor_save["map"]["metadata"] = new_metadata
+	editor_save["map"]["metadata"] = new_metadata.duplicate_deep()
+	if checkpoint_save:
+		checkpoint_save["map"]["metadata"] = new_metadata.duplicate_deep()
 
 
 func load_level_data(level_data):
@@ -270,14 +279,12 @@ func load_level_data(level_data):
 	editor_save = level_data["state"]
 	load_edited()
 	close_pause_menu()
-	
-	checkpoint_save = editor_save
 
 func try_load_next_level():
 	if not MapManager.has_next_level():
 		return
 	
-	var next_level_name = MapManager.get_next_level_name()
+	var next_level_name = MapManager.get_metadata_value("next_level")
 	var next_level_data = FilesManager.get_level_data(cur_game_name, next_level_name)
 	load_level_data(next_level_data)
 
@@ -384,12 +391,15 @@ func rescale_window() -> void:
 	if window.mode == Window.MODE_FULLSCREEN or window.mode == Window.MODE_MAXIMIZED:
 		return
 	
-	window.size = game_view * MapManager.tile_width * get_default_pixel_scale()
-	
-	# Re-center the window
-	var screen_size = DisplayServer.screen_get_size()
-	@warning_ignore("integer_division")
-	window.position = screen_size/2 - window.size/2 + DisplayServer.screen_get_position()
+	var available_size: Vector2i = DisplayServer.screen_get_usable_rect().size
+	var intended_size: = Vector2(game_view * MapManager.tile_width * get_default_pixel_scale())
+	var decoration_size: = window.get_size_with_decorations() - window.size
+	var intended_with_dec: = intended_size + Vector2(decoration_size)
+	if intended_with_dec.x > available_size.x or intended_with_dec.y > available_size.y:
+		var scale_factor: float = minf(available_size.x / intended_with_dec.x, available_size.y / intended_with_dec.y)
+		intended_size = (intended_with_dec * scale_factor).floor() - Vector2(decoration_size)
+	window.size = Vector2i(intended_size)
+	window.move_to_center()
 
 func toggle_pause_menu():
 	if cur_scene != "Play":
