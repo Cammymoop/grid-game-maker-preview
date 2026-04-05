@@ -1,10 +1,12 @@
 extends Node
 
+const MapLayer = preload("res://src/MapLayer.gd")
+
 signal level_size_changed
 
 var map_layer_template = preload("res://Scenes/MapLayer.tscn")
 
-var layers = []
+var layers: Array = []
 var map_metadata = {}
 
 var blocking_tiles = []
@@ -175,9 +177,6 @@ func serialize() -> Dictionary:
     var serialized_layers = []
     for l in layers:
         serialized_layers.append(l.serialize())
-    
-    prints(map_metadata)
-    prints(map_metadata.duplicate(true))
 
     var serialized_stuff = {"layers": serialized_layers, "metadata": map_metadata.duplicate(true)}
     return serialized_stuff
@@ -192,6 +191,78 @@ func deserialize(data: Dictionary) -> void:
     map_metadata = data.get("metadata", {}).duplicate(true)
     
     emit_signal("level_size_changed")
+
+func create_positioned_property(at_pos: Vector2i, for_tile_index: int) -> Dictionary:
+    if not map_metadata.has("positioned_properties"):
+        map_metadata["positioned_properties"] = {}
+    var on_layer_index: int = -1
+    for i in layers.size():
+        var layer: = layers[i] as MapLayer
+        var index_here: = layer.get_cell_s(at_pos)
+        if index_here != for_tile_index:
+            continue
+        on_layer_index = i
+        break
+    
+    if on_layer_index == -1:
+        #push_warning("Tile index %s not found at position %s to create positioned property for" % [for_tile_index, at_pos])
+        return {}
+    
+    var pos_props: Dictionary = map_metadata["positioned_properties"]
+    if not has_positioned_property_at(at_pos):
+        pos_props[at_pos] = { "layers": {} }
+    var new_pos_prop: Dictionary = {
+        "tile_index": for_tile_index,
+        "local_properties": {},
+    }
+    pos_props[at_pos]["layers"][on_layer_index] = new_pos_prop
+    return new_pos_prop
+
+func has_positioned_property_at(at_pos: Vector2i, for_tile_index: int = -1) -> bool:
+    if not map_metadata.has("positioned_properties"):
+        return false
+    var pos_props: Dictionary = map_metadata["positioned_properties"]
+    if for_tile_index >= 0:
+        var pos_prop: = pos_props.get(at_pos, {}) as Dictionary
+        for layer_pos_prop: Dictionary in pos_prop["layers"].values():
+            if layer_pos_prop["tile_index"] == for_tile_index:
+                return true
+        return false
+    return pos_props.has(at_pos)
+
+func get_positioned_property_at(at_pos: Vector2i, for_tile_index: int) -> Dictionary:
+    if not has_positioned_property_at(at_pos):
+        return {}
+    var pos_prop: = map_metadata["positioned_properties"].get(at_pos, {}) as Dictionary
+    for layer_pos_prop: Dictionary in pos_prop["layers"].values():
+        if layer_pos_prop["tile_index"] == for_tile_index:
+            return layer_pos_prop
+    return {}
+
+func get_or_create_positioned_property_at(at_pos: Vector2i, for_tile_index: int) -> Dictionary:
+    var existing: = get_positioned_property_at(at_pos, for_tile_index)
+    if existing:
+        return existing
+    return create_positioned_property(at_pos, for_tile_index)
+
+func set_positioned_prop_value(at_pos: Vector2i, for_tile_index: int, property_name: String, value: Variant) -> void:
+    var pos_prop: = get_or_create_positioned_property_at(at_pos, for_tile_index)
+    if not pos_prop:
+        # tile index is not at this position
+        return
+    pos_prop["local_properties"][property_name] = value
+
+func get_positioned_prop_value(at_pos: Vector2i, for_tile_index: int, property_name: String) -> Variant:
+    var pos_prop: = get_positioned_property_at(at_pos, for_tile_index)
+    if not pos_prop or not pos_prop["local_properties"].has(property_name):
+        return null
+    return pos_prop["local_properties"][property_name]
+
+func remove_positioned_prop_value(at_pos: Vector2i, for_tile_index: int, property_name: String) -> void:
+    var pos_prop: = get_positioned_property_at(at_pos, for_tile_index)
+    if not pos_prop or not pos_prop["local_properties"].has(property_name):
+        return
+    pos_prop["local_properties"].erase(property_name)
 
 func has_next_level() -> bool:
     var next_level_name = map_metadata.get("next_level", "") as String
@@ -249,7 +320,7 @@ func find_blocking() -> void:
     blocking_tiles = []
     
     for ti in tile_defs:
-        var blocks: = get_tile_property(ti, "blocks")
+        var blocks: = get_tile_index_property(ti, "blocks")
         if blocks and not blocks.is_conditional() and blocks.get_value():
             blocking_tiles.append(ti)
 
@@ -330,25 +401,121 @@ func remove_tile_definition(tile_index) -> void:
     tile_defs.erase(tile_index)
     refresh_definition()
 
-func get_tile_property_at(tile_position, property_name) -> Property:
-    var return_val = null
-    for l in layers:
-        var ti = l.get_cell_s(tile_position)
-        if ti != -1:
-            var tprop = get_tile_property(ti, property_name)
-            if tprop != null:
-                return_val = tprop
-    return return_val
+func check_multiple_pos_for_property_bool(tile_positions: Array, entity_asking: BaseEntity, property_name: String, check_for: bool, is_all: bool = false) -> bool:
+    for pos in tile_positions:
+        var pass_check: = Property.resolve_truthy(get_tile_property_at(pos, property_name), null, entity_asking, pos) == check_for
+        if not is_all and pass_check:
+            return true
+        if is_all and not pass_check:
+            return false
+    # If all, then yes all passed, if any, then no, none passed
+    return is_all
 
-func set_tile_property_at(tile_position, property_name, value) -> void:
-    var tile_ids: Array[int] = []
+func compare_multiple_pos_prop_value(tile_positions: Array, entity_asking: BaseEntity, property_name: String, comparison: String, compare_to: float, is_all: bool = false) -> bool:
+    for pos in tile_positions:
+        var prop: Property = get_tile_property_at(pos, property_name)
+        if not prop:
+            if is_all:
+                return false
+            continue
+        var compare_result: = Utility.check_comparison(prop.get_or_resolve(null, entity_asking, pos), compare_to, comparison)
+        if not is_all and compare_result:
+            return true
+        if is_all and not compare_result:
+            return false
+    # If all, then yes all passed, if any, then no, none passed
+    return is_all
+
+func get_tile_property_at(tile_position: Vector2i, property_name: String) -> Property:
+    var tile_indices: Array[int] = []
     for l in layers:
         var ti = l.get_cell_s(tile_position)
-        if ti != -1:
-            tile_ids.append(ti)
+        if ti != -1 and ti not in tile_indices:
+            tile_indices.append(ti)
+
+    var check_positioned_props: = has_positioned_property_at(tile_position)
+    for ti in tile_indices:
+        var tprop: Property
+        if check_positioned_props:
+            tprop = get_tile_property_for_index_at(tile_position, property_name, ti)
+        else:
+            tprop = get_tile_index_property(ti, property_name)
+        if tprop != null:
+            return tprop
+    return null
+
+func get_tile_property_for_index_at(tile_position: Vector2i, property_name: String, for_index: int) -> Property:
+    var pos_prop: = get_positioned_property_at(tile_position, for_index)
+    if pos_prop and pos_prop["local_properties"].has(property_name):
+        var prop: Property = Property.new()
+        prop.set_value(pos_prop["local_properties"][property_name])
+        prop.set_name(property_name)
+        return prop
+    return get_tile_index_property(for_index, property_name)
+
+func get_tile_index_property(tile_index, property_name) -> Property:
+    var props = tile_defs[tile_index]["properties"]
+    if not property_name in props:
+        return null
+    var property = Property.new()
+    property.set_value(props[property_name])
+    property.set_name(property_name)
+    return property
+
+
+func tile_index_has_property(tile_index: int, property_name: String) -> bool:
+    var tile_index_props: Dictionary = tile_defs[tile_index]["properties"]
+    return property_name in tile_index_props
+
+func any_pos_has_property(tile_positions: Array, property_name: String) -> bool:
+    for pos in tile_positions:
+        for layer in layers:
+            var ti = layer.get_cell_s(pos)
+            if ti == -1:
+                continue
+            if tile_index_has_property(ti, property_name):
+                return true
+    for pos in tile_positions:
+        for layer in layers:
+            var ti = layer.get_cell_s(pos)
+            if ti == -1:
+                continue
+            var pos_prop: = get_positioned_property_at(pos, ti)
+            if pos_prop and pos_prop["local_properties"].has(property_name):
+                return true
+    return false
+
+func remove_tile_property_multiple(tile_positions: Array, property_name: String, for_index: int = -1) -> void:
+    for pos in tile_positions:
+        remove_tile_property_for_all_tiles_at(pos, property_name, for_index)
+
+func remove_tile_property_for_all_tiles_at(at_pos: Vector2i, property_name: String, for_index: int = -1) -> void:
+    for layer in layers:
+        var ti = layer.get_cell_s(at_pos)
+        if ti != -1 and (for_index == -1 or ti == for_index):
+            remove_positioned_prop_value(at_pos, ti, property_name)
+
+func set_tile_property_at_multiple(tile_positions: Array, property_name: String, value: Variant, for_index: int = -1) -> void:
+    for pos in tile_positions:
+        set_tile_property_for_all_tiles_at(pos, property_name, value, for_index)
+
+func set_tile_property_for_all_tiles_at(at_pos: Vector2i, property_name: String, value: Variant, for_index: int = -1) -> void:
+    for layer in layers:
+        var ti = layer.get_cell_s(at_pos)
+        if ti != -1 and (for_index == -1 or ti == for_index):
+            set_positioned_prop_value(at_pos, ti, property_name, value)
+
+func set_tile_property_for_tile_at(at_pos: Vector2i, for_tile_index: int, property_name: String, value: Variant) -> void:
+    if not is_tile_index_at(at_pos, for_tile_index):
+        return
+    set_positioned_prop_value(at_pos, for_tile_index, property_name, value)
     
-    for ti in tile_ids:
-        set_tile_property(ti, property_name, value)
+
+func is_tile_index_at(tile_position, tile_index: int) -> bool:
+    for l in layers:
+        if l.get_cell_s(tile_position) == tile_index:
+            return true
+    return false
 
 func get_tile_index_at(tile_position) -> int:
     var tile_index = -1
@@ -358,18 +525,9 @@ func get_tile_index_at(tile_position) -> int:
             tile_index = ti
     return tile_index
 
-func get_tile_property(tile_index, property_name) -> Property:
-    var props = tile_defs[tile_index]["properties"]
-    if not property_name in props:
-        return null
-    var property = Property.new()
-    property.set_value(props[property_name])
-    property.set_name(property_name)
-    return property
-
-func set_tile_property(tile_index, property_name, value) -> void:
-    var props = tile_defs[tile_index]["properties"]
-    props[property_name] = value
+#func set_tile_property(tile_index, property_name, value) -> void:
+    #var props = tile_defs[tile_index]["properties"]
+    #props[property_name] = value
 
 func can_move_to(entity, tile_position) -> bool:
     if not EntityManager.can_move_to(entity, tile_position):
@@ -382,7 +540,7 @@ func check_blocks(entity, tile_position) -> bool:
         var tile_here = layer.get_cell_s(tile_position)
         if tile_here == -1 or tile_here in blocking_tiles:
             return false
-        var blocks_conditional: = get_tile_property(tile_here, "blocks")
+        var blocks_conditional: = get_tile_index_property(tile_here, "blocks")
         if blocks_conditional and blocks_conditional.is_conditional():
             var result = blocks_conditional.resolve(null, entity, tile_position)
             if result:
@@ -410,10 +568,17 @@ func finish_move(moving_entity, onto_positions: Array) -> void:
     
     resolve_tile_event(onto_positions, "finish_move_onto_tile", moving_entity)
 
+# Resolve tile event for every tile index that exists at all locations provided
+# (Only once per index-position pair)
 func resolve_tile_event(at_tile_positions: Array, tile_event_name: String, context_entity) -> void:
-    for l in layers:
-        for at_pos in at_tile_positions:
-            var event_property: = get_tile_property(l.get_cell_s(at_pos), tile_event_name)
+    for at_pos in at_tile_positions:
+        var resolved_indices: Array[int] = []
+        for l in layers:
+            var ti = l.get_cell_s(at_pos)
+            if ti in resolved_indices:
+                continue
+            resolved_indices.append(ti)
+            var event_property: = get_tile_property_for_index_at(at_pos, tile_event_name, ti)
             if event_property and event_property.is_conditional():
                 event_property.resolve(null, context_entity, at_pos)
 

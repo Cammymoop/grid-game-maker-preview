@@ -7,6 +7,14 @@ var property_name = ""
 var use_conditionalv2 = true
 var use_conditionalv3 = true
 
+static func resolve_truthy(the_prop: Property, owner, target, tile_position, args=[]) -> bool:
+	if not the_prop or not the_prop.is_conditional():
+		return the_prop and the_prop.get_value()
+	var resolve_result = the_prop.resolve(owner, target, tile_position, args)
+	if resolve_result:
+		return true
+	return false
+
 func get_value():
 	if is_conditional():
 		return null
@@ -21,6 +29,11 @@ func set_name(prop_name) -> void:
 func set_value(value) -> void:
 	internal_value = value
 
+func get_or_resolve(owner, target, tile_position, args=[]):
+	if is_conditional():
+		return resolve(owner, target, tile_position, args)
+	else:
+		return get_value()
 # When resolving array of conditionals, returns the result of the last one
 func resolve(owner, target, tile_position, args=[]):
 	if not is_conditional():

@@ -52,10 +52,10 @@ func cmd_c_has_property(slots: Dictionary, chosen_slot: int, invert: bool, prope
 	if Commands.slot_is_entity(chosen_slot):
 		result = EntityManager.entity_has_property(selected, property_name)
 	else:
-		if not selected or len(selected) < 1:
+		if not selected:
 			result = false
 		else:
-			result = MapManager.get_tile_property_at(selected[0], property_name) != null
+			result = MapManager.any_pos_has_property(selected, property_name)
 	return not result if invert else result
 
 func desc_c_is_named() -> String:
@@ -133,13 +133,15 @@ func cmd_a_set_tiles(slots: Dictionary, chosen_slot: int, tile_name: String) -> 
 	MapManager.replace_tiles_at_array(slots[chosen_slot], MapManager.get_tile_index(tile_name))
 
 func desc_a_set_property() -> String:
-	return "entity|Set the entity's [property_name:PropertyInput] property to [value:ValueInput]"
+	return "entity,pos|Set the entity or tile's [property_name:PropertyInput] property to [value:ValueInput]"
 func cmd_a_set_property(slots: Dictionary, chosen_slot: int, property_name: String, value: Variant) -> void:
 	if Commands.slot_is_entity(chosen_slot):
-		slots[chosen_slot].set_local_property(property_name, value)
+		if slots[chosen_slot]:
+			slots[chosen_slot].set_local_property(property_name, value)
 	elif Commands.slot_is_positions(chosen_slot):
-		for pos in slots[chosen_slot]:
-			MapManager.set_tile_property_at(pos, property_name, value)
+		var positions: Array = slots[chosen_slot]
+		if positions.size() > 0:
+			MapManager.set_tile_property_at_multiple(positions, property_name, value)
 
 func desc_a_property_add() -> String:
 	return "entity|Add [amount:ValueInput] to the entity's [property_name:PropertyInput] property"
@@ -167,10 +169,15 @@ func cmd_a_property_subtract(slots: Dictionary, chosen_slot: int, property_name:
 			selected.set_local_property(property_name, new_val)
 
 func desc_a_remove_property() -> String:
-	return "entity|Remove the entity's [property_name:PropertyInput] property"
+	return "entity,pos|Remove the entity or tile's [property_name:PropertyInput] property"
 func cmd_a_remove_property(slots: Dictionary, chosen_slot: int, property_name: String) -> void:
 	if Commands.slot_is_entity(chosen_slot):
-		slots[chosen_slot].remove_local_property(property_name)
+		if slots[chosen_slot]:
+			slots[chosen_slot].remove_local_property(property_name)
+	elif Commands.slot_is_positions(chosen_slot):
+		var positions: Array = slots[chosen_slot]
+		if positions.size() > 0:
+			MapManager.remove_tile_property_multiple(positions, property_name)
 
 func desc_a_save_checkpoint() -> String:
 	return "none|Save the current state as a checkpoint"
@@ -238,11 +245,5 @@ func cmd_compare_property(slots: Dictionary, chosen_slot: int, property_name: St
 				number_result = float(prop.get_value())
 			return Utility.check_comparison(number_result, float(value), comparison)
 	elif Commands.slot_is_positions(chosen_slot) and selected:
-		var prop: Property = MapManager.get_tile_property_at(selected[0], property_name)
-		var number_result = 0
-		if prop.is_conditional():
-			number_result = float(prop.resolve(null, slots[Slot.RED], selected[0]))
-		else:
-			number_result = float(prop.get_value())
-		return Utility.check_comparison(number_result, float(value), comparison)
+		return MapManager.compare_multiple_pos_prop_value(selected, slots[Slot.RED], property_name, comparison, float(value))
 	return false

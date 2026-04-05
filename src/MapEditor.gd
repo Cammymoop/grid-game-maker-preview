@@ -192,6 +192,8 @@ func _place(holding=false):
 		# remove existing entities of the same index
 		for e in entities_here:
 			if e.entity_index == current_entity_index:
+				if EntityManager.get_entity_prop_with_default(e, "edit_place_multiple", false):
+					continue
 				EntityManager.remove_entity(e)
 		EntityManager.create_entity(current_entity_index, cursor_tile_pos, current_entity_facing)
 	elif placing == "delete":
