@@ -110,11 +110,11 @@ func cmd_a_die(slots: Dictionary, chosen_slot: int) -> void:
 		slots[chosen_slot].die()
 
 func desc_a_move() -> String:
-	return "entity|The entity starts moving this way [direction:DirectionInput]"
-func cmd_a_move(slots: Dictionary, chosen_slot: int, direction: int) -> void:
+	return "entity|The entity starts moving this way [direction:DirectionInput:1]"
+func cmd_a_move(slots: Dictionary, chosen_slot: int, complex_dir: Dictionary) -> void:
 	if Commands.slot_is_entity(chosen_slot):
 		var selected = slots[chosen_slot]
-		selected.start_move(resolve_direction_value(direction, slots))
+		selected.start_move(resolve_complex_direction(complex_dir, slots))
 
 func desc_a_swap_tiles() -> String:
 	return "pos|Swap the tiles here, switching [a_name:TileNameInput] and [b_name:TileNameInput]"
@@ -201,12 +201,12 @@ func cmd_a_create_entity(slots: Dictionary, chosen_slot: int, entity_name: Strin
 			new_entity.start_move(facing)
 
 func desc_a_turn() -> String:
-	return "entity|Turn the entity to face this way [direction:DirectionInput]"
-func cmd_a_turn(slots: Dictionary, chosen_slot: int, direction: int) -> void:
+	return "entity|Turn the entity/tile to face this way [direction:DirectionInput:1]"
+func cmd_a_turn(slots: Dictionary, chosen_slot: int, complex_dir: Dictionary) -> void:
 	if Commands.slot_is_entity(chosen_slot):
-		slots[chosen_slot].turn_to_facing(resolve_direction_value(direction, slots))
+		slots[chosen_slot].turn_to_facing(resolve_complex_direction(complex_dir, slots))
 	elif Commands.slot_is_positions(chosen_slot):
-		set_tiles_to_facing(slots, chosen_slot, resolve_direction_value(direction, slots))
+		set_tiles_to_facing(slots, chosen_slot, resolve_complex_direction(complex_dir, slots))
 
 func desc_next_level_exists() -> String:
 	return "none|If the next level exists"
