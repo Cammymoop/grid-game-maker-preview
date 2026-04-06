@@ -6,13 +6,15 @@ const SLOT_SHIFT = 4
 
 const DIRECTION_ONLY = 3
 
-var absolute = true
+@export var is_reference_position: bool = false
+
+var is_absolute_mode: = true
 
 var arg_name: String = ""
 
 func _ready():
 	$AbsoluteModeSelect.set_items(["Absolute", "Relative to"])
-	$AbsoluteModeSelect.connect("changed", Callable(self, "absolute_changed"))
+	$AbsoluteModeSelect.changed.connect(absolute_changed)
 	$EntityRelativeMode.set_items(["Moving", "Facing"])
 	
 	$SlotSelectorButton.set_valid_slot_categories(["entity", "pos"])
@@ -24,17 +26,44 @@ func set_arg_name(new_arg_name: String) -> void:
 func get_arg_name() -> String:
 	return arg_name
 
+func set_input_args(new_args: Array) -> void:
+	if not new_args:
+		return
+	if new_args[0]:
+		is_reference_position = true
+	else:
+		is_reference_position = false
+
 # Return all the info about the selected direction and relativeness as a single int value
-func get_value():
-	var value: int = $DirectionSelectorButton.current_direction
+func get_value() -> Variant:
+	if not is_reference_position:
+		return get_int_value()
+	else:
+		return get_complex_value()
+
+func get_int_value() -> int:
+	var value: int = $DirectionSelectorButton.get_direction()
+	return _relativify(value)
+
+func get_complex_value() -> Dictionary:
+	var value: int = $DirectionSelectorButton.get_direction()
+	var slot_id: int = $DirectionSelectorButton.get_slot_id()
+	if slot_id == -1:
+		return {"type": "plain", "direction": value}
+	else:
+		return {"type": "slot_reference", "slot_id": slot_id, "direction": _relativify(0)}
+
+func _relativify(plain_value: int) -> int:
 	var slot_id: int = $SlotSelectorButton.current_slot_id
 	var is_tile_pos: bool = Commands.slot_is_positions(slot_id)
-	if not absolute:
-		value = value | RELATIVE_BIT
+	var modified_value: int = plain_value
+	if not is_absolute_mode:
+		modified_value = modified_value | RELATIVE_BIT
 		if not is_tile_pos and $EntityRelativeMode.selected_value == "Facing":
-			value = value | RELATIVE_MODE_BIT
-		value = value | (slot_id << SLOT_SHIFT)
-	return value
+			modified_value = modified_value | RELATIVE_MODE_BIT
+		modified_value = modified_value | (slot_id << SLOT_SHIFT)
+	return modified_value
+
 
 func set_value(new_val) -> void:
 	new_val = int(new_val)
@@ -53,12 +82,12 @@ func absolute_changed(new_value: String) -> void:
 	if new_value == "Absolute":
 		$SlotSelectorButton.visible = false
 		$EntityRelativeMode.visible = false
-		absolute = true
+		is_absolute_mode = true
 		$DirectionSelectorButton.show_absolute()
 	else:
 		$SlotSelectorButton.visible = true
 		$EntityRelativeMode.visible = true
-		absolute = false
+		is_absolute_mode = false
 		$DirectionSelectorButton.show_relative()
 
 func slot_changed(_new_slot_id: int) -> void:

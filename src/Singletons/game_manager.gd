@@ -159,6 +159,11 @@ func get_game_setting(setting_name, default):
 		return default
 	return game_definition["game_settings"].get(setting_name, default)
 
+func set_game_setting(setting_name: String, value: Variant) -> void:
+	if not "game_settings" in game_definition:
+		game_definition["game_settings"] = {}
+	game_definition["game_settings"][setting_name] = value
+
 func get_default_pixel_scale() -> float:
 	return get_game_setting("pixel_scale", 1)
 

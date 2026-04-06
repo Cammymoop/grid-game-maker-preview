@@ -6,6 +6,9 @@
 [ext_resource type="PackedScene" path="res://Scenes/UI/ButtonContainer.tscn" id="4"]
 [ext_resource type="Script" uid="uid://bojqxahvyrs2k" path="res://src/GameEditor/DirectionSelectorButton.gd" id="5"]
 [ext_resource type="Texture2D" uid="uid://ffxpksyt1x1d" path="res://assets/img/button_icons/direction_icons/down.png" id="6"]
+[ext_resource type="Texture2D" uid="uid://ccjgplwhqsyrh" path="res://assets/img/button_icons/slot_icons/A.png" id="7_bbnla"]
+[ext_resource type="Texture2D" uid="uid://c6g7hfr7ktmki" path="res://assets/img/button_icons/slot_icons/B.png" id="8_pp85q"]
+[ext_resource type="Texture2D" uid="uid://cj15rcxrpom7t" path="res://assets/img/button_icons/slot_icons/C.png" id="9_yl608"]
 
 [sub_resource type="StyleBoxFlat" id="1"]
 bg_color = Color(0.0901961, 0.0901961, 0.168627, 1)
@@ -19,90 +22,144 @@ expand_margin_right = 4.0
 expand_margin_bottom = 4.0
 
 [node name="DirectionSelectorButton" type="CenterContainer" unique_id=1325026885]
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -384.0
-offset_top = -384.0
-offset_right = 384.0
-offset_bottom = 384.0
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 script = ExtResource("5")
 
 [node name="PopupPicker" type="PopupPanel" parent="." unique_id=402108247]
 oversampling_override = 1.0
+size = Vector2i(72, 112)
 
 [node name="PopupPickerPanel" type="PanelContainer" parent="PopupPicker" unique_id=102246391]
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
 offset_left = 4.0
 offset_top = 4.0
-offset_right = 96.0
-offset_bottom = 96.0
+offset_right = -4.0
+offset_bottom = -4.0
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_styles/panel = SubResource("1")
 
-[node name="VBoxContainer" type="VBoxContainer" parent="PopupPicker/PopupPickerPanel" unique_id=1136173802]
+[node name="MarginContainer" type="MarginContainer" parent="PopupPicker/PopupPickerPanel" unique_id=1526014761]
+layout_mode = 2
+theme_override_constants/margin_left = 2
+theme_override_constants/margin_top = 4
+theme_override_constants/margin_right = 2
+theme_override_constants/margin_bottom = 8
+
+[node name="HBoxContainer" type="HBoxContainer" parent="PopupPicker/PopupPickerPanel/MarginContainer" unique_id=293744500]
+layout_mode = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="PopupPicker/PopupPickerPanel/MarginContainer/HBoxContainer" unique_id=1136173802]
+layout_mode = 2
+size_flags_horizontal = 4
+alignment = 1
+
+[node name="PickUp" parent="PopupPicker/PopupPickerPanel/MarginContainer/HBoxContainer/VBoxContainer" unique_id=878660069 instance=ExtResource("4")]
 layout_mode = 2
 size_flags_horizontal = 4
 
-[node name="PickUp" parent="PopupPicker/PopupPickerPanel/VBoxContainer" unique_id=878660069 instance=ExtResource("4")]
-layout_mode = 2
-size_flags_horizontal = 4
-
-[node name="CenterContainer" type="CenterContainer" parent="PopupPicker/PopupPickerPanel/VBoxContainer/PickUp" unique_id=1463508046]
+[node name="CenterContainer" type="CenterContainer" parent="PopupPicker/PopupPickerPanel/MarginContainer/HBoxContainer/VBoxContainer/PickUp" unique_id=1463508046]
 layout_mode = 2
 mouse_filter = 2
 
-[node name="Icon" type="TextureRect" parent="PopupPicker/PopupPickerPanel/VBoxContainer/PickUp/CenterContainer" unique_id=1233394461]
+[node name="Icon" type="TextureRect" parent="PopupPicker/PopupPickerPanel/MarginContainer/HBoxContainer/VBoxContainer/PickUp/CenterContainer" unique_id=1233394461]
 layout_mode = 2
 mouse_filter = 2
 texture = ExtResource("1")
 
-[node name="HBoxContainer" type="HBoxContainer" parent="PopupPicker/PopupPickerPanel/VBoxContainer" unique_id=1125896665]
+[node name="HBoxContainer" type="HBoxContainer" parent="PopupPicker/PopupPickerPanel/MarginContainer/HBoxContainer/VBoxContainer" unique_id=1125896665]
 layout_mode = 2
 
-[node name="PickLeft" parent="PopupPicker/PopupPickerPanel/VBoxContainer/HBoxContainer" unique_id=1204615929 instance=ExtResource("4")]
+[node name="PickLeft" parent="PopupPicker/PopupPickerPanel/MarginContainer/HBoxContainer/VBoxContainer/HBoxContainer" unique_id=1204615929 instance=ExtResource("4")]
 layout_mode = 2
 
-[node name="CenterContainer" type="CenterContainer" parent="PopupPicker/PopupPickerPanel/VBoxContainer/HBoxContainer/PickLeft" unique_id=1844428562]
+[node name="CenterContainer" type="CenterContainer" parent="PopupPicker/PopupPickerPanel/MarginContainer/HBoxContainer/VBoxContainer/HBoxContainer/PickLeft" unique_id=1844428562]
 layout_mode = 2
 mouse_filter = 2
 
-[node name="Icon" type="TextureRect" parent="PopupPicker/PopupPickerPanel/VBoxContainer/HBoxContainer/PickLeft/CenterContainer" unique_id=657691281]
+[node name="Icon" type="TextureRect" parent="PopupPicker/PopupPickerPanel/MarginContainer/HBoxContainer/VBoxContainer/HBoxContainer/PickLeft/CenterContainer" unique_id=657691281]
 layout_mode = 2
 mouse_filter = 2
 texture = ExtResource("3")
 
-[node name="PickRight" parent="PopupPicker/PopupPickerPanel/VBoxContainer/HBoxContainer" unique_id=1846147964 instance=ExtResource("4")]
+[node name="PickRight" parent="PopupPicker/PopupPickerPanel/MarginContainer/HBoxContainer/VBoxContainer/HBoxContainer" unique_id=1846147964 instance=ExtResource("4")]
 layout_mode = 2
 
-[node name="CenterContainer" type="CenterContainer" parent="PopupPicker/PopupPickerPanel/VBoxContainer/HBoxContainer/PickRight" unique_id=1404742619]
+[node name="CenterContainer" type="CenterContainer" parent="PopupPicker/PopupPickerPanel/MarginContainer/HBoxContainer/VBoxContainer/HBoxContainer/PickRight" unique_id=1404742619]
 layout_mode = 2
 mouse_filter = 2
 
-[node name="Icon" type="TextureRect" parent="PopupPicker/PopupPickerPanel/VBoxContainer/HBoxContainer/PickRight/CenterContainer" unique_id=520072092]
+[node name="Icon" type="TextureRect" parent="PopupPicker/PopupPickerPanel/MarginContainer/HBoxContainer/VBoxContainer/HBoxContainer/PickRight/CenterContainer" unique_id=520072092]
 layout_mode = 2
 mouse_filter = 2
 texture = ExtResource("2")
 
-[node name="PickDown" parent="PopupPicker/PopupPickerPanel/VBoxContainer" unique_id=383071369 instance=ExtResource("4")]
+[node name="PickDown" parent="PopupPicker/PopupPickerPanel/MarginContainer/HBoxContainer/VBoxContainer" unique_id=383071369 instance=ExtResource("4")]
 layout_mode = 2
 size_flags_horizontal = 4
 
-[node name="CenterContainer" type="CenterContainer" parent="PopupPicker/PopupPickerPanel/VBoxContainer/PickDown" unique_id=1988780245]
+[node name="CenterContainer" type="CenterContainer" parent="PopupPicker/PopupPickerPanel/MarginContainer/HBoxContainer/VBoxContainer/PickDown" unique_id=1988780245]
 layout_mode = 2
 mouse_filter = 2
 
-[node name="Icon" type="TextureRect" parent="PopupPicker/PopupPickerPanel/VBoxContainer/PickDown/CenterContainer" unique_id=2125363711]
+[node name="Icon" type="TextureRect" parent="PopupPicker/PopupPickerPanel/MarginContainer/HBoxContainer/VBoxContainer/PickDown/CenterContainer" unique_id=2125363711]
 layout_mode = 2
 mouse_filter = 2
 texture = ExtResource("6")
+
+[node name="SlotSeparator" type="VSeparator" parent="PopupPicker/PopupPickerPanel/MarginContainer/HBoxContainer" unique_id=1011625860]
+visible = false
+layout_mode = 2
+
+[node name="SlotsList" type="VBoxContainer" parent="PopupPicker/PopupPickerPanel/MarginContainer/HBoxContainer" unique_id=1489833546]
+visible = false
+layout_mode = 2
+alignment = 1
+
+[node name="PickA" parent="PopupPicker/PopupPickerPanel/MarginContainer/HBoxContainer/SlotsList" unique_id=482954381 instance=ExtResource("4")]
+layout_mode = 2
+size_flags_horizontal = 4
+
+[node name="CenterContainer" type="CenterContainer" parent="PopupPicker/PopupPickerPanel/MarginContainer/HBoxContainer/SlotsList/PickA" unique_id=1141065433]
+layout_mode = 2
+mouse_filter = 2
+
+[node name="Icon" type="TextureRect" parent="PopupPicker/PopupPickerPanel/MarginContainer/HBoxContainer/SlotsList/PickA/CenterContainer" unique_id=1950064279]
+layout_mode = 2
+mouse_filter = 2
+texture = ExtResource("7_bbnla")
+
+[node name="PickB" parent="PopupPicker/PopupPickerPanel/MarginContainer/HBoxContainer/SlotsList" unique_id=155799058 instance=ExtResource("4")]
+layout_mode = 2
+size_flags_horizontal = 4
+
+[node name="CenterContainer" type="CenterContainer" parent="PopupPicker/PopupPickerPanel/MarginContainer/HBoxContainer/SlotsList/PickB" unique_id=193470598]
+layout_mode = 2
+mouse_filter = 2
+
+[node name="Icon" type="TextureRect" parent="PopupPicker/PopupPickerPanel/MarginContainer/HBoxContainer/SlotsList/PickB/CenterContainer" unique_id=2012029123]
+layout_mode = 2
+mouse_filter = 2
+texture = ExtResource("8_pp85q")
+
+[node name="PickC" parent="PopupPicker/PopupPickerPanel/MarginContainer/HBoxContainer/SlotsList" unique_id=155893870 instance=ExtResource("4")]
+layout_mode = 2
+size_flags_horizontal = 4
+
+[node name="CenterContainer" type="CenterContainer" parent="PopupPicker/PopupPickerPanel/MarginContainer/HBoxContainer/SlotsList/PickC" unique_id=853199572]
+layout_mode = 2
+mouse_filter = 2
+
+[node name="Icon" type="TextureRect" parent="PopupPicker/PopupPickerPanel/MarginContainer/HBoxContainer/SlotsList/PickC/CenterContainer" unique_id=377870758]
+layout_mode = 2
+mouse_filter = 2
+texture = ExtResource("9_yl608")
 
 [node name="ButtonContainer" parent="." unique_id=979041800 instance=ExtResource("4")]
 layout_mode = 2
@@ -116,87 +173,11 @@ layout_mode = 2
 mouse_filter = 2
 texture = ExtResource("1")
 
-[node name="Control" type="Control" parent="ButtonContainer/CenterContainer" unique_id=736187641]
-layout_mode = 2
-
-[node name="RemoteTransform2D" type="RemoteTransform2D" parent="ButtonContainer/CenterContainer/Control" unique_id=2005472189]
-remote_path = NodePath("../../../../CanvasLayer/Node2D")
-
-[node name="CanvasLayer" type="CanvasLayer" parent="." unique_id=870204380]
-layer = 4
-
-[node name="Node2D" type="Node2D" parent="CanvasLayer" unique_id=1828705285]
-position = Vector2(384, 384)
-
-[node name="PopupPicker_" type="PanelContainer" parent="CanvasLayer/Node2D" unique_id=447415544]
-visible = false
-grow_horizontal = 2
-grow_vertical = 2
-theme_override_styles/panel = SubResource("1")
-
-[node name="VBoxContainer" type="VBoxContainer" parent="CanvasLayer/Node2D/PopupPicker_" unique_id=1729292860]
-layout_mode = 2
-size_flags_horizontal = 4
-
-[node name="PickUp" parent="CanvasLayer/Node2D/PopupPicker_/VBoxContainer" unique_id=968823073 instance=ExtResource("4")]
-layout_mode = 2
-size_flags_horizontal = 4
-
-[node name="CenterContainer" type="CenterContainer" parent="CanvasLayer/Node2D/PopupPicker_/VBoxContainer/PickUp" unique_id=1496680379]
-layout_mode = 2
-mouse_filter = 2
-
-[node name="Icon" type="TextureRect" parent="CanvasLayer/Node2D/PopupPicker_/VBoxContainer/PickUp/CenterContainer" unique_id=605086977]
-layout_mode = 2
-mouse_filter = 2
-texture = ExtResource("1")
-
-[node name="HBoxContainer" type="HBoxContainer" parent="CanvasLayer/Node2D/PopupPicker_/VBoxContainer" unique_id=1241525389]
-layout_mode = 2
-
-[node name="PickLeft" parent="CanvasLayer/Node2D/PopupPicker_/VBoxContainer/HBoxContainer" unique_id=1280291563 instance=ExtResource("4")]
-layout_mode = 2
-
-[node name="CenterContainer" type="CenterContainer" parent="CanvasLayer/Node2D/PopupPicker_/VBoxContainer/HBoxContainer/PickLeft" unique_id=1871856769]
-layout_mode = 2
-mouse_filter = 2
-
-[node name="Icon" type="TextureRect" parent="CanvasLayer/Node2D/PopupPicker_/VBoxContainer/HBoxContainer/PickLeft/CenterContainer" unique_id=605397855]
-layout_mode = 2
-mouse_filter = 2
-texture = ExtResource("3")
-
-[node name="PickRight" parent="CanvasLayer/Node2D/PopupPicker_/VBoxContainer/HBoxContainer" unique_id=1067940046 instance=ExtResource("4")]
-layout_mode = 2
-
-[node name="CenterContainer" type="CenterContainer" parent="CanvasLayer/Node2D/PopupPicker_/VBoxContainer/HBoxContainer/PickRight" unique_id=685413950]
-layout_mode = 2
-mouse_filter = 2
-
-[node name="Icon" type="TextureRect" parent="CanvasLayer/Node2D/PopupPicker_/VBoxContainer/HBoxContainer/PickRight/CenterContainer" unique_id=1186682311]
-layout_mode = 2
-mouse_filter = 2
-texture = ExtResource("2")
-
-[node name="PickDown" parent="CanvasLayer/Node2D/PopupPicker_/VBoxContainer" unique_id=2098720939 instance=ExtResource("4")]
-layout_mode = 2
-size_flags_horizontal = 4
-
-[node name="CenterContainer" type="CenterContainer" parent="CanvasLayer/Node2D/PopupPicker_/VBoxContainer/PickDown" unique_id=210738993]
-layout_mode = 2
-mouse_filter = 2
-
-[node name="Icon" type="TextureRect" parent="CanvasLayer/Node2D/PopupPicker_/VBoxContainer/PickDown/CenterContainer" unique_id=521769992]
-layout_mode = 2
-mouse_filter = 2
-texture = ExtResource("6")
-
-[connection signal="pressed" from="PopupPicker/PopupPickerPanel/VBoxContainer/PickUp" to="." method="_on_DirectionSelected" binds= ["up"]]
-[connection signal="pressed" from="PopupPicker/PopupPickerPanel/VBoxContainer/HBoxContainer/PickLeft" to="." method="_on_DirectionSelected" binds= ["left"]]
-[connection signal="pressed" from="PopupPicker/PopupPickerPanel/VBoxContainer/HBoxContainer/PickRight" to="." method="_on_DirectionSelected" binds= ["right"]]
-[connection signal="pressed" from="PopupPicker/PopupPickerPanel/VBoxContainer/PickDown" to="." method="_on_DirectionSelected" binds= ["down"]]
+[connection signal="pressed" from="PopupPicker/PopupPickerPanel/MarginContainer/HBoxContainer/VBoxContainer/PickUp" to="." method="_on_DirectionSelected" binds= ["up"]]
+[connection signal="pressed" from="PopupPicker/PopupPickerPanel/MarginContainer/HBoxContainer/VBoxContainer/HBoxContainer/PickLeft" to="." method="_on_DirectionSelected" binds= ["left"]]
+[connection signal="pressed" from="PopupPicker/PopupPickerPanel/MarginContainer/HBoxContainer/VBoxContainer/HBoxContainer/PickRight" to="." method="_on_DirectionSelected" binds= ["right"]]
+[connection signal="pressed" from="PopupPicker/PopupPickerPanel/MarginContainer/HBoxContainer/VBoxContainer/PickDown" to="." method="_on_DirectionSelected" binds= ["down"]]
+[connection signal="pressed" from="PopupPicker/PopupPickerPanel/MarginContainer/HBoxContainer/SlotsList/PickA" to="." method="_on_DirectionSelected" binds= ["A"]]
+[connection signal="pressed" from="PopupPicker/PopupPickerPanel/MarginContainer/HBoxContainer/SlotsList/PickB" to="." method="_on_DirectionSelected" binds= ["B"]]
+[connection signal="pressed" from="PopupPicker/PopupPickerPanel/MarginContainer/HBoxContainer/SlotsList/PickC" to="." method="_on_DirectionSelected" binds= ["C"]]
 [connection signal="pressed" from="ButtonContainer" to="." method="_on_ButtonContainer_pressed"]
-[connection signal="pressed" from="CanvasLayer/Node2D/PopupPicker_/VBoxContainer/PickUp" to="." method="_on_DirectionSelected" binds= ["up"]]
-[connection signal="pressed" from="CanvasLayer/Node2D/PopupPicker_/VBoxContainer/HBoxContainer/PickLeft" to="." method="_on_DirectionSelected" binds= ["left"]]
-[connection signal="pressed" from="CanvasLayer/Node2D/PopupPicker_/VBoxContainer/HBoxContainer/PickRight" to="." method="_on_DirectionSelected" binds= ["right"]]
-[connection signal="pressed" from="CanvasLayer/Node2D/PopupPicker_/VBoxContainer/PickDown" to="." method="_on_DirectionSelected" binds= ["down"]]

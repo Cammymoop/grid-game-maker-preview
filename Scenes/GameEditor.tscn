@@ -61,28 +61,31 @@ script = ExtResource("10")
 layout_mode = 2
 theme = ExtResource("3_qrjoe")
 current_tab = 0
+tab_0/title = "Game"
 
-[node name="Game" type="VBoxContainer" parent="MarginContainer/UIRoot/TabContainer" unique_id=1146228055]
+[node name="GameDefinition" type="VBoxContainer" parent="MarginContainer/UIRoot/TabContainer" unique_id=1146228055 node_paths=PackedStringArray("show_level_title_option_picker")]
 layout_mode = 2
 script = ExtResource("6")
+show_level_title_option_picker = NodePath("ScrollContainer/VBoxContainer/HBoxContainer11/OptionButton")
 metadata/_tab_index = 0
+metadata/_tab_name = "Game"
 
-[node name="ScrollContainer" type="ScrollContainer" parent="MarginContainer/UIRoot/TabContainer/Game" unique_id=867284119]
+[node name="ScrollContainer" type="ScrollContainer" parent="MarginContainer/UIRoot/TabContainer/GameDefinition" unique_id=867284119]
 layout_mode = 2
 size_flags_vertical = 3
 follow_focus = true
 scroll_hint_mode = 1
 
-[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/UIRoot/TabContainer/Game/ScrollContainer" unique_id=1512902127]
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer" unique_id=1512902127]
 layout_mode = 2
 size_flags_horizontal = 6
 size_flags_vertical = 3
 
-[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/UIRoot/TabContainer/Game/ScrollContainer/VBoxContainer" unique_id=673726693]
+[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer" unique_id=673726693]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="Label" type="Label" parent="MarginContainer/UIRoot/TabContainer/Game/ScrollContainer/VBoxContainer/HBoxContainer" unique_id=651129406]
+[node name="Label" type="Label" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer/HBoxContainer" unique_id=651129406]
 custom_minimum_size = Vector2(0, 28)
 layout_mode = 2
 size_flags_horizontal = 3
@@ -91,15 +94,15 @@ text = "Game Name:"
 horizontal_alignment = 2
 vertical_alignment = 1
 
-[node name="NameInput" type="LineEdit" parent="MarginContainer/UIRoot/TabContainer/Game/ScrollContainer/VBoxContainer/HBoxContainer" unique_id=1146516637]
+[node name="NameInput" type="LineEdit" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer/HBoxContainer" unique_id=1146516637]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="HBoxContainer10" type="HBoxContainer" parent="MarginContainer/UIRoot/TabContainer/Game/ScrollContainer/VBoxContainer" unique_id=2137570543]
+[node name="HBoxContainer10" type="HBoxContainer" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer" unique_id=2137570543]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="Label" type="Label" parent="MarginContainer/UIRoot/TabContainer/Game/ScrollContainer/VBoxContainer/HBoxContainer10" unique_id=1061104694]
+[node name="Label" type="Label" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer/HBoxContainer10" unique_id=1061104694]
 custom_minimum_size = Vector2(0, 28)
 layout_mode = 2
 size_flags_horizontal = 3
@@ -108,175 +111,194 @@ text = "Game Title:"
 horizontal_alignment = 2
 vertical_alignment = 1
 
-[node name="TitleInput" type="LineEdit" parent="MarginContainer/UIRoot/TabContainer/Game/ScrollContainer/VBoxContainer/HBoxContainer10" unique_id=1204018705]
+[node name="TitleInput" type="LineEdit" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer/HBoxContainer10" unique_id=1204018705]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="HSeparator" type="HSeparator" parent="MarginContainer/UIRoot/TabContainer/Game/ScrollContainer/VBoxContainer" unique_id=1372894110]
+[node name="HSeparator" type="HSeparator" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer" unique_id=1372894110]
 layout_mode = 2
 theme_override_styles/separator = ExtResource("4")
 
-[node name="HBoxContainer9" type="HBoxContainer" parent="MarginContainer/UIRoot/TabContainer/Game/ScrollContainer/VBoxContainer" unique_id=761041775]
+[node name="HBoxContainer9" type="HBoxContainer" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer" unique_id=761041775]
 layout_mode = 2
 alignment = 2
 
-[node name="Label" type="Label" parent="MarginContainer/UIRoot/TabContainer/Game/ScrollContainer/VBoxContainer/HBoxContainer9" unique_id=1347001610]
+[node name="Label" type="Label" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer/HBoxContainer9" unique_id=1347001610]
 layout_mode = 2
 text = "Movement Mode:"
 
-[node name="MovementModeMenuButton" type="MenuButton" parent="MarginContainer/UIRoot/TabContainer/Game/ScrollContainer/VBoxContainer/HBoxContainer9" unique_id=1152217431]
+[node name="MovementModeMenuButton" type="MenuButton" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer/HBoxContainer9" unique_id=1152217431]
 custom_minimum_size = Vector2(160, 30)
 layout_mode = 2
 text = "Continuous"
 flat = false
 
-[node name="HSeparator3" type="HSeparator" parent="MarginContainer/UIRoot/TabContainer/Game/ScrollContainer/VBoxContainer" unique_id=94997323]
-layout_mode = 2
-theme_override_styles/separator = ExtResource("4")
-
-[node name="HBoxContainer3" type="HBoxContainer" parent="MarginContainer/UIRoot/TabContainer/Game/ScrollContainer/VBoxContainer" unique_id=55029724]
+[node name="HBoxContainer11" type="HBoxContainer" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer" unique_id=1380201629]
 layout_mode = 2
 alignment = 2
 
-[node name="Label" type="Label" parent="MarginContainer/UIRoot/TabContainer/Game/ScrollContainer/VBoxContainer/HBoxContainer3" unique_id=674785261]
+[node name="Label" type="Label" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer/HBoxContainer11" unique_id=1316488706]
+layout_mode = 2
+text = "Show Level Title:"
+
+[node name="OptionButton" type="OptionButton" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer/HBoxContainer11" unique_id=584782591]
+layout_mode = 2
+selected = 0
+item_count = 3
+popup/item_0/text = "At Level Start"
+popup/item_0/id = 0
+popup/item_1/text = "Always"
+popup/item_1/id = 1
+popup/item_2/text = "Hide"
+popup/item_2/id = 2
+
+[node name="HSeparator3" type="HSeparator" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer" unique_id=94997323]
+layout_mode = 2
+theme_override_styles/separator = ExtResource("4")
+
+[node name="HBoxContainer3" type="HBoxContainer" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer" unique_id=55029724]
+layout_mode = 2
+alignment = 2
+
+[node name="Label" type="Label" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer/HBoxContainer3" unique_id=674785261]
 layout_mode = 2
 text = " Default Zoom Level (Windowed):"
 
-[node name="PixelScaleInput" type="SpinBox" parent="MarginContainer/UIRoot/TabContainer/Game/ScrollContainer/VBoxContainer/HBoxContainer3" unique_id=235024528]
+[node name="PixelScaleInput" type="SpinBox" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer/HBoxContainer3" unique_id=235024528]
 layout_mode = 2
 min_value = 0.1
 step = 0.1
 value = 1.0
 
-[node name="HBoxContainer2" type="HBoxContainer" parent="MarginContainer/UIRoot/TabContainer/Game/ScrollContainer/VBoxContainer" unique_id=1842180820]
+[node name="HBoxContainer2" type="HBoxContainer" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer" unique_id=1842180820]
 layout_mode = 2
 alignment = 2
 
-[node name="Label" type="Label" parent="MarginContainer/UIRoot/TabContainer/Game/ScrollContainer/VBoxContainer/HBoxContainer2" unique_id=82436683]
+[node name="Label" type="Label" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer/HBoxContainer2" unique_id=82436683]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Game View Size (In Tiles) Width:"
 horizontal_alignment = 2
 
-[node name="SetWindowWidth" type="SpinBox" parent="MarginContainer/UIRoot/TabContainer/Game/ScrollContainer/VBoxContainer/HBoxContainer2" unique_id=314379242]
+[node name="SetWindowWidth" type="SpinBox" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer/HBoxContainer2" unique_id=314379242]
 layout_mode = 2
 min_value = 2.0
 value = 12.0
 
-[node name="Label2" type="Label" parent="MarginContainer/UIRoot/TabContainer/Game/ScrollContainer/VBoxContainer/HBoxContainer2" unique_id=1001203741]
+[node name="Label2" type="Label" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer/HBoxContainer2" unique_id=1001203741]
 layout_mode = 2
 text = "Height:"
 horizontal_alignment = 2
 
-[node name="SetWindowHeight" type="SpinBox" parent="MarginContainer/UIRoot/TabContainer/Game/ScrollContainer/VBoxContainer/HBoxContainer2" unique_id=956752844]
+[node name="SetWindowHeight" type="SpinBox" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer/HBoxContainer2" unique_id=956752844]
 layout_mode = 2
 min_value = 2.0
 value = 12.0
 
-[node name="HBoxContainer8" type="HBoxContainer" parent="MarginContainer/UIRoot/TabContainer/Game/ScrollContainer/VBoxContainer" unique_id=729833972]
+[node name="HBoxContainer8" type="HBoxContainer" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer" unique_id=729833972]
 layout_mode = 2
 alignment = 2
 
-[node name="AutoAspect" type="CheckButton" parent="MarginContainer/UIRoot/TabContainer/Game/ScrollContainer/VBoxContainer/HBoxContainer8" unique_id=1615923820]
+[node name="AutoAspect" type="CheckButton" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer/HBoxContainer8" unique_id=1615923820]
 layout_mode = 2
 text = "Expand Game View To Fit Window Aspect"
 
-[node name="HBoxContainer4" type="HBoxContainer" parent="MarginContainer/UIRoot/TabContainer/Game/ScrollContainer/VBoxContainer" unique_id=1334245388]
+[node name="HBoxContainer4" type="HBoxContainer" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer" unique_id=1334245388]
 layout_mode = 2
 alignment = 2
 
-[node name="UpdateWindow" type="Button" parent="MarginContainer/UIRoot/TabContainer/Game/ScrollContainer/VBoxContainer/HBoxContainer4" unique_id=1584401285]
+[node name="UpdateWindow" type="Button" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer/HBoxContainer4" unique_id=1584401285]
 layout_mode = 2
 text = "Update Window Size"
 
-[node name="HSeparator2" type="HSeparator" parent="MarginContainer/UIRoot/TabContainer/Game/ScrollContainer/VBoxContainer" unique_id=478265406]
+[node name="HSeparator2" type="HSeparator" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer" unique_id=478265406]
 layout_mode = 2
 theme_override_styles/separator = ExtResource("4")
 
-[node name="HBoxContainer5" type="HBoxContainer" parent="MarginContainer/UIRoot/TabContainer/Game/ScrollContainer/VBoxContainer" unique_id=613777199]
+[node name="HBoxContainer5" type="HBoxContainer" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer" unique_id=613777199]
 layout_mode = 2
 alignment = 1
 
-[node name="Label" type="Label" parent="MarginContainer/UIRoot/TabContainer/Game/ScrollContainer/VBoxContainer/HBoxContainer5" unique_id=1905247433]
+[node name="Label" type="Label" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer/HBoxContainer5" unique_id=1905247433]
 layout_mode = 2
 text = "Default Camera Settings:"
 
-[node name="HBoxContainer6" type="HBoxContainer" parent="MarginContainer/UIRoot/TabContainer/Game/ScrollContainer/VBoxContainer" unique_id=1658482809]
+[node name="HBoxContainer6" type="HBoxContainer" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer" unique_id=1658482809]
 layout_mode = 2
 alignment = 2
 
-[node name="LabelLabelLabel" type="Label" parent="MarginContainer/UIRoot/TabContainer/Game/ScrollContainer/VBoxContainer/HBoxContainer6" unique_id=625328399]
+[node name="LabelLabelLabel" type="Label" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer/HBoxContainer6" unique_id=625328399]
 layout_mode = 2
 text = "Follow Entity by:"
 
-[node name="FollowBy" type="MenuButton" parent="MarginContainer/UIRoot/TabContainer/Game/ScrollContainer/VBoxContainer/HBoxContainer6" unique_id=1920892838]
+[node name="FollowBy" type="MenuButton" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer/HBoxContainer6" unique_id=1920892838]
 layout_mode = 2
 text = "property"
 flat = false
 script = ExtResource("15")
 
-[node name="FollowEntity" type="LineEdit" parent="MarginContainer/UIRoot/TabContainer/Game/ScrollContainer/VBoxContainer/HBoxContainer6" unique_id=482357832]
+[node name="FollowEntity" type="LineEdit" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer/HBoxContainer6" unique_id=482357832]
 custom_minimum_size = Vector2(140, 0)
 layout_mode = 2
 script = ExtResource("7_73cj6")
 
-[node name="HBoxContainer7" type="HBoxContainer" parent="MarginContainer/UIRoot/TabContainer/Game/ScrollContainer/VBoxContainer" unique_id=733011440]
+[node name="HBoxContainer7" type="HBoxContainer" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer" unique_id=733011440]
 layout_mode = 2
 alignment = 2
 
-[node name="EnableLimitsToggle" type="CheckButton" parent="MarginContainer/UIRoot/TabContainer/Game/ScrollContainer/VBoxContainer/HBoxContainer7" unique_id=331745706]
+[node name="EnableLimitsToggle" type="CheckButton" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer/HBoxContainer7" unique_id=331745706]
 layout_mode = 2
 text = "Stop At Map Edge:"
 
-[node name="Label" type="Label" parent="MarginContainer/UIRoot/TabContainer/Game/ScrollContainer/VBoxContainer/HBoxContainer7" unique_id=1502058678]
+[node name="Label" type="Label" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer/HBoxContainer7" unique_id=1502058678]
 layout_mode = 2
 text = "Extend Camera Limits:"
 
-[node name="ExtendCamLimits" type="SpinBox" parent="MarginContainer/UIRoot/TabContainer/Game/ScrollContainer/VBoxContainer/HBoxContainer7" unique_id=1741488458]
+[node name="ExtendCamLimits" type="SpinBox" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer/HBoxContainer7" unique_id=1741488458]
 layout_mode = 2
 max_value = 300.0
 suffix = "px"
 
-[node name="HSeparator4" type="HSeparator" parent="MarginContainer/UIRoot/TabContainer/Game/ScrollContainer/VBoxContainer" unique_id=1617850490]
+[node name="HSeparator4" type="HSeparator" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer" unique_id=1617850490]
 layout_mode = 2
 theme_override_styles/separator = ExtResource("4")
 
-[node name="Label" type="Label" parent="MarginContainer/UIRoot/TabContainer/Game/ScrollContainer/VBoxContainer" unique_id=1822737996]
+[node name="Label" type="Label" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer" unique_id=1822737996]
 layout_mode = 2
 theme_override_font_sizes/font_size = 14
 text = "Credits:"
 horizontal_alignment = 1
 
-[node name="CreditsList" parent="MarginContainer/UIRoot/TabContainer/Game/ScrollContainer/VBoxContainer" unique_id=493844250 instance=ExtResource("6_qrjoe")]
+[node name="CreditsList" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer" unique_id=493844250 instance=ExtResource("6_qrjoe")]
 layout_mode = 2
 
-[node name="HBoxContainer6" type="HBoxContainer" parent="MarginContainer/UIRoot/TabContainer/Game" unique_id=1970910118]
+[node name="HBoxContainer6" type="HBoxContainer" parent="MarginContainer/UIRoot/TabContainer/GameDefinition" unique_id=1970910118]
 custom_minimum_size = Vector2(0, 50)
 layout_mode = 2
 alignment = 2
 
-[node name="OpenGameDir" type="Button" parent="MarginContainer/UIRoot/TabContainer/Game/HBoxContainer6" unique_id=1310730974]
+[node name="OpenGameDir" type="Button" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/HBoxContainer6" unique_id=1310730974]
 layout_mode = 2
 size_flags_vertical = 4
 text = "Open Game Info Folder"
 
-[node name="HBoxContainer5" type="HBoxContainer" parent="MarginContainer/UIRoot/TabContainer/Game" unique_id=33989943]
+[node name="HBoxContainer5" type="HBoxContainer" parent="MarginContainer/UIRoot/TabContainer/GameDefinition" unique_id=33989943]
 layout_mode = 2
 theme = SubResource("3")
 theme_override_constants/separation = 24
 alignment = 1
 
-[node name="SaveButton" type="Button" parent="MarginContainer/UIRoot/TabContainer/Game/HBoxContainer5" unique_id=351529520]
+[node name="SaveButton" type="Button" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/HBoxContainer5" unique_id=351529520]
 custom_minimum_size = Vector2(100, 50)
 layout_mode = 2
 text = "Save"
 
-[node name="LoadButton" type="Button" parent="MarginContainer/UIRoot/TabContainer/Game/HBoxContainer5" unique_id=1871997939]
+[node name="LoadButton" type="Button" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/HBoxContainer5" unique_id=1871997939]
 custom_minimum_size = Vector2(100, 50)
 layout_mode = 2
 text = "Load"
 
-[node name="SetDefault" type="Button" parent="MarginContainer/UIRoot/TabContainer/Game/HBoxContainer5" unique_id=129913275]
+[node name="SetDefault" type="Button" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/HBoxContainer5" unique_id=129913275]
 custom_minimum_size = Vector2(280, 50)
 layout_mode = 2
 text = "Set As Default Game"
@@ -450,19 +472,19 @@ metadata/_edit_lock_ = true
 size_factor = 0.5
 max_brightness = 0.3
 
-[connection signal="text_changed" from="MarginContainer/UIRoot/TabContainer/Game/ScrollContainer/VBoxContainer/HBoxContainer/NameInput" to="MarginContainer/UIRoot/TabContainer/Game" method="_on_NameInput_text_changed"]
-[connection signal="text_changed" from="MarginContainer/UIRoot/TabContainer/Game/ScrollContainer/VBoxContainer/HBoxContainer10/TitleInput" to="MarginContainer/UIRoot/TabContainer/Game" method="_on_title_input_text_changed"]
-[connection signal="value_changed" from="MarginContainer/UIRoot/TabContainer/Game/ScrollContainer/VBoxContainer/HBoxContainer3/PixelScaleInput" to="MarginContainer/UIRoot/TabContainer/Game" method="_on_PixelScaleInput_value_changed"]
-[connection signal="value_changed" from="MarginContainer/UIRoot/TabContainer/Game/ScrollContainer/VBoxContainer/HBoxContainer2/SetWindowWidth" to="MarginContainer/UIRoot/TabContainer/Game" method="_on_SetWindowWidth_value_changed"]
-[connection signal="value_changed" from="MarginContainer/UIRoot/TabContainer/Game/ScrollContainer/VBoxContainer/HBoxContainer2/SetWindowHeight" to="MarginContainer/UIRoot/TabContainer/Game" method="_on_SetWindowHeight_value_changed"]
-[connection signal="toggled" from="MarginContainer/UIRoot/TabContainer/Game/ScrollContainer/VBoxContainer/HBoxContainer8/AutoAspect" to="MarginContainer/UIRoot/TabContainer/Game" method="_on_AutoAspect_toggled"]
-[connection signal="pressed" from="MarginContainer/UIRoot/TabContainer/Game/ScrollContainer/VBoxContainer/HBoxContainer4/UpdateWindow" to="MarginContainer/UIRoot/TabContainer/Game" method="_on_UpdateWindow_pressed"]
-[connection signal="toggled" from="MarginContainer/UIRoot/TabContainer/Game/ScrollContainer/VBoxContainer/HBoxContainer7/EnableLimitsToggle" to="MarginContainer/UIRoot/TabContainer/Game" method="_on_EnableLimitsToggle_toggled"]
-[connection signal="value_changed" from="MarginContainer/UIRoot/TabContainer/Game/ScrollContainer/VBoxContainer/HBoxContainer7/ExtendCamLimits" to="MarginContainer/UIRoot/TabContainer/Game" method="_on_ExtendCamLimits_value_changed"]
-[connection signal="pressed" from="MarginContainer/UIRoot/TabContainer/Game/HBoxContainer6/OpenGameDir" to="MarginContainer/UIRoot" method="_on_OpenGameDir_pressed"]
-[connection signal="pressed" from="MarginContainer/UIRoot/TabContainer/Game/HBoxContainer5/SaveButton" to="MarginContainer/UIRoot/TabContainer/Game" method="_on_SaveButton_pressed"]
-[connection signal="pressed" from="MarginContainer/UIRoot/TabContainer/Game/HBoxContainer5/LoadButton" to="MarginContainer/UIRoot/TabContainer/Game" method="_on_LoadButton_pressed"]
-[connection signal="pressed" from="MarginContainer/UIRoot/TabContainer/Game/HBoxContainer5/SetDefault" to="MarginContainer/UIRoot/TabContainer/Game" method="_on_SetDefault_pressed"]
+[connection signal="text_changed" from="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer/HBoxContainer/NameInput" to="MarginContainer/UIRoot/TabContainer/GameDefinition" method="_on_NameInput_text_changed"]
+[connection signal="text_changed" from="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer/HBoxContainer10/TitleInput" to="MarginContainer/UIRoot/TabContainer/GameDefinition" method="_on_title_input_text_changed"]
+[connection signal="value_changed" from="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer/HBoxContainer3/PixelScaleInput" to="MarginContainer/UIRoot/TabContainer/GameDefinition" method="_on_PixelScaleInput_value_changed"]
+[connection signal="value_changed" from="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer/HBoxContainer2/SetWindowWidth" to="MarginContainer/UIRoot/TabContainer/GameDefinition" method="_on_SetWindowWidth_value_changed"]
+[connection signal="value_changed" from="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer/HBoxContainer2/SetWindowHeight" to="MarginContainer/UIRoot/TabContainer/GameDefinition" method="_on_SetWindowHeight_value_changed"]
+[connection signal="toggled" from="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer/HBoxContainer8/AutoAspect" to="MarginContainer/UIRoot/TabContainer/GameDefinition" method="_on_AutoAspect_toggled"]
+[connection signal="pressed" from="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer/HBoxContainer4/UpdateWindow" to="MarginContainer/UIRoot/TabContainer/GameDefinition" method="_on_UpdateWindow_pressed"]
+[connection signal="toggled" from="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer/HBoxContainer7/EnableLimitsToggle" to="MarginContainer/UIRoot/TabContainer/GameDefinition" method="_on_EnableLimitsToggle_toggled"]
+[connection signal="value_changed" from="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer/HBoxContainer7/ExtendCamLimits" to="MarginContainer/UIRoot/TabContainer/GameDefinition" method="_on_ExtendCamLimits_value_changed"]
+[connection signal="pressed" from="MarginContainer/UIRoot/TabContainer/GameDefinition/HBoxContainer6/OpenGameDir" to="MarginContainer/UIRoot" method="_on_OpenGameDir_pressed"]
+[connection signal="pressed" from="MarginContainer/UIRoot/TabContainer/GameDefinition/HBoxContainer5/SaveButton" to="MarginContainer/UIRoot/TabContainer/GameDefinition" method="_on_SaveButton_pressed"]
+[connection signal="pressed" from="MarginContainer/UIRoot/TabContainer/GameDefinition/HBoxContainer5/LoadButton" to="MarginContainer/UIRoot/TabContainer/GameDefinition" method="_on_LoadButton_pressed"]
+[connection signal="pressed" from="MarginContainer/UIRoot/TabContainer/GameDefinition/HBoxContainer5/SetDefault" to="MarginContainer/UIRoot/TabContainer/GameDefinition" method="_on_SetDefault_pressed"]
 [connection signal="resized" from="MarginContainer/UIRoot/TabContainer/Tiles & Entities" to="MarginContainer/UIRoot/TabContainer/Tiles & Entities" method="_on_Tiles_resized"]
 [connection signal="pressed" from="MarginContainer/UIRoot/TabContainer/Tiles & Entities/EntitiesHBoxContainer/NewEntityButton" to="MarginContainer/UIRoot/TabContainer/Tiles & Entities" method="_on_NewEntityButton_pressed"]
 [connection signal="pressed" from="MarginContainer/UIRoot/TabContainer/Tiles & Entities/TilesHBoxContainer/NewTileButton" to="MarginContainer/UIRoot/TabContainer/Tiles & Entities" method="_on_NewTileButton_pressed"]

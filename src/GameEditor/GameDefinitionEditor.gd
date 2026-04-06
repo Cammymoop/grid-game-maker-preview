@@ -9,6 +9,8 @@ var game_settings = {}
 
 var invalid_field_color = Color(0.7, 0.4, 0.4)
 
+@export var show_level_title_option_picker: OptionButton
+
 func _ready():
 	var name_box = find_child("NameInput")
 	var game_name = GameManager.get_game_name()
@@ -43,6 +45,15 @@ func _ready():
 		follow_by_button.text = cam_settings["follow_entity_by"]
 	if "enable_limits" in cam_settings:
 		find_child("EnableLimitsToggle").button_pressed = cam_settings["enable_limits"]
+	
+	var show_lvl_title_opt: String = GameManager.get_game_setting("show_level_title", "At Level Start").to_lower()
+	show_level_title_option_picker.select(0)
+	for index in show_level_title_option_picker.item_count:
+		var item_text: = show_level_title_option_picker.get_item_text(index)
+		if item_text.to_lower() == show_lvl_title_opt:
+			show_level_title_option_picker.select(index)
+			break
+	show_level_title_option_picker.item_selected.connect(on_show_level_title_option_picked)
 
 func init_movement_modes() -> void:
 	var popup_menu: PopupMenu = find_child("MovementModeMenuButton").get_popup()
@@ -87,7 +98,7 @@ func _real_save():
 	FilesManager.save_game_info(def_data)
 	GameManager.loaded_from_game_name = GameManager.get_game_name()
 	
-	GlobalToaster.show_message("Saved Game Definition")
+	GlobalToaster.show_toast_message("Saved Game Definition")
 
 
 func _on_NameInput_text_changed(new_name: String) -> void:
@@ -111,7 +122,7 @@ func _on_LoadButton_pressed():
 
 func _on_SetDefault_pressed():
 	FilesManager.save_default_game(GameManager.cur_game_name)
-	GlobalToaster.show_message("Default Game Set")
+	GlobalToaster.show_toast_message("Default Game Set")
 
 
 func _on_SetWindowWidth_value_changed(value):
@@ -144,3 +155,6 @@ func _on_AutoAspect_toggled(button_pressed):
 func _on_title_input_text_changed(new_text: String) -> void:
 	game_settings["title"] = new_text
 	
+func on_show_level_title_option_picked(index: int) -> void:
+	var item_text: = show_level_title_option_picker.get_item_text(index)
+	GameManager.set_game_setting("show_level_title", item_text)

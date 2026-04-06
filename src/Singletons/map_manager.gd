@@ -268,6 +268,12 @@ func has_next_level() -> bool:
     var next_level_name: = map_metadata.get("next_level", "") as String
     return next_level_name != "" and FilesManager.level_exists(GameManager.cur_game_name, next_level_name)
 
+func get_level_title() -> String:
+    var title: = map_metadata.get("title", "") as String
+    if not title:
+        return GameManager.loaded_level_name
+    return title
+
 func set_metadata_value(key: String, value: Variant) -> void:
     map_metadata[key] = value
     GameManager.update_saved_level_metadata(map_metadata)

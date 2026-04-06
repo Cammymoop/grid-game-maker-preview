@@ -125,6 +125,16 @@ func get_context_position(slots: Dictionary) -> Vector2i:
 func resolve_direction_value(dir_value: int, slots: Dictionary) -> int:
 	return Utility.resolve_full_direction_to_facing(dir_value, slots)
 
+func resolve_complex_direction(complex_direction: Dictionary, slots: Dictionary) -> int:
+	if complex_direction["type"] == "plain":
+		return resolve_direction_value(complex_direction["direction"], slots)
+	elif complex_direction["type"] == "slot_reference":
+		var referenced_facing: int = slots[complex_direction["slot_id"]]
+		return resolve_direction_value(complex_direction.get("direction", 0) | referenced_facing, slots)
+	else:
+		push_error("Invalid complex direction type: %s" % [complex_direction["type"]])
+		return 0
+
 func set_tiles_to_facing(slots: Dictionary, slot_id: int, facing: int) -> void:
 	if not Commands.slot_is_positions(slot_id):
 		push_warning("set_tiles_to_facing: Slot is not a tile position: %s" % [slot_id])

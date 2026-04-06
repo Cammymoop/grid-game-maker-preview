@@ -1,9 +1,64 @@
 [gd_scene format=3 uid="uid://bj65n8nf1knx1"]
 
-[ext_resource type="PackedScene" path="res://Scenes/MapEditor.tscn" id="1"]
+[ext_resource type="PackedScene" uid="uid://byt0p1dxwdwb3" path="res://Scenes/MapEditor.tscn" id="1"]
 [ext_resource type="PackedScene" uid="uid://c56bx5og1o0x1" path="res://Scenes/PauseMenu.tscn" id="2"]
+[ext_resource type="Script" uid="uid://0xx8dh5smcvl" path="res://src/PlayUI/overlay_ui.gd" id="3_vx41i"]
 [ext_resource type="PackedScene" uid="uid://ccr48mbb8s5et" path="res://Scenes/bg_effect_5.tscn" id="4_nsvgp"]
 [ext_resource type="Script" uid="uid://jw5fk1ax6p18" path="res://src/GameView.gd" id="5"]
+
+[sub_resource type="Animation" id="Animation_nsvgp"]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:position")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector2(0, -81)]
+}
+
+[sub_resource type="Animation" id="Animation_vx41i"]
+resource_name = "hide"
+length = 0.2667
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:position")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.26666668),
+"transitions": PackedFloat32Array(4.924576, 1),
+"update": 0,
+"values": [Vector2(0, 0), Vector2(0, -81)]
+}
+
+[sub_resource type="Animation" id="Animation_ek1d2"]
+resource_name = "show"
+length = 0.2667
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:position")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.26666668),
+"transitions": PackedFloat32Array(0.39229208, 1),
+"update": 0,
+"values": [Vector2(0, -81), Vector2(0, 0)]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_r5y0w"]
+_data = {
+&"RESET": SubResource("Animation_nsvgp"),
+&"hide": SubResource("Animation_vx41i"),
+&"show": SubResource("Animation_ek1d2")
+}
 
 [node name="Play" type="Control" unique_id=357405740]
 layout_mode = 3
@@ -34,9 +89,60 @@ script = ExtResource("5")
 [node name="Entities" type="Node2D" parent="Display/GameView" unique_id=896339554]
 z_index = 5
 
-[node name="PauseMenu" parent="." unique_id=2024441651 instance=ExtResource("2")]
-layout_mode = 1
+[node name="OverlayLayer" type="CanvasLayer" parent="." unique_id=912846084]
+layer = 8
+
+[node name="OverlayUI" type="Control" parent="OverlayLayer" unique_id=570287762 node_paths=PackedStringArray("level_title_label", "level_title_animator")]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("3_vx41i")
+level_title_label = NodePath("TopCenter/AnimationRoot/PanelContainer/VBoxContainer/LevelTitleLabel")
+level_title_animator = NodePath("TopCenter/AnimationRoot/AnimationPlayer")
+
+[node name="TopCenter" type="Control" parent="OverlayLayer/OverlayUI" unique_id=158356953]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+grow_horizontal = 2
+mouse_filter = 2
+
+[node name="AnimationRoot" type="Node2D" parent="OverlayLayer/OverlayUI/TopCenter" unique_id=1893012651]
+position = Vector2(0, -81)
+
+[node name="PanelContainer" type="PanelContainer" parent="OverlayLayer/OverlayUI/TopCenter/AnimationRoot" unique_id=153308375]
+anchors_preset = -1
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_top = 12.0
+offset_bottom = 12.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="OverlayLayer/OverlayUI/TopCenter/AnimationRoot/PanelContainer" unique_id=1390456184]
+layout_mode = 2
+
+[node name="BlankLabel" type="Label" parent="OverlayLayer/OverlayUI/TopCenter/AnimationRoot/PanelContainer/VBoxContainer" unique_id=1505847387]
+layout_mode = 2
+
+[node name="LevelTitleLabel" type="Label" parent="OverlayLayer/OverlayUI/TopCenter/AnimationRoot/PanelContainer/VBoxContainer" unique_id=934599978]
+layout_mode = 2
+theme_override_font_sizes/font_size = 28
+text = "LEVEL NAME"
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="OverlayLayer/OverlayUI/TopCenter/AnimationRoot" unique_id=921051847]
+libraries/ = SubResource("AnimationLibrary_r5y0w")
+
+[node name="PauseMenuLayer" type="CanvasLayer" parent="." unique_id=166184817]
+layer = 10
+
+[node name="PauseMenu" parent="PauseMenuLayer" unique_id=2024441651 instance=ExtResource("2")]
 
 [node name="BGEffects" parent="." unique_id=1203754819 instance=ExtResource("4_nsvgp")]
