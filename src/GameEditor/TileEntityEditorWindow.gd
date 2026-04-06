@@ -27,6 +27,10 @@ func _ready():
 	
 	controller_list.connect("index_pressed", Callable(self, "set_controller"))
 	
+	var terrain_spr_mod_switch: CheckButton = find_child("TestTerrainSprMod")
+	if terrain_spr_mod_switch:
+		terrain_spr_mod_switch.toggled.connect(_on_TestTerrainSprMod_toggled)
+	
 	close_requested.connect(close_window)
 
 func set_controller(list_index) -> void:
@@ -82,9 +86,19 @@ func load_tile_info(tile_index: int):
 	the_definition = MapManager.get_tile_definition(tile_index)
 	
 	find_child("NameInput").text = MapManager.get_tile_name(tile_index)
+	
+	var terrain_spr_mod_switch: CheckButton = find_child("TestTerrainSprMod")
+	var terrain_spr_mod: Dictionary = the_definition.get("terrain_sprite_modifier", {})
+	terrain_spr_mod_switch.set_pressed_no_signal(not terrain_spr_mod.is_empty())
+
 	load_common()
 
 func load_common():
+	var terrain_spr_mod_switch: CheckButton = find_child("TestTerrainSprMod")
+	if terrain_spr_mod_switch:
+		var terrain_spr_mod_parent: Control = terrain_spr_mod_switch.get_parent()
+		terrain_spr_mod_parent.visible = tile_entity_mode == "tile"
+
 	update_image_button()
 	
 	show_property_list()
@@ -164,6 +178,27 @@ func _on_ImageButton_pressed():
 
 func _on_NameInput_text_changed(new_text):
 	the_definition['name'] = new_text
+
+func _on_TestTerrainSprMod_toggled(button_pressed):
+	if not tile_entity_mode == "tile":
+		return
+	
+	var has_terrain_spr_mod: bool = not the_definition.get("terrain_sprite_modifier", {}).is_empty()
+	if button_pressed and not has_terrain_spr_mod:
+		the_definition["terrain_sprite_modifier"] = {
+			"name": "my_test_terrain_mod",
+			"layers": [{"texture": 1, "tex_index": 42, "rotates": false}],
+			"mask_info": {
+				"masked": true,
+				"mask_texture": 1,
+				"mask_tex_index": 43,
+				"mask_rotates": false,
+				"mask_clip_outer": false,
+				"mask_is_bw": true,
+			}
+		}
+	else:
+		the_definition.erase("terrain_sprite_modifier")
 
 
 func _on_UpdateButton_pressed():

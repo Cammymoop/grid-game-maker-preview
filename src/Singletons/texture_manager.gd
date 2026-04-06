@@ -224,10 +224,10 @@ func get_texture(texture_index) -> Texture:
         return placeholder
     return textures[texture_index]
 
-func get_index_offset(texture_index, tile_index) -> Vector2:
-    var tpr = tiles_per_row[texture_index]
+func get_index_offset(texture_index: int, tile_index: int) -> Vector2:
+    var tpr: int = tiles_per_row[texture_index]
     var tsize = tile_sizes[texture_index]
-    return Vector2(tile_index % tpr * tsize.x, floor(tile_index/tpr) * tsize.y)
+    return Vector2(tile_index % tpr * tsize.x, floor(tile_index/float(tpr)) * tsize.y)
 
 func get_tiles_per_row(texture_index):
     return tiles_per_row[texture_index]
@@ -242,10 +242,10 @@ func get_texture_tile_size(texture_index) -> Vector2i:
     return tile_sizes[texture_index]
 
 func get_index_atlas_coords(texture_index, tile_index) -> Vector2i:
-    var tpr = tiles_per_row[texture_index]
+    var tpr: int = tiles_per_row[texture_index]
     return Vector2i(tile_index % tpr, floor(tile_index/tpr))
 
 func get_last_sub_index(texture_index) -> int:
-    var tpr = tiles_per_row[texture_index]
-    var rows = texture_rows[texture_index]
+    var tpr: int = tiles_per_row[texture_index]
+    var rows: int = texture_rows[texture_index]
     return (rows * tpr) - 1

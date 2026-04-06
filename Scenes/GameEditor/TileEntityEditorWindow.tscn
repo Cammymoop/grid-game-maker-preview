@@ -15,7 +15,7 @@ region = Rect2(0, 64, 32, 32)
 oversampling_override = 1.0
 title = "Edit"
 position = Vector2i(0, 25)
-size = Vector2i(441, 439)
+size = Vector2i(441, 521)
 wrap_controls = true
 popup_window = true
 script = ExtResource("2")
@@ -136,6 +136,20 @@ size_flags_vertical = 4
 mouse_filter = 2
 texture = SubResource("AtlasTexture_nnx4p")
 stretch_mode = 5
+
+[node name="HBoxContainer5" type="HBoxContainer" parent="PanelContainer/VBoxContainer" unique_id=567205767]
+layout_mode = 2
+size_flags_horizontal = 3
+alignment = 1
+
+[node name="Label" type="Label" parent="PanelContainer/VBoxContainer/HBoxContainer5" unique_id=1078261995]
+layout_mode = 2
+size_flags_stretch_ratio = 0.5
+text = "Test Terrain Spr Modifier Enabled:"
+horizontal_alignment = 2
+
+[node name="TestTerrainSprMod" type="CheckButton" parent="PanelContainer/VBoxContainer/HBoxContainer5" unique_id=48218373]
+layout_mode = 2
 
 [node name="HSeparator2" parent="PanelContainer/VBoxContainer" unique_id=547141302 instance=ExtResource("2_nnx4p")]
 layout_mode = 2

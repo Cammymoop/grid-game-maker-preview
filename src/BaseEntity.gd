@@ -41,7 +41,11 @@ var active: = false
 
 var local_properties: = {}
 
+var terrain_sprite_modifiers: Array[int] = []
+
 var instance_id: int = 0
+
+var _pre_init_called: = false
 
 func _ready() -> void:
 	pre_init()
@@ -54,9 +58,12 @@ func _make_sprite() -> void:
 	add_child(sprite, true)
 
 func pre_init() -> void:
+	if _pre_init_called:
+		return
+	_pre_init_called = true
 	entity_name = EntityManager.get_entity_name(entity_index)
 	_make_sprite()
-	offset_center()
+	sprite.position = get_center_offset()
 
 func setup_initial_position() -> void:
 	tile_position = MapManager.world_to_tile_position(global_position)
@@ -81,9 +88,6 @@ func update_z():
 			z_index = int(z.get_value())
 	else:
 		z_index = 0
-
-func offset_center() -> void:
-	sprite.position = get_center_offset()
 
 func get_center_offset() -> Vector2:
 	return Vector2(floor(MapManager.tile_width/2.0), floor(MapManager.tile_width/2.0))
@@ -405,3 +409,24 @@ func entity_manager_signal(signaling_entity, args, signal_name) -> void:
 	var handler = EntityManager.get_entity_property(self, "when_signal_" + signal_name)
 	if handler and handler.is_conditional():
 		handler.resolve(self, signaling_entity, tile_position, args)
+
+func add_sprite_modifier(mod_info: Dictionary) -> void:
+	if not mod_info or not mod_info.get("name", ""):
+		return
+	sprite.apply_modifier(mod_info.get("name", ""), mod_info.get("layers", []), mod_info.get("mask_info", {}))
+
+func remove_sprite_modifier(mod_info: Dictionary) -> void:
+	if not mod_info or not mod_info.get("name", ""):
+		return
+	sprite.remove_modifier(mod_info.get("name", ""))
+
+func clear_sprite_modifiers() -> void:
+	sprite.clear_modifiers()
+
+func get_stationary_position() -> Vector2i:
+	return Vector2i(tile_position)
+
+func get_moving_position() -> Vector2i:
+	if not moving:
+		return get_stationary_position()
+	return Vector2i(next_tile_pos)

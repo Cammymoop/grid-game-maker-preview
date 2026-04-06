@@ -358,6 +358,8 @@ func create_entity(entity_index: int, tile_position: Vector2i, facing: int = 0, 
         entity.set_active(true)
     on_entity_added(entity)
     
+    MapManager.check_terrain_spr_mod_for_created(entity)
+    
     return entity
 
 func setup_entity_controller(entity: BaseEntity) -> void:
@@ -414,6 +416,8 @@ func restore_entity(serialized_entity: Dictionary, refresh: bool = false) -> voi
     add_entity_to_world(entity)
     entity.initialize() # initialize after deserializing
     setup_entity_texture(entity)
+    
+    MapManager.check_terrain_spr_mod_for_created(entity)
     
     if refresh:
         refresh_entity_list()
@@ -655,6 +659,8 @@ func post_move_actions(moving_entity, from_position, to_position, exclude_group:
     var entities_destination = get_entities_at(to_position, moving_entity, exclude_group)
     for e in entities_destination:
         resolve_entity_interaction_event("post_move_onto", e, moving_entity, to_position)
+    
+    MapManager.post_move_actions(moving_entity, from_position, to_position)
 
 func post_move_multi_pos(moving_entity, moved_off_positions: Array, moved_onto_positions: Array, exclude_group: Array = []) -> void:
     var entities_moved_off: Array = []

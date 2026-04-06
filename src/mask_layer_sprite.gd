@@ -126,6 +126,7 @@ func create_and_add_nodes_for_layer(layer_info: Dictionary) -> void:
     var layer_spr: = Sprite2D.new()
     layer_spr.texture = layer_tex
     layer_spr.region_rect = layer_tex_rect
+    layer_spr.region_enabled = true
     var main_layer_node: Node2D = layer_spr
     
     var is_masked: bool = layer_info.get("masked", false)
@@ -240,7 +241,7 @@ func create_expanded_mask_from_rect(tex: Texture2D, tex_rect: Rect2i, clip_color
     var full_size: Vector2i = Vector2i.ONE * MapManager.tile_width * 2
     var mask_img: Image = Image.create(full_size.x, full_size.y, false, Image.FORMAT_RGBA8)
 
-    var dest_offset: Vector2i = full_size - texture_region_size
+    var dest_offset: Vector2i = Vector2i((Vector2(full_size - texture_region_size) / 2.0).floor())
     var bg_color: Color = clip_color if clip_outer else Color.WHITE
     mask_img.fill(bg_color)
     mask_img.blit_rect(src_img, tex_rect, dest_offset)

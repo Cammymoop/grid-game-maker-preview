@@ -4,16 +4,17 @@ const MapLayer = preload("res://src/MapLayer.gd")
 
 signal level_size_changed
 
-var map_layer_template = preload("res://Scenes/MapLayer.tscn")
+var map_layer_template: = preload("res://Scenes/MapLayer.tscn")
 
 var layers: Array = []
-var map_metadata = {}
+var map_metadata: = {}
 
-var blocking_tiles = []
+var blocking_tiles: = []
+var tiles_with_sprite_modifiers: = []
 
-var tile_width = 32
+var tile_width: int = 32
 
-var tile_defs = {
+var tile_defs: = {
     0: {
         "name": "floor",
         "texture": 0,
@@ -69,13 +70,13 @@ var tile_defs = {
         "properties": {},
     },
 }
-@onready var loaded_tile_defs = tile_defs
+@onready var loaded_tile_defs: = tile_defs
 
-var tile_index_map = {}
+var tile_index_map: = {}
 
-var tileset = null
+var tileset: TileSet = null
 
-var im_ready = false
+var im_ready: = false
 
 func setup() -> void:
     fix_string_keys()
@@ -83,6 +84,7 @@ func setup() -> void:
         await TextureManager.textures_loaded
     create_tileset()
     find_blocking()
+    find_tiles_with_sprite_modifiers()
     
     im_ready = true
 
@@ -90,6 +92,7 @@ func refresh_definition():
     fix_string_keys()
     create_tileset()
     find_blocking()
+    find_tiles_with_sprite_modifiers()
 
 func fix_string_keys():
     var old_definition = tile_defs
@@ -331,6 +334,14 @@ func find_blocking() -> void:
         var blocks: = get_tile_index_property(ti, "blocks")
         if blocks and not blocks.is_conditional() and blocks.get_value():
             blocking_tiles.append(ti)
+
+func find_tiles_with_sprite_modifiers() -> void:
+    tiles_with_sprite_modifiers = []
+    for ti in tile_defs:
+        var spr_mod_prop: = get_tile_index_property(ti, "tile_sprite_modifier")
+        if spr_mod_prop:
+            if spr_mod_prop.is_conditional() or spr_mod_prop.get_value():
+                tiles_with_sprite_modifiers.append(ti)
 
 func clear_all_at(tile_position) -> void:
     for l in layers:
@@ -575,6 +586,34 @@ func finish_move(moving_entity, onto_positions: Array) -> void:
             ifmot.resolve(moving_entity, null, onto_position)
     
     resolve_tile_event(onto_positions, "finish_move_onto_tile", moving_entity)
+    
+    check_and_apply_terrain_sprite_modifier(moving_entity, onto_positions)
+
+
+func check_and_apply_terrain_sprite_modifier(entity: BaseEntity, tile_positions: Array) -> void:
+    if not entity.active:
+        return
+    var tile_indices_to_check: = tiles_with_sprite_modifiers.duplicate()
+    for ti in entity.terrain_sprite_modifiers:
+        tile_indices_to_check.erase(ti)
+    if not tile_indices_to_check:
+        return
+    _check_add_terrain_spr_modifier(entity, tile_positions, tile_indices_to_check)
+
+func _check_add_terrain_spr_modifier(entity: BaseEntity, tile_positions: Array, tile_indices_to_check: Array) -> void:
+    for l in layers:
+        for pos in tile_positions:
+            var ti = l.get_cell_s(pos)
+            if ti == -1 or not ti in tile_indices_to_check:
+                continue
+            tile_indices_to_check.erase(ti)
+            if conditional_tile_event([pos], "tile_sprite_modifier", entity, true, ti):
+                var sprite_modifier_info: Dictionary = tile_defs[ti].get("terrain_sprite_modifier", {})
+                if sprite_modifier_info:
+                    entity.add_sprite_modifier(sprite_modifier_info)
+                # redundant safety check
+                if not entity.terrain_sprite_modifiers.has(ti):
+                    entity.terrain_sprite_modifiers.append(ti)
 
 # Resolve tile event for every tile index that exists at all locations provided
 # (Only once per index-position pair)
@@ -590,11 +629,13 @@ func resolve_tile_event(at_tile_positions: Array, tile_event_name: String, conte
             if event_property and event_property.is_conditional():
                 event_property.resolve(null, context_entity, at_pos)
 
-func conditional_tile_event(at_tile_positions: Array, tile_event_name: String, context_entity: BaseEntity, is_all: bool = false) -> bool:
+func conditional_tile_event(at_tile_positions: Array, tile_event_name: String, context_entity: BaseEntity, is_all: bool = false, only_index: int = -1) -> bool:
     for at_pos in at_tile_positions:
         var resolved_indices: Array[int] = []
         for l in layers:
             var ti = l.get_cell_s(at_pos)
+            if only_index != -1 and ti != only_index:
+                continue
             if ti == -1 or ti in resolved_indices:
                 continue
             resolved_indices.append(ti)
@@ -648,3 +689,31 @@ func get_all_tile_names() -> Array[String]:
         if not t_name in names:
             names.append(t_name)
     return names
+
+func check_terrain_spr_mod_for_created(created_entity: BaseEntity) -> void:
+    _check_add_terrain_spr_modifier(created_entity, [created_entity.get_stationary_position()], tiles_with_sprite_modifiers.duplicate())
+    
+    # If the entity is created moving, check and remove the terrain sprite mod from their previous pos if it's no longer active during the move
+    if created_entity.moving:
+        _check_and_remove_terrain_spr_mod_for_moving(created_entity, created_entity.get_moving_position())
+
+func post_move_actions(moving_entity: BaseEntity, _from_position: Vector2i, to_position: Vector2i) -> void:
+    _check_and_remove_terrain_spr_mod_for_moving(moving_entity, to_position)
+
+func _check_and_remove_terrain_spr_mod_for_moving(moving_entity: BaseEntity, to_position: Vector2i) -> void:
+    if not moving_entity.terrain_sprite_modifiers:
+        return
+    
+    var cur_terrain_mods: = moving_entity.terrain_sprite_modifiers.duplicate()
+    
+    var overlapping_tile_indices: Array[int] = []
+    for l in layers:
+        var ti = l.get_cell_s(to_position)
+        overlapping_tile_indices.append(ti)
+    
+    for mod_tile_index in cur_terrain_mods:
+        if not mod_tile_index in overlapping_tile_indices:
+            var mod_info: Dictionary = tile_defs[mod_tile_index].get("terrain_sprite_modifier", {})
+            moving_entity.remove_sprite_modifier(mod_info)
+            moving_entity.terrain_sprite_modifiers.erase(mod_tile_index)
+    
