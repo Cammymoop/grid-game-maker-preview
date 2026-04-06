@@ -14,7 +14,7 @@ var moving: = false
 var just_moved: = false
 var steps_remaining: int = 0
 
-var sprite: Node2D
+var sprite: MaskLayerSprite
 
 # tiles per second
 var current_move_speed: float = 0
@@ -47,9 +47,15 @@ func _ready() -> void:
 	pre_init()
 	setup_initial_position()
 
+func _make_sprite() -> void:
+	if sprite:
+		return
+	sprite = MaskLayerSprite.new()
+	add_child(sprite, true)
+
 func pre_init() -> void:
 	entity_name = EntityManager.get_entity_name(entity_index)
-	sprite = $Sprite2D
+	_make_sprite()
 	offset_center()
 
 func setup_initial_position() -> void:
@@ -317,7 +323,7 @@ func set_visual_facing(new_facing):
 	var no_rotate = EntityManager.get_entity_property(self, "no_rotation")
 	if no_rotate != null and no_rotate.get_value():
 		return
-	sprite.rotation = Utility.facing_rotation(visual_facing)
+	sprite.set_sprite_rotation(Utility.facing_rotation(visual_facing))
 
 func set_facing(new_facing):
 	facing = new_facing

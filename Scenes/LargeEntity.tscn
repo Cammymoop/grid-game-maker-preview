@@ -1,13 +1,6 @@
-[gd_scene load_steps=3 format=2]
+[gd_scene format=3 uid="uid://v1ob8isvhyqx"]
 
-[ext_resource path="res://src/LargeEntity.gd" type="Script" id=1]
-[ext_resource path="res://assets/img/entityTiles.png" type="Texture2D" id=2]
+[ext_resource type="Script" uid="uid://c0gegacm3cqx3" path="res://src/LargeEntity.gd" id="1"]
 
-[node name="BaseEntity" type="Node2D" groups=["_entity_"]]
-script = ExtResource( 1 )
-
-[node name="Sprite2D" type="Sprite2D" parent="."]
-position = Vector2( 16, 16 )
-texture = ExtResource( 2 )
-region_enabled = true
-region_rect = Rect2( 0, 0, 32, 32 )
+[node name="BaseEntity" type="Node2D" unique_id=1799560345 groups=["_entity_"]]
+script = ExtResource("1")

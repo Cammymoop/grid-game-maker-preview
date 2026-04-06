@@ -14,6 +14,8 @@ var checkpoint_save: = {}
 var editor_save: = {}
 var loaded_level: = {}
 
+var quicksave_state: = {}
+
 var loaded_level_name: = ""
 
 var loaded = false
@@ -114,6 +116,7 @@ func load_game_definition_data(definition_data: Dictionary) -> void:
 	loaded_from_game_name = cur_game_name
 	
 	editor_save = {}
+	quicksave_state = {}
 	checkpoint_save = {}
 	loaded_level = {}
 	
@@ -194,7 +197,7 @@ func get_serialized_play_state() -> Dictionary:
 	var s_ent = EntityManager.serialize()
 	return {"game_name": cur_game_name, "map": s_map, "entities": s_ent}
 
-func load_serialized_play_state(serialized_state: Dictionary) -> void:
+func load_serialized_play_state(serialized_state: Dictionary, as_level_load: bool = true) -> void:
 	if cur_scene != "Play":
 		print("Can't deserialize play state, not in play scene")
 		return
@@ -204,13 +207,14 @@ func load_serialized_play_state(serialized_state: Dictionary) -> void:
 	set_pause("gm_loading_state", true)
 	
 	await get_tree().process_frame
-	await get_tree().process_frame
+	#await get_tree().process_frame
 	EntityManager.clear()
 	MapManager.clear_layers()
 	MapManager.deserialize(serialized_state['map'])
 	EntityManager.deserialize(serialized_state['entities'])
 	
-	level_state_loaded.emit()
+	if as_level_load:
+		level_state_loaded.emit()
 	set_pause("gm_loading_state", false)
 
 func create_game_camera() -> void:
@@ -255,19 +259,27 @@ func save_checkpoint() -> void:
 func load_checkpoint() -> void:
 	if not checkpoint_save:
 		if loaded_level_name and editor_save:
-			load_serialized_play_state(editor_save)
+			load_serialized_play_state(editor_save, false)
 		return
-	load_serialized_play_state(checkpoint_save)
+	load_serialized_play_state(checkpoint_save, false)
 func clear_checkpoint() -> void:
 	checkpoint_save = {}
 
 func save_edited() -> void:
-	print_debug("setting editor_save")
 	editor_save = get_serialized_play_state()
 	clear_checkpoint()
 func load_edited() -> void:
 	load_serialized_play_state(editor_save)
 	clear_checkpoint()
+
+func save_quicksave() -> void:
+	quicksave_state = get_serialized_play_state()
+func load_quicksave() -> void:
+	if not quicksave_state:
+		return
+	load_serialized_play_state(quicksave_state, false)
+func clear_quicksave() -> void:
+	quicksave_state = {}
 
 # hack
 func update_saved_level_metadata(new_metadata: Dictionary) -> void:
@@ -445,6 +457,15 @@ func _process(_delta):
 			get_tree().quit()
 		elif cur_scene == "Play":
 			toggle_pause_menu()
+	elif Input.is_action_just_pressed(&"press_quicksave"):
+		save_quicksave()
+		GlobalToaster.show_toast_message("Quicksaved")
+	elif Input.is_action_just_pressed(&"press_quickload"):
+		if quicksave_state:
+			load_quicksave()
+			GlobalToaster.show_toast_message("Loaded quicksave")
+		else:
+			GlobalToaster.show_toast_message("No Quicksave")
 
 func get_all_used_prop_names() -> Array[String]:
 	var prop_names: Array[String] = []

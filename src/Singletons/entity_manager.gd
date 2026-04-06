@@ -421,9 +421,12 @@ func restore_entity(serialized_entity: Dictionary, refresh: bool = false) -> voi
 func setup_entity_texture(entity: BaseEntity) -> void:
     var texture_index = entity_defs[entity.entity_index]['texture']
     var texture_sub_index = entity_defs[entity.entity_index]['tex_index']
-    var sprite = entity.get_node("Sprite2D")
-    sprite.texture = TextureManager.get_texture(texture_index)
-    sprite.region_rect = TextureManager.get_index_rect(texture_index, texture_sub_index)
+    var sprite: MaskLayerSprite = entity.sprite
+    var sprite_config: Dictionary = entity_defs[entity.entity_index].get("sprite_config", {})
+    if sprite_config and sprite_config.get("layers", []):
+        sprite.set_main_layers(sprite_config["layers"])
+    else:
+        sprite.set_as_single(texture_index, texture_sub_index)
 
 func serialize() -> Dictionary:
     var serialized_entities: Array = []

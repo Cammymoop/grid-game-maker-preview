@@ -1,3 +1,4 @@
+class_name MaskLayerSprite
 extends Node2D
 
 var layers: Array[Dictionary] = []
