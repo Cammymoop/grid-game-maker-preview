@@ -358,9 +358,20 @@ func create_entity(entity_index: int, tile_position: Vector2i, facing: int = 0, 
         entity.set_active(true)
     on_entity_added(entity)
     
+    post_created_at_actions(entity)
+    
     MapManager.check_terrain_spr_mod_for_created(entity)
     
     return entity
+
+func post_created_at_actions(entity: BaseEntity) -> void:
+    var at_pos: = entity.get_stationary_position()
+    var sitting_on_entities: Array = get_entities_at(at_pos, entity)
+    for e in sitting_on_entities:
+        resolve_entity_interaction_event("i_finish_move_onto", entity, e, at_pos)
+    if entity.active:
+        for e in sitting_on_entities:
+            resolve_entity_interaction_event("finish_move_onto", e, entity, at_pos)
 
 func setup_entity_controller(entity: BaseEntity) -> void:
     var entity_index = entity.entity_index
@@ -530,6 +541,15 @@ func get_entities_at(tile_position: Vector2, exclude_entity: Object = null, excl
                 entities_here.append(e)
     return entities_here
 
+func get_entities_at_multiple(tile_positions: Array, exclude_entity: Object = null, exclude_list: Array = [], include_moving_away: bool = false) -> Array:
+    var entities_here: Array = []
+    for e in entity_list:
+        if e == exclude_entity or (exclude_list and e.instance_id in exclude_list):
+            continue
+        if e.is_at_multiple(tile_positions, include_moving_away):
+            entities_here.append(e)
+    return entities_here
+
 func find_entity_by_index(entity_index: int, first: bool = true) -> BaseEntity:
     for i in Utility.array_iter(entity_list, not first):
         if entity_list[i].entity_index == entity_index:
@@ -541,6 +561,13 @@ func find_entity_with_property(prop_name: String, first: bool = true) -> BaseEnt
         if entity_has_property(entity_list[i], prop_name):
             return entity_list[i]
     return null
+
+func filter_entities_by_property(prop_name: String, entities: Array, invert: bool = false) -> Array:
+    var filtered_entities: Array = []
+    for i in entities.size():
+        if entity_has_property(entities[i], prop_name) != invert:
+            filtered_entities.append(entities[i])
+    return filtered_entities
 
 func find_entity_with_truthy_property(prop_name: String, first: bool = true) -> BaseEntity:
     for i in Utility.array_iter(entity_list, not first):
@@ -601,10 +628,10 @@ func finish_move(moving_entity, onto_positions: Array) -> void:
                 entities_overlapped_at.append(onto_position)
 
     for i in entities_here.size():
-        var e = entities_here[i]
-        var tile_position = entities_overlapped_at[i]
-        resolve_entity_interaction_event("i_finish_move_onto", moving_entity, e, tile_position)
-        resolve_entity_interaction_event("finish_move_onto", e, moving_entity, tile_position)
+        resolve_entity_interaction_event("i_finish_move_onto", moving_entity, entities_here[i], entities_overlapped_at[i])
+    if moving_entity.active:
+        for i in entities_here.size():
+            resolve_entity_interaction_event("finish_move_onto", entities_here[i], moving_entity, entities_overlapped_at[i])
 
 func resolve_entity_interaction_event(event_name: String, actor, interactee, at_tile_position: Vector2) -> void:
     var event_prop: = get_entity_property(actor, event_name)
@@ -661,6 +688,13 @@ func post_move_actions(moving_entity, from_position, to_position, exclude_group:
         resolve_entity_interaction_event("post_move_onto", e, moving_entity, to_position)
     
     MapManager.post_move_actions(moving_entity, from_position, to_position)
+
+func post_die_actions(dying_entity: BaseEntity) -> void:
+    if not dying_entity.moving:
+        var at_pos: = dying_entity.get_stationary_position()
+        var sitting_on_entities: Array = get_entities_at(at_pos, dying_entity)
+        for e in sitting_on_entities:
+            resolve_entity_interaction_event("post_move_off_of", e, dying_entity, at_pos)
 
 func post_move_multi_pos(moving_entity, moved_off_positions: Array, moved_onto_positions: Array, exclude_group: Array = []) -> void:
     var entities_moved_off: Array = []

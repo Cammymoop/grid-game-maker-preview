@@ -1,6 +1,8 @@
 class_name MaskLayerSprite
 extends Node2D
 
+var clipping_spr_scn: PackedScene = preload("res://src/Utility/sub_vp_friendly_clipping_sprite.tscn")
+
 var layers: Array[Dictionary] = []
 var current_rotation: float = 0
 
@@ -123,11 +125,6 @@ func create_and_add_nodes_for_layer(layer_info: Dictionary) -> void:
     
     var layer_tex: Texture = TextureManager.get_texture(layer_texture_id)
     var layer_tex_rect: Rect2 = TextureManager.get_index_rect(layer_texture_id, layer_info.get("tex_index", 0))
-    var layer_spr: = Sprite2D.new()
-    layer_spr.texture = layer_tex
-    layer_spr.region_rect = layer_tex_rect
-    layer_spr.region_enabled = true
-    var main_layer_node: Node2D = layer_spr
     
     var is_masked: bool = layer_info.get("masked", false)
     var mask_texture_id: int = -1
@@ -136,16 +133,29 @@ func create_and_add_nodes_for_layer(layer_info: Dictionary) -> void:
         if mask_texture_id == -1:
             is_masked = false
     
+    var main_layer_node: Node2D = null
     if is_masked:
+        var clipping_spr: = clipping_spr_scn.instantiate()
+        clipping_spr.texture = layer_tex
+        clipping_spr.region_rect = layer_tex_rect
+        clipping_spr.region_enabled = true
+        main_layer_node = clipping_spr
+
+        var mask_src_tex: Texture = TextureManager.get_texture(mask_texture_id)
         var mask_tex_rect: Rect2 = TextureManager.get_index_rect(mask_texture_id, layer_info.get("mask_tex_index", 0))
         var mask_clip_outer: bool = layer_info.get("mask_clip_outer", true)
         var mask_is_bw: bool = layer_info.get("mask_is_bw", false)
 
-        var mask_spr: = Sprite2D.new()
-        mask_spr.texture = create_alpha_mask_from_texture_region(TextureManager.get_texture(mask_texture_id), mask_tex_rect, mask_is_bw, mask_clip_outer)
-        mask_spr.clip_children = CanvasItem.CLIP_CHILDREN_ONLY
-        main_layer_node = mask_spr
-        main_layer_node.add_child(layer_spr)
+        # clipping sprite template comes with the mask sprite, just need to add the texture
+        # note the mask must cover the size of the clipping sprite for it to work as intended
+        var mask_spr: = clipping_spr.get_child(0)
+        mask_spr.texture = create_bw_mask_from_texture_region(mask_src_tex, mask_tex_rect, mask_is_bw, mask_clip_outer)
+    else:
+        var layer_spr: = Sprite2D.new()
+        layer_spr.texture = layer_tex
+        layer_spr.region_rect = layer_tex_rect
+        layer_spr.region_enabled = true
+        main_layer_node = layer_spr
     
     add_child(main_layer_node)
     var layer_scale: Vector2 = layer_info.get("scale", Vector2.ONE)
@@ -156,10 +166,10 @@ func create_and_add_nodes_for_layer(layer_info: Dictionary) -> void:
     main_layer_node.set_meta("modifier", layer_info.get("modifier", ""))
     
     var layer_rotates: bool = layer_info.get("rotates", true)
-    var sub_layer_rotates: bool = false
+    var sub_layer_rotates: bool = layer_rotates
     if is_masked:
-        sub_layer_rotates = layer_rotates
-        layer_rotates = layer_info.get("mask_rotates", false)
+        sub_layer_rotates = layer_info.get("mask_rotates", true)
+        prints("layer_rotates: %s, sub_layer_rotates: %s" % [layer_rotates, sub_layer_rotates])
 
     main_layer_node.set_meta("rotates", layer_rotates)
     main_layer_node.set_meta("sub_layer_rotates", sub_layer_rotates)
@@ -206,14 +216,59 @@ func set_sprite_facing(facing: int) -> void:
 func set_sprite_rotation(new_rotation: float) -> void:
     current_rotation = new_rotation
     for layer_node in get_children():
-        if layer_node.get_meta("rotates"):
+        var layer_rotates: bool = layer_node.get_meta("rotates")
+        if layer_rotates:
             layer_node.rotation = new_rotation
-            if not layer_node.get_meta("sub_layer_rotates"):
-                for sub_node in layer_node.get_children():
-                    sub_node.rotation = -new_rotation
-        elif layer_node.get_meta("sub_layer_rotates"):
-            for sub_node in layer_node.get_children():
-                sub_node.rotation = new_rotation
+        if layer_node.get_meta("sub_layer_rotates") != layer_rotates and layer_node.get_child_count() > 0:
+            layer_node.get_child(0).rotation = (-2 * layer_node.rotation) + new_rotation
+
+# Helpers for making expanded mask textures
+func create_bw_mask_from_texture_region(tex: Texture2D, tex_rect: Rect2i, tex_is_bw_mask: bool, clip_outer: bool) -> Texture:
+    if tex_is_bw_mask:
+        return create_bw_mask_from_bw_texture_region(tex, tex_rect, clip_outer)
+    else:
+        return create_bw_mask_from_texture_region_alpha(tex, tex_rect, clip_outer)
+
+func create_bw_mask_from_bw_texture_region(tex: Texture2D, tex_rect: Rect2i, clip_outer: bool) -> Texture:
+    var mask_img: Image = create_expanded_mask_from_rect(tex, tex_rect, Color.BLACK, clip_outer)
+    return ImageTexture.create_from_image(mask_img)
+
+func create_bw_mask_from_texture_region_alpha(tex: Texture2D, tex_rect: Rect2i, clip_outer: bool) -> Texture:
+    var region_img: Image = Image.create(tex_rect.size.x, tex_rect.size.y, false, Image.FORMAT_RGBA8)
+    var src_img: Image = tex.get_image()
+    for y in tex_rect.size.y:
+        for x in tex_rect.size.x:
+            var src_pixel: Color = src_img.get_pixel(x, y)
+            # alpha to grey-white, full opaque
+            region_img.set_pixel(x, y, Color(src_pixel.a, src_pixel.a, src_pixel.a, 1.0))
+    return ImageTexture.create_from_image(expand_image_with_color(region_img, Color.BLACK if clip_outer else Color.WHITE))
+
+# expand on an Image source, needed if I first need to convert colors
+func expand_image_with_color(content_img: Image, bg_color: Color) -> Image:
+    var full_size: Vector2i = Vector2i.ONE * MapManager.tile_width * 2
+    var dest_offset: Vector2i = Vector2i((Vector2(full_size - content_img.size) / 2.0).floor())
+    var full_size_img: Image = Image.create(full_size.x, full_size.y, false, Image.FORMAT_RGBA8)
+    full_size_img.fill(bg_color)
+    full_size_img.blit_rect(content_img, Rect2i(Vector2.ZERO, content_img.size), dest_offset)
+    return full_size_img
+
+# expand on a region from a Texture2D source
+func create_expanded_mask_from_rect(tex: Texture2D, tex_rect: Rect2i, clip_color: Color, clip_outer: bool) -> Image:
+    var texture_region_size: Vector2i = tex_rect.size
+    var src_img: Image = tex.get_image()
+    var full_size: Vector2i = Vector2i.ONE * MapManager.tile_width * 2
+    var mask_img: Image = Image.create(full_size.x, full_size.y, false, Image.FORMAT_RGBA8)
+
+    var dest_offset: Vector2i = Vector2i((Vector2(full_size - texture_region_size) / 2.0).floor())
+    var bg_color: Color = clip_color if clip_outer else Color.WHITE
+    mask_img.fill(bg_color)
+    mask_img.blit_rect(src_img, tex_rect, dest_offset)
+    return mask_img
+
+# These versions are for creating white/transparent masks, because of transparent VP screen texture lacking transparency in 2D, which is being used by clip_children, I'm switching to custom shader and BW mask
+# see above
+func create_expanded_bw_mask_from_rect(tex: Texture2D, tex_rect: Rect2i, clip_outer: bool) -> Image:
+    return create_expanded_mask_from_rect(tex, tex_rect, Color.BLACK, clip_outer)
 
 func create_alpha_mask_from_texture_region(tex: Texture2D, tex_rect: Rect2i, tex_is_bw_mask: bool, clip_outer: bool) -> Texture:
     if tex_is_bw_mask:
@@ -231,18 +286,3 @@ func create_alpha_mask_from_bw_texture_region(tex: Texture2D, tex_rect: Rect2i, 
         for x in mask_img.get_width():
             mask_img.set_pixel(x, y, Color.WHITE if mask_img.get_pixel(x, y).r > 0.5 else Color.TRANSPARENT)
     return ImageTexture.create_from_image(mask_img)
-
-func create_expanded_bw_mask_from_rect(tex: Texture2D, tex_rect: Rect2i, clip_outer: bool) -> Image:
-    return create_expanded_mask_from_rect(tex, tex_rect, Color.BLACK, clip_outer)
-
-func create_expanded_mask_from_rect(tex: Texture2D, tex_rect: Rect2i, clip_color: Color, clip_outer: bool) -> Image:
-    var texture_region_size: Vector2i = tex_rect.size
-    var src_img: Image = tex.get_image()
-    var full_size: Vector2i = Vector2i.ONE * MapManager.tile_width * 2
-    var mask_img: Image = Image.create(full_size.x, full_size.y, false, Image.FORMAT_RGBA8)
-
-    var dest_offset: Vector2i = Vector2i((Vector2(full_size - texture_region_size) / 2.0).floor())
-    var bg_color: Color = clip_color if clip_outer else Color.WHITE
-    mask_img.fill(bg_color)
-    mask_img.blit_rect(src_img, tex_rect, dest_offset)
-    return mask_img

@@ -1,0 +1,13 @@
+[gd_scene format=3 uid="uid://be5seun0xeh7h"]
+
+[ext_resource type="Shader" uid="uid://ijay384llaph" path="res://src/Utility/clip_by_child_red.gdshader" id="1_8bg45"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_f5q02"]
+shader = ExtResource("1_8bg45")
+
+[node name="SubVPFriendlyClippingSprite" type="Sprite2D" unique_id=1889967894]
+clip_children = 1
+material = SubResource("ShaderMaterial_f5q02")
+
+[node name="MaskSpr" type="Sprite2D" parent="." unique_id=662597231]
+region_rect = Rect2(224, 128, 32, 32)

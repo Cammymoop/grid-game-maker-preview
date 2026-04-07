@@ -15,6 +15,8 @@ enum InputTypes {
 	BoolChoice,
 	InvertInput,
 	PositionInput,
+	
+	SlotInput,
 }
 
 # either scene or a script
@@ -33,6 +35,8 @@ var templates: = {
 	InputTypes.InvertInput: preload("res://Scenes/GameEditor/ConditionalEditor/InvertInput.tscn"),
 
 	InputTypes.PositionInput: preload("res://Scenes/GameEditor/ConditionalEditor/vector2i_input.tscn"),
+	
+	InputTypes.SlotInput: preload("res://Scenes/GameEditor/ConditionalEditor/slot_input.tscn"),
 }
 
 func get_template(input_type: InputTypes) -> Control:

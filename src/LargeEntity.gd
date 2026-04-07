@@ -22,6 +22,16 @@ func serialize() -> Dictionary:
 	serialized["entity_class"] = "LargeEntity"
 	return serialized
 
+func is_at_multiple(check_positions: Array[Vector2i], include_moving_away: bool = false) -> bool:
+	var my_positions: = get_positions_at(tile_position)
+	var moving_pos_offset: = Vector2i(next_tile_pos - tile_position)
+	for check_pos in check_positions:
+		if check_pos in my_positions:
+			return true
+		if include_moving_away and check_pos - moving_pos_offset in my_positions:
+			return true
+	return false
+
 func is_at(check_position: Vector2i, include_moving_away: bool = false) -> bool:
 	if moving:
 		if is_at_relative(check_position - Vector2i(next_tile_pos)):

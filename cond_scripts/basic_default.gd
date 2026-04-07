@@ -23,6 +23,19 @@ func cmd_select_tiles_named(slots: Dictionary, chosen_slot: Slot, tile_name: Str
 	var tindex = MapManager.get_tile_index(tile_name)
 	slots[chosen_slot] = MapManager.get_all_positions_of_tile(tindex)
 
+func desc_filter_tiles_named() -> String:
+	return "pos|<= Filter the positions to those where a tile named [tile_name:TileNameInput] [invert:InvertInput:is,is not] found"
+func cmd_filter_tiles_named(slots: Dictionary, chosen_slot: Slot, tile_name: String, invert: bool) -> void:
+	if not Commands.slot_is_positions(chosen_slot) or not slots[chosen_slot]:
+		return
+	var tindex = MapManager.get_tile_index(tile_name)
+	var found_positions = MapManager.get_all_positions_of_tile(tindex)
+	var filtered_positions: Array = []
+	for current_pos in slots[chosen_slot]:
+		if (current_pos in found_positions) != invert:
+			filtered_positions.append(current_pos)
+	slots[chosen_slot] = filtered_positions
+
 func desc_select_tiles_rect() -> String:
 	return "pos|<= Select positions within a rectangle\nstarting at [top_left:PositionInput:0,0]\nwith size [size:PositionInput:1,1]"
 func cmd_select_tiles_rect(slots: Dictionary, chosen_slot: Slot, top_left: Vector2i, size: Vector2i) -> void:
@@ -35,14 +48,45 @@ func cmd_select_tiles_rect(slots: Dictionary, chosen_slot: Slot, top_left: Vecto
 
 func desc_select_tiles_around() -> String:
 	return "pos|<= Select positions within [radius:ValueInput] (full square)"
-func cmd_select_tiles_around(slots: Dictionary, chosen_slot: int, radius: int) -> void:
-	var top_left = get_context_position(slots) - Vector2i(radius, radius)
-	var width: = radius * 2 + 1
+func cmd_select_tiles_around(slots: Dictionary, chosen_slot: int, radius: String) -> void:
+	var radius_int: = int(radius)
+	var top_left = get_context_position(slots) - Vector2i(radius_int, radius_int)
+	var width: = radius_int * 2 + 1
 	var positions: Array = []
 	for xi in range(width):
 		for yi in range(width):
 			positions.append(top_left + Vector2i(xi, yi))
 	slots[chosen_slot] = positions
+
+func desc_select_entity_at() -> String:
+	return "entity|<= Select an entity (ignoring self) at [at_pos_slot:SlotInput:pos] [invert:InvertInput:with,without] a [prop_name:PropertyInput] property"
+func cmd_select_entity_at(slots: Dictionary, chosen_slot: int, at_pos_slot: int, prop_name: String, invert: bool) -> void:
+	if not Commands.slot_is_entity(chosen_slot) or not Commands.slot_is_positions(at_pos_slot):
+		prints("cant select entity at %s" % at_pos_slot, "chosen slot %s is invalid" % chosen_slot)
+		return
+	var at_positions: Array = slots[at_pos_slot]
+	if not at_positions:
+		slots[chosen_slot] = null
+		prints("no positions in slot %s" % at_pos_slot)
+		return
+	var filtered_entities: Array = EntityManager.get_entities_at_multiple(at_positions, slots[Slot.RED])
+	prints("select entity at, pre-filter count: %s" % filtered_entities.size())
+	filtered_entities = EntityManager.filter_entities_by_property(prop_name, filtered_entities, invert)
+	prints("select entity at, post-filter count: %s" % filtered_entities.size(), "selecting first in slot %s" % chosen_slot)
+	slots[chosen_slot] = filtered_entities[0] if filtered_entities else null
+
+func desc_is_entity_at() -> String:
+	return "pos|If there is an entity (ignoring self) at this location [invert:InvertInput:with,without] a [prop_name:PropertyInput] property"
+func cmd_is_entity_at(slots: Dictionary, chosen_slot: int, prop_name: String, invert: bool) -> bool:
+	if not Commands.slot_is_positions(chosen_slot):
+		return false
+	var at_positions: Array = slots[chosen_slot]
+	if not at_positions:
+		return false
+	var entities_here: Array = EntityManager.get_entities_at_multiple(at_positions, slots[Slot.RED])
+	entities_here = EntityManager.filter_entities_by_property(prop_name, entities_here, invert)
+	prints("is entity with property %s at %s: %s" % [prop_name, at_positions, entities_here.size() > 0])
+	return entities_here.size() > 0
 
 func desc_c_has_property() -> String:
 	return "entity,pos|If the entity/tile [invert:InvertInput:has,doesn't have] a [property_name:PropertyInput] property"
@@ -106,8 +150,10 @@ func cmd_c_is_moving(slots: Dictionary, chosen_slot: int, invert: bool, directio
 func desc_a_die() -> String:
 	return "entity|The entity dies now"
 func cmd_a_die(slots: Dictionary, chosen_slot: int) -> void:
-	if Commands.slot_is_entity(chosen_slot):
+	if Commands.slot_is_entity(chosen_slot) and slots[chosen_slot]:
 		slots[chosen_slot].die()
+	else:
+		prints("failed to kill on slot %s" % chosen_slot)
 
 func desc_a_move() -> String:
 	return "entity|The entity starts moving this way [direction:DirectionInput:1]"
@@ -246,4 +292,14 @@ func cmd_compare_property(slots: Dictionary, chosen_slot: int, property_name: St
 			return Utility.check_comparison(number_result, float(value), comparison)
 	elif Commands.slot_is_positions(chosen_slot) and selected:
 		return MapManager.compare_multiple_pos_prop_value(selected, slots[Slot.RED], property_name, comparison, float(value))
+	return false
+
+func desc_exists() -> String:
+	return "entity,pos|If there are any entities/tiles selected in the slot"
+func cmd_exists(slots: Dictionary, chosen_slot: int) -> bool:
+	var selected = slots[chosen_slot]
+	if Commands.slot_is_entity(chosen_slot):
+		return selected != null
+	elif Commands.slot_is_positions(chosen_slot):
+		return selected.size() > 0
 	return false

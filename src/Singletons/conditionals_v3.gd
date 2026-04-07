@@ -65,11 +65,10 @@ func _ready() -> void:
                 prints("Added orch command: %s" % command)
 
 func make_slots(owning_entity, target_entity, tile_position, arguments = []) -> Dictionary:
-    var slots = {}
+    var slots = empty_slots()
     slots[Slot.RED] = owning_entity
     slots[Slot.BLUE] = target_entity
     slots[Slot.GREY] = [tile_position]
-    slots[Slot.BLACK] = []
     slots[Slot.THIS_TILE] = tile_position
     
     if arguments:
@@ -321,3 +320,26 @@ func select_reset(slots: Dictionary) -> void:
 
 func select_reset_slot(slots: Dictionary, slot_id: Slot) -> void:
     slots[slot_id] = reset_slots[slot_id]
+
+func empty_slots() -> Dictionary:
+    return {
+        Slot.RED: null,
+        Slot.BLUE: null,
+        Slot.WHITE: null,
+        Slot.PINK: null,
+        Slot.GREY: [],
+        Slot.BLACK: [],
+        Slot.A: 0,
+        Slot.B: 0,
+        Slot.C: 0,
+        Slot.X: 0.0,
+        Slot.Y: 0.0,
+        Slot.Z: 0.0,
+        Slot.I: "",
+        Slot.II: "",
+        Slot.III: "",
+        Slot.DARK_RED: null,
+        Slot.DARK_BLUE: null,
+        Slot.DARK_GREEN: null,
+        Slot.DARK_ORANGE: null,
+    }

@@ -373,6 +373,7 @@ func die() -> void:
 	var dying = EntityManager.get_entity_property(self, "dying")
 	if dying and dying.is_conditional():
 		dying.resolve(self, null, tile_position)
+	EntityManager.post_die_actions(self)
 	EntityManager.remove_entity(self)
 
 func set_tailing(entity_to_tail) -> void:
@@ -430,3 +431,10 @@ func get_moving_position() -> Vector2i:
 	if not moving:
 		return get_stationary_position()
 	return Vector2i(next_tile_pos)
+
+func is_at_multiple(check_positions: Array, include_moving_away: bool = false) -> bool:
+	if get_moving_position() in check_positions:
+		return true
+	elif include_moving_away and get_stationary_position() in check_positions:
+		return true
+	return false

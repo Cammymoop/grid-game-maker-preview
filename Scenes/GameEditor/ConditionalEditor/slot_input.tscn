@@ -1,0 +1,17 @@
+[gd_scene format=3 uid="uid://bbptrucqhioub"]
+
+[ext_resource type="Script" uid="uid://b2y4psfn57u8u" path="res://src/GameEditor/ConditionalEditor/slot_input.gd" id="1_wukps"]
+[ext_resource type="PackedScene" uid="uid://bh1w4w8i5hk66" path="res://Scenes/GameEditor/SlotSelectorButton.tscn" id="2_4mqjy"]
+
+[node name="SlotSelectorContainer" type="MarginContainer" unique_id=121858909 node_paths=PackedStringArray("slot_button")]
+offset_right = 40.0
+offset_bottom = 40.0
+theme_override_constants/margin_left = 0
+theme_override_constants/margin_top = 0
+theme_override_constants/margin_right = 0
+theme_override_constants/margin_bottom = 0
+script = ExtResource("1_wukps")
+slot_button = NodePath("SlotSelectorButton")
+
+[node name="SlotSelectorButton" parent="." unique_id=1264497244 instance=ExtResource("2_4mqjy")]
+layout_mode = 2
