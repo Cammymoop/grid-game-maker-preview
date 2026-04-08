@@ -150,7 +150,7 @@ func connect_custom_signal(signal_name: String, callable: Callable) -> void:
     if callable.is_valid():
         connect(signal_name, callable)
 
-func do_emit_signal(signal_name: String, owning_entity = null, args = null) -> void:
+func do_emit_signal(signal_name: String, owning_entity: BaseEntity = null, args: Array = []) -> void:
     if not has_user_signal(signal_name):
         print_debug("ERROR: custom signal not found: " + signal_name)
         return
@@ -625,6 +625,8 @@ func preload_controller_templates() -> void:
         controller_templates[controller_name] = load(controllers_path + fname)
 
 func finish_move(moving_entity, onto_positions: Array) -> void:
+    moving_entity.process_deferred_signals()
+
     var entities_here: Array = []
     var entities_overlapped_at: Array = []
     for onto_position in onto_positions:

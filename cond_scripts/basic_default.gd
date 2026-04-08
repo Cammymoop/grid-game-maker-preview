@@ -250,6 +250,8 @@ func desc_a_turn() -> String:
 	return "entity|Turn the entity/tile to face this way [complex_dir:DirectionInput:1]"
 func cmd_a_turn(slots: Dictionary, chosen_slot: int, complex_dir: Dictionary) -> void:
 	if Commands.slot_is_entity(chosen_slot):
+		if not slots[chosen_slot] or slots[chosen_slot].moving:
+			return
 		slots[chosen_slot].turn_to_facing(resolve_complex_direction(complex_dir, slots))
 	elif Commands.slot_is_positions(chosen_slot):
 		set_tiles_to_facing(slots, chosen_slot, resolve_complex_direction(complex_dir, slots))

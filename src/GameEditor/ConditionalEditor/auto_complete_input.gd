@@ -42,7 +42,7 @@ func _ready() -> void:
 	text_submitted.connect(_on_text_submitted)
 	
 	if use_autocomplete_menu:
-		_create_autocomplete_menu()
+		_create_autocomplete_menu.call_deferred()
 
 	if _fetched:
 		update_highlight()

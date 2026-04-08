@@ -422,6 +422,8 @@ func _on_ControllerOptionsShow_pressed():
 	var current_option_values: Dictionary = {}
 	if "controller_options" in the_definition:
 		current_option_values = the_definition["controller_options"].duplicate()
+		if controller_instance.has_method("get_default_options"):
+			current_option_values.merge(controller_instance.get_default_options(), false)
 	elif controller_instance.has_method("get_default_options"):
 		current_option_values = controller_instance.get_default_options()
 	

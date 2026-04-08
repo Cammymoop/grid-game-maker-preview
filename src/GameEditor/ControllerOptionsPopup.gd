@@ -20,6 +20,19 @@ func init(available_options: Dictionary, current_options: Dictionary) -> void:
 				
 				opt.get_node("BoolOptionValue").connect("toggled", Callable(self, "option_updated").bind(option_name))
 				option_values[option_name] = false
+			"int":
+				opt = HBoxContainer.new()
+				var label: Label = Label.new()
+				label.name = "Label"
+				opt.add_child(label, true)
+				
+				var int_input = SpinBox.new()
+				int_input.step = 1
+				int_input.min_value = option.get("min_value", 0)
+				int_input.max_value = option.get("max_value", 100)
+				int_input.name = "IntInput"
+				int_input.value_changed.connect(option_updated.bind(option_name))
+				opt.add_child(int_input, true)
 			"reorderable_list":
 				opt = reorderable_list_scn.instantiate()
 				
@@ -33,9 +46,10 @@ func init(available_options: Dictionary, current_options: Dictionary) -> void:
 				label.name = "Label"
 				opt.add_child(label, true)
 				
-				var property_select = InputTemplates.get_template(InputTemplates.InputTypes.PropertyInput)
+				var property_select: = InputTemplates.get_template(InputTemplates.InputTypes.PropertyInput) as LineEdit
 				property_select.name = "InputControl"
 				property_select.set_arg_name(option_name)
+				property_select.text_changed.connect(option_updated.bind(option_name))
 				opt.add_child(property_select, true)
 		if not opt:
 			push_error("Failed to create input control for option %s" % [option_name])
@@ -57,13 +71,18 @@ func set_current_options(current_options: Dictionary) -> void:
 		match option_meta[option_name]["type"]:
 			"bool":
 				opt.get_node("BoolOptionValue").set_pressed_no_signal(current_options[option_name])
+			"int":
+				opt.get_node("IntInput").value = float(current_options[option_name])
 			"reorderable_list":
 				opt.set_items(current_options[option_name])
 			"property":
 				opt.get_node("InputControl").set_value(current_options[option_name])
 
 func option_updated(value, option_name) -> void:
-	option_values[option_name] = value
+	if option_meta[option_name]["type"] == "int":
+		option_values[option_name] = int(value)
+	else:
+		option_values[option_name] = value
 
 func _on_vis_changed():
 	if not visible:

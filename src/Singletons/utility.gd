@@ -430,3 +430,9 @@ func get_arr_from_vector2(vec: Vector2) -> Array:
 
 func get_arr_from_vector2i(vec: Vector2i) -> Array:
 	return [vec.x, vec.y]
+
+func string_list_union(list_a: Array, list_b: Array) -> Array:
+	for item in list_b:
+		if not item in list_a:
+			list_a.append(item)
+	return list_a

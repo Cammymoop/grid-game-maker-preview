@@ -1,11 +1,13 @@
 [gd_scene format=3 uid="uid://bf3w5kvvtxq83"]
 
 [ext_resource type="Script" uid="uid://b11qxkebwcvfm" path="res://src/GameEditor/NewPropertyDialog.gd" id="1"]
+[ext_resource type="Script" uid="uid://di2eyvsiqwsee" path="res://src/GameEditor/ConditionalEditor/PropertyInput.gd" id="2_m2epb"]
 
 [node name="NewPropetyDialog" type="ConfirmationDialog" unique_id=1688005687]
 oversampling_override = 1.0
 title = "Add Property/Event"
-size = Vector2i(207, 123)
+position = Vector2i(0, 25)
+size = Vector2i(360, 240)
 visible = true
 script = ExtResource("1")
 
@@ -17,7 +19,6 @@ offset_left = 8.0
 offset_top = 8.0
 offset_right = -8.0
 offset_bottom = -49.0
-alignment = 1
 
 [node name="HBoxContainer2" type="HBoxContainer" parent="VBoxContainer" unique_id=1477151240]
 layout_mode = 2
@@ -28,11 +29,16 @@ layout_mode = 2
 text = "Property Name:"
 
 [node name="SetName" type="LineEdit" parent="VBoxContainer/HBoxContainer2" unique_id=635870834]
+custom_minimum_size = Vector2(220, 0)
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 4
+script = ExtResource("2_m2epb")
+include_events = true
+override_default_min_size = Vector2(220, -1)
 
 [node name="SelectEvent" type="MenuButton" parent="VBoxContainer" unique_id=163296998]
+visible = false
 layout_mode = 2
 text = "(Select Event)"
 flat = false

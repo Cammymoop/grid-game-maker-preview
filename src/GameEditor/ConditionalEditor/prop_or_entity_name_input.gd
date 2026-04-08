@@ -23,7 +23,5 @@ func get_all_values() -> Array[String]:
 	elif cur_mode == "entity_name":
 		return EntityManager.get_all_entity_names()
 	elif cur_mode == "both":
-		var vals: = GameManager.get_all_used_prop_names()
-		vals.append_array(EntityManager.get_all_entity_names())
-		return vals
+		return Utility.string_list_union(GameManager.get_all_used_prop_names(), EntityManager.get_all_entity_names())
 	return []

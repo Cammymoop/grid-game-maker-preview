@@ -1,9 +1,7 @@
 [gd_scene format=3 uid="uid://cgwpivoqnwa7l"]
 
 [ext_resource type="Script" uid="uid://dul5ief1gtnlp" path="res://src/GameEditor/controller_options_reorderable_list.gd" id="1_qpffx"]
-[ext_resource type="PackedScene" uid="uid://cemds60k8ytal" path="res://Scenes/UI/icon_button.tscn" id="2_dn0sr"]
-[ext_resource type="Texture2D" uid="uid://tpslcq3ccosh" path="res://assets/img/button_icons/up_small.png" id="3_ndwkf"]
-[ext_resource type="Texture2D" uid="uid://c1h0arduxil1j" path="res://assets/img/button_icons/down_small.png" id="4_fahg2"]
+[ext_resource type="PackedScene" uid="uid://27u0v6yloyx7" path="res://Scenes/GameEditor/ControllerOptions/reorderable_item.tscn" id="2_kqut2"]
 
 [node name="HBoxContainer" type="HBoxContainer" unique_id=2052247205 node_paths=PackedStringArray("list_container")]
 offset_right = 162.0
@@ -22,21 +20,5 @@ layout_mode = 2
 [node name="ItemList" type="VBoxContainer" parent="PanelContainer" unique_id=661182419]
 layout_mode = 2
 
-[node name="ReorderableItem" type="HBoxContainer" parent="PanelContainer/ItemList" unique_id=288574870]
+[node name="ReorderableItem" parent="PanelContainer/ItemList" unique_id=260700139 instance=ExtResource("2_kqut2")]
 layout_mode = 2
-
-[node name="ItemLabel" type="Label" parent="PanelContainer/ItemList/ReorderableItem" unique_id=1502138717]
-layout_mode = 2
-size_flags_horizontal = 3
-text = "Something"
-
-[node name="UpButton" parent="PanelContainer/ItemList/ReorderableItem" unique_id=451892711 instance=ExtResource("2_dn0sr")]
-layout_mode = 2
-icon = ExtResource("3_ndwkf")
-
-[node name="DownButton" parent="PanelContainer/ItemList/ReorderableItem" unique_id=280578097 instance=ExtResource("2_dn0sr")]
-layout_mode = 2
-icon = ExtResource("4_fahg2")
-
-[connection signal="pressed" from="PanelContainer/ItemList/ReorderableItem/UpButton" to="." method="_on_up_button_pressed" flags=18]
-[connection signal="pressed" from="PanelContainer/ItemList/ReorderableItem/DownButton" to="." method="_on_down_button_pressed" flags=18]

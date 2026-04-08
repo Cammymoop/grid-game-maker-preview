@@ -43,6 +43,8 @@ var local_properties: = {}
 
 var terrain_sprite_modifiers: Array[int] = []
 
+var deferred_signals: Array[Dictionary] = []
+
 var instance_id: int = 0
 
 var _pre_init_called: = false
@@ -132,6 +134,8 @@ func serialize() -> Dictionary:
 	
 	important_stuff['entity_class'] = "BaseEntity"
 	
+	important_stuff['deferred_signals'] = JSON.from_native(deferred_signals)
+	
 	return important_stuff
 
 func deserialize(data: Dictionary) -> void:
@@ -154,6 +158,9 @@ func deserialize(data: Dictionary) -> void:
 	next_tile_pos = Vector2(data['next_tile_pos'][0], data['next_tile_pos'][1])
 	if "steps_remaining" in data:
 		steps_remaining = int(data["steps_remaining"])
+	
+	if "deferred_signals" in data:
+		deferred_signals = JSON.to_native(data['deferred_signals'])
 	
 	await EntityManager.post_deserialize
 
@@ -426,7 +433,13 @@ func tail_follow(_move_facing) -> void:
 func can_i_move_relative(relative_direction) -> bool:
 	return can_i_move(Utility.resolve_relative_direction(relative_direction, facing))
 
-func entity_manager_signal(signaling_entity, args, signal_name) -> void:
+func entity_manager_signal(signaling_entity: BaseEntity, args: Array, signal_name: String) -> void:
+	if not moving:
+		_handle_signal(signaling_entity, args, signal_name)
+	else:
+		add_deferred_signal(signaling_entity, args, signal_name)
+
+func _handle_signal(signaling_entity: BaseEntity, args: Array, signal_name: String) -> void:
 	var handler = EntityManager.get_entity_property(self, "when_signal_" + signal_name)
 	if handler and handler.is_conditional():
 		handler.resolve(self, signaling_entity, tile_position, args)
@@ -458,3 +471,16 @@ func is_at_multiple(check_positions: Array, include_moving_away: bool = false) -
 	elif include_moving_away and get_stationary_position() in check_positions:
 		return true
 	return false
+
+func add_deferred_signal(signaling_entity: BaseEntity, args: Array, signal_name: String) -> void:
+	deferred_signals.append({
+		"signaling_entity": signaling_entity.instance_id,
+		"args": args,
+		"signal_name": signal_name
+	})
+
+func process_deferred_signals() -> void:
+	for deferred_signal in deferred_signals:
+		var signaling_entity = EntityManager.get_instance(deferred_signal["signaling_entity"])
+		_handle_signal(signaling_entity, deferred_signal["args"], deferred_signal["signal_name"])
+	deferred_signals.clear()
