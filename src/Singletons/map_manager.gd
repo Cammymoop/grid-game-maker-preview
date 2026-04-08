@@ -74,7 +74,10 @@ var tile_defs: = {
 
 var tile_index_map: = {}
 
+var is_tile_preview_mode: = false
+
 var tileset: TileSet = null
+var preview_tileset: TileSet = null
 
 var im_ready: = false
 
@@ -104,17 +107,17 @@ func fix_string_keys():
             tile_defs[intk]["texture"] = int(tile_defs[intk]["texture"])
         if "tex_index" in tile_defs[intk]:
             tile_defs[intk]["tex_index"] = int(tile_defs[intk]["tex_index"])
+        if "preview_variant" in tile_defs[intk]:
+            if "texture" in tile_defs[intk]["preview_variant"]:
+                tile_defs[intk]["preview_variant"]["texture"] = int(tile_defs[intk]["preview_variant"]["texture"])
+            if "tex_index" in tile_defs[intk]["preview_variant"]:
+                tile_defs[intk]["preview_variant"]["tex_index"] = int(tile_defs[intk]["preview_variant"]["tex_index"])
 
 func clear_layers():
     for l in layers:
         if is_instance_valid(l):
             l.queue_free()
     layers = []
-
-func auto_setup_layers():
-    layers = get_tree().get_nodes_in_group("MapLayer")
-    for l in layers:
-        l.tile_set = tileset
 
 func create_random_layer():
     create_plain_layer()
@@ -129,39 +132,58 @@ func create_plain_layer():
     
     emit_signal("level_size_changed")
 
+func current_tileset() -> TileSet:
+    return preview_tileset if is_tile_preview_mode else tileset
+
 func create_empty_layer():
     var map_layer = map_layer_template.instantiate()
     var ents = Utility.get_world().get_node("Entities")
     ents.add_sibling(map_layer, true)
-    map_layer.tile_set = tileset
+    map_layer.tile_set = current_tileset()
     layers.append(map_layer)
     return map_layer
 
 func create_tileset():
     var new_tileset: = TileSet.new()
+    var new_preview_tileset: = TileSet.new()
     new_tileset.tile_size = Vector2i.ONE * tile_width
+    new_preview_tileset.tile_size = Vector2i.ONE * tile_width
     tile_index_map = {}
     
     for tile_index in tile_defs:
         var tile_info = tile_defs[tile_index]
+        var tile_preview_info: Dictionary = tile_info.get("preview_variant", {})
+        if not tile_preview_info:
+            tile_preview_info = tile_info
         var atlas_source: = TileSetAtlasSource.new()
+        var preview_atlas_source: = TileSetAtlasSource.new()
         atlas_source.texture = TextureManager.get_texture(tile_info['texture'])
+        preview_atlas_source.texture = TextureManager.get_texture(tile_preview_info['texture'])
         new_tileset.add_source(atlas_source)
+        new_preview_tileset.add_source(preview_atlas_source)
         
         if tile_info['name'] in tile_index_map:
             print_debug("WARNING: tile name already in use: " + tile_info['name'])
         tile_index_map[tile_info['name']] = tile_index
         
         var tile_native_size = TextureManager.get_texture_tile_size(tile_info['texture'])
+        var preview_tile_native_size = TextureManager.get_texture_tile_size(tile_preview_info['texture'])
         atlas_source.texture_region_size = tile_native_size
+        preview_atlas_source.texture_region_size = preview_tile_native_size
         var atlas_coords: = TextureManager.get_index_atlas_coords(tile_info['texture'], tile_info['tex_index'])
+        var preview_atlas_coords: = TextureManager.get_index_atlas_coords(tile_preview_info['texture'], tile_preview_info['tex_index'])
         atlas_source.create_tile(atlas_coords)
+        preview_atlas_source.create_tile(preview_atlas_coords)
         
         if "z-index" in tile_info['properties']:
+            var tile_z_index = int(tile_info['properties']['z-index'])
             var tile_data: = atlas_source.get_tile_data(atlas_coords, 0)
-            tile_data.z_index = int(tile_info['properties']['z-index'])
+            tile_data.z_index = tile_z_index
+            var preview_tile_data: = preview_atlas_source.get_tile_data(preview_atlas_coords, 0)
+            preview_tile_data.z_index = tile_z_index
             
     tileset = new_tileset
+    preview_tileset = new_preview_tileset
 
 func update_index_map() -> void:
     tile_index_map = {}
@@ -171,10 +193,22 @@ func update_index_map() -> void:
             push_warning("WARNING: tile name already in use: " + tname)
         tile_index_map[tname] = tile_index
 
-func get_tile_texture(tile_index) -> Texture2D:
-    return TextureManager.get_texture(tile_defs[tile_index]['texture'])
-func get_tile_texture_rect(tile_index) -> Rect2:
-    return TextureManager.get_index_rect(tile_defs[tile_index]['texture'], tile_defs[tile_index]['tex_index'])
+func get_tile_texture(tile_index, preview: bool = false) -> Texture2D:
+    var tex_from: Dictionary = tile_defs[tile_index]
+    if preview and tex_from.get("preview_variant", {}):
+        tex_from = tex_from["preview_variant"]
+    return TextureManager.get_texture(tex_from['texture'])
+func get_tile_texture_rect(tile_index, preview: bool = false) -> Rect2:
+    var tex_from: Dictionary = tile_defs[tile_index]
+    if preview and tex_from.get("preview_variant", {}):
+        tex_from = tex_from["preview_variant"]
+    return TextureManager.get_index_rect(tex_from['texture'], tex_from['tex_index'])
+
+func get_tile_atlas_coords(tile_index, preview: bool = false) -> Vector2i:
+    var tex_from: Dictionary = tile_defs[tile_index]
+    if preview and tex_from.get("preview_variant", {}):
+        tex_from = tex_from["preview_variant"]
+    return TextureManager.get_index_atlas_coords(tex_from['texture'], tex_from['tex_index'])
 
 func serialize() -> Dictionary:
     var serialized_layers = []
@@ -717,3 +751,24 @@ func _check_and_remove_terrain_spr_mod_for_moving(moving_entity: BaseEntity, to_
             moving_entity.remove_sprite_modifier(mod_info)
             moving_entity.terrain_sprite_modifiers.erase(mod_tile_index)
     
+
+func switch_tiles_preview_mode(enable_preview: bool) -> void:
+    if enable_preview == is_tile_preview_mode:
+        return
+    is_tile_preview_mode = enable_preview
+    
+    for tilemap_layer in layers:
+        tilemap_layer.tile_set = current_tileset()
+        
+    # Cell data is stored in TileMapLayers as source IDs and atlas coords, so in order for the tilemap to work
+    # we need to change the atlas coords even though each source only has a single tile defined anyway
+    for tile_index in tile_defs:
+        if not tile_defs[tile_index].get("preview_variant", {}):
+            continue
+
+        var cur_atlas_coords: = get_tile_atlas_coords(tile_index, is_tile_preview_mode)
+        for tilemap_layer: TileMapLayer in layers:
+            var tile_index_positions: = tilemap_layer.get_used_cells_by_id(tile_index)
+            for at_pos in tile_index_positions:
+                var alt_id: = tilemap_layer.get_cell_alternative_tile(at_pos)
+                tilemap_layer.set_cell(at_pos, tile_index, cur_atlas_coords, alt_id)

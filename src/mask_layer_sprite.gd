@@ -160,7 +160,6 @@ func create_and_add_nodes_for_layer(layer_info: Dictionary, layer_index: int) ->
     add_child(main_layer_node)
     var layer_scale: Vector2 = Utility.get_vector2_from_arr(layer_info.get("scale", [1,1]))
     var layer_offset: Vector2 = Utility.get_vector2_from_arr(layer_info.get("offset", [0,0]))
-    prints("layer %d scale: %s, offset: %s" % [layer_index, layer_scale, layer_offset])
     main_layer_node.scale = layer_scale
     main_layer_node.position = layer_offset
     

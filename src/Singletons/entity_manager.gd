@@ -301,11 +301,17 @@ func create_random_entity(entity_name) -> void:
         create_entity(get_entity_index(entity_name), entity_pos)
         break
 
-func get_entity_texture(entity_index: int):
-    return TextureManager.get_texture(entity_defs[entity_index]['texture'])
+func get_entity_texture(entity_index: int, preview: bool = false):
+    if not preview or entity_defs[entity_index].get("preview_variant", {}).is_empty():
+        return TextureManager.get_texture(entity_defs[entity_index]['texture'])
+    else:
+        return TextureManager.get_texture(entity_defs[entity_index]['preview_variant']['texture'])
 
-func get_entity_texture_rect(entity_index: int):
-    return TextureManager.get_index_rect(entity_defs[entity_index]['texture'], entity_defs[entity_index]['tex_index'])
+func get_entity_texture_rect(entity_index: int, preview: bool = false):
+    var tex_from: Dictionary = entity_defs[entity_index]
+    if preview and tex_from.get("preview_variant", {}):
+        tex_from = tex_from["preview_variant"]
+    return TextureManager.get_index_rect(tex_from['texture'], tex_from['tex_index'])
 
 func get_new_controller(controller_name: String):
     return controller_templates[controller_name].instantiate()

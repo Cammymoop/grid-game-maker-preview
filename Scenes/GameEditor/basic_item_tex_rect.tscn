@@ -1,0 +1,67 @@
+[gd_scene format=3 uid="uid://dsjbo767ulglw"]
+
+[ext_resource type="Script" uid="uid://exudf110pfav" path="res://Scenes/GameEditor/basic_item_display.gd" id="1_46vrw"]
+[ext_resource type="Texture2D" uid="uid://d0uyc2rshryrj" path="res://assets/img/entityTiles.png" id="2_6evqi"]
+[ext_resource type="Texture2D" uid="uid://b6lj5qghhre2t" path="res://assets/img/tiles.png" id="2_uq43k"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_41xpm"]
+atlas = ExtResource("2_uq43k")
+region = Rect2(96, 32, 32, 32)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_uq43k"]
+content_margin_left = 0.0
+content_margin_top = 0.0
+content_margin_right = 0.0
+content_margin_bottom = 0.0
+bg_color = Color(0.1, 0.1, 0.1, 0.6)
+corner_detail = 5
+shadow_color = Color(0, 0, 0, 0.52156866)
+shadow_size = 1
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_afpf7"]
+atlas = ExtResource("2_6evqi")
+region = Rect2(256, 0, 32, 32)
+
+[node name="ItemDisplay" type="Control" unique_id=1768807943 node_paths=PackedStringArray("main_tex_rect", "small_tex_container", "small_tex_rect")]
+texture_filter = 1
+custom_minimum_size = Vector2(64, 64)
+layout_mode = 3
+anchors_preset = 0
+offset_right = 64.0
+offset_bottom = 64.0
+size_flags_horizontal = 4
+mouse_filter = 2
+script = ExtResource("1_46vrw")
+main_tex_rect = NodePath("MainTexture")
+small_tex_container = NodePath("Panel")
+small_tex_rect = NodePath("Panel/SmallTexture")
+
+[node name="MainTexture" type="TextureRect" parent="." unique_id=234669689]
+texture_filter = 1
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = SubResource("AtlasTexture_41xpm")
+expand_mode = 4
+
+[node name="Panel" type="Panel" parent="." unique_id=837662279]
+layout_mode = 0
+offset_left = 39.0
+offset_top = -4.0
+offset_right = 68.0
+offset_bottom = 25.0
+theme_override_styles/panel = SubResource("StyleBoxFlat_uq43k")
+
+[node name="SmallTexture" type="TextureRect" parent="Panel" unique_id=1610100322]
+texture_filter = 1
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = SubResource("AtlasTexture_afpf7")
+expand_mode = 4

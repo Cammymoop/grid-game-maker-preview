@@ -206,10 +206,10 @@ func get_new_texture_index() -> int:
         index = max(index, ti+1)
     return index
 
-func get_texture_name(texture_index):
+func get_texture_name(texture_index: int) -> String:
     return texture_names[texture_index]
 
-func get_texture_name_list():
+func get_texture_name_list() -> Array:
     var tlist = []
     for i in textures:
         tlist.append(get_texture_name(i))
@@ -219,7 +219,7 @@ func get_texture_name_list():
 func get_all_indexes() -> Array:
     return textures.keys()
 
-func get_texture(texture_index) -> Texture:
+func get_texture(texture_index: int) -> Texture:
     if not texture_index in textures:
         return placeholder
     return textures[texture_index]
@@ -229,23 +229,23 @@ func get_index_offset(texture_index: int, tile_index: int) -> Vector2:
     var tsize = tile_sizes[texture_index]
     return Vector2(tile_index % tpr * tsize.x, floor(tile_index/float(tpr)) * tsize.y)
 
-func get_tiles_per_row(texture_index):
+func get_tiles_per_row(texture_index: int) -> int:
     return tiles_per_row[texture_index]
 
-func get_texture_metadata(texture_index) -> Dictionary:
+func get_texture_metadata(texture_index: int) -> Dictionary:
     return texture_meta[texture_index]
 
-func get_index_rect(texture_index, tile_index) -> Rect2:
+func get_index_rect(texture_index: int, tile_index: int) -> Rect2:
     return Rect2(get_index_offset(texture_index, tile_index), tile_sizes[texture_index])
 
-func get_texture_tile_size(texture_index) -> Vector2i:
+func get_texture_tile_size(texture_index: int) -> Vector2i:
     return tile_sizes[texture_index]
 
-func get_index_atlas_coords(texture_index, tile_index) -> Vector2i:
+func get_index_atlas_coords(texture_index: int, tile_index: int) -> Vector2i:
     var tpr: int = tiles_per_row[texture_index]
-    return Vector2i(tile_index % tpr, floor(tile_index/tpr))
+    return Vector2i(tile_index % tpr, floor(tile_index/float(tpr)))
 
-func get_last_sub_index(texture_index) -> int:
+func get_last_sub_index(texture_index: int) -> int:
     var tpr: int = tiles_per_row[texture_index]
     var rows: int = texture_rows[texture_index]
     return (rows * tpr) - 1

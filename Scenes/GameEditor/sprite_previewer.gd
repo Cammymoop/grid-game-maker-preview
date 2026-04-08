@@ -4,6 +4,9 @@ extends MarginContainer
 @export var interp_duration: float = 0.24
 @export_exp_easing() var interp_ease_param: float = 0.2
 
+@export var preview_viewport_padding: float = 0.25
+@export var preview_vp_container: SubViewportContainer
+@export var preview_subviewport: SubViewport
 @export var the_sprite: MaskLayerSprite
 @export var spin_sprite_toggle: CheckButton
 
@@ -17,8 +20,17 @@ var rotation_interp_from: float = 0
 var interp_timer: float = 0
 
 func _ready() -> void:
+    update_preview_size()
     if spin_sprite_toggle:
         spin_sprite_toggle.toggled.connect(on_spin_sprite_toggled)
+
+func update_preview_size() -> void:
+    var base_grid_size: = Vector2.ONE * MapManager.tile_width
+    var preview_padding: = base_grid_size.y * preview_viewport_padding
+    var preview_size: = base_grid_size + (Vector2.ONE * preview_padding * 2.0)
+    preview_vp_container.custom_minimum_size = preview_size * GameManager.get_default_pixel_scale()
+    preview_vp_container.size = preview_vp_container.custom_minimum_size
+    preview_subviewport.size_2d_override = preview_size
 
 func _process(delta: float) -> void:
     if not the_sprite:

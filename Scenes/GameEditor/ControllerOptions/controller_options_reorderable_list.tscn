@@ -1,8 +1,9 @@
 [gd_scene format=3 uid="uid://cgwpivoqnwa7l"]
 
 [ext_resource type="Script" uid="uid://dul5ief1gtnlp" path="res://src/GameEditor/controller_options_reorderable_list.gd" id="1_qpffx"]
-[ext_resource type="Texture2D" uid="uid://bg3fk2uirfc1t" path="res://assets/img/button_icons/direction_icons/up.png" id="2_j0s1w"]
-[ext_resource type="Texture2D" uid="uid://ffxpksyt1x1d" path="res://assets/img/button_icons/direction_icons/down.png" id="3_dn0sr"]
+[ext_resource type="PackedScene" uid="uid://cemds60k8ytal" path="res://Scenes/UI/icon_button.tscn" id="2_dn0sr"]
+[ext_resource type="Texture2D" uid="uid://tpslcq3ccosh" path="res://assets/img/button_icons/up_small.png" id="3_ndwkf"]
+[ext_resource type="Texture2D" uid="uid://c1h0arduxil1j" path="res://assets/img/button_icons/down_small.png" id="4_fahg2"]
 
 [node name="HBoxContainer" type="HBoxContainer" unique_id=2052247205 node_paths=PackedStringArray("list_container")]
 offset_right = 162.0
@@ -29,13 +30,13 @@ layout_mode = 2
 size_flags_horizontal = 3
 text = "Something"
 
-[node name="UpButton" type="Button" parent="PanelContainer/ItemList/ReorderableItem" unique_id=1514053319]
+[node name="UpButton" parent="PanelContainer/ItemList/ReorderableItem" unique_id=451892711 instance=ExtResource("2_dn0sr")]
 layout_mode = 2
-icon = ExtResource("2_j0s1w")
+icon = ExtResource("3_ndwkf")
 
-[node name="DownButton" type="Button" parent="PanelContainer/ItemList/ReorderableItem" unique_id=460461721]
+[node name="DownButton" parent="PanelContainer/ItemList/ReorderableItem" unique_id=280578097 instance=ExtResource("2_dn0sr")]
 layout_mode = 2
-icon = ExtResource("3_dn0sr")
+icon = ExtResource("4_fahg2")
 
 [connection signal="pressed" from="PanelContainer/ItemList/ReorderableItem/UpButton" to="." method="_on_up_button_pressed" flags=18]
 [connection signal="pressed" from="PanelContainer/ItemList/ReorderableItem/DownButton" to="." method="_on_down_button_pressed" flags=18]

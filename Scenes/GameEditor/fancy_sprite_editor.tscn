@@ -1,10 +1,10 @@
 [gd_scene format=3 uid="uid://dr80l8lq0hd0a"]
 
-[ext_resource type="Script" uid="uid://ca63p80n7lnuh" path="res://Scenes/GameEditor/fancy_sprite_editor.gd" id="1_hivwt"]
+[ext_resource type="Script" path="res://Scenes/GameEditor/fancy_sprite_editor.gd" id="1_hivwt"]
 [ext_resource type="Texture2D" uid="uid://lrqeyxjmk22w" path="res://assets/img/tile_composer_bg.png" id="2_vsv20"]
-[ext_resource type="Script" uid="uid://cqph58nb42mmo" path="res://Scenes/GameEditor/fancy_sprite_layer_list.gd" id="3_b74fv"]
+[ext_resource type="Script" path="res://Scenes/GameEditor/fancy_sprite_layer_list.gd" id="3_b74fv"]
 [ext_resource type="Script" uid="uid://sxkikutun5ce" path="res://Scenes/GameEditor/sprite_previewer.gd" id="3_hivwt"]
-[ext_resource type="Script" uid="uid://c2uppviixc87y" path="res://src/previewing_viewport.gd" id="3_vsv20"]
+[ext_resource type="Script" path="res://src/previewing_viewport.gd" id="3_vsv20"]
 [ext_resource type="Script" uid="uid://kgd8llopg4rb" path="res://src/mask_layer_sprite.gd" id="4_huvp6"]
 [ext_resource type="Texture2D" uid="uid://d1pgxolpq4uu5" path="res://icon.png" id="5_huvp6"]
 [ext_resource type="PackedScene" uid="uid://rafo4lh58320" path="res://Scenes/GameEditor/directional_buttons.tscn" id="6_huvp6"]
@@ -86,10 +86,12 @@ size_flags_horizontal = 3
 layout_mode = 2
 size_flags_vertical = 3
 
-[node name="SpritePreviewer" type="MarginContainer" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/PreviewColumn/CenterContainer" unique_id=1681254917 node_paths=PackedStringArray("the_sprite", "spin_sprite_toggle")]
+[node name="SpritePreviewer" type="MarginContainer" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/PreviewColumn/CenterContainer" unique_id=1681254917 node_paths=PackedStringArray("preview_vp_container", "preview_subviewport", "the_sprite", "spin_sprite_toggle")]
 layout_mode = 2
 script = ExtResource("3_hivwt")
 interp_duration = 0.12
+preview_vp_container = NodePath("HBoxContainer/VBoxContainer/PanelContainer/SubViewportContainer")
+preview_subviewport = NodePath("HBoxContainer/VBoxContainer/PanelContainer/SubViewportContainer/SubViewport")
 the_sprite = NodePath("HBoxContainer/VBoxContainer/PanelContainer/SubViewportContainer/SubViewport/PreviewSprite")
 spin_sprite_toggle = NodePath("HBoxContainer/VBoxContainer/CheckButton")
 

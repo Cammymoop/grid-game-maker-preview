@@ -43,7 +43,7 @@ var has_edited_something: = false
 
 func _ready() -> void:
 	if not edit_mode:
-		enable_edit_mode(false, false)
+		switch_edit_mode(false, false)
 	
 	var pause_menu = Utility.get_pause_menu()
 	pause_menu.gameplay_paused.connect(save_current_level_state)
@@ -53,12 +53,12 @@ func save_current_level_state() -> void:
 		return
 	GameManager.save_edited()
 
-func enable_edit_mode(on, save_state=true):
-	edit_mode = on
-	visible = on
-	process_mode = PROCESS_MODE_ALWAYS if on else PROCESS_MODE_PAUSABLE
-	GameManager.set_pause("map_editor", on)
-	if not on:
+func switch_edit_mode(edit_enabled: bool, save_state: bool = true) -> void:
+	edit_mode = edit_enabled
+	visible = edit_enabled
+	process_mode = PROCESS_MODE_ALWAYS if edit_enabled else PROCESS_MODE_PAUSABLE
+	GameManager.set_pause("map_editor", edit_enabled)
+	if not edit_enabled:
 		place_mode("none")
 		if save_state:
 			GameManager.save_edited()
@@ -83,6 +83,8 @@ func enable_edit_mode(on, save_state=true):
 		current_tile_index = all_tiles[cur_tile_i]
 		if placing in ["entity", "tile"]:
 			show_item_name()
+	
+	MapManager.switch_tiles_preview_mode(edit_mode)
 
 func set_entity_to(index: int) -> void:
 	var prev_i: = cur_ent_i
@@ -125,12 +127,12 @@ func advance_tile(delta: int) -> void:
 		show_item_name()
 
 func preview_entity(entity_index):
-	preview.texture = EntityManager.get_entity_texture(entity_index)
-	preview.region_rect = EntityManager.get_entity_texture_rect(entity_index)
+	preview.texture = EntityManager.get_entity_texture(entity_index, true)
+	preview.region_rect = EntityManager.get_entity_texture_rect(entity_index, true)
 
 func preview_tile(tile_index):
-	preview.texture = MapManager.get_tile_texture(tile_index)
-	preview.region_rect = MapManager.get_tile_texture_rect(tile_index)
+	preview.texture = MapManager.get_tile_texture(tile_index, true)
+	preview.region_rect = MapManager.get_tile_texture_rect(tile_index, true)
 
 func place_mode(mode: String):
 	if mode != "none":
@@ -212,7 +214,7 @@ func _process(delta):
 	if GameManager.get_pause("pause_menu"):
 		return
 	if Input.is_action_just_pressed("editor_start"):
-		enable_edit_mode(not edit_mode)
+		switch_edit_mode(not edit_mode)
 	
 	if Input.is_action_just_pressed("refresh") and not edit_mode:
 		#get_tree().reload_current_scene()

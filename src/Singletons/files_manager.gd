@@ -76,22 +76,6 @@ func init_folders():
 	ensure_data_dir_exists(local_data_subdir)
 
 func _do_game_data_migration() -> void:
-	var old_data_subdir: = "godot/app_userdata/TileGameEngineRedux"
-	var old_data_dir: = OS.get_data_dir().path_join(old_data_subdir)
-	if DirAccess.dir_exists_absolute(old_data_dir):
-		var new_user_data_dir: = ProjectSettings.globalize_path(OS.get_user_data_dir())
-		print_debug("Found user data in TileGameEngineRedux, moving to %s" % [new_user_data_dir])
-		var error: = ___MIGRATION_quick_dir_copy(old_data_dir, new_user_data_dir)
-		if error != OK:
-			push_error("Failed to copy user data folder to new location: %s" % [error_string(error)])
-			get_tree().quit()
-			return
-		var remove_old_data_dir_success: = DirAccess.remove_absolute(old_data_dir)
-		if remove_old_data_dir_success != OK:
-			push_error("Failed to remove old user data folder: %s" % [error_string(remove_old_data_dir_success)])
-			get_tree().quit()
-			return
-
 	print_debug("Checking for game data migration, looking for %s" % [_data_path(games_subdir, "please_migrate")])
 	if not FileAccess.file_exists(_data_path(games_subdir, "please_migrate")):
 		return

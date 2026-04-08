@@ -55,6 +55,12 @@ func _ready():
 	update_sprite_style_picker()
 	sprite_style_picker.item_selected.connect(on_sprite_style_selected)
 	
+	var has_preview_variant: bool = not the_definition.get("preview_variant", {}).is_empty()
+	var preview_variant_settings: = find_child("PreviewVariantSettings") as Control
+	preview_variant_settings.visible = has_preview_variant
+	var add_preview_variant_button: = find_child("AddPreviewVariantButton") as Control
+	add_preview_variant_button.visible = not has_preview_variant
+	
 	close_requested.connect(close_window)
 
 func set_controller(list_index) -> void:
@@ -130,12 +136,22 @@ func load_common():
 	show_property_list()
 
 func update_image_button():
-	update_preview_simple()
+	update_image_simple()
 
-func update_preview_simple() -> void:
-	var image_tex_rect: = find_child("ImageButton").find_child("TextureRect") as TextureRect
-	image_tex_rect.texture = Utility.atlas_texture_from_texture_index(the_definition['texture'], the_definition['tex_index'])
-	image_tex_rect.custom_minimum_size = image_tex_rect.texture.get_size() * 2
+func update_image_simple() -> void:
+	_set_img_button_texture(find_child("ImageButton"), the_definition['texture'], the_definition['tex_index'])
+
+func update_preview_image_button() -> void:
+	if not the_definition.get("preview_variant", {}):
+		return
+	var texture_index: int = the_definition['preview_variant']['texture']
+	var tex_sub_index: int = the_definition['preview_variant']['tex_index']
+	_set_img_button_texture(find_child("PreviewImageButton"), texture_index, tex_sub_index)
+
+func _set_img_button_texture(the_image_button: Control, texture_index: int, tex_sub_index: int) -> void:
+	var image_tex_rect: = the_image_button.find_child("TextureRect") as TextureRect
+	image_tex_rect.texture = Utility.atlas_texture_from_texture_index(texture_index, tex_sub_index)
+	image_tex_rect.custom_minimum_size = image_tex_rect.texture.get_size() * GameManager.get_default_pixel_scale()
 
 
 func set_tile_entity_mode(tile_or_entity: String) -> void:
@@ -199,6 +215,14 @@ func update_tex_simple(tex_popup: Node) -> void:
 	update_image_button()
 	tex_popup.queue_free()
 
+func update_preview_variant_info(tex_popup: Node) -> void:
+	the_definition["preview_variant"] = {
+		"texture": tex_popup.get_selected_texture(),
+		"tex_index": tex_popup.get_selected_sub_index(),
+	}
+	update_preview_image_button()
+	tex_popup.queue_free()
+
 func update_sprite_config(new_sprite_config: Dictionary) -> void:
 	prints("update_sprite_config: %s" % new_sprite_config)
 	if not new_sprite_config or new_sprite_config.get("layers", []).is_empty():
@@ -219,12 +243,22 @@ func _on_ImageButton_pressed() -> void:
 		fancy_spr_edit.sprite_config_changed.connect(update_sprite_config)
 		fancy_spr_edit.closing.connect(set_basic_texture_indices_from_sprite_config)
 	else:
-		var tex_popup: Node = tex_popup_scene.instantiate()
-		add_child(tex_popup)
-		tex_popup.setup(the_definition['texture'], the_definition['tex_index'])
-		
+		show_basic_texture_select_dialog(false)
+
+func _on_PreviewImageButton_pressed() -> void:
+	show_basic_texture_select_dialog(true)
+
+func show_basic_texture_select_dialog(is_for_preview: bool) -> void:
+	var tex_popup: Node = tex_popup_scene.instantiate()
+	add_child(tex_popup)
+	var tex_index_from: Dictionary = the_definition.get("preview_variant", {}) if is_for_preview else the_definition
+	tex_popup.setup(tex_index_from['texture'], tex_index_from['tex_index'])
+	
+	if is_for_preview:
+		tex_popup.confirmed.connect(update_preview_variant_info.bind(tex_popup))
+	else:
 		tex_popup.confirmed.connect(update_tex_simple.bind(tex_popup))
-		tex_popup.popup_centered()
+	tex_popup.popup_centered()
 
 func get_selected_sprite_style() -> String:
 	var sprite_style_picker: = find_child("SpriteStylePicker") as OptionButton
@@ -232,6 +266,7 @@ func get_selected_sprite_style() -> String:
 	if not selected_text in sprite_style_options:
 		return SPRITE_SIMPLE
 	return sprite_style_options[selected_text]
+
 
 
 func _on_NameInput_text_changed(new_text):
@@ -453,3 +488,21 @@ func on_sprite_style_selected(index: int) -> void:
 		restore_last_fancy_sprite()
 	else:
 		the_definition.erase("sprite_config")
+
+
+func _on_remove_preview_variant_button_pressed() -> void:
+	var preview_variant_settings: = find_child("PreviewVariantSettings") as Control
+	preview_variant_settings.hide()
+	var add_preview_variant_button: = find_child("AddPreviewVariantButton") as Control
+	add_preview_variant_button.show()
+	the_definition.erase("preview_variant")
+
+func _on_add_preview_variant_button_pressed() -> void:
+	the_definition["preview_variant"] = {
+		"texture": the_definition['texture'],
+		"tex_index": the_definition['tex_index'],
+	}
+	var preview_variant_settings: = find_child("PreviewVariantSettings") as Control
+	preview_variant_settings.show()
+	var add_preview_variant_button: = find_child("AddPreviewVariantButton") as Control
+	add_preview_variant_button.hide()

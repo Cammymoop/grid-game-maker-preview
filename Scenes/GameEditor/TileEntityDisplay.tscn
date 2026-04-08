@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://cylqeyps4jgre"]
 
-[ext_resource type="Texture2D" uid="uid://b6lj5qghhre2t" path="res://assets/img/tiles.png" id="1"]
 [ext_resource type="Script" uid="uid://bq8qgs0mv5uiy" path="res://src/GameEditor/TileEntityButton.gd" id="2"]
+[ext_resource type="PackedScene" uid="uid://dsjbo767ulglw" path="res://Scenes/GameEditor/basic_item_tex_rect.tscn" id="2_pyg1f"]
 
 [sub_resource type="StyleBoxFlat" id="3"]
 bg_color = Color(0, 0, 0, 0.25)
@@ -24,11 +24,7 @@ corner_radius_top_right = 2
 corner_radius_bottom_right = 2
 corner_radius_bottom_left = 2
 
-[sub_resource type="AtlasTexture" id="1"]
-atlas = ExtResource("1")
-region = Rect2(0, 64, 32, 32)
-
-[node name="TileEntityDisplay" type="Button" unique_id=1303340023]
+[node name="TileEntityDisplay" type="Button" unique_id=1303340023 node_paths=PackedStringArray("basic_item_display", "name_label")]
 clip_contents = true
 custom_minimum_size = Vector2(80, 96)
 offset_right = 60.0
@@ -38,6 +34,8 @@ theme_override_styles/normal = SubResource("3")
 theme_override_styles/pressed = SubResource("4")
 theme_override_styles/hover = SubResource("2")
 script = ExtResource("2")
+basic_item_display = NodePath("VBox/TileImage")
+name_label = NodePath("VBox/TileName")
 
 [node name="VBox" type="VBoxContainer" parent="." unique_id=1670773220]
 custom_minimum_size = Vector2(60, 60)
@@ -48,13 +46,8 @@ grow_horizontal = 2
 mouse_filter = 2
 alignment = 1
 
-[node name="TileImage" type="TextureRect" parent="VBox" unique_id=1804473754]
-texture_filter = 1
-custom_minimum_size = Vector2(64, 64)
+[node name="TileImage" parent="VBox" unique_id=1890262040 instance=ExtResource("2_pyg1f")]
 layout_mode = 2
-size_flags_horizontal = 4
-mouse_filter = 2
-texture = SubResource("1")
 
 [node name="TileName" type="Label" parent="VBox" unique_id=313935584]
 layout_mode = 2
