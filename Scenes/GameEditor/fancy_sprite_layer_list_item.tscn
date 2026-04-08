@@ -1,0 +1,133 @@
+[gd_scene format=3 uid="uid://cth5sq5jot88a"]
+
+[ext_resource type="PackedScene" uid="uid://yskjico8qrbl" path="res://Scenes/GameEditor/ConditionalEditor/vector2i_input.tscn" id="1_s7nl1"]
+[ext_resource type="Script" uid="uid://mmq6q1nx8xn" path="res://Scenes/GameEditor/fancy_sprite_layer_list_item.gd" id="1_ya7sx"]
+[ext_resource type="Texture2D" uid="uid://clvyilalbfs0l" path="res://assets/img/cursor_delete.png" id="2_x76fy"]
+[ext_resource type="Script" uid="uid://bq446sgdivroo" path="res://ButtonContainer.gd" id="2_ya7sx"]
+[ext_resource type="Texture2D" uid="uid://tpslcq3ccosh" path="res://assets/img/button_icons/up_small.png" id="3_60pnq"]
+[ext_resource type="Texture2D" uid="uid://b6lj5qghhre2t" path="res://assets/img/tiles.png" id="3_jxcnp"]
+[ext_resource type="PackedScene" uid="uid://cemds60k8ytal" path="res://Scenes/UI/icon_button.tscn" id="4_60pnq"]
+[ext_resource type="Texture2D" uid="uid://c1h0arduxil1j" path="res://assets/img/button_icons/down_small.png" id="4_x76fy"]
+
+[sub_resource type="Theme" id="Theme_b74fv"]
+default_font_size = 14
+Label/font_sizes/font_size = 14
+LineEdit/font_sizes/font_size = 14
+OptionButton/font_sizes/font_size = 14
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_mwfft"]
+atlas = ExtResource("3_jxcnp")
+region = Rect2(0, 64, 32, 32)
+
+[node name="FancySpriteLayerListItem" type="MarginContainer" unique_id=1110623540 node_paths=PackedStringArray("remove_button", "layer_image_button", "offset_input", "mode_selector", "reorder_buttons", "rotates_toggle")]
+offset_right = 331.0
+offset_bottom = 72.0
+theme = SubResource("Theme_b74fv")
+theme_override_constants/margin_left = 0
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 0
+theme_override_constants/margin_bottom = 8
+script = ExtResource("1_ya7sx")
+empty_layer_button_icon = ExtResource("2_x76fy")
+remove_button = NodePath("HBoxContainer/RemoveLayerButton")
+layer_image_button = NodePath("HBoxContainer/PanelContainer/HBoxContainer/LayerImageButton")
+offset_input = NodePath("HBoxContainer/PanelContainer/HBoxContainer/VBoxContainer/HBoxContainer2/OffsetInput")
+mode_selector = NodePath("HBoxContainer/PanelContainer/HBoxContainer/VBoxContainer/HBoxContainer/OptionButton")
+reorder_buttons = NodePath("HBoxContainer/VBoxContainer2")
+rotates_toggle = NodePath("HBoxContainer/PanelContainer/HBoxContainer/VBoxContainer/HBoxContainer/RotatesToggle")
+
+[node name="HBoxContainer" type="HBoxContainer" parent="." unique_id=209136135]
+layout_mode = 2
+
+[node name="VBoxContainer2" type="VBoxContainer" parent="HBoxContainer" unique_id=515207632]
+layout_mode = 2
+alignment = 1
+
+[node name="UpButton" parent="HBoxContainer/VBoxContainer2" unique_id=451892711 instance=ExtResource("4_60pnq")]
+layout_mode = 2
+tooltip_text = "move up"
+icon = ExtResource("3_60pnq")
+
+[node name="DownButton" parent="HBoxContainer/VBoxContainer2" unique_id=1049922120 instance=ExtResource("4_60pnq")]
+layout_mode = 2
+tooltip_text = "move down"
+icon = ExtResource("4_x76fy")
+
+[node name="PanelContainer" type="PanelContainer" parent="HBoxContainer" unique_id=1362961099]
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 1
+
+[node name="HBoxContainer" type="HBoxContainer" parent="HBoxContainer/PanelContainer" unique_id=396024966]
+layout_mode = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="HBoxContainer/PanelContainer/HBoxContainer" unique_id=860413154]
+layout_mode = 2
+theme_override_constants/separation = 6
+alignment = 1
+
+[node name="HBoxContainer" type="HBoxContainer" parent="HBoxContainer/PanelContainer/HBoxContainer/VBoxContainer" unique_id=1303919679]
+layout_mode = 2
+size_flags_horizontal = 0
+
+[node name="Label" type="Label" parent="HBoxContainer/PanelContainer/HBoxContainer/VBoxContainer/HBoxContainer" unique_id=805874057]
+layout_mode = 2
+text = "Mode:"
+
+[node name="OptionButton" type="OptionButton" parent="HBoxContainer/PanelContainer/HBoxContainer/VBoxContainer/HBoxContainer" unique_id=911801953]
+layout_mode = 2
+mouse_filter = 1
+selected = 0
+item_count = 1
+popup/item_0/text = "normal"
+popup/item_0/id = 0
+
+[node name="RotatesToggle" type="CheckButton" parent="HBoxContainer/PanelContainer/HBoxContainer/VBoxContainer/HBoxContainer" unique_id=974809]
+layout_mode = 2
+mouse_filter = 1
+text = "Rotates:"
+
+[node name="HBoxContainer2" type="HBoxContainer" parent="HBoxContainer/PanelContainer/HBoxContainer/VBoxContainer" unique_id=1726006408]
+layout_mode = 2
+size_flags_horizontal = 0
+
+[node name="Label" type="Label" parent="HBoxContainer/PanelContainer/HBoxContainer/VBoxContainer/HBoxContainer2" unique_id=273727419]
+layout_mode = 2
+text = "Offset:"
+
+[node name="OffsetInput" parent="HBoxContainer/PanelContainer/HBoxContainer/VBoxContainer/HBoxContainer2" unique_id=2047234622 instance=ExtResource("1_s7nl1")]
+layout_mode = 2
+
+[node name="Spacer" type="Control" parent="HBoxContainer/PanelContainer/HBoxContainer" unique_id=1495181123]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="LayerImageButton" type="Container" parent="HBoxContainer/PanelContainer/HBoxContainer" unique_id=1068316695]
+layout_mode = 2
+script = ExtResource("2_ya7sx")
+metadata/_custom_type_script = "uid://bq446sgdivroo"
+
+[node name="MarginContainer" type="MarginContainer" parent="HBoxContainer/PanelContainer/HBoxContainer/LayerImageButton" unique_id=491096593]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/margin_left = 4
+theme_override_constants/margin_top = 4
+theme_override_constants/margin_right = 4
+theme_override_constants/margin_bottom = 4
+
+[node name="TextureRect" type="TextureRect" parent="HBoxContainer/PanelContainer/HBoxContainer/LayerImageButton/MarginContainer" unique_id=32878848]
+texture_filter = 1
+custom_minimum_size = Vector2(64, 64)
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+mouse_filter = 2
+texture = SubResource("AtlasTexture_mwfft")
+stretch_mode = 5
+
+[node name="RemoveLayerButton" parent="HBoxContainer" unique_id=1790843655 instance=ExtResource("4_60pnq")]
+layout_mode = 2
+tooltip_text = "remove layer"
+
+[node name="Control" type="Control" parent="HBoxContainer" unique_id=519738425]
+layout_mode = 2

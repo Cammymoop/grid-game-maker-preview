@@ -156,7 +156,7 @@ func cmd_a_die(slots: Dictionary, chosen_slot: int) -> void:
 		prints("failed to kill on slot %s" % chosen_slot)
 
 func desc_a_move() -> String:
-	return "entity|The entity starts moving this way [direction:DirectionInput:1]"
+	return "entity|The entity starts moving this way [complex_dir:DirectionInput:1]"
 func cmd_a_move(slots: Dictionary, chosen_slot: int, complex_dir: Dictionary) -> void:
 	if Commands.slot_is_entity(chosen_slot):
 		var selected = slots[chosen_slot]
@@ -247,7 +247,7 @@ func cmd_a_create_entity(slots: Dictionary, chosen_slot: int, entity_name: Strin
 			new_entity.start_move(facing)
 
 func desc_a_turn() -> String:
-	return "entity|Turn the entity/tile to face this way [direction:DirectionInput:1]"
+	return "entity|Turn the entity/tile to face this way [complex_dir:DirectionInput:1]"
 func cmd_a_turn(slots: Dictionary, chosen_slot: int, complex_dir: Dictionary) -> void:
 	if Commands.slot_is_entity(chosen_slot):
 		slots[chosen_slot].turn_to_facing(resolve_complex_direction(complex_dir, slots))

@@ -1,0 +1,72 @@
+extends MarginContainer
+
+@export var do_interpolate_rotation: bool = true
+@export var interp_duration: float = 0.24
+@export_exp_easing() var interp_ease_param: float = 0.2
+
+@export var the_sprite: MaskLayerSprite
+@export var spin_sprite_toggle: CheckButton
+
+@export var is_spinning: bool = false
+@export var spin_speed: float = 0.6
+
+var sprite_rotation: float = 0
+
+var rotation_interp_target: float = 0
+var rotation_interp_from: float = 0
+var interp_timer: float = 0
+
+func _ready() -> void:
+    if spin_sprite_toggle:
+        spin_sprite_toggle.toggled.connect(on_spin_sprite_toggled)
+
+func _process(delta: float) -> void:
+    if not the_sprite:
+        return
+    if is_spinning:
+        sprite_rotation += spin_speed * delta
+    elif interp_timer > 0:
+        interp_timer -= delta
+        var interp_progress: = minf(1.0, 1.0 - interp_timer / interp_duration)
+        sprite_rotation = lerp_angle(rotation_interp_from, rotation_interp_target, interp_progress)
+    the_sprite.set_sprite_rotation(sprite_rotation)
+
+func on_spin_sprite_toggled(button_pressed: bool) -> void:
+    is_spinning = button_pressed
+
+func stop_spinning() -> void:
+    if spin_sprite_toggle:
+        spin_sprite_toggle.set_pressed_no_signal(false)
+    is_spinning = false
+
+func update_sprite_config(entity_def: Dictionary) -> void:
+    if not the_sprite:
+        return
+    
+    the_sprite.clear()
+    var sprite_config: = entity_def.get("sprite_config", {}) as Dictionary
+    if not sprite_config:
+        update_simple_sprite(entity_def)
+    else:
+        the_sprite.set_main_layers(sprite_config["layers"])
+
+func update_simple_sprite(entity_def: Dictionary) -> void:
+    the_sprite.set_as_single(entity_def['texture'], entity_def['tex_index'])
+
+func set_sprite_facing(facing: int) -> void:
+    var rotation_val: = Utility.facing_rotation(facing)
+    set_preview_spr_rotation(rotation_val)
+
+func set_preview_spr_rotation(rotation_val: float) -> void:
+    if is_spinning:
+        stop_spinning()
+    if do_interpolate_rotation and absf(angle_difference(rotation_val, sprite_rotation)) > TAU / 12.0:
+        rotation_interp_target = rotation_val
+        rotation_interp_from = sprite_rotation
+        interp_timer = interp_duration
+        return
+
+    sprite_rotation = rotation_val
+    if not the_sprite:
+        return
+    the_sprite.set_sprite_rotation(rotation_val)

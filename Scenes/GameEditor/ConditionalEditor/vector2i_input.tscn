@@ -1,30 +1,20 @@
 [gd_scene format=3 uid="uid://yskjico8qrbl"]
 
+[ext_resource type="StyleBox" uid="uid://cw7cqsfd2oaqh" path="res://assets/ui/input_box_panel.tres" id="1_fqw2b"]
 [ext_resource type="Script" uid="uid://dmfsa56dqenr" path="res://src/GameEditor/ConditionalEditor/vector_2i_input.gd" id="1_rfa5f"]
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_rfa5f"]
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_fqw2b"]
-content_margin_left = 4.0
-content_margin_top = 0.0
-content_margin_right = 4.0
-content_margin_bottom = 0.0
-bg_color = Color(0.231373, 0.231373, 0.231373, 1)
-border_width_left = 1
-border_width_top = 1
-border_width_right = 1
-border_width_bottom = 1
-border_color = Color(0.12549, 0.105882, 0.105882, 1)
-corner_radius_top_left = 4
-corner_radius_top_right = 4
-corner_radius_bottom_right = 4
-corner_radius_bottom_left = 4
-shadow_offset = Vector2(0, 1)
-
 [sub_resource type="Theme" id="Theme_50ets"]
 LineEdit/constants/minimum_character_width = 2
 LineEdit/styles/normal = SubResource("StyleBoxEmpty_rfa5f")
-PanelContainer/styles/panel = SubResource("StyleBoxFlat_fqw2b")
+PanelContainer/styles/panel = ExtResource("1_fqw2b")
+
+[sub_resource type="StyleBoxLine" id="StyleBoxLine_rfa5f"]
+color = Color(0.1728327, 0.17283267, 0.17283267, 1)
+grow_begin = -1.0
+grow_end = -1.0
+vertical = true
 
 [node name="VecInput" type="PanelContainer" unique_id=2047234622 node_paths=PackedStringArray("x_input", "y_input")]
 offset_right = 70.0
@@ -53,8 +43,13 @@ alignment = 2
 select_all_on_focus = true
 
 [node name="Spacer" type="Control" parent="HBoxContainer" unique_id=1626839014]
+visible = false
 custom_minimum_size = Vector2(6, 0)
 layout_mode = 2
+
+[node name="VSeparator" type="VSeparator" parent="HBoxContainer" unique_id=1423555853]
+layout_mode = 2
+theme_override_styles/separator = SubResource("StyleBoxLine_rfa5f")
 
 [node name="Label2" type="Label" parent="HBoxContainer" unique_id=683053561]
 layout_mode = 2

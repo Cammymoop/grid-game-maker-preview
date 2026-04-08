@@ -1,0 +1,32 @@
+[gd_scene format=3 uid="uid://cemds60k8ytal"]
+
+[ext_resource type="Script" uid="uid://bkf0pmfj7eoac" path="res://Scenes/UI/icon_button.gd" id="1_htk4i"]
+[ext_resource type="Texture2D" uid="uid://dx8arqf2lcidg" path="res://assets/img/button_icons/minus_small.png" id="2_htk4i"]
+
+[node name="IconButton" type="Container" unique_id=451892711 node_paths=PackedStringArray("tex_rect")]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -10.0
+offset_top = -10.0
+offset_right = 10.0
+offset_bottom = 10.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+script = ExtResource("1_htk4i")
+tex_rect = NodePath("CenterContainer/Icon")
+icon = ExtResource("2_htk4i")
+metadata/_custom_type_script = "uid://bq446sgdivroo"
+
+[node name="CenterContainer" type="CenterContainer" parent="." unique_id=1526103059]
+layout_mode = 2
+mouse_filter = 2
+
+[node name="Icon" type="TextureRect" parent="CenterContainer" unique_id=608765331]
+layout_mode = 2
+mouse_filter = 2
+texture = ExtResource("2_htk4i")

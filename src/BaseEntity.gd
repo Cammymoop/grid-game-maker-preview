@@ -188,6 +188,10 @@ func entity_process() -> void:
 					return
 		
 		var max_intentions: int = get_max_move_intentions()
+		var pre_fetch_move_list: Array = get_pre_fetch_move_list()
+		if pre_fetch_move_list.size() > 0:
+			max_intentions = pre_fetch_move_list.size()
+
 		var start_v_facing: = visual_facing
 		var start_move_facing: = facing
 		var first_attempt_v_facing: = -1
@@ -197,7 +201,12 @@ func entity_process() -> void:
 			if attempt > 0:
 				set_visual_facing(start_v_facing)
 				set_facing(start_move_facing)
-			var intended_move_facing = get_intended_move(attempt)
+			var intended_move_facing: int = -1
+			if pre_fetch_move_list.size() > 0:
+				intended_move_facing = pre_fetch_move_list[attempt]
+			else:
+				intended_move_facing = get_intended_move(attempt)
+
 			if intended_move_facing > -1:
 				set_current_steps_per_tile(self_steps_per_tile)
 				var was_allowed = start_move(intended_move_facing)
@@ -237,14 +246,25 @@ func set_local_property(property_name, value) -> void:
 func remove_local_property(property_name) -> void:
 	local_properties.erase(property_name)
 
-func get_intended_move(attempt_num: int = 0):
+func get_intended_move(attempt_num: int = 0) -> int:
 	if not controller:
 		return -1
 	
 	if controller.move_mode == "direction":
 		return Utility.direction_to_facing(controller.get_move(attempt_num))
-	else:
+	elif controller.move_mode == "facing":
 		return controller.get_move(attempt_num)
+	elif controller.move_mode == "pre_fetch":
+		return -1
+	else:
+		push_error("Unknown controller move mode: " + controller.move_mode)
+		return -1
+
+func get_pre_fetch_move_list() -> Array:
+	if not controller or not controller.move_mode == "pre_fetch":
+		return []
+	
+	return controller.get_moves()
 
 func get_max_move_intentions() -> int:
 	if not controller:

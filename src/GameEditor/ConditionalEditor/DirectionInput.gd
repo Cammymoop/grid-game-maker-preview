@@ -39,6 +39,7 @@ func get_value() -> Variant:
 	if not is_reference_position:
 		return get_int_value()
 	else:
+		prints("complex direction value", get_complex_value())
 		return get_complex_value()
 
 func get_int_value() -> int:
@@ -49,7 +50,7 @@ func get_complex_value() -> Dictionary:
 	var value: int = $DirectionSelectorButton.get_direction()
 	var slot_id: int = $DirectionSelectorButton.get_slot_id()
 	if slot_id == -1:
-		return {"type": "plain", "direction": value}
+		return {"type": "plain", "direction": _relativify(value)}
 	else:
 		return {"type": "slot_reference", "slot_id": slot_id, "direction": _relativify(0)}
 
@@ -66,12 +67,24 @@ func _relativify(plain_value: int) -> int:
 
 
 func set_value(new_val) -> void:
-	new_val = int(new_val)
-	var is_relative = new_val & RELATIVE_BIT > 0
-	var rel_mode = new_val & RELATIVE_MODE_BIT > 0
-	var rel_slot = (new_val >> SLOT_SHIFT)
-	
-	$DirectionSelectorButton.set_direction(new_val & DIRECTION_ONLY)
+	var facing_dir: int = -1
+
+	var set_direction_button_to_facing: bool = true
+	if typeof(new_val) == TYPE_DICTIONARY:
+		facing_dir = new_val["direction"]
+		if new_val["type"] == "slot_reference":
+			set_direction_button_to_facing = false
+			$DirectionSelectorButton.set_slot_id(new_val["slot_id"])
+	else:
+		facing_dir = int(new_val)
+
+	var is_relative = facing_dir & RELATIVE_BIT > 0
+	var rel_mode = facing_dir & RELATIVE_MODE_BIT > 0
+	var rel_slot = (facing_dir >> SLOT_SHIFT)
+
+	if set_direction_button_to_facing:
+		$DirectionSelectorButton.set_direction(facing_dir & DIRECTION_ONLY)
+
 	$AbsoluteModeSelect.select_index(1 if is_relative else 0)
 	if is_relative:
 		$EntityRelativeMode.select_index(1 if rel_mode else 0)

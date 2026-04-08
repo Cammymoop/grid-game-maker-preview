@@ -36,6 +36,7 @@ func _init():
 	button = Button.new()
 	button.name = "BGButton"
 	button.show_behind_parent = true
+	button.mouse_filter = mouse_filter
 	add_child(button)
 	button.anchor_right = 1
 	button.anchor_bottom = 1

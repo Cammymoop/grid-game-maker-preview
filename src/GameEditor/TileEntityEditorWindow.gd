@@ -2,20 +2,34 @@ extends Window
 
 signal hidden
 
-var tex_popup_scene = preload("res://Scenes/GameEditor/BetterTextureDialog.tscn")
-var new_prop_popup_scene = preload("res://Scenes/GameEditor/NewPropertyDialog.tscn")
-var update_prop_popup_scene = preload("res://Scenes/GameEditor/PropertyDialog.tscn")
+const FancySpriteEditor: = preload("res://Scenes/GameEditor/fancy_sprite_editor.gd")
+const FancySpriteLayerListItem: = preload("res://Scenes/GameEditor/fancy_sprite_layer_list_item.gd")
 
-var controller_options_popup_scene = preload("res://Scenes/GameEditor/ControllerOptionsPopup.tscn")
+var tex_popup_scene: = preload("res://Scenes/GameEditor/BetterTextureDialog.tscn")
+var fancy_sprite_editor_scene: = preload("res://Scenes/GameEditor/fancy_sprite_editor.tscn")
+var new_prop_popup_scene: = preload("res://Scenes/GameEditor/NewPropertyDialog.tscn")
+var update_prop_popup_scene: = preload("res://Scenes/GameEditor/PropertyDialog.tscn")
 
-var alert_popup_scene = preload("res://Scenes/GameEditor/AlertDialog.tscn")
+var controller_options_popup_scene: = preload("res://Scenes/GameEditor/ControllerOptionsPopup.tscn")
 
-var tile_entity_mode = "tile"
+var alert_popup_scene: = preload("res://Scenes/GameEditor/AlertDialog.tscn")
+
+var tile_entity_mode: = "tile"
 
 var the_min_size: = Vector2(0, 0)
-var the_index = 0
+var the_index: int = 0
 
 var the_definition: = {}
+
+var last_fancy_sprite_config: Dictionary = {}
+
+const SPRITE_SIMPLE: = "simple"
+const SPRITE_FANCY: = "fancy"
+
+var sprite_style_options: = {
+	"Simple": SPRITE_SIMPLE,
+	"Fancy": SPRITE_FANCY,
+}
 
 func _ready():
 	visibility_changed.connect(_on_vis_changed)
@@ -30,6 +44,16 @@ func _ready():
 	var terrain_spr_mod_switch: CheckButton = find_child("TestTerrainSprMod")
 	if terrain_spr_mod_switch:
 		terrain_spr_mod_switch.toggled.connect(_on_TestTerrainSprMod_toggled)
+	
+	var sprite_style_option: = find_child("SpriteStyleOption") as Control
+	sprite_style_option.visible = tile_entity_mode == "tile"
+	
+	var sprite_style_picker: = find_child("SpriteStylePicker") as OptionButton
+	sprite_style_picker.clear()
+	for style_text in sprite_style_options:
+		sprite_style_picker.add_item(style_text)
+	update_sprite_style_picker()
+	sprite_style_picker.item_selected.connect(on_sprite_style_selected)
 	
 	close_requested.connect(close_window)
 
@@ -78,6 +102,8 @@ func load_entity_info(entity_index: int):
 		find_child("ControllerOpContainer").visible = false
 	controller_select.text = text
 	
+	last_fancy_sprite_config = the_definition.get("sprite_config", {}).duplicate_deep()
+	
 	load_common()
 
 func load_tile_info(tile_index: int):
@@ -104,6 +130,9 @@ func load_common():
 	show_property_list()
 
 func update_image_button():
+	update_preview_simple()
+
+func update_preview_simple() -> void:
 	var image_tex_rect: = find_child("ImageButton").find_child("TextureRect") as TextureRect
 	image_tex_rect.texture = Utility.atlas_texture_from_texture_index(the_definition['texture'], the_definition['tex_index'])
 	image_tex_rect.custom_minimum_size = image_tex_rect.texture.get_size() * 2
@@ -160,20 +189,49 @@ func _on_TileEntityEditorWindow_resized():
 func _on_CancelButton_pressed():
 	close_window()
 
-func update_texture(tex_popup):
+func update_tex_simple(tex_popup: Node) -> void:
 	the_definition['texture'] = tex_popup.get_selected_texture()
 	the_definition['tex_index'] = tex_popup.get_selected_sub_index()
-	
+	the_definition.erase("sprite_config")
+
+	# dont update sprite style picker, it just picks which edit popup to show
+	#update_sprite_style_picker()
 	update_image_button()
 	tex_popup.queue_free()
 
-func _on_ImageButton_pressed():
-	var tex_popup = tex_popup_scene.instantiate()
-	add_child(tex_popup)
-	tex_popup.setup(the_definition['texture'], the_definition['tex_index'])
-	
-	tex_popup.confirmed.connect(update_texture.bind(tex_popup))
-	tex_popup.popup_centered()
+func update_sprite_config(new_sprite_config: Dictionary) -> void:
+	prints("update_sprite_config: %s" % new_sprite_config)
+	if not new_sprite_config or new_sprite_config.get("layers", []).is_empty():
+		the_definition.erase("sprite_config")
+	else:
+		the_definition["sprite_config"] = new_sprite_config.duplicate_deep()
+		last_fancy_sprite_config = new_sprite_config.duplicate_deep()
+	update_image_button()
+	# dont update sprite style picker, it just picks which edit popup to show
+
+func _on_ImageButton_pressed() -> void:
+	if tile_entity_mode == "entity" and get_selected_sprite_style() == SPRITE_FANCY:
+		restore_last_fancy_sprite()
+		var fancy_spr_edit: Node = fancy_sprite_editor_scene.instantiate()
+		add_child(fancy_spr_edit)
+		fancy_spr_edit.setup(the_definition)
+		fancy_spr_edit.popup_centered()
+		fancy_spr_edit.sprite_config_changed.connect(update_sprite_config)
+		fancy_spr_edit.closing.connect(set_basic_texture_indices_from_sprite_config)
+	else:
+		var tex_popup: Node = tex_popup_scene.instantiate()
+		add_child(tex_popup)
+		tex_popup.setup(the_definition['texture'], the_definition['tex_index'])
+		
+		tex_popup.confirmed.connect(update_tex_simple.bind(tex_popup))
+		tex_popup.popup_centered()
+
+func get_selected_sprite_style() -> String:
+	var sprite_style_picker: = find_child("SpriteStylePicker") as OptionButton
+	var selected_text = sprite_style_picker.get_item_text(sprite_style_picker.selected)
+	if not selected_text in sprite_style_options:
+		return SPRITE_SIMPLE
+	return sprite_style_options[selected_text]
 
 
 func _on_NameInput_text_changed(new_text):
@@ -354,3 +412,44 @@ func close_window():
 func _on_vis_changed():
 	if not visible:
 		hidden.emit()
+
+func update_sprite_style_picker() -> void:
+	var is_simple: bool = the_definition.get("sprite_config", {}).is_empty()
+	var set_selected_to: String = SPRITE_SIMPLE if is_simple else SPRITE_FANCY
+	var option_text: String = sprite_style_options.find_key(set_selected_to)
+	
+	var sprite_style_picker: = find_child("SpriteStylePicker") as OptionButton
+	sprite_style_picker.selected = -1
+	for i in sprite_style_picker.get_item_count():
+		if sprite_style_picker.get_item_text(i) == option_text:
+			sprite_style_picker.selected = i
+			break
+
+func set_basic_texture_indices_from_sprite_config() -> void:
+	var sprite_config_layers: Array = the_definition.get("sprite_config", {}).get("layers", [])
+	if not sprite_config_layers:
+		return
+
+	var texture_index: int = 0
+	var tex_sub_index: int = 0
+	for layer in sprite_config_layers:
+		if layer.get("mode", FancySpriteLayerListItem.MODE_NORMAL) != "empty":
+			texture_index = layer.get("texture", 0)
+			tex_sub_index = layer.get("tex_index", 0)
+	the_definition['texture'] = texture_index
+	the_definition['tex_index'] = tex_sub_index
+	update_image_button()
+
+func restore_last_fancy_sprite() -> void:
+	if last_fancy_sprite_config and not the_definition.get("sprite_config", {}):
+		the_definition["sprite_config"] = last_fancy_sprite_config.duplicate_deep()
+
+func on_sprite_style_selected(index: int) -> void:
+	var sprite_style_picker: = find_child("SpriteStylePicker") as OptionButton
+	var selected_text = sprite_style_picker.get_item_text(index)
+	var selected_style = sprite_style_options[selected_text]
+	
+	if selected_style == SPRITE_FANCY:
+		restore_last_fancy_sprite()
+	else:
+		the_definition.erase("sprite_config")

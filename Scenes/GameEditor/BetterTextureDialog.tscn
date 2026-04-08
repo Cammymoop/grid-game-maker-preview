@@ -6,7 +6,7 @@
 
 [node name="BetterTextureDialog" type="ConfirmationDialog" unique_id=17079518]
 oversampling_override = 1.0
-title = "Select Tile"
+title = "Select Image"
 size = Vector2i(200, 127)
 visible = true
 script = ExtResource("3")

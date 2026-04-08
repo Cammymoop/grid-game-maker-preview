@@ -15,7 +15,7 @@ region = Rect2(0, 64, 32, 32)
 oversampling_override = 1.0
 title = "Edit"
 position = Vector2i(0, 25)
-size = Vector2i(441, 521)
+size = Vector2i(497, 521)
 wrap_controls = true
 popup_window = true
 script = ExtResource("2")
@@ -106,20 +106,39 @@ layout_mode = 2
 [node name="HBoxContainer2" type="HBoxContainer" parent="PanelContainer/VBoxContainer" unique_id=770714770]
 layout_mode = 2
 size_flags_horizontal = 3
+theme_override_constants/separation = 12
 alignment = 1
 
-[node name="Label" type="Label" parent="PanelContainer/VBoxContainer/HBoxContainer2" unique_id=2062341728]
+[node name="SpriteStyleOption" type="HBoxContainer" parent="PanelContainer/VBoxContainer/HBoxContainer2" unique_id=232190657]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="PanelContainer/VBoxContainer/HBoxContainer2/SpriteStyleOption" unique_id=2029823560]
+layout_mode = 2
+text = "Image Style:"
+
+[node name="SpriteStylePicker" type="OptionButton" parent="PanelContainer/VBoxContainer/HBoxContainer2/SpriteStyleOption" unique_id=2093749690]
+layout_mode = 2
+size_flags_vertical = 4
+selected = 0
+item_count = 1
+popup/item_0/text = "Simple"
+popup/item_0/id = 0
+
+[node name="HBoxContainer2" type="HBoxContainer" parent="PanelContainer/VBoxContainer/HBoxContainer2" unique_id=381815038]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="PanelContainer/VBoxContainer/HBoxContainer2/HBoxContainer2" unique_id=2062341728]
 layout_mode = 2
 size_flags_stretch_ratio = 0.5
 text = "Image:"
 horizontal_alignment = 2
 
-[node name="ImageButton" type="Container" parent="PanelContainer/VBoxContainer/HBoxContainer2" unique_id=1185949534]
+[node name="ImageButton" type="Container" parent="PanelContainer/VBoxContainer/HBoxContainer2/HBoxContainer2" unique_id=1185949534]
 layout_mode = 2
 script = ExtResource("3_obo3l")
 metadata/_custom_type_script = "uid://bq446sgdivroo"
 
-[node name="MarginContainer" type="MarginContainer" parent="PanelContainer/VBoxContainer/HBoxContainer2/ImageButton" unique_id=1737076894]
+[node name="MarginContainer" type="MarginContainer" parent="PanelContainer/VBoxContainer/HBoxContainer2/HBoxContainer2/ImageButton" unique_id=1737076894]
 layout_mode = 2
 mouse_filter = 2
 theme_override_constants/margin_left = 4
@@ -127,7 +146,7 @@ theme_override_constants/margin_top = 4
 theme_override_constants/margin_right = 4
 theme_override_constants/margin_bottom = 4
 
-[node name="TextureRect" type="TextureRect" parent="PanelContainer/VBoxContainer/HBoxContainer2/ImageButton/MarginContainer" unique_id=6858143]
+[node name="TextureRect" type="TextureRect" parent="PanelContainer/VBoxContainer/HBoxContainer2/HBoxContainer2/ImageButton/MarginContainer" unique_id=6858143]
 texture_filter = 1
 custom_minimum_size = Vector2(64, 64)
 layout_mode = 2
@@ -207,7 +226,7 @@ text = "Cancel"
 [connection signal="value_changed" from="PanelContainer/VBoxContainer/HBoxContainer4/MoveSpeed/EditMoveSpeed" to="." method="_on_EditMoveSpeed_value_changed"]
 [connection signal="pressed" from="PanelContainer/VBoxContainer/ControllerOpContainer/ControllerOptionsReset" to="." method="_on_ControllerOptionsReset_pressed"]
 [connection signal="pressed" from="PanelContainer/VBoxContainer/ControllerOpContainer/ControllerOptionsShow" to="." method="_on_ControllerOptionsShow_pressed"]
-[connection signal="pressed" from="PanelContainer/VBoxContainer/HBoxContainer2/ImageButton" to="." method="_on_ImageButton_pressed"]
+[connection signal="pressed" from="PanelContainer/VBoxContainer/HBoxContainer2/HBoxContainer2/ImageButton" to="." method="_on_ImageButton_pressed"]
 [connection signal="item_activated" from="PanelContainer/VBoxContainer/VBoxContainer/HBoxContainer4/PropertyList" to="." method="_on_PropertyList_item_activated"]
 [connection signal="pressed" from="PanelContainer/VBoxContainer/VBoxContainer/HBoxContainer4/VBoxContainer/AddPropertyButton" to="." method="_on_AddPropertyButton_pressed"]
 [connection signal="pressed" from="PanelContainer/VBoxContainer/VBoxContainer/HBoxContainer4/VBoxContainer/RemovePropertyButton" to="." method="_on_RemovePropertyButton_pressed"]

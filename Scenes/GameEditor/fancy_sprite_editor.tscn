@@ -1,0 +1,151 @@
+[gd_scene format=3 uid="uid://dr80l8lq0hd0a"]
+
+[ext_resource type="Script" uid="uid://ca63p80n7lnuh" path="res://Scenes/GameEditor/fancy_sprite_editor.gd" id="1_hivwt"]
+[ext_resource type="Texture2D" uid="uid://lrqeyxjmk22w" path="res://assets/img/tile_composer_bg.png" id="2_vsv20"]
+[ext_resource type="Script" uid="uid://cqph58nb42mmo" path="res://Scenes/GameEditor/fancy_sprite_layer_list.gd" id="3_b74fv"]
+[ext_resource type="Script" uid="uid://sxkikutun5ce" path="res://Scenes/GameEditor/sprite_previewer.gd" id="3_hivwt"]
+[ext_resource type="Script" uid="uid://c2uppviixc87y" path="res://src/previewing_viewport.gd" id="3_vsv20"]
+[ext_resource type="Script" uid="uid://kgd8llopg4rb" path="res://src/mask_layer_sprite.gd" id="4_huvp6"]
+[ext_resource type="Texture2D" uid="uid://d1pgxolpq4uu5" path="res://icon.png" id="5_huvp6"]
+[ext_resource type="PackedScene" uid="uid://rafo4lh58320" path="res://Scenes/GameEditor/directional_buttons.tscn" id="6_huvp6"]
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_huvp6"]
+content_margin_left = 4.0
+content_margin_right = 4.0
+content_margin_bottom = 4.0
+texture = ExtResource("2_vsv20")
+axis_stretch_horizontal = 1
+axis_stretch_vertical = 1
+region_rect = Rect2(0, 0, 64, 64)
+
+[node name="FancySpriteEditor" type="Window" unique_id=1597314855 node_paths=PackedStringArray("sprite_previewer", "layer_list_scroll", "layer_list")]
+oversampling_override = 1.0
+title = "Edit Fancy Sprite"
+position = Vector2i(0, 25)
+size = Vector2i(600, 400)
+wrap_controls = true
+script = ExtResource("1_hivwt")
+sprite_previewer = NodePath("PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/PreviewColumn/CenterContainer/SpritePreviewer")
+layer_list_scroll = NodePath("PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer/ScrollContainer")
+layer_list = NodePath("PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer/ScrollContainer/FancySpriteLayerList")
+
+[node name="PanelContainer" type="PanelContainer" parent="." unique_id=595496396]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxTexture_huvp6")
+
+[node name="MarginContainer" type="MarginContainer" parent="PanelContainer" unique_id=1504394953]
+layout_mode = 2
+theme_override_constants/margin_left = 6
+theme_override_constants/margin_top = 6
+theme_override_constants/margin_right = 6
+theme_override_constants/margin_bottom = 6
+
+[node name="VBoxContainer" type="VBoxContainer" parent="PanelContainer/MarginContainer" unique_id=2004559522]
+layout_mode = 2
+
+[node name="ResetChangesButton" type="Button" parent="PanelContainer/MarginContainer/VBoxContainer" unique_id=972349672]
+layout_mode = 2
+size_flags_horizontal = 4
+text = "Reset Changes"
+
+[node name="HBoxContainer" type="HBoxContainer" parent="PanelContainer/MarginContainer/VBoxContainer" unique_id=255445786]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="VBoxContainer" type="VBoxContainer" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer" unique_id=1986719293]
+layout_mode = 2
+theme_override_constants/separation = 12
+alignment = 1
+
+[node name="AddLayerButton" type="Button" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer" unique_id=2130563510]
+layout_mode = 2
+size_flags_horizontal = 4
+text = "Add Layer"
+
+[node name="ScrollContainer" type="ScrollContainer" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer" unique_id=882363263]
+custom_minimum_size = Vector2(200, 0)
+layout_mode = 2
+horizontal_scroll_mode = 0
+scroll_hint_mode = 1
+
+[node name="FancySpriteLayerList" type="VBoxContainer" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer/ScrollContainer" unique_id=1182384443]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 0
+script = ExtResource("3_b74fv")
+
+[node name="PreviewColumn" type="VBoxContainer" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer" unique_id=1702505203]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="CenterContainer" type="CenterContainer" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/PreviewColumn" unique_id=1781160959]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="SpritePreviewer" type="MarginContainer" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/PreviewColumn/CenterContainer" unique_id=1681254917 node_paths=PackedStringArray("the_sprite", "spin_sprite_toggle")]
+layout_mode = 2
+script = ExtResource("3_hivwt")
+interp_duration = 0.12
+the_sprite = NodePath("HBoxContainer/VBoxContainer/PanelContainer/SubViewportContainer/SubViewport/PreviewSprite")
+spin_sprite_toggle = NodePath("HBoxContainer/VBoxContainer/CheckButton")
+
+[node name="HBoxContainer" type="HBoxContainer" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/PreviewColumn/CenterContainer/SpritePreviewer" unique_id=2069086974]
+layout_mode = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/PreviewColumn/CenterContainer/SpritePreviewer/HBoxContainer" unique_id=881707318]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/PreviewColumn/CenterContainer/SpritePreviewer/HBoxContainer/VBoxContainer" unique_id=1374289775]
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_font_sizes/font_size = 12
+text = "Preview:"
+
+[node name="PanelContainer" type="PanelContainer" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/PreviewColumn/CenterContainer/SpritePreviewer/HBoxContainer/VBoxContainer" unique_id=1324742087]
+layout_mode = 2
+
+[node name="SubViewportContainer" type="SubViewportContainer" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/PreviewColumn/CenterContainer/SpritePreviewer/HBoxContainer/VBoxContainer/PanelContainer" unique_id=855817105]
+custom_minimum_size = Vector2(64, 64)
+layout_mode = 2
+stretch = true
+
+[node name="SubViewport" type="SubViewport" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/PreviewColumn/CenterContainer/SpritePreviewer/HBoxContainer/VBoxContainer/PanelContainer/SubViewportContainer" unique_id=1521900232]
+transparent_bg = true
+handle_input_locally = false
+canvas_item_default_texture_filter = 0
+size = Vector2i(64, 64)
+size_2d_override = Vector2i(32, 32)
+size_2d_override_stretch = true
+render_target_update_mode = 4
+script = ExtResource("3_vsv20")
+
+[node name="PreviewSprite" type="Node2D" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/PreviewColumn/CenterContainer/SpritePreviewer/HBoxContainer/VBoxContainer/PanelContainer/SubViewportContainer/SubViewport" unique_id=557299421]
+script = ExtResource("4_huvp6")
+
+[node name="Sprite2D" type="Sprite2D" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/PreviewColumn/CenterContainer/SpritePreviewer/HBoxContainer/VBoxContainer/PanelContainer/SubViewportContainer/SubViewport/PreviewSprite" unique_id=470885270]
+texture = ExtResource("5_huvp6")
+metadata/rotates = true
+metadata/sub_layer_rotates = true
+
+[node name="CheckButton" type="CheckButton" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/PreviewColumn/CenterContainer/SpritePreviewer/HBoxContainer/VBoxContainer" unique_id=1638079990]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "spin"
+alignment = 2
+
+[node name="DirectionalButtons" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/PreviewColumn/CenterContainer/SpritePreviewer/HBoxContainer" unique_id=1971834257 instance=ExtResource("6_huvp6")]
+layout_mode = 2
+
+[node name="OkButton" type="Button" parent="PanelContainer/MarginContainer/VBoxContainer" unique_id=393528458]
+layout_mode = 2
+size_flags_horizontal = 4
+text = "OK"
+
+[connection signal="pressed" from="PanelContainer/MarginContainer/VBoxContainer/ResetChangesButton" to="." method="restore_sprite_config"]
+[connection signal="pressed" from="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer/AddLayerButton" to="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer/ScrollContainer/FancySpriteLayerList" method="append_new_layer_auto"]
+[connection signal="facing_pressed" from="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/PreviewColumn/CenterContainer/SpritePreviewer/HBoxContainer/DirectionalButtons" to="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/PreviewColumn/CenterContainer/SpritePreviewer" method="set_sprite_facing"]
+[connection signal="pressed" from="PanelContainer/MarginContainer/VBoxContainer/OkButton" to="." method="close_sprite_editor"]

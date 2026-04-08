@@ -1,5 +1,7 @@
 extends Control
 
+signal value_changed(value: Vector2i)
+
 @export var starting_value: Vector2i = Vector2i(0, 0)
 
 @export var x_input: Range
@@ -9,6 +11,8 @@ var arg_name: String = ""
 
 func _ready():
     set_value(starting_value)
+    x_input.value_changed.connect(on_input_changed.unbind(1))
+    y_input.value_changed.connect(on_input_changed.unbind(1))
 
 func set_arg_name(new_arg_name: String) -> void:
     arg_name = new_arg_name
@@ -45,3 +49,6 @@ func get_value() -> Vector2i:
 func set_value(new_val: Vector2i) -> void:
     x_input.value = new_val.x
     y_input.value = new_val.y
+
+func on_input_changed() -> void:
+    value_changed.emit(get_value())

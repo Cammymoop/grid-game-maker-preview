@@ -18,7 +18,7 @@ var rotation_prop: float = 0:
 
 func set_as_single(single_texture_id: int, tex_index: int, rotates: bool = true) -> void:
     var layer_info: Dictionary = {
-        "type": "regular",
+        "mode": "normal",
         "texture": single_texture_id,
         "tex_index": tex_index,
         "rotates": rotates,
@@ -47,8 +47,8 @@ func append_layer(layer_info: Dictionary) -> void:
     refresh_layers()
 
 func _append_layer(layer_info: Dictionary) -> void:
-    if not layer_info.has("type"):
-        layer_info["type"] = "regular"
+    if not layer_info.has("mode"):
+        layer_info["mode"] = "normal"
     layer_info["order_id"] = layer_order_id
     layer_order_id += 1
     layers.append(layer_info)
@@ -56,8 +56,8 @@ func _append_layer(layer_info: Dictionary) -> void:
 func refresh_layers() -> void:
     resort_layers()
     clear_children()
-    for layer_info in layers:
-        create_and_add_nodes_for_layer(layer_info)
+    for layer_index in layers.size():
+        create_and_add_nodes_for_layer(layers[layer_index], layer_index)
 
 func clear() -> void:
     modifier_masks.clear()
@@ -116,8 +116,8 @@ func _remove_modifier_layers(modifier: String) -> void:
             new_layers.append(layer)
     layers = new_layers
 
-func create_and_add_nodes_for_layer(layer_info: Dictionary) -> void:
-    if not layer_info or layer_info.get("type", "empty") == "empty":
+func create_and_add_nodes_for_layer(layer_info: Dictionary, layer_index: int) -> void:
+    if not layer_info or layer_info.get("mode", "empty") == "empty":
         return
     var layer_texture_id: int = layer_info.get("texture", -1)
     if layer_texture_id == -1:
@@ -158,8 +158,9 @@ func create_and_add_nodes_for_layer(layer_info: Dictionary) -> void:
         main_layer_node = layer_spr
     
     add_child(main_layer_node)
-    var layer_scale: Vector2 = layer_info.get("scale", Vector2.ONE)
-    var layer_offset: Vector2 = layer_info.get("offset", Vector2.ZERO)
+    var layer_scale: Vector2 = Utility.get_vector2_from_arr(layer_info.get("scale", [1,1]))
+    var layer_offset: Vector2 = Utility.get_vector2_from_arr(layer_info.get("offset", [0,0]))
+    prints("layer %d scale: %s, offset: %s" % [layer_index, layer_scale, layer_offset])
     main_layer_node.scale = layer_scale
     main_layer_node.position = layer_offset
     

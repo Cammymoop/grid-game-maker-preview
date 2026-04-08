@@ -102,15 +102,19 @@ func _on_ButtonContainer_pressed():
 func _on_DirectionSelected(direction_name: String):
 	hide_picker()
 	if direction_name in absolute_directions:
-		current_direction = absolute_directions[direction_name]
-		current_slot_id = -1
+		set_direction(absolute_directions[direction_name])
 	else:
-		current_direction = -1
-		current_slot_id = get_slot_id_from_button_name(direction_name)
+		set_slot_id(get_slot_id_from_button_name(direction_name))
 	update_icon()
 
 func set_direction(direction_val: int) -> void:
 	current_direction = direction_val
+	current_slot_id = -1
+	update_icon()
+
+func set_slot_id(slot_id: int) -> void:
+	current_direction = -1
+	current_slot_id = slot_id
 	update_icon()
 
 func update_picker() -> void:

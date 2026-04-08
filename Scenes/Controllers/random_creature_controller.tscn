@@ -1,0 +1,6 @@
+[gd_scene format=3 uid="uid://bi3i85ro5u2fj"]
+
+[ext_resource type="Script" uid="uid://bdkgojiy08phx" path="res://src/entity_controllers/random_creature_controller.gd" id="1_s4swt"]
+
+[node name="RandomCreatureController" type="Node" unique_id=1220827187]
+script = ExtResource("1_s4swt")

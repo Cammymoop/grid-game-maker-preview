@@ -1,0 +1,71 @@
+[gd_scene format=3 uid="uid://rafo4lh58320"]
+
+[ext_resource type="Script" uid="uid://ddnwnh0pqf8p2" path="res://src/GameEditor/directional_buttons.gd" id="1_qt3u8"]
+[ext_resource type="PackedScene" path="res://Scenes/UI/ButtonContainer.tscn" id="1_s5ial"]
+[ext_resource type="Texture2D" uid="uid://bg3fk2uirfc1t" path="res://assets/img/button_icons/direction_icons/up.png" id="2_qt3u8"]
+[ext_resource type="Texture2D" uid="uid://dn7c2cihicbkd" path="res://assets/img/button_icons/direction_icons/left.png" id="3_14hlx"]
+[ext_resource type="Texture2D" uid="uid://wo7nayhwkk8y" path="res://assets/img/button_icons/direction_icons/right.png" id="4_7r6jl"]
+[ext_resource type="Texture2D" uid="uid://ffxpksyt1x1d" path="res://assets/img/button_icons/direction_icons/down.png" id="5_i4jvs"]
+
+[node name="DirectionalButtons" type="VBoxContainer" unique_id=1971834257]
+size_flags_horizontal = 4
+alignment = 1
+script = ExtResource("1_qt3u8")
+
+[node name="PickUp" parent="." unique_id=1777211596 instance=ExtResource("1_s5ial")]
+layout_mode = 2
+size_flags_horizontal = 4
+
+[node name="CenterContainer" type="CenterContainer" parent="PickUp" unique_id=293405388]
+layout_mode = 2
+mouse_filter = 2
+
+[node name="Icon" type="TextureRect" parent="PickUp/CenterContainer" unique_id=638293454]
+layout_mode = 2
+mouse_filter = 2
+texture = ExtResource("2_qt3u8")
+
+[node name="HBoxContainer" type="HBoxContainer" parent="." unique_id=420158100]
+layout_mode = 2
+
+[node name="PickLeft" parent="HBoxContainer" unique_id=1123196654 instance=ExtResource("1_s5ial")]
+layout_mode = 2
+
+[node name="CenterContainer" type="CenterContainer" parent="HBoxContainer/PickLeft" unique_id=339642073]
+layout_mode = 2
+mouse_filter = 2
+
+[node name="Icon" type="TextureRect" parent="HBoxContainer/PickLeft/CenterContainer" unique_id=1017682625]
+layout_mode = 2
+mouse_filter = 2
+texture = ExtResource("3_14hlx")
+
+[node name="PickRight" parent="HBoxContainer" unique_id=631584531 instance=ExtResource("1_s5ial")]
+layout_mode = 2
+
+[node name="CenterContainer" type="CenterContainer" parent="HBoxContainer/PickRight" unique_id=1575388548]
+layout_mode = 2
+mouse_filter = 2
+
+[node name="Icon" type="TextureRect" parent="HBoxContainer/PickRight/CenterContainer" unique_id=2100101236]
+layout_mode = 2
+mouse_filter = 2
+texture = ExtResource("4_7r6jl")
+
+[node name="PickDown" parent="." unique_id=1007569384 instance=ExtResource("1_s5ial")]
+layout_mode = 2
+size_flags_horizontal = 4
+
+[node name="CenterContainer" type="CenterContainer" parent="PickDown" unique_id=654172283]
+layout_mode = 2
+mouse_filter = 2
+
+[node name="Icon" type="TextureRect" parent="PickDown/CenterContainer" unique_id=254130534]
+layout_mode = 2
+mouse_filter = 2
+texture = ExtResource("5_i4jvs")
+
+[connection signal="pressed" from="PickUp" to="." method="btn_pressed" flags=18]
+[connection signal="pressed" from="HBoxContainer/PickLeft" to="." method="btn_pressed" flags=18]
+[connection signal="pressed" from="HBoxContainer/PickRight" to="." method="btn_pressed" flags=18]
+[connection signal="pressed" from="PickDown" to="." method="btn_pressed" flags=18]

@@ -1,3 +1,4 @@
+@tool
 extends Node
 
 const TILE_TANSFORM_MASK: int = TileSetAtlasSource.TRANSFORM_FLIP_H | TileSetAtlasSource.TRANSFORM_FLIP_V | TileSetAtlasSource.TRANSFORM_TRANSPOSE
@@ -418,3 +419,14 @@ func sanitize_for_filename(the_str: String, allow_uppercase: bool = false) -> St
 		return "OOPS"
 	return the_str
 	
+func get_vector2_from_arr(arr: Array) -> Vector2:
+	return Vector2(arr[0], arr[1])
+
+func get_vector2i_from_arr(arr: Array) -> Vector2i:
+	return Vector2i(int(arr[0]), int(arr[1]))
+
+func get_arr_from_vector2(vec: Vector2) -> Array:
+	return [vec.x, vec.y]
+
+func get_arr_from_vector2i(vec: Vector2i) -> Array:
+	return [vec.x, vec.y]
