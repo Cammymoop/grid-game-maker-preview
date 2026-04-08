@@ -436,3 +436,13 @@ func string_list_union(list_a: Array, list_b: Array) -> Array:
 		if not item in list_a:
 			list_a.append(item)
 	return list_a
+
+func long_basis(vec: Vector2) -> Vector2:
+	var dir_vec: = vec.sign()
+	dir_vec[vec.abs().min_axis_index()] = 0
+	return dir_vec
+
+func short_basis(vec: Vector2) -> Vector2:
+	var dir_vec: = vec.sign()
+	dir_vec[vec.abs().max_axis_index()] = 0
+	return dir_vec

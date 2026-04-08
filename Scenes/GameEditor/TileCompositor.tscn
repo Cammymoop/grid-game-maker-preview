@@ -347,6 +347,7 @@ show_behind_parent = true
 layout_mode = 0
 anchor_right = 1.0
 anchor_bottom = 1.0
+mouse_filter = 2
 texture = ExtResource("18")
 expand_mode = 1
 stretch_mode = 1
@@ -380,6 +381,7 @@ visible = false
 anchors_preset = 0
 anchor_right = 1.0
 anchor_bottom = 1.0
+mouse_filter = 2
 
 [node name="ColorRect" type="ColorRect" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/Panel/VBoxContainer/MarginContainer/AspectRatioContainer/BrushView/Crosshair" unique_id=2097596003]
 custom_minimum_size = Vector2(2, 0)
@@ -388,6 +390,7 @@ anchor_left = 0.5
 anchor_right = 0.5
 anchor_bottom = 1.0
 grow_horizontal = 2
+mouse_filter = 2
 color = Color(0, 0, 0, 0.658824)
 
 [node name="ColorRect2" type="ColorRect" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/Panel/VBoxContainer/MarginContainer/AspectRatioContainer/BrushView/Crosshair" unique_id=1133031071]
@@ -397,6 +400,7 @@ anchor_top = 0.5
 anchor_right = 1.0
 anchor_bottom = 0.5
 grow_vertical = 2
+mouse_filter = 2
 color = Color(0, 0, 0, 0.658824)
 
 [node name="TileToBrushButton" type="Button" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/Panel/VBoxContainer" unique_id=397932245]
@@ -834,6 +838,7 @@ filters = PackedStringArray("*.png")
 [connection signal="pressed" from="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer/HBoxContainer2/HFlipButton" to="." method="_on_HFlipButton_pressed"]
 [connection signal="pressed" from="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer/HBoxContainer2/VFlipButton" to="." method="_on_VFlipButton_pressed"]
 [connection signal="toggled" from="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/Panel/VBoxContainer/BrushWrap" to="." method="_on_BrushWrap_toggled"]
+[connection signal="gui_input" from="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/Panel/VBoxContainer/MarginContainer/AspectRatioContainer/BrushView" to="." method="_on_brush_view_gui_input"]
 [connection signal="gui_input" from="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/Panel/VBoxContainer/MarginContainer/AspectRatioContainer/BrushView/BrushSlideH" to="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/Panel/VBoxContainer/MarginContainer/AspectRatioContainer/BrushView/BrushSlideH" method="_on_BrushSlide_gui_input"]
 [connection signal="mouse_pressed" from="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/Panel/VBoxContainer/MarginContainer/AspectRatioContainer/BrushView/BrushSlideH" to="." method="_on_BrushSlideH_mouse_pressed"]
 [connection signal="mouse_released" from="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/Panel/VBoxContainer/MarginContainer/AspectRatioContainer/BrushView/BrushSlideH" to="." method="_on_BrushSlideH_mouse_released"]
@@ -856,6 +861,7 @@ filters = PackedStringArray("*.png")
 [connection signal="mouse_exited" from="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/PanelContainer/MarginContainer/VBoxContainer2/ButtonGroup/GridContainer/BRButton" to="." method="_on_CornerButtonUnHover"]
 [connection signal="pressed" from="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/PanelContainer/MarginContainer/VBoxContainer2/ButtonGroup/GridContainer/BRButton" to="." method="_on_BRButton_pressed"]
 [connection signal="mouse_entered" from="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/PanelContainer/MarginContainer/VBoxContainer2/ButtonGroup/CenterContainer/MarginContainer/AllButton" to="." method="_on_CornerButtonHover" flags=18]
+[connection signal="mouse_exited" from="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/PanelContainer/MarginContainer/VBoxContainer2/ButtonGroup/CenterContainer/MarginContainer/AllButton" to="." method="_on_CornerButtonUnHover"]
 [connection signal="pressed" from="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/PanelContainer/MarginContainer/VBoxContainer2/ButtonGroup/CenterContainer/MarginContainer/AllButton" to="." method="_on_AllButton_pressed"]
 [connection signal="pressed" from="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer2/PickBrushButton" to="." method="_on_PickBrushButton_pressed"]
 [connection signal="pressed" from="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer2/UndoBrushButton" to="." method="_on_UndoBrushButton_pressed"]

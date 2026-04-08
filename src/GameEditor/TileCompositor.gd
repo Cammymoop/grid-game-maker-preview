@@ -30,7 +30,7 @@ var picked_colored_brush_image: Image
 const MAX_TILE_BRUSH_UNDOS = 100
 const MAX_TEXTURE_UNDOS = 10
 
-@onready var tile_brush_canvas = find_child("BrushView")
+@onready var tile_brush_canvas: TextureRect = find_child("BrushView")
 const TBC_MAX_WIDTH: = 96
 const TBC_MAX_HEIGHT: = 96
 
@@ -647,3 +647,61 @@ func _on_margin_container_resized() -> void:
 		size.x = min_content_size.x
 	if size.y < min_content_size.y:
 		size.y = min_content_size.y
+
+
+var click_paint_holding_click: bool = false
+var click_paint_last_pos: Vector2 = Vector2.ZERO
+var click_paint_last_was_in_bounds: bool = false
+func start_click_paint() -> void:
+	undoer.save_current_image("tile_brush", tile_brush_image)
+	click_paint_holding_click = true
+	click_paint_last_was_in_bounds = false
+
+func _on_brush_view_gui_input(event: InputEvent) -> void:
+	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_MASK_LEFT:
+		if click_paint_holding_click and not event.is_pressed():
+			click_paint_holding_click = false
+		if event.is_pressed():
+			start_click_paint()
+	
+	if click_paint_holding_click and event is InputEventMouseMotion:
+		var cur_pos: Vector2 = (event.position / tile_brush_canvas.size) * Vector2(tile_brush_image.get_size())
+		var prev_pos: = click_paint_last_pos
+		click_paint_last_pos = cur_pos
+
+		if not Rect2(Vector2.ZERO, tile_brush_image.get_size()).has_point(cur_pos):
+			click_paint_last_was_in_bounds = false
+			return
+
+		if click_paint_last_was_in_bounds:
+			for pixel_pos in bresenham_line(prev_pos, cur_pos):
+				tile_brush_image.set_pixelv(pixel_pos, brush_color)
+		else:
+			tile_brush_image.set_pixelv(cur_pos.floor(), brush_color)
+		update_tile_brush_preview()
+		
+		click_paint_last_was_in_bounds = true
+
+func bresenham_line(start_pos: Vector2, end_pos: Vector2) -> Array[Vector2i]:
+	var start_pixel_pos: Vector2i = Vector2i(start_pos.floor())
+	var end_pixel_pos: Vector2i = Vector2i(end_pos.floor())
+	if start_pixel_pos == end_pixel_pos or (start_pixel_pos - end_pixel_pos).length() < 1.5:
+		return [end_pixel_pos]
+	var rounding_delta: Vector2 = Vector2(start_pixel_pos) + Vector2.ONE * 0.5 - start_pos
+
+	var delta: Vector2 = end_pos - start_pos
+	var long_basis: = Vector2i(Utility.long_basis(delta))
+	var short_basis: = Vector2i(Utility.short_basis(delta))
+	var long_axis: int = delta.abs().max_axis_index()
+
+	var step_delta: float = delta[1 - long_axis] / delta[long_axis]
+	var start_offs: float = clampf(rounding_delta[long_axis] * step_delta + rounding_delta[1 - long_axis], -.5, .5)
+	
+	prints("line parameters: long_basis = %s, short_basis = %s, long_axis = %s, delta = %s, step_delta = %s, start_offs = %s" % [long_basis, short_basis, long_axis, delta, step_delta, start_offs])
+
+	var line: Array[Vector2i] = []
+	for i in (end_pixel_pos - start_pixel_pos).abs()[long_axis] + 1:
+		var short_length: int = floori(start_offs + i * absf(step_delta))
+		line.append(start_pixel_pos + long_basis * i + short_basis * short_length)
+	prints("line start/end: %s/%s" % [start_pos, end_pos], "pixels:", line)
+	return line
