@@ -697,11 +697,8 @@ func bresenham_line(start_pos: Vector2, end_pos: Vector2) -> Array[Vector2i]:
 	var step_delta: float = delta[1 - long_axis] / delta[long_axis]
 	var start_offs: float = clampf(rounding_delta[long_axis] * step_delta + rounding_delta[1 - long_axis], -.5, .5)
 	
-	prints("line parameters: long_basis = %s, short_basis = %s, long_axis = %s, delta = %s, step_delta = %s, start_offs = %s" % [long_basis, short_basis, long_axis, delta, step_delta, start_offs])
-
 	var line: Array[Vector2i] = []
 	for i in (end_pixel_pos - start_pixel_pos).abs()[long_axis] + 1:
 		var short_length: int = floori(start_offs + i * absf(step_delta))
 		line.append(start_pixel_pos + long_basis * i + short_basis * short_length)
-	prints("line start/end: %s/%s" % [start_pos, end_pos], "pixels:", line)
 	return line
