@@ -311,6 +311,8 @@ func _movement_steps_finished() -> void:
 	if tile_position != positioned_at_tile_position:
 		push_warning("entity moved above another tile position than expected: over tile: " + str(positioned_at_tile_position) + " != actual pos: " + str(tile_position))
 	moving = false
+	if is_spt_override:
+		set_native_move_speed()
 
 func process_finish_move() -> void:
 	MapManager.finish_move(self, [tile_position])

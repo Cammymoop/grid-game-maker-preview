@@ -9,7 +9,6 @@ if override used but movement is blocked, sit on force floor for a movement dura
 holding a direction that aligns with the force floor does not count as an override
 
 I need to add:
- * command for calling custom conditional event, (no return)
  * reworked idle_update including tile idle on top of event
 
 finish move onto:
