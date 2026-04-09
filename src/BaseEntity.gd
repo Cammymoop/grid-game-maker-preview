@@ -5,21 +5,31 @@ signal started_move
 signal finished_move
 signal blocked
 
+var move_facing: = 0
 var facing: = 0
-var visual_facing: = 0
 
 var visual_turn_on_move: = true
 
 var moving: = false
 var just_moved: = false
+var _this_move_steps: int = 0
 var steps_remaining: int = 0
+
+var _revert_position: Vector2 = Vector2(0, 0)
+
+var idle_ticks_elapsed: int = 0
 
 var sprite: MaskLayerSprite
 
 # tiles per second
+var DEPRECATED_steps_per_tile: int = 0
+
+# speed in tiles per second, set by config as speed, but steps per tile is used internally
 var current_move_speed: float = 0
-var steps_per_tile: int = 0
-var self_steps_per_tile: int = 0
+
+var _cached_definition_spt: int = 0
+var is_spt_override: bool = false
+var override_steps_per_tile: int = 0
 
 var controller: Node = null
 var controller_name: String = ""
@@ -84,12 +94,7 @@ func initialize() -> void:
 func update_z():
 	var z = EntityManager.get_entity_property(self, "z-index")
 	if z:
-		if z.is_conditional():
-			z_index = int(z.resolve(self, null, tile_position))
-		else:
-			z_index = int(z.get_value())
-	else:
-		z_index = 0
+		z_index = z.get_or_resolve(self, null, tile_position)
 
 func get_center_offset() -> Vector2:
 	return Vector2(floor(MapManager.tile_width/2.0), floor(MapManager.tile_width/2.0))
@@ -117,17 +122,23 @@ func check_visual_turn_on_move() -> void:
 			visual_turn_on_move = bool(move_turn.get_value())
 
 func serialize() -> Dictionary:
-	var important_stuff = {"entity_index": entity_index, "active": active, "moving": moving, "facing": facing}
+	var important_stuff = {}
+	important_stuff['entity_index'] = entity_index
+	important_stuff['active'] = active
 	important_stuff['instance_id'] = instance_id
-	important_stuff['visual_facing'] = visual_facing
-	important_stuff['tile_position'] = [tile_position.x, tile_position.y]
-	important_stuff['next_tile_pos'] = [next_tile_pos.x, next_tile_pos.y]
+	important_stuff['facing'] = facing
+	important_stuff['position'] = Utility.get_arr_from_vector2(position)
+	important_stuff['moving'] = moving
+	important_stuff['move_facing'] = move_facing
+	important_stuff['tile_position'] = Utility.get_arr_from_vector2(tile_position)
+	important_stuff['next_tile_pos'] = Utility.get_arr_from_vector2(next_tile_pos)
 	important_stuff['local_properties'] = local_properties.duplicate()
-	important_stuff['steps_per_tile'] = steps_per_tile
-	important_stuff['self_steps_per_tile'] = self_steps_per_tile
-	important_stuff['position'] = [position.x, position.y]
+	important_stuff['is_spt_override'] = is_spt_override
+	important_stuff['override_steps_per_tile'] = override_steps_per_tile
+	important_stuff['idle_ticks_elapsed'] = idle_ticks_elapsed
 	if moving:
 		important_stuff['steps_remaining'] = steps_remaining
+		important_stuff['_this_move_steps'] = _this_move_steps
 	
 	if tailing and is_instance_valid(tailing):
 		important_stuff['tailing'] = tailing.instance_id
@@ -140,41 +151,48 @@ func serialize() -> Dictionary:
 
 func deserialize(data: Dictionary) -> void:
 	data = data.duplicate_deep()
-	active = data['active']
-	set_self_speed(data['self_steps_per_tile'])
-	set_current_steps_per_tile(data['steps_per_tile'])
 	entity_index = int(data['entity_index'])
-	instance_id = int(data['instance_id'])
 	entity_name = EntityManager.get_entity_name(entity_index)
+	instance_id = int(data['instance_id'])
+
+	active = data['active']
+	if "idle_ticks_elapsed" in data:
+		idle_ticks_elapsed = int(data['idle_ticks_elapsed'])
+	override_steps_per_tile = data['override_steps_per_tile']
+	is_spt_override = data['is_spt_override']
+	update_cached_spt()
 	local_properties = data['local_properties']
 	
 	bond_group = EntityManager.find_bond_group_of_entity(self)
 	
-	set_facing(int(data['facing']))
-	set_visual_facing(int(data['visual_facing']))
+	if data.has('facing'):
+		set_move_facing(int(data['facing']))
+		set_facing(int(data['facing']))
+	else:
+		set_move_facing(int(data['move_facing']))
+		set_facing(int(data['facing']))
 	moving = data['moving']
-	position = Vector2(data['position'][0], data['position'][1])
-	tile_position = Vector2(data['tile_position'][0], data['tile_position'][1])
-	next_tile_pos = Vector2(data['next_tile_pos'][0], data['next_tile_pos'][1])
+	position = Utility.get_vector2_from_arr(data['position'])
+	tile_position = Utility.get_vector2_from_arr(data['tile_position'])
+	next_tile_pos = Utility.get_vector2_from_arr(data['next_tile_pos'])
 	if "steps_remaining" in data:
 		steps_remaining = int(data["steps_remaining"])
+	if "_this_move_steps" in data:
+		_this_move_steps = int(data["_this_move_steps"])
 	
 	if "deferred_signals" in data:
 		deferred_signals = JSON.to_native(data['deferred_signals'])
 	
-	await EntityManager.post_deserialize
+	if data.has('tailing'):
+		await EntityManager.post_deserialize
+		set_tailing(EntityManager.get_instance(data['tailing']))
 
 func set_active(new_active: bool) -> void:
 	active = new_active
 
-func _physics_process(_delta) -> void:
-	if EntityManager.movements_enabled:
-		entity_process()
-
-func entity_process() -> void:
+func entity_process_starting_actions() -> void:
 	if not active:
 		return
-	
 	
 	if not moving:
 		if has_idle_update_conditional:
@@ -195,49 +213,52 @@ func entity_process() -> void:
 					return
 		
 		var max_intentions: int = get_max_move_intentions()
-		var pre_fetch_move_list: Array = get_pre_fetch_move_list()
-		if pre_fetch_move_list.size() > 0:
-			max_intentions = pre_fetch_move_list.size()
-
-		var start_v_facing: = visual_facing
-		var start_move_facing: = facing
-		var first_attempt_v_facing: = -1
-		var first_attempt_move_facing: = -1
-		for attempt in max_intentions:
-			# if a previous attempt failed, reset the visual facing and move facing
-			if attempt > 0:
-				set_visual_facing(start_v_facing)
-				set_facing(start_move_facing)
-			var intended_move_facing: int = -1
+		if max_intentions > 0:
+			var pre_fetch_move_list: Array = get_pre_fetch_move_list()
 			if pre_fetch_move_list.size() > 0:
-				intended_move_facing = pre_fetch_move_list[attempt]
-			else:
-				intended_move_facing = get_intended_move(attempt)
+				max_intentions = pre_fetch_move_list.size()
 
-			if intended_move_facing > -1:
-				set_current_steps_per_tile(self_steps_per_tile)
-				var was_allowed = start_move(intended_move_facing)
-				if first_attempt_v_facing == -1:
-					first_attempt_v_facing = visual_facing
-					first_attempt_move_facing = facing
-				if was_allowed:
-					break
-		
-		if not moving and first_attempt_v_facing > -1:
-			set_visual_facing(first_attempt_v_facing)
-			set_facing(first_attempt_move_facing)
-	if moving:
-		
-		just_moved = false
-		position += Utility.facing_vector(facing) * current_move_speed
-		steps_remaining -= 1
-		if steps_remaining < 1:
-			finish_move()
-			return # temporarily disabled
-#			var intended = get_intended_move()
-#			if intended > -1:
-#				set_current_steps_per_tile(self_steps_per_tile)
-#				start_move(intended)
+			var start_v_facing: = facing
+			var start_move_facing: = move_facing
+			var first_attempt_v_facing: = -1
+			var first_attempt_move_facing: = -1
+			for attempt in max_intentions:
+				# if a previous attempt failed, reset the visual move_facing and move move_facing
+				if attempt > 0:
+					set_facing(start_v_facing)
+					set_move_facing(start_move_facing)
+				var intended_move_facing: int = -1
+				if pre_fetch_move_list.size() > 0:
+					intended_move_facing = pre_fetch_move_list[attempt]
+				else:
+					intended_move_facing = get_intended_move(attempt)
+
+				if intended_move_facing > -1:
+					set_native_move_speed()
+					var was_allowed = start_move(intended_move_facing)
+					if first_attempt_v_facing == -1:
+						first_attempt_v_facing = facing
+						first_attempt_move_facing = move_facing
+					if was_allowed:
+						break
+			
+			if not moving and first_attempt_v_facing > -1:
+				set_facing(first_attempt_v_facing)
+				set_move_facing(first_attempt_move_facing)
+
+func entity_process_moving_actions() -> void:
+	if not moving:
+		return
+
+	just_moved = false
+	bump_move_step()
+	if steps_remaining < 1:
+		_movement_steps_finished()
+
+func bump_move_step() -> void:
+	steps_remaining -= 1
+	var pixel_speed_per_tick: float = MapManager.tile_width * (current_move_speed / GameManager.get_full_tick_rate())
+	position += Utility.facing_vector(move_facing) * pixel_speed_per_tick
 
 func has_local_property(property_name) -> bool:
 	return property_name in local_properties
@@ -259,7 +280,7 @@ func get_intended_move(attempt_num: int = 0) -> int:
 	
 	if controller.move_mode == "direction":
 		return Utility.direction_to_facing(controller.get_move(attempt_num))
-	elif controller.move_mode == "facing":
+	elif controller.move_mode == "move_facing":
 		return controller.get_move(attempt_num)
 	elif controller.move_mode == "pre_fetch":
 		return -1
@@ -282,63 +303,81 @@ func get_max_move_intentions() -> int:
 	else:
 		return controller.get_max_move_intentions()
 
-func finish_move() -> void:
+func _movement_steps_finished() -> void:
 	position = position.round()
-	#tile_position = next_tile_pos
-	tile_position = MapManager.world_to_tile_position(global_position)
-	emit_signal("finished_move")
-	if tile_position != next_tile_pos:
-		push_warning("entity moved to another tile position than expected: current " + str(tile_position) + " != " + str(next_tile_pos))
+	tile_position = next_tile_pos
+	finished_move.emit()
+	var positioned_at_tile_position = MapManager.world_to_tile_position(global_position)
+	if tile_position != positioned_at_tile_position:
+		push_warning("entity moved above another tile position than expected: over tile: " + str(positioned_at_tile_position) + " != actual pos: " + str(tile_position))
 	moving = false
+
+func process_finish_move() -> void:
 	MapManager.finish_move(self, [tile_position])
 
-func start_move(move_facing, change_visual_facing=true, group_move=false) -> bool:
-	if moving:
-		return false
-	if current_move_speed <= 0:
+func start_move(in_facing_dir: int, change_visual_facing: bool = true, group_move: bool = false) -> bool:
+	if moving or get_steps_per_tile() <= 0:
 		return false
 	if change_visual_facing and visual_turn_on_move:
-		set_visual_facing(move_facing)
-	set_facing(move_facing)
+		set_facing(in_facing_dir)
+	set_move_facing(in_facing_dir)
 	
 	if not group_move and bond_group:
-		return EntityManager.bond_group_start_move(bond_group, steps_per_tile, move_facing)
+		return EntityManager.bond_group_start_move(bond_group, get_steps_per_tile(), in_facing_dir)
 	
-	next_tile_pos = tile_position + Utility.facing_vector(facing)
-	var not_stopped = MapManager.attempt_move(self, next_tile_pos, group_move)
-	if entity_name == "player" and not not_stopped:
-		prints("player was stopped")
-	if not_stopped:
+	next_tile_pos = tile_position + Utility.facing_vector(in_facing_dir)
+	var move_has_started = MapManager.attempt_move(self, next_tile_pos, group_move)
+
+	if move_has_started:
 		moving = true
-		steps_remaining = steps_per_tile
-		if not bond_group:
-			# during a bonded move, entity manager handles calling post_move_actions and actually_started_move
-			# they wont get called unless the move succeeds
+		steps_remaining = get_steps_per_tile()
+		_this_move_steps = steps_remaining
+		if not group_move:
 			EntityManager.post_move_actions(self, tile_position, next_tile_pos)
 			actually_started_move()
 		else:
-			emit_signal("started_move", move_facing)
+			# save position before a bump to revert to if the group move is reverted
+			_revert_position = position
+			# during a bonded move, entity manager handles calling post_move_actions and actually_started_move if the group move succeeds
+		_move_bump_check()
 		return true
 	else:
 		next_tile_pos = tile_position
 		if not group_move:
-			emit_signal("blocked", move_facing)
+			blocked.emit(in_facing_dir)
 		return false
+
+func _move_bump_check() -> void:
+	if EntityManager.should_bump_move():
+		# Bump 1 step forward so that late move starts during a tick are synchronized
+		# but if the next step could trigger actions, bumping would skip them so don't bump
+		if not next_step_has_actions():
+			bump_move_step()
+
+func next_step_has_actions() -> bool:
+	if not moving:
+		var spt: = get_steps_per_tile()
+		return spt == 1 or spt == 2
+	else:
+		var next_steps_remaining: = steps_remaining - 1
+		# next step would finish move, or would trigger half-move
+		return next_steps_remaining == 0 or next_steps_remaining == floori(_this_move_steps / 2.0)
 
 # Only called right after start move to abort the actual move
 # Used by bond groups to stop members moving when one member can't
 func revert_move_start() -> void:
 	moving = false
+	position = _revert_position
 	steps_remaining = 0
+	_this_move_steps = 0
 	next_tile_pos = tile_position
-	emit_signal("blocked", facing)
+	blocked.emit(move_facing)
 
 # I started moving
 func actually_started_move() -> void:
-	emit_signal("started_move", facing)
+	started_move.emit(move_facing)
 	var post_move = EntityManager.get_entity_property(self, "post_move")
 	if post_move and post_move.is_conditional():
-		print("post move conditional")
 		post_move.resolve(self, null, next_tile_pos)
 
 func is_settled() -> bool:
@@ -351,50 +390,65 @@ func set_controller(new_controller) -> void:
 	if "controller_optiops" in definition:
 		controller.set_options(definition["controller_options"])
 
-func set_visual_facing(new_facing):
-	visual_facing = new_facing
+func set_facing(new_facing):
+	facing = new_facing
 	var no_rotate = EntityManager.get_entity_property(self, "no_rotation")
 	if no_rotate != null and no_rotate.get_value():
 		return
-	sprite.set_sprite_rotation(Utility.facing_rotation(visual_facing))
+	sprite.set_sprite_rotation(Utility.facing_rotation(facing))
 
-func set_facing(new_facing):
-	facing = new_facing
+func set_move_facing(new_facing):
+	move_facing = new_facing
 
 func turn_to_facing(new_facing):
+	set_move_facing(new_facing)
 	set_facing(new_facing)
-	set_visual_facing(new_facing)
 
-func set_intended_move_speed(intended: float) -> void:
-	var ticks_per_second: int = ProjectSettings.get("physics/common/physics_ticks_per_second")
-	
-	if intended > 0:
-		var spt: = maxi(1, round(ticks_per_second / intended))
-		set_self_speed(spt)
-	else:
-		set_self_speed(0)
+static func _speed_to_spt(speed: float) -> int:
+	if speed <= 0:
+		return 0
+	return maxi(1, roundi(GameManager.get_full_tick_rate() / speed))
 
-func set_self_speed(new_steps_per_tile: int) -> void:
-	self_steps_per_tile = new_steps_per_tile
-	set_current_steps_per_tile(new_steps_per_tile)
+static func _spt_to_speed(spt: int) -> float:
+	if spt <= 0:
+		return 0
+	return 1 / (float(spt) / GameManager.get_full_tick_rate())
 
-func set_current_steps_per_tile(new_spt) -> void:
-	steps_per_tile = new_spt
-	if steps_per_tile == 0:
-		current_move_speed = 0
-	else:
-		current_move_speed = MapManager.tile_width / float(steps_per_tile)
-		
+func update_cached_spt() -> void:
+	var entity_speed = EntityManager.get_entity_definition(entity_index).get("intended_move_speed", EntityManager.default_move_speed)
+	_cached_definition_spt = _speed_to_spt(entity_speed)
+	update_move_speed()
+
+func set_steps_per_tile_override(override_spt: int) -> void:
+	is_spt_override = true
+	override_steps_per_tile = override_spt
+	update_move_speed()
+
+func set_move_speed_override(speed: float) -> void:
+	set_steps_per_tile_override(_speed_to_spt(speed))
+
+func set_native_move_speed() -> void:
+	is_spt_override = false
+	update_move_speed()
+
+func get_steps_per_tile() -> int:
+	if is_spt_override:
+		return override_steps_per_tile
+	return _cached_definition_spt
+
+func update_move_speed() -> void:
+	current_move_speed = _spt_to_speed(get_steps_per_tile())
+
 
 func can_i_move(at_facing) -> bool:
 	var my_pos = tile_position if not moving else next_tile_pos
 	var target_pos = my_pos + Utility.facing_vector(at_facing)
 	
 	# temporarily face the movement direction, so that blocking conditionals can read it
-	var old_facing = facing
-	set_facing(at_facing)
+	var old_facing = move_facing
+	set_move_facing(at_facing)
 	var result = MapManager.can_move_to(self, target_pos)
-	set_facing(old_facing)
+	set_move_facing(old_facing)
 	
 	return result
 
@@ -418,10 +472,10 @@ func untail() -> void:
 func tail_follow(_move_facing) -> void:
 	if not tailing:
 		return
-	if steps_per_tile != tailing.steps_per_tile:
-		set_current_steps_per_tile(tailing.steps_per_tile)
+	if get_steps_per_tile() != tailing.get_steps_per_tile():
+		set_steps_per_tile_override(tailing.get_steps_per_tile())
 	
-	var target_tile = tailing.tile_position
+	var target_tile = tailing.get_stationary_position()
 	if (target_tile - tile_position).length() > 1:
 		print_debug('tail detached')
 		untail()
@@ -433,7 +487,7 @@ func tail_follow(_move_facing) -> void:
 		untail()
 
 func can_i_move_relative(relative_direction) -> bool:
-	return can_i_move(Utility.resolve_relative_direction(relative_direction, facing))
+	return can_i_move(Utility.resolve_relative_direction(relative_direction, move_facing))
 
 func entity_manager_signal(signaling_entity: BaseEntity, args: Array, signal_name: String) -> void:
 	if not moving:

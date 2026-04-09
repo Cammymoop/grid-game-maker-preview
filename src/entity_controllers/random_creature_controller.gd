@@ -32,8 +32,8 @@ func get_moves() -> Array:
 	var shuffled_directions: Array = [0, 1, 2, 3]
 	shuffled_directions.shuffle()
 	if prefer_forward:
-		shuffled_directions.erase(parent.facing)
-		shuffled_directions.push_front(parent.facing)
+		shuffled_directions.erase(parent.move_facing)
+		shuffled_directions.push_front(parent.move_facing)
 	
 	return shuffled_directions
 	

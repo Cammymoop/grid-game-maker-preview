@@ -311,9 +311,9 @@ func resolve_full_direction_to_facing(full_direction: int, slots: Dictionary) ->
 			return get_full_direction_absolute(full_direction)
 		
 		if is_full_dir_relative_to_visual_facing(full_direction):
-			facing = entity.visual_facing
-		else:
 			facing = entity.facing
+		else:
+			facing = entity.move_facing
 	elif Commands.slot_is_positions(relative_to_slot_id):
 		var positions: Array = slots[relative_to_slot_id]
 		if not positions:

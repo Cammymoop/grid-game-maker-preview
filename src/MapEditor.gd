@@ -308,7 +308,7 @@ func _process(delta):
 			if len(entities_here) > 1 and entities_here[-1].entity_index == current_entity_index:
 				picked_entity = entities_here[-2]
 			set_entity_to(picked_entity.entity_index)
-			set_current_facing(picked_entity.visual_facing)
+			set_current_facing(picked_entity.facing)
 		else:
 			var tile_here = MapManager.get_tile_index_at(cursor_tile_pos)
 			if tile_here > -1:

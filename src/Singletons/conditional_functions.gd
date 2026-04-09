@@ -81,12 +81,12 @@ func resolve_conditional(conditional_name, conditional_data, owning_entity, targ
 			"can_move", "cant_move":
 				var facing = split_condition[1]
 				if facing == "target":
-					facing = Utility.resolve_relative_direction(split_condition[2], target_entity.facing)
+					facing = Utility.resolve_relative_direction(split_condition[2], target_entity.move_facing)
 				else:
 					if Utility.is_absolute_direction(facing):
 						facing = Utility.direction_to_facing(facing)
 					else:
-						facing = Utility.resolve_relative_direction(facing, owning_entity.facing)
+						facing = Utility.resolve_relative_direction(facing, owning_entity.move_facing)
 				var can_move = owning_entity.can_i_move(facing)
 				condition_stack.append(can_move if c == "can_move" else not can_move)
 			"is_entity_in_direction":
@@ -106,10 +106,10 @@ func resolve_conditional(conditional_name, conditional_data, owning_entity, targ
 				elif Utility.is_absolute_direction(facing):
 					facing = Utility.direction_to_facing(facing)
 				else:
-					var ent_facing = check_entity.visual_facing if check_visual else check_entity.facing
+					var ent_facing = check_entity.facing if check_visual else check_entity.move_facing
 					facing = Utility.resolve_relative_direction(facing, ent_facing)
 				
-				var check_position = owning_entity.tile_position + Utility.facing_vector(facing)
+				var check_position = owning_entity.tile_position + Utility.move_facing_vector(facing)
 				var entities_are_there = len(EntityManager.get_entities_at(check_position, owning_entity)) > 0
 				
 				condition_stack.append(entities_are_there)
@@ -142,16 +142,16 @@ func resolve_conditional(conditional_name, conditional_data, owning_entity, targ
 				elif Utility.is_absolute_direction(facing):
 					facing = Utility.direction_to_facing(facing)
 				else:
-					var owner_facing = owning_entity.visual_facing if check_visual else owning_entity.facing
+					var owner_facing = owning_entity.facing if check_visual else owning_entity.move_facing
 					facing = Utility.resolve_relative_direction(facing, owner_facing)
 				var check_target_visual = false
 				if arg < len(split_condition) - 1:
 					if split_condition[arg] == "visual":
 						check_target_visual = true
 				
-				var target_facing = target_entity.facing
+				var target_facing = target_entity.move_facing
 				if check_target_visual:
-					target_facing = target_entity.visual_facing
+					target_facing = target_entity.facing
 				var same_facing = target_facing == facing
 				condition_stack.append(same_facing if c == "is_facing" else not same_facing)
 			"tile_has_property", "tile_has_no_property":
@@ -164,8 +164,8 @@ func resolve_conditional(conditional_name, conditional_data, owning_entity, targ
 				if owning_entity.moving:
 					condition_stack.append(false)
 				else:
-					owning_entity.set_current_steps_per_tile(target_entity.steps_per_tile)
-					var move_facing = Utility.resolve_relative_direction(split_condition[1], target_entity.facing)
+					owning_entity.set_steps_per_tile_override(target_entity.DEPRECATED_steps_per_tile)
+					var move_facing = Utility.resolve_relative_direction(split_condition[1], target_entity.move_facing)
 					var visual_turn = true
 					if 2 <= len(split_condition) - 1:
 						if split_condition[2] == "false":
@@ -226,7 +226,7 @@ func do_action(action_data, owning_entity, target_entity, tile_position, argumen
 		"copy_move_speed", "send_move_speed":
 			var to_ent = owning_entity if a == "copy_move_speed" else target_entity
 			var from_ent = target_entity if a == "copy_move_speed" else owning_entity
-			to_ent.set_current_steps_per_tile(from_ent.steps_per_tile)
+			to_ent.set_steps_per_tile_override(from_ent.DEPRECATED_steps_per_tile)
 		"move", "you_move":
 			var mover = owning_entity if a == "move" else target_entity
 			if mover.moving:
@@ -234,10 +234,10 @@ func do_action(action_data, owning_entity, target_entity, tile_position, argumen
 			var move_facing = -1
 			var arg = 2
 			if split_action[1] == "target":
-				move_facing = Utility.resolve_relative_direction(split_action[2], target_entity.facing)
+				move_facing = Utility.resolve_relative_direction(split_action[2], target_entity.move_facing)
 				arg += 1
 			else:
-				move_facing = Utility.resolve_relative_direction(split_action[1], owning_entity.facing)
+				move_facing = Utility.resolve_relative_direction(split_action[1], owning_entity.move_facing)
 			
 			var visual_turn = true
 			if arg <= len(split_action) - 1:
@@ -249,18 +249,18 @@ func do_action(action_data, owning_entity, target_entity, tile_position, argumen
 		"make_entity":
 			var index = EntityManager.get_entity_index(split_action[1])
 			var at_position = tile_position
-			var at_facing = owning_entity.facing
+			var at_facing = owning_entity.move_facing
 			
 			var arg = 2
 			if arg <= len(split_action) - 1:
 				if split_action[arg] == "target":
-					at_facing = Utility.resolve_relative_direction(split_action[arg + 1], target_entity.facing)
+					at_facing = Utility.resolve_relative_direction(split_action[arg + 1], target_entity.move_facing)
 					arg += 2
 				else:
 					if Utility.is_absolute_direction(split_action[arg]):
 						at_facing = Utility.direction_to_facing(split_action[arg])
 					else:
-						at_facing = Utility.resolve_relative_direction(split_action[arg], owning_entity.facing)
+						at_facing = Utility.resolve_relative_direction(split_action[arg], owning_entity.move_facing)
 					arg += 1
 			
 			var new_entity = EntityManager.create_entity(index, at_position, at_facing)
@@ -320,7 +320,7 @@ func do_action(action_data, owning_entity, target_entity, tile_position, argumen
 			var new_facing = -1
 			var arg = 2
 			if split_action[1] == "target":
-				new_facing = Utility.resolve_relative_direction(split_action[2], target_entity.facing)
+				new_facing = Utility.resolve_relative_direction(split_action[2], target_entity.move_facing)
 				arg += 1
 			else:
 				if Utility.is_absolute_direction(split_action[1]):
@@ -337,15 +337,15 @@ func do_action(action_data, owning_entity, target_entity, tile_position, argumen
 							new_facing = int(prop.get_value())
 					arg += 1
 				else:
-					new_facing = Utility.resolve_relative_direction(split_action[1], owning_entity.facing)
+					new_facing = Utility.resolve_relative_direction(split_action[1], owning_entity.move_facing)
 			if new_facing > -1:
 				var secondary = false
 				if arg <= len(split_action) - 1:
 					secondary = split_action[arg]
 				if not secondary or secondary != "visual":
-					ent.set_facing(new_facing)
+					ent.set_move_facing(new_facing)
 				if (not secondary and ent.visual_turn_on_move) or (bool(secondary) and secondary != "actual"):
-					ent.set_visual_facing(new_facing)
+					ent.set_facing(new_facing)
 		"set_property", "i_set_property":
 			var val = true
 			if len(split_action) > 2:
@@ -383,7 +383,7 @@ func do_action(action_data, owning_entity, target_entity, tile_position, argumen
 				if val <= 0 and ent.has_local_property(prop_name):
 					ent.remove_local_property(prop_name)
 		"save_facing":
-			EntityManager.set_entity_property(owning_entity, split_action[1], target_entity.facing)
+			EntityManager.set_entity_property(owning_entity, split_action[1], target_entity.move_facing)
 		"unset_property", "i_unset_property":
 			var ent = owning_entity if a == "i_unset_property" else target_entity
 			ent.remove_local_property(split_action[1])

@@ -4,9 +4,12 @@ var move_mode = "direction"
 
 # Options
 var stop_repeat_after_bonk = true
+var lock_for_idle_delay_after_bonk = true
 var allow_wait = true
 
 var is_repeat = false
+
+var is_delay_locked: = false
 
 var up_held: = false
 var down_held: = false
@@ -17,21 +20,32 @@ var cancelled: = false
 
 var most_recent_is_horizontal: = false
 
+var parent_entity: BaseEntity = null
+
 var available_options = {
 	"stop_repeat_after_bonk": {"display_name": "Stop repeating movement after being blocked", "type": "bool"},
+	"lock_for_idle_delay_after_bonk": {"display_name": "Prevent movement briefly after being blocked", "type": "bool"},
 	"allow_wait": {"display_name": "Press a key to wait a turn", "type": "bool"},
 }
 
 func _ready():
-	get_parent().connect("blocked", Callable(self, "got_blocked"))
-	get_parent().connect("started_move", Callable(self, "on_start_move"))
+	parent_entity = get_parent() as BaseEntity
+	if not parent_entity:
+		push_error("InputController parent is not a BaseEntity")
+		return
+	parent_entity.blocked.connect(got_blocked)
+	parent_entity.started_move.connect(on_start_move)
 
 func get_max_move_intentions() -> int:
+	if is_delay_locked and parent_entity.idle_ticks_elapsed + 1 < EntityManager.idle_delay_frames:
+		return 0
 	return 1
 
 func set_options(options: Dictionary) -> void:
 	if "stop_repeat_after_bonk" in options:
 		stop_repeat_after_bonk = options["stop_repeat_after_bonk"]
+	if "lock_for_idle_delay_after_bonk" in options:
+		lock_for_idle_delay_after_bonk = options["lock_for_idle_delay_after_bonk"]
 	if "allow_wait" in options:
 		allow_wait = options["allow_wait"]
 
@@ -113,6 +127,9 @@ func get_move(attempt_num: int = 0):
 func got_blocked(_facing_dir) -> void:
 	if stop_repeat_after_bonk:
 		cancelled = true
+	if lock_for_idle_delay_after_bonk:
+		is_delay_locked = true
 
 func on_start_move(_facing_dir) -> void:
 	cancelled = false
+	is_delay_locked = false

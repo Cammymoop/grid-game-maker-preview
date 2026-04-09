@@ -48,7 +48,7 @@ func is_at_relative(check_relative: Vector2i) -> bool:
 		return check_relative.x >= 0 and check_relative.x < entity_size.x and check_relative.y >= 0 and check_relative.y < entity_size.y
 
 func check_mask(check_offset: Vector2i) -> bool:
-	return shape_mask.get(mask_offset_rotated_by(check_offset, visual_facing), false)
+	return shape_mask.get(mask_offset_rotated_by(check_offset, facing), false)
 
 func mask_offset_rotated_by(offset: Vector2i, by_facing: int) -> Vector2i:
 	if by_facing == 0 or entity_size == Vector2.ONE:
@@ -79,31 +79,31 @@ func get_frontier(in_facing_dir: int) -> Dictionary:
 	return {to = frontier, from = fromtier}
 
 # Override start_move because I'm too thicc
-func start_move(move_facing: int, change_visual_facing: bool = true, group_move: bool = false) -> bool:
+func start_move(in_facing_dir: int, change_visual_facing: bool = true, group_move: bool = false) -> bool:
 	if moving:
 		push_warning("Tried to start move when already moving")
 		return false
-	if  current_move_speed <= 0:
+	if get_steps_per_tile() <= 0:
 		return false
 
 	if change_visual_facing and visual_turn_on_move:
-		set_visual_facing(move_facing)
-	set_facing(move_facing)
+		set_facing(in_facing_dir)
+	set_move_facing(in_facing_dir)
 	
 	if not group_move and bond_group:
 		# TODO entity managers bond group move checking doesnt take large entities into account yet
-		return EntityManager.bond_group_start_move(bond_group, steps_per_tile, move_facing)
+		return EntityManager.bond_group_start_move(bond_group, get_steps_per_tile(), in_facing_dir)
 	
-	next_tile_pos = tile_position + Utility.facing_vector(facing)
+	next_tile_pos = tile_position + Utility.facing_vector(in_facing_dir)
 	var not_stopped = true
 	
-	var frontier = get_frontier(move_facing)
+	var frontier = get_frontier(in_facing_dir)
 	for moving_to in frontier.to:
 		not_stopped = not_stopped and MapManager.attempt_move(self, moving_to, group_move)
 	
 	if not_stopped:
 		moving = true
-		steps_remaining = steps_per_tile
+		steps_remaining = get_steps_per_tile()
 		if not bond_group:
 			# during a bonded move, entity manager handles calling post_move_actions and actually_started_move
 			# they wont get called unless the move succeeds
@@ -111,20 +111,13 @@ func start_move(move_facing: int, change_visual_facing: bool = true, group_move:
 			actually_started_move()
 		else:
 			emit_signal("started_move")
+		_move_bump_check()
 		return true
 	else:
 		next_tile_pos = tile_position
 		emit_signal("blocked")
 		return false
 
-func finish_move() -> void:
-	position = position.round()
-	#tile_position = next_tile_pos
-	var frontier = get_frontier(facing)
-	tile_position = MapManager.world_to_tile_position(global_position)
-	emit_signal("finished_move")
-	if tile_position != next_tile_pos:
-		print_debug("???")
-	moving = false
-	
+func process_finish_move() -> void:
+	var frontier = get_frontier(move_facing)
 	MapManager.finish_move(self, frontier.to)

@@ -2,6 +2,9 @@ extends Node
 
 signal level_state_loaded
 
+const FULL_TICK_RATE: int = 60
+@onready var TICK_RATE: int = ProjectSettings.get_setting_with_override("physics/common/physics_ticks_per_second")
+
 var started = false
 var cur_scene = null
 
@@ -482,3 +485,12 @@ func get_all_used_prop_names() -> Array[String]:
 				prop_names.append(prop_name)
 
 	return prop_names
+
+func get_tick_rate() -> int:
+	return TICK_RATE
+
+func get_full_tick_rate() -> int:
+	return FULL_TICK_RATE
+
+func get_is_half_tick_rate() -> bool:
+	return TICK_RATE <= FULL_TICK_RATE / 2.0

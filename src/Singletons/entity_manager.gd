@@ -88,8 +88,57 @@ var controller_frame: bool = true
 var movement_mode: int
 
 var default_move_speed: float = 6
+var default_idle_delay: float = 1/10.0
+@onready var idle_delay_frames: int = roundi(default_idle_delay * GameManager.get_tick_rate())
+
+var process_phase: int = 0
+
+func entity_list_process() -> void:
+    var active_entities: Array[BaseEntity] = []
+    var moving_entities: Array[BaseEntity] = []
+    var idle_entities: Array[BaseEntity] = []
+    
+    # Phased processing so each entity completes a phase before any entity processes the next phase
+    
+    # Phase 1 - Starting movement and start of move actions
+    process_phase = 1
+    for e in entity_list:
+        if e.active:
+            active_entities.append(e)
+            e.entity_process_starting_actions()
+            if e.moving:
+                moving_entities.append(e)
+            else:
+                idle_entities.append(e)
+    
+    # Phase 2 - Update idle tick counter (for non-moving)
+    process_phase = 2
+    for e in idle_entities:
+        e.idle_ticks_elapsed += 1
+    
+    # Phase 3 - Moving progress and mid-move actions
+    # if an entity starts moving during this phase it will not be processed as moving until the next tick
+    process_phase = 3
+    var entities_that_finished_moving: Array[BaseEntity] = []
+    for e in moving_entities:
+        e.idle_ticks_elapsed = 0
+        e.entity_process_moving_actions()
+        if not e.moving:
+            entities_that_finished_moving.append(e)
+    
+    # Phase 4 - All entities moved for the frame, now process actions resulting from completed moves
+    process_phase = 4
+    for e in entities_that_finished_moving:
+        e.process_finish_move()
+    
+    process_phase = 0
+
+func should_bump_move() -> bool:
+    return process_phase >= 3
 
 func _physics_process(_delta):
+    entity_list_process()
+
     if movements_enabled:
         frame_counter += 1
     
@@ -240,9 +289,16 @@ func clear_entity_list():
     clear()
 
 # In discrete mode we wont update entities at all until a move is requested
-func request_move(entity) -> void:
+func request_move(entity: BaseEntity, request_frames: int = -1) -> void:
+    if movement_mode == GameManager.MovementMode.MOVEMENT_CONTINUOUS:
+        return
     if movement_mode == GameManager.MovementMode.MOVEMENT_DISCRETE:
-        requested_turn_frames = entity.steps_per_tile
+        if request_frames:
+            requested_turn_frames = request_frames
+        elif entity:
+            requested_turn_frames = entity.get_steps_per_tile()
+        else:
+            requested_turn_frames = idle_delay_frames
     turn_requested = true
 
 func get_instance(instance_id: int) -> BaseEntity:
@@ -334,10 +390,7 @@ func create_entity(entity_index: int, tile_position: Vector2i, facing: int = 0, 
     else: 
         entity = entity_template.instantiate()
 
-    var intended_move_speed: = float(entity_info.get("intended_move_speed", default_move_speed))
-    if intended_move_speed <= 0:
-        intended_move_speed = default_move_speed
-    entity.set_intended_move_speed(intended_move_speed)
+    entity.update_cached_spt()
 
     entity.entity_index = entity_index
     setup_entity_controller(entity)
@@ -346,9 +399,9 @@ func create_entity(entity_index: int, tile_position: Vector2i, facing: int = 0, 
     entity.initialize()
     setup_entity_texture(entity)
     
-    entity.set_facing(facing)
+    entity.set_move_facing(facing)
     if entity.visual_turn_on_move:
-        entity.set_visual_facing(facing)
+        entity.set_facing(facing)
     
     if "groups" in entity_info:
         for g in entity_info["groups"]:
@@ -442,8 +495,9 @@ func restore_entity(serialized_entity: Dictionary, refresh: bool = false) -> voi
 func setup_entity_texture(entity: BaseEntity) -> void:
     var texture_index = entity_defs[entity.entity_index]['texture']
     var texture_sub_index = entity_defs[entity.entity_index]['tex_index']
-    var sprite: MaskLayerSprite = entity.sprite
     var sprite_config: Dictionary = entity_defs[entity.entity_index].get("sprite_config", {})
+
+    var sprite: MaskLayerSprite = entity.sprite
     if sprite_config and sprite_config.get("layers", []):
         sprite.set_main_layers(sprite_config["layers"])
     else:
@@ -458,15 +512,15 @@ func serialize() -> Dictionary:
 
 func deserialize(data: Dictionary) -> void:
     clear_entity_list()
+    bond_groups = data["bond_groups"].duplicate_deep()
     for entity_data in data["entity_list"]:
         restore_entity(entity_data)
-    bond_groups = data["bond_groups"]
     refresh_entity_list()
     instance_counter = 0
     for e in entity_list:
         instance_counter = maxi(instance_counter, e.instance_id + 1)
     
-    emit_signal("post_deserialize")
+    post_deserialize.emit()
 
 func create_bond_group(entities: Array) -> void:
     var group = []
@@ -516,7 +570,7 @@ func bond_group_start_move(bond_group: Array, steps_per_tile: int, move_facing: 
     for entity in instances:
         # set change visual facing to false for group moves for now
         # good default but should be configurable somehow
-        entity.set_current_steps_per_tile(steps_per_tile)
+        entity.set_steps_per_tile_override(steps_per_tile)
         if not entity.start_move(move_facing, false, true):
             move_allowed = false
     
@@ -772,6 +826,11 @@ func get_entity_prop_with_default(entity, property_name, default_value) -> Varia
         return prop.resolve(entity, null, entity.tile_position)
     else:
         return prop.get_value()
+
+func get_entity_prop_is_truthy(entity: BaseEntity, property_name: String, default_val: bool = false) -> bool:
+    if not entity_has_property(entity, property_name):
+        return default_val
+    return Property.resolve_truthy(get_entity_property(entity, property_name), entity, null, entity.tile_position)
 
 func entity_has_property(entity, property_name: String) -> bool:
     var entity_props = entity_defs[entity.entity_index]["properties"]

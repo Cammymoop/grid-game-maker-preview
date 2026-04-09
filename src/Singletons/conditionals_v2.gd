@@ -191,7 +191,7 @@ func do_condition(command_code: int, selected_slot: int, slots: Dictionary, comm
 				var facing = Utility.resolve_full_direction_to_facing(command_options[0], slots)
 				
 				var blue_entity = slots[Slot.BLUE]
-				selected.set_current_steps_per_tile(blue_entity.steps_per_tile)
+				selected.set_steps_per_tile_override(blue_entity.get_steps_per_tile())
 				
 				var visual_turn = not command_options[1]
 				return selected.start_move(facing, visual_turn)

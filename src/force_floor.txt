@@ -1,0 +1,52 @@
+
+
+force floors:
+
+if sliding onto force floor, then holding a direction will allow you to move that way. [override]
+if last move was an override, you will not be able to override.
+if override used but movement is blocked, sit on force floor for a movement duration, then the force floor activates
+
+holding a direction that aligns with the force floor does not count as an override
+
+I need to add:
+ * command for calling custom conditional event, (no return)
+ * reworked idle_update including tile idle on top of event
+
+finish move onto:
+  if entity has unforcable:
+    break
+
+  if not entity has can_override_force:
+    run force entity
+    break
+
+  if entity's forced_move is false or entity's override_move is true or not(entity has intended move):
+    run force entity
+    break
+  
+  if entity's intended move is not facing the forced dir:
+    set entity's override_move to true
+
+idle on top of:
+  if entity has unforcable:
+    break
+  
+  run force entity
+
+force entity: (custom conditional event)
+  if not entity has can_override_force:
+    entity gets pushed in forced dir
+    break
+  else:
+    set entity's forced_move to true
+    set entity's override_move to false
+    entity gets pushed in forced dir
+
+move off of:
+  if not entity has unforcable: 
+    move speed is slide speed
+
+player's finish move:
+  if tile doesnt have can_force_move:
+    set forced_move to false
+    set override_move to false

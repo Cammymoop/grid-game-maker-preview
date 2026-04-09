@@ -102,6 +102,16 @@ func cmd_c_has_property(slots: Dictionary, chosen_slot: int, invert: bool, prope
 			result = MapManager.any_pos_has_property(selected, property_name)
 	return not result if invert else result
 
+func desc_if_property_value() -> String:
+	return "entity,pos|If the entity/tile's [property_name:PropertyInput] property is [is_truthy:BoolChoice:true or non-zero,false or zero]"
+func cmd_if_property_value(slots: Dictionary, chosen_slot: int, property_name: String, is_truthy: bool) -> bool:
+	var result: bool = false
+	if Commands.slot_is_entity(chosen_slot):
+		result = EntityManager.get_entity_prop_is_truthy(slots[chosen_slot], property_name)
+	else:
+		result = MapManager.check_multiple_pos_for_property_bool(slots[chosen_slot], slots[Slot.RED], property_name, is_truthy)
+	return result if is_truthy else not result
+
 func desc_c_is_named() -> String:
 	return "entity|If the entity [invert:InvertInput:is,is not] named [check_name:EntityNameInput]"
 func cmd_c_is_named(slots: Dictionary, chosen_slot: int, invert: bool, check_name: String) -> bool:
@@ -123,7 +133,7 @@ func cmd_c_get_pushed(slots: Dictionary, chosen_slot: int, direction: int, keep_
 	if selected.moving:
 		return false
 	var blue_entity = slots[Slot.BLUE]
-	selected.set_current_steps_per_tile(blue_entity.steps_per_tile)
+	selected.set_steps_per_tile_override(blue_entity.get_steps_per_tile())
 	var facing = resolve_direction_value(direction, slots)
 	return selected.start_move(facing, not keep_visual)
 
@@ -134,7 +144,7 @@ func cmd_c_is_facing(slots: Dictionary, chosen_slot: int, invert: bool, directio
 		return false
 	var selected = slots[chosen_slot]
 
-	var result = selected.visual_facing == resolve_direction_value(direction, slots)
+	var result = selected.facing == resolve_direction_value(direction, slots)
 	return not result if invert else result
 
 func desc_c_is_moving() -> String:
@@ -144,7 +154,7 @@ func cmd_c_is_moving(slots: Dictionary, chosen_slot: int, invert: bool, directio
 		return false
 	var selected = slots[chosen_slot]
 
-	var result = selected.facing == resolve_direction_value(direction, slots)
+	var result = selected.move_facing == resolve_direction_value(direction, slots)
 	return not result if invert else result
 
 func desc_a_die() -> String:
@@ -305,3 +315,17 @@ func cmd_exists(slots: Dictionary, chosen_slot: int) -> bool:
 	elif Commands.slot_is_positions(chosen_slot):
 		return selected.size() > 0
 	return false
+
+func desc_override_move_speed() -> String:
+	return "entity|Override the entity's move speed for the current movement to [speed:ValueInput]"
+func cmd_override_move_speed(slots: Dictionary, chosen_slot: int, speed: float) -> void:
+	if Commands.slot_is_entity(chosen_slot) and slots[chosen_slot]:
+		slots[chosen_slot].set_move_speed_override(speed)
+
+func desc_trigger_custom_event() -> String:
+	return "entity,pos|Trigger the [event_name:PropertyInput] custom event for the entity/tiles"
+func cmd_trigger_custom_event(slots: Dictionary, chosen_slot: int, event_name: String) -> void:
+	if Commands.slot_is_entity(chosen_slot):
+		EntityManager.resolve_entity_interaction_event(event_name, slots[chosen_slot], slots[Slot.RED], slots[chosen_slot].get_moving_position())
+	elif Commands.slot_is_positions(chosen_slot):
+		MapManager.resolve_tile_event(slots[chosen_slot], event_name, slots[Slot.RED])

@@ -15,6 +15,6 @@ func get_move(_attempt_num: int):
 		return -1
 	
 	if parent.can_i_move_relative("forward"):
-		return parent.facing
+		return parent.move_facing
 	else:
-		return Utility.facing_opposite(parent.facing)
+		return Utility.facing_opposite(parent.move_facing)
