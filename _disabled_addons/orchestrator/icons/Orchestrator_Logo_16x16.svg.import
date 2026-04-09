@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bo6446fycy5n"
-path="res://.godot/imported/CircleReference.svg-452a6b59c24b710639430d28505145ae.ctex"
+uid="uid://6rp6vgmnmvas"
+path="res://.godot/imported/Orchestrator_Logo_16x16.svg-099b298029586824bc7d213fba3f7365.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://addons/orchestrator/editor/icons/CircleReference.svg"
-dest_files=["res://.godot/imported/CircleReference.svg-452a6b59c24b710639430d28505145ae.ctex"]
+source_file="res://_disabled_addons/orchestrator/icons/Orchestrator_Logo_16x16.svg"
+dest_files=["res://.godot/imported/Orchestrator_Logo_16x16.svg-099b298029586824bc7d213fba3f7365.ctex"]
 
 [params]
 

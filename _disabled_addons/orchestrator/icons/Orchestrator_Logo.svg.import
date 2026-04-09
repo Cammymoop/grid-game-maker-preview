@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://u824fatbgyio"
-path="res://.godot/imported/Decompose.svg-52676c2ad418a57d79d58d8b312a6740.ctex"
+uid="uid://d3n7siref0uyn"
+path="res://.godot/imported/Orchestrator_Logo.svg-4b3bd881e0bd2a122d9a85307bd83655.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://addons/orchestrator/editor/icons/Decompose.svg"
-dest_files=["res://.godot/imported/Decompose.svg-52676c2ad418a57d79d58d8b312a6740.ctex"]
+source_file="res://_disabled_addons/orchestrator/icons/Orchestrator_Logo.svg"
+dest_files=["res://.godot/imported/Orchestrator_Logo.svg-4b3bd881e0bd2a122d9a85307bd83655.ctex"]
 
 [params]
 

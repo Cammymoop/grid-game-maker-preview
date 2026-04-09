@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bfk8ej2o0dgcf"
-path="res://.godot/imported/CircleValue.svg-587a193410954141d7def4c437a0e723.ctex"
+uid="uid://borioicb517hj"
+path="res://.godot/imported/CircleReference.svg-834873095dbae1f84c1f527daf3309f8.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://addons/orchestrator/editor/icons/CircleValue.svg"
-dest_files=["res://.godot/imported/CircleValue.svg-587a193410954141d7def4c437a0e723.ctex"]
+source_file="res://_disabled_addons/orchestrator/editor/icons/CircleReference.svg"
+dest_files=["res://.godot/imported/CircleReference.svg-834873095dbae1f84c1f527daf3309f8.ctex"]
 
 [params]
 
