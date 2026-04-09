@@ -59,7 +59,7 @@ var all_commands: Dictionary[String, Dictionary] = {}
 
 const DEFAULT_SCRIPTS: = [ "basic_default" ]
 
-var add_orch_scripts: Array[String] = ["res://cond_scripts/orch_cmds.torch"]
+var add_orch_scripts: Array[String] = []#["res://cond_scripts/orch_cmds.torch"]
 
 const BUILTIN_COMMANDS: Array[String] = ["and", "or", "xor", "not", "false", "true"]
 
@@ -79,6 +79,9 @@ func _ready() -> void:
         for command in all_commands:
             if command.begins_with(script_name + "."):
                 prints("Added orch command: %s" % command)
+
+func get_all_events() -> Array[String]:
+    return all_events.duplicate()
 
 func make_slots(owning_entity, target_entity, tile_position, arguments = []) -> Dictionary:
     var slots = empty_slots()

@@ -10,4 +10,4 @@ func _ready() -> void:
 	super._ready()
 
 func get_all_props_and_events() -> Array[String]:
-	return Utility.string_list_union(GameManager.get_all_used_prop_names(), ConditionalsV2.get_all_events())
+	return Utility.string_list_union(GameManager.get_all_used_prop_names(), ConditionalsV3.get_all_events())
