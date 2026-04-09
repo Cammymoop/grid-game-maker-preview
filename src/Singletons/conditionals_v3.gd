@@ -53,6 +53,8 @@ var verbose = false
 
 var reset_slots: Dictionary = {}
 
+var _extra_debug: = false
+
 func _ready() -> void:
     for script_name in DEFAULT_SCRIPTS:
         add_command_script_auto(script_name, ScriptType.GDSCRIPT, null)
@@ -173,7 +175,8 @@ func conditions_collapse(condition_stack: Array) -> bool:
         result = i_res
     return result
 
-func resolve_conditional(conditional: Variant, slots: Dictionary) -> Dictionary:
+func resolve_conditional(conditional: Variant, slots: Dictionary, extra_debug: bool = false) -> Dictionary:
+    _extra_debug = extra_debug
     var regularized_conditional: Array[Dictionary] = []
     if typeof(conditional) == TYPE_ARRAY:
         regularized_conditional.assign(conditional)
@@ -228,12 +231,20 @@ func _resolve_conditional_step(cond_step: Dictionary, overall_result: Dictionary
                 break_step = true
             condition_stack.append(cmd_result["result"])
     
+    if _extra_debug:
+        prints("condition stack: %s" % condition_stack)
+    
     if len(condition_stack) > 1:
         step_result["result"] = conditions_collapse(condition_stack)
     elif len(condition_stack) == 1:
         step_result["result"] = condition_stack[0]
     
+    if _extra_debug:
+        prints("step result: %s" % step_result)
+    
     if step_result["quit"] or break_step:
+        if _extra_debug:
+            prints("quitting step")
         return step_result
     
     var cases: Array[String] = []
@@ -242,6 +253,8 @@ func _resolve_conditional_step(cond_step: Dictionary, overall_result: Dictionary
             cases.append(key.trim_prefix("when "))
     
     for case in cases:
+        if _extra_debug:
+            prints("evaluating case: %s" % case)
         if step_result["quit"] or break_step:
             break
         if not check_against_case(case, step_result["result"]):
@@ -249,6 +262,7 @@ func _resolve_conditional_step(cond_step: Dictionary, overall_result: Dictionary
         var cmds: Array = cond_step["when " + case]
         for cmd in cmds:
             if cmd == "true" or cmd == "false":
+                prints("result changed in case: %s to %s" % [case, cmd == "true"])
                 step_result["result"] = cmd == "true"
                 continue
             var cmd_result = call_conditional_command(cmd, slots)
@@ -256,6 +270,9 @@ func _resolve_conditional_step(cond_step: Dictionary, overall_result: Dictionary
                 step_result["quit"] = true
             elif cmd_result.get("break", false):
                 break_step = true
+    
+    if _extra_debug:
+        prints("step result after cases: %s" % step_result)
 
     return step_result
 

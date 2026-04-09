@@ -74,7 +74,6 @@ func on_rotates_toggled(button_pressed: bool) -> void:
 
 func set_layer_info(new_layer_info: Dictionary) -> void:
     layer_info = new_layer_info.duplicate_deep()
-    prints("got layer info:", layer_info)
     if is_inside_tree():
         refresh_ui()
 
@@ -113,7 +112,6 @@ func _set_default_texture_and_index() -> void:
         layer_info['tex_index'] = 0
 
 func on_offset_changed(new_offset: Vector2i) -> void:
-    prints("on_offset_changed: %s" % new_offset)
     if new_offset == Vector2i.ZERO:
         layer_info.erase("offset")
     else:

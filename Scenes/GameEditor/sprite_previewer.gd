@@ -11,7 +11,7 @@ extends MarginContainer
 @export var spin_sprite_toggle: CheckButton
 
 @export var is_spinning: bool = false
-@export var spin_speed: float = 0.6
+@export var spin_speed: float = 1.2
 
 var sprite_rotation: float = 0
 

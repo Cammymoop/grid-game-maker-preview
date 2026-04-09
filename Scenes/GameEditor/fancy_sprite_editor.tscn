@@ -1,10 +1,10 @@
 [gd_scene format=3 uid="uid://dr80l8lq0hd0a"]
 
-[ext_resource type="Script" path="res://Scenes/GameEditor/fancy_sprite_editor.gd" id="1_hivwt"]
+[ext_resource type="Script" uid="uid://ca63p80n7lnuh" path="res://Scenes/GameEditor/fancy_sprite_editor.gd" id="1_hivwt"]
 [ext_resource type="Texture2D" uid="uid://lrqeyxjmk22w" path="res://assets/img/tile_composer_bg.png" id="2_vsv20"]
-[ext_resource type="Script" path="res://Scenes/GameEditor/fancy_sprite_layer_list.gd" id="3_b74fv"]
+[ext_resource type="Script" uid="uid://cqph58nb42mmo" path="res://Scenes/GameEditor/fancy_sprite_layer_list.gd" id="3_b74fv"]
 [ext_resource type="Script" uid="uid://sxkikutun5ce" path="res://Scenes/GameEditor/sprite_previewer.gd" id="3_hivwt"]
-[ext_resource type="Script" path="res://src/previewing_viewport.gd" id="3_vsv20"]
+[ext_resource type="Script" uid="uid://c2uppviixc87y" path="res://src/previewing_viewport.gd" id="3_vsv20"]
 [ext_resource type="Script" uid="uid://kgd8llopg4rb" path="res://src/mask_layer_sprite.gd" id="4_huvp6"]
 [ext_resource type="Texture2D" uid="uid://d1pgxolpq4uu5" path="res://icon.png" id="5_huvp6"]
 [ext_resource type="PackedScene" uid="uid://rafo4lh58320" path="res://Scenes/GameEditor/directional_buttons.tscn" id="6_huvp6"]
@@ -17,6 +17,24 @@ texture = ExtResource("2_vsv20")
 axis_stretch_horizontal = 1
 axis_stretch_vertical = 1
 region_rect = Rect2(0, 0, 64, 64)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_6myec"]
+content_margin_left = 8.0
+content_margin_top = 8.0
+content_margin_right = 8.0
+content_margin_bottom = 8.0
+bg_color = Color(0.151927, 0.19807908, 0.25876707, 1)
+draw_center = false
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.07601128, 0.070221595, 0.11531044, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+corner_detail = 7
 
 [node name="FancySpriteEditor" type="Window" unique_id=1597314855 node_paths=PackedStringArray("sprite_previewer", "layer_list_scroll", "layer_list")]
 oversampling_override = 1.0
@@ -94,6 +112,7 @@ preview_vp_container = NodePath("HBoxContainer/VBoxContainer/PanelContainer/SubV
 preview_subviewport = NodePath("HBoxContainer/VBoxContainer/PanelContainer/SubViewportContainer/SubViewport")
 the_sprite = NodePath("HBoxContainer/VBoxContainer/PanelContainer/SubViewportContainer/SubViewport/PreviewSprite")
 spin_sprite_toggle = NodePath("HBoxContainer/VBoxContainer/CheckButton")
+spin_speed = 2.4
 
 [node name="HBoxContainer" type="HBoxContainer" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/PreviewColumn/CenterContainer/SpritePreviewer" unique_id=2069086974]
 layout_mode = 2
@@ -109,10 +128,13 @@ text = "Preview:"
 
 [node name="PanelContainer" type="PanelContainer" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/PreviewColumn/CenterContainer/SpritePreviewer/HBoxContainer/VBoxContainer" unique_id=1324742087]
 layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_6myec")
 
 [node name="SubViewportContainer" type="SubViewportContainer" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/PreviewColumn/CenterContainer/SpritePreviewer/HBoxContainer/VBoxContainer/PanelContainer" unique_id=855817105]
 custom_minimum_size = Vector2(64, 64)
 layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
 stretch = true
 
 [node name="SubViewport" type="SubViewport" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/PreviewColumn/CenterContainer/SpritePreviewer/HBoxContainer/VBoxContainer/PanelContainer/SubViewportContainer" unique_id=1521900232]

@@ -306,6 +306,8 @@ func start_move(move_facing, change_visual_facing=true, group_move=false) -> boo
 	
 	next_tile_pos = tile_position + Utility.facing_vector(facing)
 	var not_stopped = MapManager.attempt_move(self, next_tile_pos, group_move)
+	if entity_name == "player" and not not_stopped:
+		prints("player was stopped")
 	if not_stopped:
 		moving = true
 		steps_remaining = steps_per_tile
