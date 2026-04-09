@@ -601,6 +601,15 @@ func get_entities_at(tile_position: Vector2, exclude_entity: Object = null, excl
                 entities_here.append(e)
     return entities_here
 
+func get_entities_half_at(tile_pos: Vector2i, exclude_entity: Object = null, exclude_list: Array = []) -> Array:
+    var entities_here: Array = []
+    for e in entity_list:
+        if e == exclude_entity or (exclude_list and e.instance_id in exclude_list):
+            continue
+        if e.get_half_moved_position() == tile_pos:
+            entities_here.append(e)
+    return entities_here
+
 func get_entities_at_multiple(tile_positions: Array, exclude_entity: Object = null, exclude_list: Array = [], include_moving_away: bool = false) -> Array:
     var entities_here: Array = []
     for e in entity_list:
@@ -739,6 +748,13 @@ func attempt_move(moving_entity, tile_position, group_move=false) -> bool:
             return false
         
     return true
+
+func half_moved_actions(moving_entity: BaseEntity, to_position: Vector2i) -> void:
+    var entities_here: Array = get_entities_half_at(to_position, moving_entity)
+    for e in entities_here:
+        resolve_entity_interaction_event("i_half_moved_onto", moving_entity, e, to_position)
+    for e in entities_here:
+        resolve_entity_interaction_event("half_moved_onto", e, moving_entity, to_position)
 
 func post_move_actions(moving_entity, from_position, to_position, exclude_group: Array = []) -> void:
     var entities_start = get_entities_at(from_position, moving_entity, exclude_group)

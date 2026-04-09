@@ -38,6 +38,20 @@ const V3_CMD_MAP: Dictionary = {
     CC.A_SEND_SIGNAL: "",
 }
 
+const all_events: Array[String] = [
+	"blocks",
+	"finish_move_onto_tile", "i_finish_move_onto_tile",
+	"finish_move_onto", "i_finish_move_onto",
+    "half_moved_onto", "i_half_moved_onto",
+    "covered_by_[property]", "uncovered_by_[property]",
+	"move_onto", "move_off_of",
+	"post_move_onto", "post_move_off_of",
+	"post_move",
+	"when_signal_[signal]",
+	"idle_update",
+	"dying",
+]
+
 enum ScriptType { GDSCRIPT, ORCHESTRATOR }
 
 var scripts: Array[Dictionary] = []
