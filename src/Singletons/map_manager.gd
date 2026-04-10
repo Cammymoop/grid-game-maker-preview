@@ -661,6 +661,8 @@ func resolve_tile_event(at_tile_positions: Array, tile_event_name: String, conte
             resolved_indices.append(ti)
             var event_property: = get_tile_property_for_index_at(at_pos, tile_event_name, ti)
             if event_property and event_property.is_conditional():
+                if tile_event_name == "idle_on":
+                    prints("handing tile idle on event for tile:", get_tile_name(ti), " at pos:", at_pos)
                 event_property.resolve(null, context_entity, at_pos)
 
 func conditional_tile_event(at_tile_positions: Array, tile_event_name: String, context_entity: BaseEntity, is_all: bool = false, only_index: int = -1) -> bool:

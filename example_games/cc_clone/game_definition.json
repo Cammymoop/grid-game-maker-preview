@@ -51,7 +51,20 @@
         "chips": 0.0,
         "can-cross-gravel": true,
         "can-cross-goal": true,
-        "solid": true
+        "solid": true,
+        "can-override-forced": true,
+        "i_finish_move_onto_tile": {
+          "v": "3",
+          "conditions": [
+            "basic_default.c_has_property::[\"i:4\",true,\"s:can-force\"]"
+          ],
+          "when true": [
+            "basic_default.a_set_property::[\"i:0\",\"s:forced-move\",\"s:false\"]",
+            "basic_default.a_set_property::[\"i:0\",\"s:override-move\",\"s:false\"]"
+          ],
+          "when false": [],
+          "when always": []
+        }
       },
       "groups": [
         "Player"
@@ -187,7 +200,10 @@
       "properties": {
         "ice-skater": true,
         "fire-resistant": true,
-        "purple-keys": true
+        "purple-keys": true,
+        "unforcable": true,
+        "override-move": true,
+        "forced-move": true
       },
       "intended_move_speed": 0.0
     },
@@ -1094,6 +1110,138 @@
       "tex_index": 14,
       "properties": {
 
+      }
+    },
+    "21": {
+      "name": "revealed-wall",
+      "texture": 0,
+      "tex_index": 38,
+      "properties": {
+        "blocks": true
+      }
+    },
+    "22": {
+      "name": "hidden-wall",
+      "texture": 0,
+      "tex_index": 18,
+      "properties": {
+        "blocks": {
+          "v": "3",
+          "conditions": [],
+          "when true": [
+            "basic_default.a_set_tiles::[\"i:4\",\"s:revealed-wall\"]"
+          ],
+          "when false": [],
+          "when always": []
+        }
+      },
+      "preview_variant": {
+        "texture": 0,
+        "tex_index": 38
+      }
+    },
+    "23": {
+      "name": "force-floor",
+      "texture": 0,
+      "tex_index": 8,
+      "properties": {
+        "idle_on": {
+          "v": "3",
+          "conditions": [],
+          "when true": [
+            "basic_default.trigger_custom_event::[\"i:4\",\"s:force-entity\"]"
+          ],
+          "when false": [],
+          "when always": []
+        },
+        "force-entity": [
+          {
+            "v": "3",
+            "conditions": [
+              "basic_default.if_property_value::[\"i:1\",\"s:can-override-forced\",true]"
+            ],
+            "when true": [
+              "basic_default.a_set_property::[\"i:1\",\"s:forced-move\",\"s:true\"]",
+              "basic_default.a_set_property::[\"i:1\",\"s:override-move\",\"s:false\"]"
+            ],
+            "when false": [],
+            "when always": []
+          },
+          {
+            "v": "3",
+            "conditions": [
+              "basic_default.c_get_pushed::[\"i:1\",\"i:68\",false]"
+            ],
+            "when true": [],
+            "when false": [],
+            "when always": []
+          }
+        ],
+        "move_off_of": {
+          "v": "3",
+          "conditions": [
+            "basic_default.if_property_value::[\"i:1\",\"s:unforcable\",false]"
+          ],
+          "when true": [
+            "basic_default.override_move_speed::[\"i:1\",\"s:10\"]"
+          ],
+          "when false": [],
+          "when always": []
+        },
+        "finish_move_onto_tile": [
+          {
+            "v": "3",
+            "conditions": [
+              "basic_default.if_property_value::[\"i:1\",\"s:unforcable\",true]"
+            ],
+            "when true": [
+              "basic_default.quit::[\"i:0\"]"
+            ],
+            "when false": [],
+            "when always": []
+          },
+          {
+            "v": "3",
+            "conditions": [
+              "basic_default.if_property_value::[\"i:1\",\"s:can-override-forced\",false]"
+            ],
+            "when true": [
+              "basic_default.trigger_custom_event::[\"i:4\",\"s:force-entity\"]",
+              "basic_default.quit::[\"i:0\"]"
+            ],
+            "when false": [],
+            "when always": []
+          },
+          {
+            "v": "3",
+            "conditions": [
+              "basic_default.if_property_value::[\"i:1\",\"s:forced-move\",false]",
+              "basic_default.if_property_value::[\"i:1\",\"s:override-move\",true]",
+              "basic_default.has_intended_move_direction::[\"i:1\"]",
+              "not",
+              "or",
+              "or"
+            ],
+            "when true": [
+              "basic_default.trigger_custom_event::[\"i:4\",\"s:force-entity\"]",
+              "basic_default.quit::[\"i:0\"]"
+            ],
+            "when false": [],
+            "when always": []
+          },
+          {
+            "v": "3",
+            "conditions": [
+              "basic_default.is_intended_move_direction::[\"i:1\",{\"args\":[\"s:type\",\"s:plain\",\"s:direction\",\"i:68\"],\"type\":\"Dictionary\"}]"
+            ],
+            "when true": [],
+            "when false": [
+              "basic_default.a_set_property::[\"i:1\",\"s:override-move\",\"s:true\"]"
+            ],
+            "when always": []
+          }
+        ],
+        "can-force": true
       }
     }
   },

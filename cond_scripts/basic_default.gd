@@ -70,9 +70,7 @@ func cmd_select_entity_at(slots: Dictionary, chosen_slot: int, at_pos_slot: int,
 		prints("no positions in slot %s" % at_pos_slot)
 		return
 	var filtered_entities: Array = EntityManager.get_entities_at_multiple(at_positions, slots[Slot.RED])
-	prints("select entity at, pre-filter count: %s" % filtered_entities.size())
 	filtered_entities = EntityManager.filter_entities_by_property(prop_name, filtered_entities, invert)
-	prints("select entity at, post-filter count: %s" % filtered_entities.size(), "selecting first in slot %s" % chosen_slot)
 	slots[chosen_slot] = filtered_entities[0] if filtered_entities else null
 
 func desc_is_entity_at() -> String:
@@ -85,7 +83,6 @@ func cmd_is_entity_at(slots: Dictionary, chosen_slot: int, prop_name: String, in
 		return false
 	var entities_here: Array = EntityManager.get_entities_at_multiple(at_positions, slots[Slot.RED])
 	entities_here = EntityManager.filter_entities_by_property(prop_name, entities_here, invert)
-	prints("is entity with property %s at %s: %s" % [prop_name, at_positions, entities_here.size() > 0])
 	return entities_here.size() > 0
 
 func desc_c_has_property() -> String:
@@ -103,13 +100,14 @@ func cmd_c_has_property(slots: Dictionary, chosen_slot: int, invert: bool, prope
 	return not result if invert else result
 
 func desc_if_property_value() -> String:
-	return "entity,pos|If the entity/tile's [property_name:PropertyInput] property is [is_truthy:BoolChoice:true or non-zero,false or zero]"
+	return "entity,pos|If the entity/tile's [property_name:PropertyInput] property is [is_truthy:BoolChoice:true,true or non-zero,false or zero]"
 func cmd_if_property_value(slots: Dictionary, chosen_slot: int, property_name: String, is_truthy: bool) -> bool:
 	var result: bool = false
 	if Commands.slot_is_entity(chosen_slot):
 		result = EntityManager.get_entity_prop_is_truthy(slots[chosen_slot], property_name)
 	else:
 		result = MapManager.check_multiple_pos_for_property_bool(slots[chosen_slot], slots[Slot.RED], property_name, is_truthy)
+	#prints("if prop", property_name, "is", str(is_truthy), "prop val is: ", result)
 	return result if is_truthy else not result
 
 func desc_c_is_named() -> String:
@@ -191,6 +189,9 @@ func cmd_a_set_tiles(slots: Dictionary, chosen_slot: int, tile_name: String) -> 
 func desc_a_set_property() -> String:
 	return "entity,pos|Set the entity or tile's [property_name:PropertyInput] property to [value:ValueInput]"
 func cmd_a_set_property(slots: Dictionary, chosen_slot: int, property_name: String, value: Variant) -> void:
+	if typeof(value) == TYPE_STRING:
+		if value == "true" or value == "false":
+			value = value == "true"
 	if Commands.slot_is_entity(chosen_slot):
 		if slots[chosen_slot]:
 			slots[chosen_slot].set_local_property(property_name, value)
@@ -298,7 +299,6 @@ func cmd_compare_property(slots: Dictionary, chosen_slot: int, property_name: St
 			var number_result = 0
 			if prop.is_conditional():
 				number_result = float(prop.resolve(selected, slots[Slot.RED], selected.tile_position))
-				prints("number_result: ", number_result)
 			else:
 				number_result = float(prop.get_value())
 			return Utility.check_comparison(number_result, float(value), comparison)
@@ -318,9 +318,9 @@ func cmd_exists(slots: Dictionary, chosen_slot: int) -> bool:
 
 func desc_override_move_speed() -> String:
 	return "entity|Override the entity's move speed for the current movement to [speed:ValueInput]"
-func cmd_override_move_speed(slots: Dictionary, chosen_slot: int, speed: float) -> void:
+func cmd_override_move_speed(slots: Dictionary, chosen_slot: int, speed: Variant) -> void:
 	if Commands.slot_is_entity(chosen_slot) and slots[chosen_slot]:
-		slots[chosen_slot].set_move_speed_override(speed)
+		slots[chosen_slot].set_move_speed_override(float(speed))
 
 func desc_trigger_custom_event() -> String:
 	return "entity,pos|Trigger the [event_name:PropertyInput] custom event for the entity/tiles"
@@ -328,19 +328,24 @@ func cmd_trigger_custom_event(slots: Dictionary, chosen_slot: int, event_name: S
 	if Commands.slot_is_entity(chosen_slot):
 		EntityManager.resolve_entity_interaction_event(event_name, slots[chosen_slot], slots[Slot.RED], slots[chosen_slot].get_moving_position())
 	elif Commands.slot_is_positions(chosen_slot):
-		MapManager.resolve_tile_event(slots[chosen_slot], event_name, slots[Slot.RED])
+		MapManager.resolve_tile_event(slots[chosen_slot], event_name, slots[Slot.BLUE])
+
+func _entity_has_controller_intention_count(slots: Dictionary, chosen_slot: int) -> bool:
+	if not Commands.slot_is_entity(chosen_slot) or not slots[chosen_slot] or slots[chosen_slot].moving:
+		return false
+	return slots[chosen_slot].has_move_intentions()
 
 func desc_has_intended_move_direction() -> String:
 	return "entity|If the entity has an intended move direction"
 func cmd_has_intended_move_direction(slots: Dictionary, chosen_slot: int) -> bool:
-	if not Commands.slot_is_entity(chosen_slot) or not slots[chosen_slot] or slots[chosen_slot].moving:
+	if not _entity_has_controller_intention_count(slots, chosen_slot):
 		return false
-	return slots[chosen_slot].has_intended_move()
+	return slots[chosen_slot].soft_check_intended_move_facing() != -1
 
 func desc_is_intended_move_direction() -> String:
-	return "entity|If the entity is intended to move this way [direction:DirectionInput:1]"
+	return "entity|If the entity is intended to move this way [complex_dir:DirectionInput:1]"
 func cmd_is_intended_move_direction(slots: Dictionary, chosen_slot: int, complex_dir: Dictionary) -> bool:
-	if not cmd_has_intended_move_direction(slots, chosen_slot):
+	if not _entity_has_controller_intention_count(slots, chosen_slot):
 		return false
 	var intended_move_facing: int = slots[chosen_slot].soft_check_intended_move_facing()
 	if intended_move_facing == -1:

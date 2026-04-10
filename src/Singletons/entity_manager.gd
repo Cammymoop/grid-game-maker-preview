@@ -930,6 +930,8 @@ func get_entity_prop_is_truthy(entity: BaseEntity, property_name: String, defaul
     return Property.resolve_truthy(get_entity_property(entity, property_name), entity, null, entity.tile_position)
 
 func entity_has_property(entity, property_name: String) -> bool:
+    if not entity:
+        return false
     var entity_props = entity_defs[entity.entity_index]["properties"]
     var has = entity.has_local_property(property_name) 
     has = has or property_name in entity_props

@@ -133,3 +133,7 @@ func got_blocked(_facing_dir) -> void:
 func on_start_move(_facing_dir) -> void:
 	cancelled = false
 	is_delay_locked = false
+
+func on_idle() -> void:
+	is_delay_locked = false
+	cancelled = false

@@ -16,7 +16,7 @@ finish move onto:
   if entity has unforcable:
     break
 
-  if not entity has can_override_force:
+  if not entity has can_override_forced:
     run force entity
     break
 

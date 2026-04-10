@@ -250,11 +250,12 @@ func entity_process_starting_actions() -> void:
 				set_move_facing(first_attempt_move_facing)
 
 func entity_process_idle_actions() -> void:
-	if not has_idle_update_conditional:
-		return
-	if not idle_update_cache:
-		idle_update_cache = EntityManager.get_entity_property(self, "idle_update")
-	idle_update_cache.resolve(self, null, tile_position)
+	if has_idle_update_conditional:
+		if not idle_update_cache:
+			idle_update_cache = EntityManager.get_entity_property(self, "idle_update")
+		idle_update_cache.resolve(self, null, tile_position)
+	if controller and controller.has_method("on_idle"):
+		controller.on_idle()
 
 func entity_process_moving_actions() -> void:
 	if not moving:
@@ -316,7 +317,7 @@ func get_max_move_intentions() -> int:
 	else:
 		return controller.get_max_move_intentions()
 
-func has_intended_move() -> bool:
+func has_move_intentions() -> bool:
 	if not controller:
 		return false
 	return get_max_move_intentions() > 0
@@ -332,7 +333,7 @@ func soft_check_intended_move_facing() -> int:
 		var intended_move_facing: int = move_list[i] if move_list else get_intended_move(i)
 		if intended_move_facing == -1:
 			continue
-		if can_i_move(intended_move_facing):
+		if i == max_intentions - 1 or can_i_move(intended_move_facing):
 			return intended_move_facing
 	return -1
 
