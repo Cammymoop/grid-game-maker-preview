@@ -628,7 +628,8 @@
             "basic_default.a_remove_property::[\"i:1\",\"s:purple-keys\"]",
             "basic_default.a_remove_property::[\"i:1\",\"s:floats\"]",
             "basic_default.a_remove_property::[\"i:1\",\"s:fire-resistant\"]",
-            "basic_default.a_remove_property::[\"i:1\",\"s:ice-skater\"]"
+            "basic_default.a_remove_property::[\"i:1\",\"s:ice-skater\"]",
+            "basic_default.a_remove_property::[\"i:1\",\"s:unforcable\"]"
           ],
           "when false": [],
           "when always": []
@@ -693,6 +694,35 @@
           "backward"
         ],
         "num_directions": 1.0
+      }
+    },
+    "30": {
+      "name": "suc-boots",
+      "texture": 1,
+      "tex_index": 39,
+      "properties": {
+        "finish_move_onto": {
+          "v": "3",
+          "conditions": [
+            "basic_default.c_has_property::[\"i:1\",false,\"s:player\"]"
+          ],
+          "when true": [
+            "basic_default.a_set_property::[\"i:1\",\"s:unforcable\",\"s:true\"]",
+            "basic_default.a_die::[\"i:0\"]"
+          ],
+          "when false": [],
+          "when always": []
+        },
+        "z-index": -1.0,
+        "blocks": {
+          "v": "3",
+          "conditions": [
+            "basic_default.c_has_property::[\"i:1\",false,\"s:creature\"]"
+          ],
+          "when true": [],
+          "when false": [],
+          "when always": []
+        }
       }
     }
   },
@@ -1147,7 +1177,9 @@
       "properties": {
         "idle_on": {
           "v": "3",
-          "conditions": [],
+          "conditions": [
+            "basic_default.if_property_value::[\"i:1\",\"s:unforcable\",false]"
+          ],
           "when true": [
             "basic_default.trigger_custom_event::[\"i:4\",\"s:force-entity\"]"
           ],
@@ -1177,17 +1209,28 @@
             "when always": []
           }
         ],
-        "move_off_of": {
-          "v": "3",
-          "conditions": [
-            "basic_default.if_property_value::[\"i:1\",\"s:unforcable\",false]"
-          ],
-          "when true": [
-            "basic_default.override_move_speed::[\"i:1\",\"s:10\"]"
-          ],
-          "when false": [],
-          "when always": []
-        },
+        "move_off_of": [
+          {
+            "v": "3",
+            "conditions": [
+              "basic_default.if_property_value::[\"i:1\",\"s:unforcable\",false]"
+            ],
+            "when true": [
+              "basic_default.override_move_speed::[\"i:1\",\"s:10\"]"
+            ],
+            "when false": [],
+            "when always": []
+          },
+          {
+            "v": "3",
+            "conditions": [
+              "basic_default.c_has_property::[\"i:1\",true,\"s:impossible\"]"
+            ],
+            "when true": [],
+            "when false": [],
+            "when always": []
+          }
+        ],
         "finish_move_onto_tile": [
           {
             "v": "3",
