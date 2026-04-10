@@ -3,11 +3,11 @@ extends Node
 signal entity_list_updated
 signal post_deserialize
 
-var entity_template = preload("res://Scenes/BaseEntity.tscn")
-var large_entity_template = preload("res://Scenes/LargeEntity.tscn")
-var controller_templates = {}
+var entity_template: = preload("res://Scenes/BaseEntity.tscn")
+var large_entity_template: = preload("res://Scenes/LargeEntity.tscn")
+var controller_templates: = {}
 
-var entity_defs = {
+var entity_defs: Dictionary = {
     0: {
         "name": "player",
         "texture": 1,
@@ -64,21 +64,22 @@ var entity_defs = {
         },
     },
 }
-@onready var loaded_entity_defs = entity_defs
+@onready var loaded_entity_defs: = entity_defs
 
-var entity_index_map = {}
-var entity_instance_map = {}
+var entity_index_map: = {}
+var entity_instance_map: = {}
 
-var entity_signal_connections = {}
+var entity_signal_connections: = {}
 
-var entity_list = []
-var bond_groups = []
+var entity_list: Array = []
+var bond_groups: Array = []
+var _pending_half_move_actions: Array[BaseEntity] = []
 
-var im_ready = false
+var im_ready: = false
 
-var instance_counter = 0
+var instance_counter: int = 0
 
-var frame_counter = 0
+var frame_counter: int = 0
 
 var movements_enabled: bool = true
 var turn_requested: bool = false
@@ -89,7 +90,7 @@ var movement_mode: int
 
 var default_move_speed: float = 6
 var default_idle_delay: float = 1/10.0
-@onready var idle_delay_frames: int = roundi(default_idle_delay * GameManager.get_tick_rate())
+var idle_delay_frames: int = -1
 
 var process_phase: int = 0
 
@@ -111,27 +112,44 @@ func entity_list_process() -> void:
             else:
                 idle_entities.append(e)
     
-    # Phase 2 - Update idle tick counter (for non-moving)
+    # Phase 2 - Update idle tick counter (for non-moving) and idle actions
     process_phase = 2
     for e in idle_entities:
-        e.idle_ticks_elapsed += 1
+        if e.active:
+            e.idle_ticks_elapsed += 1
+    for e in idle_entities:
+        if e.active and e.idle_ticks_elapsed >= idle_delay_frames:
+            MapManager.idle_actions(e)
+            e.entity_process_idle_actions()
+            e.idle_ticks_elapsed = 0
     
     # Phase 3 - Moving progress and mid-move actions
     # if an entity starts moving during this phase it will not be processed as moving until the next tick
     process_phase = 3
     var entities_that_finished_moving: Array[BaseEntity] = []
+    _pending_half_move_actions.clear()
     for e in moving_entities:
-        e.idle_ticks_elapsed = 0
-        e.entity_process_moving_actions()
-        if not e.moving:
-            entities_that_finished_moving.append(e)
+        if e.active:
+            e.idle_ticks_elapsed = 0
+            e.entity_process_moving_actions()
+            if not e.moving:
+                entities_that_finished_moving.append(e)
+    if _pending_half_move_actions:
+        process_half_moves()
     
     # Phase 4 - All entities moved for the frame, now process actions resulting from completed moves
     process_phase = 4
     for e in entities_that_finished_moving:
-        e.process_finish_move()
+        if e.active:
+            e.process_finish_move()
     
     process_phase = 0
+
+func queue_half_move_actions_for(entity: BaseEntity) -> void:
+    if process_phase != 3:
+        push_error("ERROR: tried to queue half move actions for an entity outside of the moving phase")
+        return
+    _pending_half_move_actions.append(entity)
 
 func should_bump_move() -> bool:
     return process_phase >= 3
@@ -166,6 +184,10 @@ func all_entities_settled() -> bool:
 func _ready():
     preload_controller_templates()
     process_physics_priority = 10
+    if not GameManager.is_node_ready():
+        await GameManager.ready
+    idle_delay_frames = roundi(default_idle_delay * GameManager.get_tick_rate())
+    prints("idle_delay_frames: ", idle_delay_frames)
 
 func setup():
     fix_string_keys()
@@ -749,12 +771,71 @@ func attempt_move(moving_entity, tile_position, group_move=false) -> bool:
         
     return true
 
-func half_moved_actions(moving_entity: BaseEntity, to_position: Vector2i) -> void:
-    var entities_here: Array = get_entities_half_at(to_position, moving_entity)
-    for e in entities_here:
-        resolve_entity_interaction_event("i_half_moved_onto", moving_entity, e, to_position)
-    for e in entities_here:
-        resolve_entity_interaction_event("half_moved_onto", e, moving_entity, to_position)
+func process_half_moves() -> void:
+    var half_moved_at_positions: Dictionary[Vector2i, Dictionary] = {}
+    for entity in _pending_half_move_actions:
+        if not entity.active:
+            continue
+        entity._pending_half_move = false
+        var from_pos: = entity.get_stationary_position()
+        if not from_pos in half_moved_at_positions:
+            half_moved_at_positions[from_pos] = {"leaving": [], "entering": []}
+        half_moved_at_positions[from_pos]["leaving"].append(entity)
+        var to_pos: = entity.get_moving_position()
+        if not to_pos in half_moved_at_positions:
+            half_moved_at_positions[to_pos] = {"leaving": [], "entering": []}
+        half_moved_at_positions[to_pos]["entering"].append(entity)
+
+    for hm_pos in half_moved_at_positions:
+        half_moved_at_positions[hm_pos]["other_entities"] = get_entities_half_at(hm_pos, null, half_moved_at_positions[hm_pos]["entering"])
+        if half_moved_at_positions[hm_pos]["leaving"].size() > 0:
+            half_moved_leaving_at(hm_pos, half_moved_at_positions[hm_pos]["leaving"], half_moved_at_positions[hm_pos]["other_entities"])
+            MapManager.half_moved_leaving_at(hm_pos, half_moved_at_positions[hm_pos]["leaving"])
+    
+    for hm_pos in half_moved_at_positions:
+        if half_moved_at_positions[hm_pos]["entering"].size() > 0:
+            half_moved_entering_at(hm_pos, half_moved_at_positions[hm_pos]["entering"], half_moved_at_positions[hm_pos]["other_entities"])
+            MapManager.half_moved_entering_at(hm_pos, half_moved_at_positions[hm_pos]["entering"])
+    
+    # TODO handle covered tracking here
+    
+# symmetrical event processing for half-move changes
+
+func half_moved_leaving_at(at_position: Vector2i, leaving_entities: Array, other_entities: Array) -> void:
+    for i in leaving_entities.size():
+        var entity: BaseEntity = leaving_entities[i]
+        var interacted: Array[BaseEntity] = []
+        for other_entity: BaseEntity in other_entities:
+            resolve_entity_interaction_event("half_moved_off_of", entity, other_entity, at_position)
+            interacted.append(other_entity)
+        var to_pos: = entity.get_moving_position()
+        for j in leaving_entities.size() - 1 - i:
+            var other_entity: BaseEntity = leaving_entities[j]
+            if other_entity.get_moving_position() == to_pos:
+                continue
+            resolve_entity_interaction_event("half_moved_off_of", entity, other_entity, at_position)
+            interacted.append(other_entity)
+        
+        for other_entity: BaseEntity in interacted:
+            resolve_entity_interaction_event("half_moved_off_of", other_entity, entity, at_position)
+
+func half_moved_entering_at(at_position: Vector2i, entering_entities: Array, other_entities: Array) -> void:
+    for i in entering_entities.size():
+        var entity: BaseEntity = entering_entities[i]
+        var interacted: Array[BaseEntity] = []
+        for other_entity: BaseEntity in other_entities:
+            resolve_entity_interaction_event("half_moved_onto", entity, other_entity, at_position)
+            interacted.append(other_entity)
+        var from_pos: = entity.get_stationary_position()
+        for j in entering_entities.size() - 1 - i:
+            var other_entity: BaseEntity = entering_entities[j]
+            if other_entity.get_stationary_position() == from_pos:
+                continue
+            resolve_entity_interaction_event("half_moved_onto", entity, other_entity, at_position)
+            interacted.append(other_entity)
+        
+        for other_entity: BaseEntity in interacted:
+            resolve_entity_interaction_event("half_moved_onto", other_entity, entity, at_position)
 
 func post_move_actions(moving_entity, from_position, to_position, exclude_group: Array = []) -> void:
     var entities_start = get_entities_at(from_position, moving_entity, exclude_group)

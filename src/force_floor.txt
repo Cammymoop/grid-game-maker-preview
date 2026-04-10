@@ -10,6 +10,7 @@ holding a direction that aligns with the force floor does not count as an overri
 
 I need to add:
  * reworked idle_update including tile idle on top of event
+ * command to check entity intended move direction
 
 finish move onto:
   if entity has unforcable:

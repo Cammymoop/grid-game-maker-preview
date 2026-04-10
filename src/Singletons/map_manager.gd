@@ -731,8 +731,43 @@ func check_terrain_spr_mod_for_created(created_entity: BaseEntity) -> void:
     if created_entity.moving:
         _check_and_remove_terrain_spr_mod_for_moving(created_entity, created_entity.get_moving_position())
 
+func half_moved_leaving_at(at_position: Vector2i, leaving_entities: Array) -> void:
+    var tile_indices_here: Array[int] = []
+    for l in layers:
+        var ti = l.get_cell_s(at_position)
+        if ti != -1 and ti not in tile_indices_here:
+            tile_indices_here.append(ti)
+    
+    if not tile_indices_here:
+        return
+
+    for entity: BaseEntity in leaving_entities:
+        EntityManager.resolve_entity_interaction_event("half_moved_off_of_tile", entity, null, at_position)
+    for entity: BaseEntity in leaving_entities:
+        resolve_tile_event([at_position], "half_moved_off_of", entity)
+    
+func half_moved_entering_at(at_position: Vector2i, entering_entities: Array) -> void:
+    var tile_indices_here: Array[int] = []
+    for l in layers:
+        var ti = l.get_cell_s(at_position)
+        if ti != -1 and ti not in tile_indices_here:
+            tile_indices_here.append(ti)
+    
+    if not tile_indices_here:
+        return
+
+    for entity: BaseEntity in entering_entities:
+        EntityManager.resolve_entity_interaction_event("half_moved_onto_tile", entity, null, at_position)
+    for entity: BaseEntity in entering_entities:
+        resolve_tile_event([at_position], "half_moved_onto", entity)
+    
+    # TODO handle covered tracking here
+
 func post_move_actions(moving_entity: BaseEntity, _from_position: Vector2i, to_position: Vector2i) -> void:
     _check_and_remove_terrain_spr_mod_for_moving(moving_entity, to_position)
+
+func idle_actions(entity: BaseEntity) -> void:
+    resolve_tile_event([entity.get_stationary_position()], "idle_on", entity)
 
 func _check_and_remove_terrain_spr_mod_for_moving(moving_entity: BaseEntity, to_position: Vector2i) -> void:
     if not moving_entity.terrain_sprite_modifiers:

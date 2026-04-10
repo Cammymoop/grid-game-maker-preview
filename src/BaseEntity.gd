@@ -11,7 +11,7 @@ var facing: = 0
 var visual_turn_on_move: = true
 
 var moving: = false
-var just_moved: = false
+var _pending_half_move: = false
 var _this_move_steps: int = 0
 var steps_remaining: int = 0
 
@@ -129,6 +129,7 @@ func serialize() -> Dictionary:
 	important_stuff['facing'] = facing
 	important_stuff['position'] = Utility.get_arr_from_vector2(position)
 	important_stuff['moving'] = moving
+	important_stuff['_pending_half_move'] = _pending_half_move
 	important_stuff['move_facing'] = move_facing
 	important_stuff['tile_position'] = Utility.get_arr_from_vector2(tile_position)
 	important_stuff['next_tile_pos'] = Utility.get_arr_from_vector2(next_tile_pos)
@@ -165,13 +166,15 @@ func deserialize(data: Dictionary) -> void:
 	
 	bond_group = EntityManager.find_bond_group_of_entity(self)
 	
-	if data.has('facing'):
+	# handle old format of 'visual_facing'
+	if data.has('visual_facing'):
 		set_move_facing(int(data['facing']))
-		set_facing(int(data['facing']))
+		set_facing(int(data['visual_facing']))
 	else:
 		set_move_facing(int(data['move_facing']))
 		set_facing(int(data['facing']))
 	moving = data['moving']
+	_pending_half_move = data.get('_pending_half_move', false)
 	position = Utility.get_vector2_from_arr(data['position'])
 	tile_position = Utility.get_vector2_from_arr(data['tile_position'])
 	next_tile_pos = Utility.get_vector2_from_arr(data['next_tile_pos'])
@@ -195,22 +198,22 @@ func entity_process_starting_actions() -> void:
 		return
 	
 	if not moving:
-		if has_idle_update_conditional:
-			if not idle_update_cache:
-				idle_update_cache = EntityManager.get_entity_property(self, "idle_update")
-				var idle_update_sleep_prop = EntityManager.get_entity_property(self, "idle_update_sleep")
-				if idle_update_sleep_prop:
-					if idle_update_sleep_prop.is_conditional():
-						pass
-						# I might make idle_update_sleep conditional run only on start, 
-						# and also whenever it gets set as a local property
-					else:
-						idle_update_sleep = int(idle_update_sleep_prop.get_value())
-			if idle_update_sleep == 1 or EntityManager.frame_counter % idle_update_sleep == 0:
-				idle_update_cache.resolve(self, null, tile_position)
-				if not active:
-					# we died or were deactivated in idle update
-					return
+		#if has_idle_update_conditional:
+		#	if not idle_update_cache:
+		#		idle_update_cache = EntityManager.get_entity_property(self, "idle_update")
+		#		var idle_update_sleep_prop = EntityManager.get_entity_property(self, "idle_update_sleep")
+		#		if idle_update_sleep_prop:
+		#			if idle_update_sleep_prop.is_conditional():
+		#				pass
+		#				# I might make idle_update_sleep conditional run only on start, 
+		#				# and also whenever it gets set as a local property
+		#			else:
+		#				idle_update_sleep = int(idle_update_sleep_prop.get_value())
+		#	if idle_update_sleep == 1 or EntityManager.frame_counter % idle_update_sleep == 0:
+		#		idle_update_cache.resolve(self, null, tile_position)
+		#		if not active:
+		#			# we died or were deactivated in idle update
+		#			return
 		
 		var max_intentions: int = get_max_move_intentions()
 		if max_intentions > 0:
@@ -246,12 +249,22 @@ func entity_process_starting_actions() -> void:
 				set_facing(first_attempt_v_facing)
 				set_move_facing(first_attempt_move_facing)
 
+func entity_process_idle_actions() -> void:
+	if not has_idle_update_conditional:
+		return
+	if not idle_update_cache:
+		idle_update_cache = EntityManager.get_entity_property(self, "idle_update")
+	idle_update_cache.resolve(self, null, tile_position)
+
 func entity_process_moving_actions() -> void:
 	if not moving:
 		return
 
-	just_moved = false
 	bump_move_step()
+
+	if _pending_half_move and steps_remaining <= floori(_this_move_steps / 2.0):
+		EntityManager.queue_half_move_actions_for(self)
+
 	if steps_remaining < 1:
 		_movement_steps_finished()
 
@@ -303,6 +316,26 @@ func get_max_move_intentions() -> int:
 	else:
 		return controller.get_max_move_intentions()
 
+func has_intended_move() -> bool:
+	if not controller:
+		return false
+	return get_max_move_intentions() > 0
+
+func soft_check_intended_move_facing() -> int:
+	var max_intentions: int = get_max_move_intentions()
+	if max_intentions == 0:
+		return -1
+	var move_list: Array = get_pre_fetch_move_list()
+	if move_list.size() > 0:
+		max_intentions = move_list.size()
+	for i in max_intentions:
+		var intended_move_facing: int = move_list[i] if move_list else get_intended_move(i)
+		if intended_move_facing == -1:
+			continue
+		if can_i_move(intended_move_facing):
+			return intended_move_facing
+	return -1
+
 func _movement_steps_finished() -> void:
 	position = position.round()
 	tile_position = next_tile_pos
@@ -332,6 +365,7 @@ func start_move(in_facing_dir: int, change_visual_facing: bool = true, group_mov
 
 	if move_has_started:
 		moving = true
+		_pending_half_move = true
 		steps_remaining = get_steps_per_tile()
 		_this_move_steps = steps_remaining
 		if not group_move:
@@ -522,6 +556,11 @@ func get_moving_position() -> Vector2i:
 	if not moving:
 		return get_stationary_position()
 	return Vector2i(next_tile_pos)
+
+func get_half_moved_position() -> Vector2i:
+	if moving and not _pending_half_move:
+		return get_moving_position()
+	return Vector2i(tile_position)
 
 func is_at_multiple(check_positions: Array, include_moving_away: bool = false) -> bool:
 	if get_moving_position() in check_positions:

@@ -238,12 +238,12 @@ func cmd_a_remove_property(slots: Dictionary, chosen_slot: int, property_name: S
 func desc_a_save_checkpoint() -> String:
 	return "none|Save the current state as a checkpoint"
 func cmd_a_save_checkpoint(_slots: Dictionary) -> void:
-	GameManager.save_checkpoint()
+	GameManager.save_checkpoint.call_deferred()
 
 func desc_a_load_checkpoint() -> String:
 	return "none|Load the last saved checkpoint"
 func cmd_a_load_checkpoint(_slots: Dictionary) -> void:
-	GameManager.load_checkpoint()
+	GameManager.load_checkpoint.call_deferred()
 
 func desc_a_create_entity() -> String:
 	return "pos|Create a new [entity_name:EntityNameInput] entity here\n" \
@@ -329,3 +329,21 @@ func cmd_trigger_custom_event(slots: Dictionary, chosen_slot: int, event_name: S
 		EntityManager.resolve_entity_interaction_event(event_name, slots[chosen_slot], slots[Slot.RED], slots[chosen_slot].get_moving_position())
 	elif Commands.slot_is_positions(chosen_slot):
 		MapManager.resolve_tile_event(slots[chosen_slot], event_name, slots[Slot.RED])
+
+func desc_has_intended_move_direction() -> String:
+	return "entity|If the entity has an intended move direction"
+func cmd_has_intended_move_direction(slots: Dictionary, chosen_slot: int) -> bool:
+	if not Commands.slot_is_entity(chosen_slot) or not slots[chosen_slot] or slots[chosen_slot].moving:
+		return false
+	return slots[chosen_slot].has_intended_move()
+
+func desc_is_intended_move_direction() -> String:
+	return "entity|If the entity is intended to move this way [direction:DirectionInput:1]"
+func cmd_is_intended_move_direction(slots: Dictionary, chosen_slot: int, complex_dir: Dictionary) -> bool:
+	if not cmd_has_intended_move_direction(slots, chosen_slot):
+		return false
+	var intended_move_facing: int = slots[chosen_slot].soft_check_intended_move_facing()
+	if intended_move_facing == -1:
+		return false
+	return intended_move_facing == resolve_complex_direction(complex_dir, slots)
+	
