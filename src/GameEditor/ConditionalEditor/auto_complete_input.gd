@@ -137,6 +137,8 @@ func _drop_autocomplete_menu() -> void:
 		_ac_list = null
 
 func _on_ac_item_clicked(_index: int, choice: String) -> void:
+	if not has_focus():
+		return
 	_apply_autocomplete_choice(choice)
 
 
@@ -168,7 +170,7 @@ func _set_ac_max_rows_for_viewport() -> void:
 	if _ac_list == null:
 		return
 	var gr := get_global_rect()
-	var row := int(round(float(get_theme_font_size(&"font_size")) * 1.35)) + 8
+	var row := int(roundf(get_theme_font_size(&"font_size") * 1.35)) + 8
 	var sep := 4
 	var space_below: int = int(get_viewport().get_visible_rect().size.y - gr.position.y - gr.size.y)
 	var max_rows_below: int = floori(float(space_below) / float(row + sep))
@@ -192,12 +194,14 @@ func _accept_highlighted_autocomplete() -> void:
 
 
 func _apply_autocomplete_choice(choice: String) -> void:
+	prints("applying autocomplete", get_path())
 	_ignore_menu_sync = true
 	text = choice
 	caret_column = text.length()
 	update_highlight()
 	_ignore_menu_sync = false
 	_hide_autocomplete()
+	text_changed.emit(text)
 	grab_focus.call_deferred()
 
 

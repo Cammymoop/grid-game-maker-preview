@@ -1,0 +1,6 @@
+[gd_scene format=3 uid="uid://1pr8oa44c54n"]
+
+[ext_resource type="Script" uid="uid://ft6f62yqt2hf" path="res://Scenes/digit_display.gd" id="1_iiemw"]
+
+[node name="DigitDisplay" type="Node2D" unique_id=162028677]
+script = ExtResource("1_iiemw")

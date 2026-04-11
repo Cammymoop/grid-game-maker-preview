@@ -152,7 +152,8 @@ func queue_half_move_actions_for(entity: BaseEntity) -> void:
     _pending_half_move_actions.append(entity)
 
 func should_bump_move() -> bool:
-    return process_phase >= 3
+    return false
+    #return process_phase >= 3
 
 func _physics_process(_delta):
     entity_list_process()

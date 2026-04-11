@@ -159,8 +159,10 @@ func deserialize(data: Dictionary) -> void:
 	active = data['active']
 	if "idle_ticks_elapsed" in data:
 		idle_ticks_elapsed = int(data['idle_ticks_elapsed'])
-	override_steps_per_tile = data['override_steps_per_tile']
-	is_spt_override = data['is_spt_override']
+	if "override_steps_per_tile" in data:
+		override_steps_per_tile = data['override_steps_per_tile']
+	if "is_spt_override" in data:
+		is_spt_override = data['is_spt_override']
 	update_cached_spt()
 	local_properties = data['local_properties']
 	
@@ -294,7 +296,7 @@ func get_intended_move(attempt_num: int = 0) -> int:
 	
 	if controller.move_mode == "direction":
 		return Utility.direction_to_facing(controller.get_move(attempt_num))
-	elif controller.move_mode == "move_facing":
+	elif controller.move_mode == "facing":
 		return controller.get_move(attempt_num)
 	elif controller.move_mode == "pre_fetch":
 		return -1

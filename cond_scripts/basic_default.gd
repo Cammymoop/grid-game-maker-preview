@@ -70,7 +70,9 @@ func cmd_select_entity_at(slots: Dictionary, chosen_slot: int, at_pos_slot: int,
 		prints("no positions in slot %s" % at_pos_slot)
 		return
 	var filtered_entities: Array = EntityManager.get_entities_at_multiple(at_positions, slots[Slot.RED])
+	prints("filtered entities:", filtered_entities)
 	filtered_entities = EntityManager.filter_entities_by_property(prop_name, filtered_entities, invert)
+	prints("filtered by property:", filtered_entities)
 	slots[chosen_slot] = filtered_entities[0] if filtered_entities else null
 
 func desc_is_entity_at() -> String:

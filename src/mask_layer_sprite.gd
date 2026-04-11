@@ -1,6 +1,9 @@
 class_name MaskLayerSprite
 extends Node2D
 
+const DigitDisplay = preload("res://Scenes/digit_display.gd")
+
+var digit_display_scn: PackedScene = preload("res://Scenes/digit_display.tscn")
 var clipping_spr_scn: PackedScene = preload("res://src/Utility/sub_vp_friendly_clipping_sprite.tscn")
 
 var layers: Array[Dictionary] = []
@@ -9,6 +12,8 @@ var current_rotation: float = 0
 var layer_order_id: int = 0
 
 var modifier_masks: Dictionary = {}
+
+var prop_update_response: Dictionary[String, Array] = {}
 
 var rotation_prop: float = 0:
     get:
@@ -56,6 +61,7 @@ func _append_layer(layer_info: Dictionary) -> void:
 func refresh_layers() -> void:
     resort_layers()
     clear_children()
+    prop_update_response.clear()
     for layer_index in layers.size():
         create_and_add_nodes_for_layer(layers[layer_index], layer_index)
 
@@ -116,46 +122,70 @@ func _remove_modifier_layers(modifier: String) -> void:
             new_layers.append(layer)
     layers = new_layers
 
-func create_and_add_nodes_for_layer(layer_info: Dictionary, layer_index: int) -> void:
+func create_and_add_nodes_for_layer(layer_info: Dictionary, _layer_index: int) -> void:
     if not layer_info or layer_info.get("mode", "empty") == "empty":
         return
-    var layer_texture_id: int = layer_info.get("texture", -1)
-    if layer_texture_id == -1:
-        return
-    
-    var layer_tex: Texture = TextureManager.get_texture(layer_texture_id)
-    var layer_tex_rect: Rect2 = TextureManager.get_index_rect(layer_texture_id, layer_info.get("tex_index", 0))
-    
-    var is_masked: bool = layer_info.get("masked", false)
-    var mask_texture_id: int = -1
-    if is_masked:
-        mask_texture_id = layer_info.get("mask_texture", -1)
-        if mask_texture_id == -1:
-            is_masked = false
-    
+
     var main_layer_node: Node2D = null
-    if is_masked:
-        var clipping_spr: = clipping_spr_scn.instantiate()
-        clipping_spr.texture = layer_tex
-        clipping_spr.region_rect = layer_tex_rect
-        clipping_spr.region_enabled = true
-        main_layer_node = clipping_spr
+    var is_masked: bool = false
 
-        var mask_src_tex: Texture = TextureManager.get_texture(mask_texture_id)
-        var mask_tex_rect: Rect2 = TextureManager.get_index_rect(mask_texture_id, layer_info.get("mask_tex_index", 0))
-        var mask_clip_outer: bool = layer_info.get("mask_clip_outer", true)
-        var mask_is_bw: bool = layer_info.get("mask_is_bw", false)
+    if layer_info.get("mode") == "normal":
+        var layer_texture_id: int = layer_info.get("texture", -1)
+        if layer_texture_id == -1:
+            return
+        
+        var layer_tex: Texture = TextureManager.get_texture(layer_texture_id)
+        var layer_tex_rect: Rect2 = TextureManager.get_index_rect(layer_texture_id, layer_info.get("tex_index", 0))
+    
+        
+        is_masked = layer_info.get("masked", false)
+        var mask_texture_id: int = -1
+        if is_masked:
+            mask_texture_id = layer_info.get("mask_texture", -1)
+            if mask_texture_id == -1:
+                is_masked = false
 
-        # clipping sprite template comes with the mask sprite, just need to add the texture
-        # note the mask must cover the size of the clipping sprite for it to work as intended
-        var mask_spr: = clipping_spr.get_child(0)
-        mask_spr.texture = create_bw_mask_from_texture_region(mask_src_tex, mask_tex_rect, mask_is_bw, mask_clip_outer)
-    else:
-        var layer_spr: = Sprite2D.new()
-        layer_spr.texture = layer_tex
-        layer_spr.region_rect = layer_tex_rect
-        layer_spr.region_enabled = true
-        main_layer_node = layer_spr
+        if is_masked:
+            var clipping_spr: = clipping_spr_scn.instantiate()
+            clipping_spr.texture = layer_tex
+            clipping_spr.region_rect = layer_tex_rect
+            clipping_spr.region_enabled = true
+            main_layer_node = clipping_spr
+
+            var mask_src_tex: Texture = TextureManager.get_texture(mask_texture_id)
+            var mask_tex_rect: Rect2 = TextureManager.get_index_rect(mask_texture_id, layer_info.get("mask_tex_index", 0))
+            var mask_clip_outer: bool = layer_info.get("mask_clip_outer", true)
+            var mask_is_bw: bool = layer_info.get("mask_is_bw", false)
+
+            # clipping sprite template comes with the mask sprite, just need to add the texture
+            # note the mask must cover the size of the clipping sprite for it to work as intended
+            var mask_spr: = clipping_spr.get_child(0)
+            mask_spr.texture = create_bw_mask_from_texture_region(mask_src_tex, mask_tex_rect, mask_is_bw, mask_clip_outer)
+        else:
+            var layer_spr: = Sprite2D.new()
+            layer_spr.texture = layer_tex
+            layer_spr.region_rect = layer_tex_rect
+            layer_spr.region_enabled = true
+            main_layer_node = layer_spr
+    elif layer_info.get("mode") == "digits":
+        var digit_display: = digit_display_scn.instantiate() as DigitDisplay
+        main_layer_node = digit_display
+        digit_display.pad_zeros = layer_info.get("pad_zeros", true)
+        digit_display.set_max_digits(layer_info.get("max_digits", 1))
+        
+        if layer_info.get("property", ""):
+            var prop_name: String = layer_info["property"]
+            if not prop_update_response.has(prop_name):
+                prop_update_response[prop_name] = []
+            prop_update_response[prop_name].append(set_digit_display_number.bind(digit_display))
+            
+            if is_inside_tree():
+                var entity: = get_parent() as BaseEntity
+                if entity:
+                    var prop_val: Variant = EntityManager.get_entity_prop_with_default(entity, prop_name, 0)
+                    set_digit_display_number(prop_val, digit_display)
+                else:
+                    set_digit_display_number(layer_info.get("preview_number", 0), digit_display)
     
     add_child(main_layer_node)
     var layer_scale: Vector2 = Utility.get_vector2_from_arr(layer_info.get("scale", [1,1]))
@@ -175,6 +205,12 @@ func create_and_add_nodes_for_layer(layer_info: Dictionary, layer_index: int) ->
     main_layer_node.set_meta("sub_layer_rotates", sub_layer_rotates)
 
     set_sprite_rotation(current_rotation)
+
+func on_local_properties_updated(entity: BaseEntity) -> void:
+    for prop_name in prop_update_response:
+        var prop_val: Variant = EntityManager.get_entity_prop_with_default(entity, prop_name, 0)
+        for update_func in prop_update_response[prop_name]:
+            update_func.call(prop_val)
 
 
 func _apply_most_recent_modifier_mask() -> void:
@@ -286,3 +322,13 @@ func create_alpha_mask_from_bw_texture_region(tex: Texture2D, tex_rect: Rect2i, 
         for x in mask_img.get_width():
             mask_img.set_pixel(x, y, Color.WHITE if mask_img.get_pixel(x, y).r > 0.5 else Color.TRANSPARENT)
     return ImageTexture.create_from_image(mask_img)
+
+func set_digit_display_number(new_number: Variant, digit_display: DigitDisplay) -> void:
+    if typeof(new_number) == TYPE_BOOL:
+        digit_display.set_number(1 if new_number else 0)
+    elif typeof(new_number) in [TYPE_INT, TYPE_FLOAT]:
+        digit_display.set_number(int(new_number))
+    elif typeof(new_number) == TYPE_STRING and new_number.is_valid_float():
+        digit_display.set_number(int(float(new_number)))
+    else:
+        digit_display.set_number(0)

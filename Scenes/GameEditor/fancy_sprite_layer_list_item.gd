@@ -14,10 +14,12 @@ const BetterTextureDialog: = preload("res://src/GameEditor/BetterTextureDialog.g
 static var texture_picker_scene: = preload("res://Scenes/GameEditor/BetterTextureDialog.tscn")
 
 const MODE_NORMAL: = "normal"
+const MODE_DIGITS: = "digits"
 const MODE_EMPTY: = "empty"
 
 const LayerModeOptions: Dictionary[String, String] = {
     MODE_NORMAL: "normal",
+    MODE_DIGITS: "digits",
     MODE_EMPTY: "empty",
 }
 
@@ -29,6 +31,12 @@ const LayerModeOptions: Dictionary[String, String] = {
 @export var mode_selector: OptionButton
 @export var reorder_buttons: Control
 @export var rotates_toggle: CheckButton
+
+@export var digits_settings: Control
+@export var digits_pad_zeros_toggle: CheckButton
+@export var digits_max_digits_input: Range
+@export var digits_settings_2: Control
+@export var digits_property_input: LineEdit
 
 @export var show_reorder_buttons: bool = true
 @export var enable_context_menu: bool = true
@@ -62,6 +70,10 @@ func _ready() -> void:
     rotates_toggle.set_pressed_no_signal(layer_info.get("rotates", true))
     if layer_info and layer_info.has("mode"):
         refresh_ui()
+    
+    digits_pad_zeros_toggle.toggled.connect(on_digits_pad_zeros_toggled)
+    digits_max_digits_input.value_changed.connect(on_digits_max_digits_changed)
+    digits_property_input.text_changed.connect(on_digits_property_changed)
     
     layer_image_button.pressed.connect(on_layer_image_button_pressed)
 
@@ -100,8 +112,18 @@ func set_mode_picker_value(new_mode_value: String) -> void:
 
 func on_mode_selected(_index: int) -> void:
     layer_info['mode'] = get_mode_value()
-    if layer_info['mode'] != MODE_EMPTY:
+    if layer_info['mode'] == MODE_NORMAL:
         _set_default_texture_and_index()
+
+    if layer_info['mode'] == MODE_DIGITS:
+        layer_info['pad_zeros'] = digits_pad_zeros_toggle.button_pressed
+        layer_info['max_digits'] = int(digits_max_digits_input.value)
+        layer_info['property'] = digits_property_input.text
+    else:
+        layer_info.erase('pad_zeros')
+        layer_info.erase('max_digits')
+        layer_info.erase('property')
+
     changed.emit()
     refresh_ui()
 
@@ -123,6 +145,16 @@ func refresh_ui() -> void:
     set_mode_picker_value(layer_info['mode'])
     if layer_info['mode'] == MODE_EMPTY:
         layer_image_button.disabled = true
+    elif layer_info['mode'] == MODE_DIGITS:
+        digits_pad_zeros_toggle.set_pressed_no_signal(layer_info['pad_zeros'])
+        digits_max_digits_input.set_value_no_signal(layer_info['max_digits'])
+        
+        digits_property_input.set_value(layer_info.get("property", ""))
+    
+    digits_settings.visible = layer_info['mode'] == MODE_DIGITS
+    digits_settings_2.visible = layer_info['mode'] == MODE_DIGITS
+    layer_image_button.visible = layer_info['mode'] != MODE_DIGITS
+
     offset_input.set_value(get_layer_offset())
     update_image_button_texture()
 
@@ -130,7 +162,7 @@ func update_image_button_texture() -> void:
     var button_texture: Texture2D = null
     if layer_info['mode'] == MODE_EMPTY and empty_layer_button_icon:
         button_texture = empty_layer_button_icon
-    else:
+    elif layer_info['mode'] == MODE_NORMAL:
         button_texture = Utility.atlas_texture_from_texture_index(layer_info['texture'], layer_info['tex_index'])
     layer_image_button.find_child("TextureRect").texture = button_texture
 
@@ -200,3 +232,21 @@ func _layer_mode_index(layer_mode: String) -> int:
         if mode_selector.get_item_text(i) == mode_text:
             return i
     return -1
+
+func on_digits_pad_zeros_toggled(is_pad_zeros: bool) -> void:
+    if not layer_info["mode"] == MODE_DIGITS:
+        return
+    layer_info['pad_zeros'] = is_pad_zeros
+    changed.emit()
+
+func on_digits_max_digits_changed(new_value: float) -> void:
+    if not layer_info["mode"] == MODE_DIGITS:
+        return
+    layer_info['max_digits'] = int(new_value)
+    changed.emit()
+
+func on_digits_property_changed(prop_name: String) -> void:
+    if not layer_info["mode"] == MODE_DIGITS:
+        return
+    layer_info['property'] = prop_name
+    changed.emit()

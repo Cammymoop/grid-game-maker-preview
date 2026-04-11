@@ -8,6 +8,7 @@
 [ext_resource type="Texture2D" uid="uid://b6lj5qghhre2t" path="res://assets/img/tiles.png" id="3_jxcnp"]
 [ext_resource type="PackedScene" uid="uid://cemds60k8ytal" path="res://Scenes/UI/icon_button.tscn" id="4_60pnq"]
 [ext_resource type="Texture2D" uid="uid://c1h0arduxil1j" path="res://assets/img/button_icons/down_small.png" id="4_x76fy"]
+[ext_resource type="Script" uid="uid://di2eyvsiqwsee" path="res://src/GameEditor/ConditionalEditor/PropertyInput.gd" id="7_d3nlp"]
 
 [sub_resource type="Theme" id="Theme_b74fv"]
 default_font_size = 14
@@ -15,11 +16,14 @@ Label/font_sizes/font_size = 14
 LineEdit/font_sizes/font_size = 14
 OptionButton/font_sizes/font_size = 14
 
+[sub_resource type="Theme" id="Theme_x76fy"]
+LineEdit/constants/minimum_character_width = 2
+
 [sub_resource type="AtlasTexture" id="AtlasTexture_mwfft"]
 atlas = ExtResource("3_jxcnp")
 region = Rect2(0, 64, 32, 32)
 
-[node name="FancySpriteLayerListItem" type="MarginContainer" unique_id=1110623540 node_paths=PackedStringArray("remove_button", "layer_image_button", "offset_input", "mode_selector", "reorder_buttons", "rotates_toggle")]
+[node name="FancySpriteLayerListItem" type="MarginContainer" unique_id=1110623540 node_paths=PackedStringArray("remove_button", "layer_image_button", "offset_input", "mode_selector", "reorder_buttons", "rotates_toggle", "digits_settings", "digits_pad_zeros_toggle", "digits_max_digits_input", "digits_settings_2", "digits_property_input")]
 offset_right = 331.0
 offset_bottom = 72.0
 theme = SubResource("Theme_b74fv")
@@ -35,6 +39,11 @@ offset_input = NodePath("HBoxContainer/PanelContainer/HBoxContainer/VBoxContaine
 mode_selector = NodePath("HBoxContainer/PanelContainer/HBoxContainer/VBoxContainer/HBoxContainer/OptionButton")
 reorder_buttons = NodePath("HBoxContainer/VBoxContainer2")
 rotates_toggle = NodePath("HBoxContainer/PanelContainer/HBoxContainer/VBoxContainer/HBoxContainer/RotatesToggle")
+digits_settings = NodePath("HBoxContainer/PanelContainer/HBoxContainer/DigitSettings")
+digits_pad_zeros_toggle = NodePath("HBoxContainer/PanelContainer/HBoxContainer/DigitSettings/HBoxContainer/PadZerosToggle")
+digits_max_digits_input = NodePath("HBoxContainer/PanelContainer/HBoxContainer/DigitSettings/HBoxContainer2/DigitsInput")
+digits_settings_2 = NodePath("HBoxContainer/PanelContainer/HBoxContainer/DigitSettings2")
+digits_property_input = NodePath("HBoxContainer/PanelContainer/HBoxContainer/DigitSettings2/HBoxContainer2/DigitPropertyInput")
 
 [node name="HBoxContainer" type="HBoxContainer" parent="." unique_id=209136135]
 layout_mode = 2
@@ -98,11 +107,60 @@ text = "Offset:"
 [node name="OffsetInput" parent="HBoxContainer/PanelContainer/HBoxContainer/VBoxContainer/HBoxContainer2" unique_id=2047234622 instance=ExtResource("1_s7nl1")]
 layout_mode = 2
 
+[node name="DigitSettings" type="VBoxContainer" parent="HBoxContainer/PanelContainer/HBoxContainer" unique_id=1813679788]
+layout_mode = 2
+alignment = 1
+
+[node name="HBoxContainer" type="HBoxContainer" parent="HBoxContainer/PanelContainer/HBoxContainer/DigitSettings" unique_id=435544444]
+layout_mode = 2
+
+[node name="PadZerosToggle" type="CheckButton" parent="HBoxContainer/PanelContainer/HBoxContainer/DigitSettings/HBoxContainer" unique_id=235302580]
+layout_mode = 2
+mouse_filter = 1
+button_pressed = true
+text = "Leading 0s:"
+
+[node name="HBoxContainer2" type="HBoxContainer" parent="HBoxContainer/PanelContainer/HBoxContainer/DigitSettings" unique_id=2078126990]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="HBoxContainer/PanelContainer/HBoxContainer/DigitSettings/HBoxContainer2" unique_id=1569572081]
+layout_mode = 2
+text = "Digits:"
+
+[node name="DigitsInput" type="SpinBox" parent="HBoxContainer/PanelContainer/HBoxContainer/DigitSettings/HBoxContainer2" unique_id=371833828]
+layout_mode = 2
+theme = SubResource("Theme_x76fy")
+min_value = 1.0
+max_value = 20.0
+value = 1.0
+allow_greater = true
+alignment = 2
+
 [node name="Spacer" type="Control" parent="HBoxContainer/PanelContainer/HBoxContainer" unique_id=1495181123]
 layout_mode = 2
 size_flags_horizontal = 3
 
+[node name="DigitSettings2" type="VBoxContainer" parent="HBoxContainer/PanelContainer/HBoxContainer" unique_id=259796157]
+layout_mode = 2
+alignment = 1
+
+[node name="HBoxContainer" type="HBoxContainer" parent="HBoxContainer/PanelContainer/HBoxContainer/DigitSettings2" unique_id=83345334]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="HBoxContainer/PanelContainer/HBoxContainer/DigitSettings2/HBoxContainer" unique_id=1406306363]
+layout_mode = 2
+text = "Number Property:"
+
+[node name="HBoxContainer2" type="HBoxContainer" parent="HBoxContainer/PanelContainer/HBoxContainer/DigitSettings2" unique_id=158156875]
+layout_mode = 2
+
+[node name="DigitPropertyInput" type="LineEdit" parent="HBoxContainer/PanelContainer/HBoxContainer/DigitSettings2/HBoxContainer2" unique_id=249245980]
+custom_minimum_size = Vector2(140, 0)
+layout_mode = 2
+script = ExtResource("7_d3nlp")
+
 [node name="LayerImageButton" type="Container" parent="HBoxContainer/PanelContainer/HBoxContainer" unique_id=1068316695]
+visible = false
 layout_mode = 2
 script = ExtResource("2_ya7sx")
 metadata/_custom_type_script = "uid://bq446sgdivroo"
