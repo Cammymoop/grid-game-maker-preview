@@ -4,7 +4,7 @@ signal hidden
 
 func _ready():
 	visibility_changed.connect(_on_vis_changed)
-	find_child("LevelNameInput").text = GameManager.loaded_level_name
+	find_child("LevelNameInput").text = Utility.sanitize_for_filename(GameManager.loaded_level_name)
 	close_requested.connect(close_dialog)
 
 func _on_SaveFileButton_pressed():

@@ -232,13 +232,13 @@ func serialize_and_save_data_to_json(data: Dictionary, directory: String, file_n
 
 func _save_json_in_data_dir_path(json_string: String, directory: String, file_name: String) -> void:
 	# just in case sanitization
-	file_name = Utility.sanitize_for_filename(file_name.trim_suffix(".json")) + ".json"
+	file_name = Utility.sanitize_for_filename(file_name.trim_suffix(".json"), true, true) + ".json"
 	var save_to_path = _data_path(directory, file_name)
 	_save_file(json_string, save_to_path)
 
 func _save_json_string_absolute(json_string: String, abs_directory: String, file_name: String) -> bool:
 	# just in case sanitization
-	file_name = Utility.sanitize_for_filename(file_name.trim_suffix(".json")) + ".json"
+	file_name = Utility.sanitize_for_filename(file_name.trim_suffix(".json"), true, true) + ".json"
 	var save_to_path = abs_directory.path_join(file_name)
 	return _save_file(json_string, save_to_path)
 
@@ -419,7 +419,7 @@ func get_all_image_names() -> Array:
 func _sanitize_image_filename(image_filename: String) -> String:
 	var extension: = "." + image_filename.get_extension()
 	var just_filename: = image_filename.trim_suffix(extension)
-	return Utility.sanitize_for_filename(just_filename, true) + extension
+	return Utility.sanitize_for_filename(just_filename, true, true) + extension
 
 func save_shared_image(image_to_save: Image, as_name: String) -> void:
 	var img_filename: = _sanitize_image_filename(as_name)
@@ -448,7 +448,7 @@ func load_file_as_texture(file_path: String) -> Texture:
 	return ImageTexture.create_from_image(loaded_img)
 
 func _level_filename(level_name: String) -> String:
-	return Utility.sanitize_for_filename(level_name) + ".json"
+	return Utility.sanitize_for_filename(level_name, true, true) + ".json"
 
 func save_level(game_name: String, level_data: Dictionary) -> bool:
 	if not game_exists(game_name):

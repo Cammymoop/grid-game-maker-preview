@@ -315,7 +315,7 @@ func _process(delta):
 				var tile_facing = MapManager.get_tile_facing_at(cursor_tile_pos)
 				place_mode("tile")
 				set_tile_to(tile_here)
-				current_tile_facing = tile_facing
+				set_current_facing(tile_facing)
 			else:
 				place_mode("delete")
 	

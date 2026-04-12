@@ -62,17 +62,14 @@ func desc_select_entity_at() -> String:
 	return "entity|<= Select an entity (ignoring self) at [at_pos_slot:SlotInput:pos] [invert:InvertInput:with,without] a [prop_name:PropertyInput] property"
 func cmd_select_entity_at(slots: Dictionary, chosen_slot: int, at_pos_slot: int, prop_name: String, invert: bool) -> void:
 	if not Commands.slot_is_entity(chosen_slot) or not Commands.slot_is_positions(at_pos_slot):
-		prints("cant select entity at %s" % at_pos_slot, "chosen slot %s is invalid" % chosen_slot)
+		push_error("Invalid slots to select entity at: %s and %s" % [chosen_slot, at_pos_slot])
 		return
 	var at_positions: Array = slots[at_pos_slot]
 	if not at_positions:
 		slots[chosen_slot] = null
-		prints("no positions in slot %s" % at_pos_slot)
 		return
 	var filtered_entities: Array = EntityManager.get_entities_at_multiple(at_positions, slots[Slot.RED])
-	prints("filtered entities:", filtered_entities)
 	filtered_entities = EntityManager.filter_entities_by_property(prop_name, filtered_entities, invert)
-	prints("filtered by property:", filtered_entities)
 	slots[chosen_slot] = filtered_entities[0] if filtered_entities else null
 
 func desc_select_number() -> String:
@@ -136,13 +133,10 @@ func cmd_add_text(slots: Dictionary, chosen_slot: int, inserted_text: String, se
 		return
 	var text: String = slots[chosen_slot]
 	if not text.strip_edges():
-		prints("text is empty: '%s' - replacing with: '%s'" % [text, inserted_text])
 		slots[chosen_slot] = inserted_text
 	elif is_end:
-		prints("appending to end: '%s' + '%s' + '%s'" % [text, separator, inserted_text])
 		slots[chosen_slot] = text + separator + inserted_text
 	else:
-		prints("appending to beginning: '%s' + '%s' + '%s'" % [inserted_text, separator, text])
 		slots[chosen_slot] = inserted_text + separator + text
 
 func desc_add_number_to_text() -> String:
@@ -273,6 +267,11 @@ func desc_a_set_tiles() -> String:
 	return "pos|Change the tile(s) here to [tile_name:TileNameInput]"
 func cmd_a_set_tiles(slots: Dictionary, chosen_slot: int, tile_name: String) -> void:
 	MapManager.replace_tiles_at_array(slots[chosen_slot], MapManager.get_tile_index(tile_name))
+
+func desc_erase_tiles() -> String:
+	return "pos|Erase the tile(s) here"
+func cmd_erase_tiles(slots: Dictionary, chosen_slot: int) -> void:
+	MapManager.replace_tiles_at_array(slots[chosen_slot], -1)
 
 func desc_a_set_property() -> String:
 	return "entity,pos|Set the entity or tile's [property_name:PropertyInput] property to [value:StringInput]"

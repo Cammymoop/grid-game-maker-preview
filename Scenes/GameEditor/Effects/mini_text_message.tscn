@@ -115,6 +115,7 @@ _data = {
 }
 
 [node name="MiniTextMessage" type="Node2D" unique_id=1604703929 node_paths=PackedStringArray("label_node", "animator")]
+z_index = 20
 script = ExtResource("1_vghrs")
 label_node = NodePath("AnimRoot/CenterContainer/Label")
 animator = NodePath("AnimRoot/AnimationPlayer")
