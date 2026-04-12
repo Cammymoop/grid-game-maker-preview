@@ -10,6 +10,9 @@ func _ready() -> void:
 	super._ready()
 	#var grid_size = Vector2(MapManager.tile_width, MapManager.tile_width)
 
+func get_half_size() -> Vector2:
+	return (entity_size * MapManager.tile_width) * 0.5
+
 func update_sprite_pos_scale() -> void:
 	sprite.position = Vector2(MapManager.tile_width * entity_size.x, MapManager.tile_width * entity_size.y) / 2
 	if EntityManager.get_entity_prop_with_default(self, "auto_scale", true):

@@ -186,11 +186,10 @@ func load_v3_conditional_data_step(from_data: Dictionary) -> void:
     add_when_list("when false")
     add_when_list("always")
     var show_when_list: String = "when true"
-    if not "when true" in from_data:
-        if "when false" in from_data:
-            show_when_list = "when false"
-        elif "when always" in from_data:
-            show_when_list = "always"
+    if "when always" in from_data and from_data["when always"].size() > 0:
+        show_when_list = "always"
+    elif "when false" in from_data and from_data["when false"].size() > 0:
+        show_when_list = "when false"
     action_tabs.set_current_list(show_when_list)
 
     for key in from_data:

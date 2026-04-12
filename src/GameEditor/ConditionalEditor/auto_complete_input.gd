@@ -27,6 +27,8 @@ var _filtered: Array[String] = []
 var _typed_this_focus: bool = false
 var _ignore_menu_sync: bool = false
 
+var _text_change_is_from_completion_accept: bool = false
+
 func _ready() -> void:
 	clear_button_enabled = default_show_clear_button
 	if override_default_min_size.x >= 0:
@@ -112,6 +114,9 @@ func update_highlight() -> void:
 
 
 func _on_text_changed(_new_text: String) -> void:
+	if _text_change_is_from_completion_accept:
+		_text_change_is_from_completion_accept = false
+		return
 	_typed_this_focus = true
 	update_highlight()
 	if use_autocomplete_menu:
@@ -194,15 +199,16 @@ func _accept_highlighted_autocomplete() -> void:
 
 
 func _apply_autocomplete_choice(choice: String) -> void:
-	prints("applying autocomplete", get_path())
 	_ignore_menu_sync = true
 	text = choice
 	caret_column = text.length()
 	update_highlight()
 	_ignore_menu_sync = false
 	_hide_autocomplete()
+	_text_change_is_from_completion_accept = true
 	text_changed.emit(text)
-	grab_focus.call_deferred()
+	if not has_focus():
+		grab_focus.call_deferred()
 
 
 func _filter_values(query: String) -> Array[String]:

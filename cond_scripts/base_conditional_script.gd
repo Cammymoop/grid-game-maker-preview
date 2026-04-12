@@ -135,6 +135,23 @@ func resolve_complex_direction(complex_direction: Dictionary, slots: Dictionary)
 		push_error("Invalid complex direction type: %s" % [complex_direction["type"]])
 		return 0
 
+func resolve_complex_scalar(complex_scalar: Dictionary, slots: Dictionary) -> float:
+	if complex_scalar["type"] == "plain":
+		return complex_scalar["value"]
+	elif complex_scalar["type"] == "slot_value":
+		var chosen_slot: int = complex_scalar["slot_id"]
+		if Commands.slot_is_argument(chosen_slot):
+			push_error("Arguments not implemented")
+			return 0
+		if Commands.slot_is_scalar(chosen_slot) or Commands.slot_is_string(chosen_slot):
+			return float(slots[chosen_slot])
+		else:
+			push_error("Invalid complex scalar slot: %s" % [chosen_slot])
+			return 0
+	else:
+		push_error("Invalid complex scalar type: %s" % [complex_scalar["type"]])
+		return 0
+
 func set_tiles_to_facing(slots: Dictionary, slot_id: int, facing: int) -> void:
 	if not Commands.slot_is_positions(slot_id):
 		push_warning("set_tiles_to_facing: Slot is not a tile position: %s" % [slot_id])
@@ -142,3 +159,49 @@ func set_tiles_to_facing(slots: Dictionary, slot_id: int, facing: int) -> void:
 	
 	for pos in slots[slot_id]:
 		MapManager.set_tile_facing_at(pos, facing)
+
+func set_value_slot_as_number(slots: Dictionary, slot_id: int, value: float) -> void:
+	if Commands.slot_is_int(slot_id):
+		slots[slot_id] = int(value)
+	elif Commands.slot_is_float(slot_id):
+		slots[slot_id] = float(value)
+	elif Commands.slot_is_string(slot_id):
+		if Utility.is_float_integer(value):
+			slots[slot_id] = str(roundi(value))
+		else:
+			slots[slot_id] = str(value)
+	else:
+		push_error("Invalid slot to put a number into: %s" % slot_id)
+
+func get_value_slot_as_int(slots: Dictionary, slot_id: int) -> int:
+	if Commands.slot_is_scalar(slot_id):
+		return int(slots[slot_id])
+	elif Commands.slot_is_string(slot_id):
+		var str_value: String = slots[slot_id]
+		if not str_value.is_valid_float():
+			return 0
+		return roundi(float(str_value))
+	else:
+		push_error("Non-value slot or get int not implemented: %s" % slot_id)
+		return 0
+
+func get_value_slot_as_float(slots: Dictionary, slot_id: int) -> float:
+	if Commands.slot_is_scalar(slot_id):
+		return float(slots[slot_id])
+	elif Commands.slot_is_string(slot_id):
+		var str_value: String = slots[slot_id]
+		if not str_value.is_valid_float():
+			return 0
+		return float(str_value)
+	else:
+		push_error("Non-value slot or get float not implemented: %s" % slot_id)
+		return 0
+
+func get_value_slot_as_string(slots: Dictionary, slot_id: int) -> String:
+	if Commands.slot_is_scalar(slot_id):
+		return str(slots[slot_id])
+	elif Commands.slot_is_string(slot_id):
+		return slots[slot_id]
+	else:
+		push_error("Non-value slot or get string not implemented: %s" % slot_id)
+		return ""

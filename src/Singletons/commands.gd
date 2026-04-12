@@ -95,11 +95,27 @@ func is_condition(command_id) -> bool:
 func is_action(command_id) -> bool:
 	return command_id >= FIRST_ACTION
 
-func slot_is_entity(slot_id) -> bool:
+func slot_is_entity(slot_id: int) -> bool:
 	return slot_id >= Slot.RED and slot_id <= Slot.PINK
 
-func slot_is_positions(slot_id) -> bool:
+func slot_is_positions(slot_id: int) -> bool:
 	return slot_id >= Slot.GREY and slot_id <= Slot.BLACK
+
+
+func slot_is_scalar(slot_id: int) -> bool:
+	return slot_id >= Slot.A and slot_id <= Slot.Z
+
+func slot_is_int(slot_id: int) -> bool:
+	return slot_id >= Slot.A and slot_id <= Slot.C
+
+func slot_is_float(slot_id: int) -> bool:
+	return slot_id >= Slot.X and slot_id <= Slot.Z
+
+func slot_is_string(slot_id: int) -> bool:
+	return slot_id >= Slot.I and slot_id <= Slot.III
+
+func slot_is_argument(slot_id: int) -> bool:
+	return slot_id >= Slot.DARK_RED and slot_id <= Slot.DARK_ORANGE
 
 var Friendly = {
 	CC.SELECT_DEFAULTS: {
@@ -119,10 +135,10 @@ var Friendly = {
 		display_name= "Select Tile Rectangle",
 		slot_types= ["tile_pos"],
 		options= {
-			"x": {input_type= InputTypes.ValueInput},
-			"y": {input_type= InputTypes.ValueInput},
-			"width": {input_type= InputTypes.ValueInput},
-			"height": {input_type= InputTypes.ValueInput},
+			"x": {input_type= InputTypes.ScalarInput},
+			"y": {input_type= InputTypes.ScalarInput},
+			"width": {input_type= InputTypes.ScalarInput},
+			"height": {input_type= InputTypes.ScalarInput},
 		},
 		ui= ["<", "Select tiles in a relative rectangle ", "br", "x/y", "[x", "[y", "w/h", "[width", "[height"]
 	},
@@ -240,7 +256,7 @@ var Friendly = {
 		slot_types= ["entity"],
 		options= {
 			"property_name": {input_type= InputTypes.PropertyInput},
-			"val": {input_type= InputTypes.ValueInput},
+			"val": {input_type= InputTypes.ScalarInput},
 		},
 		ui= ["Set the property called ", "[property_name", " on this Entity to ","[val"]
 	},
@@ -249,7 +265,7 @@ var Friendly = {
 		slot_types= ["entity"],
 		options= {
 			"property_name": {input_type= InputTypes.PropertyInput},
-			"val": {input_type= InputTypes.ValueInput},
+			"val": {input_type= InputTypes.ScalarInput},
 		},
 		ui= ["Increase the property called ", "[property_name", " on this Entity by ", "[val"]
 	},
@@ -258,7 +274,7 @@ var Friendly = {
 		slot_types= ["entity"],
 		options= {
 			"property_name": {input_type= InputTypes.PropertyInput},
-			"val": {input_type= InputTypes.ValueInput},
+			"val": {input_type= InputTypes.ScalarInput},
 			"autoremove": {input_type= InputTypes.InvertInput,
 				template_options= {
 					regular_text= "do nothing",

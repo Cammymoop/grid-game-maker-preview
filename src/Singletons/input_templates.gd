@@ -7,7 +7,10 @@ enum InputTypes {
 	EntityNameInput,
 	SignalInput,
 	
-	ValueInput,
+	ScalarInput,
+	ComplexScalarInput,
+	
+	StringInput,
 	
 	OrderComparison,
 	
@@ -26,7 +29,10 @@ var templates: = {
 	InputTypes.EntityNameInput: preload("res://src/GameEditor/ConditionalEditor/entity_name_input.gd"),
 	InputTypes.SignalInput: preload("res://src/GameEditor/ConditionalEditor/generic_input.gd"),
 	
-	InputTypes.ValueInput: preload("res://Scenes/GameEditor/ConditionalEditor/generic_input.tscn"),
+	InputTypes.ScalarInput: preload("res://Scenes/GameEditor/ConditionalEditor/scalar_value_input.tscn"),
+	InputTypes.ComplexScalarInput: preload("res://Scenes/GameEditor/ConditionalEditor/complex_scalar_input.tscn"),
+	
+	InputTypes.StringInput: preload("res://Scenes/GameEditor/ConditionalEditor/generic_input.tscn"),
 	
 	InputTypes.OrderComparison: preload("res://Scenes/GameEditor/ConditionalEditor/order_comparison_input.tscn"),
 	

@@ -35,6 +35,7 @@ size_flags_horizontal = 3
 size_flags_vertical = 4
 script = ExtResource("2_m2epb")
 include_events = true
+highlight_unknown_color = Color(0.660753, 0.9219391, 0.48474276, 1)
 override_default_min_size = Vector2(220, -1)
 
 [node name="SelectEvent" type="MenuButton" parent="VBoxContainer" unique_id=163296998]

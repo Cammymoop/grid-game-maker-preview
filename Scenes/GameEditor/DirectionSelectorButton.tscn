@@ -31,7 +31,7 @@ script = ExtResource("5")
 
 [node name="PopupPicker" type="PopupPanel" parent="." unique_id=402108247]
 oversampling_override = 1.0
-size = Vector2i(72, 112)
+size = Vector2i(112, 112)
 
 [node name="PopupPickerPanel" type="PanelContainer" parent="PopupPicker" unique_id=102246391]
 anchors_preset = 15
@@ -39,8 +39,8 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 offset_left = 4.0
 offset_top = 4.0
-offset_right = -4.0
-offset_bottom = -4.0
+offset_right = 108.0
+offset_bottom = 108.0
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_styles/panel = SubResource("1")

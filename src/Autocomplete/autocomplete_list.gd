@@ -82,7 +82,7 @@ func get_anchor_control() -> Control:
 func clear_items() -> void:
 	for c in _vbox.get_children():
 		_vbox.remove_child(c)
-		c.free()
+		c.queue_free()
 	_rows.clear()
 	_strings.clear()
 	_current_index = -1

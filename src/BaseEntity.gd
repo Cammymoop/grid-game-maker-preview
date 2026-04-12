@@ -99,6 +99,12 @@ func update_z():
 func get_center_offset() -> Vector2:
 	return Vector2(floor(MapManager.tile_width/2.0), floor(MapManager.tile_width/2.0))
 
+func get_center_position() -> Vector2:
+	return position + get_center_offset()
+
+func get_half_size() -> Vector2:
+	return Vector2.ONE * (MapManager.tile_width * 0.5)
+
 func connect_to_signals() -> void:
 	var all_props = EntityManager.get_entity_property_list(self)
 

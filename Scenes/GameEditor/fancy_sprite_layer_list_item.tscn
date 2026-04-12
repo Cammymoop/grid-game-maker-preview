@@ -16,16 +16,16 @@ Label/font_sizes/font_size = 14
 LineEdit/font_sizes/font_size = 14
 OptionButton/font_sizes/font_size = 14
 
-[sub_resource type="Theme" id="Theme_x76fy"]
-LineEdit/constants/minimum_character_width = 2
-
 [sub_resource type="AtlasTexture" id="AtlasTexture_mwfft"]
 atlas = ExtResource("3_jxcnp")
 region = Rect2(0, 64, 32, 32)
 
-[node name="FancySpriteLayerListItem" type="MarginContainer" unique_id=1110623540 node_paths=PackedStringArray("remove_button", "layer_image_button", "offset_input", "mode_selector", "reorder_buttons", "rotates_toggle", "digits_settings", "digits_pad_zeros_toggle", "digits_max_digits_input", "digits_settings_2", "digits_property_input")]
-offset_right = 331.0
-offset_bottom = 72.0
+[sub_resource type="Theme" id="Theme_x76fy"]
+LineEdit/constants/minimum_character_width = 2
+
+[node name="FancySpriteLayerListItem" type="MarginContainer" unique_id=1110623540 node_paths=PackedStringArray("remove_button", "layer_image_button", "offset_input", "mode_selector", "reorder_buttons", "rotates_toggle", "digits_settings", "digits_pad_zeros_toggle", "digits_max_digits_input", "digits_property_input", "digits_color_picker")]
+offset_right = 502.0
+offset_bottom = 124.0
 theme = SubResource("Theme_b74fv")
 theme_override_constants/margin_left = 0
 theme_override_constants/margin_top = 8
@@ -34,16 +34,16 @@ theme_override_constants/margin_bottom = 8
 script = ExtResource("1_ya7sx")
 empty_layer_button_icon = ExtResource("2_x76fy")
 remove_button = NodePath("HBoxContainer/RemoveLayerButton")
-layer_image_button = NodePath("HBoxContainer/PanelContainer/HBoxContainer/LayerImageButton")
+layer_image_button = NodePath("HBoxContainer/PanelContainer/HBoxContainer/HBoxContainer/LayerImageButton")
 offset_input = NodePath("HBoxContainer/PanelContainer/HBoxContainer/VBoxContainer/HBoxContainer2/OffsetInput")
 mode_selector = NodePath("HBoxContainer/PanelContainer/HBoxContainer/VBoxContainer/HBoxContainer/OptionButton")
 reorder_buttons = NodePath("HBoxContainer/VBoxContainer2")
 rotates_toggle = NodePath("HBoxContainer/PanelContainer/HBoxContainer/VBoxContainer/HBoxContainer/RotatesToggle")
-digits_settings = NodePath("HBoxContainer/PanelContainer/HBoxContainer/DigitSettings")
-digits_pad_zeros_toggle = NodePath("HBoxContainer/PanelContainer/HBoxContainer/DigitSettings/HBoxContainer/PadZerosToggle")
-digits_max_digits_input = NodePath("HBoxContainer/PanelContainer/HBoxContainer/DigitSettings/HBoxContainer2/DigitsInput")
-digits_settings_2 = NodePath("HBoxContainer/PanelContainer/HBoxContainer/DigitSettings2")
-digits_property_input = NodePath("HBoxContainer/PanelContainer/HBoxContainer/DigitSettings2/HBoxContainer2/DigitPropertyInput")
+digits_settings = NodePath("HBoxContainer/PanelContainer/HBoxContainer/HBoxContainer/DigitSettings")
+digits_pad_zeros_toggle = NodePath("HBoxContainer/PanelContainer/HBoxContainer/HBoxContainer/DigitSettings/HBoxContainer/PadZerosToggle")
+digits_max_digits_input = NodePath("HBoxContainer/PanelContainer/HBoxContainer/HBoxContainer/DigitSettings/HBoxContainer2/DigitsInput")
+digits_property_input = NodePath("HBoxContainer/PanelContainer/HBoxContainer/HBoxContainer/DigitSettings/HBoxContainer3/DigitPropertyInput")
+digits_color_picker = NodePath("HBoxContainer/PanelContainer/HBoxContainer/HBoxContainer/DigitSettings/HBoxContainer4/DigitColorPicker")
 
 [node name="HBoxContainer" type="HBoxContainer" parent="." unique_id=209136135]
 layout_mode = 2
@@ -107,65 +107,19 @@ text = "Offset:"
 [node name="OffsetInput" parent="HBoxContainer/PanelContainer/HBoxContainer/VBoxContainer/HBoxContainer2" unique_id=2047234622 instance=ExtResource("1_s7nl1")]
 layout_mode = 2
 
-[node name="DigitSettings" type="VBoxContainer" parent="HBoxContainer/PanelContainer/HBoxContainer" unique_id=1813679788]
-layout_mode = 2
-alignment = 1
-
-[node name="HBoxContainer" type="HBoxContainer" parent="HBoxContainer/PanelContainer/HBoxContainer/DigitSettings" unique_id=435544444]
-layout_mode = 2
-
-[node name="PadZerosToggle" type="CheckButton" parent="HBoxContainer/PanelContainer/HBoxContainer/DigitSettings/HBoxContainer" unique_id=235302580]
-layout_mode = 2
-mouse_filter = 1
-button_pressed = true
-text = "Leading 0s:"
-
-[node name="HBoxContainer2" type="HBoxContainer" parent="HBoxContainer/PanelContainer/HBoxContainer/DigitSettings" unique_id=2078126990]
-layout_mode = 2
-
-[node name="Label" type="Label" parent="HBoxContainer/PanelContainer/HBoxContainer/DigitSettings/HBoxContainer2" unique_id=1569572081]
-layout_mode = 2
-text = "Digits:"
-
-[node name="DigitsInput" type="SpinBox" parent="HBoxContainer/PanelContainer/HBoxContainer/DigitSettings/HBoxContainer2" unique_id=371833828]
-layout_mode = 2
-theme = SubResource("Theme_x76fy")
-min_value = 1.0
-max_value = 20.0
-value = 1.0
-allow_greater = true
-alignment = 2
-
-[node name="Spacer" type="Control" parent="HBoxContainer/PanelContainer/HBoxContainer" unique_id=1495181123]
+[node name="HBoxContainer" type="HBoxContainer" parent="HBoxContainer/PanelContainer/HBoxContainer" unique_id=642636696]
 layout_mode = 2
 size_flags_horizontal = 3
+theme_override_constants/separation = 0
+alignment = 2
 
-[node name="DigitSettings2" type="VBoxContainer" parent="HBoxContainer/PanelContainer/HBoxContainer" unique_id=259796157]
-layout_mode = 2
-alignment = 1
-
-[node name="HBoxContainer" type="HBoxContainer" parent="HBoxContainer/PanelContainer/HBoxContainer/DigitSettings2" unique_id=83345334]
-layout_mode = 2
-
-[node name="Label" type="Label" parent="HBoxContainer/PanelContainer/HBoxContainer/DigitSettings2/HBoxContainer" unique_id=1406306363]
-layout_mode = 2
-text = "Number Property:"
-
-[node name="HBoxContainer2" type="HBoxContainer" parent="HBoxContainer/PanelContainer/HBoxContainer/DigitSettings2" unique_id=158156875]
-layout_mode = 2
-
-[node name="DigitPropertyInput" type="LineEdit" parent="HBoxContainer/PanelContainer/HBoxContainer/DigitSettings2/HBoxContainer2" unique_id=249245980]
-custom_minimum_size = Vector2(140, 0)
-layout_mode = 2
-script = ExtResource("7_d3nlp")
-
-[node name="LayerImageButton" type="Container" parent="HBoxContainer/PanelContainer/HBoxContainer" unique_id=1068316695]
+[node name="LayerImageButton" type="Container" parent="HBoxContainer/PanelContainer/HBoxContainer/HBoxContainer" unique_id=1068316695]
 visible = false
 layout_mode = 2
 script = ExtResource("2_ya7sx")
 metadata/_custom_type_script = "uid://bq446sgdivroo"
 
-[node name="MarginContainer" type="MarginContainer" parent="HBoxContainer/PanelContainer/HBoxContainer/LayerImageButton" unique_id=491096593]
+[node name="MarginContainer" type="MarginContainer" parent="HBoxContainer/PanelContainer/HBoxContainer/HBoxContainer/LayerImageButton" unique_id=491096593]
 layout_mode = 2
 mouse_filter = 2
 theme_override_constants/margin_left = 4
@@ -173,7 +127,7 @@ theme_override_constants/margin_top = 4
 theme_override_constants/margin_right = 4
 theme_override_constants/margin_bottom = 4
 
-[node name="TextureRect" type="TextureRect" parent="HBoxContainer/PanelContainer/HBoxContainer/LayerImageButton/MarginContainer" unique_id=32878848]
+[node name="TextureRect" type="TextureRect" parent="HBoxContainer/PanelContainer/HBoxContainer/HBoxContainer/LayerImageButton/MarginContainer" unique_id=32878848]
 texture_filter = 1
 custom_minimum_size = Vector2(64, 64)
 layout_mode = 2
@@ -182,6 +136,61 @@ size_flags_vertical = 4
 mouse_filter = 2
 texture = SubResource("AtlasTexture_mwfft")
 stretch_mode = 5
+
+[node name="DigitSettings" type="HFlowContainer" parent="HBoxContainer/PanelContainer/HBoxContainer/HBoxContainer" unique_id=897502454]
+layout_mode = 2
+
+[node name="HBoxContainer2" type="HBoxContainer" parent="HBoxContainer/PanelContainer/HBoxContainer/HBoxContainer/DigitSettings" unique_id=2078126990]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="HBoxContainer/PanelContainer/HBoxContainer/HBoxContainer/DigitSettings/HBoxContainer2" unique_id=1569572081]
+layout_mode = 2
+text = "Digits:"
+
+[node name="DigitsInput" type="SpinBox" parent="HBoxContainer/PanelContainer/HBoxContainer/HBoxContainer/DigitSettings/HBoxContainer2" unique_id=371833828]
+layout_mode = 2
+theme = SubResource("Theme_x76fy")
+min_value = 1.0
+max_value = 20.0
+value = 1.0
+allow_greater = true
+alignment = 2
+
+[node name="HBoxContainer4" type="HBoxContainer" parent="HBoxContainer/PanelContainer/HBoxContainer/HBoxContainer/DigitSettings" unique_id=970519487]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="HBoxContainer/PanelContainer/HBoxContainer/HBoxContainer/DigitSettings/HBoxContainer4" unique_id=587597450]
+layout_mode = 2
+text = "Color:"
+
+[node name="DigitColorPicker" type="ColorPickerButton" parent="HBoxContainer/PanelContainer/HBoxContainer/HBoxContainer/DigitSettings/HBoxContainer4" unique_id=2099511892]
+custom_minimum_size = Vector2(32, 28)
+layout_mode = 2
+color = Color(1, 1, 1, 1)
+edit_intensity = false
+
+[node name="HBoxContainer" type="HBoxContainer" parent="HBoxContainer/PanelContainer/HBoxContainer/HBoxContainer/DigitSettings" unique_id=435544444]
+layout_mode = 2
+
+[node name="PadZerosToggle" type="CheckButton" parent="HBoxContainer/PanelContainer/HBoxContainer/HBoxContainer/DigitSettings/HBoxContainer" unique_id=235302580]
+layout_mode = 2
+mouse_filter = 1
+button_pressed = true
+text = "Leading 0s:"
+
+[node name="HBoxContainer3" type="HBoxContainer" parent="HBoxContainer/PanelContainer/HBoxContainer/HBoxContainer/DigitSettings" unique_id=83345334]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Label" type="Label" parent="HBoxContainer/PanelContainer/HBoxContainer/HBoxContainer/DigitSettings/HBoxContainer3" unique_id=1406306363]
+layout_mode = 2
+text = "Property:"
+
+[node name="DigitPropertyInput" type="LineEdit" parent="HBoxContainer/PanelContainer/HBoxContainer/HBoxContainer/DigitSettings/HBoxContainer3" unique_id=249245980]
+custom_minimum_size = Vector2(140, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+script = ExtResource("7_d3nlp")
 
 [node name="RemoveLayerButton" parent="HBoxContainer" unique_id=1790843655 instance=ExtResource("4_60pnq")]
 layout_mode = 2

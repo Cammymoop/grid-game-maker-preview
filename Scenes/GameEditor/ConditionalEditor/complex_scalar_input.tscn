@@ -1,0 +1,20 @@
+[gd_scene format=3 uid="uid://c71equt4aef0v"]
+
+[ext_resource type="Script" uid="uid://1ua5p1m8xtef" path="res://src/GameEditor/ConditionalEditor/complex_number_input.gd" id="1_tety4"]
+[ext_resource type="PackedScene" uid="uid://bh1w4w8i5hk66" path="res://Scenes/GameEditor/SlotSelectorButton.tscn" id="2_ckiqw"]
+[ext_resource type="PackedScene" uid="uid://bleyoj5f36kfy" path="res://Scenes/GameEditor/ConditionalEditor/scalar_value_input.tscn" id="3_pvav6"]
+
+[node name="ComplexNumberInput" type="HBoxContainer" unique_id=1726993889 node_paths=PackedStringArray("slot_selector", "plain_value_input")]
+offset_right = 40.0
+offset_bottom = 40.0
+script = ExtResource("1_tety4")
+slot_selector = NodePath("SlotSelectorButton")
+plain_value_input = NodePath("ScalarValueInput")
+
+[node name="SlotSelectorButton" parent="." unique_id=1264497244 instance=ExtResource("2_ckiqw")]
+layout_mode = 2
+show_number_option = true
+default_slot_id = -3
+
+[node name="ScalarValueInput" parent="." unique_id=1458729988 instance=ExtResource("3_pvav6")]
+layout_mode = 2

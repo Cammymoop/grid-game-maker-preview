@@ -47,9 +47,9 @@ func cmd_select_tiles_rect(slots: Dictionary, chosen_slot: Slot, top_left: Vecto
 	slots[chosen_slot] = positions
 
 func desc_select_tiles_around() -> String:
-	return "pos|<= Select positions within [radius:ValueInput] (full square)"
-func cmd_select_tiles_around(slots: Dictionary, chosen_slot: int, radius: String) -> void:
-	var radius_int: = int(radius)
+	return "pos|<= Select positions within [radius:ComplexScalarInput] (full square)"
+func cmd_select_tiles_around(slots: Dictionary, chosen_slot: int, radius: Dictionary) -> void:
+	var radius_int: = int(resolve_complex_scalar(radius, slots))
 	var top_left = get_context_position(slots) - Vector2i(radius_int, radius_int)
 	var width: = radius_int * 2 + 1
 	var positions: Array = []
@@ -74,6 +74,92 @@ func cmd_select_entity_at(slots: Dictionary, chosen_slot: int, at_pos_slot: int,
 	filtered_entities = EntityManager.filter_entities_by_property(prop_name, filtered_entities, invert)
 	prints("filtered by property:", filtered_entities)
 	slots[chosen_slot] = filtered_entities[0] if filtered_entities else null
+
+func desc_select_number() -> String:
+	return "number,string|<= Select the number [complex_num:ComplexScalarInput]"
+func cmd_select_number(slots: Dictionary, chosen_slot: int, complex_num: Dictionary) -> void:
+	set_value_slot_as_number(slots, chosen_slot, resolve_complex_scalar(complex_num, slots))
+
+func desc_select_text() -> String:
+	return "string|<= Select the text [text_val:StringInput]"
+func cmd_select_text(slots: Dictionary, chosen_slot: int, text_val: String) -> void:
+	if Commands.slot_is_string(chosen_slot):
+		slots[chosen_slot] = text_val
+	else:
+		push_error("Invalid slot to select text into: %s" % chosen_slot)
+
+func desc_select_text_property() -> String:
+	return "string|<= Select the text value of [target_slot:SlotInput:entity,pos]'s [property_name:PropertyInput] property"
+func cmd_select_text_property(slots: Dictionary, chosen_slot: int, target_slot: int, property_name: String) -> void:
+	if not Commands.slot_is_string(chosen_slot):
+		push_error("Invalid slot to select property value text into: %s" % chosen_slot)
+		return
+	
+	if Commands.slot_is_entity(target_slot):
+		if not slots[target_slot]:
+			slots[chosen_slot] = ""
+		else:
+			slots[chosen_slot] = EntityManager.get_entity_prop_text_value(slots[target_slot], property_name)
+	elif Commands.slot_is_positions(target_slot):
+		if not slots[target_slot]:
+			slots[chosen_slot] = ""
+		else:
+			slots[chosen_slot] = MapManager.get_tile_prop_text_value_at(slots[target_slot], property_name)
+	else:
+		push_error("Invalid slot to select property value text from: %s" % target_slot)
+
+func desc_select_number_property() -> String:
+	return "string,number|<= Select the text value of [target_slot:SlotInput:entity,pos]'s [property_name:PropertyInput] property"
+func cmd_select_number_property(slots: Dictionary, chosen_slot: int, target_slot: int, property_name: String) -> void:
+	if not Commands.slot_is_scalar(chosen_slot) and not Commands.slot_is_string(chosen_slot):
+		push_error("Invalid slot to select property value as scalar into: %s" % chosen_slot)
+		return
+	
+	var prop_val: float = 0
+	if Commands.slot_is_entity(target_slot):
+		if slots[target_slot]:
+			prop_val = EntityManager.get_entity_prop_scalar_value(slots[target_slot], property_name)
+	elif Commands.slot_is_positions(target_slot):
+		if slots[target_slot]:
+			prop_val = MapManager.get_tile_prop_scalar_value_at(slots[target_slot], property_name)
+	else:
+		push_error("Invalid slot to select property value text from: %s" % target_slot)
+		return
+	set_value_slot_as_number(slots, chosen_slot, prop_val)
+
+func desc_add_text() -> String:
+	return "string|<= Add [inserted_text:StringInput] to the [is_end:BoolChoice:true,end,beginning] of the slot\n" + \
+	       "Separated by [separator:StringInput]"
+func cmd_add_text(slots: Dictionary, chosen_slot: int, inserted_text: String, separator: String, is_end: bool) -> void:
+	if not Commands.slot_is_string(chosen_slot):
+		push_error("Invalid slot to add text into: %s" % chosen_slot)
+		return
+	var text: String = slots[chosen_slot]
+	if not text.strip_edges():
+		prints("text is empty: '%s' - replacing with: '%s'" % [text, inserted_text])
+		slots[chosen_slot] = inserted_text
+	elif is_end:
+		prints("appending to end: '%s' + '%s' + '%s'" % [text, separator, inserted_text])
+		slots[chosen_slot] = text + separator + inserted_text
+	else:
+		prints("appending to beginning: '%s' + '%s' + '%s'" % [inserted_text, separator, text])
+		slots[chosen_slot] = inserted_text + separator + text
+
+func desc_add_number_to_text() -> String:
+	return "string|<= Add [inserted_num:ComplexScalarInput] to the [is_end:BoolChoice:true,end,beginning] of the slot\n" + \
+	       "Separated by [separator:StringInput]"
+func cmd_add_number_to_text(slots: Dictionary, chosen_slot: int, inserted_num: Dictionary, separator: String, is_end: bool) -> void:
+	if not Commands.slot_is_string(chosen_slot):
+		push_error("Invalid slot to add number to text into: %s" % chosen_slot)
+		return
+	var text: String = slots[chosen_slot]
+	var inserted_text: String = str(resolve_complex_scalar(inserted_num, slots))
+	if not text.strip_edges():
+		slots[chosen_slot] = inserted_text
+	elif is_end:
+		slots[chosen_slot] = text + separator + inserted_text
+	else:
+		slots[chosen_slot] = inserted_text + separator + text
 
 func desc_is_entity_at() -> String:
 	return "pos|If there is an entity (ignoring self) at this location [invert:InvertInput:with,without] a [prop_name:PropertyInput] property"
@@ -189,43 +275,49 @@ func cmd_a_set_tiles(slots: Dictionary, chosen_slot: int, tile_name: String) -> 
 	MapManager.replace_tiles_at_array(slots[chosen_slot], MapManager.get_tile_index(tile_name))
 
 func desc_a_set_property() -> String:
-	return "entity,pos|Set the entity or tile's [property_name:PropertyInput] property to [value:ValueInput]"
-func cmd_a_set_property(slots: Dictionary, chosen_slot: int, property_name: String, value: Variant) -> void:
-	if typeof(value) == TYPE_STRING:
-		if value == "true" or value == "false":
-			value = value == "true"
+	return "entity,pos|Set the entity or tile's [property_name:PropertyInput] property to [value:StringInput]"
+func cmd_a_set_property(slots: Dictionary, chosen_slot: int, property_name: String, value: String) -> void:
+	var converted_value: Variant = value
+	if value == "true" or value == "false":
+		converted_value = value == "true"
+	elif value.is_valid_float():
+		if value.is_valid_int():
+			converted_value = int(value)
+		else:
+			converted_value = float(value)
+
 	if Commands.slot_is_entity(chosen_slot):
 		if slots[chosen_slot]:
-			slots[chosen_slot].set_local_property(property_name, value)
+			slots[chosen_slot].set_local_property(property_name, converted_value)
 	elif Commands.slot_is_positions(chosen_slot):
 		var positions: Array = slots[chosen_slot]
 		if positions.size() > 0:
-			MapManager.set_tile_property_at_multiple(positions, property_name, value)
+			MapManager.set_tile_property_at_multiple(positions, property_name, converted_value)
 
 func desc_a_property_add() -> String:
-	return "entity|Add [amount:ValueInput] to the entity's [property_name:PropertyInput] property"
-func cmd_a_property_add(slots: Dictionary, chosen_slot: int, property_name: String, amount: Variant) -> void:
+	return "entity|Add [amount:ComplexScalarInput] to the entity's [property_name:PropertyInput] property"
+func cmd_a_property_add(slots: Dictionary, chosen_slot: int, property_name: String, amount: Dictionary) -> void:
 	if Commands.slot_is_entity(chosen_slot):
-		var selected = slots[chosen_slot]
-		var existing = 0
-		if selected.has_local_property(property_name):
-			existing = int(selected.get_local_property(property_name))
-		selected.set_local_property(property_name, existing + int(amount))
+		var selected: = slots[chosen_slot] as BaseEntity
+		if selected:
+			var existing = EntityManager.get_entity_prop_with_default(selected, property_name, 0)
+			selected.set_local_property(property_name, existing + resolve_complex_scalar(amount, slots))
 
 func desc_a_property_subtract() -> String:
-	return "entity|Subtract [amount:ValueInput] from the entity's [property_name:PropertyInput] property\n" \
+	return "entity|Subtract [amount:ComplexScalarInput] from the entity's [property_name:PropertyInput] property\n" \
 	     + "[autoremove:BoolChoice:true,remove the property if it reaches zero,allow values less than and including zero]"
-func cmd_a_property_subtract(slots: Dictionary, chosen_slot: int, property_name: String, amount: Variant, autoremove: bool) -> void:
+func cmd_a_property_subtract(slots: Dictionary, chosen_slot: int, property_name: String, amount: Dictionary, autoremove: bool) -> void:
 	if Commands.slot_is_entity(chosen_slot):
-		var selected = slots[chosen_slot]
-		var new_val = -float(amount)
-		if selected.has_local_property(property_name):
-			new_val += float(selected.get_local_property(property_name))
+		var selected: = slots[chosen_slot] as BaseEntity
+		if selected:
+			var existing = EntityManager.get_entity_prop_with_default(selected, property_name, 0)
+			var new_val: float = existing - resolve_complex_scalar(amount, slots)
 
-		if autoremove and (new_val <= 0 or is_zero_approx(new_val)):
-			selected.remove_local_property(property_name)
-		else:
-			selected.set_local_property(property_name, new_val)
+			if autoremove and (new_val <= 0 or is_zero_approx(new_val)):
+				if selected.has_local_property(property_name):
+					selected.remove_local_property(property_name)
+			else:
+				selected.set_local_property(property_name, new_val)
 
 func desc_a_remove_property() -> String:
 	return "entity,pos|Remove the entity or tile's [property_name:PropertyInput] property"
@@ -292,9 +384,10 @@ func cmd_send_signal(slots: Dictionary, chosen_slot: int, signal_name: String) -
 		EntityManager.do_emit_signal(signal_name, slots[chosen_slot])
 
 func desc_compare_property() -> String:
-	return "entity,pos|If the entity/tile's [property_name:PropertyInput] property [comparison:OrderComparison] [value:ValueInput]"
-func cmd_compare_property(slots: Dictionary, chosen_slot: int, property_name: String, comparison: String, value: Variant) -> bool:
+	return "entity,pos|If the entity/tile's [property_name:PropertyInput] property [comparison:OrderComparison] [num_val:ComplexScalarInput]"
+func cmd_compare_property(slots: Dictionary, chosen_slot: int, property_name: String, comparison: String, num_val: Dictionary) -> bool:
 	var selected = slots[chosen_slot]
+	var compare_to_val: float = resolve_complex_scalar(num_val, slots)
 	if Commands.slot_is_entity(chosen_slot) and selected:
 		var prop: Property = EntityManager.get_entity_property(selected, property_name)
 		if prop:
@@ -303,9 +396,9 @@ func cmd_compare_property(slots: Dictionary, chosen_slot: int, property_name: St
 				number_result = float(prop.resolve(selected, slots[Slot.RED], selected.tile_position))
 			else:
 				number_result = float(prop.get_value())
-			return Utility.check_comparison(number_result, float(value), comparison)
+			return Utility.check_comparison(number_result, compare_to_val, comparison)
 	elif Commands.slot_is_positions(chosen_slot) and selected:
-		return MapManager.compare_multiple_pos_prop_value(selected, slots[Slot.RED], property_name, comparison, float(value))
+		return MapManager.compare_multiple_pos_prop_value(selected, slots[Slot.RED], property_name, comparison, compare_to_val)
 	return false
 
 func desc_exists() -> String:
@@ -319,10 +412,10 @@ func cmd_exists(slots: Dictionary, chosen_slot: int) -> bool:
 	return false
 
 func desc_override_move_speed() -> String:
-	return "entity|Override the entity's move speed for the current movement to [speed:ValueInput]"
+	return "entity|Override the entity's move speed for the current movement to [speed:ComplexScalarInput]"
 func cmd_override_move_speed(slots: Dictionary, chosen_slot: int, speed: Variant) -> void:
 	if Commands.slot_is_entity(chosen_slot) and slots[chosen_slot]:
-		slots[chosen_slot].set_move_speed_override(float(speed))
+		slots[chosen_slot].set_move_speed_override(resolve_complex_scalar(speed, slots))
 
 func desc_trigger_custom_event() -> String:
 	return "entity,pos|Trigger the [event_name:PropertyInput] custom event for the entity/tiles"
@@ -354,3 +447,25 @@ func cmd_is_intended_move_direction(slots: Dictionary, chosen_slot: int, complex
 		return false
 	return intended_move_facing == resolve_complex_direction(complex_dir, slots)
 	
+func desc_show_mini_text_at() -> String:
+	return "pos,entity|Temporarily show the text [text_slot:SlotInput:string,number] [is_above:BoolChoice:true,above,at] this position/entity"
+func cmd_show_mini_text_at(slots: Dictionary, chosen_slot: int, text_slot: int, is_above: bool) -> void:
+	if not Commands.slot_is_positions(chosen_slot) and not Commands.slot_is_entity(chosen_slot):
+		push_error("Invalid slot to show mini text at: %s" % chosen_slot)
+		return
+
+	var mini_message: String = get_value_slot_as_string(slots, text_slot)
+	if Commands.slot_is_entity(chosen_slot):
+		if slots[chosen_slot]:
+			var message_pos: Vector2 = EntityManager.get_pos_above(slots[chosen_slot]) if is_above else slots[chosen_slot].get_center_position()
+			EffectsHelper.spawn_mini_text_at(mini_message, message_pos)
+		else:
+			push_error("Entity slot %s is empty" % chosen_slot)
+	elif Commands.slot_is_positions(chosen_slot):
+		if not slots[chosen_slot]:
+			push_error("Positions slot %s is empty" % chosen_slot)
+		for tile_pos in slots[chosen_slot]:
+			var message_pos: Vector2 = MapManager.get_world_pos_above(tile_pos) if is_above else MapManager.tile_to_world_position_centered(tile_pos)
+			EffectsHelper.spawn_mini_text_at(mini_message, message_pos)
+	else:
+		push_error("Invalid slot to show mini text at: %s" % chosen_slot)

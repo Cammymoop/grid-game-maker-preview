@@ -453,7 +453,6 @@ func _on_vis_changed():
 
 func update_sprite_style_picker() -> void:
 	var is_simple: bool = the_definition.get("sprite_config", {}).is_empty()
-	prints("is_simple: %s" % is_simple)
 	var set_selected_to: String = SPRITE_SIMPLE if is_simple else SPRITE_FANCY
 	var option_text: String = sprite_style_options.find_key(set_selected_to)
 	

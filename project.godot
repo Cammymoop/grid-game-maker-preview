@@ -34,6 +34,7 @@ OldConditionalConverter="*res://src/Singletons/old_conditional_converter.gd"
 UiUtil="*uid://bk2amu7jaulpw"
 Autocomplete="*uid://ucb851a8s6xk"
 GlobalToaster="*uid://dyjhlku4kgqkm"
+EffectsHelper="*uid://kxi1ld2dix41"
 
 [debug]
 

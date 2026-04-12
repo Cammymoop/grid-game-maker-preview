@@ -186,6 +186,8 @@ func create_and_add_nodes_for_layer(layer_info: Dictionary, _layer_index: int) -
                     set_digit_display_number(prop_val, digit_display)
                 else:
                     set_digit_display_number(layer_info.get("preview_number", 0), digit_display)
+
+    main_layer_node.modulate = Utility.get_dict_color(layer_info, "mod_color", Color.WHITE)
     
     add_child(main_layer_node)
     var layer_scale: Vector2 = Utility.get_vector2_from_arr(layer_info.get("scale", [1,1]))

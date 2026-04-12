@@ -27,6 +27,7 @@ y_input = NodePath("HBoxContainer/YInput")
 
 [node name="HBoxContainer" type="HBoxContainer" parent="." unique_id=96841244]
 layout_mode = 2
+theme_override_constants/separation = 2
 
 [node name="Label" type="Label" parent="HBoxContainer" unique_id=2095592117]
 layout_mode = 2

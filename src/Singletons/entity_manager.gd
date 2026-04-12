@@ -925,6 +925,22 @@ func get_entity_prop_with_default(entity, property_name, default_value) -> Varia
     else:
         return prop.get_value()
 
+func get_entity_prop_text_value(entity: BaseEntity, property_name: String, default_value: String = "") -> String:
+    if not entity_has_property(entity, property_name):
+        return default_value
+    var prop: Property = get_entity_property(entity, property_name)
+    var prop_value: Variant = prop.get_or_resolve(entity, null, entity.tile_position)
+    if typeof(prop_value) == TYPE_STRING and prop_value == "":
+        return default_value
+    return Utility.property_value_nonempty_string(prop_value, default_value)
+
+func get_entity_prop_scalar_value(entity: BaseEntity, property_name: String, default_value: float = 0.0) -> float:
+    if not entity_has_property(entity, property_name):
+        return default_value
+    var prop: Property = get_entity_property(entity, property_name)
+    var prop_value: Variant = prop.get_or_resolve(entity, null, entity.tile_position)
+    return Utility.property_value_scalar(prop_value, default_value)
+
 func get_entity_prop_is_truthy(entity: BaseEntity, property_name: String, default_val: bool = false) -> bool:
     if not entity_has_property(entity, property_name):
         return default_val
@@ -1014,3 +1030,7 @@ func is_valid_entity_in_world(entity: Object) -> bool:
     if not is_valid_entity(entity):
         return false
     return entity in entity_list
+
+func get_pos_above(entity: BaseEntity) -> Vector2i:
+    var entity_pos: = entity.get_center_position()
+    return entity_pos + Vector2.UP * (entity.get_half_size().y + MapManager.tile_width * 0.25)

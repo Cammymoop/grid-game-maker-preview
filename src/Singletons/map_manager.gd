@@ -497,6 +497,27 @@ func get_tile_property_at(tile_position: Vector2i, property_name: String) -> Pro
             return tprop
     return null
 
+func get_tile_prop_text_value_at(tile_positions: Array, property_name: String, default_value: String = "") -> String:
+    var prop_info: Dictionary = get_first_located_tile_property(tile_positions, property_name)
+    if not prop_info:
+        return default_value
+    var prop_value: Variant = prop_info["prop"].get_or_resolve(null, null, prop_info["pos"])
+    return Utility.property_value_nonempty_string(prop_value, default_value)
+
+func get_tile_prop_scalar_value_at(tile_positions: Array, property_name: String, default_value: float = 0.0) -> float:
+    var prop_info: Dictionary = get_first_located_tile_property(tile_positions, property_name)
+    if not prop_info:
+        return default_value
+    var prop_value: Variant = prop_info["prop"].get_or_resolve(null, null, prop_info["pos"])
+    return Utility.property_value_scalar(prop_value, default_value)
+
+func get_first_located_tile_property(tile_positions: Array, property_name: String) -> Dictionary:
+    for pos in tile_positions:
+        var prop: Property = get_tile_property_at(pos, property_name)
+        if prop:
+            return {"pos": pos, "prop": prop}
+    return {}
+
 func get_tile_property_for_index_at(tile_position: Vector2i, property_name: String, for_index: int) -> Property:
     var pos_prop: = get_positioned_property_at(tile_position, for_index)
     if pos_prop and pos_prop["local_properties"].has(property_name):
@@ -807,3 +828,6 @@ func switch_tiles_preview_mode(enable_preview: bool) -> void:
             for at_pos in tile_index_positions:
                 var alt_id: = tilemap_layer.get_cell_alternative_tile(at_pos)
                 tilemap_layer.set_cell(at_pos, tile_index, cur_atlas_coords, alt_id)
+
+func get_world_pos_above(tile_position: Vector2i) -> Vector2:
+    return tile_to_world_position_centered(tile_position) + (Vector2.UP * (tile_width * 0.75))

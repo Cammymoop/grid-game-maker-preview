@@ -57,7 +57,6 @@ func arrange_sprites() -> void:
     for i in range(num_sprites):
         var digit_sprite: = get_child(i) as DigitSprite
         var x_pos: int = -floori(total_width / 2.0) + i * (digit_width + digit_separation) + floori(digit_width / 2.)
-        prints("digit %d x_pos: %d" % [i, x_pos])
         digit_sprite.position = Vector2(x_pos, 0)
 
 

@@ -35,8 +35,8 @@ const LayerModeOptions: Dictionary[String, String] = {
 @export var digits_settings: Control
 @export var digits_pad_zeros_toggle: CheckButton
 @export var digits_max_digits_input: Range
-@export var digits_settings_2: Control
 @export var digits_property_input: LineEdit
+@export var digits_color_picker: ColorPickerButton
 
 @export var show_reorder_buttons: bool = true
 @export var enable_context_menu: bool = true
@@ -68,14 +68,17 @@ func _ready() -> void:
     
     rotates_toggle.toggled.connect(on_rotates_toggled)
     rotates_toggle.set_pressed_no_signal(layer_info.get("rotates", true))
-    if layer_info and layer_info.has("mode"):
-        refresh_ui()
     
     digits_pad_zeros_toggle.toggled.connect(on_digits_pad_zeros_toggled)
     digits_max_digits_input.value_changed.connect(on_digits_max_digits_changed)
     digits_property_input.text_changed.connect(on_digits_property_changed)
     
+    digits_color_picker.color_changed.connect(on_digits_color_changed)
+    
     layer_image_button.pressed.connect(on_layer_image_button_pressed)
+
+    if layer_info and layer_info.has("mode"):
+        refresh_ui()
 
 func _req_remove() -> void:
     request_remove.emit(self)
@@ -119,6 +122,7 @@ func on_mode_selected(_index: int) -> void:
         layer_info['pad_zeros'] = digits_pad_zeros_toggle.button_pressed
         layer_info['max_digits'] = int(digits_max_digits_input.value)
         layer_info['property'] = digits_property_input.text
+        layer_info['mod_color'] = Utility.color_string(digits_color_picker.color)
     else:
         layer_info.erase('pad_zeros')
         layer_info.erase('max_digits')
@@ -142,20 +146,20 @@ func on_offset_changed(new_offset: Vector2i) -> void:
 
 
 func refresh_ui() -> void:
+    offset_input.set_value(get_layer_offset())
+
     set_mode_picker_value(layer_info['mode'])
     if layer_info['mode'] == MODE_EMPTY:
         layer_image_button.disabled = true
     elif layer_info['mode'] == MODE_DIGITS:
-        digits_pad_zeros_toggle.set_pressed_no_signal(layer_info['pad_zeros'])
-        digits_max_digits_input.set_value_no_signal(layer_info['max_digits'])
+        digits_pad_zeros_toggle.set_pressed_no_signal(layer_info.get("pad_zeros", true))
+        digits_max_digits_input.set_value_no_signal(layer_info.get("max_digits", 1))
         
         digits_property_input.set_value(layer_info.get("property", ""))
+        digits_color_picker.color = Utility.get_dict_color(layer_info, "mod_color", Color.WHITE)
     
     digits_settings.visible = layer_info['mode'] == MODE_DIGITS
-    digits_settings_2.visible = layer_info['mode'] == MODE_DIGITS
     layer_image_button.visible = layer_info['mode'] != MODE_DIGITS
-
-    offset_input.set_value(get_layer_offset())
     update_image_button_texture()
 
 func update_image_button_texture() -> void:
@@ -249,4 +253,10 @@ func on_digits_property_changed(prop_name: String) -> void:
     if not layer_info["mode"] == MODE_DIGITS:
         return
     layer_info['property'] = prop_name
+    changed.emit()
+
+func on_digits_color_changed(new_color: Color) -> void:
+    if not layer_info["mode"] == MODE_DIGITS:
+        return
+    layer_info['mod_color'] = Utility.color_string(new_color)
     changed.emit()

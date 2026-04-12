@@ -446,3 +446,53 @@ func short_basis(vec: Vector2) -> Vector2:
 	var dir_vec: = vec.sign()
 	dir_vec[vec.abs().max_axis_index()] = 0
 	return dir_vec
+
+func get_dict_color(from_dict: Dictionary, key: String, default_color: Color) -> Color:
+	if not key in from_dict:
+		return default_color
+	var val: String = from_dict.get(key, "")
+	if not val.is_valid_html_color():
+		return default_color
+	return Color.from_string(val, default_color)
+
+func color_string(of_color: Color, force_alpha: bool = true) -> String:
+	return '#' + of_color.to_html(force_alpha or (of_color.a < 1))
+
+func color_string_no_alpha(of_color: Color) -> String:
+	return '#' + of_color.to_html(false)
+
+func is_float_integer(num: float) -> bool:
+	return is_equal_approx(num, roundf(num))
+
+func property_value_to_string(prop_value: Variant) -> String:
+	if typeof(prop_value) == TYPE_STRING:
+		return prop_value
+	elif typeof(prop_value) == TYPE_FLOAT:
+		if is_float_integer(prop_value):
+			return str(roundi(prop_value))
+		else:
+			return str(prop_value)
+	elif typeof(prop_value) in [TYPE_INT, TYPE_BOOL]:
+		return str(prop_value)
+	else:
+		push_error("Tried to convert unexpectedly typed (%s) property value to string defualt str(): %s" % [type_string(typeof(prop_value)), prop_value])
+		return ""
+
+func property_value_nonempty_string(prop_value: Variant, default_value: String) -> String:
+	var str_value: String = property_value_to_string(prop_value)
+	if str_value.strip_edges() == "":
+		return default_value
+	return str_value
+
+func property_value_scalar(prop_value: Variant, default_value: float) -> float:
+	if typeof(prop_value) in [TYPE_INT, TYPE_FLOAT]:
+		return float(prop_value)
+	elif typeof(prop_value) == TYPE_STRING:
+		if not prop_value or not prop_value.is_valid_float():
+			return default_value
+		return float(prop_value)
+	elif typeof(prop_value) == TYPE_BOOL:
+		return 1.0 if prop_value else 0.0
+	else:
+		push_error("Tried to convert unexpectedly typed (%s) property value to scalar: %s" % [type_string(typeof(prop_value)), prop_value])
+		return default_value

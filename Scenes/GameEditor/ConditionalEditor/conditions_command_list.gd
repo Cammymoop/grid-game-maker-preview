@@ -57,6 +57,13 @@ func _process(_delta: float) -> void:
     if visible and _dirty:
         rebuild_grid()
 
+func reset_combiner_tree() -> void:
+    combiner_tree = {
+        "first_command_index": 0,
+        "function": "and",
+        "children": [],
+    }
+
 func set_command_list(new_list_items: Array) -> void:
     clear_commands()
     var just_commands: Array[CommandListItem] = []
@@ -484,6 +491,7 @@ func clear_commands() -> void:
     for command_item in command_list_items:
         command_item.queue_free()
     command_list_items = []
+    reset_combiner_tree()
     _dirty = true
 
 func clear_children() -> void:

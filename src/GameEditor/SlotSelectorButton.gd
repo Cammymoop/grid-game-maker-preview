@@ -3,10 +3,17 @@ extends CenterContainer
 signal slot_changed(new_slot_id)
 
 @export var show_any_option: bool = false
+@export var show_number_option: bool = false
+@export var args_enabled: bool = false
 @export var default_slot_id: int = Commands.Slot.RED
+
+@export var show_categories: Array[String] = ["all"]
 
 @onready var picker = find_child("PopupPicker")
 @onready var cur_display = find_child("CurrentSlotDisplay")
+
+const ANY_SLOT: int = -2
+const NUMBER_VALUE: int = -3
 
 var slot_textures: = {
     Commands.Slot.RED:    preload("res://assets/img/button_icons/slot_icons/red_diamond.png"),
@@ -34,7 +41,8 @@ var slot_textures: = {
     Commands.Slot.DARK_GREEN:  preload("res://assets/img/button_icons/slot_icons/dark_green_blob.png"),
     Commands.Slot.DARK_ORANGE:   preload("res://assets/img/button_icons/slot_icons/dark_orange_blob.png"), 
     
-    -2: preload("res://assets/img/button_icons/slot_icons/any.png"),
+    ANY_SLOT: preload("res://assets/img/button_icons/slot_icons/any.png"),
+    NUMBER_VALUE: preload("res://assets/img/button_icons/slot_icons/num.png"),
 }
 
 var slot_ids: = {
@@ -63,7 +71,8 @@ var slot_ids: = {
     dark_green= Commands.Slot.DARK_GREEN,
     dark_orange= Commands.Slot.DARK_ORANGE,
     
-    any= -2,
+    any= ANY_SLOT,
+    num= NUMBER_VALUE,
 }
 
 var disabled_slots: Array = []
@@ -71,8 +80,6 @@ var disabled_slots: Array = []
 var current_slot_id: int = Commands.Slot.RED
 
 var picker_open: = false
-
-var show_categories: = ["all"]
 
 var PICKER_SCREEN_MARGIN_H = 10
 var PICKER_SCREEN_MARGIN_V = 10
@@ -82,6 +89,7 @@ func _ready():
     if default_slot_id != current_slot_id and default_slot_id in slot_textures.keys():
         current_slot_id = default_slot_id
         update_texture()
+    set_valid_slot_categories(show_categories)
     update_disabled_slots()
 
 func update_disabled_slots() -> void:
@@ -116,53 +124,79 @@ func get_slot_id_from_button_texture(button_node: ButtonContainer) -> int:
     return slot_textures.find_key(texture_rect.texture)
 
 func set_valid_slot_categories(categories: Array) -> void:
-    show_categories = categories
+    show_categories.assign(categories)
     
-    find_child("AnyColumn").visible = show_any_option
-    find_child("AnySeparator").visible = show_any_option
+    var has_special_column: bool = show_any_option or show_number_option
+    var special_column: Node = find_child("SpecialColumn")
     
-    var all = "all" in show_categories
-    
-    find_child("EntitySlots").visible = all or "entity" in show_categories
-    find_child("EntitySeparator").visible = all or "entity" in show_categories
+    special_column.visible = has_special_column
+    find_child("SpecialSeparator").visible = has_special_column
 
-    find_child("TilePosSlots").visible = all or "pos" in show_categories
-    find_child("TilePosSeparator").visible = all or "pos" in show_categories
-    
-    var value = all or "value" in show_categories
-    var number = all or "number" in show_categories
-    
-    var int_category = value or number or "int" in show_categories
-    var float_category = value or number or "float" in show_categories
-    var string_category = value or "string" in show_categories
-    
-    find_child("IntSlots").visible = int_category
-    find_child("IntSeparator").visible = int_category
-    find_child("FloatSlots").visible = float_category
-    find_child("FloatSeparator").visible = float_category
-    find_child("StringSlots").visible = string_category
-    find_child("StringSeparator").visible = string_category
-    
-    var arg_category = all or value or "argument" in show_categories
-    find_child("ArgSlots").visible = all or value or "argument" in show_categories
-    
-    if not arg_category:
-        for category in ["String", "Float", "Int", "TilePos", "Entity", "Any"]:
-            var separator = find_child(category + "Separator")
-            if separator.visible:
-                separator.visible = false
-                break
-    
+    special_column.find_child("PickAny").visible = show_any_option
+    special_column.find_child("PickNumber").visible = show_number_option
+
     if len(show_categories) == 0:
         $ButtonContainer.set_disabled(true)
         $ButtonContainer/CenterContainer.visible = false
+        return
     else:
         $ButtonContainer.set_disabled(false)
         $ButtonContainer/CenterContainer.visible = true
+    
+    
+    var all = "all" in show_categories
+    var cat_visible: Dictionary = {
+        "Entity": all,
+        "TilePos": all,
+        "Int": all,
+        "Float": all,
+        "String": all,
+        "Arg": all and args_enabled,
+    }
+    
+    if "entity" in show_categories:
+        cat_visible["Entity"] = true
+    if "pos" in show_categories:
+        cat_visible["TilePos"] = true
+
+    if "string" in show_categories:
+        cat_visible["String"] = true
+        if args_enabled:
+            cat_visible["Arg"] = true
+
+    if "float" in show_categories:
+        cat_visible["Float"] = true
+    if "int" in show_categories:
+        cat_visible["Int"] = true
+
+    var or_in_show: = func(acc: bool, cat: String) -> bool: return acc or cat in show_categories
+    var numerical: bool = ["float", "int", "number"].reduce(or_in_show, false)
+
+    if numerical:
+        cat_visible["Float"] = true
+        cat_visible["Int"] = true
+        if args_enabled:
+            cat_visible["Arg"] = true
+    if "argument" in show_categories and args_enabled:
+        cat_visible["Arg"] = true
+    
+    var last_category: String = ""
+    for category in cat_visible.keys():
+        if cat_visible[category]:
+            last_category = category
+
+    for category in cat_visible.keys():
+        if category != "Arg":
+            find_child(category + "Separator").visible = false if category == last_category else cat_visible[category] 
+        find_child(category + "Slots").visible = cat_visible[category]
+    
 
 func get_first_valid_slot_id() -> int:
     if show_any_option:
-        return -2
+        return ANY_SLOT
+    elif show_number_option:
+        return NUMBER_VALUE
+
     for category_name in ["Entity", "TilePos", "Int", "Float", "String", "Arg"]:
         var slot_list: Node = find_child(category_name + "Slots")
         if not slot_list.visible or slot_list.get_child_count() == 0:
