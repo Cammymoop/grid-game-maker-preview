@@ -45,8 +45,8 @@ func _ready() -> void:
 	if not edit_mode:
 		switch_edit_mode(false, false)
 	
-	var pause_menu = Utility.get_pause_menu()
-	pause_menu.gameplay_paused.connect(save_current_level_state)
+	#var pause_menu = Utility.get_pause_menu()
+	#pause_menu.gameplay_paused.connect(save_current_level_state)
 
 func save_current_level_state() -> void:
 	if not edit_mode:
@@ -221,11 +221,7 @@ func _process(delta):
 		#call_deferred("load_random_level")
 		GameManager.load_checkpoint()
 	if Input.is_action_just_pressed("editor_new_map"):
-		#get_tree().reload_current_scene()
-		EntityManager.clear_entity_list()
-		MapManager.clear_layers()
-		MapManager.create_plain_layer()
-		EntityManager.create_defaults()
+		GameManager.new_empty_level()
 	
 	if not edit_mode:
 		return
@@ -346,12 +342,17 @@ func _process(delta):
 			place_mode("delete")
 
 func _auto_save(level_state: Dictionary) -> void:
-	var autosave_name: = "editor autosave"
-	var level_data = {
-		"name": autosave_name,
+	var autosave_filename: = "editor_autosave"
+	var level_name: = GameManager.loaded_level_name
+	if not level_name.strip_edges():
+		level_name = "LEVEL"
+	prints("autosaving level: ", level_name)
+
+	var level_data: = {
+		"name": level_name,
 		"state": level_state,
 	}
-	FilesManager.save_level(GameManager.cur_game_name, level_data)
+	FilesManager.save_level_to_name(GameManager.cur_game_name, level_data, autosave_filename)
 
 func get_current_facing() -> int:
 	if placing == "entity":

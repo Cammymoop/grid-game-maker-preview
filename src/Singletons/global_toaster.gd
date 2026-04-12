@@ -10,6 +10,9 @@ var base_control: Control
 
 var message_queue: Array[String] = []
 
+func _ready() -> void:
+    process_mode = Node.PROCESS_MODE_ALWAYS
+
 func show_toast_message(message: String) -> void:
     if message_queue and message_queue.front() == message:
         return

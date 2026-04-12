@@ -259,9 +259,6 @@ func update_movement_mode():
     
     #print_debug("MOVEMENT MODE is now " + GameManager.describe_movement_mode(movement_mode))
 
-func clear():
-    bond_groups = []
-
 func fix_string_keys():
     var old_definition = entity_defs
     entity_defs = {}
@@ -299,6 +296,12 @@ func on_entity_added(entity: BaseEntity) -> void:
 func on_entity_list_changed() -> void:
     entity_list_updated.emit()
 
+func clear():
+    clear_entity_list()
+    turn_requested = false
+    update_movement_mode()
+    process_phase = 0
+
 func clear_entity_list():
     disconnect_all_custom_signals()
     for entity in entity_list:
@@ -309,7 +312,10 @@ func clear_entity_list():
         entity.queue_free()
     entity_list = []
     entity_instance_map = {}
-    clear()
+    clear_bond_groups()
+
+func clear_bond_groups():
+    bond_groups = []
 
 # In discrete mode we wont update entities at all until a move is requested
 func request_move(entity: BaseEntity, request_frames: int = -1) -> void:
@@ -534,7 +540,7 @@ func serialize() -> Dictionary:
     return {"entity_list": serialized_entities, "bond_groups": bond_groups.duplicate_deep()}
 
 func deserialize(data: Dictionary) -> void:
-    clear_entity_list()
+    clear()
     bond_groups = data["bond_groups"].duplicate_deep()
     for entity_data in data["entity_list"]:
         restore_entity(entity_data)

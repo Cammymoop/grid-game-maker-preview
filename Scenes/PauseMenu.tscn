@@ -170,7 +170,7 @@ theme_override_font_sizes/font_size = 24
 text = "Paused"
 horizontal_alignment = 1
 
-[node name="ResumeButton2" type="Button" parent="CenterContainer/LevelSettingsPausePanel/MarginContainer/VBoxContainer" unique_id=1432632766]
+[node name="BackButton" type="Button" parent="CenterContainer/LevelSettingsPausePanel/MarginContainer/VBoxContainer" unique_id=1432632766]
 layout_mode = 2
 size_flags_horizontal = 4
 theme_override_fonts/font = ExtResource("2")
@@ -225,5 +225,5 @@ text = "Quit to Main Menu"
 [connection signal="pressed" from="CenterContainer/MainPausePanel/MarginContainer/VBoxContainer/HBoxContainer/NewLevelButton" to="." method="_on_new_level_button_pressed"]
 [connection signal="pressed" from="CenterContainer/MainPausePanel/MarginContainer/VBoxContainer/HBoxContainer/LoadLevelButton" to="." method="_on_LoadLevelButton_pressed"]
 [connection signal="pressed" from="CenterContainer/MainPausePanel/MarginContainer/VBoxContainer/QuitToMenu" to="." method="_on_QuitToMenu_pressed"]
-[connection signal="pressed" from="CenterContainer/LevelSettingsPausePanel/MarginContainer/VBoxContainer/ResumeButton2" to="." method="_on_resume_button_pressed"]
+[connection signal="pressed" from="CenterContainer/LevelSettingsPausePanel/MarginContainer/VBoxContainer/BackButton" to="." method="_on_back_button_pressed"]
 [connection signal="pressed" from="CenterContainer/LevelSettingsPausePanel/MarginContainer/VBoxContainer/QuitToMenu2" to="." method="_on_QuitToMenu_pressed"]

@@ -22,6 +22,10 @@ func _ready() -> void:
     await get_tree().process_frame
     update_scroll_container_size()
 
+func _shortcut_input(event: InputEvent) -> void:
+    if Input.is_action_just_pressed_by_event(&"escape", event):
+        close_sprite_editor()
+
 func setup(new_entity_def: Dictionary) -> void:
     entity_def = new_entity_def.duplicate_deep()
     sprite_config = new_entity_def.get("sprite_config", {})

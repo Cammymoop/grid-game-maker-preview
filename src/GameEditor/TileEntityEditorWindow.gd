@@ -63,6 +63,10 @@ func _ready():
 	
 	close_requested.connect(close_window)
 
+func _shortcut_input(event: InputEvent) -> void:
+	if Input.is_action_just_pressed_by_event(&"escape", event):
+		close_window()
+
 func set_controller(list_index) -> void:
 	if tile_entity_mode != "entity":
 		return

@@ -211,8 +211,6 @@ func load_serialized_play_state(serialized_state: Dictionary, as_level_load: boo
 	
 	await get_tree().process_frame
 	#await get_tree().process_frame
-	EntityManager.clear()
-	MapManager.clear_layers()
 	MapManager.deserialize(serialized_state['map'])
 	EntityManager.deserialize(serialized_state['entities'])
 	
@@ -285,14 +283,32 @@ func clear_quicksave() -> void:
 	quicksave_state = {}
 
 # hack
-func update_saved_level_metadata(new_metadata: Dictionary) -> void:
-	if not loaded_level_name or not editor_save:
+func update_edited_level_metadata_value(meta_key: String, meta_value: Variant) -> void:
+	if not editor_save:
 		return
 	
-	editor_save["map"]["metadata"] = new_metadata.duplicate_deep()
-	if checkpoint_save:
-		checkpoint_save["map"]["metadata"] = new_metadata.duplicate_deep()
+	if typeof(meta_value) in [TYPE_ARRAY, TYPE_DICTIONARY]:
+		meta_value = meta_value.duplicate_deep()
 
+	editor_save["map"]["metadata"][meta_key] = meta_value
+	if checkpoint_save:
+		checkpoint_save["map"]["metadata"][meta_key] = meta_value
+
+func erase_edited_level_metadata_value(meta_key: String) -> void:
+	if not editor_save:
+		return
+	
+	editor_save["map"]["metadata"].erase(meta_key)
+	if checkpoint_save:
+		checkpoint_save["map"]["metadata"].erase(meta_key)
+
+
+func has_editor_autosave() -> bool:
+	return FilesManager.level_exists(cur_game_name, "editor_autosave")
+
+func load_editor_autosave() -> void:
+	var autosave_data: = FilesManager.get_level_data(cur_game_name, "editor_autosave")
+	load_level_data(autosave_data)
 
 func load_level_data(level_data):
 	loaded_level_name = level_data["name"]
@@ -304,23 +320,30 @@ func try_load_next_level():
 	if not MapManager.has_next_level():
 		return
 	
-	var next_level_name = MapManager.get_metadata_value("next_level")
-	var next_level_data = FilesManager.get_level_data(cur_game_name, next_level_name)
+	var next_level_name: String = MapManager.get_metadata_value("next_level")
+	var next_level_data: = FilesManager.get_level_data(cur_game_name, next_level_name)
 	load_level_data(next_level_data)
 
-func level_start():
-	EntityManager.clear_entity_list()
+func try_load_level(level_name: String):
+	if not FilesManager.level_exists(cur_game_name, level_name):
+		return
+	var the_level_data: = FilesManager.get_level_data(cur_game_name, level_name)
+	load_level_data(the_level_data)
+
+func new_empty_level():
+	EntityManager.clear()
+	MapManager.clear()
 	MapManager.create_plain_layer()
 	EntityManager.create_defaults()
 	
-	save_checkpoint()
+	save_edited()
 
 func load_random_level():
-	EntityManager.clear_entity_list()
+	EntityManager.clear()
 	MapManager.create_random_layer()
 	EntityManager.create_randoms()
 	
-	save_checkpoint()
+	save_edited()
 
 func change_scene(new_scene: String):
 	if cur_scene != "Loading":
@@ -334,8 +357,8 @@ func change_scene(new_scene: String):
 		transition_left = true
 		if editor_save:
 			loaded_level = editor_save
-		EntityManager.clear_entity_list()
-		MapManager.clear_layers()
+		EntityManager.clear()
+		MapManager.clear()
 		game_camera = null
 		_unpause()
 	elif cur_scene == "GameEditor":
@@ -395,8 +418,19 @@ func post_scene_change() -> void:
 		activate_gameplay_camera()
 		if loaded_level:
 			load_serialized_play_state(loaded_level)
+		elif has_editor_autosave():
+			if FilesManager.get_editor_autosave_is_newer(cur_game_name):
+				GlobalToaster.show_toast_message("Loading autosave")
+				load_editor_autosave()
+			else:
+				var autosave_level_name: String = FilesManager.get_editor_autosave_level_name(cur_game_name)
+				if autosave_level_name:
+					load_level_data(FilesManager.get_level_data(cur_game_name, autosave_level_name))
+				else:
+					GlobalToaster.show_toast_message("Loading autosave")
+					load_editor_autosave()
 		else:
-			level_start()
+			new_empty_level()
 
 func update_game_viewport() -> void:
 	var vp = Utility.get_world().get_viewport()
@@ -453,22 +487,25 @@ func _process(_delta):
 	if transitioning:
 		scene_transisiton_update()
 	
-	if Input.is_action_just_pressed("escape"):
+	if cur_scene == "Play":
+		if Input.is_action_just_pressed(&"press_quicksave"):
+			save_quicksave()
+			GlobalToaster.show_toast_message("Quicksaved")
+		elif Input.is_action_just_pressed(&"press_quickload"):
+			if quicksave_state:
+				load_quicksave()
+				GlobalToaster.show_toast_message("Loaded quicksave")
+			else:
+				GlobalToaster.show_toast_message("No Quicksave")
+
+func _shortcut_input(event: InputEvent) -> void:
+	if Input.is_action_just_pressed_by_event(&"escape", event):
 		if cur_scene == "GameEditor":
 			change_scene("Menu")
 		elif cur_scene == "Menu":
 			get_tree().quit()
 		elif cur_scene == "Play":
 			toggle_pause_menu()
-	elif Input.is_action_just_pressed(&"press_quicksave"):
-		save_quicksave()
-		GlobalToaster.show_toast_message("Quicksaved")
-	elif Input.is_action_just_pressed(&"press_quickload"):
-		if quicksave_state:
-			load_quicksave()
-			GlobalToaster.show_toast_message("Loaded quicksave")
-		else:
-			GlobalToaster.show_toast_message("No Quicksave")
 
 func get_all_used_prop_names() -> Array[String]:
 	var prop_names: Array[String] = []

@@ -113,6 +113,10 @@ func fix_string_keys():
             if "tex_index" in tile_defs[intk]["preview_variant"]:
                 tile_defs[intk]["preview_variant"]["tex_index"] = int(tile_defs[intk]["preview_variant"]["tex_index"])
 
+func clear():
+    clear_layers()
+    map_metadata = {}
+
 func clear_layers():
     for l in layers:
         if is_instance_valid(l):
@@ -219,7 +223,7 @@ func serialize() -> Dictionary:
     return serialized_stuff
 
 func deserialize(data: Dictionary) -> void:
-    clear_layers()
+    clear()
     
     for layer_data in data["layers"]:
         var new_layer = create_empty_layer()
@@ -311,9 +315,16 @@ func get_level_title() -> String:
         return GameManager.loaded_level_name
     return title
 
-func set_metadata_value(key: String, value: Variant) -> void:
+func set_metadata_value(key: String, value: Variant, update_edited_metadata: bool = true) -> void:
     map_metadata[key] = value
-    GameManager.update_saved_level_metadata(map_metadata)
+    if update_edited_metadata:
+        GameManager.update_edited_level_metadata_value(key, value)
+
+func erase_metadata_value(key: String, update_edited_metadata: bool = true) -> void:
+    map_metadata.erase(key)
+    if update_edited_metadata:
+        GameManager.erase_edited_level_metadata_value(key, null)
+
 func has_metadata_value(key: String) -> bool:
     return map_metadata.has(key)
 func get_metadata_value(key: String) -> Variant:

@@ -447,19 +447,24 @@ func load_file_as_texture(file_path: String) -> Texture:
 	var loaded_img: = Image.load_from_file(file_path)
 	return ImageTexture.create_from_image(loaded_img)
 
-func _level_filename(level_name: String) -> String:
-	return Utility.sanitize_for_filename(level_name, true, true) + ".json"
+func sanitize_level_filename(level_name: String) -> String:
+	return Utility.sanitize_for_filename(level_name, true, true)
 
-func save_level(game_name: String, level_data: Dictionary) -> bool:
+func _level_filename(level_name: String) -> String:
+	return sanitize_level_filename(level_name) + ".json"
+
+func save_level_to_name(game_name: String, level_data: Dictionary, as_filename: String) -> bool:
 	if not game_exists(game_name):
 		push_error("Game %s does not exist" % [game_name])
 		return false
-	if not level_data.get("name", ""):
+	serialize_and_save_data_to_json(level_data, get_game_levels_dir(game_name), _level_filename(as_filename))
+	return true
+
+func save_level(game_name: String, level_data: Dictionary) -> bool:
+	if not level_data.get("name", "").strip_edges():
 		push_error("Level data does not contain a name" % [game_name])
 		return false
-	var level_filename: = _level_filename(level_data["name"])
-	serialize_and_save_data_to_json(level_data, get_game_levels_dir(game_name), level_filename)
-	return true
+	return save_level_to_name(game_name, level_data, level_data["name"])
 
 func level_exists(game_name: String, level_name: String) -> bool:
 	if not level_name or not game_exists(game_name):
@@ -483,3 +488,28 @@ func get_level_list(game_name: String) -> Array:
 	for level_filename in iterate_directory_flat_filelist(get_game_levels_dir(game_name), "json"):
 		level_names.append(level_filename.get_basename())
 	return level_names
+
+func get_editor_autosave_level_name(game_name: String) -> String:
+	var level_list: = get_level_list(game_name)
+	if "editor_autosave" not in level_list:
+		return ""
+	var editor_autosave_level_name: String = get_level_data(game_name, "editor_autosave").get("name", "")
+	if not editor_autosave_level_name or editor_autosave_level_name == "editor_autosave" or editor_autosave_level_name not in level_list:
+		return ""
+	return editor_autosave_level_name
+
+func get_editor_autosave_is_newer(game_name: String) -> bool:
+	var level_list: = get_level_list(game_name)
+	if "editor_autosave" not in level_list:
+		push_error("Editor autosave not found in level list for game %s" % [game_name])
+		return false
+	var editor_autosave_data: = get_level_data(game_name, "editor_autosave")
+	var editor_autosave_level_name: String = editor_autosave_data.get("name", "")
+	if not editor_autosave_level_name or editor_autosave_level_name == "editor_autosave" or editor_autosave_level_name not in level_list:
+		return true
+	
+	var editor_autosave_timestamp: = FileAccess.get_modified_time(get_game_levels_dir(game_name).path_join(_level_filename("editor_autosave")))
+	var autosaved_level_timestamp: = FileAccess.get_modified_time(get_game_levels_dir(game_name).path_join(_level_filename(editor_autosave_level_name)))
+	if editor_autosave_timestamp > autosaved_level_timestamp:
+		return true
+	return false

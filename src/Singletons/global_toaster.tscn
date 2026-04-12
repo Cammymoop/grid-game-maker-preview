@@ -79,6 +79,7 @@ mouse_filter = 2
 [node name="ToastMessageLabel" type="Label" parent="CenterContainer" unique_id=1376014116]
 visible = false
 layout_mode = 2
+theme_override_font_sizes/font_size = 26
 theme_override_styles/normal = ExtResource("2_4a857")
 text = "Message!"
 

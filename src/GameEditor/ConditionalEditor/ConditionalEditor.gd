@@ -63,6 +63,10 @@ func _ready():
     
     popup()
 
+func _shortcut_input(event: InputEvent) -> void:
+    if Input.is_action_just_pressed_by_event(&"escape", event):
+        cancel()
+
 func add_new_command(command_code: int, slot_id: int, destination: String) -> void:
     if use_conditionalv3:
         push_error("adding new v3 command with old method")

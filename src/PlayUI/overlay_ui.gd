@@ -13,7 +13,9 @@ var level_title_is_showing: = false
 var hide_delay_timer: = Timer.new()
 
 func _ready() -> void:
+    process_mode = Node.PROCESS_MODE_ALWAYS
     add_child(hide_delay_timer)
+    hide_delay_timer.process_mode = Node.PROCESS_MODE_PAUSABLE
     var show_level_title_opt: String = GameManager.get_game_setting("show_level_title", "At Level Start").to_lower()
     is_show_level_title = show_level_title_opt != "hide"
     is_keep_level_title_shown = show_level_title_opt == "always"
@@ -29,7 +31,7 @@ func on_level_state_loaded() -> void:
 
 func switch_level_title() -> void:
     var new_title: = MapManager.get_level_title()
-    if not is_show_level_title:
+    if not is_show_level_title or not new_title:
         _set_level_title_to(new_title)
         return
     if level_title_is_showing:

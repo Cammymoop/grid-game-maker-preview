@@ -69,7 +69,7 @@ func _on_SaveLevelButton_pressed():
 	popup.hidden.connect(refresh_level_settings)
 
 func _on_new_level_button_pressed() -> void:
-	GameManager.level_start()
+	GameManager.new_empty_level()
 	close_pause_menu()
 
 func _on_LoadLevelButton_pressed():
@@ -95,9 +95,9 @@ func next_level_picked(index: int) -> void:
 
 func on_level_title_edited(new_title: String) -> void:
 	if new_title == "":
-		MapManager.map_metadata.erase("title")
+		MapManager.erase_metadata_value("title")
 	else:
-		MapManager.map_metadata["title"] = new_title
+		MapManager.set_metadata_value("title", new_title)
 
 func _on_edit_level_settings_button_pressed() -> void:
 	switch_panel("level_settings")
@@ -117,6 +117,8 @@ func refresh_next_level_list() -> void:
 	level_list.push_front("[None]")
 
 	for level in level_list:
+		if level == "editor_autosave":
+			continue
 		next_level_list.add_item(level)
 
 	if MapManager.has_next_level():
@@ -124,3 +126,6 @@ func refresh_next_level_list() -> void:
 		next_level_list.selected = index
 	else:
 		next_level_list.selected = 0
+
+func _on_back_button_pressed() -> void:
+	switch_panel("main")
