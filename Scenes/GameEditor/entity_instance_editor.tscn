@@ -1,0 +1,107 @@
+[gd_scene format=3 uid="uid://4c11q33d8c57"]
+
+[ext_resource type="Texture2D" uid="uid://ceh21i1ehclje" path="res://assets/img/property_list/conditional_icon.png" id="1_f4tn4"]
+[ext_resource type="Texture2D" uid="uid://mq4ujdfvc5v8" path="res://assets/img/property_list/no_icon.png" id="2_b60re"]
+[ext_resource type="Texture2D" uid="uid://cv8l7ymc05wg5" path="res://assets/img/button_icons/plus.png" id="6_57ay7"]
+[ext_resource type="Texture2D" uid="uid://b0qrxa5lu7j65" path="res://assets/img/button_icons/minus.png" id="7_4ieml"]
+
+[sub_resource type="Theme" id="Theme_1fs4v"]
+Label/font_sizes/font_size = 24
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_447cj"]
+content_margin_left = 8.0
+content_margin_top = 8.0
+content_margin_right = 8.0
+content_margin_bottom = 8.0
+bg_color = Color(0.08859397, 0.121477626, 0.16257498, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.334955, 0.31812483, 0.44406027, 1)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+corner_detail = 7
+
+[node name="EntityInstanceEditor" type="PanelContainer" unique_id=1898877842]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = SubResource("Theme_1fs4v")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="." unique_id=520120316]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="PanelContainer" type="PanelContainer" parent="VBoxContainer" unique_id=113858417]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_447cj")
+
+[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer/PanelContainer" unique_id=1106205439]
+layout_mode = 2
+alignment = 1
+
+[node name="Label" type="Label" parent="VBoxContainer/PanelContainer/HBoxContainer" unique_id=1724083426]
+layout_mode = 2
+text = "Edit Entity Instance"
+horizontal_alignment = 1
+
+[node name="VBoxContainer" type="VBoxContainer" parent="VBoxContainer" unique_id=340915200]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="Label" type="Label" parent="VBoxContainer/VBoxContainer" unique_id=96880889]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 0.4
+text = "Properties:"
+horizontal_alignment = 1
+
+[node name="HBoxContainer4" type="HBoxContainer" parent="VBoxContainer/VBoxContainer" unique_id=215106456]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="PropertyList" type="ItemList" parent="VBoxContainer/VBoxContainer/HBoxContainer4" unique_id=1196399889]
+custom_minimum_size = Vector2(140, 100)
+layout_mode = 2
+size_flags_horizontal = 3
+scroll_hint_mode = 1
+item_count = 3
+max_columns = 3
+item_0/icon = ExtResource("1_f4tn4")
+item_1/icon = ExtResource("2_b60re")
+item_2/text = "move_onto"
+
+[node name="VBoxContainer" type="VBoxContainer" parent="VBoxContainer/VBoxContainer/HBoxContainer4" unique_id=1724675279]
+layout_mode = 2
+size_flags_vertical = 4
+
+[node name="AddPropertyButton" type="Button" parent="VBoxContainer/VBoxContainer/HBoxContainer4/VBoxContainer" unique_id=525265645]
+custom_minimum_size = Vector2(0, 50)
+layout_mode = 2
+icon = ExtResource("6_57ay7")
+
+[node name="RemovePropertyButton" type="Button" parent="VBoxContainer/VBoxContainer/HBoxContainer4/VBoxContainer" unique_id=1407681144]
+custom_minimum_size = Vector2(0, 50)
+layout_mode = 2
+icon = ExtResource("7_4ieml")
+
+[node name="HBoxContainer3" type="HBoxContainer" parent="VBoxContainer" unique_id=1716997162]
+visible = false
+layout_mode = 2
+theme_override_constants/separation = 24
+alignment = 1
+
+[node name="UpdateButton" type="Button" parent="VBoxContainer/HBoxContainer3" unique_id=868842957]
+custom_minimum_size = Vector2(100, 50)
+layout_mode = 2
+text = "Update"
+
+[node name="CancelButton" type="Button" parent="VBoxContainer/HBoxContainer3" unique_id=1533796461]
+custom_minimum_size = Vector2(100, 50)
+layout_mode = 2
+text = "Cancel"

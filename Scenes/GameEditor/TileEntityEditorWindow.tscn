@@ -241,6 +241,7 @@ size_flags_vertical = 3
 custom_minimum_size = Vector2(140, 100)
 layout_mode = 2
 size_flags_horizontal = 3
+scroll_hint_mode = 1
 
 [node name="VBoxContainer" type="VBoxContainer" parent="PanelContainer/VBoxContainer/VBoxContainer/HBoxContainer4" unique_id=1724675279]
 layout_mode = 2
@@ -262,13 +263,13 @@ theme_override_constants/separation = 24
 alignment = 1
 
 [node name="UpdateButton" type="Button" parent="PanelContainer/VBoxContainer/HBoxContainer3" unique_id=868842957]
-custom_minimum_size = Vector2(100, 50)
 layout_mode = 2
+theme_type_variation = &"BigTextButton"
 text = "Update"
 
 [node name="CancelButton" type="Button" parent="PanelContainer/VBoxContainer/HBoxContainer3" unique_id=1533796461]
-custom_minimum_size = Vector2(100, 50)
 layout_mode = 2
+theme_type_variation = &"BigTextButton"
 text = "Cancel"
 
 [connection signal="size_changed" from="." to="." method="_on_TileEntityEditorWindow_resized"]

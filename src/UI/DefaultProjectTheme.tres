@@ -1,11 +1,29 @@
 [gd_resource type="Theme" format=3 uid="uid://bk4glgf60oqjr"]
 
-[ext_resource type="StyleBox" path="res://src/UI/ButtonHighlightBG.tres" id="1"]
+[ext_resource type="StyleBox" uid="uid://dj7jnhbod4x3t" path="res://src/UI/ButtonHighlightBG.tres" id="1"]
 [ext_resource type="StyleBox" uid="uid://cnjuypb4ppt15" path="res://src/UI/ButtonDisabledBG.tres" id="2"]
 [ext_resource type="StyleBox" uid="uid://dv2bynxqebkbe" path="res://src/UI/ButtonNormalBG.tres" id="3"]
-[ext_resource type="StyleBox" path="res://src/UI/ButtonPressedBG.tres" id="4"]
+[ext_resource type="StyleBox" uid="uid://uetsxobnqbum" path="res://src/UI/ButtonPressedBG.tres" id="4"]
 [ext_resource type="StyleBox" uid="uid://besih0ptcojgl" path="res://assets/ui/base_panel.tres" id="5_8mgp1"]
+[ext_resource type="Texture2D" uid="uid://l84jm2jtjy66" path="res://assets/ui/foldable_expanded_icon.tres" id="5_l1u4k"]
 [ext_resource type="FontFile" uid="uid://cxxr3l22y0327" path="res://assets/font/NotoSans-Regular.ttf" id="5_mgbrl"]
+[ext_resource type="Texture2D" uid="uid://dlftqhv4kuv7q" path="res://assets/ui/foldable_collapsed_icon.tres" id="6_xr878"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_3adip"]
+content_margin_left = 8.0
+content_margin_top = 10.0
+content_margin_right = 8.0
+content_margin_bottom = 10.0
+bg_color = Color(0.231373, 0.231373, 0.231373, 1)
+border_width_bottom = 4
+border_color = Color(0.180392, 0.180392, 0.180392, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+expand_margin_bottom = 4.0
+shadow_size = 2
+shadow_offset = Vector2(0, 1)
 
 [sub_resource type="StyleBoxEmpty" id="9"]
 content_margin_left = 4.0
@@ -42,6 +60,65 @@ content_margin_left = 6.0
 content_margin_top = 4.0
 content_margin_right = 6.0
 content_margin_bottom = 4.0
+
+[sub_resource type="DPITexture" id="DPITexture_ayaws"]
+_source = "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"16\" height=\"16\"><path fill=\"none\" stroke=\"#b2b2b2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-opacity=\".45\" stroke-width=\"2\" d=\"m11.011063 9.9776246-3.0222094-2.9776246-2.9776247 3.02221\"/></svg>
+"
+
+[sub_resource type="DPITexture" id="DPITexture_aql4b"]
+_source = "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"16\" height=\"16\"><path fill=\"none\" stroke=\"#b2b2b2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-opacity=\".45\" stroke-width=\"2\" d=\"m9 11-3-3 3-3\"/></svg>
+"
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ocwlj"]
+content_margin_left = 28.0
+content_margin_top = 4.0
+content_margin_right = 2.0
+content_margin_bottom = 4.0
+bg_color = Color(0.23576689, 0.24348915, 0.27954403, 0.6745098)
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_l1u4k"]
+content_margin_left = 4.0
+content_margin_top = 2.0
+content_margin_right = 4.0
+content_margin_bottom = 2.0
+bg_color = Color(0.29411766, 0.30980393, 0.34901962, 1)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+corner_detail = 5
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_xr878"]
+content_margin_left = 4.0
+content_margin_top = 2.0
+content_margin_right = 4.0
+content_margin_bottom = 2.0
+bg_color = Color(0.3423414, 0.3576312, 0.40356785, 1)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+corner_detail = 5
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_aql4b"]
+content_margin_left = 4.0
+content_margin_top = 2.0
+content_margin_right = 4.0
+bg_color = Color(0.29552943, 0.31031474, 0.34971094, 1)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_detail = 5
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ayaws"]
+content_margin_left = 4.0
+content_margin_top = 2.0
+content_margin_right = 4.0
+bg_color = Color(0.3423414, 0.3576312, 0.40356785, 1)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_detail = 5
 
 [sub_resource type="DPITexture" id="DPITexture_qnfc8"]
 _source = "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"16\" height=\"16\"><path fill=\"#fff\" fill-opacity=\"1\" d=\"m1 3 2-2 5 5 5-5 2 2-5 5 5 5-2 2-5-5-5 5-2-2 5-5z\"/></svg>
@@ -91,6 +168,9 @@ shadow_offset = Vector2(0, 1)
 
 [resource]
 default_font = ExtResource("5_mgbrl")
+BigTextButton/base_type = &"Button"
+BigTextButton/font_sizes/font_size = 22
+BigTextButton/styles/normal = SubResource("StyleBoxFlat_3adip")
 Button/styles/disabled = ExtResource("2")
 Button/styles/hover = ExtResource("1")
 Button/styles/normal = ExtResource("3")
@@ -107,6 +187,18 @@ CheckButton/styles/hover = SubResource("13")
 CheckButton/styles/hover_pressed = SubResource("13")
 CheckButton/styles/normal = SubResource("13")
 CheckButton/styles/pressed = SubResource("13")
+FoldableContainer/colors/collapsed_font_color = Color(1, 1, 1, 1)
+FoldableContainer/colors/font_color = Color(1, 1, 1, 1)
+FoldableContainer/font_sizes/font_size = 14
+FoldableContainer/icons/expanded_arrow = ExtResource("5_l1u4k")
+FoldableContainer/icons/expanded_arrow_mirrored = SubResource("DPITexture_ayaws")
+FoldableContainer/icons/folded_arrow = ExtResource("6_xr878")
+FoldableContainer/icons/folded_arrow_mirrored = SubResource("DPITexture_aql4b")
+FoldableContainer/styles/panel = SubResource("StyleBoxFlat_ocwlj")
+FoldableContainer/styles/title_collapsed_hover_panel = SubResource("StyleBoxFlat_l1u4k")
+FoldableContainer/styles/title_collapsed_panel = SubResource("StyleBoxFlat_xr878")
+FoldableContainer/styles/title_hover_panel = SubResource("StyleBoxFlat_aql4b")
+FoldableContainer/styles/title_panel = SubResource("StyleBoxFlat_ayaws")
 MenuButton/styles/disabled = ExtResource("2")
 MenuButton/styles/hover = ExtResource("1")
 MenuButton/styles/normal = ExtResource("3")

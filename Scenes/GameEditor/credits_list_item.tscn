@@ -21,4 +21,5 @@ size_flags_vertical = 4
 [node name="RemoveCreditItemButton" type="Button" parent="." unique_id=1689946817]
 layout_mode = 2
 size_flags_vertical = 4
+tooltip_text = "remove credit"
 icon = ExtResource("1_jmlwx")

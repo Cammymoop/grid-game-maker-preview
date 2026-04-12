@@ -794,12 +794,14 @@ size_flags_horizontal = 3
 [node name="SaveFileButton" type="Button" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer3" unique_id=717827855]
 custom_minimum_size = Vector2(80, 30)
 layout_mode = 2
+theme_type_variation = &"BigTextButton"
 disabled = true
 text = "Save"
 
 [node name="SaveAsFileButton" type="Button" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer3" unique_id=1587495055]
 custom_minimum_size = Vector2(80, 30)
 layout_mode = 2
+theme_type_variation = &"BigTextButton"
 text = "Save As"
 
 [node name="Control" type="Control" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer3" unique_id=208632194]
@@ -809,6 +811,7 @@ size_flags_horizontal = 3
 [node name="DiscardButton" type="Button" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer3" unique_id=627951835]
 custom_minimum_size = Vector2(80, 0)
 layout_mode = 2
+theme_type_variation = &"BigTextButton"
 text = "Cancel"
 
 [node name="Control3" type="Control" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer3" unique_id=2084738060]

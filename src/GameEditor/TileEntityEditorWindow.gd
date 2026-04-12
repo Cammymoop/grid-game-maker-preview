@@ -229,7 +229,6 @@ func update_preview_variant_info(tex_popup: Node) -> void:
 	tex_popup.queue_free()
 
 func update_sprite_config(new_sprite_config: Dictionary) -> void:
-	prints("update_sprite_config: %s" % new_sprite_config)
 	if not new_sprite_config or new_sprite_config.get("layers", []).is_empty():
 		the_definition.erase("sprite_config")
 	else:

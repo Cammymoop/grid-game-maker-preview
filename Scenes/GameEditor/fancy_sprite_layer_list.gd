@@ -91,11 +91,11 @@ func delete_other_layers(except_layer_item: FancySpriteLayerListItem) -> void:
             child.queue_free()
     layers_changed.emit()
 
-func duplicate_layer_item(layer_item: FancySpriteLayerListItem) -> void:
-    var layer_info: Dictionary = layer_item.get_layer_info()
+func duplicate_layer_item(duplicated_layer: FancySpriteLayerListItem) -> void:
+    var layer_info: Dictionary = duplicated_layer.get_layer_info()
     _append_layer_info(layer_info)
-    var new_layer_item: = get_child(-1) as FancySpriteLayerListItem
-    move_child(new_layer_item, layer_item.get_index() + 1)
+    var new_layer_item: = get_child(0) as FancySpriteLayerListItem
+    move_child(new_layer_item, duplicated_layer.get_index() - 1)
     layers_changed.emit()
 
 func move_layer_item_relative(layer_item: FancySpriteLayerListItem, move_amt: int) -> void:

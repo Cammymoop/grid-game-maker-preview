@@ -2,9 +2,11 @@
 
 [ext_resource type="Script" uid="uid://dqss0wota8j04" path="res://src/GameEditor/credits_list.gd" id="1_m1ccg"]
 [ext_resource type="PackedScene" uid="uid://cwk5ku3hwjwrx" path="res://Scenes/GameEditor/credits_list_item.tscn" id="2_avai8"]
-[ext_resource type="Texture2D" uid="uid://cv8l7ymc05wg5" path="res://assets/img/button_icons/plus.png" id="3_43qtu"]
+[ext_resource type="Texture2D" uid="uid://c71dfd3j0223d" path="res://assets/img/button_icons/plus_small.png" id="3_m1ccg"]
 
 [node name="CreditsList" type="VBoxContainer" unique_id=493844250]
+offset_right = 166.0
+offset_bottom = 92.0
 script = ExtResource("1_m1ccg")
 
 [node name="HBoxContainer" type="HBoxContainer" parent="." unique_id=169347860]
@@ -13,15 +15,17 @@ layout_mode = 2
 [node name="Label" type="Label" parent="HBoxContainer" unique_id=2034992539]
 layout_mode = 2
 size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 12
 text = "Role:"
 
 [node name="Label2" type="Label" parent="HBoxContainer" unique_id=1379206455]
 layout_mode = 2
 size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 12
 text = "Name:"
 
 [node name="Control" type="Control" parent="HBoxContainer" unique_id=377678673]
-custom_minimum_size = Vector2(26, 26)
+custom_minimum_size = Vector2(26, 10)
 layout_mode = 2
 
 [node name="CreditsListItem" parent="." unique_id=647526226 instance=ExtResource("2_avai8")]
@@ -38,7 +42,9 @@ size_flags_horizontal = 3
 [node name="NewCreditItem" type="Button" parent="HBoxContainer2/CenterContainer" unique_id=1219647165]
 layout_mode = 2
 size_flags_vertical = 4
-icon = ExtResource("3_43qtu")
+text = "Add Credit"
+icon = ExtResource("3_m1ccg")
+icon_alignment = 2
 
 [node name="Control" type="Control" parent="HBoxContainer2" unique_id=1854739564]
 custom_minimum_size = Vector2(26, 26)

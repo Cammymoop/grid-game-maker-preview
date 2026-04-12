@@ -21,6 +21,9 @@ func add_popup_layer_node(node: Node) -> void:
 func _on_BackButton_pressed():
 	GameManager.change_scene("Menu")
 
+func _on_test_play_button_pressed() -> void:
+	GameManager.change_scene("Play")
+
 
 func _on_OpenGameDir_pressed():
 	if GameManager.cur_game_name:
@@ -30,4 +33,3 @@ func _on_OpenGameDir_pressed():
 
 func _on_OpenImagesFolder_pressed():
 	OS.shell_open(FilesManager.get_shared_images_dir())
-

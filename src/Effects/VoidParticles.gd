@@ -25,7 +25,7 @@ func _ready():
 		extents = process_material.get_shader_parameter("emission_box_extents")
 	density = amount / (extents.x * extents.y)
 	update_size(true)
-	get_viewport().connect("size_changed", Callable(self, "update_size"))
+	get_viewport().size_changed.connect(update_size)
 
 func _process(delta):
 	if is_zero_approx(smooth_amount_reset):

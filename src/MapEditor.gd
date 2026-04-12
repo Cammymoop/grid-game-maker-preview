@@ -4,6 +4,9 @@ extends Node2D
 
 @export var camera_move_speed: = 400
 
+@export var ui_layer: CanvasLayer
+@export var ui_root_control: Control
+
 var edit_mode: = false
 
 var cur_ent_i: int = 0
@@ -42,6 +45,7 @@ var last_mouse: = Vector2(0, 0)
 var has_edited_something: = false
 
 func _ready() -> void:
+	visibility_changed.connect(on_visibility_changed)
 	if not edit_mode:
 		switch_edit_mode(false, false)
 	
@@ -367,3 +371,9 @@ func set_current_facing(facing: int) -> void:
 	elif placing == "tile":
 		current_tile_facing = facing
 	preview.rotation = Utility.facing_rotation(facing)
+
+func on_visibility_changed() -> void:
+	prints("visibility changed: ", visible)
+	if ui_layer:
+		prints("setting ui layer visible: ", visible)
+		ui_layer.visible = visible

@@ -2,6 +2,7 @@
 
 [ext_resource type="Script" uid="uid://ca63p80n7lnuh" path="res://Scenes/GameEditor/fancy_sprite_editor.gd" id="1_hivwt"]
 [ext_resource type="Texture2D" uid="uid://lrqeyxjmk22w" path="res://assets/img/tile_composer_bg.png" id="2_vsv20"]
+[ext_resource type="Texture2D" uid="uid://c71dfd3j0223d" path="res://assets/img/button_icons/plus_small.png" id="3_aov4j"]
 [ext_resource type="Script" uid="uid://cqph58nb42mmo" path="res://Scenes/GameEditor/fancy_sprite_layer_list.gd" id="3_b74fv"]
 [ext_resource type="Script" uid="uid://sxkikutun5ce" path="res://Scenes/GameEditor/sprite_previewer.gd" id="3_hivwt"]
 [ext_resource type="Script" uid="uid://c2uppviixc87y" path="res://src/previewing_viewport.gd" id="3_vsv20"]
@@ -10,9 +11,6 @@
 [ext_resource type="PackedScene" uid="uid://rafo4lh58320" path="res://Scenes/GameEditor/directional_buttons.tscn" id="6_huvp6"]
 
 [sub_resource type="StyleBoxTexture" id="StyleBoxTexture_huvp6"]
-content_margin_left = 4.0
-content_margin_right = 4.0
-content_margin_bottom = 4.0
 texture = ExtResource("2_vsv20")
 axis_stretch_horizontal = 1
 axis_stretch_vertical = 1
@@ -23,8 +21,7 @@ content_margin_left = 8.0
 content_margin_top = 8.0
 content_margin_right = 8.0
 content_margin_bottom = 8.0
-bg_color = Color(0.151927, 0.19807908, 0.25876707, 1)
-draw_center = false
+bg_color = Color(0.019411728, 0.02275991, 0.027590092, 0.32156864)
 border_width_left = 2
 border_width_top = 2
 border_width_right = 2
@@ -40,7 +37,7 @@ corner_detail = 7
 oversampling_override = 1.0
 title = "Edit Fancy Sprite"
 position = Vector2i(0, 25)
-size = Vector2i(600, 400)
+size = Vector2i(600, 560)
 wrap_controls = true
 script = ExtResource("1_hivwt")
 sprite_previewer = NodePath("PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/PreviewColumn/CenterContainer/SpritePreviewer")
@@ -60,21 +57,17 @@ layout_mode = 2
 theme_override_constants/margin_left = 6
 theme_override_constants/margin_top = 6
 theme_override_constants/margin_right = 6
-theme_override_constants/margin_bottom = 6
+theme_override_constants/margin_bottom = 10
 
 [node name="VBoxContainer" type="VBoxContainer" parent="PanelContainer/MarginContainer" unique_id=2004559522]
 layout_mode = 2
-
-[node name="ResetChangesButton" type="Button" parent="PanelContainer/MarginContainer/VBoxContainer" unique_id=972349672]
-layout_mode = 2
-size_flags_horizontal = 4
-text = "Reset Changes"
 
 [node name="HBoxContainer" type="HBoxContainer" parent="PanelContainer/MarginContainer/VBoxContainer" unique_id=255445786]
 layout_mode = 2
 size_flags_vertical = 3
 
 [node name="VBoxContainer" type="VBoxContainer" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer" unique_id=1986719293]
+custom_minimum_size = Vector2(324, 0)
 layout_mode = 2
 theme_override_constants/separation = 12
 alignment = 1
@@ -83,6 +76,8 @@ alignment = 1
 layout_mode = 2
 size_flags_horizontal = 4
 text = "Add Layer"
+icon = ExtResource("3_aov4j")
+icon_alignment = 2
 
 [node name="ScrollContainer" type="ScrollContainer" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer" unique_id=882363263]
 custom_minimum_size = Vector2(200, 0)
@@ -123,7 +118,7 @@ layout_mode = 2
 [node name="Label" type="Label" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/PreviewColumn/CenterContainer/SpritePreviewer/HBoxContainer/VBoxContainer" unique_id=1374289775]
 layout_mode = 2
 size_flags_horizontal = 4
-theme_override_font_sizes/font_size = 12
+theme_override_font_sizes/font_size = 14
 text = "Preview:"
 
 [node name="PanelContainer" type="PanelContainer" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/PreviewColumn/CenterContainer/SpritePreviewer/HBoxContainer/VBoxContainer" unique_id=1324742087]
@@ -157,19 +152,33 @@ metadata/sub_layer_rotates = true
 
 [node name="CheckButton" type="CheckButton" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/PreviewColumn/CenterContainer/SpritePreviewer/HBoxContainer/VBoxContainer" unique_id=1638079990]
 layout_mode = 2
+size_flags_horizontal = 4
 theme_override_font_sizes/font_size = 14
 text = "spin"
-alignment = 2
 
 [node name="DirectionalButtons" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/PreviewColumn/CenterContainer/SpritePreviewer/HBoxContainer" unique_id=1971834257 instance=ExtResource("6_huvp6")]
 layout_mode = 2
 
-[node name="OkButton" type="Button" parent="PanelContainer/MarginContainer/VBoxContainer" unique_id=393528458]
+[node name="HBoxContainer" type="HBoxContainer" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/PreviewColumn" unique_id=1102466442]
+layout_mode = 2
+
+[node name="OkButton" type="Button" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/PreviewColumn/HBoxContainer" unique_id=393528458]
 layout_mode = 2
 size_flags_horizontal = 4
+theme_type_variation = &"BigTextButton"
 text = "OK"
 
-[connection signal="pressed" from="PanelContainer/MarginContainer/VBoxContainer/ResetChangesButton" to="." method="restore_sprite_config"]
+[node name="Spacer" type="Control" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/PreviewColumn/HBoxContainer" unique_id=896218389]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="ResetChangesButton" type="Button" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/PreviewColumn/HBoxContainer" unique_id=972349672]
+layout_mode = 2
+size_flags_horizontal = 4
+theme_type_variation = &"BigTextButton"
+text = "Reset Changes"
+
 [connection signal="pressed" from="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer/AddLayerButton" to="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer/ScrollContainer/FancySpriteLayerList" method="append_new_layer_auto"]
 [connection signal="facing_pressed" from="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/PreviewColumn/CenterContainer/SpritePreviewer/HBoxContainer/DirectionalButtons" to="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/PreviewColumn/CenterContainer/SpritePreviewer" method="set_sprite_facing"]
-[connection signal="pressed" from="PanelContainer/MarginContainer/VBoxContainer/OkButton" to="." method="close_sprite_editor"]
+[connection signal="pressed" from="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/PreviewColumn/HBoxContainer/OkButton" to="." method="close_sprite_editor"]
+[connection signal="pressed" from="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/PreviewColumn/HBoxContainer/ResetChangesButton" to="." method="restore_sprite_config"]

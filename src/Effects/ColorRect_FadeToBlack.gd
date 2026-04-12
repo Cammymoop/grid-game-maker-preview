@@ -2,6 +2,8 @@ extends ColorRect
 
 @onready var normal_color = color
 
+@export var do_fade: bool = true
+
 @export var fade_length: float = 1
 var fading: bool = true
 var fade_timer: float = 0
@@ -12,12 +14,20 @@ func _ready():
 	get_viewport().connect("size_changed", Callable(self, "updated"))
 
 func updated() -> void:
+	if not do_fade:
+		return
 	fade_timer = fade_length
 	fading = true
 	set_process(true)
 
 func _process(delta):
 	if fading:
+		if not do_fade:
+			color = normal_color
+			fading = false
+			fade_timer = 0
+			set_process(false)
+			return
 		fade -= delta / fade_length
 		fade = max(0, fade)
 		if fade <= 0:
