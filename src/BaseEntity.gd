@@ -49,7 +49,9 @@ var idle_update_sleep: int = 1
 
 var active: = false
 
+# Properties set on an entity instance overriding their default for the entity type or removing them entirely
 var local_properties: = {}
+var removed_properties: Array[String] = []
 
 var terrain_sprite_modifiers: Array[int] = []
 
@@ -140,6 +142,7 @@ func serialize() -> Dictionary:
 	important_stuff['tile_position'] = Utility.get_arr_from_vector2(tile_position)
 	important_stuff['next_tile_pos'] = Utility.get_arr_from_vector2(next_tile_pos)
 	important_stuff['local_properties'] = local_properties.duplicate()
+	important_stuff['removed_properties'] = removed_properties.duplicate()
 	important_stuff['is_spt_override'] = is_spt_override
 	important_stuff['override_steps_per_tile'] = override_steps_per_tile
 	important_stuff['idle_ticks_elapsed'] = idle_ticks_elapsed
@@ -171,6 +174,7 @@ func deserialize(data: Dictionary) -> void:
 		is_spt_override = data['is_spt_override']
 	update_cached_spt()
 	local_properties = data['local_properties']
+	removed_properties.assign(data.get('removed_properties', []).duplicate())
 	
 	bond_group = EntityManager.find_bond_group_of_entity(self)
 	
@@ -282,19 +286,32 @@ func bump_move_step() -> void:
 	var pixel_speed_per_tick: float = MapManager.tile_width * (current_move_speed / GameManager.get_full_tick_rate())
 	position += Utility.facing_vector(move_facing) * pixel_speed_per_tick
 
-func has_local_property(property_name) -> bool:
+func has_local_property(property_name: String) -> bool:
+	if property_name in removed_properties:
+		return false
 	return property_name in local_properties
 
-func get_local_property(property_name):
+func is_property_removed(property_name: String) -> bool:
+	return property_name in removed_properties
+
+func get_local_property(property_name: String) -> Variant:
 	return local_properties[property_name]
 
-func set_local_property(property_name, value) -> void:
+func set_local_property(property_name: String, value: Variant) -> void:
+	if property_name in removed_properties:
+		removed_properties.erase(property_name)
 	local_properties[property_name] = value
 	if property_name == "idle_update":
 		check_for_idle_update_conditional()
 
-func remove_local_property(property_name) -> void:
+func remove_local_property(property_name: String) -> void:
 	local_properties.erase(property_name)
+	if EntityManager.entity_has_property(self, property_name):
+		removed_properties.append(property_name)
+
+func reset_local_property(property_name: String) -> void:
+	local_properties.erase(property_name)
+	removed_properties.erase(property_name)
 
 func get_intended_move(attempt_num: int = 0) -> int:
 	if not controller:

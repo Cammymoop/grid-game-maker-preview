@@ -329,6 +329,17 @@ func cmd_a_remove_property(slots: Dictionary, chosen_slot: int, property_name: S
 		if positions.size() > 0:
 			MapManager.remove_tile_property_multiple(positions, property_name)
 
+func desc_reset_property_to_default() -> String:
+	return "entity,pos|Reset the entity or tile's [property_name:PropertyInput] property to the default value"
+func cmd_reset_property_to_default(slots: Dictionary, chosen_slot: int, property_name: String) -> void:
+	if Commands.slot_is_entity(chosen_slot):
+		if slots[chosen_slot]:
+			slots[chosen_slot].reset_local_property(property_name)
+	elif Commands.slot_is_positions(chosen_slot):
+		var positions: Array = slots[chosen_slot]
+		if positions.size() > 0:
+			MapManager.remove_tile_property_multiple(positions, property_name)
+
 func desc_a_save_checkpoint() -> String:
 	return "none|Save the current state as a checkpoint"
 func cmd_a_save_checkpoint(_slots: Dictionary) -> void:

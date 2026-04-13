@@ -885,7 +885,7 @@ func post_move_multi_pos(moving_entity, moved_off_positions: Array, moved_onto_p
         var e = entities_moved_onto[i]
         resolve_entity_interaction_event("post_move_onto", e, moving_entity, entities_moved_onto_at[i])
 
-func can_move_to(moving_entity, tile_position) -> bool:
+func can_move_to(moving_entity: BaseEntity, tile_position: Vector2i) -> bool:
     var entities_here = get_entities_at(tile_position, moving_entity)
     for e in entities_here:
         var blocks: = get_entity_property(e, "blocks")
@@ -898,31 +898,36 @@ func can_move_to(moving_entity, tile_position) -> bool:
                     return false
     return true
 
-func set_entity_property(entity, property_name, property_value) -> void:
+func set_entity_property(entity: BaseEntity, property_name: String, property_value: Variant) -> void:
     entity.set_local_property(property_name, property_value)
 
-func get_entity_property(entity, property_name) -> Property:
-    var value = null
-    if not entity.has_local_property(property_name):
+func remove_entity_property(entity: BaseEntity, property_name: String) -> void:
+    entity.remove_local_property(property_name)
+
+func get_entity_property(entity: BaseEntity, property_name: String) -> Property:
+    if entity.is_property_removed(property_name):
+        return null
+    var raw_property_val: Variant = null
+    if entity.has_local_property(property_name):
+        raw_property_val = entity.get_local_property(property_name)
+    else:
         var def_props = entity_defs[entity.entity_index]["properties"]
         if property_name in def_props:
-            value = def_props[property_name]
+            raw_property_val = def_props[property_name]
         elif "inherit_properties" in def_props:
-            var inherit_from = get_entity_index(def_props["inherit_properties"])
-            var inherit_props = entity_defs[inherit_from]["properties"]
+            var inherit_from: = get_entity_index(def_props["inherit_properties"])
+            var inherit_props: Dictionary = entity_defs[inherit_from]["properties"]
             if not property_name in inherit_props:
                 return null
-            value = inherit_props[property_name]
+            raw_property_val = inherit_props[property_name]
         else:
             return null
-    else:
-        value = entity.get_local_property(property_name)
     var property = Property.new()
-    property.set_value(value)
+    property.set_value(raw_property_val)
     property.set_name(property_name)
     return property
 
-func get_entity_prop_with_default(entity, property_name, default_value) -> Variant:
+func get_entity_prop_with_default(entity: BaseEntity, property_name: String, default_value: Variant) -> Variant:
     if not entity_has_property(entity, property_name):
         return default_value
     var prop: Property = get_entity_property(entity, property_name)
@@ -952,10 +957,13 @@ func get_entity_prop_is_truthy(entity: BaseEntity, property_name: String, defaul
         return default_val
     return Property.resolve_truthy(get_entity_property(entity, property_name), entity, null, entity.tile_position)
 
-func entity_has_property(entity, property_name: String) -> bool:
+func entity_has_property(entity: BaseEntity, property_name: String) -> bool:
     if not entity:
         return false
-    var entity_props = entity_defs[entity.entity_index]["properties"]
+    if entity.is_property_removed(property_name):
+        return false
+
+    var entity_props: Dictionary = entity_defs[entity.entity_index]["properties"]
     var has = entity.has_local_property(property_name) 
     has = has or property_name in entity_props
     if "inherit_properties" in entity_props:
@@ -963,7 +971,7 @@ func entity_has_property(entity, property_name: String) -> bool:
         has = has or property_name in entity_defs[from]["properties"]
     return has
 
-func get_entity_property_list(entity) -> Array:
+func get_entity_property_list(entity: BaseEntity) -> Array:
     var props: Dictionary = {}
     var definition_props = entity_defs[entity.entity_index]["properties"]
     Utility.set_keys(props, definition_props.keys())
@@ -971,24 +979,26 @@ func get_entity_property_list(entity) -> Array:
     if "inherit_properties" in definition_props:
         var inherit_from = get_entity_index(definition_props["inherit_properties"])
         Utility.set_keys(props, entity_defs[inherit_from]["properties"].keys())
+    for removed_prop in entity.removed_properties:
+        props.erase(removed_prop)
     
     return props.keys()
 
-func get_entity_definition(entity_index) -> Dictionary:
+func get_entity_definition(entity_index: int) -> Dictionary:
     return entity_defs[entity_index].duplicate(true)
 
-func remove_entity_definition(entity_index) -> void:
+func remove_entity_definition(entity_index: int) -> void:
     erase_all_entities_with_id(entity_index)
     var entity_name = entity_defs[entity_index]["name"]
     entity_index_map.erase(entity_name)
     entity_defs.erase(entity_index)
 
-func erase_all_entities_with_id(entity_index) -> void:
+func erase_all_entities_with_id(entity_index: int) -> void:
     for entity in entity_list:
         if entity.entity_index == entity_index:
             remove_entity(entity)
 
-func remove_entity(entity) -> void:
+func remove_entity(entity: BaseEntity) -> void:
     if entity in entity_signal_connections:
         for connected_sig in entity_signal_connections.get(entity, []):
             var signal_connections = get_signal_connection_list(connected_sig)
@@ -1010,13 +1020,13 @@ func get_all_entity_indexes() -> Array:
     keys.sort()
     return keys
 
-func get_entity_index(entity_name) -> int:
+func get_entity_index(entity_name: String) -> int:
     return entity_index_map[entity_name]
 
-func entity_name_exists(entity_name) -> bool:
+func entity_name_exists(entity_name: String) -> bool:
     return entity_name in entity_index_map
 
-func get_entity_name(entity_index) -> String:
+func get_entity_name(entity_index: int) -> String:
     return entity_defs[entity_index]['name']
 
 func get_all_entity_names() -> Array[String]:

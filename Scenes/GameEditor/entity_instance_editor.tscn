@@ -2,6 +2,7 @@
 
 [ext_resource type="Texture2D" uid="uid://ceh21i1ehclje" path="res://assets/img/property_list/conditional_icon.png" id="1_f4tn4"]
 [ext_resource type="Texture2D" uid="uid://mq4ujdfvc5v8" path="res://assets/img/property_list/no_icon.png" id="2_b60re"]
+[ext_resource type="PackedScene" uid="uid://cxrfq7ld3ttmn" path="res://Scenes/GameEditor/property_edit_list.tscn" id="3_b60re"]
 [ext_resource type="Texture2D" uid="uid://cv8l7ymc05wg5" path="res://assets/img/button_icons/plus.png" id="6_57ay7"]
 [ext_resource type="Texture2D" uid="uid://b0qrxa5lu7j65" path="res://assets/img/button_icons/minus.png" id="7_4ieml"]
 
@@ -24,6 +25,18 @@ corner_radius_top_right = 3
 corner_radius_bottom_right = 3
 corner_radius_bottom_left = 3
 corner_detail = 7
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_hn6w8"]
+content_margin_left = 4.0
+content_margin_top = 4.0
+content_margin_right = 4.0
+content_margin_bottom = 4.0
+bg_color = Color(0.1, 0.1, 0.1, 0.6)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+corner_detail = 5
 
 [node name="EntityInstanceEditor" type="PanelContainer" unique_id=1898877842]
 anchors_preset = 15
@@ -66,15 +79,20 @@ layout_mode = 2
 size_flags_vertical = 3
 
 [node name="PropertyList" type="ItemList" parent="VBoxContainer/VBoxContainer/HBoxContainer4" unique_id=1196399889]
+visible = false
 custom_minimum_size = Vector2(140, 100)
 layout_mode = 2
 size_flags_horizontal = 3
+theme_override_styles/panel = SubResource("StyleBoxFlat_hn6w8")
 scroll_hint_mode = 1
 item_count = 3
 max_columns = 3
 item_0/icon = ExtResource("1_f4tn4")
 item_1/icon = ExtResource("2_b60re")
 item_2/text = "move_onto"
+
+[node name="PropertyEditList" parent="VBoxContainer/VBoxContainer/HBoxContainer4" unique_id=1906411767 instance=ExtResource("3_b60re")]
+layout_mode = 2
 
 [node name="VBoxContainer" type="VBoxContainer" parent="VBoxContainer/VBoxContainer/HBoxContainer4" unique_id=1724675279]
 layout_mode = 2

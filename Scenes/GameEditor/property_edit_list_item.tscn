@@ -1,0 +1,96 @@
+[gd_scene format=3 uid="uid://8ltfb41oda7k"]
+
+[ext_resource type="StyleBox" uid="uid://e8hy20htok11" path="res://assets/ui/property_list_item_inactive.tres" id="1_iue0q"]
+[ext_resource type="Script" uid="uid://doft6456w5f4e" path="res://Scenes/GameEditor/property_edit_list_item.gd" id="2_dh7t6"]
+[ext_resource type="StyleBox" uid="uid://chwejgkh5xprx" path="res://assets/ui/property_list_item_active.tres" id="3_58pcx"]
+[ext_resource type="StyleBox" uid="uid://cr7tvl662vo8e" path="res://assets/ui/property_list_item_highlight.tres" id="4_mspwa"]
+[ext_resource type="Texture2D" uid="uid://ceh21i1ehclje" path="res://assets/img/property_list/conditional_icon.png" id="5_dbpd2"]
+[ext_resource type="Texture2D" uid="uid://b5udrkwc2cuu5" path="res://assets/img/property_list/special_prop_icon.png" id="6_t1kqt"]
+[ext_resource type="PackedScene" uid="uid://cemds60k8ytal" path="res://Scenes/UI/icon_button.tscn" id="7_bjote"]
+
+[sub_resource type="Theme" id="Theme_06inb"]
+RichTextLabel/constants/strikethrough_alpha = 100
+
+[node name="PropertyEditListItem" type="PanelContainer" unique_id=161799549 node_paths=PackedStringArray("icon_button1", "icon_button2", "name_section", "name_label", "name_edit", "value_section", "value_label", "override_button", "remove_button")]
+theme = SubResource("Theme_06inb")
+theme_override_styles/panel = ExtResource("1_iue0q")
+script = ExtResource("2_dh7t6")
+icon_button1 = NodePath("ListItemSections/Icon1")
+icon_button2 = NodePath("ListItemSections/Icon2")
+name_section = NodePath("ListItemSections/NameSection")
+name_label = NodePath("ListItemSections/NameSection/PropNameLabel")
+name_edit = NodePath("ListItemSections/NameSection/PropNameEdit")
+value_section = NodePath("ListItemSections/PropValueSection")
+value_label = NodePath("ListItemSections/PropValueSection/PropValueLabel")
+override_button = NodePath("ListItemSections/OverrideButton")
+remove_button = NodePath("ListItemSections/RemovePropButton")
+inactive_stylebox = ExtResource("1_iue0q")
+active_stylebox = ExtResource("3_58pcx")
+highlighted_stylebox = ExtResource("4_mspwa")
+
+[node name="ListItemSections" type="HBoxContainer" parent="." unique_id=1699541846]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 4
+
+[node name="Icon1" type="Button" parent="ListItemSections" unique_id=1318159047]
+layout_mode = 2
+icon = ExtResource("5_dbpd2")
+flat = true
+
+[node name="Icon2" type="Button" parent="ListItemSections" unique_id=2096333099]
+layout_mode = 2
+icon = ExtResource("6_t1kqt")
+flat = true
+
+[node name="NameSection" type="HBoxContainer" parent="ListItemSections" unique_id=1589094284]
+layout_mode = 2
+
+[node name="PropNameEdit" type="LineEdit" parent="ListItemSections/NameSection" unique_id=1383435662]
+visible = false
+layout_mode = 2
+text = "prop1"
+expand_to_text_length = true
+
+[node name="PropNameLabel" type="RichTextLabel" parent="ListItemSections/NameSection" unique_id=53362337]
+modulate = Color(0.59717613, 0.59717613, 0.5971761, 1)
+layout_mode = 2
+focus_mode = 2
+bbcode_enabled = true
+text = "[s]prop1[/s]"
+fit_content = true
+scroll_active = false
+autowrap_mode = 0
+vertical_alignment = 1
+selection_enabled = true
+drag_and_drop_selection_enabled = false
+
+[node name="NameValSeparator" type="Label" parent="ListItemSections" unique_id=1149005379]
+layout_mode = 2
+text = ":"
+
+[node name="PropValueSection" type="HBoxContainer" parent="ListItemSections" unique_id=1115560318]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="PropValueLabel" type="RichTextLabel" parent="ListItemSections/PropValueSection" unique_id=1463440927]
+modulate = Color(0.59717613, 0.59717613, 0.5971761, 1)
+layout_mode = 2
+size_flags_horizontal = 3
+focus_mode = 2
+bbcode_enabled = true
+text = "[s]1 prop value asdf[/s]"
+scroll_active = false
+autowrap_mode = 0
+vertical_alignment = 1
+selection_enabled = true
+drag_and_drop_selection_enabled = false
+
+[node name="OverrideButton" type="Button" parent="ListItemSections" unique_id=1644408115]
+custom_minimum_size = Vector2(72, 0)
+layout_mode = 2
+size_flags_vertical = 4
+text = "override"
+
+[node name="RemovePropButton" parent="ListItemSections" unique_id=451892711 instance=ExtResource("7_bjote")]
+layout_mode = 2
