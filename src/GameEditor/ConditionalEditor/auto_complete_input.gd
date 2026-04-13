@@ -69,15 +69,15 @@ func set_fetch_values_func(new_func: Callable) -> void:
 func _gui_input(event: InputEvent) -> void:
 	if not use_autocomplete_menu or _ac_list == null or not _ac_list.visible:
 		return
-	if Input.is_action_just_pressed_by_event(&"ui_text_completion_accept", event):
+	if Utility.fixed_just_pressed_by_event("ui_text_completion_accept", event):
 		_accept_highlighted_autocomplete()
 		accept_event()
 		return
-	if Input.is_action_just_pressed_by_event(&"ui_up", event):
+	if Utility.fixed_just_pressed_by_event("ui_up", event):
 		_ac_list.move_current(-1)
 		accept_event()
 		return
-	if Input.is_action_just_pressed_by_event(&"ui_down", event):
+	if Utility.fixed_just_pressed_by_event("ui_down", event):
 		_ac_list.move_current(1)
 		accept_event()
 

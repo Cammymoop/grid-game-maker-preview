@@ -497,3 +497,36 @@ func property_value_scalar(prop_value: Variant, default_value: float) -> float:
 	else:
 		push_error("Tried to convert unexpectedly typed (%s) property value to scalar: %s" % [type_string(typeof(prop_value)), prop_value])
 		return default_value
+
+func _fixed_just_press_released_by_event(action: String, event: InputEvent, exact: bool, as_pressed: bool) -> bool:
+	if not InputMap.has_action(action):
+		push_error("Action %s not found in InputMap" % action)
+		EngineDebugger.debug()
+	
+	if not event is InputEventMouseButton or event.is_pressed() != as_pressed:
+		return Input.is_action_just_pressed_by_event(action, event, exact)
+	
+	var action_bindings: = InputMap.action_get_events(action)
+	for bound_event in action_bindings:
+		var mbe: = bound_event as InputEventMouseButton
+		if not mbe or mbe.button_index != event.button_index:
+			continue
+		if not exact:
+			return true
+
+		var shift_bound: = mbe.shift_pressed
+		# TODO handle cmd remapping for Mac
+		var ctr_bound: = mbe.command_or_control_autoremap or mbe.ctrl_pressed
+		var meta_bound: = mbe.meta_pressed
+		
+		if shift_bound != event.shift_pressed or ctr_bound != event.ctrl_pressed or meta_bound != event.meta_pressed:
+			return false
+		else:
+			return true
+	return false
+
+func fixed_just_pressed_by_event(action: String, event: InputEvent, exact: bool = false) -> bool:
+	return _fixed_just_press_released_by_event(action, event, exact, true)
+
+func fixed_just_released_by_event(action: String, event: InputEvent, exact: bool = false) -> bool:
+	return _fixed_just_press_released_by_event(action, event, exact, false)

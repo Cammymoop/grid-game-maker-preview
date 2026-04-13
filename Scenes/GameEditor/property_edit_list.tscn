@@ -1,33 +1,17 @@
 [gd_scene format=3 uid="uid://cxrfq7ld3ttmn"]
 
-[ext_resource type="StyleBox" uid="uid://e8hy20htok11" path="res://assets/ui/property_list_item_inactive.tres" id="1_inxdd"]
-[ext_resource type="Texture2D" uid="uid://ceh21i1ehclje" path="res://assets/img/property_list/conditional_icon.png" id="1_lnika"]
-[ext_resource type="StyleBox" uid="uid://chwejgkh5xprx" path="res://assets/ui/property_list_item_active.tres" id="1_wqs1l"]
-[ext_resource type="PackedScene" uid="uid://cemds60k8ytal" path="res://Scenes/UI/icon_button.tscn" id="2_lnika"]
-[ext_resource type="Script" uid="uid://doft6456w5f4e" path="res://Scenes/GameEditor/property_edit_list_item.gd" id="2_ydf8f"]
-[ext_resource type="StyleBox" uid="uid://cr7tvl662vo8e" path="res://assets/ui/property_list_item_highlight.tres" id="4_b7fr1"]
-[ext_resource type="Texture2D" uid="uid://b5udrkwc2cuu5" path="res://assets/img/property_list/special_prop_icon.png" id="4_ydf8f"]
+[ext_resource type="StyleBox" uid="uid://hgcxijv4kj1l" path="res://assets/ui/property_edit_list_background_panel.tres" id="1_lnika"]
+[ext_resource type="Script" uid="uid://cnn1owgs1ekol" path="res://Scenes/GameEditor/property_edit_list.gd" id="1_nvjmx"]
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_rxkun"]
-content_margin_left = 4.0
-content_margin_top = 4.0
-content_margin_right = 4.0
-content_margin_bottom = 4.0
-bg_color = Color(0.13058957, 0.13912675, 0.19993821, 1)
-corner_radius_top_left = 3
-corner_radius_top_right = 3
-corner_radius_bottom_right = 3
-corner_radius_bottom_left = 3
-corner_detail = 5
-
-[sub_resource type="Theme" id="Theme_06inb"]
-RichTextLabel/constants/strikethrough_alpha = 100
-
-[node name="PropertyEditList" type="PanelContainer" unique_id=1906411767]
+[node name="PropertyEditList" type="PanelContainer" unique_id=1906411767 node_paths=PackedStringArray("list_item_parent", "scroll_container")]
+custom_minimum_size = Vector2(390, 0)
 offset_right = 364.0
 offset_bottom = 101.0
 size_flags_horizontal = 3
-theme_override_styles/panel = SubResource("StyleBoxFlat_rxkun")
+theme_override_styles/panel = ExtResource("1_lnika")
+script = ExtResource("1_nvjmx")
+list_item_parent = NodePath("MarginContainer/ScrollContainer/MarginContainer/VBoxContainer")
+scroll_container = NodePath("MarginContainer/ScrollContainer")
 
 [node name="MarginContainer" type="MarginContainer" parent="." unique_id=2087525460]
 layout_mode = 2
@@ -52,88 +36,3 @@ theme_override_constants/margin_bottom = 3
 [node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/ScrollContainer/MarginContainer" unique_id=1188843552]
 layout_mode = 2
 theme_override_constants/separation = 0
-
-[node name="PropertyEditListItem" type="PanelContainer" parent="MarginContainer/ScrollContainer/MarginContainer/VBoxContainer" unique_id=787125697 node_paths=PackedStringArray("icon_button1", "icon_button2", "name_section", "name_label", "name_edit", "value_section", "value_label", "override_button", "remove_button")]
-layout_mode = 2
-theme = SubResource("Theme_06inb")
-theme_override_styles/panel = ExtResource("1_inxdd")
-script = ExtResource("2_ydf8f")
-icon_button1 = NodePath("ListItemSections/Icon1")
-icon_button2 = NodePath("ListItemSections/Icon2")
-name_section = NodePath("ListItemSections/NameSection")
-name_label = NodePath("ListItemSections/NameSection/PropNameLabel")
-name_edit = NodePath("ListItemSections/NameSection/PropNameEdit")
-value_section = NodePath("ListItemSections/PropValueSection")
-value_label = NodePath("ListItemSections/PropValueSection/PropValueLabel")
-override_button = NodePath("ListItemSections/OverrideButton")
-remove_button = NodePath("ListItemSections/RemovePropButton")
-inactive_stylebox = ExtResource("1_inxdd")
-active_stylebox = ExtResource("1_wqs1l")
-highlighted_stylebox = ExtResource("4_b7fr1")
-
-[node name="ListItemSections" type="HBoxContainer" parent="MarginContainer/ScrollContainer/MarginContainer/VBoxContainer/PropertyEditListItem" unique_id=1242650783]
-layout_mode = 2
-size_flags_horizontal = 3
-size_flags_vertical = 4
-
-[node name="Icon1" type="Button" parent="MarginContainer/ScrollContainer/MarginContainer/VBoxContainer/PropertyEditListItem/ListItemSections" unique_id=1102009241]
-layout_mode = 2
-icon = ExtResource("1_lnika")
-flat = true
-
-[node name="Icon2" type="Button" parent="MarginContainer/ScrollContainer/MarginContainer/VBoxContainer/PropertyEditListItem/ListItemSections" unique_id=1538340334]
-layout_mode = 2
-icon = ExtResource("4_ydf8f")
-flat = true
-
-[node name="NameSection" type="HBoxContainer" parent="MarginContainer/ScrollContainer/MarginContainer/VBoxContainer/PropertyEditListItem/ListItemSections" unique_id=2091514512]
-layout_mode = 2
-
-[node name="PropNameEdit" type="LineEdit" parent="MarginContainer/ScrollContainer/MarginContainer/VBoxContainer/PropertyEditListItem/ListItemSections/NameSection" unique_id=274706339]
-visible = false
-layout_mode = 2
-text = "prop1"
-expand_to_text_length = true
-
-[node name="PropNameLabel" type="RichTextLabel" parent="MarginContainer/ScrollContainer/MarginContainer/VBoxContainer/PropertyEditListItem/ListItemSections/NameSection" unique_id=940206306]
-modulate = Color(0.59717613, 0.59717613, 0.5971761, 1)
-layout_mode = 2
-focus_mode = 2
-bbcode_enabled = true
-text = "[s]prop1[/s]"
-fit_content = true
-scroll_active = false
-autowrap_mode = 0
-vertical_alignment = 1
-selection_enabled = true
-drag_and_drop_selection_enabled = false
-
-[node name="NameValSeparator" type="Label" parent="MarginContainer/ScrollContainer/MarginContainer/VBoxContainer/PropertyEditListItem/ListItemSections" unique_id=1585589120]
-layout_mode = 2
-text = ":"
-
-[node name="PropValueSection" type="HBoxContainer" parent="MarginContainer/ScrollContainer/MarginContainer/VBoxContainer/PropertyEditListItem/ListItemSections" unique_id=150348252]
-layout_mode = 2
-size_flags_horizontal = 3
-
-[node name="PropValueLabel" type="RichTextLabel" parent="MarginContainer/ScrollContainer/MarginContainer/VBoxContainer/PropertyEditListItem/ListItemSections/PropValueSection" unique_id=797896034]
-modulate = Color(0.59717613, 0.59717613, 0.5971761, 1)
-layout_mode = 2
-size_flags_horizontal = 3
-focus_mode = 2
-bbcode_enabled = true
-text = "[s]1 prop value asdf[/s]"
-scroll_active = false
-autowrap_mode = 0
-vertical_alignment = 1
-selection_enabled = true
-drag_and_drop_selection_enabled = false
-
-[node name="OverrideButton" type="Button" parent="MarginContainer/ScrollContainer/MarginContainer/VBoxContainer/PropertyEditListItem/ListItemSections" unique_id=454472166]
-custom_minimum_size = Vector2(72, 0)
-layout_mode = 2
-size_flags_vertical = 4
-text = "override"
-
-[node name="RemovePropButton" parent="MarginContainer/ScrollContainer/MarginContainer/VBoxContainer/PropertyEditListItem/ListItemSections" unique_id=451892711 instance=ExtResource("2_lnika")]
-layout_mode = 2

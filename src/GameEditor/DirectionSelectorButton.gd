@@ -57,7 +57,7 @@ func picker_input(event: InputEvent) -> void:
 		return
 	
 	for dir_input in ["move_up", "move_right", "move_down", "move_left"]:
-		if Input.is_action_just_pressed_by_event(dir_input, event):
+		if Utility.fixed_just_pressed_by_event(dir_input, event):
 			var new_dir: String = dir_input.trim_prefix("move_")
 			_on_DirectionSelected(new_dir)
 			break

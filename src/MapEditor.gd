@@ -1,11 +1,14 @@
 extends Node2D
 
+const EntityInstanceEditor = preload("res://Scenes/GameEditor/entity_instance_editor.gd")
+
 @export var do_autosave: = true
 
-@export var camera_move_speed: = 400
+@export var camera_move_speed: = 700
 
 @export var ui_layer: CanvasLayer
 @export var ui_root_control: Control
+@export var entity_instance_editor: EntityInstanceEditor
 
 var edit_mode: = false
 
@@ -40,9 +43,13 @@ var delete_held_on_entity: = false
 
 var cursor_tile_pos: = Vector2(0, 0)
 
-var last_mouse: = Vector2(0, 0)
+var cursor_stick_vector: = Vector2(0, 0)
 
 var has_edited_something: = false
+
+var _last_picked_entity: BaseEntity = null
+
+var _cursor_moved_from_directional_input: = false
 
 func _ready() -> void:
 	visibility_changed.connect(on_visibility_changed)
@@ -87,6 +94,8 @@ func switch_edit_mode(edit_enabled: bool, save_state: bool = true) -> void:
 		current_tile_index = all_tiles[cur_tile_i]
 		if placing in ["entity", "tile"]:
 			show_item_name()
+		if entity_instance_editor:
+			entity_instance_editor.find_auto_pick()
 	
 	MapManager.switch_tiles_preview_mode(edit_mode)
 
@@ -161,6 +170,9 @@ func place_mode(mode: String):
 	else:
 		cursor.texture = cursor_tex
 		preview.visible = false
+
+	if placing != "entity":
+		_last_picked_entity = null
 	
 	if item_name_changed:
 		show_item_name()
@@ -178,6 +190,7 @@ func show_item_name() -> void:
 	item_name_text_animator.play("show_fade")
 
 func mouse_moved(new_mouse) -> void:
+	_cursor_moved_from_directional_input = false
 	move_cursor(MapManager.world_to_tile_position(new_mouse))
 
 func move_cursor(new_position) -> void:
@@ -214,73 +227,71 @@ func _place(holding=false):
 		for e in entities_here:
 			EntityManager.remove_entity(e)
 
-func _process(delta):
+func _process(delta: float) -> void:
 	if GameManager.get_pause("pause_menu"):
 		return
 	if Input.is_action_just_pressed("editor_start"):
 		switch_edit_mode(not edit_mode)
 	
-	if Input.is_action_just_pressed("refresh") and not edit_mode:
-		#get_tree().reload_current_scene()
-		#call_deferred("load_random_level")
-		GameManager.load_checkpoint()
-	if Input.is_action_just_pressed("editor_new_map"):
-		GameManager.new_empty_level()
-	
 	if not edit_mode:
 		return
-	
-	var new_mouse = get_viewport().get_scaled_mouse_position()
-	new_mouse += $EditorCam.get_tl_position()
-	new_mouse = new_mouse.round()
-	if edit_mode and last_mouse != new_mouse:
-		mouse_moved(new_mouse)
-	last_mouse = new_mouse
-	
-	var iup = Input.is_action_just_pressed("editor_cursor_up")
-	var idown = Input.is_action_just_pressed("editor_cursor_down")
-	var ileft = Input.is_action_just_pressed("editor_cursor_left")
-	var iright = Input.is_action_just_pressed("editor_cursor_right")
-	
-	var horiz_camera_move = Input.get_axis("editor_camera_left", "editor_camera_right")
-	var vert_camera_move = Input.get_axis("editor_camera_up", "editor_camera_down")
-	
-	var hscroll = horiz_camera_move * delta * camera_move_speed
-	var vscroll = vert_camera_move * delta * camera_move_speed
-	$EditorCam.do_scroll(hscroll, vscroll)
-	
-	var input_dir = "none"
-	
-	if iup and not idown:
-		input_dir = "up"
-	elif idown and not iup:
-		input_dir = "down"
-	elif ileft and not iright:
-		input_dir = "left"
-	elif iright and not ileft:
-		input_dir = "right"
-	
-	if input_dir != "none":
-		move_cursor(cursor_tile_pos + Utility.facing_vector(Utility.direction_to_facing(input_dir)))
 	
 	if not Input.is_action_pressed("editor_place_entity"):
 		delete_held_on_entity = false
 	
-	if Input.is_action_just_pressed("editor_next_tile"):
-		if placing != "tile":
-			place_mode("tile")
-			current_tile_facing = 0
-		else:
-			advance_tile(1)
-	if Input.is_action_just_pressed("editor_prev_tile"):
-		if placing != "tile":
-			place_mode("tile")
-			current_tile_facing = 0
-		else:
-			advance_tile(-1)
+	vector_stick_process()
+	camera_scroll_process(delta)
+
+func update_cursor_stick_vector() -> void:
+	cursor_stick_vector = Input.get_vector("editor_cursor_left", "editor_cursor_right", "editor_cursor_up", "editor_cursor_down")
+
+func vector_stick_process() -> void:
+	if cursor_stick_vector.length() < 0.25:
+		return
+	move_cursor(cursor_tile_pos + cursor_stick_vector.snapped(Vector2.ONE))
+	_cursor_moved_from_directional_input = true
+	cursor_stick_vector = Vector2.ZERO
+
+func camera_scroll_process(delta: float) -> void:
+	var hscroll = Input.get_axis("editor_camera_left", "editor_camera_right") * delta * camera_move_speed
+	var vscroll = Input.get_axis("editor_camera_up", "editor_camera_down") * delta * camera_move_speed
+	$EditorCam.do_scroll(hscroll, vscroll)
+	if Vector2(hscroll, vscroll).length() > 0 and not _cursor_moved_from_directional_input:
+		process_new_mouse_position()
+
+func process_new_mouse_position() -> void:
+	var new_mouse_pos: Vector2 = get_viewport().get_scaled_mouse_position()
+	new_mouse_pos += $EditorCam.get_tl_position()
+	new_mouse_pos = new_mouse_pos.round()
+	mouse_moved(new_mouse_pos)
+
+func forwarded_gui_input(event: InputEvent) -> void:
+	if not edit_mode or GameManager.get_pause("pause_menu"):
+		return
 	
-	if Input.is_action_just_released("scroll_up") or Input.is_action_just_released("scroll_down"):
-		var direction = 1 if Input.is_action_just_released("scroll_up") else -1
+	if event is InputEventMouseMotion:
+		process_new_mouse_position()
+		return
+	
+	for cursor_stick_action in ["editor_cursor_up", "editor_cursor_down", "editor_cursor_left", "editor_cursor_right"]:
+		if event.is_action(cursor_stick_action):
+			update_cursor_stick_vector()
+			break
+	
+	for tile_ent in ["tile", "entity"]:
+		for next_prev in ["next", "prev"]:
+			var direction = 1 if next_prev == "next" else -1
+			if Utility.fixed_just_pressed_by_event("editor_" + next_prev + "_" + tile_ent, event, true):
+				if placing != tile_ent:
+					place_mode(tile_ent)
+					set_current_facing(0)
+				advance_tile(direction)
+				return
+	
+	var scroll_up: = Utility.fixed_just_pressed_by_event("scroll_up", event)
+	var scroll_down: = Utility.fixed_just_pressed_by_event("scroll_down", event)
+	if scroll_up or scroll_down:
+		var direction = 1 if scroll_up else -1
 		if Input.is_key_pressed(KEY_SHIFT):
 			if placing == "entity" or placing == "tile":
 				set_current_facing(posmod(get_current_facing() + direction, 4))
@@ -292,58 +303,67 @@ func _process(delta):
 				advance_tile(direction)
 			elif placing == "entity":
 				advance_entity(direction)
+		return
 	
-	if Input.is_action_just_pressed("editor_rotate_entity"):
+	if Utility.fixed_just_pressed_by_event("editor_rotate_entity", event, true):
 		if placing == "entity" or placing == "tile":
 			set_current_facing(posmod(get_current_facing() + 1, 4))
+		return
 	
-	if Input.is_action_just_pressed("editor_place_entity"):
+	if Utility.fixed_just_pressed_by_event("editor_place_entity", event, true):
 		_place()
-	elif Input.is_action_just_pressed("editor_pick"):
-		var entities_here = EntityManager.get_entities_at(cursor_tile_pos)
-		if len(entities_here) > 0:
+		return
+
+	if Utility.fixed_just_pressed_by_event("editor_pick", event, true):
+		prints("editor_pick")
+		var entities_here: = EntityManager.get_entities_at(cursor_tile_pos, null, [], true)
+		if entities_here.size() > 0:
 			if placing != "entity":
 				place_mode("entity")
-			var picked_entity = entities_here[-1]
-			if len(entities_here) > 1 and entities_here[-1].entity_index == current_entity_index:
-				picked_entity = entities_here[-2]
+			entities_here = sort_entities_by_render_order(entities_here)
+			var picked_entity: BaseEntity
+			if entities_here.size() > 1:
+				for i in entities_here.size():
+					if entities_here[i] == _last_picked_entity:
+						picked_entity = entities_here[posmod(i + 1, entities_here.size())]
+						break
+			if not picked_entity:
+				picked_entity = entities_here[0]
+
 			set_entity_to(picked_entity.entity_index)
 			set_current_facing(picked_entity.facing)
+			_last_picked_entity = picked_entity
 		else:
 			var tile_here = MapManager.get_tile_index_at(cursor_tile_pos)
 			if tile_here > -1:
-				var tile_facing = MapManager.get_tile_facing_at(cursor_tile_pos)
 				place_mode("tile")
 				set_tile_to(tile_here)
-				set_current_facing(tile_facing)
+				set_current_facing(MapManager.get_tile_facing_at(cursor_tile_pos))
 			else:
 				place_mode("delete")
+		return
 	
-	
-	if Input.is_action_just_pressed("editor_next_entity"):
-		if placing != "entity":
-			place_mode("entity")
-			set_current_facing(0)
-		else:
-			advance_entity(1)
-	if Input.is_action_just_pressed("editor_prev_entity"):
-		if placing != "entity":
-			place_mode("entity")
-			set_current_facing(0)
-		else:
-			advance_entity(-1)
-	
-	if Input.is_action_just_pressed("editor_clear_entities"):
-		var entities_here = EntityManager.get_entities_at(cursor_tile_pos)
-		if len(entities_here) < 1:
-			# No entities, remove the tile
+	if Utility.fixed_just_pressed_by_event("editor_clear_entities", event):
+		var entities_here: = EntityManager.get_entities_at(cursor_tile_pos, null, [], true)
+		if Input.is_key_pressed(KEY_SHIFT) or len(entities_here) < 1:
+			# No entities or holding shift, remove the tile
 			MapManager.replace_tiles_at(cursor_tile_pos, -1)
 		for e in entities_here:
 			EntityManager.remove_entity(e)
+		return
 	
-	if Input.is_action_just_pressed("editor_toggle_delete"):
+	if Utility.fixed_just_pressed_by_event("editor_toggle_delete", event):
 		if placing != "delete":
 			place_mode("delete")
+		return
+
+func forwarded_shortcut_input(event: InputEvent) -> void:
+	if Utility.fixed_just_pressed_by_event("refresh", event) and not edit_mode:
+		GameManager.load_checkpoint()
+		return
+	if Utility.fixed_just_pressed_by_event("editor_new_map", event):
+		GameManager.new_empty_level()
+		return
 
 func _auto_save(level_state: Dictionary) -> void:
 	var autosave_filename: = "editor_autosave"
@@ -377,3 +397,13 @@ func on_visibility_changed() -> void:
 	if ui_layer:
 		prints("setting ui layer visible: ", visible)
 		ui_layer.visible = visible
+
+func _entity_render_order(entity_a: BaseEntity, entity_b: BaseEntity) -> bool:
+	if entity_a.z_index != entity_b.z_index:
+		return entity_a.z_index > entity_b.z_index
+	return entity_a.get_index() > entity_b.get_index()
+
+func sort_entities_by_render_order(entity_list: Array) -> Array:
+	entity_list = entity_list.duplicate()
+	entity_list.sort_custom(_entity_render_order)
+	return entity_list

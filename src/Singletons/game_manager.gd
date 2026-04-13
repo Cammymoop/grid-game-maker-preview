@@ -36,6 +36,10 @@ var cameras = {
 	"SimpleCamera": preload("res://Scenes/SimpleCamera.tscn"),
 }
 
+const SPECIAL_PROPS: Array[String] = [
+	"z-index", "inherit_properties", "auto_bond", "auto_tail"
+]
+
 @export_file("*.json") var builtin_default_game_file: String = ""
 var builtin_default_game_definition: Dictionary = {}
 
@@ -499,7 +503,7 @@ func _process(_delta):
 				GlobalToaster.show_toast_message("No Quicksave")
 
 func _shortcut_input(event: InputEvent) -> void:
-	if Input.is_action_just_pressed_by_event(&"escape", event):
+	if Utility.fixed_just_pressed_by_event("escape", event):
 		if cur_scene == "GameEditor":
 			change_scene("Menu")
 		elif cur_scene == "Menu":
@@ -531,3 +535,13 @@ func get_full_tick_rate() -> int:
 
 func get_is_half_tick_rate() -> bool:
 	return TICK_RATE <= FULL_TICK_RATE / 2.0
+
+func is_special_prop_name(prop_name: String) -> bool:
+	return prop_name in SPECIAL_PROPS
+
+func is_event_name(prop_name: String) -> bool:
+	if prop_name.begins_with("when_signal_"):
+		return true
+	elif prop_name in ConditionalsV3.all_events:
+		return true
+	return false

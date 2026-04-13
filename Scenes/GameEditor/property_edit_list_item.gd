@@ -25,6 +25,8 @@ const no_icon: Texture2D = preload("res://assets/img/property_list/no_icon.png")
 @export var enable_edit_base_props: bool = true
 
 @export_group("UI Refs")
+@export var sub_item_container: Control
+
 @export var icon_button1: Control
 @export var icon_button2: Control
 
@@ -73,6 +75,21 @@ func _ready() -> void:
     override_button.pressed.connect(on_override_button_pressed)
     name_edit.text_changed.connect(on_name_edit_text_changed)
     name_edit.editing_toggled.connect(on_name_edit_editing_toggled)
+    
+    if not sub_item_container:
+        sub_item_container = self
+    for child in sub_item_container.get_children():
+        if child is Control:
+            var has_control_children: bool = false
+            if not child is ButtonContainer:
+                for sub_sub_item in child.get_children():
+                    if sub_sub_item is Control:
+                        has_control_children = true
+                        sub_sub_item.gui_input.connect(sub_item_gui_input)
+                        sub_sub_item.focus_entered.connect(sub_item_focus_entered)
+            if not has_control_children:
+                child.gui_input.connect(sub_item_gui_input)
+                child.focus_entered.connect(sub_item_focus_entered)
 
     add_theme_stylebox_override("panel", _normal_stylebox())
     set_prop_value(property_value)
@@ -91,13 +108,18 @@ func set_prop_value(new_value: Variant) -> void:
 
 func _process(_delta: float) -> void:
     if not get_window().has_focus():
+        if _hovered:
+            add_theme_stylebox_override("panel", _normal_stylebox())
+            _hovered = false
         return
     
-    var mouse_over: = get_rect().has_point(get_local_mouse_position())
+    var mouse_over: = Rect2(Vector2.ZERO, get_size()).has_point(get_local_mouse_position())
     if not _hovered and mouse_over:
         add_theme_stylebox_override("panel", highlighted_stylebox)
+        _hovered = true
     elif _hovered and not mouse_over:
         add_theme_stylebox_override("panel", _normal_stylebox())
+        _hovered = false
 
 func _normal_stylebox() -> StyleBox:
     return active_stylebox if _is_active else inactive_stylebox
@@ -106,7 +128,7 @@ func set_active(new_is_active: bool) -> void:
     if _is_active == new_is_active:
         return
     _is_active = new_is_active
-    var mouse_over: = get_rect().has_point(get_local_mouse_position())
+    var mouse_over: = Rect2(Vector2.ZERO, get_size()).has_point(get_local_mouse_position())
     if not mouse_over:
         add_theme_stylebox_override("panel", _normal_stylebox())
 
@@ -187,26 +209,26 @@ func refresh_ui() -> void:
         value_label.text = get_rich_value_text()
     
     if is_event_name(property_name):
-        icon_button1.texture_normal = event_icon
+        icon_button1.icon = event_icon
         icon_button1.modulate = event_name_color
         icon_button1.tooltip_text = "Event"
     elif is_special_prop_name(property_name):
-        icon_button1.texture_normal = special_prop_icon
+        icon_button1.icon = special_prop_icon
         icon_button1.modulate = special_prop_name_color
         icon_button1.tooltip_text = "Special Property"
     else:
-        icon_button1.texture_normal = no_icon
+        icon_button1.icon = no_icon
         icon_button1.modulate = Color.WHITE
         icon_button1.tooltip_text = ""
     
     if local_props_enabled and is_overridden or is_removed:
-        icon_button2.texture_normal = local_prop_icon
+        icon_button2.icon = local_prop_icon
         icon_button2.tooltip_text = "Local Property Override" + (" (Overridden as Removed)" if is_removed else "")
     elif is_conditional():
-        icon_button2.texture_normal = conditional_icon
+        icon_button2.icon = conditional_icon
         icon_button2.tooltip_text = "Conditional"
     else:
-        icon_button2.texture_normal = no_icon
+        icon_button2.icon = no_icon
         icon_button2.tooltip_text = ""
     
     override_button.visible = is_base_definition_property and local_props_enabled
@@ -239,8 +261,17 @@ func is_event_name(prop_name: String) -> bool:
     return GameManager.is_event_name(prop_name)
 
 func sub_item_gui_input(event: InputEvent) -> void:
+    any_gui_input(event)
+
+func _gui_input(event: InputEvent) -> void:
+    any_gui_input(event)
+
+func any_gui_input(event: InputEvent) -> void:
     if event is InputEventMouseButton and event.is_pressed():
         request_activate.emit(self)
+
+func sub_item_focus_entered() -> void:
+    request_activate.emit(self)
 
 
 func is_fade_base_prop() -> bool:

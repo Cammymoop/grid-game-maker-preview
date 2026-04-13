@@ -11,10 +11,13 @@
 [sub_resource type="Theme" id="Theme_06inb"]
 RichTextLabel/constants/strikethrough_alpha = 100
 
-[node name="PropertyEditListItem" type="PanelContainer" unique_id=161799549 node_paths=PackedStringArray("icon_button1", "icon_button2", "name_section", "name_label", "name_edit", "value_section", "value_label", "override_button", "remove_button")]
+[node name="PropertyEditListItem" type="PanelContainer" unique_id=161799549 node_paths=PackedStringArray("sub_item_container", "icon_button1", "icon_button2", "name_section", "name_label", "name_edit", "value_section", "value_label", "override_button", "remove_button")]
+offset_right = 302.0
+offset_bottom = 34.0
 theme = SubResource("Theme_06inb")
 theme_override_styles/panel = ExtResource("1_iue0q")
 script = ExtResource("2_dh7t6")
+sub_item_container = NodePath("ListItemSections")
 icon_button1 = NodePath("ListItemSections/Icon1")
 icon_button2 = NodePath("ListItemSections/Icon2")
 name_section = NodePath("ListItemSections/NameSection")
@@ -24,6 +27,13 @@ value_section = NodePath("ListItemSections/PropValueSection")
 value_label = NodePath("ListItemSections/PropValueSection/PropValueLabel")
 override_button = NodePath("ListItemSections/OverrideButton")
 remove_button = NodePath("ListItemSections/RemovePropButton")
+boolean_text_color = Color(0.31940958, 0.5276067, 1, 1)
+number_text_color = Color(0.16114607, 0.73384285, 0.67318916, 1)
+removed_text_color = Color(0.9883972, 0.54669845, 0.5425837, 1)
+removed_bool_text_color = Color(0.5091911, 0.54157495, 0.74506867, 1)
+removed_number_text_color = Color(0.4781412, 0.69430685, 0.6129805, 1)
+event_name_color = Color(0.7605691, 0.6433923, 0.12274904, 1)
+special_prop_name_color = Color(0.47197592, 0.7700104, 0.99045914, 1)
 inactive_stylebox = ExtResource("1_iue0q")
 active_stylebox = ExtResource("3_58pcx")
 highlighted_stylebox = ExtResource("4_mspwa")
@@ -53,7 +63,6 @@ text = "prop1"
 expand_to_text_length = true
 
 [node name="PropNameLabel" type="RichTextLabel" parent="ListItemSections/NameSection" unique_id=53362337]
-modulate = Color(0.59717613, 0.59717613, 0.5971761, 1)
 layout_mode = 2
 focus_mode = 2
 bbcode_enabled = true
@@ -70,11 +79,11 @@ layout_mode = 2
 text = ":"
 
 [node name="PropValueSection" type="HBoxContainer" parent="ListItemSections" unique_id=1115560318]
+custom_minimum_size = Vector2(80, 0)
 layout_mode = 2
 size_flags_horizontal = 3
 
 [node name="PropValueLabel" type="RichTextLabel" parent="ListItemSections/PropValueSection" unique_id=1463440927]
-modulate = Color(0.59717613, 0.59717613, 0.5971761, 1)
 layout_mode = 2
 size_flags_horizontal = 3
 focus_mode = 2
