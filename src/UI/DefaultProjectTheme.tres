@@ -1,29 +1,18 @@
 [gd_resource type="Theme" format=3 uid="uid://bk4glgf60oqjr"]
 
 [ext_resource type="StyleBox" uid="uid://dj7jnhbod4x3t" path="res://src/UI/ButtonHighlightBG.tres" id="1"]
+[ext_resource type="StyleBox" uid="uid://blabdujowgbvy" path="res://assets/ui/button_styles/padded_button_hover.tres" id="1_aql4b"]
+[ext_resource type="StyleBox" uid="uid://dyvca3dea62q4" path="res://assets/ui/button_styles/padded_button_disabled.tres" id="1_ocwlj"]
 [ext_resource type="StyleBox" uid="uid://cnjuypb4ppt15" path="res://src/UI/ButtonDisabledBG.tres" id="2"]
+[ext_resource type="StyleBox" uid="uid://ctkbqv6y1a1xk" path="res://assets/ui/button_styles/padded_button_normal.tres" id="2_ocwlj"]
 [ext_resource type="StyleBox" uid="uid://dv2bynxqebkbe" path="res://src/UI/ButtonNormalBG.tres" id="3"]
 [ext_resource type="StyleBox" uid="uid://uetsxobnqbum" path="res://src/UI/ButtonPressedBG.tres" id="4"]
+[ext_resource type="StyleBox" uid="uid://dv7lsfcc27sxd" path="res://assets/ui/button_styles/padded_button_pressed.tres" id="4_p8x2k"]
 [ext_resource type="StyleBox" uid="uid://besih0ptcojgl" path="res://assets/ui/base_panel.tres" id="5_8mgp1"]
 [ext_resource type="Texture2D" uid="uid://l84jm2jtjy66" path="res://assets/ui/foldable_expanded_icon.tres" id="5_l1u4k"]
 [ext_resource type="FontFile" uid="uid://cxxr3l22y0327" path="res://assets/font/NotoSans-Regular.ttf" id="5_mgbrl"]
 [ext_resource type="Texture2D" uid="uid://dlftqhv4kuv7q" path="res://assets/ui/foldable_collapsed_icon.tres" id="6_xr878"]
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_3adip"]
-content_margin_left = 8.0
-content_margin_top = 10.0
-content_margin_right = 8.0
-content_margin_bottom = 10.0
-bg_color = Color(0.231373, 0.231373, 0.231373, 1)
-border_width_bottom = 4
-border_color = Color(0.180392, 0.180392, 0.180392, 1)
-corner_radius_top_left = 4
-corner_radius_top_right = 4
-corner_radius_bottom_right = 4
-corner_radius_bottom_left = 4
-expand_margin_bottom = 4.0
-shadow_size = 2
-shadow_offset = Vector2(0, 1)
+[ext_resource type="StyleBox" uid="uid://bg5tmd1718hxa" path="res://assets/ui/tooltip_stylebox.tres" id="8_xr878"]
 
 [sub_resource type="StyleBoxEmpty" id="9"]
 content_margin_left = 4.0
@@ -120,7 +109,7 @@ corner_radius_top_left = 3
 corner_radius_top_right = 3
 corner_detail = 5
 
-[sub_resource type="DPITexture" id="DPITexture_qnfc8"]
+[sub_resource type="DPITexture" id="DPITexture_p8x2k"]
 _source = "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"16\" height=\"16\"><path fill=\"#fff\" fill-opacity=\"1\" d=\"m1 3 2-2 5 5 5-5 2 2-5 5 5 5-2 2-5-5-5 5-2-2 5-5z\"/></svg>
 "
 color_map = {
@@ -170,7 +159,10 @@ shadow_offset = Vector2(0, 1)
 default_font = ExtResource("5_mgbrl")
 BigTextButton/base_type = &"Button"
 BigTextButton/font_sizes/font_size = 22
-BigTextButton/styles/normal = SubResource("StyleBoxFlat_3adip")
+BigTextButton/styles/disabled = ExtResource("1_ocwlj")
+BigTextButton/styles/hover = ExtResource("1_aql4b")
+BigTextButton/styles/normal = ExtResource("2_ocwlj")
+BigTextButton/styles/pressed = ExtResource("4_p8x2k")
 Button/styles/disabled = ExtResource("2")
 Button/styles/hover = ExtResource("1")
 Button/styles/normal = ExtResource("3")
@@ -204,12 +196,13 @@ MenuButton/styles/hover = ExtResource("1")
 MenuButton/styles/normal = ExtResource("3")
 MenuButton/styles/pressed = ExtResource("4")
 PanelContainer/styles/panel = ExtResource("5_8mgp1")
+TooltipPanel/styles/panel = ExtResource("8_xr878")
 Window/colors/title_color = Color(0, 0, 0, 1)
 Window/constants/close_h_offset = 18
 Window/constants/close_v_offset = 20
 Window/constants/resize_margin = 4
 Window/constants/title_height = 25
-Window/icons/close = SubResource("DPITexture_qnfc8")
+Window/icons/close = SubResource("DPITexture_p8x2k")
 Window/icons/close_pressed = SubResource("DPITexture_swlsm")
 Window/styles/embedded_border = SubResource("StyleBoxFlat_qnfc8")
 Window/styles/embedded_unfocused_border = SubResource("StyleBoxFlat_8mgp1")

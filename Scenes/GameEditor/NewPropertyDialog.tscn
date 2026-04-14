@@ -18,7 +18,7 @@ anchor_bottom = 1.0
 offset_left = 8.0
 offset_top = 8.0
 offset_right = -8.0
-offset_bottom = -49.0
+offset_bottom = -45.0
 
 [node name="HBoxContainer2" type="HBoxContainer" parent="VBoxContainer" unique_id=1477151240]
 layout_mode = 2
@@ -35,8 +35,8 @@ size_flags_horizontal = 3
 size_flags_vertical = 4
 script = ExtResource("2_m2epb")
 include_events = true
-highlight_unknown_color = Color(0.660753, 0.9219391, 0.48474276, 1)
 override_default_min_size = Vector2(220, -1)
+highlight_unknown_color = Color(0.660753, 0.9219391, 0.48474276, 1)
 
 [node name="SelectEvent" type="MenuButton" parent="VBoxContainer" unique_id=163296998]
 visible = false

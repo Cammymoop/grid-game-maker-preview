@@ -5,15 +5,22 @@ const MAX_SUGGESTIONS_VISIBLE := 20
 
 @export var use_autocomplete_menu: bool = true
 
-@export var do_highlight_unknown: bool = true
-@export var do_highlight_known: bool = false
-
-@export var highlight_unknown_color: Color = Color.RED
-@export var highlight_known_color: Color = Color(0.83, 0.87, 0.39)
-
 @export var default_show_clear_button: bool = true
 
 @export var override_default_min_size: Vector2 = Vector2(140, -1)
+
+
+@export_group("highlight options")
+@export var do_highlight_unknown: bool = true
+@export var do_highlight_known: bool = false
+@export var do_highlight_other: bool = false
+@export var other_list: Array[String] = []
+@export var include_other_list_in_completions: bool = false
+
+@export_group("highlight colors")
+@export var highlight_unknown_color: Color = Color.RED
+@export var highlight_known_color: Color = Color(0.83, 0.87, 0.39)
+@export var highlight_other_color: Color = Color.BLUE
 
 var arg_name: String = ""
 
@@ -56,6 +63,8 @@ func _create_autocomplete_menu() -> void:
 	_ac_list.item_clicked.connect(_on_ac_item_clicked)
 
 func fetch_now() -> void:
+	if include_other_list_in_completions:
+		all_values.assign(other_list)
 	all_values = fetch_values_func.call()
 	_fetched = true
 
@@ -100,6 +109,10 @@ func set_value(new_val) -> void:
 
 
 func update_highlight() -> void:
+	if do_highlight_other and text in other_list:
+		add_theme_color_override("font_color", highlight_other_color)
+		return
+
 	var valid_prop_name: = text in all_values
 	if not valid_prop_name:
 		if do_highlight_unknown:

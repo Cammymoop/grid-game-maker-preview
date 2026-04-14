@@ -1,0 +1,130 @@
+[gd_scene format=3 uid="uid://durty3gycutfy"]
+
+[ext_resource type="Script" uid="uid://dyid6c47qj07t" path="res://Scenes/GameEditor/bool_toggle_input.gd" id="1_s4ypx"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_5uy45"]
+content_margin_left = 2.0
+content_margin_top = 0.0
+content_margin_right = 2.0
+content_margin_bottom = 2.0
+bg_color = Color(0.21982825, 0.3232533, 0.21756598, 1)
+border_width_bottom = 2
+border_color = Color(0.10184323, 0.16215253, 0.10056678, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+expand_margin_top = 1.0
+expand_margin_bottom = 1.0
+shadow_offset = Vector2(0, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_6qn5y"]
+content_margin_left = 2.0
+content_margin_top = 2.0
+content_margin_right = 2.0
+content_margin_bottom = 0.0
+bg_color = Color(0.3118465, 0.6055686, 0.31502202, 1)
+border_width_top = 2
+border_color = Color(0.12005346, 0.24191323, 0.12047852, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+expand_margin_top = 1.0
+expand_margin_bottom = 1.0
+shadow_offset = Vector2(0, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ylsxl"]
+content_margin_left = 2.0
+content_margin_top = 0.0
+content_margin_right = 2.0
+content_margin_bottom = 2.0
+bg_color = Color(0.30317134, 0.4011881, 0.3001292, 1)
+border_width_bottom = 2
+border_color = Color(0.10184323, 0.16215253, 0.10056678, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+expand_margin_top = 1.0
+expand_margin_bottom = 1.0
+shadow_offset = Vector2(0, 1)
+
+[sub_resource type="ButtonGroup" id="ButtonGroup_5uy45"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ciyhn"]
+content_margin_left = 2.0
+content_margin_top = 0.0
+content_margin_right = 2.0
+content_margin_bottom = 2.0
+bg_color = Color(0.3749499, 0.1226357, 0.08525222, 1)
+border_width_bottom = 2
+border_color = Color(0.1846669, 0.043822408, 0.024896791, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+expand_margin_top = 1.0
+expand_margin_bottom = 1.0
+shadow_offset = Vector2(0, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_x653m"]
+content_margin_left = 2.0
+content_margin_top = 2.0
+content_margin_right = 2.0
+content_margin_bottom = 0.0
+bg_color = Color(0.77039605, 0.30529076, 0.23450881, 1)
+border_width_top = 2
+border_color = Color(0.3749499, 0.1226357, 0.08525222, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+expand_margin_top = 1.0
+expand_margin_bottom = 1.0
+shadow_offset = Vector2(0, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_s4ypx"]
+content_margin_left = 2.0
+content_margin_top = 0.0
+content_margin_right = 2.0
+content_margin_bottom = 2.0
+bg_color = Color(0.44739318, 0.19517294, 0.154194, 1)
+border_width_bottom = 2
+border_color = Color(0.1846669, 0.043822408, 0.024896791, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+expand_margin_top = 1.0
+expand_margin_bottom = 1.0
+shadow_offset = Vector2(0, 1)
+
+[node name="BoolToggleInput" type="HBoxContainer" unique_id=546195378 node_paths=PackedStringArray("true_button", "false_button")]
+theme_override_constants/separation = 1
+script = ExtResource("1_s4ypx")
+true_button = NodePath("TrueButton")
+false_button = NodePath("FalseButton")
+
+[node name="TrueButton" type="Button" parent="." unique_id=598944757]
+layout_mode = 2
+mouse_default_cursor_shape = 2
+theme_override_colors/font_color = Color(0.647814, 0.72282, 0.8126409, 1)
+theme_override_styles/normal = SubResource("StyleBoxFlat_5uy45")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_6qn5y")
+theme_override_styles/hover = SubResource("StyleBoxFlat_ylsxl")
+toggle_mode = true
+button_pressed = true
+button_group = SubResource("ButtonGroup_5uy45")
+text = "True"
+
+[node name="FalseButton" type="Button" parent="." unique_id=1431595567]
+layout_mode = 2
+mouse_default_cursor_shape = 2
+theme_override_colors/font_color = Color(0.647814, 0.72282, 0.8126409, 1)
+theme_override_styles/normal = SubResource("StyleBoxFlat_ciyhn")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_x653m")
+theme_override_styles/hover = SubResource("StyleBoxFlat_s4ypx")
+toggle_mode = true
+button_group = SubResource("ButtonGroup_5uy45")
+text = "False"

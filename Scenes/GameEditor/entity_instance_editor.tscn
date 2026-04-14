@@ -4,7 +4,7 @@
 [ext_resource type="Script" uid="uid://buofscg2gv6nf" path="res://Scenes/GameEditor/entity_instance_editor.gd" id="1_hn6w8"]
 [ext_resource type="PackedScene" uid="uid://cxrfq7ld3ttmn" path="res://Scenes/GameEditor/property_edit_list.tscn" id="3_b60re"]
 [ext_resource type="Texture2D" uid="uid://cv8l7ymc05wg5" path="res://assets/img/button_icons/plus.png" id="6_57ay7"]
-[ext_resource type="Texture2D" uid="uid://b0qrxa5lu7j65" path="res://assets/img/button_icons/minus.png" id="7_4ieml"]
+[ext_resource type="PackedScene" uid="uid://cemds60k8ytal" path="res://Scenes/UI/icon_button.tscn" id="6_hn6w8"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_viklj"]
 content_margin_left = 8.0
@@ -47,7 +47,6 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 focus_mode = 2
-mouse_default_cursor_shape = 2
 theme = ExtResource("1_b60re")
 theme_override_styles/panel = SubResource("StyleBoxFlat_viklj")
 script = ExtResource("1_hn6w8")
@@ -92,16 +91,9 @@ layout_mode = 2
 layout_mode = 2
 size_flags_vertical = 4
 
-[node name="AddPropertyButton" type="Button" parent="VBoxContainer/VBoxContainer/HBoxContainer4/VBoxContainer" unique_id=525265645]
-custom_minimum_size = Vector2(0, 50)
+[node name="AddPropertyButton" parent="VBoxContainer/VBoxContainer/HBoxContainer4/VBoxContainer" unique_id=451892711 instance=ExtResource("6_hn6w8")]
 layout_mode = 2
-mouse_default_cursor_shape = 1
 icon = ExtResource("6_57ay7")
-
-[node name="RemovePropertyButton" type="Button" parent="VBoxContainer/VBoxContainer/HBoxContainer4/VBoxContainer" unique_id=1407681144]
-custom_minimum_size = Vector2(0, 50)
-layout_mode = 2
-icon = ExtResource("7_4ieml")
 
 [node name="HBoxContainer3" type="HBoxContainer" parent="VBoxContainer" unique_id=1716997162]
 visible = false
@@ -118,3 +110,29 @@ text = "Update"
 custom_minimum_size = Vector2(100, 50)
 layout_mode = 2
 text = "Cancel"
+
+[node name="VBoxContainer2" type="VBoxContainer" parent="." unique_id=1807164450]
+layout_mode = 2
+mouse_filter = 2
+
+[node name="CenterContainer" type="CenterContainer" parent="VBoxContainer2" unique_id=132610090]
+custom_minimum_size = Vector2(0, 140)
+layout_mode = 2
+mouse_filter = 2
+
+[node name="Control" type="Control" parent="VBoxContainer2/CenterContainer" unique_id=1148030348]
+layout_mode = 2
+mouse_filter = 2
+
+[node name="PopupHolder" type="CenterContainer" parent="VBoxContainer2/CenterContainer/Control" unique_id=654465750]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[connection signal="pressed" from="VBoxContainer/VBoxContainer/HBoxContainer4/VBoxContainer/AddPropertyButton" to="." method="_on_add_property_button_pressed"]

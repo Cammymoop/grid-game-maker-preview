@@ -2,8 +2,8 @@
 
 [resource]
 content_margin_top = 2.0
-content_margin_bottom = 4.0
+content_margin_bottom = 3.0
 bg_color = Color(0.746084, 0.746084, 0.746084, 0.078431375)
 draw_center = false
 border_width_bottom = 2
-border_color = Color(0.49067378, 0.56002, 0.65035474, 1)
+border_color = Color(0.26693603, 0.29534245, 0.33226117, 1)

@@ -11,3 +11,5 @@ extends ButtonContainer
         if tex_rect:
             tex_rect.texture = new_tex
 
+func set_icon(new_icon: Texture2D) -> void:
+    icon = new_icon

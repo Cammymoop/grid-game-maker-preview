@@ -84,6 +84,8 @@ func switch_edit_mode(edit_enabled: bool, save_state: bool = true) -> void:
 			vp.rescale()
 		if not GameManager.editor_live_edit_mode:
 			GameManager.load_edited()
+			await get_tree().process_frame
+			await get_tree().process_frame
 		var cam_position = GameManager.get_gameplay_camera_position()
 		move_cursor(MapManager.world_to_tile_position(cam_position))
 		$EditorCam.set_position_immediate(cam_position)

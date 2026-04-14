@@ -1,7 +1,10 @@
 extends PanelContainer
 
+signal list_size_changed()
+
 signal request_conditional_editor(property_name: String, current_value: Variant)
 signal request_new_property()
+signal request_duplicate_property(property_name: String)
 
 const ListItem = preload("res://Scenes/GameEditor/property_edit_list_item.gd")
 const list_item_scn: PackedScene = preload("res://Scenes/GameEditor/property_edit_list_item.tscn")
@@ -42,7 +45,7 @@ const _default_sorting_info: Dictionary = {
     "sort_conditional_local": -1,
     "sort_event_special": -1,
 }
-var sorting_info: Dictionary
+@export var sorting_info: Dictionary = {}
 
 const CONFLICTED_NAME: String = "NAME_CONFLICT_"
 var conflicting_property_name: String = ""
@@ -53,10 +56,11 @@ func _init() -> void:
     reset_sorting_info()
 
 func clear() -> void:
-    clear_list_items()
+    _clear_list_items()
     properties_info.clear()
     index_map.clear()
     _next_index = 0
+    list_size_changed.emit()
 
 func apply_edits_to_definition(to_definition_index: int = -1) -> void:
     if to_definition_index == -1:
@@ -164,6 +168,8 @@ func load_entity_instance_properties(the_entity: BaseEntity) -> void:
     is_entity = true
     enable_local_props = true
     enable_edit_base_props = edit_base_props_on_instance
+    if sorting_info == _default_sorting_info:
+        sorting_info["sort_conditional_local"] = 2
     if properties_info.size() > 0:
         clear()
     editing_entity = the_entity
@@ -208,22 +214,25 @@ func load_entity_instance_properties(the_entity: BaseEntity) -> void:
                 info["is_conditional"] = is_conditional(info["value"])
                 info["is_overridden"] = false
     create_list_items()
-        
 
 
 func create_list_items() -> void:
-    clear_list_items()
+    _clear_list_items()
     
     if conflicting_property_name:
         push_warning("Rebuilding list while conflicting property name is set: %s" % conflicting_property_name)
     
     var sorted_indices: = get_sorted_property_indices()
     for prop_index in sorted_indices:
-        var list_item: ListItem = list_item_scn.instantiate()
-        _setup_list_item(list_item, prop_index)
-        list_item_parent.add_child(list_item)
+        _add_list_item_for(prop_index)
     on_prop_name_width_changed()
     resort_list_items()
+    list_size_changed.emit()
+
+func _add_list_item_for(prop_index: int) -> void:
+    var list_item: ListItem = list_item_scn.instantiate()
+    _setup_list_item(list_item, prop_index)
+    list_item_parent.add_child(list_item)
 
 func resort_list_items() -> void:
     var sorted_indices: = get_sorted_property_indices()
@@ -276,6 +285,7 @@ func convert_prop_is_conditional(prop_name: String, set_is_conditional: bool) ->
     if info["list_item"]:
         properties_info[p_index]["list_item"].set_prop_value(info["value"])
     prop_changed(prop_name)
+    resort_list_items()
 
 func on_property_value_edited(prop_name: String, new_value: Variant) -> void:
     var p_index: int = index_map.get(prop_name, -1)
@@ -284,6 +294,7 @@ func on_property_value_edited(prop_name: String, new_value: Variant) -> void:
         return
     properties_info[p_index]["value"] = new_value
     prop_changed(prop_name)
+    resort_list_items()
 
 func is_instance_update() -> bool:
     return is_entity and auto_update_entity_instance and editing_entity
@@ -325,10 +336,12 @@ func on_property_name_changed(old_name: String, new_name: String) -> void:
     index_map.erase(old_name)
     index_map[rename_to] = p_index
     properties_info[p_index]["property_name"] = rename_to
+    resort_list_items()
     on_prop_name_width_changed()
 
 func on_property_name_change_finalized(_new_prop_name: String) -> void:
     all_props_changed()
+    resort_list_items()
 
 func resolve_name_conflict_as_overwrite() -> void:
     var conflicting_index: int = index_map.get(CONFLICTED_NAME, -1)
@@ -348,6 +361,8 @@ func resolve_name_conflict_as_overwrite() -> void:
     properties_info[conflicting_index]["property_name"] = conflicting_property_name
     conflicting_property_name = ""
     all_props_changed()
+    list_size_changed.emit()
+    resort_list_items()
 
 func remove_conflicting_property() -> void:
     var conflicting_index: int = index_map.get(CONFLICTED_NAME, -1)
@@ -357,6 +372,8 @@ func remove_conflicting_property() -> void:
     remove_prop_index(conflicting_index)
     conflicting_property_name = ""
     all_props_changed()
+    list_size_changed.emit()
+    resort_list_items()
 
 func remove_prop_index(index: int) -> void:
     var info: Dictionary[String, Variant] = properties_info[index]
@@ -378,6 +395,7 @@ func remove_prop_name(prop_name: String) -> void:
         push_error("Ambiguous remove property by name because of existing conflict: %s" % prop_name)
     else:
         remove_prop_index(index)
+    list_size_changed.emit()
 
 func on_prop_remove_requested(prop_name: String) -> void:
     if prop_name and prop_name == conflicting_property_name:
@@ -400,9 +418,12 @@ func on_prop_remove_requested(prop_name: String) -> void:
             push_error("Cannot remove base property: %s, editing base properties is disabled" % prop_name)
         else:
             remove_prop_index(p_index)
+    elif not properties_info[p_index]["is_base_definition_property"]:
+        remove_prop_index(p_index)
     else:
         set_prop_index_removed(p_index)
     prop_changed(prop_name)
+    resort_list_items()
 
 func set_prop_index_removed(index: int) -> void:
     var info: Dictionary[String, Variant] = properties_info[index]
@@ -436,6 +457,7 @@ func restore_prop_name(prop_name: String) -> void:
     if info["list_item"]:
         properties_info[p_index]["list_item"].set_override_state(true, false, false, info["value"])
     prop_changed(prop_name)
+    resort_list_items()
 
 func on_prop_override_requested(prop_name: String) -> void:
     if not enable_local_props:
@@ -449,6 +471,7 @@ func on_prop_override_requested(prop_name: String) -> void:
         push_error("Ambiguous set override property by name because of existing conflict: %s" % prop_name)
         return
     set_prop_index_overridden(p_index)
+    resort_list_items()
 
 func set_prop_index_overridden(index: int) -> void:
     var info: Dictionary[String, Variant] = properties_info[index]
@@ -460,7 +483,7 @@ func set_prop_index_overridden(index: int) -> void:
         properties_info[index]["list_item"].make_overridden()
     prop_changed(info["property_name"])
 
-func clear_list_items() -> void:
+func _clear_list_items() -> void:
     for list_item in get_all_list_items():
         list_item_parent.remove_child(list_item)
         list_item.queue_free()
@@ -495,6 +518,9 @@ func is_spec(info: Dictionary[String, Variant]) -> bool:
 func is_conditional(prop_value: Variant) -> bool:
     return typeof(prop_value) in [TYPE_DICTIONARY, TYPE_ARRAY]
 
+func is_local(info: Dictionary[String, Variant]) -> bool:
+    return info["is_overridden"] or info["is_removed"]
+
 func increment_sort_category(is_event_special: bool) -> void:
     if is_event_special:
         sorting_info["sort_conditional_local"] = -1
@@ -516,8 +542,8 @@ func compare_prop_info(a: Dictionary[String, Variant], b: Dictionary[String, Var
         if a_v != b_v:
             return category_sort.call(a_v, b_v, sorting_info["sort_event_special"])
     elif sorting_info["sort_conditional_local"] != -1:
-        var a_v: int = 2 if a["is_overridden"] else (1 if a["is_conditional"] else 0)
-        var b_v: int = 2 if b["is_overridden"] else (1 if b["is_conditional"] else 0)
+        var a_v: int = 2 if is_local(a) else (1 if a["is_conditional"] else 0)
+        var b_v: int = 2 if is_local(b) else (1 if b["is_conditional"] else 0)
         if a_v != b_v:
             return  category_sort.call(a_v, b_v, sorting_info["sort_conditional_local"])
 
@@ -591,3 +617,54 @@ func active_list_item_changed(new_active_list_item: ListItem) -> void:
     scroll_container.ensure_control_visible(new_active_list_item)
     
 
+func get_minimum_list_height() -> float:
+    if not scroll_container:
+        push_error("Scroll container not set")
+        return 100
+    # minimum list height is the minimum height of the list inside the scroll container plus however much margin the base list panel adds
+    var self_margin_height: float = get_minimum_size().y - scroll_container.get_minimum_size().y
+    return self_margin_height + scroll_container.get_child(0).get_minimum_size().y
+
+func _add_new_property(property_name: String, as_conditional: bool) -> int:
+    if not enable_local_props and not enable_edit_base_props:
+        push_error("Cannot add properties because local props are disabled and base property editing is disabled")
+        return -1
+
+    var new_index: int = index_map.get(property_name, -1)
+    if new_index != -1:
+        # replacing an existing property
+        remove_prop_index(new_index)
+    else:
+        new_index = _next_index
+        _next_index += 1
+    var info: Dictionary[String, Variant] = blank_property_info.duplicate()
+    info["property_name"] = property_name
+    properties_info[new_index] = info
+
+    if enable_local_props:
+        info["is_base_definition_property"] = false
+        info["is_overridden"] = true
+    if as_conditional:
+        info["is_conditional"] = true
+        info["value"] = {}
+    _add_list_item_for(new_index)
+    return new_index
+
+
+func add_new_or_duplicate_property(property_name: String, as_conditional: bool, is_duplicate_of: String = "") -> void:
+    var duplicate_of_index: int = index_map.get(is_duplicate_of, -1)
+    var duplicate_value: Variant = null
+    if duplicate_of_index != -1:
+        as_conditional = properties_info[duplicate_of_index]["is_conditional"]
+        duplicate_value = properties_info[duplicate_of_index]["value"]
+        if typeof(duplicate_value) in [TYPE_DICTIONARY, TYPE_ARRAY]:
+            duplicate_value = duplicate_value.duplicate_deep()
+
+    var new_index: int = _add_new_property(property_name, as_conditional)
+    if new_index != -1:
+        if is_duplicate_of:
+            properties_info[new_index]["value"] = duplicate_value
+        properties_info[new_index]["list_item"].start_value_editting()
+        on_prop_name_width_changed()
+        resort_list_items()
+        list_size_changed.emit()

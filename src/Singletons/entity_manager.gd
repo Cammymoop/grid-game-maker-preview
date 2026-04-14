@@ -244,6 +244,7 @@ func disconnect_all_custom_signals() -> void:
 func refresh_definition():
     update_movement_mode()
     fix_string_keys()
+    fix_int_property_vals()
     create_index_map()
     create_defined_custom_signals()
 
@@ -269,6 +270,13 @@ func fix_string_keys():
             entity_defs[intk]["texture"] = int(entity_defs[intk]["texture"])
         if "tex_index" in entity_defs[intk]:
             entity_defs[intk]["tex_index"] = int(entity_defs[intk]["tex_index"])
+
+func fix_int_property_vals():
+    for entity_id in entity_defs.keys():
+        var entity_props: Dictionary = entity_defs[entity_id].get("properties", {})
+        for prop_name in entity_props.keys():
+            if typeof(entity_props[prop_name]) == TYPE_FLOAT and Utility.is_float_integer(entity_props[prop_name]):
+                entity_props[prop_name] = int(entity_props[prop_name])
 
 func entity_order(a, b) -> bool:
     if a.entity_index == b.entity_index:

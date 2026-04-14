@@ -10,6 +10,8 @@ signal property_value_changed(property_name: String, value: Variant)
 
 signal request_convert_conditional(property_name: String, is_conditional: bool)
 
+const MultiTypeInput = preload("res://Scenes/GameEditor/multi_type_input.gd")
+
 const event_icon: Texture2D = preload("res://assets/img/property_list/event_icon.png")
 const special_prop_icon: Texture2D = preload("res://assets/img/property_list/special_prop_icon.png")
 
@@ -27,8 +29,8 @@ const no_icon: Texture2D = preload("res://assets/img/property_list/no_icon.png")
 @export_group("UI Refs")
 @export var sub_item_container: Control
 
-@export var icon_button1: Control
-@export var icon_button2: Control
+@export var icon_1: Control
+@export var icon_2: Control
 
 @export var name_section: Control
 @export var name_label: RichTextLabel
@@ -36,7 +38,7 @@ const no_icon: Texture2D = preload("res://assets/img/property_list/no_icon.png")
 
 @export var value_section: Control
 @export var value_label: RichTextLabel
-@export var value_edit: Control
+@export var value_edit: MultiTypeInput
 
 @export var override_button: Button
 @export var remove_button: ButtonContainer
@@ -57,6 +59,7 @@ const no_icon: Texture2D = preload("res://assets/img/property_list/no_icon.png")
 @export var inactive_stylebox: StyleBox
 @export var active_stylebox: StyleBox
 @export var highlighted_stylebox: StyleBox
+@export var active_highlighted_stylebox: StyleBox
 
 var base_property_value: Variant = null
 
@@ -66,6 +69,7 @@ var is_removed: bool = false
 
 var _hovered: bool = false
 var _is_active: bool = false
+var _value_editting: bool = false
 
 var _name_edited: bool = false
 var _name_edited_from: String = ""
@@ -75,6 +79,11 @@ func _ready() -> void:
     override_button.pressed.connect(on_override_button_pressed)
     name_edit.text_changed.connect(on_name_edit_text_changed)
     name_edit.editing_toggled.connect(on_name_edit_editing_toggled)
+    
+    value_edit.value_changed.connect(on_value_edited)
+    
+    value_edit.hide()
+    value_label.show()
     
     if not sub_item_container:
         sub_item_container = self
@@ -86,10 +95,10 @@ func _ready() -> void:
                     if sub_sub_item is Control:
                         has_control_children = true
                         sub_sub_item.gui_input.connect(sub_item_gui_input)
-                        sub_sub_item.focus_entered.connect(sub_item_focus_entered)
+                        sub_sub_item.focus_entered.connect(sub_item_focus_entered.bind(sub_sub_item))
             if not has_control_children:
                 child.gui_input.connect(sub_item_gui_input)
-                child.focus_entered.connect(sub_item_focus_entered)
+                child.focus_entered.connect(sub_item_focus_entered.bind(child))
 
     add_theme_stylebox_override("panel", _normal_stylebox())
     set_prop_value(property_value)
@@ -102,9 +111,15 @@ func set_name_section_fixed_width(new_width: float) -> void:
 
 func set_prop_value(new_value: Variant) -> void:
     property_value = new_value
+    value_edit.set_value(new_value)
     if is_base_definition_property and not is_overridden and not is_removed:
         base_property_value = new_value
     refresh_ui()
+
+func on_value_edited(new_value: Variant) -> void:
+    property_value = new_value
+    prints("on_value_edited: %s" % new_value)
+    property_value_changed.emit(property_name, new_value)
 
 func _process(_delta: float) -> void:
     if not get_window().has_focus():
@@ -115,7 +130,7 @@ func _process(_delta: float) -> void:
     
     var mouse_over: = Rect2(Vector2.ZERO, get_size()).has_point(get_local_mouse_position())
     if not _hovered and mouse_over:
-        add_theme_stylebox_override("panel", highlighted_stylebox)
+        add_theme_stylebox_override("panel", _highlighted_stylebox())
         _hovered = true
     elif _hovered and not mouse_over:
         add_theme_stylebox_override("panel", _normal_stylebox())
@@ -124,21 +139,46 @@ func _process(_delta: float) -> void:
 func _normal_stylebox() -> StyleBox:
     return active_stylebox if _is_active else inactive_stylebox
 
+func _highlighted_stylebox() -> StyleBox:
+    if _is_active:
+        return active_highlighted_stylebox if active_highlighted_stylebox else active_stylebox
+    else:
+        return highlighted_stylebox
+
 func set_active(new_is_active: bool) -> void:
     if _is_active == new_is_active:
         return
     _is_active = new_is_active
+    if not _is_active:
+        stop_value_editting()
     var mouse_over: = Rect2(Vector2.ZERO, get_size()).has_point(get_local_mouse_position())
     if not mouse_over:
         add_theme_stylebox_override("panel", _normal_stylebox())
+    else:
+        add_theme_stylebox_override("panel", _highlighted_stylebox())
 
 func is_active() -> bool:
     return _is_active
 
 func is_conditional() -> bool:
     if is_removed:
-        return false
+        return typeof(base_property_value) in [TYPE_DICTIONARY, TYPE_ARRAY]
     return typeof(property_value) in [TYPE_DICTIONARY, TYPE_ARRAY]
+
+func is_bool() -> bool:
+    if is_removed:
+        return typeof(base_property_value) == TYPE_BOOL
+    return typeof(property_value) == TYPE_BOOL
+
+func is_number() -> bool:
+    if is_removed:
+        return typeof(base_property_value) in [TYPE_INT, TYPE_FLOAT]
+    return typeof(property_value) in [TYPE_INT, TYPE_FLOAT]
+
+func is_string() -> bool:
+    if is_removed:
+        return typeof(base_property_value) == TYPE_STRING
+    return typeof(property_value) == TYPE_STRING
 
 func set_override_state(new_is_base: bool, new_is_override: bool, new_is_removed: bool, new_value: Variant) -> void:
     if new_is_override and new_is_removed:
@@ -156,6 +196,7 @@ func make_overridden() -> void:
     if is_conditional():
         new_value = true
     set_override_state(is_base_definition_property, true, false, new_value)
+    start_value_editting()
 
 func make_removed() -> void:
     if not is_base_definition_property:
@@ -164,11 +205,14 @@ func make_removed() -> void:
     if is_removed:
         return
     set_override_state(true, false, true, base_property_value)
+    stop_value_editting()
 
 func on_remove_button_pressed() -> void:
+    stop_value_editting()
     request_remove.emit(property_name)
 
 func on_override_button_pressed() -> void:
+    stop_value_editting()
     if not local_props_enabled or not is_base_definition_property:
         return
     if is_overridden or is_removed:
@@ -199,37 +243,40 @@ func on_name_edit_editing_toggled(is_editing: bool) -> void:
 func on_prop_value_edited(new_value: Variant) -> void:
     property_value_changed.emit(property_name, new_value)
 
+func set_control_icon(control: Control, icon_tex: Texture, tooltip_txt: String = "", mod_color: Color = Color.WHITE) -> void:
+    control.modulate = mod_color
+    control.tooltip_text = tooltip_txt
+    if control is Button:
+        control.icon = icon_tex
+    elif control is TextureRect:
+        control.texture = icon_tex
+    elif control.has_method("set_icon"):
+        control.set_icon(icon_tex)
+
+
 func refresh_ui() -> void:
-    show_name_edit_or_label()
+    name_edit.visible = not is_base_definition_property or enable_edit_base_props
+    name_label.visible = not name_edit.visible
     if name_label.visible:
         name_label.text = get_rich_name_text()
     name_edit.text = property_name
-    show_value_edit_or_label()
-    if value_label.visible:
-        value_label.text = get_rich_value_text()
     
-    if is_event_name(property_name):
-        icon_button1.icon = event_icon
-        icon_button1.modulate = event_name_color
-        icon_button1.tooltip_text = "Event"
-    elif is_special_prop_name(property_name):
-        icon_button1.icon = special_prop_icon
-        icon_button1.modulate = special_prop_name_color
-        icon_button1.tooltip_text = "Special Property"
-    else:
-        icon_button1.icon = no_icon
-        icon_button1.modulate = Color.WHITE
-        icon_button1.tooltip_text = ""
+    refresh_value_edit()
     
     if local_props_enabled and is_overridden or is_removed:
-        icon_button2.icon = local_prop_icon
-        icon_button2.tooltip_text = "Local Property Override" + (" (Overridden as Removed)" if is_removed else "")
+        var override_tooltip: String = "Local Property Override" + (" (Overridden as Removed)" if is_removed else "")
+        set_control_icon(icon_1, local_prop_icon, override_tooltip)
     elif is_conditional():
-        icon_button2.icon = conditional_icon
-        icon_button2.tooltip_text = "Conditional"
+        set_control_icon(icon_1, conditional_icon, "Conditional")
     else:
-        icon_button2.icon = no_icon
-        icon_button2.tooltip_text = ""
+        set_control_icon(icon_1, no_icon)
+    
+    if is_event_name(property_name):
+        set_control_icon(icon_2, event_icon, "Event", event_name_color)
+    elif is_special_prop_name(property_name):
+        set_control_icon(icon_2, special_prop_icon, "Special Property", special_prop_name_color)
+    else:
+        set_control_icon(icon_2, no_icon)
     
     override_button.visible = is_base_definition_property and local_props_enabled
 
@@ -240,19 +287,30 @@ func refresh_ui() -> void:
         remove_button.disabled = true
     else:
         remove_button.disabled = false
-    
-    refresh_value_edit()
 
 func refresh_value_edit() -> void:
-    pass
+    value_edit.set_value(base_property_value)
 
+    value_label.visible = not _value_editting
+    if value_label.visible:
+        value_label.text = get_rich_value_text()
 
-func show_name_edit_or_label() -> void:
-    name_edit.visible = not is_base_definition_property or enable_edit_base_props
-    name_label.visible = not name_edit.visible
+func start_value_editting() -> void:
+    if _value_editting:
+        return
+    _value_editting = true
+    value_label.hide()
+    value_edit.show()
+    value_edit.set_value(base_property_value)
+    value_edit.try_grab_focus()
 
-func show_value_edit_or_label() -> void:
-    value_label.visible = true
+func stop_value_editting() -> void:
+    if not _value_editting:
+        return
+    _value_editting = false
+    value_edit.hide()
+    value_label.show()
+    value_label.text = get_rich_value_text()
 
 func is_special_prop_name(prop_name: String) -> bool:
     return GameManager.is_special_prop_name(prop_name)
@@ -264,14 +322,29 @@ func sub_item_gui_input(event: InputEvent) -> void:
     any_gui_input(event)
 
 func _gui_input(event: InputEvent) -> void:
+    if event is InputEventMouseButton and event.is_pressed():
+        if event.double_click:
+            start_value_editting()
+        else:
+            stop_value_editting()
     any_gui_input(event)
 
 func any_gui_input(event: InputEvent) -> void:
     if event is InputEventMouseButton and event.is_pressed():
         request_activate.emit(self)
 
-func sub_item_focus_entered() -> void:
+func sub_item_focus_entered(sub_item: Control) -> void:
+    if sub_item and not (value_edit == sub_item or value_edit.is_ancestor_of(sub_item)):
+        stop_value_editting()
     request_activate.emit(self)
+
+func get_value_text() -> String:
+    var use_value: Variant = base_property_value if not is_overridden else property_value
+    if typeof(use_value) == TYPE_BOOL:
+        return str(use_value).capitalize() + " " + ("👍" if use_value else "😔")
+    if use_value == null:
+        return "--"
+    return Utility.property_value_or_conditional_to_string(use_value)
 
 
 func is_fade_base_prop() -> bool:
@@ -290,9 +363,9 @@ func get_rich_name_text() -> String:
         prop_name = "[s]%s[/s]" % prop_name
         text_color = removed_text_color
         if is_event_prop:
-            text_color = event_name_color.darkened(0.8)
+            text_color = event_name_color.darkened(0.15)
         elif is_special_prop:
-            text_color = special_prop_name_color.darkened(0.8)
+            text_color = special_prop_name_color.darkened(0.15)
     else:
         if is_event_prop:
             text_color = event_name_color
@@ -309,11 +382,11 @@ func get_rich_value_text() -> String:
         val_text = "{CONDITIONAL}"
         text_color = removed_text_color if is_removed else conditional_desc_color
     else:
-        val_text = str(property_value)
+        val_text = get_value_text()
         text_color = removed_text_color if is_removed else normal_text_color
-        if typeof(property_value) == TYPE_BOOL:
+        if is_bool():
             text_color = removed_bool_text_color if is_removed else boolean_text_color
-        elif typeof(property_value) in [TYPE_INT, TYPE_FLOAT]:
+        elif is_number():
             text_color = removed_number_text_color if is_removed else number_text_color
 
     if is_removed:

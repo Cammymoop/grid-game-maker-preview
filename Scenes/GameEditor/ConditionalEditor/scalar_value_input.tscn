@@ -1,30 +1,15 @@
 [gd_scene format=3 uid="uid://bleyoj5f36kfy"]
 
 [ext_resource type="Script" uid="uid://cnppg2kg7idd7" path="res://src/GameEditor/ConditionalEditor/scalar_value_input.gd" id="1_8ivw8"]
+[ext_resource type="StyleBox" uid="uid://dql3g3np3anc8" path="res://assets/ui/covered_spinbox_panel_bg.tres" id="1_oofn6"]
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_1eekn"]
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_8ivw8"]
-content_margin_left = 4.0
-content_margin_top = 0.0
-content_margin_right = 4.0
-content_margin_bottom = 0.0
-bg_color = Color(0.08468992, 0.08468992, 0.08468992, 1)
-border_width_left = 1
-border_width_top = 1
-border_width_right = 1
-border_width_bottom = 1
-border_color = Color(0.15722689, 0.13425243, 0.1342516, 1)
-corner_radius_top_left = 4
-corner_radius_top_right = 4
-corner_radius_bottom_right = 4
-corner_radius_bottom_left = 4
-shadow_offset = Vector2(0, 1)
 
 [sub_resource type="Theme" id="Theme_oofn6"]
 LineEdit/constants/minimum_character_width = 2
 LineEdit/styles/normal = SubResource("StyleBoxEmpty_1eekn")
-PanelContainer/styles/panel = SubResource("StyleBoxFlat_8ivw8")
+LineEdit/styles/read_only = SubResource("StyleBoxEmpty_1eekn")
+PanelContainer/styles/panel = ExtResource("1_oofn6")
 
 [node name="ScalarValueInput" type="PanelContainer" unique_id=1458729988 node_paths=PackedStringArray("value_input")]
 offset_right = 16.0

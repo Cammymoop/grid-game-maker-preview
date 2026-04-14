@@ -465,6 +465,11 @@ func color_string_no_alpha(of_color: Color) -> String:
 func is_float_integer(num: float) -> bool:
 	return is_equal_approx(num, roundf(num))
 
+func property_value_or_conditional_to_string(prop_value: Variant) -> String:
+	if typeof(prop_value) in [TYPE_DICTIONARY, TYPE_ARRAY]:
+		return "{CONDITIONAL}"
+	return property_value_to_string(prop_value)
+
 func property_value_to_string(prop_value: Variant) -> String:
 	if typeof(prop_value) == TYPE_STRING:
 		return prop_value
