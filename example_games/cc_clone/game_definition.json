@@ -48,7 +48,7 @@
           "when false": [],
           "when always": []
         },
-        "chips": 0.0,
+        "chips": 0,
         "can-cross-gravel": true,
         "can-cross-goal": true,
         "solid": true,
@@ -121,7 +121,7 @@
         },
         "can-cross-gravel": true,
         "can-cross-goal": true,
-        "z-index": 4.0,
+        "z-index": 4,
         "solid": true
       },
       "intended_move_speed": 0.0
@@ -152,7 +152,7 @@
           "when false": [],
           "when always": []
         },
-        "z-index": -1.0,
+        "z-index": -1,
         "solid": true
       },
       "intended_move_speed": 0.0
@@ -162,7 +162,7 @@
       "texture": 1,
       "tex_index": 18,
       "properties": {
-        "z-index": -1.0,
+        "z-index": -1,
         "finish_move_onto": {
           "v": "3",
           "conditions": [],
@@ -328,7 +328,7 @@
           "when false": [],
           "when always": []
         },
-        "z-index": -1.0,
+        "z-index": -1,
         "blocks": {
           "v": "3",
           "conditions": [
@@ -347,7 +347,7 @@
       "tex_index": 7,
       "properties": {
         "creature": true,
-        "z-index": 2.0,
+        "z-index": 2,
         "blocks": {
           "v": "3",
           "conditions": [
@@ -412,7 +412,7 @@
           "when false": [],
           "when always": []
         },
-        "z-index": -1.0
+        "z-index": -1
       }
     },
     "18": {
@@ -421,7 +421,7 @@
       "tex_index": 34,
       "properties": {
         "blocks": true,
-        "z-index": -1.0,
+        "z-index": -1,
         "solid": true
       }
     },
@@ -442,7 +442,7 @@
           "when false": [],
           "when always": []
         },
-        "z-index": -1.0,
+        "z-index": -1,
         "blocks": {
           "v": "3",
           "conditions": [
@@ -471,7 +471,7 @@
           "when false": [],
           "when always": []
         },
-        "z-index": -1.0,
+        "z-index": -1,
         "blocks": {
           "v": "3",
           "conditions": [
@@ -501,7 +501,7 @@
           "when false": [],
           "when always": []
         },
-        "z-index": -1.0,
+        "z-index": -1,
         "blocks": {
           "v": "3",
           "conditions": [
@@ -530,7 +530,7 @@
           "when false": [],
           "when always": []
         },
-        "z-index": -1.0
+        "z-index": -1
       }
     },
     "23": {
@@ -539,7 +539,7 @@
       "tex_index": 23,
       "properties": {
         "move_off_of": false,
-        "z-index": 6.0,
+        "z-index": 6,
         "cage": true
       },
       "intended_move_speed": 0.0
@@ -597,7 +597,7 @@
             "when always": []
           }
         ],
-        "z-index": -1.0
+        "z-index": -1
       }
     },
     "25": {
@@ -668,7 +668,7 @@
           "when false": [],
           "when always": []
         },
-        "z-index": -1.0
+        "z-index": -1
       }
     },
     "28": {
@@ -676,7 +676,7 @@
       "texture": 1,
       "tex_index": 40,
       "properties": {
-        "z-index": -1.0,
+        "z-index": -1,
         "finish_move_onto": {
           "v": "3",
           "conditions": [
@@ -697,7 +697,7 @@
       "tex_index": 41,
       "properties": {
         "creature": true,
-        "z-index": 2.0,
+        "z-index": 2,
         "blocks": {
           "v": "3",
           "conditions": [
@@ -747,7 +747,7 @@
           "when false": [],
           "when always": []
         },
-        "z-index": -1.0,
+        "z-index": -1,
         "blocks": {
           "v": "3",
           "conditions": [
@@ -760,7 +760,7 @@
       }
     },
     "31": {
-      "name": "purple-key1",
+      "name": "orange-key",
       "texture": 1,
       "tex_index": 27,
       "properties": {
@@ -776,7 +776,7 @@
           "when false": [],
           "when always": []
         },
-        "z-index": -1.0
+        "z-index": -1
       }
     },
     "32": {
@@ -796,7 +796,7 @@
           "when false": [],
           "when always": []
         },
-        "z-index": -1.0
+        "z-index": -1
       }
     },
     "33": {
@@ -816,7 +816,7 @@
           "when false": [],
           "when always": []
         },
-        "z-index": -1.0
+        "z-index": -1
       }
     },
     "34": {
@@ -824,7 +824,7 @@
       "texture": 0,
       "tex_index": 35,
       "properties": {
-        "chips-required": 9.0,
+        "chips-required": 9,
         "blocks": {
           "v": "3",
           "conditions": [

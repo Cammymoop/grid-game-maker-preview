@@ -7,6 +7,7 @@
 [ext_resource type="PackedScene" uid="uid://4c11q33d8c57" path="res://Scenes/GameEditor/entity_instance_editor.tscn" id="4_ek1d2"]
 [ext_resource type="PackedScene" uid="uid://ccr48mbb8s5et" path="res://Scenes/bg_effect_5.tscn" id="4_nsvgp"]
 [ext_resource type="Script" uid="uid://jw5fk1ax6p18" path="res://src/GameView.gd" id="5"]
+[ext_resource type="Script" uid="uid://evq6x474ma1n" path="res://Scenes/text_box_anim_root.gd" id="5_q86eb"]
 
 [sub_resource type="Animation" id="Animation_nsvgp"]
 length = 0.001
@@ -60,6 +61,60 @@ _data = {
 &"RESET": SubResource("Animation_nsvgp"),
 &"hide": SubResource("Animation_vx41i"),
 &"show": SubResource("Animation_ek1d2")
+}
+
+[sub_resource type="Animation" id="Animation_4cgsu"]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:position")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector2(0, 86)]
+}
+
+[sub_resource type="Animation" id="Animation_i0j1v"]
+resource_name = "hide"
+length = 0.5334
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:position")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.53333336),
+"transitions": PackedFloat32Array(0.4506252, 1),
+"update": 0,
+"values": [Vector2(0, 5), Vector2(0, 86)]
+}
+
+[sub_resource type="Animation" id="Animation_p1k4u"]
+resource_name = "show"
+length = 0.2667
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:position")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.26666668),
+"transitions": PackedFloat32Array(0.5358867, 1),
+"update": 0,
+"values": [Vector2(0, 86), Vector2(0, 5)]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_hagi3"]
+_data = {
+&"RESET": SubResource("Animation_4cgsu"),
+&"hide": SubResource("Animation_i0j1v"),
+&"show": SubResource("Animation_p1k4u")
 }
 
 [node name="Play" type="Control" unique_id=357405740]
@@ -147,6 +202,46 @@ text = "LEVEL NAME"
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="OverlayLayer/OverlayUI/TopCenter/AnimationRoot" unique_id=921051847]
 libraries/ = SubResource("AnimationLibrary_r5y0w")
+
+[node name="BottomCenter" type="Control" parent="OverlayLayer/OverlayUI" unique_id=829293877]
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 0
+mouse_filter = 2
+
+[node name="TextBoxAnimRoot" type="Node2D" parent="OverlayLayer/OverlayUI/BottomCenter" unique_id=1132113936 node_paths=PackedStringArray("text_label", "text_box_panel")]
+position = Vector2(0, 86)
+script = ExtResource("5_q86eb")
+text_label = NodePath("TextBoxPanel/VBoxContainer/TextBoxLabel")
+text_box_panel = NodePath("TextBoxPanel")
+
+[node name="TextBoxPanel" type="PanelContainer" parent="OverlayLayer/OverlayUI/BottomCenter/TextBoxAnimRoot" unique_id=550490554]
+anchors_preset = -1
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 0
+
+[node name="VBoxContainer" type="VBoxContainer" parent="OverlayLayer/OverlayUI/BottomCenter/TextBoxAnimRoot/TextBoxPanel" unique_id=1289661926]
+layout_mode = 2
+
+[node name="TextBoxLabel" type="Label" parent="OverlayLayer/OverlayUI/BottomCenter/TextBoxAnimRoot/TextBoxPanel/VBoxContainer" unique_id=1045195738]
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "TEXT BOX TEXT BOX TEXT BOX TEXT BOX TEXT BOX TEXT BOX TEXT BOX TEXT BOX TEXT BOX TEXT BOX TEXT BOX TEXT BOX TEXT BOX TEXT BOX TEXT BOX TEXT BOX "
+
+[node name="BlankLabel" type="Label" parent="OverlayLayer/OverlayUI/BottomCenter/TextBoxAnimRoot/TextBoxPanel/VBoxContainer" unique_id=183340097]
+layout_mode = 2
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="OverlayLayer/OverlayUI/BottomCenter/TextBoxAnimRoot" unique_id=100291838]
+libraries/ = SubResource("AnimationLibrary_hagi3")
 
 [node name="MapEditorUILayer" type="CanvasLayer" parent="." unique_id=1275328928]
 layer = 10
