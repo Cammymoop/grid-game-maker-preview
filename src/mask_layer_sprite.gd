@@ -9,11 +9,15 @@ var clipping_spr_scn: PackedScene = preload("res://src/Utility/sub_vp_friendly_c
 var layers: Array[Dictionary] = []
 var current_rotation: float = 0
 
+var preview_info: Dictionary = {}
+
 var layer_order_id: int = 0
 
 var modifier_masks: Dictionary = {}
 
 var prop_update_response: Dictionary[String, Array] = {}
+
+var is_preview_mode: bool = false
 
 var rotation_prop: float = 0:
     get:
@@ -28,6 +32,23 @@ func _enter_tree() -> void:
     
     if parent is BaseEntity:
         parent.local_prop_changed.connect(on_local_properties_updated)
+        EntityManager.entity_preview_mode_changed.connect(on_entity_preview_mode_changed)
+    else:
+        prints("not registering parent, not under an entity")
+
+func on_entity_preview_mode_changed(enable_preview: bool) -> void:
+    prints("entity preview mode changed to: %s" % enable_preview)
+    is_preview_mode = enable_preview
+    if preview_info:
+        prints("I have preview info, refreshing layers, %s: (%s)" % [is_preview_mode, preview_info])
+        refresh_layers()
+
+func set_preview_info(new_preview_info: Dictionary) -> void:
+    preview_info = new_preview_info.duplicate_deep()
+    if not preview_info.has("mode"):
+        preview_info["mode"] = "normal"
+    if is_preview_mode:
+        refresh_layers()
 
 func set_as_single(single_texture_id: int, tex_index: int, rotates: bool = true) -> void:
     var layer_info: Dictionary = {
@@ -70,8 +91,14 @@ func refresh_layers() -> void:
     resort_layers()
     clear_children()
     prop_update_response.clear()
-    for layer_index in layers.size():
-        create_and_add_nodes_for_layer(layers[layer_index], layer_index)
+    if preview_info and is_preview_mode:
+        prints("I have preview info and am in preview mode, creating preview layer")
+        create_and_add_nodes_for_layer(preview_info, 0)
+    else:
+        if preview_info:
+            prints("I have preview info and am not in preview mode, creating normal layers")
+        for layer_index in layers.size():
+            create_and_add_nodes_for_layer(layers[layer_index], layer_index)
     if is_inside_tree():
         on_local_properties_updated(get_parent() as BaseEntity)
 
@@ -140,7 +167,7 @@ func create_and_add_nodes_for_layer(layer_info: Dictionary, _layer_index: int) -
     var is_masked: bool = false
 
     if layer_info.get("mode") == "normal":
-        var layer_texture_id: int = layer_info.get("texture", -1)
+        var layer_texture_id: int = int(layer_info.get("texture", -1))
         if layer_texture_id == -1:
             return
         

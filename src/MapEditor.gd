@@ -105,6 +105,9 @@ func switch_edit_mode(edit_enabled: bool, do_save_state: bool = true) -> void:
 	else:
 		on_edit_mode_enabled()
 	
+
+func after_edit_mode_switched() -> void:
+	EntityManager.switch_entities_preview_mode(edit_mode)
 	MapManager.switch_tiles_preview_mode(edit_mode)
 
 func on_edit_mode_disabled(do_save_state: bool) -> void:
@@ -118,6 +121,7 @@ func on_edit_mode_disabled(do_save_state: bool) -> void:
 			_auto_save(GameManager.editor_save)
 	#GameManager.position_gameplay_camera(editor_cam.position)
 	GameManager.activate_gameplay_camera()
+	after_edit_mode_switched()
 
 func on_edit_mode_enabled() -> void:
 	has_edited_something = false
@@ -136,6 +140,7 @@ func on_edit_mode_enabled() -> void:
 	editor_cam.set_position_immediate(cam_position)
 	editor_cam.make_current()
 	_refresh_edited_entity_indicators()
+	after_edit_mode_switched()
 
 func get_new_edited_entity_indicator() -> Sprite2D:
 	var indicator: Sprite2D = Sprite2D.new()
@@ -598,6 +603,7 @@ func get_sorted_entities_at(tile_pos: Vector2i) -> Array:
 
 func cleanup() -> void:
 	GameManager.set_pause("map_editor", false)
+	EntityManager.switch_entities_preview_mode(false)
 	MapManager.switch_tiles_preview_mode(false)
 
 func get_reduced_world_view_rect() -> Rect2:

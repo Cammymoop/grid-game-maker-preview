@@ -1,5 +1,6 @@
 extends Node
 
+signal entity_preview_mode_changed(enable_preview: bool)
 signal entity_list_updated
 signal post_deserialize
 
@@ -93,6 +94,8 @@ var default_idle_delay: float = 1/10.0
 var idle_delay_frames: int = -1
 
 var process_phase: int = 0
+
+var is_entity_preview_mode: bool = false
 
 func entity_list_process() -> void:
     var active_entities: Array[BaseEntity] = []
@@ -539,6 +542,9 @@ func setup_entity_texture(entity: BaseEntity) -> void:
         sprite.set_main_layers(sprite_config["layers"])
     else:
         sprite.set_as_single(texture_index, texture_sub_index)
+
+    if entity_defs[entity.entity_index].get("preview_variant", {}):
+        sprite.set_preview_info(entity_defs[entity.entity_index]["preview_variant"])
 
 func serialize() -> Dictionary:
     var serialized_entities: Array = []
@@ -1061,3 +1067,7 @@ func get_pos_above(entity: BaseEntity) -> Vector2i:
 
 func get_default_spt() -> int:
     return BaseEntity._speed_to_spt(default_move_speed)
+
+func switch_entities_preview_mode(enable_preview: bool) -> void:
+    is_entity_preview_mode = enable_preview
+    entity_preview_mode_changed.emit(enable_preview)
