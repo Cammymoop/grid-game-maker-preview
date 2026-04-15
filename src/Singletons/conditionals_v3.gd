@@ -212,14 +212,14 @@ func resolve_conditional(conditional: Variant, slots: Dictionary, extra_debug: b
 func _resolve_conditional(conditional: Array[Dictionary], slots: Dictionary) -> Dictionary:
     reset_slots = slots_copy(slots)
     
-    var overall_result = {"result": true, "quit": false}
-    for step in conditional:
-        overall_result = _resolve_conditional_step(step, overall_result, slots)
-        if overall_result["quit"]:
+    var this_step_result = {"result": true, "quit": false}
+    for i in conditional.size():
+        this_step_result = _resolve_conditional_step(i, conditional[i], this_step_result, slots)
+        if this_step_result["quit"]:
             break
-    return overall_result
+    return this_step_result
     
-func _resolve_conditional_step(cond_step: Dictionary, overall_result: Dictionary, slots: Dictionary) -> Dictionary:
+func _resolve_conditional_step(step_index: int, cond_step: Dictionary, overall_result: Dictionary, slots: Dictionary) -> Dictionary:
     var step_result = overall_result.duplicate()
     var break_step = false
     
@@ -231,6 +231,9 @@ func _resolve_conditional_step(cond_step: Dictionary, overall_result: Dictionary
             if key != "conditions" and not key.begins_with("when "):
                 other_keys.append(key)
             print_debug("ConditionalV3, found other keys: %s" % [other_keys])
+    
+    if _extra_debug:
+        prints("resolving step:", step_index, "contents:", cond_step)
 
     var condition_stack = []
     for cond_call in cond_step.get("conditions", []):
@@ -278,12 +281,14 @@ func _resolve_conditional_step(cond_step: Dictionary, overall_result: Dictionary
             cases.append(key.trim_prefix("when "))
     
     for case in cases:
-        if _extra_debug:
-            prints("evaluating case: %s" % case)
         if step_result["quit"] or break_step:
             break
         if not check_against_case(case, step_result["result"]):
+            if _extra_debug and cond_step.get("when " + case, []).size() > 0:
+                prints("skipping case: %s" % case)
             continue
+        if _extra_debug and cond_step.get("when " + case, []).size() > 0:
+            prints("evaluating case: %s" % case)
         var cmds: Array = cond_step["when " + case]
         for cmd in cmds:
             if cmd == "true" or cmd == "false":
@@ -291,7 +296,10 @@ func _resolve_conditional_step(cond_step: Dictionary, overall_result: Dictionary
                 step_result["result"] = cmd == "true"
                 continue
             var cmd_result = call_conditional_command(cmd, slots)
-            if cmd_result['quit']:
+            if cmd_result.has("step_result"):
+                step_result["result"] = cmd_result["step_result"]
+
+            if cmd_result.get("quit", false):
                 step_result["quit"] = true
             elif cmd_result.get("break", false):
                 break_step = true

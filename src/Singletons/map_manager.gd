@@ -683,7 +683,7 @@ func _check_add_terrain_spr_modifier(entity: BaseEntity, tile_positions: Array, 
 
 # Resolve tile event for every tile index that exists at all locations provided
 # (Only once per index-position pair)
-func resolve_tile_event(at_tile_positions: Array, tile_event_name: String, context_entity) -> void:
+func resolve_tile_event(at_tile_positions: Array, tile_event_name: String, context_entity, extra_debug: bool = false) -> void:
     for at_pos in at_tile_positions:
         var resolved_indices: Array[int] = []
         for l in layers:
@@ -693,7 +693,7 @@ func resolve_tile_event(at_tile_positions: Array, tile_event_name: String, conte
             resolved_indices.append(ti)
             var event_property: = get_tile_property_for_index_at(at_pos, tile_event_name, ti)
             if event_property and event_property.is_conditional():
-                event_property.resolve(null, context_entity, at_pos)
+                event_property.resolve(null, context_entity, at_pos, [], extra_debug)
 
 func conditional_tile_event(at_tile_positions: Array, tile_event_name: String, context_entity: BaseEntity, is_all: bool = false, only_index: int = -1) -> bool:
     for at_pos in at_tile_positions:

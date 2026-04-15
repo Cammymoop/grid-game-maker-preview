@@ -514,6 +514,9 @@ func get_steps_per_tile() -> int:
 		return override_steps_per_tile
 	return _cached_definition_spt
 
+func get_native_steps_per_tile() -> int:
+	return _cached_definition_spt
+
 func update_move_speed() -> void:
 	current_move_speed = _spt_to_speed(get_steps_per_tile())
 

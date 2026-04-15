@@ -25,6 +25,8 @@ var command_item_tab_template: StyleBoxFlat = preload("res://assets/ui/PropertyE
     Slot.DARK_BLUE: Color.BLUE * 0.6,
     Slot.DARK_GREEN: Color.GREEN * 0.6,
     Slot.DARK_ORANGE: Color.ORANGE * 0.6,
+    
+    -1: Color.WHITE.darkened(0.2),
 }
 
 func get_command_item_styleboxes_for_slot(slot_id: int) -> Dictionary:

@@ -196,6 +196,8 @@ func get_first_valid_slot_id() -> int:
         return ANY_SLOT
     elif show_number_option:
         return NUMBER_VALUE
+    elif show_categories.size() == 0:
+        return -1
 
     for category_name in ["Entity", "TilePos", "Int", "Float", "String", "Arg"]:
         var slot_list: Node = find_child(category_name + "Slots")
@@ -237,6 +239,8 @@ func hide_picker() -> void:
     picker.hide()
 
 func get_current_slot() -> int:
+    if not show_any_option and not show_number_option and show_categories.size() == 0:
+        return -1
     return current_slot_id
 
 func get_value() -> int:

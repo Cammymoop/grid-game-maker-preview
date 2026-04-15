@@ -72,6 +72,8 @@ func refresh_layers() -> void:
     prop_update_response.clear()
     for layer_index in layers.size():
         create_and_add_nodes_for_layer(layers[layer_index], layer_index)
+    if is_inside_tree():
+        on_local_properties_updated(get_parent() as BaseEntity)
 
 func clear() -> void:
     modifier_masks.clear()
@@ -183,9 +185,7 @@ func create_and_add_nodes_for_layer(layer_info: Dictionary, _layer_index: int) -
         
         if layer_info.get("property", ""):
             var prop_name: String = layer_info["property"]
-            if not prop_update_response.has(prop_name):
-                prop_update_response[prop_name] = []
-            prop_update_response[prop_name].append(set_digit_display_number.bind(digit_display))
+            _add_prop_upate_callable(prop_name, set_digit_display_number.bind(digit_display))
             
             if is_inside_tree():
                 var entity: = get_parent() as BaseEntity
@@ -194,6 +194,18 @@ func create_and_add_nodes_for_layer(layer_info: Dictionary, _layer_index: int) -
                     set_digit_display_number(prop_val, digit_display)
                 else:
                     set_digit_display_number(layer_info.get("preview_number", 0), digit_display)
+    
+    if layer_info.get("when_property", ""):
+        var when_property_name: String = layer_info["when_property"]
+        if layer_info.get("when_prop_expression", ""):
+            var expr: Expression = Expression.new()
+            var err: = expr.parse(layer_info.get("when_prop_expression", ""), ["V"])
+            if err != OK:
+                push_error("Failed to parse expression: %s" % layer_info.get("when_prop_expression", ""))
+                return
+            _add_prop_upate_callable(when_property_name, show_hide_layer_expression.bind(main_layer_node, expr))
+        else:
+            _add_prop_upate_callable(when_property_name, show_hide_layer.bind(main_layer_node))
 
     main_layer_node.modulate = Utility.get_dict_color(layer_info, "mod_color", Color.WHITE)
     
@@ -216,7 +228,14 @@ func create_and_add_nodes_for_layer(layer_info: Dictionary, _layer_index: int) -
 
     set_sprite_rotation(current_rotation)
 
+func _add_prop_upate_callable(prop_name: String, update_func: Callable) -> void:
+    if not prop_update_response.has(prop_name):
+        prop_update_response[prop_name] = []
+    prop_update_response[prop_name].append(update_func)
+
 func on_local_properties_updated(entity: BaseEntity) -> void:
+    if not entity:
+        return
     for prop_name in prop_update_response:
         var prop_val: Variant = EntityManager.get_entity_prop_with_default(entity, prop_name, 0)
         for update_func in prop_update_response[prop_name]:
@@ -342,3 +361,22 @@ func set_digit_display_number(new_number: Variant, digit_display: DigitDisplay) 
         digit_display.set_number(int(float(new_number)))
     else:
         digit_display.set_number(0)
+
+func show_hide_layer(new_prop_value: Variant, layer_node: Node2D) -> void:
+    if new_prop_value:
+        layer_node.show()
+    else:
+        layer_node.hide()
+
+func show_hide_layer_expression(new_prop_value: Variant, expression: Expression, layer_node: Node2D) -> void:
+    var result: Variant = expression.execute([new_prop_value])
+    if expression.has_execute_failed():
+        push_error("Failed to execute expression: %s" % expression.get_error_text())
+        layer_node.hide()
+        return
+
+    if result:
+        layer_node.show()
+    else:
+        layer_node.hide()
+    

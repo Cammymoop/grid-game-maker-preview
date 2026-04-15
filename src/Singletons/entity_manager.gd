@@ -1058,3 +1058,6 @@ func is_valid_entity_in_world(entity: Object) -> bool:
 func get_pos_above(entity: BaseEntity) -> Vector2i:
     var entity_pos: = entity.get_center_position()
     return entity_pos + Vector2.UP * (entity.get_half_size().y + MapManager.tile_width * 0.25)
+
+func get_default_spt() -> int:
+    return BaseEntity._speed_to_spt(default_move_speed)

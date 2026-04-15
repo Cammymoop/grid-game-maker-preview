@@ -24,9 +24,9 @@ func on_button_pressed(_button: BaseButton) -> void:
 func set_value(new_value: bool) -> void:
     my_value = new_value
     if my_value:
-        true_button.button_pressed = true
+        true_button.set_pressed_no_signal(true)
     else:
-        false_button.button_pressed = true
+        true_button.set_pressed_no_signal(false)
 
 func get_value() -> bool:
     return my_value

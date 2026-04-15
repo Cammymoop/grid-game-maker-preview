@@ -6,7 +6,9 @@ const SlotSelectorButton = preload("res://src/GameEditor/SlotSelectorButton.gd")
 var arg_name: String = ""
 
 func _ready():
-	slot_button.set_current_slot(slot_button.get_first_valid_slot_id())
+	var slot_id: int = slot_button.get_first_valid_slot_id()
+	if slot_id != -1:
+		slot_button.set_current_slot(slot_id)
 
 func set_input_args(new_args: Array) -> void:
 	if not new_args:

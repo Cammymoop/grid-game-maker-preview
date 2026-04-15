@@ -82,11 +82,19 @@ func set_disabled_slots(disabled_slots: Array) -> void:
         command_slot_selector.set_disabled_slots(disabled_slots)
 
 func set_slot(slot_id: int) -> void:
+    var command_slot_selector: Control = find_child("CommandSlot")
     if slot_id < 0:
-        slot_id = find_child("CommandSlot").get_first_valid_slot_id()
+        slot_id = command_slot_selector.get_first_valid_slot_id()
+    elif command_slot_selector.get_current_slot() == -1:
+        slot_id = -1
+
     current_slot = slot_id
     if is_inside_tree():
-        find_child("CommandSlot").set_current_slot(slot_id)
+        if current_slot != -1:
+            command_slot_selector.show()
+            command_slot_selector.set_current_slot(current_slot)
+        else:
+            command_slot_selector.hide()
         update_panel_background()
 
 func update_panel_background() -> void:

@@ -214,13 +214,22 @@ func desc_c_get_pushed() -> String:
 	return "entity|If the entity successfully gets pushed this way [direction:DirectionInput:1]\n" \
 	     + "[keep_visual:BoolChoice:true,without turning,turning] to face that direction"
 func cmd_c_get_pushed(slots: Dictionary, chosen_slot: int, direction: Variant, keep_visual: bool) -> bool:
-	var selected = slots[chosen_slot]
+	if not Commands.slot_is_entity(chosen_slot):
+		return false
+	var selected: BaseEntity = slots[chosen_slot]
 	if selected.moving:
 		return false
 	var blue_entity = slots[Slot.BLUE]
-	selected.set_steps_per_tile_override(blue_entity.get_steps_per_tile())
+	# Pick an appropriate move speed
+	if blue_entity and blue_entity.get_steps_per_tile() > 0:
+		selected.set_steps_per_tile_override(blue_entity.get_steps_per_tile())
+	elif selected.get_native_steps_per_tile() > 0:
+		selected.set_native_move_speed()
+	else:
+		selected.set_steps_per_tile_override(EntityManager.get_default_spt())
 	var facing = resolve_variant_direction_value(direction, slots)
-	return selected.start_move(facing, not keep_visual)
+	var got_pushed: bool = selected.start_move(facing, not keep_visual)
+	return got_pushed
 
 func desc_c_is_facing() -> String:
 	return "entity|If the entity [invert:InvertInput:is,is not] facing this way [direction:DirectionInput]"
@@ -498,4 +507,12 @@ func desc_dismiss_textbox() -> String:
 func cmd_dismiss_textbox(_slots: Dictionary) -> void:
 	GameManager.dismiss_the_textbox()
 	
-	
+func desc_true() -> String:
+	return "none|Set this step's result to True"
+func cmd_true(_slots: Dictionary) -> Dictionary:
+	return {"step_result": true}
+
+func desc_false() -> String:
+	return "none|Set this step's result to False"
+func cmd_false(_slots: Dictionary) -> Dictionary:
+	return {"step_result": false}
