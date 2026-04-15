@@ -47,8 +47,8 @@ func get_value() -> Variant:
     else:
         return value_input.value
 
-func set_value(new_val) -> void:
-    value_input.value = float(new_val)
+func set_value(new_val: Variant) -> void:
+    value_input.set_value_no_signal(float(new_val))
 
 func on_value_changed(new_value: float) -> void:
     value_changed.emit(new_value)

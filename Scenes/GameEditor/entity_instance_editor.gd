@@ -1,5 +1,7 @@
 extends Control
 
+signal entity_props_edited(entity: BaseEntity)
+signal closing()
 signal cancel_popups()
 
 const PropertyEditList = preload("res://Scenes/GameEditor/property_edit_list.gd")
@@ -16,7 +18,10 @@ var non_expanded_v_size_flags: int = Control.SIZE_SHRINK_CENTER
 var prop_list_default_min_size: Vector2 = Vector2.ZERO
 var edited_entity: BaseEntity = null
 
+var edit_entity_pulse_period: float = 1.15
+
 func _ready() -> void:
+    visibility_changed.connect(on_visibility_changed)
     if size_flags_vertical != Control.SIZE_EXPAND_FILL:
         non_expanded_v_size_flags = size_flags_vertical
     if property_edit_list:
@@ -24,6 +29,7 @@ func _ready() -> void:
     property_edit_list.list_size_changed.connect(on_property_edit_list_size_changed)
     property_edit_list.request_new_property.connect(show_add_property_panel)
     property_edit_list.request_duplicate_property.connect(on_duplicate_property_requested)
+    property_edit_list.entity_instance_props_edited.connect(on_entity_instance_props_edited)
     hide()
 
 func find_auto_pick() -> void:
@@ -32,16 +38,39 @@ func find_auto_pick() -> void:
         if auto_picked_entity:
             open_instance_editor(auto_picked_entity)
 
+func _process(_delta: float) -> void:
+    if visible and edited_entity:
+        var pulse_amt: = sin((Time.get_ticks_msec() / 1000.0) / edit_entity_pulse_period * TAU)
+        edited_entity.modulate = Color.WHITE * (1 + (pulse_amt * 0.2 + 0.1))
+
+func _shortcut_input(event: InputEvent) -> void:
+    if visible and Utility.fixed_just_pressed_by_event("escape", event):
+        close_instance_editor()
+        get_viewport().set_input_as_handled()
+
+func on_entity_instance_props_edited(entity: BaseEntity) -> void:
+    entity_props_edited.emit(entity)
 
 func open_instance_editor(entity: BaseEntity) -> void:
     if not entity:
         return
+    unedit_entity()
     show()
-    prints("editing entity: ", entity.get_path())
     edited_entity = entity
-    prints(edited_entity, "me", get_path())
+    var title_label: = find_child("TitleLabel") as Label
+    if title_label:
+        var entity_name: = EntityManager.get_entity_name(entity.entity_index)
+        title_label.text = "Edit %s Instance" % entity_name
     if property_edit_list:
         property_edit_list.load_entity_instance_properties(entity)
+
+func unedit_entity() -> void:
+    if edited_entity:
+        edited_entity.modulate = Color.WHITE
+
+func close_instance_editor() -> void:
+    unedit_entity()
+    hide()
 
 func on_property_edit_list_size_changed() -> void:
     size_flags_vertical = Control.SIZE_EXPAND_FILL
@@ -50,13 +79,10 @@ func on_property_edit_list_size_changed() -> void:
     var max_list_height: float = property_edit_list.size.y
 
     var prop_list_expanded_height: = property_edit_list.get_minimum_list_height()
-    prints("prop_list_expanded_height: ", prop_list_expanded_height, "max_list_height: ", max_list_height)
     if prop_list_expanded_height <= max_list_height:
-        prints("setting to non-expanded, list height as minimum")
         size_flags_vertical = non_expanded_v_size_flags
         property_edit_list.custom_minimum_size.y = prop_list_expanded_height
     else:
-        prints("resetting min height of list")
         property_edit_list.custom_minimum_size = prop_list_default_min_size
 
 func _on_add_property_button_pressed() -> void:
@@ -87,3 +113,7 @@ func on_new_property_name_chosen(property_name: String, alt_mode: bool) -> void:
 func on_duplicate_property_name_chosen(property_name: String, alt_mode: bool, duplicate_of: String) -> void:
     if property_edit_list:
         property_edit_list.add_new_or_duplicate_property(property_name, alt_mode, duplicate_of)
+
+func on_visibility_changed() -> void:
+    if not visible:
+        closing.emit()

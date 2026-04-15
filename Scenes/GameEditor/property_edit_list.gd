@@ -2,6 +2,8 @@ extends PanelContainer
 
 signal list_size_changed()
 
+signal entity_instance_props_edited(entity: BaseEntity)
+
 signal request_conditional_editor(property_name: String, current_value: Variant)
 signal request_new_property()
 signal request_duplicate_property(property_name: String)
@@ -99,19 +101,21 @@ func apply_properties_to_entity(clear_other_local_props: bool, to_entity: BaseEn
         var info: Dictionary[String, Variant] = properties_info[i]
         prop_names.append(info["property_name"])
         if info["is_removed"]:
-            to_entity.remove_local_property(info["property_name"])
+            to_entity._remove_local_property(info["property_name"])
         elif info["is_overridden"]:
-            to_entity.set_local_property(info["property_name"], info["value"])
+            to_entity._set_local_property(info["property_name"], info["value"])
         elif info["is_base_definition_property"]:
-            to_entity.reset_local_property(info["property_name"])
+            to_entity._reset_local_property(info["property_name"])
 
     if clear_other_local_props:
         for local_prop_name in to_entity.local_properties:
             if not local_prop_name in prop_names:
-                to_entity.reset_local_property(local_prop_name)
+                to_entity._reset_local_property(local_prop_name)
         for removed_prop_name in to_entity.removed_properties:
             if not removed_prop_name in prop_names:
-                to_entity.reset_local_property(removed_prop_name)
+                to_entity._reset_local_property(removed_prop_name)
+    to_entity._local_prop_changed()
+    entity_instance_props_edited.emit(to_entity)
 
 func apply_edited_instance_property_update(for_property_name: String) -> void:
     if not for_property_name or not editing_entity:
@@ -129,6 +133,7 @@ func apply_edited_instance_property_update(for_property_name: String) -> void:
         editing_entity.set_local_property(for_property_name, info["value"])
     else:
         editing_entity.reset_local_property(for_property_name)
+    entity_instance_props_edited.emit(editing_entity)
 
 
 func reset_sorting_info() -> void:

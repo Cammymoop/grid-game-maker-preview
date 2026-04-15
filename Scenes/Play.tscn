@@ -81,6 +81,7 @@ script = ExtResource("1_r5y0w")
 forward_to = NodePath("GameView/MapEditor")
 
 [node name="GameView" type="SubViewport" parent="Display" unique_id=375337545 groups=["World"]]
+process_mode = 1
 transparent_bg = true
 handle_input_locally = false
 size = Vector2i(1536, 1536)
@@ -88,6 +89,7 @@ render_target_update_mode = 3
 script = ExtResource("5")
 
 [node name="MapEditor" parent="Display/GameView" unique_id=1447771592 node_paths=PackedStringArray("ui_layer", "ui_root_control", "entity_instance_editor") instance=ExtResource("1")]
+z_index = 20
 ui_layer = NodePath("../../../MapEditorUILayer")
 ui_root_control = NodePath("../../../MapEditorUILayer/MapEditorRootControl")
 entity_instance_editor = NodePath("../../../MapEditorUILayer/MapEditorRootControl/HBoxContainer/MarginContainer/VBoxContainer/EntityInstanceEditor")

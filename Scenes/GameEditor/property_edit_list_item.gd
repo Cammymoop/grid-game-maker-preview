@@ -37,6 +37,7 @@ const no_icon: Texture2D = preload("res://assets/img/property_list/no_icon.png")
 @export var name_edit: LineEdit
 
 @export var value_section: Control
+@export var edit_value_button: Control
 @export var value_label: RichTextLabel
 @export var value_edit: MultiTypeInput
 
@@ -94,10 +95,10 @@ func _ready() -> void:
                 for sub_sub_item in child.get_children():
                     if sub_sub_item is Control:
                         has_control_children = true
-                        sub_sub_item.gui_input.connect(sub_item_gui_input)
+                        sub_sub_item.gui_input.connect(sub_item_gui_input.bind(sub_sub_item))
                         sub_sub_item.focus_entered.connect(sub_item_focus_entered.bind(sub_sub_item))
             if not has_control_children:
-                child.gui_input.connect(sub_item_gui_input)
+                child.gui_input.connect(sub_item_gui_input.bind(child))
                 child.focus_entered.connect(sub_item_focus_entered.bind(child))
 
     add_theme_stylebox_override("panel", _normal_stylebox())
@@ -118,7 +119,6 @@ func set_prop_value(new_value: Variant) -> void:
 
 func on_value_edited(new_value: Variant) -> void:
     property_value = new_value
-    prints("on_value_edited: %s" % new_value)
     property_value_changed.emit(property_name, new_value)
 
 func _process(_delta: float) -> void:
@@ -291,18 +291,30 @@ func refresh_ui() -> void:
 func refresh_value_edit() -> void:
     value_edit.set_value(base_property_value)
 
+    _show_hide_edit_value_button()
     value_label.visible = not _value_editting
     if value_label.visible:
         value_label.text = get_rich_value_text()
 
+func _show_hide_edit_value_button() -> void:
+    edit_value_button.visible = false
+    if not _value_editting:
+        if is_overridden or (enable_edit_base_props and not is_removed):
+            edit_value_button.visible = true
+
 func start_value_editting() -> void:
     if _value_editting:
+        return
+    if is_removed or (not is_overridden and not enable_edit_base_props):
+        if local_props_enabled:
+            request_override.emit(property_name)
         return
     _value_editting = true
     value_label.hide()
     value_edit.show()
-    value_edit.set_value(base_property_value)
+    value_edit.set_value(property_value)
     value_edit.try_grab_focus()
+    _show_hide_edit_value_button()
 
 func stop_value_editting() -> void:
     if not _value_editting:
@@ -311,6 +323,7 @@ func stop_value_editting() -> void:
     value_edit.hide()
     value_label.show()
     value_label.text = get_rich_value_text()
+    _show_hide_edit_value_button()
 
 func is_special_prop_name(prop_name: String) -> bool:
     return GameManager.is_special_prop_name(prop_name)
@@ -318,20 +331,27 @@ func is_special_prop_name(prop_name: String) -> bool:
 func is_event_name(prop_name: String) -> bool:
     return GameManager.is_event_name(prop_name)
 
-func sub_item_gui_input(event: InputEvent) -> void:
+func sub_item_gui_input(event: InputEvent, sub_item: Control) -> void:
+    if sub_item == edit_value_button:
+        if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.is_pressed():
+            start_value_editting()
+            accept_event()
+            return
     any_gui_input(event)
 
 func _gui_input(event: InputEvent) -> void:
-    if event is InputEventMouseButton and event.is_pressed():
-        if event.double_click:
-            start_value_editting()
-        else:
-            stop_value_editting()
     any_gui_input(event)
 
 func any_gui_input(event: InputEvent) -> void:
     if event is InputEventMouseButton and event.is_pressed():
-        request_activate.emit(self)
+        if not is_active():
+            request_activate.emit(self)
+            return
+        if event.button_index == MOUSE_BUTTON_LEFT:
+            if event.double_click:
+                start_value_editting()
+            else:
+                stop_value_editting()
 
 func sub_item_focus_entered(sub_item: Control) -> void:
     if sub_item and not (value_edit == sub_item or value_edit.is_ancestor_of(sub_item)):

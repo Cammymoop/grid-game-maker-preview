@@ -20,6 +20,7 @@ var loaded_level: = {}
 var quicksave_state: = {}
 
 var loaded_level_name: = ""
+var loaded_is_autosave: = false
 
 var loaded = false
 
@@ -37,7 +38,9 @@ var cameras = {
 }
 
 const SPECIAL_PROPS: Array[String] = [
-	"z-index", "inherit_properties", "auto_bond", "auto_tail"
+	"z-index", "move_turns", "inherit_properties",
+	"auto_bond", "auto_tail", "auto_scale",
+	"edit_place_multiple",
 ]
 
 @export_file("*.json") var builtin_default_game_file: String = ""
@@ -255,6 +258,14 @@ func get_pause(source) -> bool:
 		return pauses[source]
 	return false
 
+func is_paused_by_other(other_than_source: String) -> bool:
+	if not get_tree().paused:
+		return false
+	for pause_source in pauses:
+		if pause_source != other_than_source and pauses[pause_source]:
+			return true
+	return false
+
 func _unpause() -> void:
 	pauses = {}
 	get_tree().paused = false
@@ -313,8 +324,10 @@ func has_editor_autosave() -> bool:
 func load_editor_autosave() -> void:
 	var autosave_data: = FilesManager.get_level_data(cur_game_name, "editor_autosave")
 	load_level_data(autosave_data)
+	loaded_is_autosave = true
 
 func load_level_data(level_data):
+	loaded_is_autosave = false
 	loaded_level_name = level_data["name"]
 	editor_save = level_data["state"]
 	load_edited()
@@ -502,7 +515,7 @@ func _process(_delta):
 			else:
 				GlobalToaster.show_toast_message("No Quicksave")
 
-func _shortcut_input(event: InputEvent) -> void:
+func _unhandled_input(event: InputEvent) -> void:
 	if Utility.fixed_just_pressed_by_event("escape", event):
 		if cur_scene == "GameEditor":
 			change_scene("Menu")
@@ -545,3 +558,21 @@ func is_event_name(prop_name: String) -> bool:
 	elif prop_name in ConditionalsV3.all_events:
 		return true
 	return false
+
+func save_edited_level_as(as_level_filename: String) -> void:
+	if not editor_save:
+		return
+	var level_data: = {}
+	level_data["name"] = FilesManager.sanitize_level_filename(as_level_filename)
+	level_data["state"] = editor_save
+	
+	var saved_successfully: = FilesManager.save_level(GameManager.cur_game_name, level_data)
+	if saved_successfully:
+		GlobalToaster.show_toast_message("Level Saved")
+	else:
+		GlobalToaster.show_toast_message("Failed to save level")
+		return
+	
+	loaded_level_name = level_data["name"]
+	loaded_is_autosave = false
+	save_checkpoint()

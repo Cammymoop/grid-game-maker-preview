@@ -323,7 +323,7 @@ func set_metadata_value(key: String, value: Variant, update_edited_metadata: boo
 func erase_metadata_value(key: String, update_edited_metadata: bool = true) -> void:
     map_metadata.erase(key)
     if update_edited_metadata:
-        GameManager.erase_edited_level_metadata_value(key, null)
+        GameManager.erase_edited_level_metadata_value(key)
 
 func has_metadata_value(key: String) -> bool:
     return map_metadata.has(key)
@@ -353,7 +353,7 @@ func is_pos_in_filter(tile_position: Vector2i, position_filter: Array) -> bool:
     else:
         return tile_position in position_filter
 
-func get_map_size() -> Rect2:
+func get_map_size() -> Rect2i:
     if len(layers) > 0:
         return layers[0].get_used_rect()
     return Rect2(0, 0, 0, 0)
@@ -415,9 +415,9 @@ func replace_tiles_at(tile_position, new_tile, facing: int = 0) -> void:
     
     if new_tile == -1:
         if get_map_size() != old_bounds:
-            emit_signal("level_size_changed")
+            level_size_changed.emit()
     elif is_pos_out_of_bounds(tile_position):
-        emit_signal("level_size_changed")
+        level_size_changed.emit()
 
 func get_tile_definition(tile_index):
     return tile_defs[tile_index].duplicate(true)
@@ -732,13 +732,13 @@ func is_blocked(tile_position, empty_blocks: bool = true) -> bool:
             return true
     return false
 
-func world_to_tile_position(world_position) -> Vector2:
+func world_to_tile_position(world_position: Vector2) -> Vector2:
     return Vector2(floor(world_position.x / tile_width), floor(world_position.y / tile_width))
 
-func tile_to_world_position(tile_position) -> Vector2:
+func tile_to_world_position(tile_position: Vector2i) -> Vector2:
     return Vector2(tile_position.x * tile_width, tile_position.y * tile_width)
-func tile_to_world_position_centered(tile_position) -> Vector2:
-    return (tile_position + Vector2(0.5, 0.5)) * tile_width
+func tile_to_world_position_centered(tile_position: Vector2i) -> Vector2:
+    return (Vector2(tile_position) + Vector2(0.5, 0.5)) * tile_width
 
 func get_used_positions_in_all_layers() -> Array[Vector2i]:
     var used_positions: Array[Vector2i] = []

@@ -1,10 +1,10 @@
 extends Camera2D
 
+@export var edge_limit_tile_count: int = 4
 var extend_limits = 0
 @onready var vp = get_viewport()
 
 func _ready():
-	extend_limits = MapManager.tile_width
 	MapManager.connect("level_size_changed", Callable(self, "update_bounds"))
 	
 	update_bounds()
@@ -47,9 +47,12 @@ func _clamped_by_limits(pos: Vector2) -> Vector2:
 		pos.y = center_lim.end.y
 	return pos
 
-func do_scroll(hscroll, vscroll):
+func do_scroll(scroll_vec: Vector2) -> void:
 	var pos = _clamped_by_limits(position)
-	position = pos + Vector2(hscroll, vscroll)
+	position = pos + scroll_vec
+
+func move_to_pos(pos: Vector2) -> void:
+	position = _clamped_by_limits(pos)
 
 func get_tl_position() -> Vector2:
 	return get_screen_center_position() - (vp.get_resolution()/2)
@@ -62,6 +65,8 @@ func outsize_bounds() -> void:
 	cached_center_limits = null
 
 func update_bounds() -> void:
+	extend_limits = MapManager.tile_width * edge_limit_tile_count
+
 	var level_bounds = MapManager.get_level_bounds()
 	limit_left = level_bounds.position.x - extend_limits
 	limit_top = level_bounds.position.y - extend_limits

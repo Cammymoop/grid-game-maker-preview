@@ -4,6 +4,7 @@ class_name BaseEntity
 signal started_move
 signal finished_move
 signal blocked
+signal local_prop_changed
 
 var move_facing: = 0
 var facing: = 0
@@ -298,6 +299,10 @@ func get_local_property(property_name: String) -> Variant:
 	return local_properties[property_name]
 
 func set_local_property(property_name: String, value: Variant) -> void:
+	_set_local_property(property_name, value)
+	_local_prop_changed()
+
+func _set_local_property(property_name: String, value: Variant) -> void:
 	if property_name in removed_properties:
 		removed_properties.erase(property_name)
 	local_properties[property_name] = value
@@ -305,13 +310,24 @@ func set_local_property(property_name: String, value: Variant) -> void:
 		check_for_idle_update_conditional()
 
 func remove_local_property(property_name: String) -> void:
+	_remove_local_property(property_name)
+	_local_prop_changed()
+
+func _remove_local_property(property_name: String) -> void:
 	local_properties.erase(property_name)
 	if EntityManager.entity_has_property(self, property_name):
 		removed_properties.append(property_name)
 
 func reset_local_property(property_name: String) -> void:
+	_reset_local_property(property_name)
+	_local_prop_changed()
+
+func _reset_local_property(property_name: String) -> void:
 	local_properties.erase(property_name)
 	removed_properties.erase(property_name)
+
+func _local_prop_changed() -> void:
+	local_prop_changed.emit(self)
 
 func get_intended_move(attempt_num: int = 0) -> int:
 	if not controller:
@@ -607,3 +623,8 @@ func process_deferred_signals() -> void:
 		var signaling_entity = EntityManager.get_instance(deferred_signal["signaling_entity"])
 		_handle_signal(signaling_entity, deferred_signal["args"], deferred_signal["signal_name"])
 	deferred_signals.clear()
+
+func has_local_data() -> bool:
+	if local_properties.size() > 0 or removed_properties.size() > 0:
+		return true
+	return false

@@ -64,7 +64,7 @@ theme_override_styles/panel = SubResource("StyleBoxFlat_447cj")
 layout_mode = 2
 alignment = 1
 
-[node name="Label" type="Label" parent="VBoxContainer/PanelContainer/HBoxContainer" unique_id=1724083426]
+[node name="TitleLabel" type="Label" parent="VBoxContainer/PanelContainer/HBoxContainer" unique_id=1724083426]
 layout_mode = 2
 text = "Edit Entity Instance"
 horizontal_alignment = 1
@@ -96,20 +96,14 @@ layout_mode = 2
 icon = ExtResource("6_57ay7")
 
 [node name="HBoxContainer3" type="HBoxContainer" parent="VBoxContainer" unique_id=1716997162]
-visible = false
 layout_mode = 2
 theme_override_constants/separation = 24
 alignment = 1
 
-[node name="UpdateButton" type="Button" parent="VBoxContainer/HBoxContainer3" unique_id=868842957]
+[node name="CloseButton" type="Button" parent="VBoxContainer/HBoxContainer3" unique_id=1533796461]
 custom_minimum_size = Vector2(100, 50)
 layout_mode = 2
-text = "Update"
-
-[node name="CancelButton" type="Button" parent="VBoxContainer/HBoxContainer3" unique_id=1533796461]
-custom_minimum_size = Vector2(100, 50)
-layout_mode = 2
-text = "Cancel"
+text = "Close"
 
 [node name="VBoxContainer2" type="VBoxContainer" parent="." unique_id=1807164450]
 layout_mode = 2
@@ -136,3 +130,4 @@ grow_vertical = 2
 mouse_filter = 2
 
 [connection signal="pressed" from="VBoxContainer/VBoxContainer/HBoxContainer4/VBoxContainer/AddPropertyButton" to="." method="_on_add_property_button_pressed"]
+[connection signal="pressed" from="VBoxContainer/HBoxContainer3/CloseButton" to="." method="close_instance_editor"]

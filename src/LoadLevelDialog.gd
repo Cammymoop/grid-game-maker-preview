@@ -36,6 +36,9 @@ func _ready():
 		for i in all_levels.size():
 			var level_name = all_levels[i]
 			select_level_option.add_item(level_name, i + 1)
+			if level_name == GameManager.loaded_level_name and not GameManager.loaded_is_autosave:
+				var index: = select_level_option.get_item_index(i + 1)
+				select_level_option.selected = index
 
 	close_requested.connect(close_dialog)
 

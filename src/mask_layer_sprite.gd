@@ -21,6 +21,14 @@ var rotation_prop: float = 0:
     set(new_rotation):
         set_sprite_rotation(new_rotation)
 
+func _enter_tree() -> void:
+    var parent: Node = get_parent()
+    if not parent.is_node_ready():
+        await parent.ready
+    
+    if parent is BaseEntity:
+        parent.local_prop_changed.connect(on_local_properties_updated)
+
 func set_as_single(single_texture_id: int, tex_index: int, rotates: bool = true) -> void:
     var layer_info: Dictionary = {
         "mode": "normal",

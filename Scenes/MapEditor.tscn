@@ -294,3 +294,5 @@ one_shot = true
 speed_scale = 1.4
 explosiveness = 0.9
 process_material = SubResource("20")
+
+[node name="EditedEntityIndicators" type="Node2D" parent="." unique_id=1280544936]

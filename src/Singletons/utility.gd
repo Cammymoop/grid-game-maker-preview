@@ -157,6 +157,13 @@ func get_world() -> Node:
 	print_debug("Error could not find world")
 	return null
 
+func get_map_editor() -> Node:
+	var world: = get_world()
+	if world:
+		return world.find_child("MapEditor")
+	else:
+		return null
+
 func get_pause_menu() -> Node:
 	var f = get_tree().get_nodes_in_group("PauseMenu")
 	if f:
@@ -535,3 +542,43 @@ func fixed_just_pressed_by_event(action: String, event: InputEvent, exact: bool 
 
 func fixed_just_released_by_event(action: String, event: InputEvent, exact: bool = false) -> bool:
 	return _fixed_just_press_released_by_event(action, event, exact, false)
+
+func input_vector_by_prefix(prefix: String) -> Vector2:
+	return Input.get_vector(prefix + "_left", prefix + "_right", prefix + "_up", prefix + "_down")
+
+func input_event_is_dir_action(event: InputEvent, dir_actions_prefix: String) -> bool:
+	if event.is_action(dir_actions_prefix + "_left"):
+		return true
+	elif event.is_action(dir_actions_prefix + "_right"):
+		return true
+	elif event.is_action(dir_actions_prefix + "_up"):
+		return true
+	elif event.is_action(dir_actions_prefix + "_down"):
+		return true
+	return false
+
+func create_auto_repeat_delay_timer(parent_node: Node = null, delay: float = -1, repeat: float = -1, check_callable: Callable = Callable(), bind_callback: Callable = Callable()) -> RepeatDelayTimer:
+	var timer: = RepeatDelayTimer.new()
+	if delay > 0:
+		timer.initial_delay = delay
+	if repeat > 0:
+		timer.repeat_delay = repeat
+	if check_callable.is_valid():
+		timer.set_check_hold_callable(check_callable)
+	if bind_callback.is_valid():
+		timer.activated.connect(bind_callback)
+	if parent_node:
+		parent_node.add_child(timer)
+	return timer
+
+func clamp_point_in_rect2i(point: Vector2i, rect: Rect2i) -> Vector2i:
+	return point.clamp(rect.position, rect.end - Vector2i.ONE)
+
+func clamp_point_in_rect2(point: Vector2, rect: Rect2) -> Vector2:
+	return point.clamp(rect.position, rect.end)
+
+func grow_rect2_by_ratio(rect: Rect2, ratio: float) -> Rect2:
+	if ratio <= 0:
+		return Rect2()
+	var delta_size: = (rect.size * ratio - rect.size) / 2.0
+	return rect.grow_individual(delta_size.x, delta_size.y, delta_size.x, delta_size.y)

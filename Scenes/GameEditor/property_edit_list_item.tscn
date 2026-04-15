@@ -15,6 +15,7 @@
 [ext_resource type="PackedScene" uid="uid://cemds60k8ytal" path="res://Scenes/UI/icon_button.tscn" id="7_bjote"]
 [ext_resource type="StyleBox" uid="uid://dx222rj1bhqkw" path="res://assets/ui/property_list_item_active_highlight.tres" id="9_t1kqt"]
 [ext_resource type="Script" uid="uid://cmisn0pwbchwf" path="res://Scenes/GameEditor/multi_type_input.gd" id="14_5qemd"]
+[ext_resource type="Texture2D" uid="uid://bo4frkvshv8li" path="res://assets/img/property_list/edit_value.png" id="14_ciyhn"]
 [ext_resource type="PackedScene" uid="uid://bleyoj5f36kfy" path="res://Scenes/GameEditor/ConditionalEditor/scalar_value_input.tscn" id="15_5uy45"]
 [ext_resource type="PackedScene" uid="uid://durty3gycutfy" path="res://Scenes/GameEditor/bool_toggle_input.tscn" id="16_6qn5y"]
 
@@ -41,7 +42,7 @@ RichTextLabel/font_sizes/normal_font_size = 14
 SpinBoxInnerLineEdit/base_type = &"LineEdit"
 SpinBoxInnerLineEdit/font_sizes/font_size = 14
 
-[node name="PropertyEditListItem" type="PanelContainer" unique_id=161799549 node_paths=PackedStringArray("sub_item_container", "icon_1", "icon_2", "name_section", "name_label", "name_edit", "value_section", "value_label", "value_edit", "override_button", "remove_button")]
+[node name="PropertyEditListItem" type="PanelContainer" unique_id=161799549 node_paths=PackedStringArray("sub_item_container", "icon_1", "icon_2", "name_section", "name_label", "name_edit", "value_section", "edit_value_button", "value_label", "value_edit", "override_button", "remove_button")]
 offset_right = 425.0
 offset_bottom = 27.0
 theme = SubResource("Theme_06inb")
@@ -54,6 +55,7 @@ name_section = NodePath("ListItemSections/NameSection")
 name_label = NodePath("ListItemSections/NameSection/PropNameLabel")
 name_edit = NodePath("ListItemSections/NameSection/PropNameEdit")
 value_section = NodePath("ListItemSections/PropValueSection")
+edit_value_button = NodePath("ListItemSections/PropValueSection/EditValueTextureButton")
 value_label = NodePath("ListItemSections/PropValueSection/PropValueLabel")
 value_edit = NodePath("ListItemSections/PropValueSection/MultiTypeInput")
 override_button = NodePath("ListItemSections/OverrideButton")
@@ -122,8 +124,15 @@ custom_minimum_size = Vector2(160, 0)
 layout_mode = 2
 size_flags_horizontal = 3
 
+[node name="EditValueTextureButton" type="TextureRect" parent="ListItemSections/PropValueSection" unique_id=562330640]
+layout_mode = 2
+size_flags_vertical = 4
+tooltip_text = "Edit Value"
+mouse_default_cursor_shape = 2
+texture = ExtResource("14_ciyhn")
+stretch_mode = 2
+
 [node name="PropValueLabel" type="RichTextLabel" parent="ListItemSections/PropValueSection" unique_id=1463440927]
-visible = false
 layout_mode = 2
 size_flags_horizontal = 3
 focus_mode = 2
@@ -136,6 +145,7 @@ selection_enabled = true
 drag_and_drop_selection_enabled = false
 
 [node name="MultiTypeInput" type="HBoxContainer" parent="ListItemSections/PropValueSection" unique_id=341462824 node_paths=PackedStringArray("type_picker", "text_input", "bool_input", "number_input", "edit_conditional_button")]
+visible = false
 layout_mode = 2
 size_flags_horizontal = 3
 script = ExtResource("14_5qemd")

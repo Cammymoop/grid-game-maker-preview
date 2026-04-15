@@ -17,6 +17,7 @@ func _ready():
 func _shortcut_input(event: InputEvent) -> void:
 	if Utility.fixed_just_pressed_by_event("escape", event):
 		close_dialog()
+		set_input_as_handled()
 
 func grab_and_select_all() -> void:
 	var level_name_input: LineEdit = find_child("LevelNameInput")
@@ -32,20 +33,11 @@ func update_save_level_to_input() -> void:
 	find_child("LevelNameInput").text = FilesManager.sanitize_level_filename(GameManager.loaded_level_name)
 
 func _on_SaveFileButton_pressed():
+	var map_editor: = Utility.get_map_editor()
+	if map_editor and map_editor.edit_mode:
+		GameManager.save_edited()
 	var level_name: String = find_child("LevelNameInput").text.strip_edges()
-	var level_data: = {}
-	level_data["name"] = FilesManager.sanitize_level_filename(level_name)
-	level_data["state"] = GameManager.editor_save
-	
-	var saved_successfully: = FilesManager.save_level(GameManager.cur_game_name, level_data)
-	if saved_successfully:
-		GlobalToaster.show_toast_message("Level Saved")
-	else:
-		GlobalToaster.show_toast_message("Failed to save level")
-		return
-	
-	GameManager.loaded_level_name = level_name
-	GameManager.checkpoint_save = GameManager.editor_save
+	GameManager.save_edited_level_as(level_name)
 	close_dialog()
 
 func _on_cancel_button_pressed() -> void:
