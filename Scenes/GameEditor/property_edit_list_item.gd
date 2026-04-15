@@ -371,6 +371,8 @@ func get_value_text() -> String:
     var use_value: Variant = base_property_value if not is_overridden else property_value
     if typeof(use_value) == TYPE_BOOL:
         return str(use_value).capitalize() + " " + ("👍" if use_value else "😔")
+    elif typeof(use_value) == TYPE_STRING and use_value.contains("\n"):
+        return use_value.split("\n", true, 1)[0] + " (...)"
     if use_value == null:
         return "--"
     return Utility.property_value_or_conditional_to_string(use_value)
