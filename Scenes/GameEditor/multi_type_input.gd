@@ -1,12 +1,15 @@
 extends Control
 
 signal value_changed(new_value: Variant)
+signal input_focus_out()
+signal input_focus_in()
 
 const ScalarValueInput = preload("res://src/GameEditor/ConditionalEditor/scalar_value_input.gd")
+const AdaptableMultiLineEdit = preload("res://Scenes/GameEditor/adaptable_multi_line_edit.gd")
 
 @export var type_picker: OptionButton
 
-@export var text_input: LineEdit
+@export var text_input: AdaptableMultiLineEdit
 @export var bool_input: Control
 @export var number_input: ScalarValueInput
 @export var edit_conditional_button: Button
@@ -39,13 +42,20 @@ func _ready() -> void:
     on_type_selected(0, false)
     type_picker.item_selected.connect(on_type_selected)
     
+    type_picker.pressed.connect(input_focus_in.emit)
+    
     number_input.max_value = max_number_value
     number_input.min_value = -max_number_value if allow_negative else 0.0
     number_input.update_input_settings()
+    number_input.focus_out.connect(on_number_input_focus_out)
+    number_input.focus_entered.connect(input_focus_in.emit)
     
-    text_input.text_changed.connect(on_value_edited)
+    text_input.multi_line_text_changed.connect(on_value_edited)
     bool_input.value_changed.connect(on_value_edited)
     number_input.value_changed.connect(on_value_edited)
+    
+    text_input.multi_line_editing_toggled.connect(on_text_editing_toggled)
+    text_input.focus_entered.connect(input_focus_in.emit)
 
 func on_value_edited(new_value: Variant) -> void:
     current_value = new_value
@@ -110,9 +120,9 @@ func on_type_selected(index: int, allow_grabbing_focus: bool = true) -> void:
 
 func try_grab_focus() -> void:
     if current_type_id == 1:
-        text_input.grab_focus.call_deferred()
+        text_input.grab_focus_and_edit.call_deferred()
     elif current_type_id == 4:
-        number_input.value_input.grab_focus.call_deferred()
+        number_input.line_edit_grab_focus.call_deferred()
 
 func convert_value(from_type_id: int, to_type_id: int) -> void:
     if from_type_id == 0:
@@ -165,7 +175,7 @@ func _set_default_value(for_type_id: int) -> void:
 func set_input_value_from_current_value() -> void:
     match current_type_id:
         1:
-            text_input.text = current_value as String
+            text_input.set_text_contents(current_value as String)
         2:
             bool_input.set_value(current_value as bool)
         4:
@@ -184,3 +194,11 @@ func show_input_for_current_type() -> void:
     bool_input.visible = current_type_id == 2
     number_input.visible = current_type_id == 4
     edit_conditional_button.visible = current_type_id == 8
+
+func on_text_editing_toggled(is_editing: bool) -> void:
+    if not is_editing and current_type_id == 1:
+        input_focus_out.emit()
+
+func on_number_input_focus_out() -> void:
+    if current_type_id == 4:
+        input_focus_out.emit()

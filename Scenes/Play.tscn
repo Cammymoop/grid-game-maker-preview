@@ -144,6 +144,7 @@ render_target_update_mode = 3
 script = ExtResource("5")
 
 [node name="MapEditor" parent="Display/GameView" unique_id=1447771592 node_paths=PackedStringArray("ui_layer", "ui_root_control", "entity_instance_editor") instance=ExtResource("1")]
+visible = false
 z_index = 20
 ui_layer = NodePath("../../../MapEditorUILayer")
 ui_root_control = NodePath("../../../MapEditorUILayer/MapEditorRootControl")
@@ -214,14 +215,15 @@ grow_horizontal = 2
 grow_vertical = 0
 mouse_filter = 2
 
-[node name="TextBoxAnimRoot" type="Node2D" parent="OverlayLayer/OverlayUI/BottomCenter" unique_id=1132113936 node_paths=PackedStringArray("text_label", "text_box_panel")]
+[node name="TextBoxAnimRoot" type="Node2D" parent="OverlayLayer/OverlayUI/BottomCenter" unique_id=1132113936 node_paths=PackedStringArray("text_label", "text_box_panel", "animator")]
 position = Vector2(0, 86)
 script = ExtResource("5_q86eb")
 text_label = NodePath("TextBoxPanel/VBoxContainer/TextBoxLabel")
 text_box_panel = NodePath("TextBoxPanel")
+animator = NodePath("AnimationPlayer")
 
 [node name="TextBoxPanel" type="PanelContainer" parent="OverlayLayer/OverlayUI/BottomCenter/TextBoxAnimRoot" unique_id=550490554]
-anchors_preset = -1
+anchors_preset = 7
 anchor_left = 0.5
 anchor_top = 1.0
 anchor_right = 0.5

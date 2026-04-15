@@ -1,6 +1,7 @@
 extends Control
 
 signal value_changed(value: float)
+signal focus_out()
 
 @export var value_input: SpinBox
 @export var is_int_type: bool = false
@@ -18,6 +19,7 @@ var arg_name: String = ""
 func _ready() -> void:
     value_input.value_changed.connect(on_value_changed)
     update_input_settings()
+    value_input.get_line_edit().gui_input.connect(on_line_edit_gui_input)
 
 func update_input_settings() -> void:
     value_input.min_value = min_value
@@ -34,6 +36,9 @@ func update_input_settings() -> void:
         value_input.step = custom_step_value
     
     value_input.get_line_edit().expand_to_text_length = is_expand_to_text
+
+func line_edit_grab_focus() -> void:
+    value_input.get_line_edit().grab_focus()
 
 func set_arg_name(new_arg_name: String) -> void:
     arg_name = new_arg_name
@@ -66,3 +71,25 @@ func set_step_and_arrow_step(new_step: float, new_arrow_step: float) -> void:
     set_expand_to_text(true)
     #value_input.step = 1.0
     #value_input.rounded = false
+
+func on_line_edit_gui_input(event: InputEvent) -> void:
+    var up_down: int = 0
+    if event.is_action_pressed("ui_up"):
+        up_down = 1
+    elif event.is_action_pressed("ui_down"):
+        up_down = -1
+
+    if up_down != 0:
+        accept_event()
+        var step_amt: float = value_input.step if value_input.custom_arrow_step == 0 else value_input.custom_arrow_step
+        if step_amt == 0:
+            step_amt = 1
+        value_input.set_value_no_signal(value_input.value + up_down * step_amt)
+        value_input.get_line_edit().text = str(value_input.value)
+        value_changed.emit(value_input.value)
+    elif Utility.fixed_just_pressed_by_event("escape", event, true):
+        accept_event()
+        if value_input.get_line_edit().is_editing():
+            value_input.get_line_edit().unedit()
+        focus_out.emit()
+

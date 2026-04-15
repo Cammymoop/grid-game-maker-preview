@@ -82,6 +82,8 @@ func _ready() -> void:
     name_edit.editing_toggled.connect(on_name_edit_editing_toggled)
     
     value_edit.value_changed.connect(on_value_edited)
+    value_edit.input_focus_out.connect(on_value_input_focus_out)
+    value_edit.input_focus_in.connect(request_activate.emit.bind(self))
     
     value_edit.hide()
     value_label.show()
@@ -118,8 +120,13 @@ func set_prop_value(new_value: Variant) -> void:
     refresh_ui()
 
 func on_value_edited(new_value: Variant) -> void:
+    if not is_active():
+        request_activate.emit(self)
     property_value = new_value
     property_value_changed.emit(property_name, new_value)
+
+func on_value_input_focus_out() -> void:
+    stop_value_editting()
 
 func _process(_delta: float) -> void:
     if not get_window().has_focus():
@@ -303,6 +310,8 @@ func _show_hide_edit_value_button() -> void:
             edit_value_button.visible = true
 
 func start_value_editting() -> void:
+    if not is_active():
+        request_activate.emit(self)
     if _value_editting:
         return
     if is_removed or (not is_overridden and not enable_edit_base_props):

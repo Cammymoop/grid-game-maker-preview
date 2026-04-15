@@ -14,10 +14,20 @@
 [ext_resource type="Texture2D" uid="uid://b5udrkwc2cuu5" path="res://assets/img/property_list/special_prop_icon.png" id="6_t1kqt"]
 [ext_resource type="PackedScene" uid="uid://cemds60k8ytal" path="res://Scenes/UI/icon_button.tscn" id="7_bjote"]
 [ext_resource type="StyleBox" uid="uid://dx222rj1bhqkw" path="res://assets/ui/property_list_item_active_highlight.tres" id="9_t1kqt"]
-[ext_resource type="Script" uid="uid://cmisn0pwbchwf" path="res://Scenes/GameEditor/multi_type_input.gd" id="14_5qemd"]
 [ext_resource type="Texture2D" uid="uid://bo4frkvshv8li" path="res://assets/img/property_list/edit_value.png" id="14_ciyhn"]
-[ext_resource type="PackedScene" uid="uid://bleyoj5f36kfy" path="res://Scenes/GameEditor/ConditionalEditor/scalar_value_input.tscn" id="15_5uy45"]
-[ext_resource type="PackedScene" uid="uid://durty3gycutfy" path="res://Scenes/GameEditor/bool_toggle_input.tscn" id="16_6qn5y"]
+[ext_resource type="PackedScene" uid="uid://ba6ojoxwk1drt" path="res://Scenes/GameEditor/multi_type_input.tscn" id="15_5uy45"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_5uy45"]
+content_margin_left = 4.0
+content_margin_top = 4.0
+content_margin_right = 4.0
+content_margin_bottom = 4.0
+bg_color = Color(0.1, 0.1, 0.1, 0.6)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+corner_detail = 5
 
 [sub_resource type="Theme" id="Theme_06inb"]
 Button/font_sizes/font_size = 14
@@ -30,6 +40,7 @@ LineEdit/font_sizes/font_size = 14
 LineEdit/styles/focus = ExtResource("5_ibb43")
 LineEdit/styles/normal = ExtResource("5_bjote")
 LineEdit/styles/read_only = ExtResource("5_bjote")
+PopupPanel/styles/panel = SubResource("StyleBoxFlat_5uy45")
 RichTextLabel/colors/selection_color = Color(0.14389294, 0.27054524, 0.46817178, 1)
 RichTextLabel/constants/strikethrough_alpha = 100
 RichTextLabel/font_sizes/bold_font_size = 14
@@ -37,10 +48,8 @@ RichTextLabel/font_sizes/bold_italics_font_size = 14
 RichTextLabel/font_sizes/italics_font_size = 14
 RichTextLabel/font_sizes/mono_font_size = 14
 RichTextLabel/font_sizes/normal_font_size = 14
-
-[sub_resource type="Theme" id="Theme_6qn5y"]
-SpinBoxInnerLineEdit/base_type = &"LineEdit"
-SpinBoxInnerLineEdit/font_sizes/font_size = 14
+TextEdit/constants/line_spacing = 0
+TextEdit/font_sizes/font_size = 14
 
 [node name="PropertyEditListItem" type="PanelContainer" unique_id=161799549 node_paths=PackedStringArray("sub_item_container", "icon_1", "icon_2", "name_section", "name_label", "name_edit", "value_section", "edit_value_button", "value_label", "value_edit", "override_button", "remove_button")]
 offset_right = 425.0
@@ -144,50 +153,7 @@ vertical_alignment = 1
 selection_enabled = true
 drag_and_drop_selection_enabled = false
 
-[node name="MultiTypeInput" type="HBoxContainer" parent="ListItemSections/PropValueSection" unique_id=341462824 node_paths=PackedStringArray("type_picker", "text_input", "bool_input", "number_input", "edit_conditional_button")]
-visible = false
-layout_mode = 2
-size_flags_horizontal = 3
-script = ExtResource("14_5qemd")
-type_picker = NodePath("OptionButton")
-text_input = NodePath("TextInput")
-bool_input = NodePath("BoolToggleInput")
-number_input = NodePath("ScalarValueInput")
-edit_conditional_button = NodePath("EditConditionalButton")
-
-[node name="OptionButton" type="OptionButton" parent="ListItemSections/PropValueSection/MultiTypeInput" unique_id=1344398108]
-layout_mode = 2
-tooltip_text = "Change the type of value"
-theme_override_font_sizes/font_size = 12
-selected = 0
-fit_to_longest_item = false
-item_count = 4
-popup/item_0/text = "Txt"
-popup/item_0/id = 0
-popup/item_1/text = "T/F"
-popup/item_1/id = 1
-popup/item_2/text = "Num"
-popup/item_2/id = 2
-popup/item_3/text = "?"
-popup/item_3/id = 3
-
-[node name="TextInput" type="LineEdit" parent="ListItemSections/PropValueSection/MultiTypeInput" unique_id=330487777]
-layout_mode = 2
-size_flags_horizontal = 3
-placeholder_text = "<empty>"
-
-[node name="ScalarValueInput" parent="ListItemSections/PropValueSection/MultiTypeInput" unique_id=1458729988 instance=ExtResource("15_5uy45")]
-custom_minimum_size = Vector2(90, 0)
-layout_mode = 2
-
-[node name="Value" parent="ListItemSections/PropValueSection/MultiTypeInput/ScalarValueInput" index="0" unique_id=1193418551]
-theme = SubResource("Theme_6qn5y")
-
-[node name="BoolToggleInput" parent="ListItemSections/PropValueSection/MultiTypeInput" unique_id=546195378 instance=ExtResource("16_6qn5y")]
-visible = false
-layout_mode = 2
-
-[node name="EditConditionalButton" type="Button" parent="ListItemSections/PropValueSection/MultiTypeInput" unique_id=1667557074]
+[node name="MultiTypeInput" parent="ListItemSections/PropValueSection" unique_id=1750676706 instance=ExtResource("15_5uy45")]
 visible = false
 layout_mode = 2
 
@@ -201,5 +167,3 @@ text = "override"
 [node name="RemovePropButton" parent="ListItemSections" unique_id=451892711 instance=ExtResource("7_bjote")]
 layout_mode = 2
 tooltip_text = "Remove Property"
-
-[editable path="ListItemSections/PropValueSection/MultiTypeInput/ScalarValueInput"]

@@ -1,0 +1,34 @@
+[gd_scene format=3 uid="uid://dvimib4iq4sje"]
+
+[ext_resource type="Script" uid="uid://c01umex82lpe5" path="res://Scenes/GameEditor/adaptable_multi_line_edit.gd" id="1_memcw"]
+[ext_resource type="StyleBox" uid="uid://cp3s8jtvyq7ou" path="res://assets/ui/thin_margin_panel.tres" id="2_jxknh"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_memcw"]
+
+[sub_resource type="Theme" id="Theme_3asy5"]
+TextEdit/constants/line_spacing = 0
+TextEdit/styles/focus = SubResource("StyleBoxEmpty_memcw")
+
+[node name="AdaptiveMultiLineEdit" type="LineEdit" unique_id=634600988 node_paths=PackedStringArray("multi_line_popup", "multi_line_input")]
+offset_right = 234.0
+offset_bottom = 31.0
+size_flags_horizontal = 3
+placeholder_text = "<empty>"
+script = ExtResource("1_memcw")
+multi_line_popup = NodePath("PopupPanel")
+multi_line_input = NodePath("PopupPanel/TextEdit")
+
+[node name="PopupPanel" type="PopupPanel" parent="." unique_id=1073281292]
+oversampling_override = 1.0
+size = Vector2i(156, 100)
+theme = SubResource("Theme_3asy5")
+theme_override_styles/panel = ExtResource("2_jxknh")
+
+[node name="TextEdit" type="TextEdit" parent="PopupPanel" unique_id=1731831828]
+offset_left = 3.0
+offset_top = 3.0
+offset_right = 153.0
+offset_bottom = 97.0
+placeholder_text = "<empty>"
+scroll_fit_content_height = true
+scroll_fit_content_width = true

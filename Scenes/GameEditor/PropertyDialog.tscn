@@ -1,6 +1,7 @@
 [gd_scene format=3 uid="uid://cgct3ynie4l1g"]
 
 [ext_resource type="Script" uid="uid://cqn3mluqm3d27" path="res://src/GameEditor/PropertyDialog.gd" id="1"]
+[ext_resource type="PackedScene" uid="uid://dvimib4iq4sje" path="res://Scenes/GameEditor/adaptive_multi_line_edit.tscn" id="2_swam5"]
 
 [sub_resource type="StyleBoxFlat" id="1"]
 bg_color = Color(0.443137, 0.443137, 0.470588, 1)
@@ -29,7 +30,7 @@ anchor_bottom = 1.0
 offset_left = 8.0
 offset_top = 8.0
 offset_right = -8.0
-offset_bottom = -49.0
+offset_bottom = -45.0
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_constants/separation = 8
@@ -58,9 +59,14 @@ layout_mode = 2
 size_flags_horizontal = 3
 text = "Value:"
 
-[node name="SetValue" type="LineEdit" parent="VBoxContainer/HBoxContainer" unique_id=1640362918]
+[node name="SetValueOld" type="LineEdit" parent="VBoxContainer/HBoxContainer" unique_id=1640362918]
+visible = false
 layout_mode = 2
 size_flags_horizontal = 3
+size_flags_stretch_ratio = 3.0
+
+[node name="SetValue" parent="VBoxContainer/HBoxContainer" unique_id=634600988 instance=ExtResource("2_swam5")]
+layout_mode = 2
 size_flags_stretch_ratio = 3.0
 
 [node name="EditConditional" type="Button" parent="VBoxContainer/HBoxContainer" unique_id=208336993]

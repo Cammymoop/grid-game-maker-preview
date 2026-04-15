@@ -577,8 +577,59 @@ func clamp_point_in_rect2i(point: Vector2i, rect: Rect2i) -> Vector2i:
 func clamp_point_in_rect2(point: Vector2, rect: Rect2) -> Vector2:
 	return point.clamp(rect.position, rect.end)
 
+func clamp_rect2i_in_rect2i(inner_rect: Rect2i, within_rect: Rect2i) -> Rect2i:
+	var clamped_pos: = (within_rect.end - inner_rect.size).max(within_rect.position)
+	var clamped_rect: = Rect2i(inner_rect.position.clamp(within_rect.position, clamped_pos), Vector2i.ONE)
+	var clamped_end: = (within_rect.position + inner_rect.size).min(within_rect.end)
+	clamped_rect.end = inner_rect.end.clamp(clamped_end, within_rect.end)
+	return clamped_rect
+
 func grow_rect2_by_ratio(rect: Rect2, ratio: float) -> Rect2:
 	if ratio <= 0:
 		return Rect2()
 	var delta_size: = (rect.size * ratio - rect.size) / 2.0
 	return rect.grow_individual(delta_size.x, delta_size.y, delta_size.x, delta_size.y)
+
+func get_line_and_column_of_char_index(multi_line_text: String, character_index: int) -> Vector2i:
+	if character_index < 0 or character_index > multi_line_text.length() + 1:
+		push_error("Character index out of bounds: %d" % character_index)
+		return Vector2i(-1, -1)
+	var lines: = multi_line_text.split("\n", true)
+	var cur_index: int = 0
+	for line_index in lines.size():
+		var line_length: int = lines[line_index].length() + 1
+		if character_index < cur_index + line_length:
+			return Vector2i(character_index - cur_index, line_index)
+		cur_index += line_length
+	return Vector2i(-1, -1)
+
+func get_line_and_column_of_char_index_in_text_edit(text_edit: TextEdit, character_index: int) -> Vector2i:
+	if character_index < 0:
+		push_error("Character index out of bounds: %d" % character_index)
+		return Vector2i(-1, -1)
+	var cur_index: int = 0
+	for line_index in text_edit.get_line_count():
+		var line_length: int = text_edit.get_line(line_index).length() + 1
+		if character_index < cur_index + line_length:
+			return Vector2i(character_index - cur_index, line_index)
+		cur_index += line_length
+	push_error("Character index out of bounds: %d" % character_index)
+	return Vector2i(-1, -1)
+
+func clamp_window_within_window(clamped_window: Window, parent_window: Window) -> void:
+	if not parent_window.gui_embed_subwindows:
+		return
+	
+	var clamped_window_rect: = Rect2i(clamped_window.get_position_with_decorations(), clamped_window.get_size_with_decorations())
+	var parent_window_inner: = Rect2i(Vector2i.ZERO, parent_window.size)
+	set_window_rect_including_decorations(clamped_window, clamp_rect2i_in_rect2i(clamped_window_rect, parent_window_inner))
+
+func set_window_rect_including_decorations(the_window: Window, rect: Rect2i) -> void:
+	var outer_size: = the_window.get_size_with_decorations()
+	var decorations_size: = (outer_size - the_window.size).min(Vector2i.ZERO)
+	var outer_pos: = the_window.get_position_with_decorations()
+	var decorations_offset: = outer_pos - the_window.position
+	
+	the_window.size = rect.size - decorations_size
+	the_window.position = rect.position + decorations_offset
+	

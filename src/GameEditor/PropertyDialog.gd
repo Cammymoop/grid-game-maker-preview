@@ -39,7 +39,7 @@ func set_info(prop_name, prop_val) -> void:
 		_on_toggle(true)
 		conditional_val = prop_val
 	else:
-		find_child("SetValue").text = prop_val
+		find_child("SetValue").set_text_contents(prop_val)
 
 
 func _on_EditConditional_pressed():
@@ -79,7 +79,7 @@ func get_value():
 	if conditional_mode:
 		return conditional_val
 	else:
-		return find_child("SetValue").text
+		return find_child("SetValue").multi_line_contents
 
 func _on_toggle(button_pressed):
 	conditional_mode = button_pressed

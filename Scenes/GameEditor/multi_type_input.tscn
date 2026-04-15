@@ -1,0 +1,58 @@
+[gd_scene format=3 uid="uid://ba6ojoxwk1drt"]
+
+[ext_resource type="Script" uid="uid://cmisn0pwbchwf" path="res://Scenes/GameEditor/multi_type_input.gd" id="1_1fryu"]
+[ext_resource type="PackedScene" uid="uid://dvimib4iq4sje" path="res://Scenes/GameEditor/adaptive_multi_line_edit.tscn" id="2_ql4rr"]
+[ext_resource type="PackedScene" uid="uid://bleyoj5f36kfy" path="res://Scenes/GameEditor/ConditionalEditor/scalar_value_input.tscn" id="2_re830"]
+[ext_resource type="PackedScene" uid="uid://durty3gycutfy" path="res://Scenes/GameEditor/bool_toggle_input.tscn" id="3_ql4rr"]
+
+[sub_resource type="Theme" id="Theme_6qn5y"]
+SpinBoxInnerLineEdit/base_type = &"LineEdit"
+SpinBoxInnerLineEdit/font_sizes/font_size = 14
+
+[node name="MultiTypeInput" type="HBoxContainer" unique_id=1750676706 node_paths=PackedStringArray("type_picker", "text_input", "bool_input", "number_input", "edit_conditional_button")]
+offset_right = 343.0
+offset_bottom = 31.0
+size_flags_horizontal = 3
+script = ExtResource("1_1fryu")
+type_picker = NodePath("OptionButton")
+text_input = NodePath("AdaptiveMultiLineEdit")
+bool_input = NodePath("BoolToggleInput")
+number_input = NodePath("ScalarValueInput")
+edit_conditional_button = NodePath("EditConditionalButton")
+
+[node name="OptionButton" type="OptionButton" parent="." unique_id=153621437]
+layout_mode = 2
+tooltip_text = "Change the type of value"
+theme_override_font_sizes/font_size = 12
+selected = 0
+fit_to_longest_item = false
+item_count = 4
+popup/item_0/text = "Txt"
+popup/item_0/id = 0
+popup/item_1/text = "T/F"
+popup/item_1/id = 1
+popup/item_2/text = "Num"
+popup/item_2/id = 2
+popup/item_3/text = "?"
+popup/item_3/id = 3
+
+[node name="AdaptiveMultiLineEdit" parent="." unique_id=634600988 instance=ExtResource("2_ql4rr")]
+layout_mode = 2
+
+[node name="ScalarValueInput" parent="." unique_id=1458729988 instance=ExtResource("2_re830")]
+visible = false
+custom_minimum_size = Vector2(90, 0)
+layout_mode = 2
+
+[node name="Value" parent="ScalarValueInput" index="0" unique_id=1193418551]
+theme = SubResource("Theme_6qn5y")
+
+[node name="BoolToggleInput" parent="." unique_id=546195378 instance=ExtResource("3_ql4rr")]
+visible = false
+layout_mode = 2
+
+[node name="EditConditionalButton" type="Button" parent="." unique_id=615535427]
+visible = false
+layout_mode = 2
+
+[editable path="ScalarValueInput"]

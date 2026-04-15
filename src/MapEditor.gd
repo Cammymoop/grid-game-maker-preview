@@ -573,9 +573,7 @@ func is_alt_mode_active() -> bool:
 	return false
 
 func on_visibility_changed() -> void:
-	prints("visibility changed: ", visible)
 	if ui_layer:
-		prints("setting ui layer visible: ", visible)
 		ui_layer.visible = visible
 
 func is_other_paused() -> bool:
