@@ -363,17 +363,20 @@ func update_property_to(prop_key, update_property_popup):
 	var value = update_property_popup.get_value()
 	var new_value
 	if typeof(value) == TYPE_STRING:
-		value = value.strip_edges()
-		if value.to_lower() == "true":
-			new_value = true
-		elif value.to_lower() == "false":
-			new_value = false
-		elif value.is_valid_int():
-			new_value = int(value)
-		elif value.is_valid_float():
-			new_value = float(value)
+		if Utility.is_multiline(value):
+			new_value = "\n".join(Utility.split_lines(value))
 		else:
-			new_value = value
+			value = value.strip_edges()
+			if value.to_lower() == "true":
+				new_value = true
+			elif value.to_lower() == "false":
+				new_value = false
+			elif value.is_valid_int():
+				new_value = int(value)
+			elif value.is_valid_float():
+				new_value = float(value)
+			else:
+				new_value = value
 	else:
 		new_value = value
 	

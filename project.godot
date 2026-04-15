@@ -50,6 +50,10 @@ window/size/initial_position_type=4
 window/size/window_width_override=768
 window/size/window_height_override=768
 
+[global_group]
+
+TextBox="the multipurpose textbox"
+
 [gui]
 
 theme/custom="res://src/UI/DefaultProjectTheme.tres"

@@ -195,6 +195,8 @@ func set_multi_line_minimum_height() -> void:
             multi_line_input.custom_minimum_size.y = size.y
 
 func adjust_popup_size_position() -> void:
+    if not is_visible_in_tree():
+        return
     multi_line_popup.reset_size()
     var target_pos: = get_screen_position()
     multi_line_popup.position = target_pos - Vector2(_popup_panel_left_margin, _popup_panel_stylebox_top_margin)

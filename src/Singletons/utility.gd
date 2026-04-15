@@ -632,4 +632,12 @@ func set_window_rect_including_decorations(the_window: Window, rect: Rect2i) -> 
 	
 	the_window.size = rect.size - decorations_size
 	the_window.position = rect.position + decorations_offset
+
+func is_multiline(text: String) -> bool:
+	return text.contains("\n")
 	
+func first_line(text: String) -> String:
+	return text.split("\n", true, 1)[0].replace("\r", "")
+
+func split_lines(text: String) -> PackedStringArray:
+	return text.replace("\r", "").split("\n", true)

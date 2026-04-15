@@ -576,3 +576,21 @@ func save_edited_level_as(as_level_filename: String) -> void:
 	loaded_level_name = level_data["name"]
 	loaded_is_autosave = false
 	save_checkpoint()
+
+func _get_textbox() -> Node:
+	if not cur_scene == "Play":
+		return null
+	var textbox: Array[Node] = get_tree().get_nodes_in_group("TextBox")
+	if not textbox:
+		return null
+	return textbox[0]
+
+func show_the_textbox(with_text: String) -> void:
+	var textbox: = _get_textbox()
+	if textbox:
+		textbox.show_with_text(with_text)
+
+func dismiss_the_textbox() -> void:
+	var textbox: = _get_textbox()
+	if textbox:
+		textbox.dismiss()

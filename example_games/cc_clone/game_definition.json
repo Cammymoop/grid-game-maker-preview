@@ -870,6 +870,38 @@
           }
         ]
       }
+    },
+    "35": {
+      "name": "hint",
+      "texture": 1,
+      "tex_index": 44,
+      "properties": {
+        "z-index": -1,
+        "hint-text": "lorem ipsum\ndolor set",
+        "half_moved_onto": {
+          "v": "3",
+          "conditions": [
+            "basic_default.c_has_property::[\"i:1\",false,\"s:player\"]"
+          ],
+          "when true": [
+            "basic_default.select_text_property::[\"i:12\",\"i:0\",\"s:hint-text\"]",
+            "basic_default.show_textbox::[\"i:12\"]"
+          ],
+          "when false": [],
+          "when always": []
+        },
+        "half_moved_off_of": {
+          "v": "3",
+          "conditions": [
+            "basic_default.c_has_property::[\"i:1\",false,\"s:player\"]"
+          ],
+          "when true": [
+            "basic_default.dismiss_textbox::[\"i:0\"]"
+          ],
+          "when false": [],
+          "when always": []
+        }
+      }
     }
   },
   "tile_definitions": {

@@ -215,7 +215,7 @@ grow_horizontal = 2
 grow_vertical = 0
 mouse_filter = 2
 
-[node name="TextBoxAnimRoot" type="Node2D" parent="OverlayLayer/OverlayUI/BottomCenter" unique_id=1132113936 node_paths=PackedStringArray("text_label", "text_box_panel", "animator")]
+[node name="TextBoxAnimRoot" type="Node2D" parent="OverlayLayer/OverlayUI/BottomCenter" unique_id=1132113936 node_paths=PackedStringArray("text_label", "text_box_panel", "animator") groups=["TextBox"]]
 position = Vector2(0, 86)
 script = ExtResource("5_q86eb")
 text_label = NodePath("TextBoxPanel/VBoxContainer/TextBoxLabel")

@@ -479,3 +479,18 @@ func cmd_show_mini_text_at(slots: Dictionary, chosen_slot: int, text_slot: int, 
 			EffectsHelper.spawn_mini_text_at(mini_message, message_pos)
 	else:
 		push_error("Invalid slot to show mini text at: %s" % chosen_slot)
+
+func desc_show_textbox() -> String:
+	return "string|Show a textbox with the text fom this slot"
+func cmd_show_textbox(slots: Dictionary, chosen_slot: int) -> void:
+	if not Commands.slot_is_string(chosen_slot):
+		push_error("Not a string slot: %s" % chosen_slot)
+		return
+	GameManager.show_the_textbox(get_value_slot_as_string(slots, chosen_slot))
+
+func desc_dismiss_textbox() -> String:
+	return "none|Dismiss the textbox"
+func cmd_dismiss_textbox(_slots: Dictionary) -> void:
+	GameManager.dismiss_the_textbox()
+	
+	
