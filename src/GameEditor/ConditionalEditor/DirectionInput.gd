@@ -20,6 +20,8 @@ func _ready():
 	$SlotSelectorButton.set_valid_slot_categories(["entity", "pos"])
 	$SlotSelectorButton.slot_changed.connect(slot_changed)
 
+	$DirectionSelectorButton.set_slots_enabled(is_reference_position)
+
 func set_arg_name(new_arg_name: String) -> void:
 	arg_name = new_arg_name
 
@@ -33,6 +35,7 @@ func set_input_args(new_args: Array) -> void:
 		is_reference_position = true
 	else:
 		is_reference_position = false
+	$DirectionSelectorButton.set_slots_enabled(is_reference_position)
 
 # Return all the info about the selected direction and relativeness as a single int value
 func get_value() -> Variant:

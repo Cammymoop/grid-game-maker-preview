@@ -43,6 +43,14 @@ func _ready():
 	picker.get_node("PopupPickerPanel").reset_size()
 	picker.window_input.connect(picker_input)
 
+func set_slots_enabled(is_slots_enabled: bool) -> void:
+	if not is_node_ready():
+		await ready
+	include_slots = is_slots_enabled
+	slot_separator.visible = include_slots
+	slots_list.visible = include_slots
+	picker.reset_size()
+
 func show_picker() -> void:
 	picker_open = true
 	#picker.visible = true

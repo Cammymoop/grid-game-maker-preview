@@ -641,3 +641,6 @@ func first_line(text: String) -> String:
 
 func split_lines(text: String) -> PackedStringArray:
 	return text.replace("\r", "").split("\n", true)
+
+func random_direction() -> int:
+	return randi() % 4

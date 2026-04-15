@@ -122,6 +122,15 @@ func get_position_arg(base_value: Variant, slots: Dictionary, is_relative: bool 
 func get_context_position(slots: Dictionary) -> Vector2i:
 	return slots[Slot.THIS_TILE]
 
+func resolve_variant_direction_value(dir_value: Variant, slots: Dictionary) -> int:
+	if typeof(dir_value) == TYPE_INT:
+		return resolve_direction_value(dir_value, slots)
+	elif typeof(dir_value) == TYPE_DICTIONARY:
+		return resolve_complex_direction(dir_value, slots)
+	else:
+		push_error("Invalid direction value type: %s" % [typeof(dir_value)])
+		return 0
+
 func resolve_direction_value(dir_value: int, slots: Dictionary) -> int:
 	return Utility.resolve_full_direction_to_facing(dir_value, slots)
 

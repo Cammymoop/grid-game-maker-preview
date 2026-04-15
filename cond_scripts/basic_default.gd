@@ -124,6 +124,11 @@ func cmd_select_number_property(slots: Dictionary, chosen_slot: int, target_slot
 		return
 	set_value_slot_as_number(slots, chosen_slot, prop_val)
 
+func desc_select_random_direction() -> String:
+	return "int|<= Select a random direction"
+func cmd_select_random_direction(slots: Dictionary, chosen_slot: int) -> void:
+	set_value_slot_as_number(slots, chosen_slot, Utility.random_direction())
+
 func desc_add_text() -> String:
 	return "string|<= Add [inserted_text:StringInput] to the [is_end:BoolChoice:true,end,beginning] of the slot\n" + \
 	       "Separated by [separator:StringInput]"
@@ -206,15 +211,15 @@ func cmd_c_can_move(slots: Dictionary, chosen_slot: int, invert: bool, direction
 	return not result if invert else result
 
 func desc_c_get_pushed() -> String:
-	return "entity|If the entity successfully gets pushed this way [direction:DirectionInput]\n" \
+	return "entity|If the entity successfully gets pushed this way [direction:DirectionInput:1]\n" \
 	     + "[keep_visual:BoolChoice:true,without turning,turning] to face that direction"
-func cmd_c_get_pushed(slots: Dictionary, chosen_slot: int, direction: int, keep_visual: bool) -> bool:
+func cmd_c_get_pushed(slots: Dictionary, chosen_slot: int, direction: Variant, keep_visual: bool) -> bool:
 	var selected = slots[chosen_slot]
 	if selected.moving:
 		return false
 	var blue_entity = slots[Slot.BLUE]
 	selected.set_steps_per_tile_override(blue_entity.get_steps_per_tile())
-	var facing = resolve_direction_value(direction, slots)
+	var facing = resolve_variant_direction_value(direction, slots)
 	return selected.start_move(facing, not keep_visual)
 
 func desc_c_is_facing() -> String:
