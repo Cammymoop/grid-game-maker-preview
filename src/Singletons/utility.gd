@@ -172,21 +172,21 @@ func get_pause_menu() -> Node:
 	return null
 
 
-func atlas_texture_from_texture_index(texture_index, sub_index):
+func atlas_texture_from_texture_index(texture_index, sub_index) -> AtlasTexture:
 	var atlas_tex: = AtlasTexture.new()
 	
 	atlas_tex.atlas = TextureManager.get_texture(texture_index)
 	atlas_tex.region = TextureManager.get_index_rect(texture_index, sub_index)
 	return atlas_tex
 
-func atlas_texture_from_tile_index(tile_index: int, preview: bool = false):
+func atlas_texture_from_tile_index(tile_index: int, preview: bool = false) -> AtlasTexture:
 	var atlas_tex: = AtlasTexture.new()
 	
 	atlas_tex.atlas = MapManager.get_tile_texture(tile_index, preview)
 	atlas_tex.region = MapManager.get_tile_texture_rect(tile_index, preview)
 	return atlas_tex
 
-func atlas_texture_from_entity_index(entity_index: int, preview: bool = false):
+func atlas_texture_from_entity_index(entity_index: int, preview: bool = false) -> AtlasTexture:
 	var atlas_tex: = AtlasTexture.new()
 	
 	atlas_tex.atlas = EntityManager.get_entity_texture(entity_index, preview)

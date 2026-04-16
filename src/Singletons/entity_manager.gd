@@ -70,6 +70,8 @@ var entity_defs: Dictionary = {
 var entity_index_map: = {}
 var entity_instance_map: = {}
 
+var entity_sprite_snapshots: Dictionary[int, ImageTexture] = {}
+
 var entity_signal_connections: = {}
 
 var entity_list: Array = []
@@ -1071,3 +1073,18 @@ func get_default_spt() -> int:
 func switch_entities_preview_mode(enable_preview: bool) -> void:
     is_entity_preview_mode = enable_preview
     entity_preview_mode_changed.emit(enable_preview)
+
+func save_entity_sprite_snapshot(entity_index: int, snapshot: ImageTexture) -> void:
+    entity_sprite_snapshots[entity_index] = snapshot
+
+func get_entity_sprite_snapshot(entity_index: int, preview: bool = false) -> Texture2D:
+    if not entity_sprite_snapshots.has(entity_index) or preview:
+        return Utility.atlas_texture_from_entity_index(entity_index, preview)
+    else:
+        return entity_sprite_snapshots[entity_index]
+
+func get_entity_sprite_snapshot_scale(entity_index: int) -> float:
+    if not entity_sprite_snapshots.has(entity_index):
+        return GameManager.get_default_pixel_scale()
+    else:
+        return 1.0

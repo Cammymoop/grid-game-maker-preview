@@ -214,13 +214,17 @@ func create_and_add_nodes_for_layer(layer_info: Dictionary, _layer_index: int) -
             var prop_name: String = layer_info["property"]
             _add_prop_upate_callable(prop_name, set_digit_display_number.bind(digit_display))
             
+            var entity_parent: BaseEntity = null
             if is_inside_tree():
-                var entity: = get_parent() as BaseEntity
-                if entity:
-                    var prop_val: Variant = EntityManager.get_entity_prop_with_default(entity, prop_name, 0)
-                    set_digit_display_number(prop_val, digit_display)
-                else:
-                    set_digit_display_number(layer_info.get("preview_number", 0), digit_display)
+                entity_parent = get_parent() as BaseEntity
+
+            if entity_parent:
+                var prop_val: Variant = EntityManager.get_entity_prop_with_default(entity_parent, prop_name, 0)
+                prints("setting digit display number for %s (entity) to %s" % [prop_name, prop_val])
+                set_digit_display_number.call_deferred(prop_val, digit_display)
+            else:
+                prints("setting digit display number for %s (preview) to %s" % [prop_name, layer_info.get("preview_number", 0)])
+                set_digit_display_number.call_deferred(layer_info.get("preview_number", 0), digit_display)
     
     if layer_info.get("when_property", ""):
         var when_property_name: String = layer_info["when_property"]

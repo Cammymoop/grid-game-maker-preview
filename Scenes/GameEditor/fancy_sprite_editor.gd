@@ -15,6 +15,8 @@ var _sprite_config_backup: Dictionary = {}
 var entity_def: = {}
 var sprite_config: = {}
 
+var snapshot_tex: ViewportTexture = null
+
 func _ready() -> void:
     close_requested.connect(close_sprite_editor)
     if layer_list:
@@ -83,6 +85,14 @@ func refresh_previewer() -> void:
     if sprite_previewer:
         sprite_previewer.update_sprite_config(entity_def)
 
+func get_snapshot() -> ViewportTexture:
+    if not sprite_previewer:
+        return null
+    sprite_previewer.set_rotation_immediate(0)
+    await RenderingServer.frame_post_draw
+    return sprite_previewer.preview_subviewport.get_texture()
+
 func close_sprite_editor() -> void:
+    snapshot_tex = await get_snapshot()
     closing.emit()
     queue_free()

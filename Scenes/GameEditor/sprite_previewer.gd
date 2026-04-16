@@ -82,3 +82,6 @@ func set_preview_spr_rotation(rotation_val: float) -> void:
     if not the_sprite:
         return
     the_sprite.set_sprite_rotation(rotation_val)
+
+func set_rotation_immediate(rotation_val: float) -> void:
+    the_sprite.set_sprite_rotation(rotation_val)

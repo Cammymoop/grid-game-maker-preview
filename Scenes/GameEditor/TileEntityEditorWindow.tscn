@@ -167,6 +167,7 @@ theme_override_font_sizes/font_size = 14
 text = "Preview
 Image:"
 horizontal_alignment = 2
+vertical_alignment = 1
 
 [node name="PreviewImageButton" type="Container" parent="PanelContainer/VBoxContainer/HBoxContainer2/PreviewVariantSettings" unique_id=804378639]
 layout_mode = 2

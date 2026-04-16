@@ -31,6 +31,8 @@ var sprite_style_options: = {
 	"Fancy": SPRITE_FANCY,
 }
 
+var sprite_snapshot_tex: ImageTexture = null
+
 func _ready():
 	visibility_changed.connect(_on_vis_changed)
 	var controller_list = find_child("EditController").get_popup()
@@ -55,13 +57,18 @@ func _ready():
 	update_sprite_style_picker()
 	sprite_style_picker.item_selected.connect(on_sprite_style_selected)
 	
+	
+	close_requested.connect(close_window)
+
+func update_preview_variant_settings() -> void:
 	var has_preview_variant: bool = not the_definition.get("preview_variant", {}).is_empty()
 	var preview_variant_settings: = find_child("PreviewVariantSettings") as Control
 	preview_variant_settings.visible = has_preview_variant
 	var add_preview_variant_button: = find_child("AddPreviewVariantButton") as Control
 	add_preview_variant_button.visible = not has_preview_variant
-	
-	close_requested.connect(close_window)
+	if has_preview_variant:
+		update_preview_image_button()
+		
 
 func _shortcut_input(event: InputEvent) -> void:
 	if Input.is_action_just_pressed_by_event(&"escape", event):
@@ -112,6 +119,7 @@ func load_entity_info(entity_index: int):
 		find_child("ControllerOpContainer").visible = false
 	controller_select.text = text
 	
+	update_preview_variant_settings()
 	last_fancy_sprite_config = the_definition.get("sprite_config", {}).duplicate_deep()
 	update_sprite_style_picker()
 	
@@ -127,6 +135,8 @@ func load_tile_info(tile_index: int):
 	var terrain_spr_mod_switch: CheckButton = find_child("TestTerrainSprMod")
 	var terrain_spr_mod: Dictionary = the_definition.get("terrain_sprite_modifier", {})
 	terrain_spr_mod_switch.set_pressed_no_signal(not terrain_spr_mod.is_empty())
+	
+	update_preview_variant_settings()
 
 	load_common()
 
@@ -141,22 +151,34 @@ func load_common():
 	show_property_list()
 
 func update_image_button():
-	update_image_simple()
+	if sprite_snapshot_tex:
+		prints("updating image button with snapshot")
+		var clipped_tex: AtlasTexture = AtlasTexture.new()
+		var tex_size: Vector2 = Vector2(MapManager.tile_width, MapManager.tile_width) * GameManager.get_default_pixel_scale()
+		clipped_tex.atlas = sprite_snapshot_tex
+		clipped_tex.region = Rect2(sprite_snapshot_tex.get_size() / 2 - tex_size / 2, tex_size)
+		_set_img_button_texture(find_child("ImageButton"), clipped_tex, false)
+	else:
+		prints("updating image button with simple texture")
+		update_image_simple()
 
 func update_image_simple() -> void:
-	_set_img_button_texture(find_child("ImageButton"), the_definition['texture'], the_definition['tex_index'])
+	var atlas_tex: = Utility.atlas_texture_from_texture_index(the_definition['texture'], the_definition['tex_index'])
+	_set_img_button_texture(find_child("ImageButton"), atlas_tex)
 
 func update_preview_image_button() -> void:
 	if not the_definition.get("preview_variant", {}):
 		return
 	var texture_index: int = the_definition['preview_variant']['texture']
 	var tex_sub_index: int = the_definition['preview_variant']['tex_index']
-	_set_img_button_texture(find_child("PreviewImageButton"), texture_index, tex_sub_index)
+	var atlas_tex: = Utility.atlas_texture_from_texture_index(texture_index, tex_sub_index)
+	_set_img_button_texture(find_child("PreviewImageButton"), atlas_tex)
 
-func _set_img_button_texture(the_image_button: Control, texture_index: int, tex_sub_index: int) -> void:
+func _set_img_button_texture(the_image_button: Control, with_texture: Texture2D, auto_zoom: bool = true) -> void:
 	var image_tex_rect: = the_image_button.find_child("TextureRect") as TextureRect
-	image_tex_rect.texture = Utility.atlas_texture_from_texture_index(texture_index, tex_sub_index)
-	image_tex_rect.custom_minimum_size = image_tex_rect.texture.get_size() * GameManager.get_default_pixel_scale()
+	image_tex_rect.texture = with_texture
+	var zoom_factor: float = 1.0 if not auto_zoom else GameManager.get_default_pixel_scale()
+	image_tex_rect.custom_minimum_size = image_tex_rect.texture.get_size() * zoom_factor
 
 
 func set_tile_entity_mode(tile_or_entity: String) -> void:
@@ -246,6 +268,7 @@ func _on_ImageButton_pressed() -> void:
 		fancy_spr_edit.popup_centered()
 		fancy_spr_edit.sprite_config_changed.connect(update_sprite_config)
 		fancy_spr_edit.closing.connect(set_basic_texture_indices_from_sprite_config)
+		fancy_spr_edit.closing.connect(save_fancy_sprite_snapshot.bind(fancy_spr_edit))
 	else:
 		show_basic_texture_select_dialog(false)
 
@@ -303,6 +326,8 @@ func _on_UpdateButton_pressed():
 		MapManager.update_tile_definition(the_index, the_definition)
 	else:
 		EntityManager.update_entity_definition(the_index, the_definition)
+		if sprite_snapshot_tex:
+			EntityManager.save_entity_sprite_snapshot(the_index, sprite_snapshot_tex)
 	close_window()
 
 func _on_RemovePropertyButton_pressed():
@@ -515,3 +540,10 @@ func _on_add_preview_variant_button_pressed() -> void:
 	preview_variant_settings.show()
 	var add_preview_variant_button: = find_child("AddPreviewVariantButton") as Control
 	add_preview_variant_button.hide()
+
+func save_fancy_sprite_snapshot(fancy_sprite_editor: FancySpriteEditor) -> void:
+	if not fancy_sprite_editor.snapshot_tex:
+		return
+	sprite_snapshot_tex = ImageTexture.create_from_image(fancy_sprite_editor.snapshot_tex.get_image())
+	prints("saved fancy sprite snapshot, updating image button")
+	update_image_button()
