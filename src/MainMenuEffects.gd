@@ -104,8 +104,6 @@ func spawn_common(spr: VelocitySprite, fall_delta: float) -> void:
 	spr.set_meta("base_scale", base_scale)
 	spr.scale *= base_scale
 	
-	prints("sprite velocity target:", base_scale * gravity_vector * fall_speed)
-	
 	spr.modulate = Utility.lerp_ok_hsl_color(bg_color, Color.WHITE, depth_factor) * max_brightness
 	
 	spr.z_index = int(depth_factor * 1000)

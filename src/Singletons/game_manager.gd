@@ -1,6 +1,7 @@
 extends Node
 
 signal level_state_loaded
+signal game_camera_target_changed(entity: BaseEntity)
 
 const FULL_TICK_RATE: int = 60
 @onready var TICK_RATE: int = ProjectSettings.get_setting_with_override("physics/common/physics_ticks_per_second")
@@ -25,6 +26,7 @@ var loaded_is_autosave: = false
 var loaded = false
 
 var editor_live_edit_mode: = false
+var current_level_is_museum: = false
 
 var scenes: = {
 	"Menu": "res://Scenes/Menu.tscn",
@@ -41,6 +43,7 @@ const SPECIAL_PROPS: Array[String] = [
 	"z-index", "move_turns", "inherit_properties",
 	"auto_bond", "auto_tail", "auto_scale",
 	"edit_place_multiple",
+	"no-museum", "museum-active",
 ]
 
 @export_file("*.json") var builtin_default_game_file: String = ""
@@ -243,6 +246,7 @@ func create_game_camera() -> void:
 	var cam = cameras["SimpleCamera"].instantiate()
 	Utility.get_world().add_child(cam)
 	game_camera = cam
+	game_camera.camera_target_changed.connect(game_camera_target_changed.emit)
 
 func position_gameplay_camera(pos: Vector2) -> void:
 	if game_camera:
@@ -342,6 +346,7 @@ func load_editor_autosave() -> void:
 
 func load_level_data(level_data):
 	loaded_is_autosave = false
+	current_level_is_museum = false
 	loaded_level_name = level_data["name"]
 	editor_save = level_data["state"]
 	load_edited()
@@ -362,10 +367,31 @@ func try_load_level(level_name: String):
 	load_level_data(the_level_data)
 
 func new_empty_level():
+	loaded_level_name = "LEVEL"
+	current_level_is_museum = false
 	EntityManager.clear()
 	MapManager.clear()
 	MapManager.create_plain_layer()
 	EntityManager.create_defaults()
+	
+	save_edited()
+
+func new_museum_level():
+	loaded_level_name = "Museum"
+	current_level_is_museum = true
+	EntityManager.clear()
+	MapManager.clear()
+	
+	var entity_museum_start_pos: = Vector2i(2, -1)
+	var tile_museum_start_pos: = Vector2i(-2, -1)
+	var museum_player_pos: = Vector2i(0, 0)
+	var museum_spacing: = Vector2i(2, 2)
+
+	var entity_museum_size: = EntityManager.create_museum(Vector2i(0, 0), entity_museum_start_pos, museum_spacing)
+	var entity_museum: = Utility.rect2i_pos_inclusive_abs(Rect2i(entity_museum_start_pos, entity_museum_size))
+
+	var tile_museum_spacing: = Vector2i(-museum_spacing.x, museum_spacing.y)
+	MapManager.create_museum_layer(museum_player_pos, tile_museum_start_pos, tile_museum_spacing, entity_museum)
 	
 	save_edited()
 
@@ -447,6 +473,7 @@ func post_scene_change() -> void:
 		update_game_viewport()
 		create_game_camera()
 		activate_gameplay_camera()
+		EffectsHelper._fetch_effects_holder()
 		if loaded_level:
 			load_serialized_play_state(loaded_level)
 		elif has_editor_autosave():
@@ -551,6 +578,10 @@ func get_all_used_prop_names() -> Array[String]:
 				continue
 			if not prop_name in prop_names:
 				prop_names.append(prop_name)
+	
+	for special_prop_name in SPECIAL_PROPS:
+		if not special_prop_name in prop_names:
+			prop_names.append(special_prop_name)
 
 	return prop_names
 
@@ -608,3 +639,18 @@ func dismiss_the_textbox() -> void:
 	var textbox: = _get_textbox()
 	if textbox:
 		textbox.dismiss()
+
+func set_live_edit_mode_enabled(new_is_enabled: bool) -> void:
+	editor_live_edit_mode = new_is_enabled
+
+func is_live_edit() -> bool:
+	if current_level_is_museum:
+		return true
+	return editor_live_edit_mode
+
+func is_entity_followed_by_camera(entity: BaseEntity) -> bool:
+	if not game_camera:
+		return false
+	if game_camera.target_entity == entity:
+		return true
+	return false

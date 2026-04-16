@@ -19,6 +19,9 @@ var prop_update_response: Dictionary[String, Array] = {}
 
 var is_preview_mode: bool = false
 
+var _local_prop_updated: = false
+var parent_entity: BaseEntity = null
+
 var rotation_prop: float = 0:
     get:
         return current_rotation
@@ -31,10 +34,20 @@ func _enter_tree() -> void:
         await parent.ready
     
     if parent is BaseEntity:
-        parent.local_prop_changed.connect(on_local_properties_updated)
+        parent_entity = parent
+        parent.local_prop_changed.connect(_notify_local_prop_updated.unbind(1))
         EntityManager.entity_preview_mode_changed.connect(on_entity_preview_mode_changed)
     else:
-        prints("not registering parent, not under an entity")
+        parent_entity = null
+
+func _notify_local_prop_updated() -> void:
+    _local_prop_updated = true
+
+func sprite_process() -> void:
+    if _local_prop_updated:
+        _local_prop_updated = false
+        if parent_entity:
+            on_local_prop_update_frame(parent_entity)
 
 func on_entity_preview_mode_changed(enable_preview: bool) -> void:
     prints("entity preview mode changed to: %s" % enable_preview)
@@ -100,7 +113,7 @@ func refresh_layers() -> void:
         for layer_index in layers.size():
             create_and_add_nodes_for_layer(layers[layer_index], layer_index)
     if is_inside_tree():
-        on_local_properties_updated(get_parent() as BaseEntity)
+        on_local_prop_update_frame(get_parent() as BaseEntity)
 
 func clear() -> void:
     modifier_masks.clear()
@@ -220,10 +233,8 @@ func create_and_add_nodes_for_layer(layer_info: Dictionary, _layer_index: int) -
 
             if entity_parent:
                 var prop_val: Variant = EntityManager.get_entity_prop_with_default(entity_parent, prop_name, 0)
-                prints("setting digit display number for %s (entity) to %s" % [prop_name, prop_val])
                 set_digit_display_number.call_deferred(prop_val, digit_display)
             else:
-                prints("setting digit display number for %s (preview) to %s" % [prop_name, layer_info.get("preview_number", 0)])
                 set_digit_display_number.call_deferred(layer_info.get("preview_number", 0), digit_display)
     
     if layer_info.get("when_property", ""):
@@ -264,9 +275,7 @@ func _add_prop_upate_callable(prop_name: String, update_func: Callable) -> void:
         prop_update_response[prop_name] = []
     prop_update_response[prop_name].append(update_func)
 
-func on_local_properties_updated(entity: BaseEntity) -> void:
-    if not entity:
-        return
+func on_local_prop_update_frame(entity: BaseEntity) -> void:
     for prop_name in prop_update_response:
         var prop_val: Variant = EntityManager.get_entity_prop_with_default(entity, prop_name, 0)
         for update_func in prop_update_response[prop_name]:

@@ -81,6 +81,11 @@ func _ready() -> void:
 	
 	GameManager.level_state_loaded.connect(on_level_state_loaded)
 
+func _physics_process(_delta: float) -> void:
+	if edit_mode and not is_other_paused():
+		if not EntityManager.can_process():
+			EntityManager.paused_visual_process()
+
 func on_level_state_loaded() -> void:
 	_refresh_edited_entity_indicators()
 
@@ -128,7 +133,7 @@ func on_edit_mode_enabled() -> void:
 	var vp = get_viewport()
 	if vp.has_method("rescale"):
 		vp.rescale()
-	if not GameManager.editor_live_edit_mode:
+	if not GameManager.is_live_edit():
 		GameManager.load_edited()
 		await get_tree().process_frame
 		await get_tree().process_frame
@@ -318,7 +323,7 @@ func _primary_action_at_cursor(holding: bool = false) -> void:
 	if cursor_mode == "tile":
 		MapManager.replace_tiles_at(cursor_tile_pos, current_tile_index, current_tile_facing)
 	elif cursor_mode == "entity":
-		var entities_here = EntityManager.get_entities_at(cursor_tile_pos)
+		var entities_here = get_all_entities_at_tile_pos(cursor_tile_pos)
 		# remove existing entities of the same index
 		for e in entities_here:
 			if e.entity_index == current_entity_index:
@@ -330,7 +335,7 @@ func _primary_action_at_cursor(holding: bool = false) -> void:
 		var force_everything: = holding and not delete_held_on_entity
 		var force_only_entities: = holding and delete_held_on_entity
 		if not holding:
-			if EntityManager.get_entities_at(cursor_tile_pos, null, [], true).size() > 0:
+			if get_all_entities_at_tile_pos(cursor_tile_pos).size() > 0:
 				delete_held_on_entity = true
 			else:
 				delete_held_on_entity = false
@@ -343,7 +348,7 @@ func _standard_delete_at_cursor(force_everything: bool = false, force_only_entit
 		# No entities, remove the tile
 		var here = MapManager.get_tile_index_at(cursor_tile_pos)
 		if here > -1:
-			MapManager.replace_tiles_at(cursor_tile_pos, -1)
+			MapManager.erase_tiles_and_effects_at(cursor_tile_pos)
 			deleted_something = true
 
 	if entities_here.size() > 0:
@@ -422,9 +427,7 @@ func move_cursor(new_position: Vector2i) -> void:
 	if new_position == cursor_tile_pos:
 		return
 	var tile_pos_bounds: = get_valid_tile_pos_bounds()
-	if not tile_pos_bounds.has_point(new_position):
-		if not _cursor_moved_from_directional_input:
-			return
+	if _cursor_moved_from_directional_input and not tile_pos_bounds.has_point(new_position):
 		new_position = Utility.clamp_point_in_rect2i(new_position, tile_pos_bounds)
 
 	cursor_tile_pos = new_position
@@ -505,7 +508,7 @@ func forwarded_gui_input(event: InputEvent) -> void:
 		return
 
 	if Utility.fixed_just_pressed_by_event("editor_pointer_pick", event, true):
-		var entities_here: = EntityManager.get_entities_at(cursor_tile_pos, null, [], true)
+		var entities_here: = get_all_entities_at_tile_pos(cursor_tile_pos)
 		if entities_here.size() > 0:
 			if cursor_mode != "entity":
 				set_cursor_mode("entity")
@@ -608,7 +611,7 @@ func sort_entities_by_render_order(entity_list: Array) -> Array:
 	return entity_list
 
 func get_sorted_entities_at(tile_pos: Vector2i) -> Array:
-	return sort_entities_by_render_order(EntityManager.get_entities_at(tile_pos, null, [], true))
+	return sort_entities_by_render_order(get_all_entities_at_tile_pos(tile_pos))
 
 func cleanup() -> void:
 	GameManager.set_pause("map_editor", false)
@@ -632,3 +635,6 @@ func entity_instance_editor_closed() -> void:
 
 func on_entity_props_edited(entity: BaseEntity) -> void:
 	_refresh_entity_is_edited(entity)
+
+func get_all_entities_at_tile_pos(tile_pos: Vector2i) -> Array:
+	return EntityManager.get_entities_at(tile_pos, null, [], true, true)

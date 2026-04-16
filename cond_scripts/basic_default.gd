@@ -59,7 +59,7 @@ func cmd_select_tiles_around(slots: Dictionary, chosen_slot: int, radius: Dictio
 	slots[chosen_slot] = positions
 
 func desc_select_entity_at() -> String:
-	return "entity|<= Select an entity (ignoring self) at [at_pos_slot:SlotInput:pos] [invert:InvertInput:with,without] a [prop_name:PropertyInput] property"
+	return "entity|<= Select an active entity (ignoring self) at [at_pos_slot:SlotInput:pos] [invert:InvertInput:with,without] a [prop_name:PropertyInput] property"
 func cmd_select_entity_at(slots: Dictionary, chosen_slot: int, at_pos_slot: int, prop_name: String, invert: bool) -> void:
 	if not Commands.slot_is_entity(chosen_slot) or not Commands.slot_is_positions(at_pos_slot):
 		push_error("Invalid slots to select entity at: %s and %s" % [chosen_slot, at_pos_slot])
@@ -68,7 +68,7 @@ func cmd_select_entity_at(slots: Dictionary, chosen_slot: int, at_pos_slot: int,
 	if not at_positions:
 		slots[chosen_slot] = null
 		return
-	var filtered_entities: Array = EntityManager.get_entities_at_multiple(at_positions, slots[Slot.RED])
+	var filtered_entities: Array = EntityManager.get_entities_at_multiple(at_positions, slots[Slot.RED], [], true, false)
 	filtered_entities = EntityManager.filter_entities_by_property(prop_name, filtered_entities, invert)
 	slots[chosen_slot] = filtered_entities[0] if filtered_entities else null
 
@@ -161,14 +161,14 @@ func cmd_add_number_to_text(slots: Dictionary, chosen_slot: int, inserted_num: D
 		slots[chosen_slot] = inserted_text + separator + text
 
 func desc_is_entity_at() -> String:
-	return "pos|If there is an entity (ignoring self) at this location [invert:InvertInput:with,without] a [prop_name:PropertyInput] property"
+	return "pos|If there is an active entity (ignoring self) at this location [invert:InvertInput:with,without] a [prop_name:PropertyInput] property"
 func cmd_is_entity_at(slots: Dictionary, chosen_slot: int, prop_name: String, invert: bool) -> bool:
 	if not Commands.slot_is_positions(chosen_slot):
 		return false
 	var at_positions: Array = slots[chosen_slot]
 	if not at_positions:
 		return false
-	var entities_here: Array = EntityManager.get_entities_at_multiple(at_positions, slots[Slot.RED])
+	var entities_here: Array = EntityManager.get_entities_at_multiple(at_positions, slots[Slot.RED], [], true, false)
 	entities_here = EntityManager.filter_entities_by_property(prop_name, entities_here, invert)
 	return entities_here.size() > 0
 
@@ -285,7 +285,7 @@ func cmd_a_set_tiles(slots: Dictionary, chosen_slot: int, tile_name: String) -> 
 func desc_erase_tiles() -> String:
 	return "pos|Erase the tile(s) here"
 func cmd_erase_tiles(slots: Dictionary, chosen_slot: int) -> void:
-	MapManager.replace_tiles_at_array(slots[chosen_slot], -1)
+	MapManager.erase_tiles_and_effects_at_array(slots[chosen_slot])
 
 func desc_a_set_property() -> String:
 	return "entity,pos|Set the entity or tile's [property_name:PropertyInput] property to [value:StringInput]"

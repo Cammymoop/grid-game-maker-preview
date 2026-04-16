@@ -645,6 +645,7 @@ func _add_new_property(property_name: String, as_conditional: bool) -> int:
     var info: Dictionary[String, Variant] = blank_property_info.duplicate()
     info["property_name"] = property_name
     properties_info[new_index] = info
+    index_map[property_name] = new_index
 
     if enable_local_props:
         info["is_base_definition_property"] = false

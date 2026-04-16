@@ -193,12 +193,8 @@ func atlas_texture_from_entity_index(entity_index: int, preview: bool = false) -
 	atlas_tex.region = EntityManager.get_entity_texture_rect(entity_index, preview)
 	return atlas_tex
 
-func get_camera_setting(setting):
-	var game_settings = GameManager.game_definition["game_settings"]
-	if "camera_settings" in game_settings:
-		if setting in game_settings["camera_settings"]:
-			return game_settings["camera_settings"][setting]
-	return null
+func get_camera_setting(setting: String, default_value: Variant = null) -> Variant:
+	return GameManager.get_game_setting("camera_settings", {}).get(setting, default_value)
 
 var animal_file = "res://src/animals.txt"
 var animals = []
@@ -650,3 +646,29 @@ func lerp_ok_hsl_color(from_color: Color, to_color: Color, factor: float) -> Col
 	var b: = Vector4(to_color.ok_hsl_h, to_color.ok_hsl_s, to_color.ok_hsl_l, to_color.a)
 	var interpolated: = a.lerp(b, factor)
 	return Color.from_ok_hsl(interpolated.x, interpolated.y, interpolated.z, interpolated.w)
+
+func rect2i_iter(rect: Rect2i) -> Array[Vector2i]:
+	rect = rect2i_pos_inclusive_abs(rect)
+	var positions: Array[Vector2i] = []
+	for y in rect.size.y:
+		for x in rect.size.x:
+			positions.append(Vector2i(x, y) + rect.position)
+	return positions
+
+## If treating a rect2i as inclusive of pos and exclusive of the last row/column, this makes the equivalent abs-sized rect.
+func rect2i_pos_inclusive_abs(rect: Rect2i) -> Rect2i:
+	if rect.size.x < 0:
+		rect.position.x = rect.end.x + 1
+	if rect.size.y < 0:
+		rect.position.y = rect.end.y + 1
+	rect.size = rect.size.abs()
+	return rect
+
+func vec2i_key(vec: Vector2i) -> String:
+	return "%d|%d" % [vec.x, vec.y]
+
+func key_to_vec2i(key: String) -> Vector2i:
+	if not key.contains("|"):
+		push_error("Invalid vector2i key: %s" % key)
+	var sp: = key.split("|", true, 1)
+	return Vector2i(int(sp[0]), int(sp[1]))

@@ -16,10 +16,13 @@ func _ready() -> void:
 func show_with_text(text: String) -> void:
     set_text_and_adjust_anim(text)
     if not is_on_screen:
+        await get_tree().process_frame
         animator.play("show")
         is_on_screen = true
 
 func dismiss() -> void:
+    set_text_and_adjust_anim(showing_text)
+    await get_tree().process_frame
     if is_on_screen:
         animator.play("hide")
         is_on_screen = false

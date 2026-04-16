@@ -273,4 +273,7 @@ func _fuzzy_rank(query: String, cand: String) -> int:
 
 func _on_text_submitted(_text: String) -> void:
 	if _ac_list and _ac_list.visible:
-		_ac_list.hide_list()
+		if not Input.is_key_pressed(KEY_SHIFT):
+			_accept_highlighted_autocomplete()
+		else:
+			_ac_list.hide_list()

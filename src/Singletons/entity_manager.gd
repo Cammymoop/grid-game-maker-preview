@@ -2,6 +2,7 @@ extends Node
 
 signal entity_preview_mode_changed(enable_preview: bool)
 signal entity_list_updated
+signal entity_became_active(entity: BaseEntity)
 signal post_deserialize
 
 var entity_template: = preload("res://Scenes/BaseEntity.tscn")
@@ -99,6 +100,10 @@ var process_phase: int = 0
 
 var is_entity_preview_mode: bool = false
 
+func paused_visual_process() -> void:
+    for e in entity_list:
+        e.sprite_process()
+
 func entity_list_process() -> void:
     var active_entities: Array[BaseEntity] = []
     var moving_entities: Array[BaseEntity] = []
@@ -116,6 +121,7 @@ func entity_list_process() -> void:
                 moving_entities.append(e)
             else:
                 idle_entities.append(e)
+        e.sprite_process()
     
     # Phase 2 - Update idle tick counter (for non-moving) and idle actions
     process_phase = 2
@@ -321,7 +327,7 @@ func clear_entity_list():
         if not entity:
             continue
         entity.remove_from_group("_entity_")
-        entity.set_active(false)
+        set_entity_active(entity, false)
         entity.queue_free()
     entity_list = []
     entity_instance_map = {}
@@ -371,26 +377,80 @@ func max_entity_index() -> int:
     return max_index
 
 func create_defaults() -> void:
-    create_default_player()
-    create_default_box()
+    create_entity_contain_insensitive("player", Vector2i(2, 2), true)
+    create_entity_contain_insensitive("box", Vector2i(3, 2))
     
 func create_randoms() -> void:
-    create_default_player()
+    create_entity_contain_insensitive("player", Vector2i(2, 2), true)
     create_random_entity("green_box")
     create_random_entity("swap_box")
     create_random_entity("bouncer")
 
-func create_default_player() -> void:
-    if entity_index_map.has("player"):
-        create_entity(get_entity_index("player"), Vector2(2, 2))
-func create_default_box() -> void:
-    pass
+func _get_museum_entity_ids() -> Array[int]:
+    var entity_ids: Array[int] = []
+    for entity_id in entity_defs:
+        if entity_defs[entity_id].get("no-museum", false):
+            continue
+        entity_ids.append(entity_id)
+    return entity_ids
+
+func is_entity_id_museum_active(entity_id: int) -> bool:
+    if entity_defs[entity_id].has("museum-active"):
+        return true if entity_defs[entity_id]["museum-active"] else false
+    return GameManager.get_game_setting("museum_all_without_controller_active", true) and not entity_id_has_controller(entity_id)
+
+func create_museum(player_pos: Vector2i, museum_start_pos: Vector2i, museum_spacing: Vector2i) -> Vector2i:
+    if entity_defs.size() < 1:
+        return Vector2i.ZERO
+    if museum_spacing.x == 0: museum_spacing.x = 1
+    if museum_spacing.y == 0: museum_spacing.y = 1
+
+    var rows: int = 4
+    var default_row_width: int = 5
+    
+    var entity_ids: = _get_museum_entity_ids()
+    var num_entities: int = entity_ids.size()
+    rows = mini(rows, ceili(num_entities / float(default_row_width)))
+    var per_row: int = ceili(num_entities / float(rows))
+    
+    var label_offset: = Vector2.UP * MapManager.tile_width * 0.25
+    for i in num_entities:
+        var e_id = entity_ids[i]
+        var row_col: = Vector2i(i % per_row, floori(i / float(per_row)))
+        var at_tile_pos: = museum_start_pos + row_col * museum_spacing
+        
+        create_entity(e_id, at_tile_pos, 0, is_entity_id_museum_active(e_id))
+        
+        # Labels
+        var e_name: = get_entity_name(e_id)
+        MapManager.create_persistant_text_effect(e_name, at_tile_pos + Vector2i.DOWN, label_offset, -2)
+    
+    create_entity_contain_insensitive("player", player_pos, true)
+    
+    return museum_spacing.sign() + Vector2i(per_row - 1, rows - 1) * museum_spacing
+
+func create_entity_contain_insensitive(partial_name: String, at_pos: Vector2i, or_first_entity: bool = false) -> void:
+    if entity_defs.size() < 1:
+        return
+    var found_index = _get_entity_index_name_insensitive(partial_name)
+    if found_index == -1 and or_first_entity:
+        found_index = entity_defs.keys()[0]
+    if found_index != -1:
+        create_entity(found_index, at_pos)
+
+func _get_entity_index_name_insensitive(partial_name: String) -> int:
+    partial_name = partial_name.to_lower()
+    for entity_index in entity_defs.keys():
+        if entity_defs[entity_index]["name"].to_lower().contains(partial_name):
+            return entity_index
+    return -1
 
 func create_random_entity(entity_name) -> void:
-    if not entity_index_map.has(entity_name):
+    var found_index = _get_entity_index_name_insensitive(entity_name)
+    if found_index == -1:
         return
+
     var tries = 20
-    
     while tries > 0:
         tries -= 1
         var entity_pos = Vector2(Utility.random_int_range(1, 11), Utility.random_int_range(1, 11))
@@ -455,24 +515,33 @@ func create_entity(entity_index: int, tile_position: Vector2i, facing: int = 0, 
     auto_bond_handler(entity)
     auto_tail_handler(entity)
     
-    if activate:
-        entity.set_active(true)
+    entity.active = activate
     on_entity_added(entity)
     
-    post_created_at_actions(entity)
+    if activate:
+        post_activated_actions(entity)
     
     MapManager.check_terrain_spr_mod_for_created(entity)
     
     return entity
 
-func post_created_at_actions(entity: BaseEntity) -> void:
+func post_activated_actions(entity: BaseEntity) -> void:
+    if not entity.active:
+        return
     var at_pos: = entity.get_stationary_position()
     var sitting_on_entities: Array = get_entities_at(at_pos, entity)
     for e in sitting_on_entities:
         resolve_entity_interaction_event("i_finish_move_onto", entity, e, at_pos)
-    if entity.active:
-        for e in sitting_on_entities:
-            resolve_entity_interaction_event("finish_move_onto", e, entity, at_pos)
+    if not entity.active:
+        return
+    for e in sitting_on_entities:
+        resolve_entity_interaction_event("finish_move_onto", e, entity, at_pos)
+
+func entity_id_has_controller(entity_id: int) -> bool:
+    var controller_name: String = entity_defs[entity_id].get("controller", "")
+    if controller_name and controller_name in controller_templates:
+        return true
+    return false
 
 func setup_entity_controller(entity: BaseEntity) -> void:
     var entity_index = entity.entity_index
@@ -630,9 +699,11 @@ func bond_group_start_move(bond_group: Array, steps_per_tile: int, move_facing: 
             entity.actually_started_move()
     return move_allowed
 
-func get_entities_at(tile_position: Vector2, exclude_entity: Object = null, exclude_list: Array = [], include_moving_away: bool = false) -> Array:
+func get_entities_at(tile_position: Vector2, exclude_entity: Object = null, exclude_list: Array = [], include_moving_away: bool = false, include_inactive: bool = false) -> Array:
     var entities_here: Array = []
     for e in entity_list:
+        if not include_inactive and not e.active:
+            continue
         if e == exclude_entity or (exclude_list and e.instance_id in exclude_list):
             continue
         if e is LargeEntity:
@@ -646,18 +717,22 @@ func get_entities_at(tile_position: Vector2, exclude_entity: Object = null, excl
                 entities_here.append(e)
     return entities_here
 
-func get_entities_half_at(tile_pos: Vector2i, exclude_entity: Object = null, exclude_list: Array = []) -> Array:
+func get_entities_half_at(tile_pos: Vector2i, exclude_entity: Object = null, exclude_list: Array = [], include_inactive: bool = false) -> Array:
     var entities_here: Array = []
     for e in entity_list:
+        if not include_inactive and not e.active:
+            continue
         if e == exclude_entity or (exclude_list and e.instance_id in exclude_list):
             continue
         if e.get_half_moved_position() == tile_pos:
             entities_here.append(e)
     return entities_here
 
-func get_entities_at_multiple(tile_positions: Array, exclude_entity: Object = null, exclude_list: Array = [], include_moving_away: bool = false) -> Array:
+func get_entities_at_multiple(tile_positions: Array, exclude_entity: Object = null, exclude_list: Array = [], include_moving_away: bool = false, include_inactive: bool = false) -> Array:
     var entities_here: Array = []
     for e in entity_list:
+        if not include_inactive and not e.active:
+            continue
         if e == exclude_entity or (exclude_list and e.instance_id in exclude_list):
             continue
         if e.is_at_multiple(tile_positions, include_moving_away):
@@ -669,6 +744,13 @@ func find_entity_by_index(entity_index: int, first: bool = true) -> BaseEntity:
         if entity_list[i].entity_index == entity_index:
             return entity_list[i]
     return null
+
+func find_all_entities_by_index(entity_index: int, active_only: bool = false) -> Array[BaseEntity]:
+    var entities: Array[BaseEntity] = []
+    for i in entity_list:
+        if i.entity_index == entity_index and (not active_only or i.active):
+            entities.append(i)
+    return entities
 
 func find_entity_with_property(prop_name: String, first: bool = true) -> BaseEntity:
     for i in Utility.array_iter(entity_list, not first):
@@ -688,6 +770,13 @@ func find_entity_with_truthy_property(prop_name: String, first: bool = true) -> 
         if get_entity_prop_with_default(entity_list[i], prop_name, false):
             return entity_list[i]
     return null
+
+func find_all_entities_with_truthy_property(prop_name: String, active_only: bool = false) -> Array[BaseEntity]:
+    var found_entities: Array[BaseEntity] = []
+    for i in entity_list:
+        if (not active_only or i.active) and get_entity_prop_with_default(i, prop_name, false):
+            found_entities.append(i)
+    return found_entities
 
 func find_closest_entity_with_property(prop_name: String, from_position: Vector2i, exclude_list: Array = []) -> BaseEntity:
     var closest_dist: float = -1
@@ -733,6 +822,8 @@ func preload_controller_templates() -> void:
         controller_templates[controller_name] = load(controllers_path + fname)
 
 func finish_move(moving_entity, onto_positions: Array) -> void:
+    if not moving_entity.active:
+        return
     moving_entity.process_deferred_signals()
 
     var entities_here: Array = []
@@ -745,9 +836,10 @@ func finish_move(moving_entity, onto_positions: Array) -> void:
 
     for i in entities_here.size():
         resolve_entity_interaction_event("i_finish_move_onto", moving_entity, entities_here[i], entities_overlapped_at[i])
-    if moving_entity.active:
-        for i in entities_here.size():
-            resolve_entity_interaction_event("finish_move_onto", entities_here[i], moving_entity, entities_overlapped_at[i])
+    if not moving_entity.active:
+        return
+    for i in entities_here.size():
+        resolve_entity_interaction_event("finish_move_onto", entities_here[i], moving_entity, entities_overlapped_at[i])
 
 func resolve_entity_interaction_event(event_name: String, actor, interactee, at_tile_position: Vector2) -> void:
     var event_prop: = get_entity_property(actor, event_name)
@@ -861,13 +953,20 @@ func half_moved_entering_at(at_position: Vector2i, entering_entities: Array, oth
             resolve_entity_interaction_event("half_moved_onto", other_entity, entity, at_position)
 
 func post_move_actions(moving_entity, from_position, to_position, exclude_group: Array = []) -> void:
-    var entities_start = get_entities_at(from_position, moving_entity, exclude_group)
-    for e in entities_start:
+    if not moving_entity.active:
+        return
+
+    var entities_at_start_pos = get_entities_at(from_position, moving_entity, exclude_group)
+    for e in entities_at_start_pos:
         resolve_entity_interaction_event("post_move_off_of", e, moving_entity, from_position)
+    if not moving_entity.active:
+        return
     
     var entities_destination = get_entities_at(to_position, moving_entity, exclude_group)
     for e in entities_destination:
         resolve_entity_interaction_event("post_move_onto", e, moving_entity, to_position)
+    if not moving_entity.active:
+        return
     
     MapManager.post_move_actions(moving_entity, from_position, to_position)
 
@@ -1091,3 +1190,9 @@ func get_entity_sprite_snapshot_scale(entity_index: int, for_ui: bool = true) ->
         return GameManager.get_default_pixel_scale() if for_ui else 1.0
     else:
         return 1.0 if for_ui else 1.0 / GameManager.get_default_pixel_scale()
+
+func set_entity_active(entity: BaseEntity, new_is_active: bool) -> void:
+    entity.active = new_is_active
+    if new_is_active:
+        post_activated_actions(entity)
+        entity_became_active.emit(entity)

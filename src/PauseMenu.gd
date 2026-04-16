@@ -51,7 +51,12 @@ func on_show() -> void:
 	load_button.disabled = not has_saved_levels
 	
 	var live_edit_mode_toggle: CheckButton = find_child("LiveEditModeToggle")
-	live_edit_mode_toggle.set_pressed_no_signal(GameManager.editor_live_edit_mode)
+	live_edit_mode_toggle.disabled = GameManager.current_level_is_museum
+	if GameManager.current_level_is_museum:
+		live_edit_mode_toggle.tooltip_text = "Live edit mode is always active in the museum"
+	else:
+		live_edit_mode_toggle.tooltip_text = ""
+	live_edit_mode_toggle.set_pressed_no_signal(GameManager.is_live_edit())
 	
 	refresh_level_settings()
 
@@ -85,7 +90,7 @@ func _on_resume_button_pressed() -> void:
 	close_pause_menu()
 
 func _on_live_edit_mode_toggle_toggled(toggled_on: bool) -> void:
-	GameManager.editor_live_edit_mode = toggled_on
+	GameManager.set_live_edit_mode_enabled(toggled_on)
 
 func next_level_picked(index: int) -> void:
 	var level_name = next_level_list.get_item_text(index)
@@ -129,3 +134,8 @@ func refresh_next_level_list() -> void:
 
 func _on_back_button_pressed() -> void:
 	switch_panel("main")
+
+
+func _on_museum_button_pressed() -> void:
+	GameManager.new_museum_level()
+	close_pause_menu()

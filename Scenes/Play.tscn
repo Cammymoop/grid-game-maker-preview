@@ -237,7 +237,7 @@ layout_mode = 2
 [node name="TextBoxLabel" type="Label" parent="OverlayLayer/OverlayUI/BottomCenter/TextBoxAnimRoot/TextBoxPanel/VBoxContainer" unique_id=1045195738]
 layout_mode = 2
 theme_override_font_sizes/font_size = 20
-text = "TEXT BOX TEXT BOX TEXT BOX TEXT BOX TEXT BOX TEXT BOX TEXT BOX TEXT BOX TEXT BOX TEXT BOX TEXT BOX TEXT BOX TEXT BOX TEXT BOX TEXT BOX TEXT BOX "
+text = "TEXT BOX"
 
 [node name="BlankLabel" type="Label" parent="OverlayLayer/OverlayUI/BottomCenter/TextBoxAnimRoot/TextBoxPanel/VBoxContainer" unique_id=183340097]
 layout_mode = 2

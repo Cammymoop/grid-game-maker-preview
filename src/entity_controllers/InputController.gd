@@ -3,9 +3,11 @@ extends Node
 var move_mode = "direction"
 
 # Options
-var stop_repeat_after_bonk = true
-var lock_for_idle_delay_after_bonk = true
-var allow_wait = true
+var stop_repeat_after_bonk: = true
+var lock_for_idle_delay_after_bonk: = true
+var allow_wait: = true
+
+var only_receive_when_camera_target: = true
 
 var is_repeat = false
 
@@ -26,6 +28,7 @@ var available_options = {
 	"stop_repeat_after_bonk": {"display_name": "Stop repeating movement after being blocked", "type": "bool"},
 	"lock_for_idle_delay_after_bonk": {"display_name": "Prevent movement briefly after being blocked", "type": "bool"},
 	"allow_wait": {"display_name": "Press a key to wait a turn", "type": "bool"},
+	"only_rcv_when_cam": {"display_name": "Only receive input when camera is following", "type": "bool"},
 }
 
 func _ready():
@@ -48,6 +51,8 @@ func set_options(options: Dictionary) -> void:
 		lock_for_idle_delay_after_bonk = options["lock_for_idle_delay_after_bonk"]
 	if "allow_wait" in options:
 		allow_wait = options["allow_wait"]
+	if "only_rcv_when_cam" in options:
+		only_receive_when_camera_target = options["only_rcv_when_cam"]
 
 func get_options() -> Dictionary:
 	return available_options
@@ -94,6 +99,8 @@ func _physics_process(_delta):
 				EntityManager.request_move(get_parent())
 
 func get_move(attempt_num: int = 0):
+	if only_receive_when_camera_target and not GameManager.is_entity_followed_by_camera(parent_entity):
+		return "none"
 	if attempt_num > 0:
 		return "none"
 	if not EntityManager.controller_frame:

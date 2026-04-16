@@ -3,6 +3,7 @@ extends Node
 const MapLayer = preload("res://src/MapLayer.gd")
 
 signal level_size_changed
+signal map_cleared
 
 var map_layer_template: = preload("res://Scenes/MapLayer.tscn")
 
@@ -11,6 +12,8 @@ var map_metadata: = {}
 
 var blocking_tiles: = []
 var tiles_with_sprite_modifiers: = []
+
+var is_empty_blocking: = true
 
 var tile_width: int = 32
 
@@ -116,6 +119,7 @@ func fix_string_keys():
 func clear():
     clear_layers()
     map_metadata = {}
+    map_cleared.emit()
 
 func clear_layers():
     for l in layers:
@@ -135,6 +139,71 @@ func create_plain_layer():
         map_layer.single_init(floor_tile_index)
     
     emit_signal("level_size_changed")
+
+func _get_tile_id_from_partial_name_insensitive(partial_name: String) -> int:
+    partial_name = partial_name.to_lower()
+    for tile_id in tile_defs.keys():
+        if tile_defs[tile_id]["name"].to_lower().contains(partial_name):
+            return tile_id
+    return -1
+
+func _get_museum_tile_ids() -> Array[int]:
+    var tile_ids: Array[int] = []
+    for tile_id in tile_defs.keys():
+        if tile_defs[tile_id].get("no-museum", false):
+            continue
+        tile_ids.append(tile_id)
+    return tile_ids
+
+func create_museum_layer(player_pos: Vector2i, tile_start: Vector2i, tile_spacing: Vector2i, ent_museum: Rect2i):
+    clear_layers()
+    create_empty_layer()
+    if tile_defs.size() < 0:
+        return
+    var floor_id: = _get_tile_id_from_partial_name_insensitive("floor")
+    if floor_id == -1:
+        floor_id = tile_defs.keys()[0]
+    var outer_walk_space: int = 4
+    
+    _fill_expanded_rect(floor_id, Rect2i(player_pos, Vector2i.ONE), outer_walk_space)
+    if ent_museum.size != Vector2i.ZERO:
+        _fill_expanded_rect(floor_id, ent_museum, outer_walk_space)
+    
+    _place_tile_museum(tile_start, tile_spacing, floor_id, outer_walk_space)
+
+func _place_tile_museum(museum_start: Vector2i, museum_spacing: Vector2i, floor_id: int, outer_walk_space: int):
+    if museum_spacing.x == 0: museum_spacing.x = 1
+    if museum_spacing.y == 0: museum_spacing.y = 1
+
+    var rows: int = 4
+    var default_row_width: int = 5
+    
+    var tile_ids: = _get_museum_tile_ids()
+    var num_tiles: int = tile_ids.size()
+    rows = mini(rows, ceili(num_tiles / float(default_row_width)))
+    var per_row: int = ceili(num_tiles / float(rows))
+    
+    var museum_size: = museum_spacing.sign() + Vector2i(per_row, rows) * museum_spacing
+    var full_museum_rect: = Utility.rect2i_pos_inclusive_abs(Rect2i(museum_start, museum_size))
+    _fill_expanded_rect(floor_id, full_museum_rect, outer_walk_space)
+    
+    var label_offset: = Vector2.UP * tile_width * 0.25
+
+    for i in num_tiles:
+        var tile_id = tile_ids[i]
+        var row_col: = Vector2i(i % per_row, floori(i / float(per_row)))
+        var at_tile_pos: = museum_start + row_col * museum_spacing
+        layers[0].set_cell_s(at_tile_pos, tile_id)
+        # Labels
+        var tile_name: = get_tile_name(tile_id)
+        create_persistant_text_effect(tile_name, at_tile_pos + Vector2i.DOWN, label_offset, -2)
+
+func _fill_expanded_rect(tile_id: int, rect: Rect2i, expanded_by: int):
+    _fill_rect(tile_id, rect.grow(expanded_by))
+
+func _fill_rect(tile_id: int, rect: Rect2i):
+    for pos in Utility.rect2i_iter(rect):
+        layers[0].set_cell_s(pos, tile_id)
 
 func current_tileset() -> TileSet:
     return preview_tileset if is_tile_preview_mode else tileset
@@ -214,6 +283,65 @@ func get_tile_atlas_coords(tile_index, preview: bool = false) -> Vector2i:
         tex_from = tex_from["preview_variant"]
     return TextureManager.get_index_atlas_coords(tex_from['texture'], tex_from['tex_index'])
 
+func create_persistant_text_effect(effect_text: String, at_tile_pos: Vector2i, pos_offset: Vector2 = Vector2.ZERO, z_offset: int = 0) -> void:
+    _create_persistant_effect_info({
+        "effect_type": "text",
+        "tile_pos": Utility.get_arr_from_vector2i(at_tile_pos),
+        "text": effect_text,
+        "pos_offset": Utility.get_arr_from_vector2(pos_offset),
+        "z_offset": z_offset,
+    })
+
+func _create_persistant_effect_info(effect_info: Dictionary) -> int:
+    var effect_type: String = effect_info.get("effect_type", "")
+    if not effect_type:
+        push_error("Can't create effect with no type")
+        return -1
+
+    var effect_id: int = -1
+    if effect_type == "text":
+        effect_id = _create_persistant_text_effect(effect_info)
+    else:
+        push_error("Unknown effect type: " + effect_type)
+    
+    if effect_id < 0:
+        return -1
+    _register_persistant_effect(effect_info)
+    return effect_id
+
+func _create_persistant_text_effect(effect_info: Dictionary) -> int:
+    var effect_id: int = effect_info.get("effect_id", -1)
+    var tile_pos: Vector2i = Utility.get_vector2i_from_arr(effect_info["tile_pos"])
+    var pos_offset: Vector2 = Utility.get_vector2_from_arr(effect_info["pos_offset"])
+    var effect_world_pos: Vector2 = tile_to_world_position_centered(tile_pos) + pos_offset
+    var z: = int(effect_info.get("z_offset", 0))
+    effect_info["effect_id"] = EffectsHelper.spawn_mini_text_at(effect_info["text"], effect_world_pos, 0, z, effect_id)
+    return effect_info["effect_id"]
+
+func _register_persistant_effect_at(at_tile_pos: Vector2i, effect_info: Dictionary) -> void:
+    effect_info["tile_pos"] = Utility.get_arr_from_vector2i(at_tile_pos)
+    _register_persistant_effect(effect_info)
+
+func _register_persistant_effect(effect_info: Dictionary) -> void:
+    if not effect_info.has("tile_pos"):
+        push_error("Can't register persistant effect with no tile position")
+        return
+    var key: = Utility.vec2i_key(Utility.get_vector2i_from_arr(effect_info["tile_pos"]))
+    if not map_metadata.has("persistant_effects"):
+        map_metadata["persistant_effects"] = {}
+    if not map_metadata["persistant_effects"].has(key):
+        map_metadata["persistant_effects"][key] = []
+    map_metadata["persistant_effects"][key].append(effect_info.duplicate_deep())
+
+func _remove_effects_at(at_tile_pos: Vector2i) -> void:
+    var key: = Utility.vec2i_key(at_tile_pos)
+    if not map_metadata.get("persistant_effects", {}).has(key):
+        return
+    for effect_info in map_metadata["persistant_effects"][key]:
+        if effect_info.has("effect_id"):
+            EffectsHelper.remove_effect_by_id(effect_info["effect_id"])
+    map_metadata["persistant_effects"].erase(key)
+
 func serialize() -> Dictionary:
     var serialized_layers = []
     for l in layers:
@@ -231,7 +359,14 @@ func deserialize(data: Dictionary) -> void:
     
     map_metadata = data.get("metadata", {}).duplicate(true)
     
+    recreate_persistant_effects()
+    
     emit_signal("level_size_changed")
+
+func recreate_persistant_effects() -> void:
+    for effect_pos_key in map_metadata.get("persistant_effects", {}).keys():
+        for i in map_metadata["persistant_effects"][effect_pos_key].size():
+            _create_persistant_effect_info(map_metadata["persistant_effects"][effect_pos_key][i])
 
 func create_positioned_property(at_pos: Vector2i, for_tile_index: int) -> Dictionary:
     if not map_metadata.has("positioned_properties"):
@@ -373,6 +508,9 @@ func get_tile_name(tile_index) -> String:
     return tile_defs[tile_index]['name']
 
 func find_blocking() -> void:
+    is_empty_blocking = GameManager.get_game_setting("empty_tiles_block", true)
+    if tile_defs.size() < 1:
+        is_empty_blocking = false
     blocking_tiles = []
     
     for ti in tile_defs:
@@ -391,6 +529,11 @@ func find_tiles_with_sprite_modifiers() -> void:
 func clear_all_at(tile_position) -> void:
     for l in layers:
         l.set_cell_s(tile_position, -1)
+
+func clear_all_at_array(position_list: Array) -> void:
+    for pos in position_list:
+        for l in layers:
+            l.set_cell_s(pos, -1)
 
 func replace_tiles_in_rect(rect: Rect2, new_tile, checker_tile=false):
     for x in range(rect.position.x, rect.end.x):
@@ -418,6 +561,15 @@ func replace_tiles_at(tile_position, new_tile, facing: int = 0) -> void:
             level_size_changed.emit()
     elif is_pos_out_of_bounds(tile_position):
         level_size_changed.emit()
+
+func erase_tiles_and_effects_at(tile_position: Vector2i) -> void:
+    clear_all_at(tile_position)
+    _remove_effects_at(tile_position)
+
+func erase_tiles_and_effects_at_array(position_list: Array) -> void:
+    clear_all_at_array(position_list)
+    for pos in position_list:
+        _remove_effects_at(pos)
 
 func get_tile_definition(tile_index):
     return tile_defs[tile_index].duplicate(true)
@@ -623,7 +775,7 @@ func can_move_to(entity, tile_position) -> bool:
 func check_blocks(entity, tile_position) -> bool:
     for layer in layers:
         var tile_here = layer.get_cell_s(tile_position)
-        if tile_here == -1 or tile_here in blocking_tiles:
+        if (tile_here == -1 and is_empty_blocking) or (tile_here in blocking_tiles):
             return false
         var blocks_conditional: = get_tile_index_property(tile_here, "blocks")
         if blocks_conditional and blocks_conditional.is_conditional():

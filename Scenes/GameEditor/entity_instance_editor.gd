@@ -14,6 +14,8 @@ const new_property_panel_scn: = preload("res://Scenes/GameEditor/new_property_pa
 @export var property_edit_list: PropertyEditList
 @export var popup_holder: Control
 
+@export var entity_active_toggle: CheckButton
+
 var non_expanded_v_size_flags: int = Control.SIZE_SHRINK_CENTER
 var prop_list_default_min_size: Vector2 = Vector2.ZERO
 var edited_entity: BaseEntity = null
@@ -21,6 +23,8 @@ var edited_entity: BaseEntity = null
 var edit_entity_pulse_period: float = 1.15
 
 func _ready() -> void:
+    if entity_active_toggle:
+        entity_active_toggle.toggled.connect(on_entity_active_toggled)
     visibility_changed.connect(on_visibility_changed)
     if size_flags_vertical != Control.SIZE_EXPAND_FILL:
         non_expanded_v_size_flags = size_flags_vertical
@@ -57,6 +61,8 @@ func open_instance_editor(entity: BaseEntity) -> void:
     unedit_entity()
     show()
     edited_entity = entity
+    if entity_active_toggle:
+        entity_active_toggle.set_pressed_no_signal(entity.active)
     var title_label: = find_child("TitleLabel") as Label
     if title_label:
         var entity_name: = EntityManager.get_entity_name(entity.entity_index)
@@ -117,3 +123,7 @@ func on_duplicate_property_name_chosen(property_name: String, alt_mode: bool, du
 func on_visibility_changed() -> void:
     if not visible:
         closing.emit()
+
+func on_entity_active_toggled(active: bool) -> void:
+    if edited_entity:
+        edited_entity.set_active(active)

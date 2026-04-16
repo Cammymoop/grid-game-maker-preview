@@ -18,7 +18,8 @@ func _ready() -> void:
     timer = Timer.new()
     timer.timeout.connect(on_timer_timeout)
     add_child(timer)
-    timer.start(lifetime)
+    if lifetime > 0:
+        timer.start(lifetime)
     if animator and use_show_anim:
         animator.speed_scale = 1.0 / show_anim_duration
         animator.play("show")

@@ -40,7 +40,7 @@ corner_radius_bottom_right = 3
 corner_radius_bottom_left = 3
 corner_detail = 7
 
-[node name="EntityInstanceEditor" type="PanelContainer" unique_id=1898877842 node_paths=PackedStringArray("property_edit_list")]
+[node name="EntityInstanceEditor" type="PanelContainer" unique_id=1898877842 node_paths=PackedStringArray("property_edit_list", "popup_holder", "entity_active_toggle")]
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -51,6 +51,8 @@ theme = ExtResource("1_b60re")
 theme_override_styles/panel = SubResource("StyleBoxFlat_viklj")
 script = ExtResource("1_hn6w8")
 property_edit_list = NodePath("VBoxContainer/VBoxContainer/HBoxContainer4/PropertyEditList")
+popup_holder = NodePath("VBoxContainer2/CenterContainer/Control/PopupHolder")
+entity_active_toggle = NodePath("VBoxContainer/VBoxContainer/HBoxContainer/HBoxContainer/EntityActiveToggle")
 
 [node name="VBoxContainer" type="VBoxContainer" parent="." unique_id=520120316]
 layout_mode = 2
@@ -73,12 +75,29 @@ horizontal_alignment = 1
 layout_mode = 2
 size_flags_vertical = 3
 
-[node name="Label" type="Label" parent="VBoxContainer/VBoxContainer" unique_id=96880889]
+[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer/VBoxContainer" unique_id=1921844194]
+layout_mode = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer/VBoxContainer/HBoxContainer" unique_id=913780326]
 layout_mode = 2
 size_flags_horizontal = 3
+alignment = 1
+
+[node name="EntityActiveToggle" type="CheckButton" parent="VBoxContainer/VBoxContainer/HBoxContainer/HBoxContainer" unique_id=408350832]
+layout_mode = 2
+theme_override_font_sizes/font_size = 22
+text = "Active:"
+
+[node name="Label" type="Label" parent="VBoxContainer/VBoxContainer/HBoxContainer" unique_id=96880889]
+layout_mode = 2
 size_flags_stretch_ratio = 0.4
 text = "Properties:"
 horizontal_alignment = 1
+
+[node name="HBoxContainer2" type="HBoxContainer" parent="VBoxContainer/VBoxContainer/HBoxContainer" unique_id=1906344184]
+layout_mode = 2
+size_flags_horizontal = 3
+alignment = 1
 
 [node name="HBoxContainer4" type="HBoxContainer" parent="VBoxContainer/VBoxContainer" unique_id=215106456]
 layout_mode = 2

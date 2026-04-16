@@ -77,23 +77,14 @@ func get_resolution() -> Vector2:
 	return resolution
 
 func get_current_pixel_scale() -> float:
-	if cached_pixel_scale:
-		return cached_pixel_scale
+	#if cached_pixel_scale:
+		#return cached_pixel_scale
 	var window_size = get_window().size
-	var intended_aspect = intended_resolution.x/intended_resolution.y
-	var window_aspect = window_size.x/window_size.y
-	
-	# Return window size in the short side (relative to our intended aspect)
-	# divided by our resolution in that axis
-	if intended_aspect <= window_aspect:
-		cached_pixel_scale = window_size.y / intended_resolution.y
-	else:
-		cached_pixel_scale = window_size.x / intended_resolution.x
-	return cached_pixel_scale
+	return window_size.y / resolution.y
 
 func get_viewport_tl_offset() -> Vector2:
-	if cached_tl_offset:
-		return cached_tl_offset
+	#if cached_tl_offset:
+		#return cached_tl_offset
 	var window_size = get_window().size
 	
 	var pixel_scale = get_current_pixel_scale()
@@ -105,5 +96,7 @@ func get_viewport_tl_offset() -> Vector2:
 
 func get_scaled_mouse_position():
 	var mouse_pos = parent_vp.get_mouse_position()
+	#return mouse_pos
+
 	mouse_pos -= get_viewport_tl_offset()
 	return mouse_pos / get_current_pixel_scale()

@@ -204,12 +204,12 @@ func deserialize(data: Dictionary) -> void:
 		set_tailing(EntityManager.get_instance(data['tailing']))
 
 func set_active(new_active: bool) -> void:
-	active = new_active
+	EntityManager.set_entity_active(self, new_active)
+
+func sprite_process() -> void:
+	sprite.sprite_process()
 
 func entity_process_starting_actions() -> void:
-	if not active:
-		return
-	
 	if not moving:
 		#if has_idle_update_conditional:
 		#	if not idle_update_cache:
@@ -571,6 +571,8 @@ func can_i_move_relative(relative_direction) -> bool:
 	return can_i_move(Utility.resolve_relative_direction(relative_direction, move_facing))
 
 func entity_manager_signal(signaling_entity: BaseEntity, args: Array, signal_name: String) -> void:
+	if not active:
+		return
 	if not moving:
 		_handle_signal(signaling_entity, args, signal_name)
 	else:

@@ -20,7 +20,7 @@ func _ready() -> void:
         property_name_input.text = prefill_prop_name
     property_name_input.grab_focus.call_deferred()
     
-    property_name_input.text_submitted.connect(accept_name)
+    property_name_input.text_submitted.connect(accept_name.unbind(1))
     property_name_input.text_changed.connect(on_text_changed)
     
     add_button.pressed.connect(accept_name)
