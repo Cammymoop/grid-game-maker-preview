@@ -158,3 +158,6 @@ func _on_title_input_text_changed(new_text: String) -> void:
 func on_show_level_title_option_picked(index: int) -> void:
 	var item_text: = show_level_title_option_picker.get_item_text(index)
 	GameManager.set_game_setting("show_level_title", item_text)
+
+func _on_new_empty_pressed() -> void:
+	GameManager.new_empty_game_definition()

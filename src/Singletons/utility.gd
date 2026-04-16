@@ -146,7 +146,7 @@ func string_to_string_float(the_string: String) -> String:
 func random_sign() -> int:
 	return int(floor(randf() * 2)) * 2 - 1
 
-func random_list_element(list):
+func random_list_element(list: Array) -> Variant:
 	var index = random_int_range(0, len(list))
 	return list[index]
 
@@ -644,3 +644,9 @@ func split_lines(text: String) -> PackedStringArray:
 
 func random_direction() -> int:
 	return randi() % 4
+
+func lerp_ok_hsl_color(from_color: Color, to_color: Color, factor: float) -> Color:
+	var a: = Vector4(from_color.ok_hsl_h, from_color.ok_hsl_s, from_color.ok_hsl_l, from_color.a)
+	var b: = Vector4(to_color.ok_hsl_h, to_color.ok_hsl_s, to_color.ok_hsl_l, to_color.a)
+	var interpolated: = a.lerp(b, factor)
+	return Color.from_ok_hsl(interpolated.x, interpolated.y, interpolated.z, interpolated.w)

@@ -10,27 +10,27 @@ var placeholder_metadata = {
     separation= Vector2.ZERO,
 }
 
-var builtin_textures = [
+var builtin_textures: Array[String] = [
     "tiles.png",
     "entityTiles.png",
     "shapes32x.png",
 ]
-var builtin_meta = {}
-var default_textures = [
+var builtin_meta: = {}
+var default_textures: Array[String] = [
     "tiles.png",
     "entityTiles.png",
     "shapes32x.png",
 ]
-var texture_names = {}
-var textures = {}
-var tiles_per_row = {0: 16}
-var texture_rows = {}
-var tile_sizes = {}
-var texture_meta = {}
+var texture_names: Dictionary [int, String] = {}
+var textures: Dictionary [int, Texture] = {}
+var tiles_per_row: Dictionary [int, int] = {0: 16}
+var texture_rows: Dictionary [int, int] = {}
+var tile_sizes: = {}
+var texture_meta: = {}
 
 var texture_spec: Array
 
-var im_ready = false
+var im_ready: = false
 
 const BUILTIN_IMAGE_DIR: = "res://assets/img/"
 
@@ -107,12 +107,16 @@ func add_builtin_texture(tex_name: String) -> void:
     add_texture(spec)
 
 func set_default_textures() -> void:
-    texture_spec = []
-    var next_id = 0
-    for tn in default_textures:
-        texture_spec.append({type = "builtin", texture_id = next_id, name = tn})
-        next_id += 1
+    texture_spec = get_default_texture_spec()
     reload_spec()
+
+func get_default_texture_spec() -> Array:
+    var spec: = []
+    var next_id = 0
+    for texture_name in default_textures:
+        spec.append({type = "builtin", texture_id = next_id, name = texture_name})
+        next_id += 1
+    return spec
 
 func set_textures(from_texture_spec: Array) -> void:
     texture_spec = from_texture_spec

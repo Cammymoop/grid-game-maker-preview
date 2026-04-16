@@ -112,6 +112,20 @@ func describe_movement_mode(mode: int) -> String:
 			return "Discrete+ (wait for all moves to stop)"
 	return ""
 
+func new_empty_game_definition() -> void:
+	var empty_game: = {
+		"game_name": "%s Game" % Utility.random_animal(),
+		"textures": TextureManager.get_default_texture_spec(),
+		"game_settings": {
+			"pixel_scale": 2,
+			"window_width": 18,
+			"window_height": 14,
+		},
+		"entity_definitions": {},
+		"tile_definitions": {},
+	}
+	load_game_definition_data(empty_game)
+
 func load_game_definition_from_file(game_name) -> void:
 	var definition = FilesManager.get_game_definition(game_name)
 	load_game_definition_data(definition)

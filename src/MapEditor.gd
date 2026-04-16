@@ -189,10 +189,10 @@ func _refresh_entity_is_edited(entity: BaseEntity) -> void:
 func refresh_game_definition() -> void:
 	all_entities = EntityManager.get_all_entity_indexes()
 	if current_entity_index not in all_entities:
-		_set_entity_index_to(all_entities[0])
+		_set_entity_index_to(-1 if all_entities.size() < 1 else all_entities[0])
 	all_tiles = MapManager.get_all_tile_indexes()
 	if current_tile_index not in all_tiles:
-		_set_tile_index_to(all_tiles[0])
+		_set_tile_index_to(-1 if all_tiles.size() < 1 else all_tiles[0])
 
 func set_as_placing_mode(tile_entity: String) -> void:
 	if not is_in_placing_mode():
@@ -209,7 +209,7 @@ func _set_entity_index_to(index: int) -> void:
 	if index == current_entity_index:
 		return
 	current_entity_index = index
-	if cursor_mode == "entity":
+	if cursor_mode == "entity" and index > -1:
 		preview_entity(index)
 		show_item_name()
 
@@ -217,7 +217,7 @@ func _set_tile_index_to(index: int) -> void:
 	if index == current_tile_index:
 		return
 	current_tile_index = index
-	if cursor_mode == "tile":
+	if cursor_mode == "tile" and index > -1:
 		preview_tile(index)
 		show_item_name()
 
@@ -250,11 +250,18 @@ func advance_as_placing_mode(tile_entity: String, delta: int) -> void:
 	advance_current(delta)
 
 func preview_entity(entity_index):
-	preview.texture = EntityManager.get_entity_texture(entity_index, true)
-	preview.region_rect = EntityManager.get_entity_texture_rect(entity_index, true)
+	if entity_index == -1:
+		return
+	preview.texture = EntityManager.get_entity_sprite_snapshot(entity_index, true)
+	preview.scale = Vector2.ONE * EntityManager.get_entity_sprite_snapshot_scale(entity_index, false)
+	preview.region_enabled = false
 
 func preview_tile(tile_index):
+	if tile_index == -1:
+		return
+	preview.scale = Vector2.ONE
 	preview.texture = MapManager.get_tile_texture(tile_index, true)
+	preview.region_enabled = true
 	preview.region_rect = MapManager.get_tile_texture_rect(tile_index, true)
 
 func set_cursor_mode(new_mode: String):
@@ -279,13 +286,15 @@ func set_cursor_mode(new_mode: String):
 	cursor.texture = default_cursor_tex
 	if cursor_mode == "entity":
 		cursor.texture = entity_cursor_tex
-		preview_entity(current_entity_index)
+		if current_entity_index > -1:
+			preview_entity(current_entity_index)
 	else:
 		_last_picked_entity = null
 
 	if cursor_mode == "tile":
 		cursor.texture = tile_cursor_tex
-		preview_tile(current_tile_index)
+		if current_tile_index > -1:
+			preview_tile(current_tile_index)
 	if cursor_mode == "delete":
 		cursor.texture = delete_cursor_tex
 

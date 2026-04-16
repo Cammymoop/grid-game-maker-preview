@@ -324,6 +324,18 @@ theme = SubResource("3")
 theme_override_constants/separation = 24
 alignment = 1
 
+[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/HBoxContainer5" unique_id=1671263611]
+layout_mode = 2
+size_flags_horizontal = 3
+alignment = 1
+
+[node name="NewEmpty" type="Button" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/HBoxContainer5/HBoxContainer" unique_id=2077242441]
+layout_mode = 2
+size_flags_vertical = 4
+theme_override_font_sizes/font_size = 14
+text = "New Empty 
+Game"
+
 [node name="SaveButton" type="Button" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/HBoxContainer5" unique_id=351529520]
 custom_minimum_size = Vector2(156, 0)
 layout_mode = 2
@@ -335,6 +347,11 @@ custom_minimum_size = Vector2(156, 0)
 layout_mode = 2
 theme_type_variation = &"BigTextButton"
 text = "Load Game"
+
+[node name="HBoxContainer2" type="HBoxContainer" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/HBoxContainer5" unique_id=1172606340]
+layout_mode = 2
+size_flags_horizontal = 3
+alignment = 1
 
 [node name="Tiles & Entities" type="VBoxContainer" parent="MarginContainer/UIRoot/TabContainer" unique_id=162263070 node_paths=PackedStringArray("tile_grid", "entity_grid")]
 visible = false
@@ -528,6 +545,7 @@ max_brightness = 0.3
 [connection signal="value_changed" from="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer/DefaultCameraSection/MarginContainer/VBoxContainer/HBoxContainer7/ExtendCamLimits" to="MarginContainer/UIRoot/TabContainer/GameDefinition" method="_on_ExtendCamLimits_value_changed"]
 [connection signal="pressed" from="MarginContainer/UIRoot/TabContainer/GameDefinition/HBoxContainer6/SetDefault" to="MarginContainer/UIRoot/TabContainer/GameDefinition" method="_on_SetDefault_pressed"]
 [connection signal="pressed" from="MarginContainer/UIRoot/TabContainer/GameDefinition/HBoxContainer6/OpenGameDir" to="MarginContainer/UIRoot" method="_on_OpenGameDir_pressed"]
+[connection signal="pressed" from="MarginContainer/UIRoot/TabContainer/GameDefinition/HBoxContainer5/HBoxContainer/NewEmpty" to="MarginContainer/UIRoot/TabContainer/GameDefinition" method="_on_new_empty_pressed"]
 [connection signal="pressed" from="MarginContainer/UIRoot/TabContainer/GameDefinition/HBoxContainer5/SaveButton" to="MarginContainer/UIRoot/TabContainer/GameDefinition" method="_on_SaveButton_pressed"]
 [connection signal="pressed" from="MarginContainer/UIRoot/TabContainer/GameDefinition/HBoxContainer5/LoadButton" to="MarginContainer/UIRoot/TabContainer/GameDefinition" method="_on_LoadButton_pressed"]
 [connection signal="resized" from="MarginContainer/UIRoot/TabContainer/Tiles & Entities" to="MarginContainer/UIRoot/TabContainer/Tiles & Entities" method="_on_Tiles_resized"]

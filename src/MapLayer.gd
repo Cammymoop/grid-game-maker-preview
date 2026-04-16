@@ -74,13 +74,11 @@ func deserialize(data: Dictionary) -> void:
 	
 	var has_alt_ids: bool = data.get("has_alt_ids", false)
 	
-	var j_range = range(len(tile_data[0]))
-	var i_range = range(len(tile_data))
-	for i in i_range:
-		var row = tile_data[i]
-		for j in j_range:
-			var coords: = Vector2i(j + sx, i + sy)
+	for y in tile_data.size():
+		var row = tile_data[y]
+		for x in row.size():
+			var coords: = Vector2i(x + sx, y + sy)
 			if has_alt_ids:
-				set_cell_s(coords, int(row[j][0]), Utility.facing_from_tile_alt_id(int(row[j][1])))
+				set_cell_s(coords, int(row[x][0]), Utility.facing_from_tile_alt_id(int(row[x][1])))
 			else:
-				set_cell_s(coords, int(row[j]))
+				set_cell_s(coords, int(row[x]))

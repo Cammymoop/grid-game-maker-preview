@@ -1077,14 +1077,17 @@ func switch_entities_preview_mode(enable_preview: bool) -> void:
 func save_entity_sprite_snapshot(entity_index: int, snapshot: ImageTexture) -> void:
     entity_sprite_snapshots[entity_index] = snapshot
 
+func entity_has_preview_variant(entity_index: int) -> bool:
+    return not entity_defs[entity_index].get("preview_variant", {}).is_empty()
+
 func get_entity_sprite_snapshot(entity_index: int, preview: bool = false) -> Texture2D:
-    if not entity_sprite_snapshots.has(entity_index) or preview:
+    if not entity_sprite_snapshots.has(entity_index) or (entity_has_preview_variant(entity_index) and preview):
         return Utility.atlas_texture_from_entity_index(entity_index, preview)
     else:
         return entity_sprite_snapshots[entity_index]
 
-func get_entity_sprite_snapshot_scale(entity_index: int) -> float:
+func get_entity_sprite_snapshot_scale(entity_index: int, for_ui: bool = true) -> float:
     if not entity_sprite_snapshots.has(entity_index):
-        return GameManager.get_default_pixel_scale()
+        return GameManager.get_default_pixel_scale() if for_ui else 1.0
     else:
-        return 1.0
+        return 1.0 if for_ui else 1.0 / GameManager.get_default_pixel_scale()
