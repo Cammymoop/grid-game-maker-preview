@@ -79,6 +79,9 @@ func facing_vector(what_facing: int) -> Vector2:
 	print_stack()
 	return Vector2.ZERO
 
+func facing_vector_i(what_facing: int) -> Vector2i:
+	return Vector2i(facing_vector(what_facing))
+
 func facing_rotated(what_facing: int, what_rotation: int) -> int:
 	return posmod(what_facing + what_rotation, 4)
 

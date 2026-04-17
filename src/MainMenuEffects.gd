@@ -160,7 +160,7 @@ func _process(delta: float) -> void:
 			var closeness: float = (mouse_push_min_distance - maxf(mouse_diff, 0.5))/mouse_push_min_distance
 			var pushness: float = 1 + ease(closeness, mouse_push_ease_param)
 			spr.add_spr_velocity(perpendicular * dir * pushness * mouse_push_factor)
-			spr.angular_velocity += dir * pushness * mouse_spin_factor * ROTATION_ADJUST
+			spr.angular_velocity -= dir * pushness * mouse_spin_factor * ROTATION_ADJUST
 		
 		spr.step(delta)
 		

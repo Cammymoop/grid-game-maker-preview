@@ -21,7 +21,9 @@ layer = -2
 process_mode = 3
 texture_filter = 1
 script = ExtResource("1")
-density = 1.5
+fall_speed = 124.0
+density = 1.2000000000000002
+size_factor = 1.4
 background_color_rect = NodePath("../../CanvasLayer/ColorRect")
 
 [node name="NewObjTimer" type="Timer" parent="CanvasLayer2/Effects" unique_id=867933495]

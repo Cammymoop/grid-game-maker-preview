@@ -47,9 +47,6 @@ func _ready():
 	if terrain_spr_mod_switch:
 		terrain_spr_mod_switch.toggled.connect(_on_TestTerrainSprMod_toggled)
 	
-	var sprite_style_option: = find_child("SpriteStyleOption") as Control
-	sprite_style_option.visible = tile_entity_mode == "tile"
-	
 	var sprite_style_picker: = find_child("SpriteStylePicker") as OptionButton
 	sprite_style_picker.clear()
 	for style_text in sprite_style_options:
@@ -145,6 +142,9 @@ func load_common():
 	if terrain_spr_mod_switch:
 		var terrain_spr_mod_parent: Control = terrain_spr_mod_switch.get_parent()
 		terrain_spr_mod_parent.visible = tile_entity_mode == "tile"
+	
+	var sprite_style_option: = find_child("SpriteStyleOption") as Control
+	sprite_style_option.visible = tile_entity_mode == "entity"
 
 	update_image_button()
 	

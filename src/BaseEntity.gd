@@ -35,8 +35,8 @@ var override_steps_per_tile: int = 0
 var controller: Node = null
 var controller_name: String = ""
 
-var tile_position = Vector2(0, 0)
-var next_tile_pos = Vector2(0, 0)
+var tile_position: = Vector2i(0, 0)
+var next_tile_pos: = Vector2i(0, 0)
 
 var entity_index: int = 0
 var entity_name: String = ""
@@ -64,7 +64,6 @@ var _pre_init_called: = false
 
 func _ready() -> void:
 	pre_init()
-	setup_initial_position()
 
 func _make_sprite() -> void:
 	if sprite:
@@ -79,10 +78,6 @@ func pre_init() -> void:
 	entity_name = EntityManager.get_entity_name(entity_index)
 	_make_sprite()
 	sprite.position = get_center_offset()
-
-func setup_initial_position() -> void:
-	tile_position = MapManager.world_to_tile_position(global_position)
-	next_tile_pos = tile_position
 	
 
 func initialize() -> void:
@@ -175,7 +170,7 @@ func deserialize(data: Dictionary) -> void:
 		is_spt_override = data['is_spt_override']
 	update_cached_spt()
 	local_properties = data['local_properties']
-	removed_properties.assign(data.get('removed_properties', []).duplicate())
+	removed_properties.assign(data.get('removed_properties', []))
 	
 	bond_group = EntityManager.find_bond_group_of_entity(self)
 	
@@ -382,9 +377,10 @@ func _movement_steps_finished() -> void:
 	position = position.round()
 	tile_position = next_tile_pos
 	finished_move.emit()
-	var positioned_at_tile_position = MapManager.world_to_tile_position(global_position)
+	var positioned_at_tile_position: = MapManager.world_to_tile_position(global_position)
 	if tile_position != positioned_at_tile_position:
 		push_warning("entity moved above another tile position than expected: over tile: " + str(positioned_at_tile_position) + " != actual pos: " + str(tile_position))
+		position = MapManager.tile_to_world_position(tile_position)
 	moving = false
 	if is_spt_override:
 		set_native_move_speed()
@@ -402,7 +398,7 @@ func start_move(in_facing_dir: int, change_visual_facing: bool = true, group_mov
 	if not group_move and bond_group:
 		return EntityManager.bond_group_start_move(bond_group, get_steps_per_tile(), in_facing_dir)
 	
-	next_tile_pos = tile_position + Utility.facing_vector(in_facing_dir)
+	next_tile_pos = tile_position + Utility.facing_vector_i(in_facing_dir)
 	var move_has_started = MapManager.attempt_move(self, next_tile_pos, group_move)
 
 	if move_has_started:
@@ -521,9 +517,9 @@ func update_move_speed() -> void:
 	current_move_speed = _spt_to_speed(get_steps_per_tile())
 
 
-func can_i_move(at_facing) -> bool:
-	var my_pos = tile_position if not moving else next_tile_pos
-	var target_pos = my_pos + Utility.facing_vector(at_facing)
+func can_i_move(at_facing: int) -> bool:
+	var my_pos: = tile_position if not moving else next_tile_pos
+	var target_pos: = my_pos + Utility.facing_vector_i(at_facing)
 	
 	# temporarily face the movement direction, so that blocking conditionals can read it
 	var old_facing = move_facing

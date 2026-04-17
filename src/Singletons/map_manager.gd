@@ -135,7 +135,9 @@ func create_plain_layer():
     clear_layers()
     var map_layer = create_empty_layer()
     if tile_defs.size() > 0:
-        var floor_tile_index = 0 if not tile_name_exists("floor") else get_tile_index("floor")
+        var floor_tile_index = _get_tile_id_from_partial_name_insensitive("floor")
+        if floor_tile_index == -1:
+            floor_tile_index = tile_defs.keys()[0]
         map_layer.single_init(floor_tile_index)
     
     emit_signal("level_size_changed")
@@ -163,7 +165,7 @@ func create_museum_layer(player_pos: Vector2i, tile_start: Vector2i, tile_spacin
     var floor_id: = _get_tile_id_from_partial_name_insensitive("floor")
     if floor_id == -1:
         floor_id = tile_defs.keys()[0]
-    var outer_walk_space: int = 4
+    var outer_walk_space: int = 3
     
     _fill_expanded_rect(floor_id, Rect2i(player_pos, Vector2i.ONE), outer_walk_space)
     if ent_museum.size != Vector2i.ZERO:
@@ -183,7 +185,7 @@ func _place_tile_museum(museum_start: Vector2i, museum_spacing: Vector2i, floor_
     rows = mini(rows, ceili(num_tiles / float(default_row_width)))
     var per_row: int = ceili(num_tiles / float(rows))
     
-    var museum_size: = museum_spacing.sign() + Vector2i(per_row, rows) * museum_spacing
+    var museum_size: = museum_spacing.sign() + Vector2i(per_row - 1, rows - 1) * museum_spacing
     var full_museum_rect: = Utility.rect2i_pos_inclusive_abs(Rect2i(museum_start, museum_size))
     _fill_expanded_rect(floor_id, full_museum_rect, outer_walk_space)
     
@@ -232,8 +234,8 @@ func create_tileset():
         var preview_atlas_source: = TileSetAtlasSource.new()
         atlas_source.texture = TextureManager.get_texture(tile_info['texture'])
         preview_atlas_source.texture = TextureManager.get_texture(tile_preview_info['texture'])
-        new_tileset.add_source(atlas_source)
-        new_preview_tileset.add_source(preview_atlas_source)
+        new_tileset.add_source(atlas_source, tile_index)
+        new_preview_tileset.add_source(preview_atlas_source, tile_index)
         
         if tile_info['name'] in tile_index_map:
             print_debug("WARNING: tile name already in use: " + tile_info['name'])
@@ -884,8 +886,8 @@ func is_blocked(tile_position, empty_blocks: bool = true) -> bool:
             return true
     return false
 
-func world_to_tile_position(world_position: Vector2) -> Vector2:
-    return Vector2(floor(world_position.x / tile_width), floor(world_position.y / tile_width))
+func world_to_tile_position(world_position: Vector2) -> Vector2i:
+    return Vector2i(world_position.floor() / tile_width)
 
 func tile_to_world_position(tile_position: Vector2i) -> Vector2:
     return Vector2(tile_position.x * tile_width, tile_position.y * tile_width)

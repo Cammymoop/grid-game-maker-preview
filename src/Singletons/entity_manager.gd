@@ -492,11 +492,17 @@ func create_entity(entity_index: int, tile_position: Vector2i, facing: int = 0, 
     else: 
         entity = entity_template.instantiate()
 
-    entity.update_cached_spt()
 
     entity.entity_index = entity_index
+    entity.instance_id = instance_counter
+    instance_counter += 1
+
+    entity.update_cached_spt()
+
     setup_entity_controller(entity)
     entity.position = MapManager.tile_to_world_position(tile_position)
+    entity.tile_position = tile_position
+    entity.next_tile_pos = tile_position
     add_entity_to_world(entity)
     entity.initialize()
     setup_entity_texture(entity)
@@ -508,9 +514,6 @@ func create_entity(entity_index: int, tile_position: Vector2i, facing: int = 0, 
     if "groups" in entity_info:
         for g in entity_info["groups"]:
             entity.add_to_group(g)
-    
-    entity.instance_id = instance_counter
-    instance_counter += 1
     
     auto_bond_handler(entity)
     auto_tail_handler(entity)
@@ -561,7 +564,7 @@ func auto_tail_handler(entity: BaseEntity) -> void:
     if typeof(auto_tail_val) == TYPE_STRING and auto_tail_val.to_lower() == "true":
         auto_tail_val = true
     
-    var looking_at_tile = entity.tile_position + Utility.facing_vector(entity.facing)
+    var looking_at_tile = entity.tile_position + Utility.facing_vector_i(entity.facing)
     var entities_in_front = get_entities_at(looking_at_tile)
     for e in entities_in_front:
         if typeof(auto_tail_val) == TYPE_STRING and get_entity_prop_with_default(e, auto_tail_val, false):
@@ -592,6 +595,7 @@ func restore_entity(serialized_entity: Dictionary, refresh: bool = false) -> voi
     else:
         entity = large_entity_template.instantiate()
     
+    entity.entity_index = int(serialized_entity['entity_index'])
     entity.pre_init()
     entity.deserialize(serialized_entity)
     add_entity_to_world(entity)
@@ -699,7 +703,7 @@ func bond_group_start_move(bond_group: Array, steps_per_tile: int, move_facing: 
             entity.actually_started_move()
     return move_allowed
 
-func get_entities_at(tile_position: Vector2, exclude_entity: Object = null, exclude_list: Array = [], include_moving_away: bool = false, include_inactive: bool = false) -> Array:
+func get_entities_at(tile_position: Vector2i, exclude_entity: Object = null, exclude_list: Array = [], include_moving_away: bool = false, include_inactive: bool = false) -> Array:
     var entities_here: Array = []
     for e in entity_list:
         if not include_inactive and not e.active:

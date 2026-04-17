@@ -138,9 +138,9 @@ func set_camera_settings(setting: String, value) -> void:
 		game_settings["camera_settings"] = {}
 	game_settings["camera_settings"][setting] = value
 
-func _on_FollowEntity_text_changed(new_text):
+func _on_FollowEntity_text_changed(new_text: String) -> void:
 	set_camera_settings("follow_entity", new_text)
-func _on_EnableLimitsToggle_toggled(button_pressed):
+func _on_EnableLimitsToggle_toggled(button_pressed: bool) -> void:
 	set_camera_settings("enable_limits", button_pressed)
 func _on_ExtendCamLimits_value_changed(value):
 	set_camera_settings("extend_limits", value)

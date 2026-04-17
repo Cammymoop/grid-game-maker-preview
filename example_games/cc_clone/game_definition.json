@@ -236,7 +236,8 @@
           "when false": [],
           "when always": []
         },
-        "solid": true
+        "solid": true,
+        "fire-resistant": true
       },
       "intended_move_speed": 6.0,
       "controller": "creature_controller",

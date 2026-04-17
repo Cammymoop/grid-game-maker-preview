@@ -70,7 +70,7 @@ func get_positions_at(at_tile_position: Vector2i) -> Array[Vector2i]:
 
 func get_frontier(in_facing_dir: int) -> Dictionary:
 	var from_positions: = get_positions_at(tile_position)
-	var to_positions: = get_positions_at(tile_position + Utility.facing_vector(in_facing_dir))
+	var to_positions: = get_positions_at(tile_position + Utility.facing_vector_i(in_facing_dir))
 	var fromtier: Array[Vector2i] = []
 	var frontier: Array[Vector2i] = []
 	for from_pos in from_positions:
@@ -97,7 +97,7 @@ func start_move(in_facing_dir: int, change_visual_facing: bool = true, group_mov
 		# TODO entity managers bond group move checking doesnt take large entities into account yet
 		return EntityManager.bond_group_start_move(bond_group, get_steps_per_tile(), in_facing_dir)
 	
-	next_tile_pos = tile_position + Utility.facing_vector(in_facing_dir)
+	next_tile_pos = tile_position + Utility.facing_vector_i(in_facing_dir)
 	var not_stopped = true
 	
 	var frontier = get_frontier(in_facing_dir)

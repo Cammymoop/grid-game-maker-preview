@@ -50,10 +50,8 @@ func sprite_process() -> void:
             on_local_prop_update_frame(parent_entity)
 
 func on_entity_preview_mode_changed(enable_preview: bool) -> void:
-    prints("entity preview mode changed to: %s" % enable_preview)
     is_preview_mode = enable_preview
     if preview_info:
-        prints("I have preview info, refreshing layers, %s: (%s)" % [is_preview_mode, preview_info])
         refresh_layers()
 
 func set_preview_info(new_preview_info: Dictionary) -> void:
