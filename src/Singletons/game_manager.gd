@@ -88,6 +88,7 @@ func _ready():
 	elif builtin_default_game_file:
 		builtin_default_game_definition = FilesManager._get_dict_from_json_file(builtin_default_game_file)
 		load_game_definition_data(builtin_default_game_definition)
+		start_managers()
 	else:
 		set_game_name("Basic")
 		loaded_from_game_name = cur_game_name
