@@ -95,7 +95,15 @@ func _on_NewTileButton_pressed():
 		num += 1
 		try_name = "tile" + str(num)
 	
-	var definition = {"name": try_name, "texture": TextureManager.get_all_indexes()[0], "tex_index": 0, "properties": {}}
+	var default_texture = TextureManager.get_all_indexes()[0]
+	var all_tile_ids: = MapManager.get_all_tile_indexes()
+	all_tile_ids.reverse()
+	for tile_id in all_tile_ids:
+		var tile_def: Dictionary = MapManager.get_tile_definition(tile_id)
+		if tile_def.get("texture", -1) >= 0:
+			default_texture = tile_def["texture"]
+			break
+	var definition = {"name": try_name, "texture": default_texture, "tex_index": 0, "properties": {}}
 	var _new_index = MapManager.make_new_tile(definition)
 	update_the_grid(true)
 
@@ -107,7 +115,15 @@ func _on_NewEntityButton_pressed():
 		num += 1
 		try_name = "entity" + str(num)
 	
-	var definition = {"name": try_name, "texture": TextureManager.get_all_indexes()[0], "tex_index": 0, "properties": {}}
+	var default_texture = TextureManager.get_all_indexes()[0]
+	var all_entity_ids: = EntityManager.get_all_entity_indexes()
+	all_entity_ids.reverse()
+	for entity_id in all_entity_ids:
+		var entity_def: Dictionary = EntityManager.get_entity_definition(entity_id)
+		if entity_def.get("texture", -1) >= 0:
+			default_texture = entity_def["texture"]
+			break
+	var definition = {"name": try_name, "texture": default_texture, "tex_index": 0, "properties": {}}
 	var _new_index = EntityManager.new_entity(definition)
 	update_the_grid(false)
 

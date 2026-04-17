@@ -1,19 +1,19 @@
 {
 	"tiles.png":
 		{
-			"size": [288, 128],
+			"size": [288, 192],
 			"tile_size": [32, 32],
-			"size_in_tiles": [9, 4],
+			"size_in_tiles": [9, 6],
 			"border": [0, 0],
-			"separation": [0, 0],
+			"separation": [0, 0]
 		},
 	"entityTiles.png":
 		{
-			"size": [288, 160],
+			"size": [288, 224],
 			"tile_size": [32, 32],  
-			"size_in_tiles": [9, 5],
+			"size_in_tiles": [9, 7],
 			"border": [0, 0],
-			"separation": [0, 0],
+			"separation": [0, 0]
 		},
 	"shapes32x.png":
 		{
@@ -21,6 +21,6 @@
 			"tile_size": [32, 32],
 			"size_in_tiles": [9, 4],
 			"border": [0, 0],
-			"separation": [0, 0],
+			"separation": [0, 0]
 		}
 }

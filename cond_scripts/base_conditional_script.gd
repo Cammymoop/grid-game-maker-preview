@@ -26,6 +26,8 @@ func list_commands() -> Array[Dictionary]:
 				"slot_type_hint": "all",
 			}
 			meta_info.merge(get_command_meta_info(cmd_name), true)
+			if meta_info.get("template_text", ""):
+				meta_info["tooltip"] = _convert_template_to_tooltip(meta_info["template_text"])
 			cmd_infos.append(meta_info)
 	return cmd_infos
 
@@ -53,6 +55,16 @@ func get_command_meta_info(cmd: String) -> Dictionary:
 	else:
 		push_error("Invalid result type for command meta info: %s (for command %s)" % [result, cmd])
 		return {}
+
+func _convert_template_to_tooltip(template_text: String) -> String:
+	var regex: = RegEx.new()
+	regex.compile("\\[([^]:]+)(:[^]]*)?\\]")
+	var matches: = regex.search_all(template_text)
+	matches.reverse()
+	var tooltip: = template_text
+	for arg_match in matches:
+		tooltip = tooltip.substr(0, arg_match.get_start(0)) + "[%s]" % [arg_match.get_string(1)] + tooltip.substr(arg_match.get_end(0))
+	return tooltip
 
 func get_command_arg_list(cmd: String, method_info: Dictionary) -> Array[String]:
 	if not has_method(CMD_FUNC_PREFIX + cmd):

@@ -40,6 +40,7 @@ func build_v3_list() -> void:
 	
 	names_to_ids = {}
 	names_to_categories = {}
+	var tooltips: = {}
 	
 	for qualified_cmd in ConditionalsV3.all_commands:
 		var cmd_info = ConditionalsV3.get_command_info(qualified_cmd)
@@ -51,9 +52,13 @@ func build_v3_list() -> void:
 		names_to_ids[display_name] = qualified_cmd
 		var category_hint = ConditionalsV3.get_command_slot_type_hint(qualified_cmd)
 		names_to_categories[display_name] = category_hint
+		tooltips[qualified_cmd] = cmd_info["tooltip"]
 	
+	var i: = 0
 	for display_name in names_to_ids:
 		list.add_item(display_name)
+		list.set_item_tooltip(i, tooltips[names_to_ids[display_name]])
+		i += 1
 
 func set_items(new_list) -> void:
 	var list = find_child("AllCommands")
