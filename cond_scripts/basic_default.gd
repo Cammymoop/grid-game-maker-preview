@@ -378,7 +378,7 @@ func cmd_a_create_entity(slots: Dictionary, chosen_slot: int, entity_name: Strin
 			new_entity.start_move(facing)
 
 func desc_a_turn() -> String:
-	return "entity|Turn the entity/tile to face this way [complex_dir:DirectionInput:1]"
+	return "entity,pos|Turn the entity/tile to face this way [complex_dir:DirectionInput:1]"
 func cmd_a_turn(slots: Dictionary, chosen_slot: int, complex_dir: Dictionary) -> void:
 	if Commands.slot_is_entity(chosen_slot):
 		if not slots[chosen_slot] or slots[chosen_slot].moving:

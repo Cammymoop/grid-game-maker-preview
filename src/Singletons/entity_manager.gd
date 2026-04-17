@@ -7,7 +7,13 @@ signal post_deserialize
 
 var entity_template: = preload("res://Scenes/BaseEntity.tscn")
 var large_entity_template: = preload("res://Scenes/LargeEntity.tscn")
-var controller_templates: = {}
+var controller_templates: = {
+    "InputController": preload("res://Scenes/Controllers/InputController.tscn"),
+    "BounceController": preload("res://Scenes/Controllers/BounceController.tscn"),
+    "creature_controller": preload("res://Scenes/Controllers/creature_controller.tscn"),
+    "random_creature_controller": preload("res://Scenes/Controllers/random_creature_controller.tscn"),
+    "direct_chase_controller": preload("res://Scenes/Controllers/direct_chase_controller.tscn"),
+}
 
 var entity_defs: Dictionary = {
     0: {
@@ -196,7 +202,7 @@ func all_entities_settled() -> bool:
     return settled
 
 func _ready():
-    preload_controller_templates()
+    #preload_controller_templates()
     process_physics_priority = 10
     if not GameManager.is_node_ready():
         await GameManager.ready
