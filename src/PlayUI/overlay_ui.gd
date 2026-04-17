@@ -30,6 +30,7 @@ func on_level_state_loaded() -> void:
     switch_level_title()
 
 func switch_level_title() -> void:
+    await get_tree().process_frame
     var new_title: = MapManager.get_level_title()
     if not is_show_level_title or not new_title:
         _set_level_title_to(new_title)
@@ -46,6 +47,7 @@ func hide_show_level_title(new_title: String) -> void:
         level_title_animator.animation_finished.disconnect(_set_level_title_to)
     level_title_animator.animation_finished.connect(_set_level_title_to.bind(new_title).unbind(1))
     level_title_animator.queue("show")
+    level_title_is_showing = true
 
 func _set_level_title_to(new_title: String) -> void:
     level_title_label.text = new_title
@@ -53,6 +55,8 @@ func _set_level_title_to(new_title: String) -> void:
 func show_level_title() -> void:
     if not is_show_level_title:
         return
+    if level_title_animator.animation_finished.is_connected(_set_level_title_to):
+        level_title_animator.animation_finished.disconnect(_set_level_title_to)
     if level_title_animator.is_playing():
         level_title_animator.stop()
     level_title_animator.play("show")
