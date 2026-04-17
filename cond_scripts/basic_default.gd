@@ -318,19 +318,21 @@ func cmd_a_property_add(slots: Dictionary, chosen_slot: int, property_name: Stri
 
 func desc_a_property_subtract() -> String:
 	return "entity|Subtract [amount:ComplexScalarInput] from the entity's [property_name:PropertyInput] property\n" \
-	     + "[autoremove:BoolChoice:true,remove the property if it reaches zero,allow values less than and including zero]"
+	     + "[autoremove:BoolChoice:true,reset the property if it reaches zero,allow values less than and including zero]"
 func cmd_a_property_subtract(slots: Dictionary, chosen_slot: int, property_name: String, amount: Dictionary, autoremove: bool) -> void:
 	if Commands.slot_is_entity(chosen_slot):
 		var selected: = slots[chosen_slot] as BaseEntity
 		if selected:
+			prints("subtract", property_name, "from", selected.entity_name, ":", selected.local_properties.get(property_name, "no local val"))
 			var existing = EntityManager.get_entity_prop_with_default(selected, property_name, 0)
 			var new_val: float = existing - resolve_complex_scalar(amount, slots)
 
 			if autoremove and (new_val <= 0 or is_zero_approx(new_val)):
-				if selected.has_local_property(property_name):
-					selected.remove_local_property(property_name)
+				selected.reset_local_property(property_name)
 			else:
 				selected.set_local_property(property_name, new_val)
+		else:
+			prints("subtract prop, no selected entity")
 
 func desc_a_remove_property() -> String:
 	return "entity,pos|Remove the entity or tile's [property_name:PropertyInput] property"
@@ -393,6 +395,7 @@ func cmd_next_level_exists(_slots: Dictionary) -> bool:
 func desc_load_next_level() -> String:
 	return "none|Load the next level"
 func cmd_load_next_level(_slots: Dictionary) -> void:
+	prints("loading next level")
 	GameManager.try_load_next_level()
 
 func desc_take_a_turn() -> String:
@@ -516,3 +519,36 @@ func desc_false() -> String:
 	return "none|Set this step's result to False"
 func cmd_false(_slots: Dictionary) -> Dictionary:
 	return {"step_result": false}
+
+func desc_if_all_entities_property() -> String:
+	return "pos|If [is_all:BoolChoice:true,every,any] [entity_name:EntityNameInput] entity here has a [invert:InvertInput:true or non-zero,false or zero] [property_name:PropertyInput] property"
+func cmd_if_all_entities_property(slots: Dictionary, chosen_slot: int, entity_name: String, is_all: bool, invert: bool, property_name: String) -> bool:
+	if not Commands.slot_is_positions(chosen_slot):
+		push_error("Slot for if all entities property is not a positions slot: %s" % chosen_slot)
+		return false
+	if not EntityManager.entity_name_exists(entity_name):
+		push_error("Entity name does not exist: %s" % entity_name)
+		return false
+	var tile_positions: Array = slots[chosen_slot]
+	var e_id: = EntityManager.get_entity_index(entity_name)
+	var all_entities: Array = EntityManager.find_all_entities_by_index(e_id, true)
+	if all_entities.size() == 0:
+		return false
+	var filtered_enities: Array[BaseEntity] = []
+	for entity in all_entities:
+		if tile_positions and entity.get_moving_position() not in tile_positions:
+			continue
+		filtered_enities.append(entity)
+	if filtered_enities.size() == 0:
+		return false
+	for entity in filtered_enities:
+		if not EntityManager.entity_has_property(entity, property_name) and is_all:
+			return invert
+		var truthy_result: = EntityManager.get_entity_prop_is_truthy(entity, property_name)
+		if invert:
+			truthy_result = not truthy_result
+		if not truthy_result and is_all:
+			return false
+		elif truthy_result and not is_all:
+			return true
+	return is_all

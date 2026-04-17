@@ -388,10 +388,11 @@ func new_museum_level():
 	var museum_spacing: = Vector2i(2, 2)
 
 	var entity_museum_size: = EntityManager.create_museum(Vector2i(0, 0), entity_museum_start_pos, museum_spacing)
+
 	var entity_museum: = Utility.rect2i_pos_inclusive_abs(Rect2i(entity_museum_start_pos, entity_museum_size))
 
 	var tile_museum_spacing: = Vector2i(-museum_spacing.x, museum_spacing.y)
-	MapManager.create_museum_layer(museum_player_pos, tile_museum_start_pos, tile_museum_spacing, entity_museum)
+	MapManager.create_museum_layer(museum_player_pos, tile_museum_start_pos, tile_museum_spacing, [entity_museum])
 	
 	save_edited()
 

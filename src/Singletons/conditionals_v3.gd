@@ -43,7 +43,7 @@ const all_events: Array[String] = [
 	"move_onto", "move_off_of",
 
 	"finish_move_onto", "i_finish_move_onto",
-	"i_finish_move_onto_tile",
+	"finish_move_onto_tile", "i_finish_move_onto_tile",
 
     "half_moved_onto", "half_moved_off_of",
     "half_moved_onto_tile", "half_moved_off_of_tile",

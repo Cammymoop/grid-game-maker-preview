@@ -1,0 +1,287 @@
+{
+  "game_name": "Basic",
+  "textures": [
+    {
+      "type": "builtin",
+      "texture_id": 0.0,
+      "name": "tiles.png"
+    },
+    {
+      "type": "builtin",
+      "texture_id": 1.0,
+      "name": "entityTiles.png"
+    },
+    {
+      "type": "builtin",
+      "texture_id": 2.0,
+      "name": "shapes32x.png"
+    }
+  ],
+  "game_settings": {
+    "pixel_scale": 2.0,
+    "window_width": 18.0,
+    "window_height": 14.0,
+    "auto_aspect": true,
+    "camera_settings": {
+      "follow_entity": "player"
+    }
+  },
+  "entity_definitions": {
+    "1": {
+      "name": "player",
+      "texture": 1,
+      "tex_index": 0,
+      "properties": {
+        "player": true,
+        "pushes": true,
+        "pushes-button": true
+      },
+      "controller": "InputController",
+      "controller_options": {
+        "stop_repeat_after_bonk": true,
+        "lock_for_idle_delay_after_bonk": true,
+        "allow_wait": false,
+        "only_rcv_when_cam": true
+      }
+    },
+    "2": {
+      "name": "box",
+      "texture": 1,
+      "tex_index": 1,
+      "properties": {
+        "move_onto": {
+          "v": "3",
+          "conditions": [
+            "basic_default.c_get_pushed::[\"i:0\",{\"args\":[\"s:type\",\"s:plain\",\"s:direction\",\"i:20\"],\"type\":\"Dictionary\"},true]"
+          ],
+          "when true": [],
+          "when false": [],
+          "when always": []
+        },
+        "pushes-button": true,
+        "blocks": {
+          "v": "3",
+          "conditions": [
+            "basic_default.if_property_value::[\"i:1\",\"s:pushes\",false]"
+          ],
+          "when true": [],
+          "when false": [],
+          "when always": []
+        }
+      }
+    },
+    "3": {
+      "name": "swap-box",
+      "texture": 1,
+      "tex_index": 8,
+      "properties": {
+        "move_onto": {
+          "v": "3",
+          "conditions": [
+            "basic_default.c_get_pushed::[\"i:0\",{\"args\":[\"s:type\",\"s:plain\",\"s:direction\",\"i:22\"],\"type\":\"Dictionary\"},true]"
+          ],
+          "when true": [],
+          "when false": [],
+          "when always": []
+        },
+        "pushes-button": true,
+        "blocks": {
+          "v": "3",
+          "conditions": [
+            "basic_default.if_property_value::[\"i:1\",\"s:pushes\",false]"
+          ],
+          "when true": [],
+          "when false": [],
+          "when always": []
+        }
+      }
+    },
+    "4": {
+      "name": "toggle-button",
+      "texture": 1,
+      "tex_index": 18,
+      "properties": {
+        "z-index": -1,
+        "half_moved_onto": {
+          "v": "3",
+          "conditions": [
+            "basic_default.if_property_value::[\"i:1\",\"s:pushes-button\",true]"
+          ],
+          "when true": [
+            "basic_default.a_swap_tiles::[\"i:5\",\"s:toggle-floor\",\"s:toggle-wall\"]"
+          ],
+          "when false": [],
+          "when always": []
+        }
+      }
+    },
+    "5": {
+      "name": "turn-box",
+      "texture": 1,
+      "tex_index": 13,
+      "properties": {
+        "move_onto": {
+          "v": "3",
+          "conditions": [
+            "basic_default.c_get_pushed::[\"i:0\",{\"args\":[\"s:type\",\"s:plain\",\"s:direction\",\"i:21\"],\"type\":\"Dictionary\"},true]"
+          ],
+          "when true": [],
+          "when false": [],
+          "when always": []
+        },
+        "pushes-button": true,
+        "blocks": {
+          "v": "3",
+          "conditions": [
+            "basic_default.if_property_value::[\"i:1\",\"s:pushes\",false]"
+          ],
+          "when true": [],
+          "when false": [],
+          "when always": []
+        },
+        "pushes": true
+      },
+      "sprite_config": {
+        "layers": [
+          {
+            "mode": "normal",
+            "texture": 1.0,
+            "tex_index": 13.0,
+            "rotates": false
+          }
+        ]
+      }
+    },
+    "6": {
+      "name": "door-button",
+      "texture": 1,
+      "tex_index": 19,
+      "properties": {
+        "z-index": -1,
+        "holding-button": 0,
+        "finish_move_onto": {
+          "v": "3",
+          "conditions": [
+            "basic_default.if_property_value::[\"i:1\",\"s:pushes-button\",true]"
+          ],
+          "when true": [
+            "basic_default.a_property_add::[\"i:0\",\"s:holding-button\",{\"args\":[\"s:type\",\"s:plain\",\"s:value\",\"f:1.0\"],\"type\":\"Dictionary\"}]"
+          ],
+          "when false": [],
+          "when always": []
+        },
+        "post_move_off_of": {
+          "v": "3",
+          "conditions": [
+            "basic_default.if_property_value::[\"i:1\",\"s:pushes-button\",true]"
+          ],
+          "when true": [
+            "basic_default.a_property_subtract::[\"i:0\",\"s:holding-button\",{\"args\":[\"s:type\",\"s:plain\",\"s:value\",\"f:1.0\"],\"type\":\"Dictionary\"},true]"
+          ],
+          "when false": [],
+          "when always": []
+        }
+      }
+    }
+  },
+  "tile_definitions": {
+    "1": {
+      "name": "floor",
+      "texture": 0,
+      "tex_index": 18,
+      "properties": {
+
+      }
+    },
+    "2": {
+      "name": "wall",
+      "texture": 0,
+      "tex_index": 19,
+      "properties": {
+        "blocks": true
+      }
+    },
+    "3": {
+      "name": "toggle-floor",
+      "texture": 0,
+      "tex_index": 11,
+      "properties": {
+
+      }
+    },
+    "4": {
+      "name": "toggle-wall",
+      "texture": 0,
+      "tex_index": 12,
+      "properties": {
+        "blocks": true
+      }
+    },
+    "5": {
+      "name": "door",
+      "texture": 0,
+      "tex_index": 38,
+      "properties": {
+        "idle_update": {
+          "v": "3",
+          "conditions": [
+            "basic_default.if_all_entities_property::[\"i:5\",\"s:door-button\",true,false,\"s:holding-button\"]"
+          ],
+          "when true": [
+            "basic_default.a_set_tiles::[\"i:4\",\"s:open-door\"]"
+          ],
+          "when false": [],
+          "when always": []
+        },
+        "blocks": true
+      }
+    },
+    "6": {
+      "name": "open-door",
+      "texture": 0,
+      "tex_index": 39,
+      "properties": {
+        "idle_update": {
+          "v": "3",
+          "conditions": [
+            "basic_default.if_all_entities_property::[\"i:5\",\"s:door-button\",false,true,\"s:holding-button\"]"
+          ],
+          "when true": [
+            "basic_default.a_set_tiles::[\"i:4\",\"s:door\"]"
+          ],
+          "when false": [],
+          "when always": []
+        },
+        "blocks": {
+          "v": "3",
+          "conditions": [
+            "basic_default.if_property_value::[\"i:1\",\"s:player\",false]"
+          ],
+          "when true": [],
+          "when false": [],
+          "when always": []
+        }
+      }
+    },
+    "7": {
+      "name": "goal",
+      "texture": 0,
+      "tex_index": 31,
+      "properties": {
+        "finish_move_onto_tile": {
+          "v": "3",
+          "conditions": [
+            "basic_default.if_property_value::[\"i:1\",\"s:player\",true]"
+          ],
+          "when true": [
+            "basic_default.load_next_level::[\"i:-1\"]"
+          ],
+          "when false": [],
+          "when always": []
+        }
+      }
+    }
+  },
+  "window_width": 22.0,
+  "window_height": 16.0
+}

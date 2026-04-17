@@ -157,7 +157,7 @@ func _get_museum_tile_ids() -> Array[int]:
         tile_ids.append(tile_id)
     return tile_ids
 
-func create_museum_layer(player_pos: Vector2i, tile_start: Vector2i, tile_spacing: Vector2i, ent_museum: Rect2i):
+func create_museum_layer(player_pos: Vector2i, tile_start: Vector2i, tile_spacing: Vector2i, other_floor_rects: Array[Rect2i]):
     clear_layers()
     create_empty_layer()
     if tile_defs.size() < 0:
@@ -168,12 +168,20 @@ func create_museum_layer(player_pos: Vector2i, tile_start: Vector2i, tile_spacin
     var outer_walk_space: int = 3
     
     _fill_expanded_rect(floor_id, Rect2i(player_pos, Vector2i.ONE), outer_walk_space)
-    if ent_museum.size != Vector2i.ZERO:
-        _fill_expanded_rect(floor_id, ent_museum, outer_walk_space)
+    for other_rect in other_floor_rects:
+        if other_rect.size != Vector2i.ZERO:
+            _fill_expanded_rect(floor_id, other_rect, outer_walk_space)
     
-    _place_tile_museum(tile_start, tile_spacing, floor_id, outer_walk_space)
+    var full_tile_museum_rect: = _place_tile_museum(tile_start, tile_spacing, floor_id, outer_walk_space)
+    var reversed_pos: = Vector2i(-tile_start.x, tile_start.y - (4 * signi(tile_spacing.y)))
+    var reversed_rect: = Rect2i(reversed_pos, full_tile_museum_rect.size)
+    if tile_spacing.x > 0:
+        reversed_rect.size.x *= -1
+    if tile_spacing.y > 0:
+        reversed_rect.size.y *= -1
+    _place_tile_museum(reversed_rect.end + tile_spacing.sign(), tile_spacing, floor_id, outer_walk_space)
 
-func _place_tile_museum(museum_start: Vector2i, museum_spacing: Vector2i, floor_id: int, outer_walk_space: int):
+func _place_tile_museum(museum_start: Vector2i, museum_spacing: Vector2i, floor_id: int, outer_walk_space: int) -> Rect2i:
     if museum_spacing.x == 0: museum_spacing.x = 1
     if museum_spacing.y == 0: museum_spacing.y = 1
 
@@ -199,6 +207,7 @@ func _place_tile_museum(museum_start: Vector2i, museum_spacing: Vector2i, floor_
         # Labels
         var tile_name: = get_tile_name(tile_id)
         create_persistant_text_effect(tile_name, at_tile_pos + Vector2i.DOWN, label_offset, -2)
+    return full_museum_rect
 
 func _fill_expanded_rect(tile_id: int, rect: Rect2i, expanded_by: int):
     _fill_rect(tile_id, rect.grow(expanded_by))
@@ -862,7 +871,7 @@ func conditional_tile_event(at_tile_positions: Array, tile_event_name: String, c
             var event_property: = get_tile_property_for_index_at(at_pos, tile_event_name, ti)
             if not event_property:
                 continue
-            var result: Variant = event_property.get_or_resolve(null, context_entity, at_pos)
+            var result: Variant = event_property.get_or_resolve(null, context_entity, at_pos, [], true)
             if not is_all and result:
                 return true
             if is_all and not result:
@@ -887,7 +896,7 @@ func is_blocked(tile_position, empty_blocks: bool = true) -> bool:
     return false
 
 func world_to_tile_position(world_position: Vector2) -> Vector2i:
-    return Vector2i(world_position.floor() / tile_width)
+    return Vector2i(Vector2(world_position.floor() / tile_width).floor())
 
 func tile_to_world_position(tile_position: Vector2i) -> Vector2:
     return Vector2(tile_position.x * tile_width, tile_position.y * tile_width)
@@ -952,7 +961,7 @@ func half_moved_entering_at(at_position: Vector2i, entering_entities: Array) -> 
 func post_move_actions(moving_entity: BaseEntity, _from_position: Vector2i, to_position: Vector2i) -> void:
     _check_and_remove_terrain_spr_mod_for_moving(moving_entity, to_position)
 
-func idle_actions(entity: BaseEntity) -> void:
+func entity_idle_actions(entity: BaseEntity) -> void:
     resolve_tile_event([entity.get_stationary_position()], "idle_on", entity)
 
 func _check_and_remove_terrain_spr_mod_for_moving(moving_entity: BaseEntity, to_position: Vector2i) -> void:
@@ -996,3 +1005,14 @@ func switch_tiles_preview_mode(enable_preview: bool) -> void:
 
 func get_world_pos_above(tile_position: Vector2i) -> Vector2:
     return tile_to_world_position_centered(tile_position) + (Vector2.UP * (tile_width * 0.75))
+
+func idle_actions() -> void:
+    for t_id in tile_defs:
+        var tile_props: Dictionary = tile_defs[t_id].get("properties", {})
+        if not tile_props.has("idle_update"):
+            continue
+        var idle_update_prop: = get_tile_index_property(t_id, "idle_update")
+        if not idle_update_prop.is_conditional():
+            continue
+        var positions_of_tile: = get_all_positions_of_tile(t_id)
+        resolve_tile_event(positions_of_tile, "idle_update", null, false)

@@ -130,9 +130,11 @@ func entity_list_process() -> void:
             e.idle_ticks_elapsed += 1
     for e in idle_entities:
         if e.active and e.idle_ticks_elapsed >= idle_delay_frames:
-            MapManager.idle_actions(e)
+            MapManager.entity_idle_actions(e)
             e.entity_process_idle_actions()
             e.idle_ticks_elapsed = 0
+    if frame_counter % idle_delay_frames == 0:
+        MapManager.idle_actions()
     
     # Phase 3 - Moving progress and mid-move actions
     # if an entity starts moving during this phase it will not be processed as moving until the next tick
@@ -845,10 +847,10 @@ func finish_move(moving_entity, onto_positions: Array) -> void:
     for i in entities_here.size():
         resolve_entity_interaction_event("finish_move_onto", entities_here[i], moving_entity, entities_overlapped_at[i])
 
-func resolve_entity_interaction_event(event_name: String, actor, interactee, at_tile_position: Vector2) -> void:
+func resolve_entity_interaction_event(event_name: String, actor, interactee, at_tile_position: Vector2, extra_debug: bool = false) -> void:
     var event_prop: = get_entity_property(actor, event_name)
     if event_prop and event_prop.is_conditional():
-        event_prop.resolve(actor, interactee, at_tile_position)
+        event_prop.resolve(actor, interactee, at_tile_position, [], extra_debug)
 
 func get_entity_interaction_bool_result(event_name: String, defualt_result: bool, actor, interactee, at_tile_position: Vector2) -> bool:
     var event_prop: = get_entity_property(actor, event_name)
@@ -962,7 +964,7 @@ func post_move_actions(moving_entity, from_position, to_position, exclude_group:
 
     var entities_at_start_pos = get_entities_at(from_position, moving_entity, exclude_group)
     for e in entities_at_start_pos:
-        resolve_entity_interaction_event("post_move_off_of", e, moving_entity, from_position)
+        resolve_entity_interaction_event("post_move_off_of", e, moving_entity, from_position, true)
     if not moving_entity.active:
         return
     

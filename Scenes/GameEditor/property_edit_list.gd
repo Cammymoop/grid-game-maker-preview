@@ -674,3 +674,5 @@ func add_new_or_duplicate_property(property_name: String, as_conditional: bool, 
         on_prop_name_width_changed()
         resort_list_items()
         list_size_changed.emit()
+        if is_instance_update():
+            apply_edited_instance_property_update(property_name)

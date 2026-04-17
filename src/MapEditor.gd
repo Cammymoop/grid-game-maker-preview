@@ -363,7 +363,10 @@ func _standard_delete_at_cursor(force_everything: bool = false, force_only_entit
 func inspect_at_cursor() -> void:
 	var entities_here = get_sorted_entities_at(cursor_tile_pos)
 	if entities_here.size() > 0:
-		entity_instance_editor.open_instance_editor(entities_here[0])
+		var found_last_picked: int = entities_here.find(_last_picked_entity)
+		if found_last_picked == -1:
+			found_last_picked = 0
+		entity_instance_editor.open_instance_editor(entities_here[found_last_picked])
 		var instance_editor_width: float = entity_instance_editor.size.x / entity_instance_editor.get_viewport().size.x
 		var offset: = (1 - instance_editor_width) * get_display_world_size().x * 0.5
 		scroll_editor_camera_to_pos(MapManager.tile_to_world_position_centered(cursor_tile_pos) + Vector2.RIGHT * offset)
@@ -421,7 +424,8 @@ func process_new_mouse_position() -> void:
 	new_mouse_pos += editor_cam.get_tl_position()
 	new_mouse_pos = new_mouse_pos.round()
 	_cursor_moved_from_directional_input = false
-	move_cursor(MapManager.world_to_tile_position(new_mouse_pos))
+	var tile_pos: = MapManager.world_to_tile_position(new_mouse_pos)
+	move_cursor(tile_pos)
 
 func move_cursor(new_position: Vector2i) -> void:
 	if new_position == cursor_tile_pos:
