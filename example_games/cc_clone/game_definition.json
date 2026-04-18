@@ -903,6 +903,66 @@
           "when always": []
         }
       }
+    },
+    "36": {
+      "name": "hidden-wall",
+      "texture": 0,
+      "tex_index": 37,
+      "properties": {
+        "move_onto": {
+          "v": "3",
+          "conditions": [],
+          "when true": [
+            "basic_default.a_set_property::[\"i:0\",\"s:shown\",\"s:true\"]",
+            "basic_default.a_set_property::[\"i:0\",\"s:countdown\",\"s:4\"]"
+          ],
+          "when false": [],
+          "when always": []
+        },
+        "shown": false,
+        "countdown": 0,
+        "idle_update": [
+          {
+            "v": "3",
+            "conditions": [
+              "basic_default.if_property_value::[\"i:0\",\"s:shown\",true]",
+              "basic_default.compare_property::[\"i:0\",\"s:countdown\",\"s:>\",{\"args\":[\"s:type\",\"s:plain\",\"s:value\",\"f:0.0\"],\"type\":\"Dictionary\"}]"
+            ],
+            "when true": [
+              "basic_default.a_property_subtract::[\"i:0\",\"s:countdown\",{\"args\":[\"s:type\",\"s:plain\",\"s:value\",\"f:1.0\"],\"type\":\"Dictionary\"},true]"
+            ],
+            "when false": [],
+            "when always": []
+          },
+          {
+            "v": "3",
+            "conditions": [
+              "basic_default.if_property_value::[\"i:0\",\"s:shown\",true]",
+              "basic_default.if_property_value::[\"i:0\",\"s:countdown\",false]"
+            ],
+            "when true": [
+              "basic_default.a_set_property::[\"i:0\",\"s:shown\",\"s:false\"]"
+            ],
+            "when false": [],
+            "when always": []
+          }
+        ]
+      },
+      "sprite_config": {
+        "layers": [
+          {
+            "mode": "empty",
+            "texture": 0.0,
+            "tex_index": 37.0
+          },
+          {
+            "mode": "normal",
+            "texture": 0.0,
+            "tex_index": 37.0,
+            "when_property": "shown"
+          }
+        ]
+      }
     }
   },
   "tile_definitions": {
@@ -1655,6 +1715,35 @@
           }
         ],
         "can-force": true
+      }
+    },
+    "28": {
+      "name": "checkpoint",
+      "texture": 0,
+      "tex_index": 33,
+      "properties": {
+        "finish_move_onto_tile": {
+          "v": "3",
+          "conditions": [
+            "basic_default.if_property_value::[\"i:1\",\"s:player\",true]"
+          ],
+          "when true": [
+            "basic_default.a_save_checkpoint::[\"i:-1\"]",
+            "basic_default.select_tiles_named::[\"i:5\",\"s:checkp-saved\"]",
+            "basic_default.a_set_tiles::[\"i:4\",\"s:checkp-saved\"]",
+            "basic_default.a_set_tiles::[\"i:5\",\"s:checkpoint\"]"
+          ],
+          "when false": [],
+          "when always": []
+        }
+      }
+    },
+    "29": {
+      "name": "checkp-saved",
+      "texture": 0,
+      "tex_index": 34,
+      "properties": {
+
       }
     }
   },

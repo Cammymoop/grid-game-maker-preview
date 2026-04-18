@@ -1,0 +1,2 @@
+Windows Desktop|windows|GridGameMaker.exe
+Linux|linux|GridGameMaker.x86_64

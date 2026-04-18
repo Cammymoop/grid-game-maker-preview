@@ -783,10 +783,10 @@ func find_entity_with_truthy_property(prop_name: String, first: bool = true) -> 
             return entity_list[i]
     return null
 
-func find_all_entities_with_truthy_property(prop_name: String, active_only: bool = false) -> Array[BaseEntity]:
+func find_all_entities_with_truthy_property(prop_name: String, active_only: bool = false, invert: bool = false) -> Array[BaseEntity]:
     var found_entities: Array[BaseEntity] = []
     for i in entity_list:
-        if (not active_only or i.active) and get_entity_prop_with_default(i, prop_name, false):
+        if (not active_only or i.active) and get_entity_prop_with_default(i, prop_name, false) != invert:
             found_entities.append(i)
     return found_entities
 

@@ -871,7 +871,7 @@ func conditional_tile_event(at_tile_positions: Array, tile_event_name: String, c
             var event_property: = get_tile_property_for_index_at(at_pos, tile_event_name, ti)
             if not event_property:
                 continue
-            var result: Variant = event_property.get_or_resolve(null, context_entity, at_pos, [], true)
+            var result: Variant = event_property.get_or_resolve(null, context_entity, at_pos, [], false)
             if not is_all and result:
                 return true
             if is_all and not result:

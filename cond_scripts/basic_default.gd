@@ -203,6 +203,60 @@ func cmd_c_is_named(slots: Dictionary, chosen_slot: int, invert: bool, check_nam
 	var result = slots[chosen_slot].entity_name == check_name
 	return not result if invert else result
 
+func desc_if_all_entities_property() -> String:
+	return "pos|If [is_all:BoolChoice:true,every,any] [entity_name:EntityNameInput] entity here has a [invert:InvertInput:true or non-zero,false or zero] [property_name:PropertyInput] property"
+func cmd_if_all_entities_property(slots: Dictionary, chosen_slot: int, entity_name: String, is_all: bool, invert: bool, property_name: String) -> bool:
+	if not Commands.slot_is_positions(chosen_slot):
+		push_error("Slot for if all entities property is not a positions slot: %s" % chosen_slot)
+		return false
+	if not EntityManager.entity_name_exists(entity_name):
+		push_error("Entity name does not exist: %s" % entity_name)
+		return false
+	var tile_positions: Array = slots[chosen_slot]
+	var e_id: = EntityManager.get_entity_index(entity_name)
+	var all_entities: Array = EntityManager.find_all_entities_by_index(e_id, true)
+	if all_entities.size() == 0:
+		return false
+	var filtered_enities: Array[BaseEntity] = []
+	for entity in all_entities:
+		if tile_positions and entity.get_moving_position() not in tile_positions:
+			continue
+		filtered_enities.append(entity)
+	if filtered_enities.size() == 0:
+		return false
+	for entity in filtered_enities:
+		if not EntityManager.entity_has_property(entity, property_name) and is_all:
+			return invert
+		var truthy_result: = EntityManager.get_entity_prop_is_truthy(entity, property_name)
+		if invert:
+			truthy_result = not truthy_result
+		if not truthy_result and is_all:
+			return false
+		elif truthy_result and not is_all:
+			return true
+	return is_all
+
+func desc_if_any_entity_exists() -> String:
+	return "pos|If any entity exists here with a [invert:InvertInput:true or non-zero,false or zero] [prop_name:PropertyInput] property\n" \
+		+ "Excluding [exclude_entity:SlotInput:entity]"
+func cmd_if_any_entity_exists(slots: Dictionary, chosen_slot: int, exclude_slot: int, invert: bool, prop_name: String) -> bool:
+	if not Commands.slot_is_positions(chosen_slot):
+		push_error("Slot for if any entity exists is not a positions slot: %s" % chosen_slot)
+		return false
+	var exclude_entity: BaseEntity = null
+	if exclude_slot != -1:
+		exclude_entity = slots[exclude_slot]
+	var tile_positions: Array = slots[chosen_slot]
+	if not tile_positions:
+		var found_entities: Array = EntityManager.find_all_entities_with_truthy_property(prop_name, true, invert)
+		found_entities.erase(exclude_entity)
+		return found_entities.size() > 0
+
+	for entity in EntityManager.get_entities_at_multiple(tile_positions, exclude_entity, [], true, false):
+		if EntityManager.get_entity_prop_is_truthy(entity, prop_name, false) != invert:
+			return true
+	return false
+
 func desc_c_can_move() -> String:
 	return "entity|If the entity [invert:InvertInput:can,cannot] move this way [direction:DirectionInput]"
 func cmd_c_can_move(slots: Dictionary, chosen_slot: int, invert: bool, direction: int) -> bool:
@@ -323,7 +377,6 @@ func cmd_a_property_subtract(slots: Dictionary, chosen_slot: int, property_name:
 	if Commands.slot_is_entity(chosen_slot):
 		var selected: = slots[chosen_slot] as BaseEntity
 		if selected:
-			prints("subtract", property_name, "from", selected.entity_name, ":", selected.local_properties.get(property_name, "no local val"))
 			var existing = EntityManager.get_entity_prop_with_default(selected, property_name, 0)
 			var new_val: float = existing - resolve_complex_scalar(amount, slots)
 
@@ -519,36 +572,3 @@ func desc_false() -> String:
 	return "none|Set this step's result to False"
 func cmd_false(_slots: Dictionary) -> Dictionary:
 	return {"step_result": false}
-
-func desc_if_all_entities_property() -> String:
-	return "pos|If [is_all:BoolChoice:true,every,any] [entity_name:EntityNameInput] entity here has a [invert:InvertInput:true or non-zero,false or zero] [property_name:PropertyInput] property"
-func cmd_if_all_entities_property(slots: Dictionary, chosen_slot: int, entity_name: String, is_all: bool, invert: bool, property_name: String) -> bool:
-	if not Commands.slot_is_positions(chosen_slot):
-		push_error("Slot for if all entities property is not a positions slot: %s" % chosen_slot)
-		return false
-	if not EntityManager.entity_name_exists(entity_name):
-		push_error("Entity name does not exist: %s" % entity_name)
-		return false
-	var tile_positions: Array = slots[chosen_slot]
-	var e_id: = EntityManager.get_entity_index(entity_name)
-	var all_entities: Array = EntityManager.find_all_entities_by_index(e_id, true)
-	if all_entities.size() == 0:
-		return false
-	var filtered_enities: Array[BaseEntity] = []
-	for entity in all_entities:
-		if tile_positions and entity.get_moving_position() not in tile_positions:
-			continue
-		filtered_enities.append(entity)
-	if filtered_enities.size() == 0:
-		return false
-	for entity in filtered_enities:
-		if not EntityManager.entity_has_property(entity, property_name) and is_all:
-			return invert
-		var truthy_result: = EntityManager.get_entity_prop_is_truthy(entity, property_name)
-		if invert:
-			truthy_result = not truthy_result
-		if not truthy_result and is_all:
-			return false
-		elif truthy_result and not is_all:
-			return true
-	return is_all

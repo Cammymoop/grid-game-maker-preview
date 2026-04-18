@@ -132,15 +132,16 @@ func get_move(attempt_num: int = 0):
 	return input_dir
 
 func got_blocked(_facing_dir) -> void:
-	if stop_repeat_after_bonk:
+	if stop_repeat_after_bonk or lock_for_idle_delay_after_bonk:
 		cancelled = true
-	if lock_for_idle_delay_after_bonk:
-		is_delay_locked = true
+		if lock_for_idle_delay_after_bonk:
+			is_delay_locked = true
 
 func on_start_move(_facing_dir) -> void:
 	cancelled = false
 	is_delay_locked = false
 
 func on_idle() -> void:
+	if is_delay_locked:
+		cancelled = false
 	is_delay_locked = false
-	cancelled = false

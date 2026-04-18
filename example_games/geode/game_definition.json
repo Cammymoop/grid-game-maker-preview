@@ -1,5 +1,5 @@
 {
-  "game_name": "GeodeClone",
+  "game_name": "Geode",
   "textures": [
     {
       "type": "builtin",
@@ -57,8 +57,10 @@
         "Player"
       ],
       "controller_options": {
-        "stop_repeat_after_bonk": true,
-        "allow_wait": false
+        "stop_repeat_after_bonk": false,
+        "lock_for_idle_delay_after_bonk": false,
+        "allow_wait": false,
+        "only_rcv_when_cam": true
       }
     },
     "1": {
@@ -71,9 +73,9 @@
           "conditions": [
             "basic_default.c_has_property::[\"i:1\",true,\"s:cutter\"]"
           ],
-          "when always": [],
           "when true": [],
-          "when false": []
+          "when false": [],
+          "when always": []
         },
         "move_onto": [
           {
@@ -82,23 +84,23 @@
               "basic_default.c_has_property::[\"i:1\",false,\"s:cutter\"]"
             ],
             "when true": [
-              "basic_default.a_turn::[\"i:0\",\"i:20\"]",
+              "basic_default.a_turn::[\"i:0\",{\"args\":[\"s:type\",\"s:plain\",\"s:direction\",\"i:20\"],\"type\":\"Dictionary\"}]",
               "basic_default.a_create_entity::[\"i:4\",\"s:split-geode\",\"i:12\",false]",
-              "basic_default.a_die::[\"i:0\"]"
+              "basic_default.a_die::[\"i:0\"]",
+              "basic_default.false::[\"i:-1\"]"
             ],
             "when false": [],
             "when always": []
           },
           {
             "v": "3",
-            "conditions": [
-              "basic_default.c_has_property::[\"i:0\",false,\"s:impossible\"]"
-            ],
+            "conditions": [],
             "when true": [],
             "when false": [],
             "when always": []
           }
-        ]
+        ],
+        "geode": true
       },
       "intended_move_speed": 0.0
     },
@@ -122,7 +124,8 @@
           ],
           "when false": [],
           "when always": []
-        }
+        },
+        "geode": true
       },
       "intended_move_speed": 0.0
     },
@@ -156,20 +159,32 @@
             "when true": [],
             "when false": [
               "basic_default.a_die::[\"i:0\"]",
-              "basic_default.quit::[\"i:0\"]"
+              "basic_default.quit::[\"i:-1\"]"
             ],
             "when always": []
           },
           {
             "v": "3",
             "conditions": [
-              "basic_default.c_get_pushed::[\"i:0\",\"i:20\",true]"
+              "basic_default.c_get_pushed::[\"i:0\",{\"args\":[\"s:type\",\"s:plain\",\"s:direction\",\"i:20\"],\"type\":\"Dictionary\"},true]"
             ],
             "when true": [],
             "when false": [],
             "when always": []
           }
-        ]
+        ],
+        "dying": {
+          "v": "3",
+          "conditions": [
+            "basic_default.if_any_entity_exists::[\"i:5\",\"i:0\",false,\"s:geode\"]"
+          ],
+          "when true": [],
+          "when false": [
+            "basic_default.load_next_level::[\"i:-1\"]"
+          ],
+          "when always": []
+        },
+        "geode": true
       },
       "intended_move_speed": 6.0
     },
@@ -178,7 +193,7 @@
       "texture": 1,
       "tex_index": 23,
       "properties": {
-        "z-index": -1.0,
+        "z-index": -1,
         "blocks": {
           "v": "3",
           "conditions": [
@@ -205,17 +220,41 @@
       "controller": "InputController",
       "controller_options": {
         "stop_repeat_after_bonk": true,
-        "allow_wait": false
+        "lock_for_idle_delay_after_bonk": false,
+        "allow_wait": false,
+        "only_rcv_when_cam": true
       }
     },
-    "10": {
-      "name": "props",
-      "texture": 2,
-      "tex_index": 11,
+    "11": {
+      "name": "hint",
+      "texture": 1,
+      "tex_index": 44,
       "properties": {
-        "cutter": true,
-        "pusher": true,
-        "breaker": true
+        "hint-text": "I'm a hint",
+        "half_moved_onto": {
+          "v": "3",
+          "conditions": [
+            "basic_default.c_has_property::[\"i:1\",false,\"s:player\"]"
+          ],
+          "when true": [
+            "basic_default.select_text_property::[\"i:12\",\"i:0\",\"s:hint-text\"]",
+            "basic_default.show_textbox::[\"i:12\"]"
+          ],
+          "when false": [],
+          "when always": []
+        },
+        "half_moved_off_of": {
+          "v": "3",
+          "conditions": [
+            "basic_default.c_has_property::[\"i:1\",false,\"s:player\"]"
+          ],
+          "when true": [
+            "basic_default.dismiss_textbox::[\"i:-1\"]"
+          ],
+          "when false": [],
+          "when always": []
+        },
+        "z-index": -1
       }
     }
   },
@@ -225,6 +264,20 @@
     "pixel_scale": 2.0,
     "camera_settings": {
       "follow_entity": "player"
+    }
+  },
+  "game_metadata": {
+    "credits": {
+      "credits_list": [
+        {
+          "role": "Recreation",
+          "name": "Cammymoop"
+        },
+        {
+          "role": "PuzzleScript Original",
+          "name": "Neonesque"
+        }
+      ]
     }
   }
 }
