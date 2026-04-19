@@ -280,6 +280,22 @@
           "when always": []
         }
       }
+    },
+    "8": {
+      "name": "box-wall",
+      "texture": 0,
+      "tex_index": 36,
+      "properties": {
+        "blocks": {
+          "v": "3",
+          "conditions": [
+            "basic_default.if_property_value::[\"i:1\",\"s:player\",false]"
+          ],
+          "when true": [],
+          "when false": [],
+          "when always": []
+        }
+      }
     }
   },
   "window_width": 22.0,
