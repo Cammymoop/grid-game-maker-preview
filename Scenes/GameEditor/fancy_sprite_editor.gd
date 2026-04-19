@@ -87,6 +87,7 @@ func refresh_previewer() -> void:
 
 func get_snapshot() -> ViewportTexture:
     if not sprite_previewer:
+        prints("No sprite previewer, returning null")
         return null
     sprite_previewer.set_rotation_immediate(0)
     await RenderingServer.frame_post_draw

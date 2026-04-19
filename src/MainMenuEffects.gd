@@ -83,8 +83,8 @@ func spawn_random_entity(fall_delta: float) -> void:
 	var spr: = VelocitySprite.new()
 	spr.centered = true
 	var entity_index: int = Utility.random_list_element(entity_indexes)
-	spr.texture = EntityManager.get_entity_sprite_snapshot(entity_index)
-	spr.scale *= EntityManager.get_entity_sprite_snapshot_scale(entity_index, false)
+	spr.texture = EntityManager.get_entity_sprite_snapshot(entity_index, true)
+	spr.scale *= EntityManager.get_entity_sprite_snapshot_scale(entity_index, true, false)
 	spawn_common(spr, fall_delta)
 
 func spawn_random_tile(fall_delta: float) -> void:

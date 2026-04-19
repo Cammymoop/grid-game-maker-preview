@@ -98,6 +98,9 @@ func set_controller(list_index) -> void:
 	controller_button.text = controller_name
 
 func load_entity_info(entity_index: int):
+	sprite_snapshot_tex = null
+	if EntityManager.entity_sprite_snapshots.has(entity_index):
+		sprite_snapshot_tex = EntityManager.entity_sprite_snapshots[entity_index]
 	set_tile_entity_mode("entity")
 	the_index = entity_index
 	the_definition = EntityManager.get_entity_definition(entity_index)
@@ -123,6 +126,7 @@ func load_entity_info(entity_index: int):
 	load_common()
 
 func load_tile_info(tile_index: int):
+	sprite_snapshot_tex = null
 	set_tile_entity_mode("tile")
 	the_index = tile_index
 	the_definition = MapManager.get_tile_definition(tile_index)

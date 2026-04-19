@@ -11,16 +11,16 @@
 [ext_resource type="Texture2D" uid="uid://c1h0arduxil1j" path="res://assets/img/button_icons/down_small.png" id="4_x76fy"]
 [ext_resource type="Script" uid="uid://di2eyvsiqwsee" path="res://src/GameEditor/ConditionalEditor/PropertyInput.gd" id="7_d3nlp"]
 
+[sub_resource type="Theme" id="Theme_x76fy"]
+LineEdit/constants/minimum_character_width = 2
+
 [sub_resource type="AtlasTexture" id="AtlasTexture_mwfft"]
 atlas = ExtResource("3_jxcnp")
 region = Rect2(0, 64, 32, 32)
 
-[sub_resource type="Theme" id="Theme_x76fy"]
-LineEdit/constants/minimum_character_width = 2
-
-[node name="FancySpriteLayerListItem" type="MarginContainer" unique_id=1110623540 node_paths=PackedStringArray("remove_button", "layer_image_button", "offset_input", "mode_selector", "reorder_buttons", "rotates_toggle", "digits_settings", "digits_pad_zeros_toggle", "digits_max_digits_input", "digits_property_input", "digits_color_picker")]
-offset_right = 322.0
-offset_bottom = 71.0
+[node name="FancySpriteLayerListItem" type="MarginContainer" unique_id=1110623540 node_paths=PackedStringArray("remove_button", "layer_image_button", "offset_type_selector", "offset_input", "mode_selector", "reorder_buttons", "rotates_toggle", "digits_settings", "digits_pad_zeros_toggle", "digits_max_digits_input", "digits_property_input", "digits_color_picker", "visibility_option", "visibility_input")]
+offset_right = 503.0
+offset_bottom = 75.0
 theme = ExtResource("1_pj4t0")
 theme_override_constants/margin_left = 0
 theme_override_constants/margin_top = 3
@@ -30,6 +30,7 @@ script = ExtResource("1_ya7sx")
 empty_layer_button_icon = ExtResource("2_x76fy")
 remove_button = NodePath("HBoxContainer/RemoveLayerButton")
 layer_image_button = NodePath("HBoxContainer/PanelContainer/HBoxContainer/HBoxContainer/LayerImageButton")
+offset_type_selector = NodePath("HBoxContainer/PanelContainer/HBoxContainer/VBoxContainer/HBoxContainer2/OffsetTypeSelect")
 offset_input = NodePath("HBoxContainer/PanelContainer/HBoxContainer/VBoxContainer/HBoxContainer2/OffsetInput")
 mode_selector = NodePath("HBoxContainer/PanelContainer/HBoxContainer/VBoxContainer/HBoxContainer/OptionButton")
 reorder_buttons = NodePath("HBoxContainer/VBoxContainer2")
@@ -39,6 +40,8 @@ digits_pad_zeros_toggle = NodePath("HBoxContainer/PanelContainer/HBoxContainer/H
 digits_max_digits_input = NodePath("HBoxContainer/PanelContainer/HBoxContainer/HBoxContainer/DigitSettings/HBoxContainer2/DigitsInput")
 digits_property_input = NodePath("HBoxContainer/PanelContainer/HBoxContainer/HBoxContainer/DigitSettings/HBoxContainer3/DigitPropertyInput")
 digits_color_picker = NodePath("HBoxContainer/PanelContainer/HBoxContainer/HBoxContainer/DigitSettings/HBoxContainer4/DigitColorPicker")
+visibility_option = NodePath("HBoxContainer/PanelContainer/HBoxContainer/HBoxContainer/VisibilityOption")
+visibility_input = NodePath("HBoxContainer/PanelContainer/HBoxContainer/HBoxContainer/VisibilityOption/VisPropInput")
 
 [node name="HBoxContainer" type="HBoxContainer" parent="." unique_id=209136135]
 layout_mode = 2
@@ -79,6 +82,7 @@ text = "Mode:"
 
 [node name="OptionButton" type="OptionButton" parent="HBoxContainer/PanelContainer/HBoxContainer/VBoxContainer/HBoxContainer" unique_id=911801953]
 layout_mode = 2
+size_flags_vertical = 4
 mouse_filter = 1
 selected = 0
 item_count = 1
@@ -94,9 +98,21 @@ text = "Rotates:"
 layout_mode = 2
 size_flags_horizontal = 0
 
+[node name="OffsetTypeSelect" type="OptionButton" parent="HBoxContainer/PanelContainer/HBoxContainer/VBoxContainer/HBoxContainer2" unique_id=895392219]
+layout_mode = 2
+size_flags_vertical = 4
+selected = 0
+item_count = 3
+popup/item_0/text = "Offset"
+popup/item_0/id = 0
+popup/item_1/text = "Pivot"
+popup/item_1/id = 1
+popup/item_2/text = "Both"
+popup/item_2/id = 2
+
 [node name="Label" type="Label" parent="HBoxContainer/PanelContainer/HBoxContainer/VBoxContainer/HBoxContainer2" unique_id=273727419]
 layout_mode = 2
-text = "Offset:"
+text = ":"
 
 [node name="OffsetInput" parent="HBoxContainer/PanelContainer/HBoxContainer/VBoxContainer/HBoxContainer2" unique_id=2047234622 instance=ExtResource("1_s7nl1")]
 layout_mode = 2
@@ -104,37 +120,32 @@ layout_mode = 2
 [node name="HBoxContainer" type="HBoxContainer" parent="HBoxContainer/PanelContainer/HBoxContainer" unique_id=642636696]
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_constants/separation = 0
+theme_override_constants/separation = 2
 alignment = 2
 
-[node name="LayerImageButton" type="Container" parent="HBoxContainer/PanelContainer/HBoxContainer/HBoxContainer" unique_id=1068316695]
+[node name="VisibilityOption" type="VBoxContainer" parent="HBoxContainer/PanelContainer/HBoxContainer/HBoxContainer" unique_id=825182032]
+custom_minimum_size = Vector2(76, 0)
 layout_mode = 2
-size_flags_vertical = 4
-script = ExtResource("2_ya7sx")
-disabled_child_modulate = Color(1, 1, 1, 1)
-metadata/_custom_type_script = "uid://bq446sgdivroo"
+size_flags_horizontal = 3
+alignment = 1
 
-[node name="MarginContainer" type="MarginContainer" parent="HBoxContainer/PanelContainer/HBoxContainer/HBoxContainer/LayerImageButton" unique_id=491096593]
+[node name="Label" type="Label" parent="HBoxContainer/PanelContainer/HBoxContainer/HBoxContainer/VisibilityOption" unique_id=808575088]
 layout_mode = 2
-mouse_filter = 2
-theme_override_constants/margin_left = 2
-theme_override_constants/margin_top = 2
-theme_override_constants/margin_right = 2
-theme_override_constants/margin_bottom = 2
+theme_override_constants/line_spacing = 1
+theme_override_font_sizes/font_size = 12
+text = "Visibility
+Prop:"
+horizontal_alignment = 1
 
-[node name="TextureRect" type="TextureRect" parent="HBoxContainer/PanelContainer/HBoxContainer/HBoxContainer/LayerImageButton/MarginContainer" unique_id=32878848]
-texture_filter = 1
-custom_minimum_size = Vector2(56, 56)
+[node name="VisPropInput" type="LineEdit" parent="HBoxContainer/PanelContainer/HBoxContainer/HBoxContainer/VisibilityOption" unique_id=1000030449]
 layout_mode = 2
-size_flags_horizontal = 4
-size_flags_vertical = 4
-mouse_filter = 2
-texture = SubResource("AtlasTexture_mwfft")
-stretch_mode = 5
+script = ExtResource("7_d3nlp")
 
 [node name="DigitSettings" type="HFlowContainer" parent="HBoxContainer/PanelContainer/HBoxContainer/HBoxContainer" unique_id=897502454]
 visible = false
+custom_minimum_size = Vector2(167, 0)
 layout_mode = 2
+size_flags_horizontal = 3
 
 [node name="HBoxContainer2" type="HBoxContainer" parent="HBoxContainer/PanelContainer/HBoxContainer/HBoxContainer/DigitSettings" unique_id=2078126990]
 layout_mode = 2
@@ -183,10 +194,37 @@ layout_mode = 2
 text = "Property:"
 
 [node name="DigitPropertyInput" type="LineEdit" parent="HBoxContainer/PanelContainer/HBoxContainer/HBoxContainer/DigitSettings/HBoxContainer3" unique_id=249245980]
-custom_minimum_size = Vector2(140, 0)
+custom_minimum_size = Vector2(100, 0)
 layout_mode = 2
 size_flags_horizontal = 3
 script = ExtResource("7_d3nlp")
+override_default_min_size = Vector2(100, -1)
+
+[node name="LayerImageButton" type="Container" parent="HBoxContainer/PanelContainer/HBoxContainer/HBoxContainer" unique_id=1068316695]
+layout_mode = 2
+size_flags_vertical = 4
+script = ExtResource("2_ya7sx")
+disabled_child_modulate = Color(1, 1, 1, 1)
+metadata/_custom_type_script = "uid://bq446sgdivroo"
+
+[node name="MarginContainer" type="MarginContainer" parent="HBoxContainer/PanelContainer/HBoxContainer/HBoxContainer/LayerImageButton" unique_id=491096593]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/margin_left = 2
+theme_override_constants/margin_top = 2
+theme_override_constants/margin_right = 2
+theme_override_constants/margin_bottom = 2
+
+[node name="TextureRect" type="TextureRect" parent="HBoxContainer/PanelContainer/HBoxContainer/HBoxContainer/LayerImageButton/MarginContainer" unique_id=32878848]
+texture_filter = 1
+custom_minimum_size = Vector2(56, 56)
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+mouse_filter = 2
+texture = SubResource("AtlasTexture_mwfft")
+expand_mode = 1
+stretch_mode = 5
 
 [node name="RemoveLayerButton" parent="HBoxContainer" unique_id=1790843655 instance=ExtResource("4_60pnq")]
 layout_mode = 2

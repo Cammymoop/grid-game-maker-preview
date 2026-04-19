@@ -23,10 +23,15 @@ const LayerModeOptions: Dictionary[String, String] = {
     MODE_EMPTY: "empty",
 }
 
+const OFFSET_OFFSET: = "Offset"
+const OFFSET_PIVOT: = "Pivot"
+const OFFSET_BOTH: = "Both"
+
 @export var empty_layer_button_icon: Texture2D
 
 @export var remove_button: ButtonContainer
 @export var layer_image_button: ButtonContainer
+@export var offset_type_selector: OptionButton
 @export var offset_input: Vec2IInput
 @export var mode_selector: OptionButton
 @export var reorder_buttons: Control
@@ -38,8 +43,13 @@ const LayerModeOptions: Dictionary[String, String] = {
 @export var digits_property_input: LineEdit
 @export var digits_color_picker: ColorPickerButton
 
+@export var visibility_option: Control
+@export var visibility_input: FuzzyAutocompleteInput
+
 @export var show_reorder_buttons: bool = true
 @export var enable_context_menu: bool = true
+
+var cur_offs_type: String = OFFSET_OFFSET
 
 var layer_info: Dictionary = {}
 
@@ -64,6 +74,12 @@ func _ready() -> void:
         mode_selector.add_item(LayerModeOptions[mode_name])
     mode_selector.item_selected.connect(on_mode_selected)
     
+    offset_type_selector.clear()
+    for offs_type_name in [OFFSET_OFFSET, OFFSET_PIVOT, OFFSET_BOTH]:
+        offset_type_selector.add_item(offs_type_name)
+    offset_type_selector.selected = 0
+    _set_cur_offset_type()
+    offset_type_selector.item_selected.connect(on_offset_type_changed)
     offset_input.value_changed.connect(on_offset_changed)
     
     rotates_toggle.toggled.connect(on_rotates_toggled)
@@ -76,6 +92,8 @@ func _ready() -> void:
     digits_color_picker.color_changed.connect(on_digits_color_changed)
     
     layer_image_button.pressed.connect(on_layer_image_button_pressed)
+    
+    visibility_input.text_changed.connect(on_visibility_prop_changed)
 
     if layer_info and layer_info.has("mode"):
         refresh_ui()
@@ -94,12 +112,6 @@ func set_layer_info(new_layer_info: Dictionary) -> void:
 
 func get_layer_info() -> Dictionary:
     return layer_info.duplicate_deep()
-
-func _set_layer_offset(new_offset: Vector2i) -> void:
-    layer_info['offset'] = Utility.get_arr_from_vector2i(new_offset)
-
-func get_layer_offset() -> Vector2i:
-    return Utility.get_vector2i_from_arr(layer_info.get("offset", [0,0]))
 
 func get_mode_value() -> String:
     var selected_text: = mode_selector.get_item_text(mode_selector.selected)
@@ -137,16 +149,37 @@ func _set_default_texture_and_index() -> void:
     if not 'tex_index' in layer_info:
         layer_info['tex_index'] = 0
 
+func on_offset_type_changed(_index: int) -> void:
+    _set_cur_offset_type()
+
+func _set_cur_offset_type() -> void:
+    cur_offs_type = offset_type_selector.get_item_text(offset_type_selector.selected)
+    update_offset_vec_input()
+
+func _get_cur_offset() -> Vector2i:
+    var offset_key: = "offset" if cur_offs_type != OFFSET_PIVOT else "pivot"
+    return Utility.get_vector2i_from_arr(layer_info.get(offset_key, [0,0]))
+
+func update_offset_vec_input() -> void:
+    var offset_value: Vector2i = _get_cur_offset()
+    offset_input.set_value(offset_value)
+
 func on_offset_changed(new_offset: Vector2i) -> void:
+    var offset_key: = "offset" if cur_offs_type != OFFSET_PIVOT else "pivot"
     if new_offset == Vector2i.ZERO:
-        layer_info.erase("offset")
+        layer_info.erase(offset_key)
+        if cur_offs_type == OFFSET_BOTH:
+            layer_info.erase("pivot")
     else:
-        _set_layer_offset(new_offset)
+        layer_info[offset_key] = Utility.get_arr_from_vector2i(new_offset)
+        if cur_offs_type == OFFSET_BOTH:
+            layer_info["pivot"] = Utility.get_arr_from_vector2i(new_offset)
     changed.emit()
 
 
 func refresh_ui() -> void:
-    offset_input.set_value(get_layer_offset())
+    update_offset_vec_input()
+    visibility_input.set_value(layer_info.get("when_property", ""))
 
     set_mode_picker_value(layer_info['mode'])
     if layer_info['mode'] == MODE_EMPTY:
@@ -157,6 +190,8 @@ func refresh_ui() -> void:
         
         digits_property_input.set_value(layer_info.get("property", ""))
         digits_color_picker.color = Utility.get_dict_color(layer_info, "mod_color", Color.WHITE)
+    
+    visibility_option.visible = layer_info['mode'] != MODE_EMPTY
     
     digits_settings.visible = layer_info['mode'] == MODE_DIGITS
     layer_image_button.visible = layer_info['mode'] != MODE_DIGITS
@@ -259,4 +294,8 @@ func on_digits_color_changed(new_color: Color) -> void:
     if not layer_info["mode"] == MODE_DIGITS:
         return
     layer_info['mod_color'] = Utility.color_string(new_color)
+    changed.emit()
+
+func on_visibility_prop_changed(prop_name: String) -> void:
+    layer_info['when_property'] = prop_name
     changed.emit()

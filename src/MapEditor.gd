@@ -258,7 +258,7 @@ func preview_entity(entity_index):
 	if entity_index == -1:
 		return
 	preview.texture = EntityManager.get_entity_sprite_snapshot(entity_index, true)
-	preview.scale = Vector2.ONE * EntityManager.get_entity_sprite_snapshot_scale(entity_index, false)
+	preview.scale = Vector2.ONE * EntityManager.get_entity_sprite_snapshot_scale(entity_index, true, false)
 	preview.region_enabled = false
 
 func preview_tile(tile_index):

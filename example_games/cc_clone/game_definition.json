@@ -914,7 +914,8 @@
           "conditions": [],
           "when true": [
             "basic_default.a_set_property::[\"i:0\",\"s:shown\",\"s:true\"]",
-            "basic_default.a_set_property::[\"i:0\",\"s:countdown\",\"s:4\"]"
+            "basic_default.a_set_property::[\"i:0\",\"s:countdown\",\"s:4\"]",
+            "basic_default.false::[\"i:-1\"]"
           ],
           "when false": [],
           "when always": []
@@ -962,6 +963,10 @@
             "when_property": "shown"
           }
         ]
+      },
+      "preview_variant": {
+        "texture": 0.0,
+        "tex_index": 37.0
       }
     }
   },

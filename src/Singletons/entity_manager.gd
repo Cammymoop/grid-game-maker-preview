@@ -1197,8 +1197,8 @@ func get_entity_sprite_snapshot(entity_index: int, preview: bool = false) -> Tex
     else:
         return entity_sprite_snapshots[entity_index]
 
-func get_entity_sprite_snapshot_scale(entity_index: int, for_ui: bool = true) -> float:
-    if not entity_sprite_snapshots.has(entity_index):
+func get_entity_sprite_snapshot_scale(entity_index: int, preview: bool = false, for_ui: bool = true) -> float:
+    if not entity_sprite_snapshots.has(entity_index) or (entity_has_preview_variant(entity_index) and preview):
         return GameManager.get_default_pixel_scale() if for_ui else 1.0
     else:
         return 1.0 if for_ui else 1.0 / GameManager.get_default_pixel_scale()

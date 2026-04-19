@@ -103,11 +103,8 @@ func refresh_layers() -> void:
     clear_children()
     prop_update_response.clear()
     if preview_info and is_preview_mode:
-        prints("I have preview info and am in preview mode, creating preview layer")
         create_and_add_nodes_for_layer(preview_info, 0)
     else:
-        if preview_info:
-            prints("I have preview info and am not in preview mode, creating normal layers")
         for layer_index in layers.size():
             create_and_add_nodes_for_layer(layers[layer_index], layer_index)
     if is_inside_tree():
@@ -170,7 +167,7 @@ func _remove_modifier_layers(modifier: String) -> void:
             new_layers.append(layer)
     layers = new_layers
 
-func create_and_add_nodes_for_layer(layer_info: Dictionary, _layer_index: int) -> void:
+func create_and_add_nodes_for_layer(layer_info: Dictionary, layer_index: int) -> void:
     if not layer_info or layer_info.get("mode", "empty") == "empty":
         return
 
@@ -249,11 +246,25 @@ func create_and_add_nodes_for_layer(layer_info: Dictionary, _layer_index: int) -
 
     main_layer_node.modulate = Utility.get_dict_color(layer_info, "mod_color", Color.WHITE)
     
-    add_child(main_layer_node)
-    var layer_scale: Vector2 = Utility.get_vector2_from_arr(layer_info.get("scale", [1,1]))
     var layer_offset: Vector2 = Utility.get_vector2_from_arr(layer_info.get("offset", [0,0]))
+    var layer_pivot_offset: Vector2 = Utility.get_vector2_from_arr(layer_info.get("pivot", [0,0]))
+
+    if layer_pivot_offset != layer_offset:
+        var relative_offset: Vector2 = layer_offset - layer_pivot_offset
+        if is_masked:
+            main_layer_node.position = layer_pivot_offset
+            main_layer_node.offset = relative_offset
+        else:
+            var pivot_node: Node2D = Node2D.new()
+            pivot_node.add_child(main_layer_node)
+            main_layer_node.position = relative_offset
+            pivot_node.position = layer_pivot_offset
+            main_layer_node = pivot_node
+    main_layer_node.name = layer_info.get("mode", "MODE") + str(layer_index)
+
+    add_child(main_layer_node, true)
+    var layer_scale: Vector2 = Utility.get_vector2_from_arr(layer_info.get("scale", [1,1]))
     main_layer_node.scale = layer_scale
-    main_layer_node.position = layer_offset
     
     main_layer_node.set_meta("modifier", layer_info.get("modifier", ""))
     
