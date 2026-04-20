@@ -4,6 +4,7 @@ signal slot_changed(new_slot_id)
 
 @export var show_any_option: bool = false
 @export var show_number_option: bool = false
+@export var show_text_option: bool = false
 @export var args_enabled: bool = false
 @export var default_slot_id: int = Commands.Slot.RED
 
@@ -14,6 +15,7 @@ signal slot_changed(new_slot_id)
 
 const ANY_SLOT: int = -2
 const NUMBER_VALUE: int = -3
+const TEXT_VALUE: int = -4
 
 var slot_textures: = {
     Commands.Slot.RED:    preload("res://assets/img/button_icons/slot_icons/red_diamond.png"),
@@ -43,6 +45,7 @@ var slot_textures: = {
     
     ANY_SLOT: preload("res://assets/img/button_icons/slot_icons/any.png"),
     NUMBER_VALUE: preload("res://assets/img/button_icons/slot_icons/num.png"),
+    TEXT_VALUE: preload("res://assets/img/button_icons/slot_icons/text.png"),
 }
 
 var slot_ids: = {
@@ -73,6 +76,7 @@ var slot_ids: = {
     
     any= ANY_SLOT,
     num= NUMBER_VALUE,
+    text= TEXT_VALUE,
 }
 
 var disabled_slots: Array = []
@@ -126,7 +130,7 @@ func get_slot_id_from_button_texture(button_node: ButtonContainer) -> int:
 func set_valid_slot_categories(categories: Array) -> void:
     show_categories.assign(categories)
     
-    var has_special_column: bool = show_any_option or show_number_option
+    var has_special_column: bool = show_any_option or show_number_option or show_text_option
     var special_column: Node = find_child("SpecialColumn")
     
     special_column.visible = has_special_column
@@ -134,6 +138,7 @@ func set_valid_slot_categories(categories: Array) -> void:
 
     special_column.find_child("PickAny").visible = show_any_option
     special_column.find_child("PickNumber").visible = show_number_option
+    special_column.find_child("PickText").visible = show_text_option
 
     if len(show_categories) == 0:
         $ButtonContainer.set_disabled(true)
@@ -196,6 +201,8 @@ func get_first_valid_slot_id() -> int:
         return ANY_SLOT
     elif show_number_option:
         return NUMBER_VALUE
+    elif show_text_option:
+        return TEXT_VALUE
     elif show_categories.size() == 0:
         return -1
 
@@ -239,8 +246,9 @@ func hide_picker() -> void:
     picker.hide()
 
 func get_current_slot() -> int:
-    if not show_any_option and not show_number_option and show_categories.size() == 0:
-        return -1
+    if show_categories.size() == 0:
+        if not (show_any_option or show_number_option or show_text_option):
+            return -1
     return current_slot_id
 
 func get_value() -> int:

@@ -114,6 +114,9 @@ func slot_is_float(slot_id: int) -> bool:
 func slot_is_string(slot_id: int) -> bool:
 	return slot_id >= Slot.I and slot_id <= Slot.III
 
+func slot_is_value(slot_id: int) -> bool:
+	return slot_is_scalar(slot_id) or slot_is_string(slot_id)
+
 func slot_is_argument(slot_id: int) -> bool:
 	return slot_id >= Slot.DARK_RED and slot_id <= Slot.DARK_ORANGE
 

@@ -11,6 +11,7 @@ enum InputTypes {
 	ComplexScalarInput,
 	
 	StringInput,
+	ComplexStringInput,
 	
 	OrderComparison,
 	
@@ -33,6 +34,7 @@ var templates: = {
 	InputTypes.ComplexScalarInput: preload("res://Scenes/GameEditor/ConditionalEditor/complex_scalar_input.tscn"),
 	
 	InputTypes.StringInput: preload("res://Scenes/GameEditor/ConditionalEditor/generic_input.tscn"),
+	InputTypes.ComplexStringInput: preload("res://Scenes/GameEditor/ConditionalEditor/complex_string_input.tscn"),
 	
 	InputTypes.OrderComparison: preload("res://Scenes/GameEditor/ConditionalEditor/order_comparison_input.tscn"),
 	

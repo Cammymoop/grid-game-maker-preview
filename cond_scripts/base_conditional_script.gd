@@ -226,3 +226,17 @@ func get_value_slot_as_string(slots: Dictionary, slot_id: int) -> String:
 	else:
 		push_error("Non-value slot or get string not implemented: %s" % slot_id)
 		return ""
+
+func get_complex_string_value(complex_string: Dictionary, slots: Dictionary) -> String:
+	if complex_string["type"] == "plain":
+		return str(complex_string["value"])
+	elif complex_string["type"] == "slot_value":
+		var chosen_slot: int = complex_string["slot_id"]
+		if not Commands.slot_is_value(chosen_slot):
+			push_error("Invalid complex string slot: %s" % [chosen_slot])
+			return ""
+		else:
+			return get_value_slot_as_string(slots, chosen_slot)
+	else:
+		push_error("Invalid complex string type: %s" % [complex_string["type"]])
+		return ""

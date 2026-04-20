@@ -9,6 +9,7 @@
 [ext_resource type="Texture2D" uid="uid://b0k5ggbxb23rv" path="res://assets/img/button_icons/slot_icons/white_triangle.png" id="6"]
 [ext_resource type="Texture2D" uid="uid://bo5gpwatetuxl" path="res://assets/img/button_icons/slot_icons/num.png" id="6_666yx"]
 [ext_resource type="PackedScene" path="res://Scenes/GameEditor/VSeparator.tscn" id="7"]
+[ext_resource type="Texture2D" uid="uid://cdtxnpnuwwlpm" path="res://assets/img/button_icons/slot_icons/text.png" id="7_nhf5h"]
 [ext_resource type="Texture2D" uid="uid://dh8f2qdse4gcq" path="res://assets/img/button_icons/slot_icons/black_hexagon.png" id="8"]
 [ext_resource type="Texture2D" uid="uid://wnvknqnyf3bg" path="res://assets/img/button_icons/slot_icons/grey_pentagon.png" id="9"]
 [ext_resource type="Texture2D" uid="uid://bkqtn6rxi8vjh" path="res://assets/img/button_icons/slot_icons/Z.png" id="10"]
@@ -112,6 +113,19 @@ mouse_filter = 2
 layout_mode = 2
 mouse_filter = 2
 texture = ExtResource("6_666yx")
+
+[node name="PickText" parent="PopupPicker/PopupPanel/MarginContainer/CategoryContainer/SpecialColumn" unique_id=2124471442 instance=ExtResource("1")]
+layout_mode = 2
+size_flags_horizontal = 4
+
+[node name="CenterContainer" type="CenterContainer" parent="PopupPicker/PopupPanel/MarginContainer/CategoryContainer/SpecialColumn/PickText" unique_id=896858068]
+layout_mode = 2
+mouse_filter = 2
+
+[node name="TextureRect" type="TextureRect" parent="PopupPicker/PopupPanel/MarginContainer/CategoryContainer/SpecialColumn/PickText/CenterContainer" unique_id=478458106]
+layout_mode = 2
+mouse_filter = 2
+texture = ExtResource("7_nhf5h")
 
 [node name="SpecialSeparator" parent="PopupPicker/PopupPanel/MarginContainer/CategoryContainer" unique_id=1835311705 instance=ExtResource("7")]
 custom_minimum_size = Vector2(0, 55)
@@ -412,6 +426,7 @@ texture = ExtResource("14")
 [connection signal="pressed" from="ButtonContainer" to="." method="_on_ButtonContainer_pressed"]
 [connection signal="pressed" from="PopupPicker/PopupPanel/MarginContainer/CategoryContainer/SpecialColumn/PickAny" to="." method="_on_SlotSelected" binds= ["any"]]
 [connection signal="pressed" from="PopupPicker/PopupPanel/MarginContainer/CategoryContainer/SpecialColumn/PickNumber" to="." method="_on_SlotSelected" binds= ["num"]]
+[connection signal="pressed" from="PopupPicker/PopupPanel/MarginContainer/CategoryContainer/SpecialColumn/PickText" to="." method="_on_SlotSelected" binds= ["text"]]
 [connection signal="pressed" from="PopupPicker/PopupPanel/MarginContainer/CategoryContainer/EntitySlots/PickRed" to="." method="_on_SlotSelected" binds= ["red"]]
 [connection signal="pressed" from="PopupPicker/PopupPanel/MarginContainer/CategoryContainer/EntitySlots/PickBlue" to="." method="_on_SlotSelected" binds= ["blue"]]
 [connection signal="pressed" from="PopupPicker/PopupPanel/MarginContainer/CategoryContainer/EntitySlots/PickWhite" to="." method="_on_SlotSelected" binds= ["white"]]

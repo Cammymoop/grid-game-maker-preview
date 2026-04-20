@@ -1,0 +1,22 @@
+[gd_scene format=3 uid="uid://b5dmgsvskxrk1"]
+
+[ext_resource type="Script" uid="uid://dmjy37188xdle" path="res://Scenes/GameEditor/ConditionalEditor/complex_string_input.gd" id="1_pjl77"]
+[ext_resource type="PackedScene" uid="uid://bh1w4w8i5hk66" path="res://Scenes/GameEditor/SlotSelectorButton.tscn" id="2_vmtaa"]
+[ext_resource type="StyleBox" uid="uid://ch63py1vky05t" path="res://assets/ui/plain_input_bg.tres" id="3_pjl77"]
+
+[node name="ComplexStringInput" type="HBoxContainer" unique_id=1726993889 node_paths=PackedStringArray("slot_selector", "plain_value_input")]
+offset_right = 40.0
+offset_bottom = 40.0
+script = ExtResource("1_pjl77")
+slot_selector = NodePath("SlotSelectorButton")
+plain_value_input = NodePath("PlainValueInput")
+
+[node name="SlotSelectorButton" parent="." unique_id=1264497244 instance=ExtResource("2_vmtaa")]
+layout_mode = 2
+show_text_option = true
+default_slot_id = -4
+
+[node name="PlainValueInput" type="LineEdit" parent="." unique_id=1435025089]
+custom_minimum_size = Vector2(140, 0)
+layout_mode = 2
+theme_override_styles/normal = ExtResource("3_pjl77")

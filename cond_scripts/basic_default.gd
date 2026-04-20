@@ -78,10 +78,10 @@ func cmd_select_number(slots: Dictionary, chosen_slot: int, complex_num: Diction
 	set_value_slot_as_number(slots, chosen_slot, resolve_complex_scalar(complex_num, slots))
 
 func desc_select_text() -> String:
-	return "string|<= Select the text [text_val:StringInput]"
-func cmd_select_text(slots: Dictionary, chosen_slot: int, text_val: String) -> void:
+	return "string|<= Select the text [text_val:ComplexStringInput]"
+func cmd_select_text(slots: Dictionary, chosen_slot: int, text_val: Dictionary) -> void:
 	if Commands.slot_is_string(chosen_slot):
-		slots[chosen_slot] = text_val
+		slots[chosen_slot] = get_complex_string_value(text_val, slots)
 	else:
 		push_error("Invalid slot to select text into: %s" % chosen_slot)
 
@@ -130,19 +130,20 @@ func cmd_select_random_direction(slots: Dictionary, chosen_slot: int) -> void:
 	set_value_slot_as_number(slots, chosen_slot, Utility.random_direction())
 
 func desc_add_text() -> String:
-	return "string|<= Add [inserted_text:StringInput] to the [is_end:BoolChoice:true,end,beginning] of the slot\n" + \
+	return "string|<= Add [inserted_text:ComplexStringInput] to the [is_end:BoolChoice:true,end,beginning] of the slot\n" + \
 	       "Separated by [separator:StringInput]"
-func cmd_add_text(slots: Dictionary, chosen_slot: int, inserted_text: String, separator: String, is_end: bool) -> void:
+func cmd_add_text(slots: Dictionary, chosen_slot: int, inserted_text: Dictionary, separator: String, is_end: bool) -> void:
 	if not Commands.slot_is_string(chosen_slot):
 		push_error("Invalid slot to add text into: %s" % chosen_slot)
 		return
 	var text: String = slots[chosen_slot]
+	var resolved_insert: String = get_complex_string_value(inserted_text, slots)
 	if not text.strip_edges():
-		slots[chosen_slot] = inserted_text
+		slots[chosen_slot] = resolved_insert
 	elif is_end:
-		slots[chosen_slot] = text + separator + inserted_text
+		slots[chosen_slot] = text + separator + resolved_insert
 	else:
-		slots[chosen_slot] = inserted_text + separator + text
+		slots[chosen_slot] = resolved_insert + separator + text
 
 func desc_add_number_to_text() -> String:
 	return "string|<= Add [inserted_num:ComplexScalarInput] to the [is_end:BoolChoice:true,end,beginning] of the slot\n" + \

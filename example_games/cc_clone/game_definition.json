@@ -362,7 +362,7 @@
             "basic_default.a_property_add::[\"i:1\",\"s:chips\",{\"args\":[\"s:type\",\"s:plain\",\"s:value\",\"f:1.0\"],\"type\":\"Dictionary\"}]",
             "basic_default.a_die::[\"i:0\"]",
             "basic_default.select_text_property::[\"i:12\",\"i:1\",\"s:chips\"]",
-            "basic_default.add_text::[\"i:12\",\"s:CHIPS\",\"s: \",true]",
+            "basic_default.add_text::[\"i:12\",{\"args\":[\"s:type\",\"s:plain\",\"s:value\",\"s:CHIPS\"],\"type\":\"Dictionary\"},\"s: \",true]",
             "basic_default.show_mini_text_at::[\"i:1\",\"i:12\",true]"
           ],
           "when false": [],
