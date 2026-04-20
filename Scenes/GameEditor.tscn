@@ -62,11 +62,12 @@ theme = ExtResource("3_qrjoe")
 current_tab = 0
 tab_0/title = "Game"
 
-[node name="GameDefinition" type="VBoxContainer" parent="MarginContainer/UIRoot/TabContainer" unique_id=1146228055 node_paths=PackedStringArray("show_level_title_option_picker", "move_interp_option_picker")]
+[node name="GameDefinition" type="VBoxContainer" parent="MarginContainer/UIRoot/TabContainer" unique_id=1146228055 node_paths=PackedStringArray("show_level_title_option_picker", "move_interp_option_picker", "action_signal_sent_to_option_picker")]
 layout_mode = 2
 script = ExtResource("6")
 show_level_title_option_picker = NodePath("ScrollContainer/VBoxContainer/GameSettingsSection/MarginContainer/VBoxContainer/HBoxContainer11/OptionButton")
 move_interp_option_picker = NodePath("ScrollContainer/VBoxContainer/GameSettingsSection/MarginContainer/VBoxContainer/HBoxContainer10/MoveInterpSelect")
+action_signal_sent_to_option_picker = NodePath("ScrollContainer/VBoxContainer/GameSettingsSection/MarginContainer/VBoxContainer/HBoxContainer12/ActionSentToSelect")
 metadata/_tab_index = 0
 metadata/_tab_name = "Game"
 
@@ -172,6 +173,36 @@ popup/item_3/text = "jerky"
 popup/item_3/id = 3
 popup/item_4/text = "jerky-stepped"
 popup/item_4/id = 4
+
+[node name="HBoxContainer12" type="HBoxContainer" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer/GameSettingsSection/MarginContainer/VBoxContainer" unique_id=1992105014]
+layout_mode = 2
+alignment = 2
+
+[node name="Label" type="Label" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer/GameSettingsSection/MarginContainer/VBoxContainer/HBoxContainer12" unique_id=405563408]
+layout_mode = 2
+text = "Entities respond to"
+
+[node name="Label2" type="Label" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer/GameSettingsSection/MarginContainer/VBoxContainer/HBoxContainer12" unique_id=549139783]
+layout_mode = 2
+tooltip_text = "Z, X, C
+Space, Shift, E
+Xbox: B, A, X
+Use event props like \"do_action_1\""
+mouse_filter = 1
+mouse_default_cursor_shape = 16
+theme_override_colors/font_color = Color(0.44167724, 0.8426321, 1, 1)
+text = "[input actions]:"
+
+[node name="ActionSentToSelect" type="OptionButton" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer/GameSettingsSection/MarginContainer/VBoxContainer/HBoxContainer12" unique_id=2076752340]
+custom_minimum_size = Vector2(0, 30)
+layout_mode = 2
+alignment = 1
+selected = 0
+item_count = 2
+popup/item_0/text = "all_entities"
+popup/item_0/id = 0
+popup/item_1/text = "camera_target"
+popup/item_1/id = 1
 
 [node name="HBoxContainer11" type="HBoxContainer" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer/GameSettingsSection/MarginContainer/VBoxContainer" unique_id=1380201629]
 layout_mode = 2

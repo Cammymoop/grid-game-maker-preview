@@ -406,7 +406,7 @@ func get_pre_fetch_move_list() -> Array:
 	return controller.get_moves()
 
 func get_max_move_intentions() -> int:
-	if not controller:
+	if not controller or EntityManager.get_entity_prop_is_truthy(self, "controller-disabled"):
 		return 0
 	
 	if not controller.has_method("get_max_move_intentions"):
@@ -638,6 +638,27 @@ func entity_manager_signal(signaling_entity: BaseEntity, args: Array, signal_nam
 	else:
 		add_deferred_signal(signaling_entity, args, signal_name)
 
+func got_action_signals(action_signals: Array[String]) -> void:
+	if not active or EntityManager.get_entity_prop_is_truthy(self, "actions-disabled"):
+		return
+	for act_sig in action_signals:
+		if not moving:
+			_handle_action_signal({"is_action_signal": true, "action_signal": act_sig})
+		else:
+			var already_deferred: = false
+			for deferred_sig in deferred_signals:
+				if deferred_sig.get("action_signal", "") == act_sig:
+					already_deferred = true
+					break
+			if not already_deferred:
+				add_deferred_action_signal(act_sig)
+
+func add_deferred_action_signal(action_signal: String) -> void:
+	deferred_signals.append({
+		"is_action_signal": true,
+		"action_signal": action_signal,
+	})
+
 func _handle_signal(signaling_entity: BaseEntity, args: Array, signal_name: String) -> void:
 	var handler = EntityManager.get_entity_property(self, "when_signal_" + signal_name)
 	if handler and handler.is_conditional():
@@ -684,10 +705,24 @@ func add_deferred_signal(signaling_entity: BaseEntity, args: Array, signal_name:
 	})
 
 func process_deferred_signals() -> void:
-	for deferred_signal in deferred_signals:
-		var signaling_entity = EntityManager.get_instance(deferred_signal["signaling_entity"])
-		_handle_signal(signaling_entity, deferred_signal["args"], deferred_signal["signal_name"])
+	for deferred_sig in deferred_signals:
+		if deferred_sig.get("is_action_signal", false):
+			_handle_action_signal(deferred_sig)
+		else:
+			var signaling_entity = EntityManager.get_instance(deferred_sig["signaling_entity"])
+			_handle_signal(signaling_entity, deferred_sig["args"], deferred_sig["signal_name"])
 	deferred_signals.clear()
+
+func _handle_action_signal(deferred_sig: Dictionary) -> void:
+	var allowed_actions: Array[String] = ["do_action_1", "do_action_2", "do_action_3"]
+	var action_signal = deferred_sig.get("action_signal", "")
+	if action_signal not in allowed_actions:
+		push_error("Unknown action signal: " + action_signal)
+		return
+	var action_signal_handler: Property = EntityManager.get_entity_property(self, action_signal)
+	if not action_signal_handler or not action_signal_handler.is_conditional():
+		return
+	action_signal_handler.resolve(self, null, tile_position, deferred_sig["args"])
 
 func has_local_data() -> bool:
 	if local_properties.size() > 0 or removed_properties.size() > 0:

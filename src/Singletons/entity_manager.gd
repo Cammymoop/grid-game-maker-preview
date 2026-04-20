@@ -102,6 +102,8 @@ var default_move_speed: float = 6
 var default_idle_delay: float = 1/10.0
 var idle_delay_frames: int = -1
 
+var actions_only_for_camera_target: bool = false
+
 var default_move_interp_style: BaseEntity.MoveInterpStyle = BaseEntity.MoveInterpStyle.CONTINUOUS_LINEAR
 
 var process_phase: int = 0
@@ -117,6 +119,11 @@ func entity_list_process() -> void:
     var moving_entities: Array[BaseEntity] = []
     var idle_entities: Array[BaseEntity] = []
     
+    var new_action_activations: Array[String] = []
+    for action_num in ["1", "2", "3"]:
+        if Input.is_action_just_pressed("input_action_" + action_num):
+            new_action_activations.append("do_action_" + action_num)
+    
     # Phased processing so each entity completes a phase before any entity processes the next phase
     
     # Phase 1 - Starting movement and start of move actions
@@ -124,6 +131,8 @@ func entity_list_process() -> void:
     for e in entity_list:
         if e.active:
             active_entities.append(e)
+            if new_action_activations:
+                e.got_action_signals(new_action_activations)
             e.entity_process_starting_actions()
             if e.moving:
                 moving_entities.append(e)
@@ -269,6 +278,8 @@ func refresh_definition():
     fix_int_property_vals()
     create_index_map()
     create_defined_custom_signals()
+    
+    actions_only_for_camera_target = GameManager.get_game_setting("action_signal_sent_to", "all_entities") != "camera_target"
 
 func on_game_settings_changed():
     update_movement_mode()

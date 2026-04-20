@@ -41,6 +41,7 @@ const V3_CMD_MAP: Dictionary = {
 const all_events: Array[String] = [
 	"blocks",
 	"move_onto", "move_off_of",
+    "i_move_onto", "i_move_onto_tile",
 
 	"finish_move_onto", "i_finish_move_onto",
 	"finish_move_onto_tile", "i_finish_move_onto_tile",
@@ -53,6 +54,8 @@ const all_events: Array[String] = [
 
 	"post_move_onto", "post_move_off_of",
 	"post_move",
+    
+    "do_action_1", "do_action_2", "do_action_3",
 
 	"idle_update",
     "idle_on",

@@ -45,7 +45,8 @@ const SPECIAL_PROPS: Array[String] = [
 	"auto_bond", "auto_tail", "auto_scale",
 	"edit_place_multiple",
 	"no-museum", "museum-active",
-	"move-animation",
+	"move-animation", "controller-disabled",
+	"actions-disabled",
 ]
 
 @export_file("*.json") var builtin_default_game_file: String = ""
