@@ -13,12 +13,14 @@ var placeholder_metadata = {
 var builtin_textures: Array[String] = [
     "tiles.png",
     "entityTiles.png",
+    "playerVariants.png",
     "shapes32x.png",
 ]
 var builtin_meta: = {}
 var default_textures: Array[String] = [
     "tiles.png",
     "entityTiles.png",
+    "playerVariants.png",
     "shapes32x.png",
 ]
 var texture_names: Dictionary [int, String] = {}

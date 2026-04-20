@@ -102,6 +102,8 @@ var default_move_speed: float = 6
 var default_idle_delay: float = 1/10.0
 var idle_delay_frames: int = -1
 
+var default_move_interp_style: BaseEntity.MoveInterpStyle = BaseEntity.MoveInterpStyle.CONTINUOUS_LINEAR
+
 var process_phase: int = 0
 
 var is_entity_preview_mode: bool = false
@@ -207,7 +209,8 @@ func _ready():
     if not GameManager.is_node_ready():
         await GameManager.ready
     idle_delay_frames = roundi(default_idle_delay * GameManager.get_tick_rate())
-    prints("idle_delay_frames: ", idle_delay_frames)
+    
+    GameManager.game_settings_changed.connect(on_game_settings_changed)
 
 func setup():
     fix_string_keys()
@@ -267,6 +270,9 @@ func refresh_definition():
     create_index_map()
     create_defined_custom_signals()
 
+func on_game_settings_changed():
+    update_movement_mode()
+
 func update_movement_mode():
     movement_mode = GameManager.get_game_setting("movement_mode", GameManager.MovementMode.MOVEMENT_CONTINUOUS)
     
@@ -276,6 +282,12 @@ func update_movement_mode():
     else:
         controller_frame = false
         movements_enabled = false
+    
+    var def_move_interp_string: = GameManager.get_game_setting("default_move_interp", "") as String
+    if not def_move_interp_string:
+        default_move_interp_style = BaseEntity.MoveInterpStyle.CONTINUOUS_LINEAR
+    else:
+        default_move_interp_style = BaseEntity.read_move_interp_style_string(def_move_interp_string)
     
     #print_debug("MOVEMENT MODE is now " + GameManager.describe_movement_mode(movement_mode))
 
@@ -491,6 +503,17 @@ func add_entity_to_world(entity: BaseEntity) -> void:
             return
     destination.add_child(entity)
 
+func reset_entity_move_interp_style(entity: BaseEntity) -> void:
+    entity.move_interp_style = default_move_interp_style
+    var base_props: Dictionary = entity_defs[entity.entity_index]["properties"]
+    if "move-animation" in base_props:
+        var def: = BaseEntity.MoveInterpStyle.NONE
+        var move_interp_str: Variant = get_entity_prop_with_default(entity, "move-animation", def)
+        if move_interp_str:
+            entity.move_interp_style = BaseEntity.read_move_interp_style_string(str(move_interp_str))
+        else:
+            entity.move_interp_style = default_move_interp_style
+
 func create_entity(entity_index: int, tile_position: Vector2i, facing: int = 0, activate: bool = true) -> Node2D:
     var entity_info = entity_defs[entity_index]
     
@@ -504,6 +527,8 @@ func create_entity(entity_index: int, tile_position: Vector2i, facing: int = 0, 
     entity.entity_index = entity_index
     entity.instance_id = instance_counter
     instance_counter += 1
+    
+    reset_entity_move_interp_style(entity)
 
     entity.update_cached_spt()
 
@@ -608,6 +633,8 @@ func restore_entity(serialized_entity: Dictionary, refresh: bool = false) -> voi
     entity.deserialize(serialized_entity)
     add_entity_to_world(entity)
     entity.initialize() # initialize after deserializing
+    
+    reset_entity_move_interp_style(entity)
     setup_entity_texture(entity)
     
     MapManager.check_terrain_spr_mod_for_created(entity)
@@ -790,10 +817,12 @@ func find_all_entities_with_truthy_property(prop_name: String, active_only: bool
             found_entities.append(i)
     return found_entities
 
-func find_closest_entity_with_property(prop_name: String, from_position: Vector2i, exclude_list: Array = []) -> BaseEntity:
+func find_closest_entity_with_property(prop_name: String, from_position: Vector2i, exclude_list: Array = [], include_inactive: bool = false) -> BaseEntity:
     var closest_dist: float = -1
     var closest_entity: BaseEntity = null
     for entity in entity_list:
+        if not include_inactive and not entity.active:
+            continue
         if entity in exclude_list or not entity_has_property(entity, prop_name):
             continue
         var euclidean_dist: = from_position.distance_to(entity.tile_position)

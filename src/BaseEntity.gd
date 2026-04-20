@@ -6,6 +6,28 @@ signal finished_move
 signal blocked
 signal local_prop_changed
 
+enum MoveInterpStyle {
+	NONE,
+	CONTINUOUS_LINEAR,
+	EASE_OUT,
+	JUMP_LINEAR,
+	JUMP_EASE_OUT,
+}
+
+static var move_interp_style_strings: Dictionary[MoveInterpStyle, String] = {
+	MoveInterpStyle.NONE: "none",
+	MoveInterpStyle.CONTINUOUS_LINEAR: "smooth",
+	MoveInterpStyle.EASE_OUT: "stepped",
+	MoveInterpStyle.JUMP_LINEAR: "jerky",
+	MoveInterpStyle.JUMP_EASE_OUT: "jerky-stepped",
+}
+
+var move_interp_style: MoveInterpStyle = MoveInterpStyle.EASE_OUT
+var teleport_interp_style: MoveInterpStyle = MoveInterpStyle.NONE
+
+var jump_interp_amount: float = 0.5
+var interp_out_ease_param: float = 0.3
+
 var move_facing: = 0
 var facing: = 0
 
@@ -279,8 +301,30 @@ func entity_process_moving_actions() -> void:
 
 func bump_move_step() -> void:
 	steps_remaining -= 1
-	var pixel_speed_per_tick: float = MapManager.tile_width * (current_move_speed / GameManager.get_full_tick_rate())
-	position += Utility.facing_vector(move_facing) * pixel_speed_per_tick
+	interpolate_pos()
+
+func interpolate_pos() -> void:
+	var move_progress: float = 1 - (steps_remaining / float(_this_move_steps))
+	var prev_pos: = MapManager.tile_to_world_position(tile_position)
+	var next_pos: = MapManager.tile_to_world_position(next_tile_pos)
+	if move_interp_style == MoveInterpStyle.NONE:
+		position = next_pos
+	elif move_interp_style == MoveInterpStyle.CONTINUOUS_LINEAR:
+		#var pixel_speed_per_tick: float = MapManager.tile_width * (current_move_speed / GameManager.get_full_tick_rate())
+		#position += Utility.facing_vector(move_facing) * pixel_speed_per_tick
+		position = prev_pos.lerp(next_pos, move_progress)
+	elif move_interp_style == MoveInterpStyle.EASE_OUT:
+		position = prev_pos.lerp(next_pos, ease(move_progress, interp_out_ease_param))
+	elif move_interp_style in [MoveInterpStyle.JUMP_LINEAR, MoveInterpStyle.JUMP_EASE_OUT]:
+		move_progress = remap(move_progress, 0, 1, jump_interp_amount, 1)
+		if move_interp_style == MoveInterpStyle.JUMP_LINEAR:
+			position = prev_pos.lerp(next_pos, move_progress)
+		elif move_interp_style == MoveInterpStyle.JUMP_EASE_OUT:
+			position = prev_pos.lerp(next_pos, ease(move_progress, interp_out_ease_param))
+	else:
+		push_error("Unknown move interpolation style: " + str(move_interp_style))
+		move_interp_style = MoveInterpStyle.NONE
+		position = next_pos
 
 func has_local_property(property_name: String) -> bool:
 	if property_name in removed_properties:
@@ -426,6 +470,7 @@ func _move_bump_check() -> void:
 		# Bump 1 step forward so that late move starts during a tick are synchronized
 		# but if the next step could trigger actions, bumping would skip them so don't bump
 		if not next_step_has_actions():
+			prints("BUMP")
 			bump_move_step()
 
 func next_step_has_actions() -> bool:
@@ -629,3 +674,13 @@ func has_local_data() -> bool:
 	if local_properties.size() > 0 or removed_properties.size() > 0:
 		return true
 	return false
+
+static func read_move_interp_style_string(style_str: String) -> MoveInterpStyle:
+	style_str = style_str.to_lower()
+	var found_style: Variant = move_interp_style_strings.find_key(style_str)
+	if found_style:
+		return found_style as MoveInterpStyle
+	return MoveInterpStyle.NONE
+
+static func get_move_interp_style_string(style: MoveInterpStyle) -> String:
+	return move_interp_style_strings.get(style, "none")

@@ -2,6 +2,7 @@ extends Node
 
 signal level_state_loaded
 signal game_camera_target_changed(entity: BaseEntity)
+signal game_settings_changed
 
 const FULL_TICK_RATE: int = 60
 @onready var TICK_RATE: int = ProjectSettings.get_setting_with_override("physics/common/physics_ticks_per_second")
@@ -44,6 +45,7 @@ const SPECIAL_PROPS: Array[String] = [
 	"auto_bond", "auto_tail", "auto_scale",
 	"edit_place_multiple",
 	"no-museum", "museum-active",
+	"move-animation",
 ]
 
 @export_file("*.json") var builtin_default_game_file: String = ""
@@ -194,6 +196,7 @@ func set_game_setting(setting_name: String, value: Variant) -> void:
 	if not "game_settings" in game_definition:
 		game_definition["game_settings"] = {}
 	game_definition["game_settings"][setting_name] = value
+	game_settings_changed.emit()
 
 func get_default_pixel_scale() -> float:
 	return get_game_setting("pixel_scale", 1)

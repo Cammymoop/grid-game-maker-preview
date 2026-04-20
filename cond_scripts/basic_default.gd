@@ -281,6 +281,8 @@ func cmd_c_get_pushed(slots: Dictionary, chosen_slot: int, direction: Variant, k
 		selected.set_native_move_speed()
 	else:
 		selected.set_steps_per_tile_override(EntityManager.get_default_spt())
+	if blue_entity:
+		selected.move_interp_style = blue_entity.move_interp_style
 	var facing = resolve_variant_direction_value(direction, slots)
 	var got_pushed: bool = selected.start_move(facing, not keep_visual)
 	return got_pushed

@@ -7,9 +7,11 @@ var move_mode = "facing"
 var options: Dictionary = {
 	"target_entity_property": {"display_name": "Chase Entities with property", "type": "property"},
 	"always_update_target": {"display_name": "Immediately switch to closer target", "type": "bool"},
+	"only_target_active": {"display_name": "Only target active entities", "type": "bool"},
 }
 
 var target_entity_property: String = "player"
+var only_target_active: bool = true
 var always_update_target: bool = false
 var targeted_entity: BaseEntity = null
 
@@ -25,6 +27,8 @@ func set_options(new_options: Dictionary) -> void:
 func get_default_options() -> Dictionary:
 	return {
 		"target_entity_property": target_entity_property,
+		"always_update_target": always_update_target,
+		"only_target_active": only_target_active,
 	}
 
 func get_max_move_intentions() -> int:

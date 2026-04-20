@@ -24,6 +24,11 @@
       "type": "builtin",
       "name": "shapes32x.png",
       "texture_id": 2.0
+    },
+    {
+      "type": "builtin",
+      "name": "playerVariants.png",
+      "texture_id": 3.0
     }
   ],
   "entity_definitions": {
@@ -75,7 +80,8 @@
           ],
           "when false": [],
           "when always": []
-        }
+        },
+        "move-animation": "stepped"
       },
       "groups": [
         "Player"
@@ -83,6 +89,39 @@
       "controller_options": {
         "stop_repeat_after_bonk": true,
         "allow_wait": false
+      },
+      "sprite_config": {
+        "layers": [
+          {
+            "mode": "normal",
+            "texture": 1.0,
+            "tex_index": 0.0
+          },
+          {
+            "mode": "normal",
+            "texture": 3.0,
+            "tex_index": 4.0,
+            "when_property": "fire-resistant"
+          },
+          {
+            "mode": "normal",
+            "texture": 3.0,
+            "tex_index": 3.0,
+            "when_property": "unforcable"
+          },
+          {
+            "mode": "normal",
+            "texture": 3.0,
+            "tex_index": 7.0,
+            "when_property": "ice-skater"
+          },
+          {
+            "mode": "normal",
+            "texture": 3.0,
+            "tex_index": 2.0,
+            "when_property": "floats"
+          }
+        ]
       }
     },
     "1": {
@@ -1725,7 +1764,7 @@
     "28": {
       "name": "checkpoint",
       "texture": 0,
-      "tex_index": 33,
+      "tex_index": 34,
       "properties": {
         "finish_move_onto_tile": {
           "v": "3",
@@ -1746,7 +1785,7 @@
     "29": {
       "name": "checkp-saved",
       "texture": 0,
-      "tex_index": 34,
+      "tex_index": 33,
       "properties": {
 
       }

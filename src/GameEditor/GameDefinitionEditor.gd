@@ -11,6 +11,8 @@ var invalid_field_color = Color(0.7, 0.4, 0.4)
 
 @export var show_level_title_option_picker: OptionButton
 
+@export var move_interp_option_picker: OptionButton
+
 func _ready():
 	var name_box = find_child("NameInput")
 	var game_name = GameManager.get_game_name()
@@ -54,6 +56,14 @@ func _ready():
 			show_level_title_option_picker.select(index)
 			break
 	show_level_title_option_picker.item_selected.connect(on_show_level_title_option_picked)
+	
+	move_interp_option_picker.item_selected.connect(on_move_interp_option_picked)
+	var cur_interp: = GameManager.get_game_setting("default_move_interp", "") as String
+	var interp_id: int = BaseEntity.MoveInterpStyle.CONTINUOUS_LINEAR
+	if cur_interp:
+		interp_id = BaseEntity.read_move_interp_style_string(cur_interp)
+	var interp_index: int = move_interp_option_picker.get_item_index(interp_id)
+	move_interp_option_picker.select(interp_index)
 
 func init_movement_modes() -> void:
 	var popup_menu: PopupMenu = find_child("MovementModeMenuButton").get_popup()
@@ -161,3 +171,7 @@ func on_show_level_title_option_picked(index: int) -> void:
 
 func _on_new_empty_pressed() -> void:
 	GameManager.new_empty_game_definition()
+
+func on_move_interp_option_picked(index: int) -> void:
+	var interp_style: = move_interp_option_picker.get_item_id(index) as BaseEntity.MoveInterpStyle
+	GameManager.set_game_setting("default_move_interp", BaseEntity.get_move_interp_style_string(interp_style))

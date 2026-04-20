@@ -62,10 +62,11 @@ theme = ExtResource("3_qrjoe")
 current_tab = 0
 tab_0/title = "Game"
 
-[node name="GameDefinition" type="VBoxContainer" parent="MarginContainer/UIRoot/TabContainer" unique_id=1146228055 node_paths=PackedStringArray("show_level_title_option_picker")]
+[node name="GameDefinition" type="VBoxContainer" parent="MarginContainer/UIRoot/TabContainer" unique_id=1146228055 node_paths=PackedStringArray("show_level_title_option_picker", "move_interp_option_picker")]
 layout_mode = 2
 script = ExtResource("6")
 show_level_title_option_picker = NodePath("ScrollContainer/VBoxContainer/GameSettingsSection/MarginContainer/VBoxContainer/HBoxContainer11/OptionButton")
+move_interp_option_picker = NodePath("ScrollContainer/VBoxContainer/GameSettingsSection/MarginContainer/VBoxContainer/HBoxContainer10/MoveInterpSelect")
 metadata/_tab_index = 0
 metadata/_tab_name = "Game"
 
@@ -146,6 +147,31 @@ custom_minimum_size = Vector2(160, 30)
 layout_mode = 2
 text = "Continuous"
 flat = false
+
+[node name="HBoxContainer10" type="HBoxContainer" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer/GameSettingsSection/MarginContainer/VBoxContainer" unique_id=1496833117]
+layout_mode = 2
+alignment = 2
+
+[node name="Label" type="Label" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer/GameSettingsSection/MarginContainer/VBoxContainer/HBoxContainer10" unique_id=533812704]
+layout_mode = 2
+text = "Default Movement Animation:"
+
+[node name="MoveInterpSelect" type="OptionButton" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer/GameSettingsSection/MarginContainer/VBoxContainer/HBoxContainer10" unique_id=1819177372]
+custom_minimum_size = Vector2(160, 30)
+layout_mode = 2
+alignment = 1
+selected = 1
+item_count = 5
+popup/item_0/text = "none"
+popup/item_0/id = 0
+popup/item_1/text = "smooth"
+popup/item_1/id = 1
+popup/item_2/text = "stepped"
+popup/item_2/id = 2
+popup/item_3/text = "jerky"
+popup/item_3/id = 3
+popup/item_4/text = "jerky-stepped"
+popup/item_4/id = 4
 
 [node name="HBoxContainer11" type="HBoxContainer" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer/GameSettingsSection/MarginContainer/VBoxContainer" unique_id=1380201629]
 layout_mode = 2

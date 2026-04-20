@@ -503,12 +503,25 @@ func set_basic_texture_indices_from_sprite_config() -> void:
 	if not sprite_config_layers:
 		return
 
-	var texture_index: int = 0
+	var texture_index: int = -1 
 	var tex_sub_index: int = 0
+	var highest_conditional_layer: Dictionary = {}
 	for layer in sprite_config_layers:
-		if layer.get("mode", FancySpriteLayerListItem.MODE_NORMAL) != "empty":
-			texture_index = layer.get("texture", 0)
-			tex_sub_index = layer.get("tex_index", 0)
+		if layer.get("mode", FancySpriteLayerListItem.MODE_NORMAL) in ["empty", "digits"]:
+			continue
+		if layer.get("when_property", ""):
+			if not highest_conditional_layer:
+				highest_conditional_layer = layer
+			continue
+		texture_index = layer.get("texture", 0)
+		tex_sub_index = layer.get("tex_index", 0)
+	
+	if texture_index == -1:
+		if highest_conditional_layer:
+			texture_index = highest_conditional_layer.get("texture", 0)
+			tex_sub_index = highest_conditional_layer.get("tex_index", 0)
+		else:
+			texture_index = 0
 	the_definition['texture'] = texture_index
 	the_definition['tex_index'] = tex_sub_index
 	update_image_button()
