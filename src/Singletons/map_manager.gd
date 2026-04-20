@@ -692,13 +692,15 @@ func get_first_located_tile_property(tile_positions: Array, property_name: Strin
             return {"pos": pos, "prop": prop}
     return {}
 
-func get_tile_property_for_index_at(tile_position: Vector2i, property_name: String, for_index: int) -> Property:
+func get_tile_property_for_index_at(tile_position: Vector2i, property_name: String, for_index: int, local_only: bool = false) -> Property:
     var pos_prop: = get_positioned_property_at(tile_position, for_index)
     if pos_prop and pos_prop["local_properties"].has(property_name):
         var prop: Property = Property.new()
         prop.set_value(pos_prop["local_properties"][property_name])
         prop.set_name(property_name)
         return prop
+    elif local_only:
+        return null
     return get_tile_index_property(for_index, property_name)
 
 func get_tile_index_property(tile_index, property_name) -> Property:
@@ -781,19 +783,24 @@ func can_move_to(entity, tile_position) -> bool:
     if not EntityManager.can_move_to(entity, tile_position):
         return false
     
-    return check_blocks(entity, tile_position)
+    return check_blocks_allow_move(entity, [tile_position])
     
-func check_blocks(entity, tile_position) -> bool:
+func check_blocks_allow_move(entity: BaseEntity, tile_positions: Array[Vector2i]) -> bool:
+    var tile_ids_here: Array[int] = []
     for layer in layers:
-        var tile_here = layer.get_cell_s(tile_position)
-        if (tile_here == -1 and is_empty_blocking) or (tile_here in blocking_tiles):
-            return false
-        var blocks_conditional: = get_tile_index_property(tile_here, "blocks")
-        if blocks_conditional and blocks_conditional.is_conditional():
-            var result = blocks_conditional.resolve(null, entity, tile_position)
-            if result:
-                return false
-    return true
+        for pos in tile_positions:
+            Utility.arr_add_if_not_included(tile_ids_here, layer.get_cell_s(pos))
+    
+    # For now we run all conditionals even if blocked already, no shortcuts, should be configurable later
+    var result: = true
+    for tile_id in tile_ids_here:
+        if (tile_id == -1 and is_empty_blocking) or (tile_id in blocking_tiles):
+            result = false
+            continue
+        # Run conditional on all pos where tile id exists, any true result is a block
+        if conditional_tile_event(tile_positions, "blocks", entity, false, tile_id):
+            result = false
+    return result
 
 func get_tile_facing_at(tile_position: Vector2i) -> int:
     for l in layers:
@@ -811,10 +818,9 @@ func finish_move(moving_entity, onto_positions: Array) -> void:
     
     var ifmot: = EntityManager.get_entity_property(moving_entity, "i_finish_move_onto_tile")
     if ifmot and ifmot.is_conditional():
-        for onto_position in onto_positions:
-            ifmot.resolve(moving_entity, null, onto_position)
+        ifmot.resolve(moving_entity, null, onto_positions)
     
-    resolve_tile_event(onto_positions, "finish_move_onto_tile", moving_entity)
+    resolve_tiles_events(onto_positions, "finish_move_onto_tile", moving_entity)
     
     check_and_apply_terrain_sprite_modifier(moving_entity, onto_positions)
 
@@ -844,14 +850,45 @@ func _check_add_terrain_spr_modifier(entity: BaseEntity, tile_positions: Array, 
                 if not entity.terrain_sprite_modifiers.has(ti):
                     entity.terrain_sprite_modifiers.append(ti)
 
-# Resolve tile event for every tile index that exists at all locations provided
-# (Only once per index-position pair)
-func resolve_tile_event(at_tile_positions: Array, tile_event_name: String, context_entity, extra_debug: bool = false) -> void:
+# Resolve some event with an optional context entity at multiple tile positions
+# for base prop conditionals, evaluates once per tile id with all positions as the grey slot
+# if any locally set override excludes a tile or replaces the event with another conditional, thos local overrides are each evaluated once at their position and excluded from the grey slot in the base case
+func resolve_tiles_events(at_tile_positions: Array, tile_event_name: String, context_entity: BaseEntity, only_index: int = -1, extra_debug: bool = false) -> void:
+    var indices_here: Array[int] = []
+    for l in layers:
+        for pos in at_tile_positions:
+            var ti = l.get_cell_s(pos)
+            if only_index != -1 and ti != only_index:
+                continue
+            if ti != -1 and ti not in indices_here:
+                indices_here.append(ti)
+
+    for ti in indices_here:
+        # if there are any locally set event conditionals, resolve each at each location set
+        var non_overriden_positions: Array[Vector2i] = []
+        for pos in at_tile_positions:
+            var local_event_prop: = get_tile_property_for_index_at(pos, tile_event_name, ti, true)
+            if local_event_prop:
+                local_event_prop.get_or_resolve(null, context_entity, [pos], [], extra_debug)
+            else:
+                non_overriden_positions.append(pos)
+
+        # evaluate only once with all non-overriden positions in the grey slot
+        if non_overriden_positions:
+            var base_tile_prop: = get_tile_index_property(ti, tile_event_name)
+            if base_tile_prop and base_tile_prop.is_conditional():
+                base_tile_prop.resolve(null, context_entity, non_overriden_positions, [], extra_debug)
+
+# Resolve tile event for every tile id that exists at all locations provided
+# (Only once per id-position pair even if multiple layers at that position have that tile id)
+func resolve_tile_individual_events(at_tile_positions: Array, tile_event_name: String, context_entity: BaseEntity, only_index: int = -1, extra_debug: bool = false) -> void:
     for at_pos in at_tile_positions:
         var resolved_indices: Array[int] = []
         for l in layers:
             var ti = l.get_cell_s(at_pos)
-            if ti == -1 or ti in resolved_indices:
+            if only_index != -1 and ti != only_index:
+                continue
+            elif ti == -1 or ti in resolved_indices:
                 continue
             resolved_indices.append(ti)
             var event_property: = get_tile_property_for_index_at(at_pos, tile_event_name, ti)
@@ -879,13 +916,20 @@ func conditional_tile_event(at_tile_positions: Array, tile_event_name: String, c
     # If all, then yes all passed, if any, then no, none passed
     return is_all
 
-func attempt_move(moving_entity, tile_position, group_move=false) -> bool:
-    var entity_move_allow = EntityManager.attempt_move(moving_entity, tile_position, group_move)
+func attempt_move(moving_entity: BaseEntity, leaving_ps: Array[Vector2i], entering_ps: Array[Vector2i], is_group_move: bool = false) -> bool:
+    var result: = conditional_tile_event(leaving_ps, "move_off_of", moving_entity, true)
+
+    var skip_collection: Array[int] = []
+    if not EntityManager.attempt_move_leave(moving_entity, leaving_ps, skip_collection, is_group_move):
+        result = false
+    if not result:
+        return false
     
-    var tile_move_allow = check_blocks(moving_entity, tile_position)
-    if tile_move_allow:
-        tile_move_allow = conditional_tile_event([moving_entity.tile_position], "move_off_of", moving_entity, true)
-    return tile_move_allow and entity_move_allow
+    result = check_blocks_allow_move(moving_entity, entering_ps)
+    if not EntityManager.attempt_move_enter(moving_entity, result, entering_ps, skip_collection):
+        result = false
+    
+    return result
 
 func is_blocked(tile_position, empty_blocks: bool = true) -> bool:
     if empty_blocks and not tile_exists_at(tile_position):
@@ -937,9 +981,9 @@ func half_moved_leaving_at(at_position: Vector2i, leaving_entities: Array) -> vo
         return
 
     for entity: BaseEntity in leaving_entities:
-        EntityManager.resolve_entity_interaction_event("half_moved_off_of_tile", entity, null, at_position)
+        EntityManager.resolve_entity_interaction_old("half_moved_off_of_tile", entity, null, at_position)
     for entity: BaseEntity in leaving_entities:
-        resolve_tile_event([at_position], "half_moved_off_of", entity)
+        resolve_tiles_events([at_position], "half_moved_off_of", entity)
     
 func half_moved_entering_at(at_position: Vector2i, entering_entities: Array) -> void:
     var tile_indices_here: Array[int] = []
@@ -952,9 +996,9 @@ func half_moved_entering_at(at_position: Vector2i, entering_entities: Array) -> 
         return
 
     for entity: BaseEntity in entering_entities:
-        EntityManager.resolve_entity_interaction_event("half_moved_onto_tile", entity, null, at_position)
+        EntityManager.resolve_entity_interaction_old("half_moved_onto_tile", entity, null, at_position)
     for entity: BaseEntity in entering_entities:
-        resolve_tile_event([at_position], "half_moved_onto", entity)
+        resolve_tiles_events([at_position], "half_moved_onto", entity)
     
     # TODO handle covered tracking here
 
@@ -962,7 +1006,7 @@ func post_move_actions(moving_entity: BaseEntity, _from_position: Vector2i, to_p
     _check_and_remove_terrain_spr_mod_for_moving(moving_entity, to_position)
 
 func entity_idle_actions(entity: BaseEntity) -> void:
-    resolve_tile_event([entity.get_stationary_position()], "idle_on", entity)
+    resolve_tiles_events([entity.get_stationary_position()], "idle_on", entity)
 
 func _check_and_remove_terrain_spr_mod_for_moving(moving_entity: BaseEntity, to_position: Vector2i) -> void:
     if not moving_entity.terrain_sprite_modifiers:
@@ -1015,4 +1059,4 @@ func idle_actions() -> void:
         if not idle_update_prop.is_conditional():
             continue
         var positions_of_tile: = get_all_positions_of_tile(t_id)
-        resolve_tile_event(positions_of_tile, "idle_update", null, false)
+        resolve_tile_individual_events(positions_of_tile, "idle_update", null, t_id, false)

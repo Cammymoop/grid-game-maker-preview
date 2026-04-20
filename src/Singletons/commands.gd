@@ -22,6 +22,7 @@ enum Slot {
 	# ...
 	
 	# Internal use slot to keep track of the contextual tile position
+	# Deprecated
 	THIS_TILE 
 }
 

@@ -578,11 +578,11 @@ func post_activated_actions(entity: BaseEntity) -> void:
     var at_pos: = entity.get_stationary_position()
     var sitting_on_entities: Array = get_entities_at(at_pos, entity)
     for e in sitting_on_entities:
-        resolve_entity_interaction_event("i_finish_move_onto", entity, e, at_pos)
+        resolve_entity_interaction_old("i_finish_move_onto", entity, e, at_pos)
     if not entity.active:
         return
     for e in sitting_on_entities:
-        resolve_entity_interaction_event("finish_move_onto", e, entity, at_pos)
+        resolve_entity_interaction_old("finish_move_onto", e, entity, at_pos)
 
 func entity_id_has_controller(entity_id: int) -> bool:
     var controller_name: String = entity_defs[entity_id].get("controller", "")
@@ -887,56 +887,60 @@ func finish_move(moving_entity, onto_positions: Array) -> void:
                 entities_overlapped_at.append(onto_position)
 
     for i in entities_here.size():
-        resolve_entity_interaction_event("i_finish_move_onto", moving_entity, entities_here[i], entities_overlapped_at[i])
+        resolve_entity_interaction_old("i_finish_move_onto", moving_entity, entities_here[i], entities_overlapped_at[i])
     if not moving_entity.active:
         return
     for i in entities_here.size():
-        resolve_entity_interaction_event("finish_move_onto", entities_here[i], moving_entity, entities_overlapped_at[i])
+        resolve_entity_interaction_old("finish_move_onto", entities_here[i], moving_entity, entities_overlapped_at[i])
 
-func resolve_entity_interaction_event(event_name: String, actor, interactee, at_tile_position: Vector2, extra_debug: bool = false) -> void:
+func resolve_entity_interaction_old(event_name: String, actor, interactee, at_tile_position: Vector2i, extra_debug: bool = false) -> void:
+    resolve_entity_interaction_event(event_name, actor, interactee, [at_tile_position], extra_debug)
+
+func resolve_entity_interaction_event(event_name: String, actor, interactee, at_tile_positions: Array[Vector2i], extra_debug: bool = false) -> void:
     var event_prop: = get_entity_property(actor, event_name)
     if event_prop and event_prop.is_conditional():
-        event_prop.resolve(actor, interactee, at_tile_position, [], extra_debug)
+        event_prop.resolve(actor, interactee, at_tile_positions, [], extra_debug)
 
-func get_entity_interaction_bool_result(event_name: String, defualt_result: bool, actor, interactee, at_tile_position: Vector2) -> bool:
+func conditional_entity_interaction(event_name: String, actor: BaseEntity, interactee: BaseEntity, at_tile_positions: Array[Vector2i], defaut_result: bool = true, extra_debug: bool = false) -> bool:
     var event_prop: = get_entity_property(actor, event_name)
     if not event_prop:
-        return defualt_result
-    if event_prop.is_conditional():
-        return event_prop.resolve(actor, interactee, at_tile_position)
-    else:
-        return event_prop.get_value()
+        return defaut_result
+    return Property.resolve_truthy(event_prop, actor, interactee, at_tile_positions, [], extra_debug)
 
-func attempt_move(moving_entity, tile_position, group_move=false) -> bool:
-    var entities_here: = []
-    if group_move:
-        entities_here = get_entities_at(moving_entity.tile_position, null, moving_entity.bond_group)
-    else:
-        entities_here = get_entities_at(moving_entity.tile_position, moving_entity)
-    for e in entities_here:
-        if not get_entity_interaction_bool_result("move_off_of", true, e, moving_entity, moving_entity.tile_position):
-            return false
+func attempt_move_leave(moving_entity: BaseEntity, leaving_ps: Array[Vector2i], skip_entity_inst_ids: Array[int] = [], is_group_move: bool = false) -> bool:
+    var result: = true
+    if not conditional_entity_interaction("i_move_off_of_tile", moving_entity, null, leaving_ps, true):
+        result = false
     
-    var entities_there: = []
-    if group_move:
-        entities_there = get_entities_at(tile_position, null, moving_entity.bond_group)
-    else:
-        entities_there = get_entities_at(tile_position, moving_entity)
+    if is_group_move:
+        skip_entity_inst_ids = moving_entity.bond_group.duplicate()
+    var entities_here: = get_entities_at_multiple(leaving_ps, moving_entity, skip_entity_inst_ids)
+    for e in entities_here:
+        skip_entity_inst_ids.append(e.instance_id)
+        if not conditional_entity_interaction("move_off_of", e, moving_entity, leaving_ps, true):
+            result = false
+    return result
+
+func attempt_move_enter(moving_entity: BaseEntity, tile_move_allowed: bool, entering_ps: Array[Vector2i], skip_entity_inst_ids: Array[int]) -> bool:
+    var result: = tile_move_allowed
+    var entities_there: = get_entities_at_multiple(entering_ps, moving_entity, skip_entity_inst_ids)
+    for e in entities_there.duplicate():
+        if conditional_entity_interaction("blocks", e, moving_entity, entering_ps, false):
+            result = false
+    # Skip move_onto checks if anything before blocked movement
+    if not result:
+        return false
+
+    if not conditional_entity_interaction("i_move_onto_tile", moving_entity, null, entering_ps, true):
+        result = false
+    
     for e in entities_there:
-        if e in entities_here:
-            continue
-        var blocks: = get_entity_property(e, "blocks")
-        if blocks:
-            if blocks.is_conditional():
-                if blocks.resolve(e, moving_entity, tile_position):
-                    return false
-            elif blocks.get_value():
-                return false
-        
-        if not get_entity_interaction_bool_result("move_onto", true, e, moving_entity, tile_position):
-            return false
-        
-    return true
+        if not conditional_entity_interaction("i_move_onto", moving_entity, e, entering_ps, true):
+            result = false
+    for e in entities_there:
+        if not conditional_entity_interaction("move_onto", e, moving_entity, entering_ps, true):
+            result = false
+    return result
 
 func process_half_moves() -> void:
     var half_moved_at_positions: Dictionary[Vector2i, Dictionary] = {}
@@ -973,36 +977,37 @@ func half_moved_leaving_at(at_position: Vector2i, leaving_entities: Array, other
         var entity: BaseEntity = leaving_entities[i]
         var interacted: Array[BaseEntity] = []
         for other_entity: BaseEntity in other_entities:
-            resolve_entity_interaction_event("half_moved_off_of", entity, other_entity, at_position)
+            resolve_entity_interaction_old("half_moved_off_of", entity, other_entity, at_position)
+
             interacted.append(other_entity)
         var to_pos: = entity.get_moving_position()
         for j in leaving_entities.size() - 1 - i:
             var other_entity: BaseEntity = leaving_entities[j]
             if other_entity.get_moving_position() == to_pos:
                 continue
-            resolve_entity_interaction_event("half_moved_off_of", entity, other_entity, at_position)
+            resolve_entity_interaction_old("half_moved_off_of", entity, other_entity, at_position)
             interacted.append(other_entity)
         
         for other_entity: BaseEntity in interacted:
-            resolve_entity_interaction_event("half_moved_off_of", other_entity, entity, at_position)
+            resolve_entity_interaction_old("half_moved_off_of", other_entity, entity, at_position)
 
 func half_moved_entering_at(at_position: Vector2i, entering_entities: Array, other_entities: Array) -> void:
     for i in entering_entities.size():
         var entity: BaseEntity = entering_entities[i]
         var interacted: Array[BaseEntity] = []
         for other_entity: BaseEntity in other_entities:
-            resolve_entity_interaction_event("half_moved_onto", entity, other_entity, at_position)
+            resolve_entity_interaction_old("half_moved_onto", entity, other_entity, at_position)
             interacted.append(other_entity)
         var from_pos: = entity.get_stationary_position()
         for j in entering_entities.size() - 1 - i:
             var other_entity: BaseEntity = entering_entities[j]
             if other_entity.get_stationary_position() == from_pos:
                 continue
-            resolve_entity_interaction_event("half_moved_onto", entity, other_entity, at_position)
+            resolve_entity_interaction_old("half_moved_onto", entity, other_entity, at_position)
             interacted.append(other_entity)
         
         for other_entity: BaseEntity in interacted:
-            resolve_entity_interaction_event("half_moved_onto", other_entity, entity, at_position)
+            resolve_entity_interaction_old("half_moved_onto", other_entity, entity, at_position)
 
 func post_move_actions(moving_entity, from_position, to_position, exclude_group: Array = []) -> void:
     if not moving_entity.active:
@@ -1010,13 +1015,13 @@ func post_move_actions(moving_entity, from_position, to_position, exclude_group:
 
     var entities_at_start_pos = get_entities_at(from_position, moving_entity, exclude_group)
     for e in entities_at_start_pos:
-        resolve_entity_interaction_event("post_move_off_of", e, moving_entity, from_position)
+        resolve_entity_interaction_old("post_move_off_of", e, moving_entity, from_position)
     if not moving_entity.active:
         return
     
     var entities_destination = get_entities_at(to_position, moving_entity, exclude_group)
     for e in entities_destination:
-        resolve_entity_interaction_event("post_move_onto", e, moving_entity, to_position)
+        resolve_entity_interaction_old("post_move_onto", e, moving_entity, to_position)
     if not moving_entity.active:
         return
     
@@ -1027,7 +1032,7 @@ func post_die_actions(dying_entity: BaseEntity) -> void:
         var at_pos: = dying_entity.get_stationary_position()
         var sitting_on_entities: Array = get_entities_at(at_pos, dying_entity)
         for e in sitting_on_entities:
-            resolve_entity_interaction_event("post_move_off_of", e, dying_entity, at_pos)
+            resolve_entity_interaction_old("post_move_off_of", e, dying_entity, at_pos)
 
 func post_move_multi_pos(moving_entity, moved_off_positions: Array, moved_onto_positions: Array, exclude_group: Array = []) -> void:
     var entities_moved_off: Array = []
@@ -1039,7 +1044,7 @@ func post_move_multi_pos(moving_entity, moved_off_positions: Array, moved_onto_p
                 entities_moved_off_at.append(moved_off_position)
     for i in entities_moved_off.size():
         var e = entities_moved_off[i]
-        resolve_entity_interaction_event("post_move_off_of", e, moving_entity, entities_moved_off_at[i])
+        resolve_entity_interaction_old("post_move_off_of", e, moving_entity, entities_moved_off_at[i])
     
     var entities_moved_onto: Array = []
     var entities_moved_onto_at: Array = []
@@ -1050,7 +1055,7 @@ func post_move_multi_pos(moving_entity, moved_off_positions: Array, moved_onto_p
                 entities_moved_onto_at.append(moved_onto_position)
     for i in entities_moved_onto.size():
         var e = entities_moved_onto[i]
-        resolve_entity_interaction_event("post_move_onto", e, moving_entity, entities_moved_onto_at[i])
+        resolve_entity_interaction_old("post_move_onto", e, moving_entity, entities_moved_onto_at[i])
 
 func can_move_to(moving_entity: BaseEntity, tile_position: Vector2i) -> bool:
     var entities_here = get_entities_at(tile_position, moving_entity)
@@ -1099,7 +1104,7 @@ func get_entity_prop_with_default(entity: BaseEntity, property_name: String, def
         return default_value
     var prop: Property = get_entity_property(entity, property_name)
     if prop.is_conditional():
-        return prop.resolve(entity, null, entity.tile_position)
+        return prop.resolve(entity, null, [entity.get_moving_position()])
     else:
         return prop.get_value()
 
@@ -1248,3 +1253,10 @@ func set_entity_active(entity: BaseEntity, new_is_active: bool) -> void:
     if new_is_active:
         post_activated_actions(entity)
         entity_became_active.emit(entity)
+
+func get_all_active_entities() -> Array[BaseEntity]:
+    var active_entities: Array[BaseEntity] = []
+    for entity in entity_list:
+        if entity.active:
+            active_entities.append(entity)
+    return active_entities

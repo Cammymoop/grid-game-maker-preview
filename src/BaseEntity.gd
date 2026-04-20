@@ -28,7 +28,7 @@ var override_move_interp_style: MoveInterpStyle = MoveInterpStyle.NONE
 var teleport_interp_style: MoveInterpStyle = MoveInterpStyle.NONE
 
 var jump_interp_amount: float = 0.5
-var interp_out_ease_param: float = 0.3
+var interp_out_ease_param: float = 0.36
 
 var move_facing: = 0
 var facing: = 0
@@ -462,7 +462,7 @@ func start_move(in_facing_dir: int, change_visual_facing: bool = true, group_mov
 		return EntityManager.bond_group_start_move(bond_group, get_steps_per_tile(), in_facing_dir)
 	
 	next_tile_pos = tile_position + Utility.facing_vector_i(in_facing_dir)
-	var move_has_started = MapManager.attempt_move(self, next_tile_pos, group_move)
+	var move_has_started = MapManager.attempt_move(self, [tile_position], [next_tile_pos], group_move)
 
 	if move_has_started:
 		moving = true

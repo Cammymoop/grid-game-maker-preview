@@ -678,3 +678,7 @@ func key_to_vec2i(key: String) -> Vector2i:
 		push_error("Invalid vector2i key: %s" % key)
 	var sp: = key.split("|", true, 1)
 	return Vector2i(int(sp[0]), int(sp[1]))
+
+func arr_add_if_not_included(arr: Array, item: Variant) -> void:
+	if not item in arr:
+		arr.append(item)

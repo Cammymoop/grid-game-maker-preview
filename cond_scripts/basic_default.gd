@@ -476,7 +476,7 @@ func cmd_compare_property(slots: Dictionary, chosen_slot: int, property_name: St
 		if prop:
 			var number_result = 0
 			if prop.is_conditional():
-				number_result = float(prop.resolve(selected, slots[Slot.RED], selected.tile_position))
+				number_result = float(prop.resolve(selected, slots[Slot.RED], [selected.get_moving_position()]))
 			else:
 				number_result = float(prop.get_value())
 			return Utility.check_comparison(number_result, compare_to_val, comparison)
@@ -507,12 +507,41 @@ func cmd_override_move_animation(slots: Dictionary, chosen_slot: int, anim_style
 		slots[chosen_slot].set_move_interp_override(BaseEntity.read_move_interp_style_string(anim_style))
 
 func desc_trigger_custom_event() -> String:
-	return "entity,pos|Trigger the [event_name:PropertyInput] custom event for the entity/tiles"
+	return "entity,pos|Trigger the [event_name:PropertyInput] custom event of the entity/tiles"
 func cmd_trigger_custom_event(slots: Dictionary, chosen_slot: int, event_name: String) -> void:
+	var pass_blue_entity: BaseEntity = null if chosen_slot == Slot.RED else slots[Slot.RED]
+	if not pass_blue_entity:
+		pass_blue_entity = slots[Slot.BLUE]
 	if Commands.slot_is_entity(chosen_slot):
-		EntityManager.resolve_entity_interaction_event(event_name, slots[chosen_slot], slots[Slot.RED], slots[chosen_slot].get_moving_position())
+		EntityManager.resolve_entity_interaction(event_name, slots[chosen_slot], pass_blue_entity, [slots[chosen_slot].get_moving_position()])
 	elif Commands.slot_is_positions(chosen_slot):
-		MapManager.resolve_tile_event(slots[chosen_slot], event_name, slots[Slot.BLUE])
+		MapManager.resolve_tiles_events(slots[chosen_slot], event_name, pass_blue_entity)
+
+func desc_trigger_custom_event_for_each_entity() -> String:
+	return "entity,pos|Trigger the [event_name:PropertyInput] custom event of the entity/tile for each entity ([include_self:InvertInput:excluding,including] self)\n" \
+			+ "at [pos_filter_slot:SlotInput:pos] with a [truthy:BoolChoice:true,true or non-zero,false or zero] [prop_name:PropertyInput] property"
+func cmd_trigger_custom_event_for_each_entity(
+		slots: Dictionary, chosen_slot: int, event_name: String,
+		pos_filter_slot: int, include_self: bool, truthy: bool, prop_name: String
+	) -> void:
+	var filter_positions: Array = slots[pos_filter_slot]
+	var pos_filtered_enities: Array[BaseEntity] = []
+	var self_exclude: BaseEntity = null if include_self else slots[Slot.RED]
+	if filter_positions:
+		pos_filtered_enities = EntityManager.get_entities_at_multiple(filter_positions, self_exclude, [], true, false)
+	else:
+		pos_filtered_enities = EntityManager.get_all_active_entities()
+	var final_entities: Array[BaseEntity] = []
+	for entity in pos_filtered_enities:
+		if EntityManager.get_entity_prop_is_truthy(entity, prop_name, false) == truthy:
+			final_entities.append(entity)
+
+	if Commands.slot_is_entity(chosen_slot):
+		for e in final_entities:
+			EntityManager.resolve_entity_interaction(event_name, slots[chosen_slot], e, slots[chosen_slot].get_moving_position())
+	elif Commands.slot_is_positions(chosen_slot):
+		for e in final_entities:
+			MapManager.resolve_tiles_events(slots[chosen_slot], event_name, e)
 
 func _entity_has_controller_intention_count(slots: Dictionary, chosen_slot: int) -> bool:
 	if not Commands.slot_is_entity(chosen_slot) or not slots[chosen_slot] or slots[chosen_slot].moving:

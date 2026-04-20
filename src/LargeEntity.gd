@@ -68,18 +68,18 @@ func get_positions_at(at_tile_position: Vector2i) -> Array[Vector2i]:
 			offset_positions.append(at_tile_position + base_pos)
 	return offset_positions
 
-func get_frontier(in_facing_dir: int) -> Dictionary:
+func get_frontier(in_facing_dir: int) -> Dictionary[String, Array]:
 	var from_positions: = get_positions_at(tile_position)
 	var to_positions: = get_positions_at(tile_position + Utility.facing_vector_i(in_facing_dir))
-	var fromtier: Array[Vector2i] = []
-	var frontier: Array[Vector2i] = []
+	var a_v2i: Array[Vector2i] = []
+	var frontier: = {"from": a_v2i.duplicate(), "to": a_v2i}
 	for from_pos in from_positions:
 		if from_pos not in to_positions:
-			fromtier.append(from_pos)
+			frontier.from.append(from_pos)
 	for to_pos in to_positions:
 		if to_pos not in from_positions:
-			frontier.append(to_pos)
-	return {to = frontier, from = fromtier}
+			frontier.to.append(to_pos)
+	return frontier
 
 # Override start_move because I'm too thicc
 func start_move(in_facing_dir: int, change_visual_facing: bool = true, group_move: bool = false) -> bool:
@@ -98,13 +98,11 @@ func start_move(in_facing_dir: int, change_visual_facing: bool = true, group_mov
 		return EntityManager.bond_group_start_move(bond_group, get_steps_per_tile(), in_facing_dir)
 	
 	next_tile_pos = tile_position + Utility.facing_vector_i(in_facing_dir)
-	var not_stopped = true
 	
 	var frontier = get_frontier(in_facing_dir)
-	for moving_to in frontier.to:
-		not_stopped = not_stopped and MapManager.attempt_move(self, moving_to, group_move)
+	var move_has_started: = MapManager.attempt_move(self, frontier.from, frontier.to, group_move)
 	
-	if not_stopped:
+	if move_has_started:
 		moving = true
 		steps_remaining = get_steps_per_tile()
 		if not bond_group:

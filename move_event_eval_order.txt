@@ -1,0 +1,45 @@
+
+Rough event order evaluated during an entity's movement:
+
+Firstly, if an entity is currently moving, trying to make it move will immediately cancel as if it was blocked.
+
+When multiple entities or tiles are included for some event, they are all processed one after another for that event before moving to the next step/event.
+
+During start of movement any event which returns a falsey value prevents the movement from occuring, "blocks" events are the same but they block on a truthy value instead.
+Any event can be a static value instead of a conditional.
+
+Start of movement:
+first: [Tile's move_off_of] -> [i_move_off_of_tile] -> [Other Entity's move_off_of]  -> (IF BLOCKED, SKIP REST OF EVENTS)
+then:  [Tile's blocks (inverted)] -> [Other Entity's blocks (inverted)]              -> (IF BLOCKED, SKIP REST OF EVENTS)
+then:  [i_move_onto_tile] -> [i_move_onto (each entity)] -> [Other Entity's move_onto]
+
+Immediately after start of movement (unconditional, dont cancel movement):
+[Other Entity's post_move_off_of] -> [Other Entity's post_move_onto] -> [Moving Entity's post_move]
+
+HALF MOVE EVENTS:
+Half move events are processed for all entities symetrically (no concept of which entity is entering/leaving, there is no "i_")
+e.g. both entities which begin to half-overlap process their half_move_onto event with the other entity in the pair in the blue slot
+(covered_by_* and uncovered_by_* would go here but they're not implemented yet)
+
+When half-way point of movement is crossed (unconditional):
+first: [Entity-vs-Entity half_move_off_of] -> [Entity's half_move_off_of_tile] -> [Tile's half_move_off_of]
+then:  [Entity-vs-Entity half_move_onto] -> [Entity's half_move_onto_tile] -> [Tile's half_move_onto]
+
+
+At the end of a movement (unconditional):
+[i_finish_move_onto (each entity here)] -> [Entity here's finish_move_onto] -> [i_finish_move_onto_tile] -> [Tile's finish_move_onto]
+
+
+
+
+SITTING STILL:
+after a set delay of not moving (right now 1/10th second unconfigurable) each entity processes an "idle" event, this repeats as long as the entity is not moving.
+
+at idle event:
+[Tile(s) Under Entity's idle_on] -> [Entity's idle_update]
+
+TILE IDLE:
+Synchronized for all tiles, not synchronized vs entity idle delay/repeat. Every tile has an "idle" event at intervals of the same delay as entities.
+
+at idle event:
+[Tile's idle_update (no entity in blue slot)]

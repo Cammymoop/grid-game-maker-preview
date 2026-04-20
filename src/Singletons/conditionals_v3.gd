@@ -42,6 +42,7 @@ const all_events: Array[String] = [
 	"blocks",
 	"move_onto", "move_off_of",
     "i_move_onto", "i_move_onto_tile",
+    "i_move_off_of_tile",
 
 	"finish_move_onto", "i_finish_move_onto",
 	"finish_move_onto_tile", "i_finish_move_onto_tile",
@@ -94,12 +95,11 @@ func _ready() -> void:
 func get_all_events() -> Array[String]:
     return all_events.duplicate()
 
-func make_slots(owning_entity, target_entity, tile_position, arguments = []) -> Dictionary:
+func make_slots(owning_entity: BaseEntity, target_entity: BaseEntity, tile_positions: Array[Vector2i], arguments: Array = []) -> Dictionary:
     var slots = empty_slots()
     slots[Slot.RED] = owning_entity
     slots[Slot.BLUE] = target_entity
-    slots[Slot.GREY] = [tile_position]
-    slots[Slot.THIS_TILE] = tile_position
+    slots[Slot.GREY] = tile_positions
     
     if arguments:
         var arg_slots = [Slot.DARK_RED, Slot.DARK_BLUE, Slot.DARK_GREEN, Slot.DARK_ORANGE,]

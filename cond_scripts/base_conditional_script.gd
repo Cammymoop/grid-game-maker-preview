@@ -132,7 +132,12 @@ func get_position_arg(base_value: Variant, slots: Dictionary, is_relative: bool 
 		return Vector2i.ZERO
 
 func get_context_position(slots: Dictionary) -> Vector2i:
-	return slots[Slot.THIS_TILE]
+	if slots[Slot.RED]:
+		return slots[Slot.RED].get_moving_position()
+	elif slots[Slot.GREY]:
+		return slots[Slot.GREY][0]
+	else:
+		return Vector2i.ZERO
 
 func resolve_variant_direction_value(dir_value: Variant, slots: Dictionary) -> int:
 	if typeof(dir_value) == TYPE_INT:
