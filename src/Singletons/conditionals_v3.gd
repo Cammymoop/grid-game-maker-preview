@@ -292,11 +292,12 @@ func _resolve_conditional_step(step_index: int, cond_step: Dictionary, overall_r
         var cmds: Array = cond_step["when " + case]
         for cmd in cmds:
             if cmd == "true" or cmd == "false":
-                prints("result changed in case: %s to %s" % [case, cmd == "true"])
                 step_result["result"] = cmd == "true"
                 continue
             var cmd_result = call_conditional_command(cmd, slots)
             if cmd_result.has("step_result"):
+                if _extra_debug:
+                    prints("result changed in case: %s to %s" % [case, cmd_result["step_result"]])
                 step_result["result"] = cmd_result["step_result"]
 
             if cmd_result.get("quit", false):

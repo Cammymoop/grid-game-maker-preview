@@ -113,19 +113,39 @@ func _on_Filter_text_changed(_new_text):
 func apply_text_filter(list: Array, filter_str: String) -> Array:
 	if len(filter_str) < 1:
 		return list.duplicate()
-	var new_list = []
+	filter_str = filter_str.to_lower()
+	var sortable: Array[Dictionary] = []
 	
 	for s: String in list:
 		var filters_left = filter_str
 		var lower = s.to_lower()
+		var sortable_item: = {}
 		for i in range(len(lower)):
 			if filters_left[0] == lower[i]:
 				if len(filters_left) <= 1:
-					new_list.append(s)
+					#new_list.append(s)
+					sortable_item["item"] = s
 					break
 				filters_left = filters_left.substr(1)
-	return new_list
+		if sortable_item:
+			sortable_item["score"] = 0
+			for i in range(len(filter_str)-1, -1, -1):
+				if lower.contains(filter_str.substr(0, i+1)):
+					sortable_item["score"] = i + 1
+					if lower.begins_with(filter_str.substr(0, i+1)):
+						sortable_item["score"] += 50
+					break
+			sortable.append(sortable_item)
+	if sortable.size() == 0:
+		return []
+	
+	sortable.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
+		if a["score"] == b["score"]:
+			return a["item"].nocasecmp_to(b["item"]) < 0
+		return a["score"] > b["score"]
+	)
 
+	return sortable.map(Utility.get_dict_item.bind("item", ""))
 
 func _on_AllCommands_item_activated(_index):
 	done()

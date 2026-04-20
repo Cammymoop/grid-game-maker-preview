@@ -462,6 +462,9 @@ func get_dict_color(from_dict: Dictionary, key: String, default_color: Color) ->
 		return default_color
 	return Color.from_string(val, default_color)
 
+func get_dict_item(from_dict: Dictionary, key: String, default_value: Variant) -> Variant:
+	return from_dict.get(key, default_value)
+
 func color_string(of_color: Color, force_alpha: bool = true) -> String:
 	return '#' + of_color.to_html(force_alpha or (of_color.a < 1))
 
