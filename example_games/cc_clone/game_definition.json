@@ -1245,7 +1245,8 @@
             "basic_default.if_property_value::[\"i:1\",\"s:ice-skater\",false]"
           ],
           "when true": [
-            "basic_default.override_move_speed::[\"i:1\",{\"args\":[\"s:type\",\"s:plain\",\"s:value\",\"f:10.0\"],\"type\":\"Dictionary\"}]"
+            "basic_default.override_move_speed::[\"i:1\",{\"args\":[\"s:type\",\"s:plain\",\"s:value\",\"f:10.0\"],\"type\":\"Dictionary\"}]",
+            "basic_default.override_move_animation::[\"i:1\",\"s:smooth\"]"
           ],
           "when false": [],
           "when always": []
@@ -1326,7 +1327,8 @@
               "basic_default.if_property_value::[\"i:1\",\"s:ice-skater\",false]"
             ],
             "when true": [
-              "basic_default.override_move_speed::[\"i:1\",{\"args\":[\"s:type\",\"s:plain\",\"s:value\",\"f:10.0\"],\"type\":\"Dictionary\"}]"
+              "basic_default.override_move_speed::[\"i:1\",{\"args\":[\"s:type\",\"s:plain\",\"s:value\",\"f:10.0\"],\"type\":\"Dictionary\"}]",
+              "basic_default.override_move_animation::[\"i:1\",\"s:smooth\"]"
             ],
             "when false": [],
             "when always": []
@@ -1516,7 +1518,8 @@
               "basic_default.if_property_value::[\"i:1\",\"s:unforcable\",false]"
             ],
             "when true": [
-              "basic_default.override_move_speed::[\"i:1\",{\"args\":[\"s:type\",\"s:plain\",\"s:value\",\"f:10.0\"],\"type\":\"Dictionary\"}]"
+              "basic_default.override_move_speed::[\"i:1\",{\"args\":[\"s:type\",\"s:plain\",\"s:value\",\"f:10.0\"],\"type\":\"Dictionary\"}]",
+              "basic_default.override_move_animation::[\"i:1\",\"s:smooth\"]"
             ],
             "when false": [],
             "when always": []
@@ -1690,7 +1693,8 @@
               "basic_default.if_property_value::[\"i:1\",\"s:unforcable\",false]"
             ],
             "when true": [
-              "basic_default.override_move_speed::[\"i:1\",{\"args\":[\"s:type\",\"s:plain\",\"s:value\",\"f:10.0\"],\"type\":\"Dictionary\"}]"
+              "basic_default.override_move_speed::[\"i:1\",{\"args\":[\"s:type\",\"s:plain\",\"s:value\",\"f:10.0\"],\"type\":\"Dictionary\"}]",
+              "basic_default.override_move_animation::[\"i:1\",\"s:smooth\"]"
             ],
             "when false": [],
             "when always": []

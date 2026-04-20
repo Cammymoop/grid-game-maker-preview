@@ -23,6 +23,8 @@ static var move_interp_style_strings: Dictionary[MoveInterpStyle, String] = {
 }
 
 var move_interp_style: MoveInterpStyle = MoveInterpStyle.EASE_OUT
+var is_move_interp_override: = false
+var override_move_interp_style: MoveInterpStyle = MoveInterpStyle.NONE
 var teleport_interp_style: MoveInterpStyle = MoveInterpStyle.NONE
 
 var jump_interp_amount: float = 0.5
@@ -171,6 +173,10 @@ func serialize() -> Dictionary:
 	if tailing and is_instance_valid(tailing):
 		important_stuff['tailing'] = tailing.instance_id
 	
+	if is_move_interp_override:
+		important_stuff['is_move_interp_override'] = true
+		important_stuff['override_move_interp_style'] = get_move_interp_style_string(override_move_interp_style)
+	
 	important_stuff['entity_class'] = "BaseEntity"
 	
 	important_stuff['deferred_signals'] = JSON.from_native(deferred_signals)
@@ -212,6 +218,10 @@ func deserialize(data: Dictionary) -> void:
 		steps_remaining = int(data["steps_remaining"])
 	if "_this_move_steps" in data:
 		_this_move_steps = int(data["_this_move_steps"])
+	
+	if data.get('is_move_interp_override', false):
+		is_move_interp_override = true
+		set_move_interp_override(read_move_interp_style_string(data['override_move_interp_style']))
 	
 	if "deferred_signals" in data:
 		deferred_signals = JSON.to_native(data['deferred_signals'])
@@ -303,27 +313,34 @@ func bump_move_step() -> void:
 	steps_remaining -= 1
 	interpolate_pos()
 
+func get_move_progress() -> float:
+	return 1 - (steps_remaining / float(_this_move_steps))
+
 func interpolate_pos() -> void:
-	var move_progress: float = 1 - (steps_remaining / float(_this_move_steps))
+	var move_progress: float = get_move_progress()
 	var prev_pos: = MapManager.tile_to_world_position(tile_position)
 	var next_pos: = MapManager.tile_to_world_position(next_tile_pos)
-	if move_interp_style == MoveInterpStyle.NONE:
+	var interp_style: MoveInterpStyle = get_move_interp_style()
+	if interp_style == MoveInterpStyle.NONE:
 		position = next_pos
-	elif move_interp_style == MoveInterpStyle.CONTINUOUS_LINEAR:
+	elif interp_style == MoveInterpStyle.CONTINUOUS_LINEAR:
 		#var pixel_speed_per_tick: float = MapManager.tile_width * (current_move_speed / GameManager.get_full_tick_rate())
 		#position += Utility.facing_vector(move_facing) * pixel_speed_per_tick
 		position = prev_pos.lerp(next_pos, move_progress)
-	elif move_interp_style == MoveInterpStyle.EASE_OUT:
+	elif interp_style == MoveInterpStyle.EASE_OUT:
 		position = prev_pos.lerp(next_pos, ease(move_progress, interp_out_ease_param))
-	elif move_interp_style in [MoveInterpStyle.JUMP_LINEAR, MoveInterpStyle.JUMP_EASE_OUT]:
+	elif interp_style in [MoveInterpStyle.JUMP_LINEAR, MoveInterpStyle.JUMP_EASE_OUT]:
 		move_progress = remap(move_progress, 0, 1, jump_interp_amount, 1)
-		if move_interp_style == MoveInterpStyle.JUMP_LINEAR:
+		if interp_style == MoveInterpStyle.JUMP_LINEAR:
 			position = prev_pos.lerp(next_pos, move_progress)
-		elif move_interp_style == MoveInterpStyle.JUMP_EASE_OUT:
+		elif interp_style == MoveInterpStyle.JUMP_EASE_OUT:
 			position = prev_pos.lerp(next_pos, ease(move_progress, interp_out_ease_param))
 	else:
-		push_error("Unknown move interpolation style: " + str(move_interp_style))
-		move_interp_style = MoveInterpStyle.NONE
+		push_error("Unknown move interpolation style: " + str(interp_style))
+		if is_move_interp_override:
+			clear_move_interp_override()
+		else:
+			move_interp_style = MoveInterpStyle.NONE
 		position = next_pos
 
 func has_local_property(property_name: String) -> bool:
@@ -428,6 +445,8 @@ func _movement_steps_finished() -> void:
 	moving = false
 	if is_spt_override:
 		set_native_move_speed()
+	if is_move_interp_override:
+		clear_move_interp_override()
 
 func process_finish_move() -> void:
 	MapManager.finish_move(self, [tile_position])
@@ -684,3 +703,16 @@ static func read_move_interp_style_string(style_str: String) -> MoveInterpStyle:
 
 static func get_move_interp_style_string(style: MoveInterpStyle) -> String:
 	return move_interp_style_strings.get(style, "none")
+
+func set_move_interp_override(style: MoveInterpStyle) -> void:
+	is_move_interp_override = true
+	override_move_interp_style = style
+
+func clear_move_interp_override() -> void:
+	is_move_interp_override = false
+	override_move_interp_style = MoveInterpStyle.NONE
+
+func get_move_interp_style() -> MoveInterpStyle:
+	if is_move_interp_override:
+		return override_move_interp_style
+	return move_interp_style

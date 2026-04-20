@@ -212,15 +212,8 @@ func show_property_list() -> void:
 		prop_list.custom_minimum_size.x = 300
 
 func fix_size():
-	size = Vector2.ZERO
 	var panel = $PanelContainer
-	size = panel.size
-	#size.x += panel.offset_left
-	#size.x -= panel.offset_right
-	#size.y += panel.offset_top
-	#size.y -= panel.offset_bottom
-	
-	the_min_size = size
+	the_min_size = panel.get_combined_minimum_size()
 	
 	move_to_center()
 

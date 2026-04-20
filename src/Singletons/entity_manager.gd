@@ -999,7 +999,7 @@ func post_move_actions(moving_entity, from_position, to_position, exclude_group:
 
     var entities_at_start_pos = get_entities_at(from_position, moving_entity, exclude_group)
     for e in entities_at_start_pos:
-        resolve_entity_interaction_event("post_move_off_of", e, moving_entity, from_position, true)
+        resolve_entity_interaction_event("post_move_off_of", e, moving_entity, from_position)
     if not moving_entity.active:
         return
     

@@ -1,0 +1,23 @@
+[gd_scene format=3 uid="uid://becu0f566yys1"]
+
+[ext_resource type="Script" uid="uid://d2lhuyan78uod" path="res://src/GameEditor/ConditionalEditor/select_option_input.gd" id="1_c3ao8"]
+
+[node name="MoveAnimStyleInput" type="OptionButton" unique_id=1381517660]
+custom_minimum_size = Vector2(60, 0)
+offset_right = 20.0
+offset_bottom = 20.0
+size_flags_vertical = 4
+selected = 0
+fit_to_longest_item = false
+item_count = 5
+popup/item_0/text = "smooth"
+popup/item_0/id = 1
+popup/item_1/text = "stepped"
+popup/item_1/id = 2
+popup/item_2/text = "jerky"
+popup/item_2/id = 3
+popup/item_3/text = "jerky-stepped"
+popup/item_3/id = 4
+popup/item_4/text = "none"
+popup/item_4/id = 0
+script = ExtResource("1_c3ao8")

@@ -15,6 +15,10 @@ var explicitly_following: = false
 var delaying: = false
 var delay_pos: = Vector2.ZERO
 
+var override_target_interp_style: = true
+var smoothing_enabled: = true
+var smoothing_amount: = 32
+
 func _ready():
 	EntityManager.entity_list_updated.connect(on_entity_list_updated)
 	EntityManager.entity_became_active.connect(on_entity_became_active)
@@ -25,6 +29,8 @@ func _ready():
 	var ext = Utility.get_camera_setting("extend_limits", 0)
 	if ext:
 		extend_level_bounds = int(ext)
+	
+	GameManager.level_state_loaded.connect(on_level_state_loaded)
 
 func update_bounds() -> void:
 	if not respect_level_bounds:
@@ -58,7 +64,7 @@ func deactivate():
 	if not explicitly_following:
 		target_entity = null
 
-func _process(_delta):
+func _process(delta):
 	if not active:
 		return
 	
@@ -67,6 +73,7 @@ func _process(_delta):
 	elif Input.is_action_just_pressed("camera_prev_target"):
 		follow_next(-1)
 	
+	var pos_target: = position
 	if target_entity and is_instance_valid(target_entity):
 		var find_new_target: = false
 		if was_target_active != target_entity.active:
@@ -77,7 +84,12 @@ func _process(_delta):
 		if find_new_target:
 			find_entity_to_follow()
 		else:
-			position = target_entity.global_position + ent_center_offset
+			pos_target = get_target_iterpolated_pos()
+	
+	if smoothing_enabled:
+		position = position.lerp(pos_target, smoothing_amount * delta)
+	else:
+		position = pos_target
 
 func is_target_active() -> bool:
 	return target_entity and is_instance_valid(target_entity) and target_entity.active
@@ -168,3 +180,19 @@ func find_entity_to_follow() -> void:
 	if not target_entity:
 		for entity in follow_targets:
 			follow_entity(entity)
+
+func teleport(pos: Vector2) -> void:
+	position = pos
+
+func on_level_state_loaded() -> void:
+	if target_entity and is_instance_valid(target_entity):
+		teleport(get_target_iterpolated_pos())
+
+func get_target_iterpolated_pos() -> Vector2:
+	if not override_target_interp_style or not target_entity.moving:
+		return target_entity.global_position + ent_center_offset
+	
+	var target_from_pos: = MapManager.tile_to_world_position(target_entity.get_stationary_position())
+	var target_to_pos: = MapManager.tile_to_world_position(target_entity.next_tile_pos)
+	return target_from_pos.lerp(target_to_pos, target_entity.get_move_progress()) + ent_center_offset
+	

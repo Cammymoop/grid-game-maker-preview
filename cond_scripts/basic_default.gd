@@ -495,10 +495,16 @@ func cmd_exists(slots: Dictionary, chosen_slot: int) -> bool:
 	return false
 
 func desc_override_move_speed() -> String:
-	return "entity|Override the entity's move speed for the current movement to [speed:ComplexScalarInput]"
+	return "entity|Override the entity's move speed for the current/next movement to [speed:ComplexScalarInput]"
 func cmd_override_move_speed(slots: Dictionary, chosen_slot: int, speed: Variant) -> void:
 	if Commands.slot_is_entity(chosen_slot) and slots[chosen_slot]:
 		slots[chosen_slot].set_move_speed_override(resolve_complex_scalar(speed, slots))
+
+func desc_override_move_animation() -> String:
+	return "entity|Override the entity's move animation for the current/next movement to [anim_style:MoveAnimStyleInput]"
+func cmd_override_move_animation(slots: Dictionary, chosen_slot: int, anim_style: String) -> void:
+	if Commands.slot_is_entity(chosen_slot) and slots[chosen_slot]:
+		slots[chosen_slot].set_move_interp_override(BaseEntity.read_move_interp_style_string(anim_style))
 
 func desc_trigger_custom_event() -> String:
 	return "entity,pos|Trigger the [event_name:PropertyInput] custom event for the entity/tiles"

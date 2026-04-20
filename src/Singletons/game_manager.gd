@@ -254,7 +254,7 @@ func create_game_camera() -> void:
 
 func position_gameplay_camera(pos: Vector2) -> void:
 	if game_camera:
-		game_camera.position = pos
+		game_camera.teleport(pos)
 
 func get_gameplay_camera_position() -> Vector2:
 	if game_camera:
