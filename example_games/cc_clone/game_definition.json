@@ -160,7 +160,7 @@
         },
         "can-cross-gravel": true,
         "can-cross-goal": true,
-        "z-index": 4,
+        "z-index": 1,
         "solid": true
       },
       "intended_move_speed": 0.0
@@ -387,7 +387,7 @@
       "tex_index": 7,
       "properties": {
         "creature": true,
-        "z-index": 2,
+        "z-index": 1,
         "blocks": {
           "v": "3",
           "conditions": [

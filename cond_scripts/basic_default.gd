@@ -541,7 +541,7 @@ func cmd_show_mini_text_at(slots: Dictionary, chosen_slot: int, text_slot: int, 
 	if Commands.slot_is_entity(chosen_slot):
 		if slots[chosen_slot]:
 			var message_pos: Vector2 = EntityManager.get_pos_above(slots[chosen_slot]) if is_above else slots[chosen_slot].get_center_position()
-			EffectsHelper.spawn_mini_text_at(mini_message, message_pos)
+			EffectsHelper.spawn_mini_text_at(mini_message, message_pos, -1, 2)
 		else:
 			push_error("Entity slot %s is empty" % chosen_slot)
 	elif Commands.slot_is_positions(chosen_slot):
@@ -549,7 +549,7 @@ func cmd_show_mini_text_at(slots: Dictionary, chosen_slot: int, text_slot: int, 
 			push_error("Positions slot %s is empty" % chosen_slot)
 		for tile_pos in slots[chosen_slot]:
 			var message_pos: Vector2 = MapManager.get_world_pos_above(tile_pos) if is_above else MapManager.tile_to_world_position_centered(tile_pos)
-			EffectsHelper.spawn_mini_text_at(mini_message, message_pos)
+			EffectsHelper.spawn_mini_text_at(mini_message, message_pos, -1, 2)
 	else:
 		push_error("Invalid slot to show mini text at: %s" % chosen_slot)
 
