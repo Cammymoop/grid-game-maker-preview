@@ -156,14 +156,12 @@ func load_common():
 
 func update_image_button():
 	if sprite_snapshot_tex:
-		prints("updating image button with snapshot")
 		var clipped_tex: AtlasTexture = AtlasTexture.new()
 		var tex_size: Vector2 = Vector2(MapManager.tile_width, MapManager.tile_width) * GameManager.get_default_pixel_scale()
 		clipped_tex.atlas = sprite_snapshot_tex
 		clipped_tex.region = Rect2(sprite_snapshot_tex.get_size() / 2 - tex_size / 2, tex_size)
 		_set_img_button_texture(find_child("ImageButton"), clipped_tex, false)
 	else:
-		prints("updating image button with simple texture")
 		update_image_simple()
 
 func update_image_simple() -> void:
@@ -264,7 +262,7 @@ func update_sprite_config(new_sprite_config: Dictionary) -> void:
 	# dont update sprite style picker, it just picks which edit popup to show
 
 func _on_ImageButton_pressed() -> void:
-	if tile_entity_mode == "entity" and get_selected_sprite_style() == SPRITE_FANCY:
+	if get_selected_sprite_style() == SPRITE_FANCY:
 		restore_last_fancy_sprite()
 		var fancy_spr_edit: Node = fancy_sprite_editor_scene.instantiate()
 		add_child(fancy_spr_edit)
@@ -292,6 +290,8 @@ func show_basic_texture_select_dialog(is_for_preview: bool) -> void:
 	tex_popup.popup_centered()
 
 func get_selected_sprite_style() -> String:
+	if tile_entity_mode != "entity":
+		return SPRITE_SIMPLE
 	var sprite_style_picker: = find_child("SpriteStylePicker") as OptionButton
 	var selected_text = sprite_style_picker.get_item_text(sprite_style_picker.selected)
 	if not selected_text in sprite_style_options:
@@ -487,11 +487,14 @@ func _on_vis_changed():
 		hidden.emit()
 
 func update_sprite_style_picker() -> void:
+	var sprite_style_picker: = find_child("SpriteStylePicker") as OptionButton
+	sprite_style_picker.visible = tile_entity_mode == "entity"
+	if tile_entity_mode != "tile":
+		return
 	var is_simple: bool = the_definition.get("sprite_config", {}).is_empty()
 	var set_selected_to: String = SPRITE_SIMPLE if is_simple else SPRITE_FANCY
 	var option_text: String = sprite_style_options.find_key(set_selected_to)
 	
-	var sprite_style_picker: = find_child("SpriteStylePicker") as OptionButton
 	sprite_style_picker.selected = -1
 	for i in sprite_style_picker.get_item_count():
 		if sprite_style_picker.get_item_text(i) == option_text:

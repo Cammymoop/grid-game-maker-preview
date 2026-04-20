@@ -26,10 +26,12 @@ func _on_test_play_button_pressed() -> void:
 
 
 func _on_OpenGameDir_pressed():
-	if GameManager.cur_game_name:
-		OS.shell_open(FilesManager.get_game_base_dir(GameManager.cur_game_name))
+	if false:#GameManager.cur_game_name:
+		var game_base_dir: = FilesManager.get_game_base_dir(GameManager.cur_game_name)
+		OS.shell_open(ProjectSettings.globalize_path(game_base_dir))
 	else:
-		OS.shell_open(FilesManager.get_games_dir())
+		OS.shell_open(ProjectSettings.globalize_path(FilesManager.get_games_dir()))
 
 func _on_OpenImagesFolder_pressed():
-	OS.shell_open(FilesManager.get_shared_images_dir())
+	var shared_images_dir: = FilesManager.get_shared_images_dir()
+	OS.shell_open(ProjectSettings.globalize_path(shared_images_dir))

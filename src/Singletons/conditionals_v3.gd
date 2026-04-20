@@ -260,7 +260,7 @@ func _resolve_conditional_step(step_index: int, cond_step: Dictionary, overall_r
             condition_stack.append(cmd_result["result"])
     
     if _extra_debug:
-        prints("condition stack: %s" % condition_stack)
+        prints("condition stack: %s" % [condition_stack])
     
     if len(condition_stack) > 1:
         step_result["result"] = conditions_collapse(condition_stack)
