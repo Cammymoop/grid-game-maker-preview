@@ -72,6 +72,32 @@ func cmd_select_entity_at(slots: Dictionary, chosen_slot: int, at_pos_slot: int,
 	filtered_entities = EntityManager.filter_entities_by_property(prop_name, filtered_entities, invert)
 	slots[chosen_slot] = filtered_entities[0] if filtered_entities else null
 
+func desc_select_nearest_entity() -> String:
+	return "entity|<= Select the nearest entity to [ref_entity_slot:SlotInput:entity] (ignoring itself) with a [truthy:BoolChoice:true,true or non-zero,false or zero] [prop_name:PropertyInput] property"
+func cmd_select_nearest_entity(slots: Dictionary, chosen_slot: int, ref_entity_slot: int, truthy: bool, prop_name: String) -> void:
+	if not Commands.slot_is_entity(chosen_slot) or not Commands.slot_is_entity(ref_entity_slot):
+		push_error("Invalid slot to select nearest entity from: %s" % chosen_slot)
+		return
+	var ref_entity: BaseEntity = slots[ref_entity_slot]
+	if not ref_entity:
+		slots[chosen_slot] = null
+		return
+	var found_entity: BaseEntity = EntityManager.find_closest_entity_with_truthy_property(prop_name, ref_entity.get_moving_position(), truthy, [ref_entity])
+	slots[chosen_slot] = found_entity
+
+func desc_select_nearest_named_entity() -> String:
+	return "entity|<= Select the nearest [complex_e_name:EntityNameInput] entity to [ref_entity_slot:SlotInput:entity] (ignoring itself)"
+func cmd_select_nearest_named_entity(slots: Dictionary, chosen_slot: int, ref_entity_slot: int, complex_e_name: Dictionary) -> void:
+	if not Commands.slot_is_entity(chosen_slot) or not Commands.slot_is_entity(ref_entity_slot):
+		push_error("Invalid slot to select nearest named entity from: %s" % chosen_slot)
+		return
+	var e_id: = get_id_of_complex_entity_name(complex_e_name, slots)
+	var ref_entity: BaseEntity = slots[ref_entity_slot]
+	if not e_id >= 0 or not ref_entity:
+		slots[chosen_slot] = null
+		return
+	slots[chosen_slot] = EntityManager.find_closest_entity_with_id(e_id, ref_entity.get_moving_position(), [ref_entity])
+
 func desc_select_number() -> String:
 	return "number,string|<= Select the number [complex_num:ComplexScalarInput]"
 func cmd_select_number(slots: Dictionary, chosen_slot: int, complex_num: Dictionary) -> void:
@@ -104,6 +130,18 @@ func cmd_select_text_property(slots: Dictionary, chosen_slot: int, target_slot: 
 			slots[chosen_slot] = MapManager.get_tile_prop_text_value_at(slots[target_slot], property_name)
 	else:
 		push_error("Invalid slot to select property value text from: %s" % target_slot)
+
+func desc_is_the_same_entity() -> String:
+	return "entity|If the entity is the same entity as [ref_entity_slot:SlotInput:entity]"
+func cmd_is_the_same_entity(slots: Dictionary, chosen_slot: int, ref_entity_slot: int) -> bool:
+	if not Commands.slot_is_entity(chosen_slot) or not Commands.slot_is_entity(ref_entity_slot):
+		push_error("Invalid slots to check if same entity: %s and %s" % [chosen_slot, ref_entity_slot])
+		return false
+	var selected: BaseEntity = slots[chosen_slot]
+	var ref_entity: BaseEntity = slots[ref_entity_slot]
+	if not selected or not ref_entity:
+		return false
+	return selected.instance_id == ref_entity.instance_id
 
 func desc_select_number_property() -> String:
 	return "string,number|<= Select the text value of [target_slot:SlotInput:entity,pos]'s [property_name:PropertyInput] property"
@@ -169,7 +207,7 @@ func cmd_is_entity_at(slots: Dictionary, chosen_slot: int, prop_name: String, in
 	var at_positions: Array = slots[chosen_slot]
 	if not at_positions:
 		return false
-	var entities_here: Array = EntityManager.get_entities_at_multiple(at_positions, slots[Slot.RED], [], true, false)
+	var entities_here: Array = EntityManager.get_entities_at_multiple(at_positions, slots[Slot.RED], [], false, false)
 	entities_here = EntityManager.filter_entities_by_property(prop_name, entities_here, invert)
 	return entities_here.size() > 0
 
@@ -199,22 +237,22 @@ func cmd_if_property_value(slots: Dictionary, chosen_slot: int, property_name: S
 	return result if is_truthy else not result
 
 func desc_c_is_named() -> String:
-	return "entity|If the entity [invert:InvertInput:is,is not] named [check_name:EntityNameInput]"
-func cmd_c_is_named(slots: Dictionary, chosen_slot: int, invert: bool, check_name: String) -> bool:
-	var result = slots[chosen_slot].entity_name == check_name
+	return "entity|If the entity [invert:InvertInput:is,is not] named [check_name:EntityNameInput:1]"
+func cmd_c_is_named(slots: Dictionary, chosen_slot: int, invert: bool, check_name: Variant) -> bool:
+	var result = slots[chosen_slot].entity_name == get_complex_or_string_as_string(check_name, slots)
 	return not result if invert else result
 
 func desc_if_all_entities_property() -> String:
-	return "pos|If [is_all:BoolChoice:true,every,any] [entity_name:EntityNameInput] entity here has a [invert:InvertInput:true or non-zero,false or zero] [property_name:PropertyInput] property"
-func cmd_if_all_entities_property(slots: Dictionary, chosen_slot: int, entity_name: String, is_all: bool, invert: bool, property_name: String) -> bool:
+	return "pos|If [is_all:BoolChoice:true,every,any] [entity_name:EntityNameInput:1] entity here has a [invert:InvertInput:true or non-zero,false or zero] [property_name:PropertyInput] property"
+func cmd_if_all_entities_property(slots: Dictionary, chosen_slot: int, entity_name: Variant, is_all: bool, invert: bool, property_name: String) -> bool:
 	if not Commands.slot_is_positions(chosen_slot):
 		push_error("Slot for if all entities property is not a positions slot: %s" % chosen_slot)
 		return false
-	if not EntityManager.entity_name_exists(entity_name):
-		push_error("Entity name does not exist: %s" % entity_name)
+	var e_id: = get_id_of_str_or_complex_entity_name(entity_name, slots)
+	if e_id < 0:
+		push_error("Entity name does not exist: %s" % get_complex_or_string_as_string(entity_name, slots))
 		return false
 	var tile_positions: Array = slots[chosen_slot]
-	var e_id: = EntityManager.get_entity_index(entity_name)
 	var all_entities: Array = EntityManager.find_all_entities_by_index(e_id, true)
 	if all_entities.size() == 0:
 		return false
@@ -423,14 +461,19 @@ func cmd_a_load_checkpoint(_slots: Dictionary) -> void:
 	GameManager.load_checkpoint.call_deferred()
 
 func desc_a_create_entity() -> String:
-	return "pos|Create a new [entity_name:EntityNameInput] entity here\n" \
+	return "pos|Create a new [entity_name:EntityNameInput:1] entity here\n" \
 	     + "facing this way [direction:DirectionInput] which is [is_moving:BoolChoice:false,moving,stationary]"
-func cmd_a_create_entity(slots: Dictionary, chosen_slot: int, entity_name: String, direction: int, is_moving: bool) -> void:
-	var entity_index = EntityManager.get_entity_index(entity_name)
+func cmd_a_create_entity(slots: Dictionary, chosen_slot: int, entity_name: Variant, direction: int, is_moving: bool) -> void:
+	var e_id: = get_id_of_str_or_complex_entity_name(entity_name, slots)
+	if e_id < 0:
+		push_error("Entity name does not exist: %s" % get_complex_or_string_as_string(entity_name, slots))
+		return
 	var facing = Utility.resolve_full_direction_to_facing(direction, slots)
 	for pos in slots[chosen_slot]:
-		var new_entity = EntityManager.create_entity(entity_index, pos, facing)
+		var new_entity = EntityManager.create_entity(e_id, pos, facing)
 		if is_moving:
+			if new_entity.get_native_steps_per_tile() <= 0:
+				new_entity.set_steps_per_tile_override(EntityManager.get_default_spt())
 			new_entity.start_move(facing)
 
 func desc_a_turn() -> String:

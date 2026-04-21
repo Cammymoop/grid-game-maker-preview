@@ -245,3 +245,29 @@ func get_complex_string_value(complex_string: Dictionary, slots: Dictionary) -> 
 	else:
 		push_error("Invalid complex string type: %s" % [complex_string["type"]])
 		return ""
+
+func get_complex_or_string_as_string(complex_or_string: Variant, slots: Dictionary) -> String:
+	if typeof(complex_or_string) == TYPE_STRING:
+		return complex_or_string
+	if not typeof(complex_or_string) == TYPE_DICTIONARY:
+		push_error("Invalid type for complex or string: %s" % [typeof(complex_or_string)])
+		return ""
+	return get_complex_string_value(complex_or_string, slots)
+
+func _get_id_of_entity_name(entity_name: String) -> int:
+	if not EntityManager.entity_name_exists(entity_name):
+		return -1
+	return EntityManager.get_entity_index(entity_name)
+
+func get_id_of_str_or_complex_entity_name(str_or_complex_entity_name: Variant, slots: Dictionary) -> int:
+	if typeof(str_or_complex_entity_name) == TYPE_STRING:
+		return _get_id_of_entity_name(str_or_complex_entity_name)
+	if not typeof(str_or_complex_entity_name) == TYPE_DICTIONARY:
+		push_error("Invalid type for str or complex entity name: %s" % [typeof(str_or_complex_entity_name)])
+		return -1
+	return get_id_of_complex_entity_name(str_or_complex_entity_name, slots)
+
+func get_id_of_complex_entity_name(complex_entity_name: Dictionary, slots: Dictionary) -> int:
+	var name_str: String = get_complex_string_value(complex_entity_name, slots)
+	return _get_id_of_entity_name(name_str)
+

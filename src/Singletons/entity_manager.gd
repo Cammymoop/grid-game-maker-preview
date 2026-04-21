@@ -842,6 +842,35 @@ func find_closest_entity_with_property(prop_name: String, from_position: Vector2
             closest_entity = entity
     return closest_entity
 
+func find_closest_entity_with_truthy_property(prop_name: String, from_position: Vector2i, is_truthy: bool = true, exclude_list: Array = [], include_inactive: bool = false) -> BaseEntity:
+    var closest_dist: float = -1
+    var closest_entity: BaseEntity = null
+    for entity in entity_list:
+        if not include_inactive and not entity.active or entity in exclude_list:
+            continue
+        var value: = get_entity_prop_is_truthy(entity, prop_name, false)
+        if value != is_truthy:
+            continue
+        var euclidean_dist: = from_position.distance_to(entity.get_moving_position())
+        if closest_dist < 0 or euclidean_dist < closest_dist:
+            closest_dist = euclidean_dist
+            closest_entity = entity
+    return closest_entity
+
+func find_closest_entity_with_id(id: int, from_position: Vector2i, exclude_list: Array = [], include_inactive: bool = false) -> BaseEntity:
+    var closest_dist: float = -1
+    var closest_entity: BaseEntity = null
+    for entity in entity_list:
+        if entity.entity_index != id:
+            continue
+        if not include_inactive and not entity.active or entity in exclude_list:
+            continue
+        var euclidean_dist: = from_position.distance_to(entity.get_moving_position())
+        if closest_dist < 0 or euclidean_dist < closest_dist:
+            closest_dist = euclidean_dist
+            closest_entity = entity
+    return closest_entity
+
 func create_index_map() -> void:
     entity_index_map = {}
     

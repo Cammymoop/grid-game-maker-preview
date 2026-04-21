@@ -29,7 +29,7 @@ enum InputTypes {
 var templates: = {
 	InputTypes.PropertyInput: preload("res://src/GameEditor/ConditionalEditor/PropertyInput.gd"),
 	InputTypes.TileNameInput: preload("res://src/GameEditor/ConditionalEditor/tile_name_input.gd"),
-	InputTypes.EntityNameInput: preload("res://src/GameEditor/ConditionalEditor/entity_name_input.gd"),
+	InputTypes.EntityNameInput: preload("res://Scenes/GameEditor/ConditionalEditor/complex_entity_name_input.tscn"),
 	InputTypes.SignalInput: preload("res://Scenes/GameEditor/ConditionalEditor/generic_input.tscn"),
 	
 	InputTypes.ScalarInput: preload("res://Scenes/GameEditor/ConditionalEditor/scalar_value_input.tscn"),

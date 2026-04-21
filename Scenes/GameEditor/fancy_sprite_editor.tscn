@@ -154,6 +154,7 @@ size_flags_vertical = 4
 stretch = true
 
 [node name="SubViewport" type="SubViewport" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/PreviewColumn/SpritePreviewer/PreviewSection/HBoxContainer/VBoxContainer/PanelContainer/MarginContainer/SubViewportContainer" unique_id=1521900232]
+transparent_bg = true
 handle_input_locally = false
 canvas_item_default_texture_filter = 0
 size = Vector2i(72, 64)
@@ -162,8 +163,7 @@ size_2d_override_stretch = true
 render_target_update_mode = 4
 script = ExtResource("3_vsv20")
 
-[node name="Sprite2D" type="Sprite2D" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/PreviewColumn/SpritePreviewer/PreviewSection/HBoxContainer/VBoxContainer/PanelContainer/MarginContainer/SubViewportContainer/SubViewport" unique_id=36484924]
-visible = false
+[node name="PreviewBG" type="Sprite2D" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/PreviewColumn/SpritePreviewer/PreviewSection/HBoxContainer/VBoxContainer/PanelContainer/MarginContainer/SubViewportContainer/SubViewport" unique_id=36484924]
 texture_repeat = 2
 position = Vector2(-8.888889, -10.5)
 texture = ExtResource("9_aov4j")
@@ -191,20 +191,24 @@ text = "spin"
 [node name="DirectionalButtons" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/PreviewColumn/SpritePreviewer/PreviewSection/HBoxContainer" unique_id=1971834257 instance=ExtResource("6_huvp6")]
 layout_mode = 2
 
-[node name="HBoxContainer" type="HBoxContainer" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/PreviewColumn" unique_id=1102466442]
+[node name="HBoxContainer" type="HBoxContainer" parent="PanelContainer/MarginContainer" unique_id=1102466442]
 layout_mode = 2
+size_flags_horizontal = 8
+size_flags_vertical = 8
+theme_override_constants/separation = 12
+alignment = 1
 
-[node name="OkButton" type="Button" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/PreviewColumn/HBoxContainer" unique_id=393528458]
+[node name="OkButton" type="Button" parent="PanelContainer/MarginContainer/HBoxContainer" unique_id=393528458]
 layout_mode = 2
 size_flags_horizontal = 4
 theme_type_variation = &"BigTextButton"
 text = "OK"
 
-[node name="Spacer" type="Control" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/PreviewColumn/HBoxContainer" unique_id=896218389]
+[node name="Spacer" type="Control" parent="PanelContainer/MarginContainer/HBoxContainer" unique_id=896218389]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="ResetChangesButton" type="Button" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/PreviewColumn/HBoxContainer" unique_id=972349672]
+[node name="ResetChangesButton" type="Button" parent="PanelContainer/MarginContainer/HBoxContainer" unique_id=972349672]
 layout_mode = 2
 size_flags_horizontal = 4
 theme_type_variation = &"BigTextButton"
@@ -212,5 +216,5 @@ text = "Reset Changes"
 
 [connection signal="pressed" from="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer/AddLayerButton" to="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer/ScrollContainer/FancySpriteLayerList" method="append_new_layer_auto"]
 [connection signal="facing_pressed" from="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/PreviewColumn/SpritePreviewer/PreviewSection/HBoxContainer/DirectionalButtons" to="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/PreviewColumn/SpritePreviewer" method="set_sprite_facing"]
-[connection signal="pressed" from="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/PreviewColumn/HBoxContainer/OkButton" to="." method="close_sprite_editor"]
-[connection signal="pressed" from="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/PreviewColumn/HBoxContainer/ResetChangesButton" to="." method="restore_sprite_config"]
+[connection signal="pressed" from="PanelContainer/MarginContainer/HBoxContainer/OkButton" to="." method="close_sprite_editor"]
+[connection signal="pressed" from="PanelContainer/MarginContainer/HBoxContainer/ResetChangesButton" to="." method="restore_sprite_config"]
