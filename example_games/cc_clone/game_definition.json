@@ -592,7 +592,8 @@
       "texture": 1,
       "tex_index": 19,
       "properties": {
-        "finish_move_onto": {
+        "z-index": -1,
+        "half_moved_onto": {
           "v": "3",
           "conditions": [
             "basic_default.c_has_property::[\"i:1\",false,\"s:solid\"]",
@@ -608,7 +609,7 @@
           "when false": [],
           "when always": []
         },
-        "post_move_off_of": [
+        "half_moved_off_of": [
           {
             "v": "3",
             "conditions": [
@@ -622,15 +623,15 @@
               "basic_default.a_set_tiles::[\"i:4\",\"s:trap-active\"]"
             ],
             "when false": [
-              "basic_default.quit::[\"i:0\"]"
+              "basic_default.quit::[\"i:-1\"]"
             ],
             "when always": []
           },
           {
             "v": "3",
             "conditions": [
-              "basic_default.select_entity_at::[\"i:0\",\"i:4\",\"s:cage\",false]",
-              "basic_default.exists::[\"i:0\"]",
+              "basic_default.select_entity_at::[\"i:2\",\"i:4\",\"s:cage\",false]",
+              "basic_default.exists::[\"i:2\"]",
               "not"
             ],
             "when true": [
@@ -639,8 +640,7 @@
             "when false": [],
             "when always": []
           }
-        ],
-        "z-index": -1
+        ]
       }
     },
     "25": {
