@@ -81,7 +81,9 @@
           "when false": [],
           "when always": []
         },
-        "move-animation": "stepped"
+        "move-animation": "stepped",
+        "tasty-looking": true,
+        "eats": true
       },
       "groups": [
         "Player"
@@ -161,7 +163,9 @@
         "can-cross-gravel": true,
         "can-cross-goal": true,
         "z-index": 1,
-        "solid": true
+        "solid": true,
+        "fire-resistant": true,
+        "eats": true
       },
       "intended_move_speed": 0.0
     },
@@ -307,7 +311,8 @@
           "when always": []
         },
         "solid": true,
-        "move-animation": "stepped"
+        "move-animation": "stepped",
+        "eats": true
       },
       "intended_move_speed": 5.0,
       "controller": "creature_controller",
@@ -337,7 +342,8 @@
           "when always": []
         },
         "solid": true,
-        "move-animation": "stepped"
+        "move-animation": "stepped",
+        "eats": true
       },
       "intended_move_speed": 5.0,
       "controller": "creature_controller",
@@ -400,10 +406,16 @@
           "when always": []
         },
         "solid": true,
-        "move-animation": "stepped"
+        "move-animation": "stepped",
+        "eats": true
       },
       "controller": "direct_chase_controller",
-      "intended_move_speed": 3.0
+      "intended_move_speed": 3.0,
+      "controller_options": {
+        "always_update_target": true,
+        "only_target_active": true,
+        "target_entity_property": "tasty-looking"
+      }
     },
     "16": {
       "name": "thin-wall",
@@ -659,7 +671,8 @@
           "when false": [],
           "when always": []
         },
-        "fire-averse": true
+        "fire-averse": true,
+        "eats": true
       },
       "intended_move_speed": 2.0,
       "controller": "random_creature_controller",
@@ -759,7 +772,8 @@
           ],
           "when false": [],
           "when always": []
-        }
+        },
+        "fire-averse": true
       },
       "controller": "creature_controller",
       "intended_move_speed": 3.0,
@@ -1050,6 +1064,27 @@
           ]
         }
       }
+    },
+    "39": {
+      "name": "cherry",
+      "texture": 1,
+      "tex_index": 11,
+      "properties": {
+        "z-index": -1,
+        "tasty-looking": true,
+        "finish_move_onto": {
+          "v": "3",
+          "conditions": [
+            "basic_default.if_property_value::[\"i:1\",\"s:eats\",true]"
+          ],
+          "when true": [
+            "basic_default.a_die::[\"i:0\"]"
+          ],
+          "when false": [],
+          "when always": []
+        }
+      },
+      "intended_move_speed": 0.0
     }
   },
   "tile_definitions": {
