@@ -1,0 +1,35 @@
+[gd_scene format=3 uid="uid://dh8ctb2t2i3ii"]
+
+[ext_resource type="Script" uid="uid://dlv4x6g4dlnyt" path="res://Scenes/GameEditor/ConditionalEditor/complex_prop_value_input.gd" id="1_f71ht"]
+[ext_resource type="Theme" uid="uid://bsgfiyn76a5op" path="res://assets/ui/complex_prop_value_input.tres" id="1_hkq6x"]
+[ext_resource type="PackedScene" uid="uid://bh1w4w8i5hk66" path="res://Scenes/GameEditor/SlotSelectorButton.tscn" id="2_fch6m"]
+[ext_resource type="PackedScene" uid="uid://ba6ojoxwk1drt" path="res://Scenes/GameEditor/multi_type_input.tscn" id="3_hkq6x"]
+
+[node name="ComplexPropValueInput" type="HBoxContainer" unique_id=1726993889 node_paths=PackedStringArray("slot_selector", "plain_multi_type_input")]
+offset_right = 163.0
+offset_bottom = 31.0
+theme = ExtResource("1_hkq6x")
+script = ExtResource("1_f71ht")
+slot_selector = NodePath("SlotSelectorButton")
+plain_multi_type_input = NodePath("MultiTypeInput")
+
+[node name="SlotSelectorButton" parent="." unique_id=1264497244 instance=ExtResource("2_fch6m")]
+layout_mode = 2
+show_number_option = true
+show_text_option = true
+show_bool_option = true
+default_slot_id = -4
+
+[node name="MultiTypeInput" parent="." unique_id=1750676706 instance=ExtResource("3_hkq6x")]
+layout_mode = 2
+size_flags_vertical = 4
+show_type_picker = false
+
+[node name="OptionButton" parent="MultiTypeInput" index="0" unique_id=153621437]
+visible = false
+
+[node name="ScalarValueInput" parent="MultiTypeInput" index="2" unique_id=1458729988]
+custom_minimum_size = Vector2(60, 0)
+
+[editable path="MultiTypeInput"]
+[editable path="MultiTypeInput/ScalarValueInput"]

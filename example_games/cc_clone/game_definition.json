@@ -30,7 +30,7 @@
       "name": "playerVariants.png",
       "texture_id": 3.0
     }
-  ],
+    ],
   "entity_definitions": {
     "0": {
       "name": "player",
@@ -196,7 +196,8 @@
           "when always": []
         },
         "z-index": -1,
-        "solid": true
+        "solid": true,
+        "no-rotate": true
       },
       "intended_move_speed": 0.0
     },
@@ -385,7 +386,8 @@
           "when true": [],
           "when false": [],
           "when always": []
-        }
+        },
+        "no-rotate": true
       },
       "intended_move_speed": 0.0
     },
@@ -506,7 +508,8 @@
           "when true": [],
           "when false": [],
           "when always": []
-        }
+        },
+        "no-rotate": true
       }
     },
     "20": {
@@ -535,7 +538,8 @@
           "when true": [],
           "when false": [],
           "when always": []
-        }
+        },
+        "no-rotate": true
       },
       "intended_move_speed": 0.0
     },
@@ -565,7 +569,8 @@
           "when true": [],
           "when false": [],
           "when always": []
-        }
+        },
+        "no-rotate": true
       }
     },
     "22": {
@@ -1045,7 +1050,40 @@
           "when always": []
         },
         "blocks": true,
-        "clone-entity": "chaser"
+        "clone-entity": "chaser",
+        "preview-loaded": false,
+        "idle_update": [
+          {
+            "v": "3",
+            "conditions": [
+              "basic_default.if_property_value::[\"i:0\",\"s:preview-loaded\",true]"
+            ],
+            "when true": [
+              "basic_default.quit::[\"i:-1\"]"
+            ],
+            "when false": [],
+            "when always": []
+          },
+          {
+            "v": "3",
+            "conditions": [
+              "basic_default.select_entity_at::[\"i:2\",\"i:4\",\"s:\",false]",
+              "basic_default.exists::[\"i:2\"]"
+            ],
+            "when true": [
+              "basic_default.a_set_property::[\"i:2\",\"s:z-index\",\"s:2\"]",
+              "basic_default.a_turn::[\"i:2\",{\"args\":[\"s:type\",\"s:plain\",\"s:direction\",\"i:12\"],\"type\":\"Dictionary\"}]",
+              "basic_default.make_entity_dependent::[\"i:2\",\"i:0\"]",
+              "basic_default.apply_effect_to_entity::[\"i:2\",\"s:Shrink\"]",
+              "basic_default.set_entity_as_active::[\"i:2\",false]",
+              "basic_default.select_name_of_entity::[\"i:12\",\"i:2\"]",
+              "basic_default.a_set_property::[\"i:0\",\"s:clone-entity\",{\"args\":[\"s:type\",\"s:slot_value\",\"s:slot_id\",\"i:12\"],\"type\":\"Dictionary\"}]",
+              "basic_default.a_set_property::[\"i:0\",\"s:preview-loaded\",\"s:true\"]"
+            ],
+            "when false": [],
+            "when always": []
+          }
+        ]
       }
     },
     "38": {
@@ -1085,6 +1123,61 @@
         }
       },
       "intended_move_speed": 0.0
+    },
+    "40": {
+      "name": "respawner",
+      "texture": 0,
+      "tex_index": 44,
+      "properties": {
+        "blocks": true,
+        "clone-entity": "green_box",
+        "idle_update": [
+          {
+            "v": "3",
+            "conditions": [
+              "basic_default.if_property_value::[\"i:0\",\"s:created-preview\",false]"
+            ],
+            "when true": [
+              "basic_default.select_text_property::[\"i:12\",\"i:0\",\"s:clone-entity\"]",
+              "basic_default.select_created_entity::[\"i:2\",{\"args\":[\"s:type\",\"s:slot_value\",\"s:slot_id\",\"i:12\"],\"type\":\"Dictionary\"},\"i:0\",{\"args\":[\"s:type\",\"s:plain\",\"s:direction\",\"i:12\"],\"type\":\"Dictionary\"},false]",
+              "basic_default.apply_effect_to_entity::[\"i:2\",\"s:Shrink\"]",
+              "basic_default.set_entity_as_active::[\"i:2\",false]",
+              "basic_default.a_set_property::[\"i:2\",\"s:z-index\",\"s:2\"]",
+              "basic_default.a_set_property::[\"i:0\",\"s:created-preview\",\"s:true\"]",
+              "basic_default.quit::[\"i:-1\"]"
+            ],
+            "when false": [],
+            "when always": []
+          },
+          {
+            "v": "3",
+            "conditions": [
+              "basic_default.exists::[\"i:3\"]"
+            ],
+            "when true": [
+              "basic_default.quit::[\"i:-1\"]"
+            ],
+            "when false": [],
+            "when always": []
+          },
+          {
+            "v": "3",
+            "conditions": [
+              "basic_default.select_adjacent_tile::[\"i:4\",\"i:0\",{\"args\":[\"s:type\",\"s:plain\",\"s:direction\",\"i:12\"],\"type\":\"Dictionary\"}]",
+              "basic_default.select_entity_at::[\"i:2\",\"i:4\",\"s:solid\",false]",
+              "basic_default.exists::[\"i:2\"]",
+              "not"
+            ],
+            "when true": [
+              "basic_default.select_text_property::[\"i:12\",\"i:0\",\"s:clone-entity\"]",
+              "basic_default.select_created_entity::[\"i:3\",{\"args\":[\"s:type\",\"s:slot_value\",\"s:slot_id\",\"i:12\"],\"type\":\"Dictionary\"},\"i:0\",{\"args\":[\"s:type\",\"s:plain\",\"s:direction\",\"i:12\"],\"type\":\"Dictionary\"},true]"
+            ],
+            "when false": [],
+            "when always": []
+          }
+        ],
+        "created-preview": false
+      }
     }
   },
   "tile_definitions": {

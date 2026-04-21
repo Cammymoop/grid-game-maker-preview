@@ -68,7 +68,7 @@ var entity_name: String = ""
 var bond_group: Array = []
 var tailing: Node = null
 
-var depends_on_entities: Array[int] = []
+var subordinate_entities: Array[int] = []
 
 var friend_instance_id: int = -1
 
@@ -154,19 +154,32 @@ func check_visual_turn_on_move() -> void:
 			visual_turn_on_move = bool(move_turn.get_value())
 
 func add_depends_on_entity(on_entity: BaseEntity) -> void:
-	if not on_entity.instance_id in depends_on_entities:
-		depends_on_entities.append(on_entity.instance_id)
+	if on_entity and on_entity.instance_id != instance_id:
+		on_entity.add_dependant_entity(self)
 
-func remove_depends_on_entity(on_entity: BaseEntity) -> void:
-	depends_on_entities.erase(on_entity.instance_id)
+func add_dependant_entity(dependant_entity: BaseEntity) -> void:
+	if not dependant_entity.instance_id in subordinate_entities:
+		subordinate_entities.append(dependant_entity.instance_id)
+
+func remove_dependant_entity(dependant_entity: BaseEntity) -> void:
+	subordinate_entities.erase(dependant_entity.instance_id)
+
+func stop_depending_on_entity(on_entity: BaseEntity) -> void:
+	if on_entity and instance_id in on_entity.subordinate_entities:
+		on_entity.remove_dependant_entity(self)
+
+func stop_depending_on_all() -> void:
+	for on_entity in EntityManager.entity_list:
+		if instance_id in on_entity.subordinate_entities:
+			on_entity.remove_dependant_entity(self)
 
 func _handle_removed_entities() -> void:
-	if depends_on_entities.size() > 0:
-		var new_depends_on_entities: Array[int] = []
-		for on_inst_id in depends_on_entities:
+	if subordinate_entities.size() > 0:
+		var new_subordinate_entities: Array[int] = []
+		for on_inst_id in subordinate_entities:
 			if EntityManager.has_instance(on_inst_id):
-				new_depends_on_entities.append(on_inst_id)
-		depends_on_entities = new_depends_on_entities
+				new_subordinate_entities.append(on_inst_id)
+		subordinate_entities = new_subordinate_entities
 	if tailing:
 		if tailing.is_queued_for_deletion() or not EntityManager.has_instance(tailing.instance_id):
 			untail()
@@ -207,8 +220,8 @@ func serialize() -> Dictionary:
 	
 	important_stuff['deferred_signals'] = JSON.from_native(deferred_signals)
 	
-	if depends_on_entities.size() > 0:
-		important_stuff['depends_on_entities'] = depends_on_entities
+	if subordinate_entities.size() > 0:
+		important_stuff['subordinate_entities'] = subordinate_entities
 	
 	return important_stuff
 
@@ -251,8 +264,8 @@ func deserialize(data: Dictionary) -> void:
 	if 'friend_instance_id' in data:
 		friend_instance_id = int(data['friend_instance_id'])
 	
-	if 'depends_on_entities' in data:
-		depends_on_entities.assign(data['depends_on_entities'])
+	if 'subordinate_entities' in data:
+		subordinate_entities.assign(data['subordinate_entities'])
 	
 	if data.get('is_move_interp_override', false):
 		is_move_interp_override = true
@@ -401,6 +414,8 @@ func _set_local_property(property_name: String, value: Variant) -> void:
 	local_properties[property_name] = value
 	if property_name == "idle_update":
 		check_for_idle_update_conditional()
+	if property_name == "z-index":
+		update_z()
 
 func remove_local_property(property_name: String) -> void:
 	_remove_local_property(property_name)
@@ -410,6 +425,8 @@ func _remove_local_property(property_name: String) -> void:
 	local_properties.erase(property_name)
 	if EntityManager.entity_has_property(self, property_name):
 		removed_properties.append(property_name)
+	if property_name == "z-index":
+		update_z()
 
 func reset_local_property(property_name: String) -> void:
 	_reset_local_property(property_name)
@@ -418,6 +435,8 @@ func reset_local_property(property_name: String) -> void:
 func _reset_local_property(property_name: String) -> void:
 	local_properties.erase(property_name)
 	removed_properties.erase(property_name)
+	if property_name == "z-index":
+		update_z()
 
 func _local_prop_changed() -> void:
 	local_prop_changed.emit(self)
@@ -567,7 +586,7 @@ func set_controller(new_controller) -> void:
 
 func set_facing(new_facing):
 	facing = new_facing
-	var no_rotate = EntityManager.get_entity_property(self, "no_rotation")
+	var no_rotate = EntityManager.get_entity_property(self, "no-rotate")
 	if no_rotate != null and no_rotate.get_value():
 		return
 	sprite.set_sprite_rotation(Utility.facing_rotation(facing))
@@ -705,7 +724,7 @@ func _handle_signal(signaling_entity: BaseEntity, args: Array, signal_name: Stri
 func add_sprite_modifier(mod_info: Dictionary) -> void:
 	if not mod_info or not mod_info.get("name", ""):
 		return
-	sprite.apply_modifier(mod_info.get("name", ""), mod_info.get("layers", []), mod_info.get("mask_info", {}))
+	sprite.apply_modifier_info(mod_info)
 
 func remove_sprite_modifier(mod_info: Dictionary) -> void:
 	if not mod_info or not mod_info.get("name", ""):

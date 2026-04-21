@@ -1,0 +1,45 @@
+[gd_resource type="Theme" format=3 uid="uid://b2btk08yskrx0"]
+
+[ext_resource type="StyleBox" uid="uid://bjfdm7g0ured8" path="res://assets/ui/button_styles/thin_button_disabled.tres" id="1_io45v"]
+[ext_resource type="StyleBox" uid="uid://dwpyvi0mnhxyx" path="res://assets/ui/button_styles/thin_button_hover.tres" id="2_u6dp8"]
+[ext_resource type="StyleBox" uid="uid://cu78oa72kple8" path="res://assets/ui/button_styles/thin_button_normal.tres" id="3_s8b20"]
+[ext_resource type="StyleBox" uid="uid://cf4b0mxp54ien" path="res://assets/ui/button_styles/thin_button_pressed.tres" id="4_j0vxr"]
+[ext_resource type="StyleBox" uid="uid://ogiwpnowrwpm" path="res://assets/ui/property_list_input_box_focus.tres" id="5_b17oo"]
+[ext_resource type="StyleBox" uid="uid://esdhmf0o1vp8" path="res://assets/ui/property_edit_list_input_bg.tres" id="6_jekxw"]
+[ext_resource type="StyleBox" uid="uid://cd1he4mv351ao" path="res://assets/ui/property_edit_list_disabled_input_bg.tres" id="7_u6dp8"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_5uy45"]
+content_margin_left = 4.0
+content_margin_top = 4.0
+content_margin_right = 4.0
+content_margin_bottom = 4.0
+bg_color = Color(0.1, 0.1, 0.1, 0.6)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+corner_detail = 5
+
+[resource]
+Button/font_sizes/font_size = 14
+Button/styles/disabled = ExtResource("1_io45v")
+Button/styles/hover = ExtResource("2_u6dp8")
+Button/styles/normal = ExtResource("3_s8b20")
+Button/styles/pressed = ExtResource("4_j0vxr")
+Label/font_sizes/font_size = 14
+LineEdit/font_sizes/font_size = 14
+LineEdit/styles/focus = ExtResource("5_b17oo")
+LineEdit/styles/normal = ExtResource("6_jekxw")
+LineEdit/styles/read_only = ExtResource("7_u6dp8")
+PopupPanel/styles/panel = SubResource("StyleBoxFlat_5uy45")
+RichTextLabel/colors/selection_color = Color(0.14389294, 0.27054524, 0.46817178, 1)
+RichTextLabel/constants/strikethrough_alpha = 100
+RichTextLabel/font_sizes/bold_font_size = 14
+RichTextLabel/font_sizes/bold_italics_font_size = 14
+RichTextLabel/font_sizes/italics_font_size = 14
+RichTextLabel/font_sizes/mono_font_size = 14
+RichTextLabel/font_sizes/normal_font_size = 14
+SpinBoxInnerLineEdit/base_type = &"LineEdit"
+SpinBoxInnerLineEdit/font_sizes/font_size = 14
+TextEdit/constants/line_spacing = 0
+TextEdit/font_sizes/font_size = 14

@@ -8,6 +8,7 @@ const ScalarValueInput = preload("res://src/GameEditor/ConditionalEditor/scalar_
 @export var slot_selector: SlotSelectorButton
 @export var plain_value_input: ScalarValueInput
 
+@export var is_int_only: bool = false
 @export var plain_value_min: float = -100
 @export var plain_value_max: float = 100
 @export var plain_value_step: float = 1
@@ -24,13 +25,26 @@ func _ready():
     slot_selector.slot_changed.connect(on_slot_changed)
     
     plain_value_input.value_changed.connect(on_plain_value_changed)
+    if is_int_only:
+        _update_int_only()
     refresh_ui()
+
+func _update_int_only() -> void:
+    plain_value_input.is_int_type = true
+    plain_value_input.update_input_settings()
 
 func set_arg_name(new_arg_name: String) -> void:
     arg_name = new_arg_name
 
 func get_arg_name() -> String:
     return arg_name
+
+func set_input_args(new_args: Array) -> void:
+    if not new_args:
+        return
+    if "int" in new_args:
+        is_int_only = true
+        _update_int_only()
 
 func get_value() -> Dictionary:
     if current_slot_id == SlotSelectorButton.NUMBER_VALUE:
@@ -67,6 +81,7 @@ func refresh_ui() -> void:
     plain_value_input.custom_step_value = plain_value_step
     plain_value_input.min_value = plain_value_min
     plain_value_input.max_value = plain_value_max
+    plain_value_input.is_int_type = is_int_only
     plain_value_input.update_input_settings()
 
     if current_slot_id == SlotSelectorButton.NUMBER_VALUE:

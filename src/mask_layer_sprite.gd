@@ -15,6 +15,8 @@ var preview_info: Dictionary = {}
 var layer_order_id: int = 0
 
 var modifier_masks: Dictionary = {}
+var modifier_transforms: Dictionary = {}
+var modifier_scales: Dictionary = {}
 
 var prop_update_response: Dictionary[String, Array] = {}
 
@@ -184,6 +186,25 @@ func apply_modifier(modifier_name: String, modifier_layers: Array = [], modifier
         _apply_modifier_mask_modifier(modifier_name)
     refresh_layers()
 
+func apply_modifier_info(modifier_info: Dictionary) -> void:
+    modifier_info = modifier_info.duplicate_deep()
+    if not modifier_info.has("name"):
+        return
+    var modifier_name: String = modifier_info["name"]
+    if has_applied_modifier(modifier_name):
+        return
+    for layer in modifier_info.get("layers", []):
+        layer["modifier"] = modifier_name
+        _append_layer(layer)
+    modifier_masks[modifier_name] = modifier_info.get("mask_info", {})
+    if modifier_masks[modifier_name]:
+        _apply_modifier_mask_modifier(modifier_name)
+    if modifier_info.has("transform"):
+        modifier_transforms[modifier_name] = modifier_info["transform"]
+    if modifier_info.has("scale"):
+        modifier_scales[modifier_name] = modifier_info["scale"]
+    refresh_layers()
+
 func has_applied_modifier(modifier_name: String) -> bool:
     return modifier_name in modifier_masks
 
@@ -191,6 +212,8 @@ func remove_modifier(modifier_name: String) -> void:
     if not has_applied_modifier(modifier_name):
         return
     modifier_masks.erase(modifier_name)
+    modifier_transforms.erase(modifier_name)
+    modifier_scales.erase(modifier_name)
     _remove_modifier_layers(modifier_name)
     _apply_most_recent_modifier_mask()
     refresh_layers()
@@ -312,6 +335,7 @@ func create_and_add_nodes_for_layer(layer_info: Dictionary, layer_index: int) ->
 
     add_child(main_layer_node, true)
     var layer_scale: Vector2 = Utility.get_vector2_from_arr(layer_info.get("scale", [1,1]))
+    layer_scale *= _get_modifiers_scale()
     main_layer_node.scale = layer_scale
     
     main_layer_node.set_meta("modifier", layer_info.get("modifier", ""))
@@ -333,6 +357,9 @@ func create_and_add_nodes_for_layer(layer_info: Dictionary, layer_index: int) ->
         _update_spinning_layer(main_layer_node)
     else:
         _set_sprite_layer_rotation(main_layer_node, current_rotation)
+    
+    if layer_info.get("is_main_layer", false) and modifier_transforms.size() > 0:
+        _apply_modifier_transforms_to(main_layer_node)
 
 func _add_prop_upate_callable(prop_name: String, update_func: Callable) -> void:
     if not prop_update_response.has(prop_name):
@@ -374,6 +401,11 @@ func _remove_main_layers_mask() -> void:
         if not layer.get("is_main_layer", false):
             continue
         layer["masked"] = false
+
+func _apply_modifier_transforms_to(layer_node: Node2D) -> void:
+    for modifier_name in modifier_transforms:
+        var m_transform: Transform2D = modifier_transforms[modifier_name]
+        layer_node.transform = m_transform * layer_node.transform
 
 func clear_children() -> void:
     for child in get_children():
@@ -512,3 +544,8 @@ func show_hide_layer_expression(new_prop_value: Variant, expression: Expression,
     else:
         layer_node.hide()
     
+func _get_modifiers_scale() -> Vector2:
+    var m_scale: Vector2 = Vector2.ONE
+    for m_name in modifier_scales:
+        m_scale *= modifier_scales[m_name]
+    return m_scale

@@ -29,6 +29,8 @@ enum Slot {
 const SLOT_CATEGORIES: = {
 	Slot.RED: "entity",
 	Slot.BLUE: "entity",
+	Slot.WHITE: "entity",
+	Slot.PINK: "entity",
 	Slot.GREY: "pos",
 	Slot.BLACK: "pos",
 	Slot.A: "int",
@@ -96,11 +98,16 @@ func is_condition(command_id) -> bool:
 func is_action(command_id) -> bool:
 	return command_id >= FIRST_ACTION
 
+
 func slot_is_entity(slot_id: int) -> bool:
 	return slot_id >= Slot.RED and slot_id <= Slot.PINK
 
 func slot_is_positions(slot_id: int) -> bool:
 	return slot_id >= Slot.GREY and slot_id <= Slot.BLACK
+
+# Entity or tile position
+func slot_has_position(slot_id: int) -> bool:
+	return slot_id >= Slot.RED and slot_id <= Slot.BLACK
 
 
 func slot_is_scalar(slot_id: int) -> bool:

@@ -12,8 +12,8 @@ LineEdit/styles/read_only = SubResource("StyleBoxEmpty_1eekn")
 PanelContainer/styles/panel = ExtResource("1_oofn6")
 
 [node name="ScalarValueInput" type="PanelContainer" unique_id=1458729988 node_paths=PackedStringArray("value_input")]
-offset_right = 16.0
-offset_bottom = 16.0
+offset_right = 51.78125
+offset_bottom = 23.0
 theme = SubResource("Theme_oofn6")
 script = ExtResource("1_8ivw8")
 value_input = NodePath("Value")

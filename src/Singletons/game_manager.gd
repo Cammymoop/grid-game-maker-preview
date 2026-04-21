@@ -47,6 +47,7 @@ const SPECIAL_PROPS: Array[String] = [
 	"no-museum", "museum-active",
 	"move-animation", "controller-disabled",
 	"actions-disabled",
+	"no-rotate",
 ]
 
 @export_file("*.json") var builtin_default_game_file: String = ""

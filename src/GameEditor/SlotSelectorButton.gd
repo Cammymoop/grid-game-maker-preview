@@ -5,6 +5,7 @@ signal slot_changed(new_slot_id)
 @export var show_any_option: bool = false
 @export var show_number_option: bool = false
 @export var show_text_option: bool = false
+@export var show_bool_option: bool = false
 @export var args_enabled: bool = false
 @export var default_slot_id: int = Commands.Slot.RED
 
@@ -16,6 +17,7 @@ signal slot_changed(new_slot_id)
 const ANY_SLOT: int = -2
 const NUMBER_VALUE: int = -3
 const TEXT_VALUE: int = -4
+const BOOL_VALUE: int = -5
 
 var slot_textures: = {
     Commands.Slot.RED:    preload("res://assets/img/button_icons/slot_icons/red_diamond.png"),
@@ -46,6 +48,7 @@ var slot_textures: = {
     ANY_SLOT: preload("res://assets/img/button_icons/slot_icons/any.png"),
     NUMBER_VALUE: preload("res://assets/img/button_icons/slot_icons/num.png"),
     TEXT_VALUE: preload("res://assets/img/button_icons/slot_icons/text.png"),
+    BOOL_VALUE: preload("res://assets/img/button_icons/slot_icons/true_false.png"),
 }
 
 var slot_ids: = {
@@ -77,6 +80,7 @@ var slot_ids: = {
     any= ANY_SLOT,
     num= NUMBER_VALUE,
     text= TEXT_VALUE,
+    tf= BOOL_VALUE,
 }
 
 var disabled_slots: Array = []

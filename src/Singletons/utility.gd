@@ -499,6 +499,16 @@ func property_value_nonempty_string(prop_value: Variant, default_value: String) 
 		return default_value
 	return str_value
 
+func property_value_from_string(str_value: String) -> Variant:
+	if str_value.is_valid_float():
+		var float_value: = float(str_value)
+		if is_float_integer(float_value):
+			return int(float_value)
+		return float_value
+	elif str_value.to_lower() in ["true", "false"]:
+		return true if str_value.to_lower() == "true" else false
+	return str_value
+
 func property_value_scalar(prop_value: Variant, default_value: float) -> float:
 	if typeof(prop_value) in [TYPE_INT, TYPE_FLOAT]:
 		return float(prop_value)

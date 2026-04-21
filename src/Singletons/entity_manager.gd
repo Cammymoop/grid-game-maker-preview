@@ -1208,20 +1208,45 @@ func erase_all_entities_with_id(entity_index: int) -> void:
             remove_entity(entity, false)
     on_entities_removed()
 
+func get_all_entities_depending_on(entity: BaseEntity, include_self: bool = true) -> Array[BaseEntity]:
+    var collected_instances: Array[int] = []
+    _collect_entity_subordinates(entity.instance_id, collected_instances)
+    if include_self:
+        collected_instances.append(entity.instance_id)
+    var entities: Array[BaseEntity] = []
+    for instance_id in collected_instances:
+        entities.append(entity_instance_map[instance_id])
+    return entities
+
+func _collect_entity_subordinates(of_instance_id: int, collected: Array[int]) -> void:
+    if not entity_index_map.has(of_instance_id):
+        return
+    for subordinate_id in entity_index_map[of_instance_id].subordinate_entities:
+        if not subordinate_id in collected:
+            collected.append(subordinate_id)
+            _collect_entity_subordinates(subordinate_id, collected)
+
 func remove_entity(entity: BaseEntity, do_emit: bool = true) -> void:
-    if entity in entity_signal_connections:
-        for connected_sig in entity_signal_connections.get(entity, []):
-            var signal_connections = get_signal_connection_list(connected_sig)
-            for sig_conn in signal_connections:
-                if (sig_conn.callable as Callable).get_object() == entity:
-                    sig_conn.signal.disconnect(sig_conn.callable)
-        entity_signal_connections.erase(entity)
-    entity_list.erase(entity)
-    if entity.bond_group:
-        unbond_entity(entity)
-    entity.remove_from_group("_entity_")
-    entity.set_active(false)
-    entity.call_deferred("queue_free")
+    _remove_entities(get_all_entities_depending_on(entity), do_emit)
+
+func _remove_entities(to_remove_entities: Array[BaseEntity], do_emit: bool = true) -> void:
+    for entity in to_remove_entities:
+        if not entity.instance_id in entity_instance_map:
+            continue
+        if entity in entity_signal_connections:
+            for connected_sig in entity_signal_connections.get(entity, []):
+                var signal_connections = get_signal_connection_list(connected_sig)
+                for sig_conn in signal_connections:
+                    if (sig_conn.callable as Callable).get_object() == entity:
+                        sig_conn.signal.disconnect(sig_conn.callable)
+            entity_signal_connections.erase(entity)
+        entity_instance_map.erase(entity.instance_id)
+        entity_list.erase(entity)
+        if entity.bond_group:
+            unbond_entity(entity)
+        entity.remove_from_group("_entity_")
+        entity.set_active(false)
+        entity.call_deferred("queue_free")
     
     if do_emit:
         on_entities_removed()
@@ -1299,3 +1324,30 @@ func get_all_active_entities() -> Array[BaseEntity]:
         if entity.active:
             active_entities.append(entity)
     return active_entities
+
+var special_effects: Dictionary = {
+    "Shrink": {
+        "name": "effect-shrink",
+        "scale": Vector2(0.65, 0.65),
+    },
+    "Grow": {
+        "name": "effect-grow",
+        "scale": Vector2(1.25, 1.25),
+    },
+}
+
+func apply_special_effect(entity: BaseEntity, effect_name: String) -> void:
+    if not entity or not effect_name in special_effects:
+        return
+    entity.add_sprite_modifier(special_effects[effect_name])
+
+func remove_special_effect(entity: BaseEntity, effect_name: String) -> void:
+    if not entity or not effect_name in special_effects:
+        return
+    entity.remove_sprite_modifier(special_effects[effect_name])
+
+func clear_special_effects(entity: BaseEntity) -> void:
+    if not entity:
+        return
+    for effect_name in special_effects:
+        entity.remove_sprite_modifier(special_effects[effect_name])

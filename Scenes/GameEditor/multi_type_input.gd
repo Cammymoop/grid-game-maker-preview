@@ -1,12 +1,14 @@
 extends Control
 
 signal value_changed(new_value: Variant)
+signal value_type_changed(new_native_type: int)
 signal input_focus_out()
 signal input_focus_in()
 
 const ScalarValueInput = preload("res://src/GameEditor/ConditionalEditor/scalar_value_input.gd")
 const AdaptableMultiLineEdit = preload("res://Scenes/GameEditor/adaptable_multi_line_edit.gd")
 
+@export var show_type_picker: bool = true
 @export var type_picker: OptionButton
 
 @export var text_input: AdaptableMultiLineEdit
@@ -25,6 +27,13 @@ const type_picker_items: Dictionary = {
     2: {"short_name": "T/F", "description": "True or False"},
     4: {"short_name": "Num", "description": "Number"},
     8: {"short_name": "?", "description": "Conditional"},
+}
+
+const NATIVE_TYPES: Dictionary[int, int] = {
+    1: TYPE_STRING,
+    2: TYPE_BOOL,
+    4: TYPE_INT,
+    8: TYPE_DICTIONARY,
 }
 
 var current_type_id: int = 0
@@ -56,6 +65,9 @@ func _ready() -> void:
     
     text_input.multi_line_editing_toggled.connect(on_text_editing_toggled)
     text_input.focus_entered.connect(input_focus_in.emit)
+    
+    if not show_type_picker:
+        type_picker.hide()
 
 func on_value_edited(new_value: Variant) -> void:
     current_value = new_value
@@ -71,6 +83,7 @@ func _setup_type_picker(with_enabled_types: int) -> void:
             index += 1
 
 func set_value(new_value: Variant) -> void:
+    var old_type_id: int = current_type_id
     if not is_node_ready():
         push_error("Setting multi-type input value before ready")
         return
@@ -87,7 +100,8 @@ func set_value(new_value: Variant) -> void:
     else:
         current_value = str(new_value)
         current_type_id = 1
-    pick_type_id(current_type_id)
+    if old_type_id != current_type_id:
+        pick_type_id(current_type_id)
     set_input_value_from_current_value()
     show_input_for_current_type()
 
@@ -102,8 +116,25 @@ func pick_type_id(type_id: int) -> void:
             type_picker.select(i)
             if enabled_types & type_id == 0:
                 type_picker.set_item_disabled(i, true)
+    value_type_changed.emit(NATIVE_TYPES[type_id])
 
-func on_type_selected(index: int, allow_grabbing_focus: bool = true) -> void:
+func set_type_from_gd_type(new_type: int) -> void:
+    var my_type: int = 0
+    if new_type == TYPE_STRING:
+        my_type = 1
+    elif new_type == TYPE_BOOL:
+        my_type = 2
+    elif new_type == TYPE_INT or new_type == TYPE_FLOAT:
+        my_type = 4
+    elif new_type == TYPE_DICTIONARY or new_type == TYPE_ARRAY:
+        my_type = 8
+    else:
+        my_type = 1
+        push_warning("Unhandled native type for multi-type input: %s" % type_string(new_type))
+    var type_index: int = Utility.opbtn_get_index_from_id(type_picker, my_type)
+    on_type_selected(type_index, false, false)
+
+func on_type_selected(index: int, allow_grabbing_focus: bool = true, do_emit: bool = true) -> void:
     var type_id: int = type_picker.get_item_id(index)
     var emit_changed: bool = false
     if type_id != current_type_id:
@@ -115,8 +146,11 @@ func on_type_selected(index: int, allow_grabbing_focus: bool = true) -> void:
     if allow_grabbing_focus:
         try_grab_focus()
 
-    if emit_changed:
+    if emit_changed and do_emit:
+        value_type_changed.emit(typeof(current_value))
         value_changed.emit(current_value)
+    if show_type_picker != type_picker.visible:
+        type_picker.visible = show_type_picker
 
 func try_grab_focus() -> void:
     if current_type_id == 1:

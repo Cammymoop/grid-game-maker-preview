@@ -271,3 +271,39 @@ func get_id_of_complex_entity_name(complex_entity_name: Dictionary, slots: Dicti
 	var name_str: String = get_complex_string_value(complex_entity_name, slots)
 	return _get_id_of_entity_name(name_str)
 
+func get_single_position_from_slot(slot_id: int, slots: Dictionary, fallback_pos: Vector2i = Vector2i.ZERO) -> Vector2i:
+	if not Commands.slot_has_position(slot_id):
+		push_error("Invalid slot to get single position from: %s" % [slot_id])
+		return fallback_pos
+	elif not slots[slot_id]:
+		return fallback_pos
+	if Commands.slot_is_positions(slot_id):
+		return slots[slot_id][0]
+	else:
+		return slots[slot_id].get_moving_position()
+
+func resolve_complex_compat_prop_value(complex_prop_value: Variant, slots: Dictionary) -> Variant:
+	if typeof(complex_prop_value) == TYPE_STRING:
+		return Utility.property_value_from_string(complex_prop_value)
+	elif typeof(complex_prop_value) == TYPE_DICTIONARY:
+		return resolve_complex_prop_value(complex_prop_value, slots)
+	else:
+		push_error("Invalid complex prop value type: %s" % [typeof(complex_prop_value)])
+		return 0
+
+func resolve_complex_prop_value(complex_prop_value: Dictionary, slots: Dictionary) -> Variant:
+	if complex_prop_value["type"] == "plain":
+		return complex_prop_value["value"]
+	elif complex_prop_value["type"] == "slot_value":
+		var chosen_slot: int = complex_prop_value["slot_id"]
+		if Commands.slot_is_value(chosen_slot):
+			return slots[chosen_slot]
+		elif Commands.slot_is_argument(chosen_slot):
+			push_error("Arguments not implemented")
+			return 0
+		else:
+			push_error("Invalid complex prop value slot: %s" % [chosen_slot])
+			return 0
+	else:
+		push_error("Invalid complex prop value native type: %s" % [complex_prop_value["type"]])
+		return 0

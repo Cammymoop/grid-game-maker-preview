@@ -46,6 +46,38 @@ func cmd_select_tiles_rect(slots: Dictionary, chosen_slot: Slot, top_left: Vecto
 			positions.append(top_left + Vector2i(xi, yi))
 	slots[chosen_slot] = positions
 
+func desc_select_tiles_in_direction() -> String:
+	return "pos|<= Select the position(s) [dist:ComplexScalarInput:int] spaces in this direction [compl_dir:DirectionInput:1] from [from_slot:SlotInput:pos,entity]"
+func cmd_select_tiles_in_direction(slots: Dictionary, chosen_slot: int, compl_dir: Dictionary, dist: Dictionary, from_slot: int) -> void:
+	if not Commands.slot_is_positions(chosen_slot) or not Commands.slot_is_positions(from_slot) or not Commands.slot_is_entity(from_slot):
+		push_error("Invalid slots to select tile in direction: %s, %s" % [chosen_slot, from_slot])
+		return
+	var distance_int: = int(resolve_complex_scalar(dist, slots))
+	var facing_vec: = Utility.facing_vector_i(resolve_complex_direction(compl_dir, slots))
+	var from_positions: Array = slots[from_slot] if Commands.slot_is_positions(from_slot) else [slots[from_slot].get_moving_position()]
+	var moved_positions: Array[Vector2i] = []
+	var delta: = facing_vec * distance_int
+	for from_pos in from_positions:
+		moved_positions.append(from_pos + delta)
+	slots[chosen_slot] = moved_positions
+
+func desc_select_adjacent_tile() -> String:
+	return "pos|<= Select the single position adjacent to [from_slot:SlotInput:pos,entity] in this direction [compl_dir:DirectionInput:1]"
+func cmd_select_adjacent_tile(slots: Dictionary, chosen_slot: int, from_slot: int, compl_dir: Dictionary) -> void:
+	if not Commands.slot_is_positions(chosen_slot) or not Commands.slot_has_position(from_slot):
+		push_error("Invalid slots to select adjacent tile: %s, %s" % [chosen_slot, from_slot])
+		return
+	var from_pos: Vector2i = Vector2i.ZERO
+	if Commands.slot_is_positions(from_slot):
+		if not slots[from_slot]:
+			slots[chosen_slot] = []
+			return
+		from_pos = slots[from_slot][0]
+	else:
+		from_pos = slots[from_slot].get_moving_position()
+	slots[chosen_slot] = [from_pos + Utility.facing_vector_i(resolve_complex_direction(compl_dir, slots))]
+
+
 func desc_select_tiles_around() -> String:
 	return "pos|<= Select positions within [radius:ComplexScalarInput] (full square)"
 func cmd_select_tiles_around(slots: Dictionary, chosen_slot: int, radius: Dictionary) -> void:
@@ -69,7 +101,8 @@ func cmd_select_entity_at(slots: Dictionary, chosen_slot: int, at_pos_slot: int,
 		slots[chosen_slot] = null
 		return
 	var filtered_entities: Array = EntityManager.get_entities_at_multiple(at_positions, slots[Slot.RED], [], true, false)
-	filtered_entities = EntityManager.filter_entities_by_property(prop_name, filtered_entities, invert)
+	if prop_name:
+		filtered_entities = EntityManager.filter_entities_by_property(prop_name, filtered_entities, invert)
 	slots[chosen_slot] = filtered_entities[0] if filtered_entities else null
 
 func desc_select_nearest_entity() -> String:
@@ -375,6 +408,14 @@ func cmd_a_move(slots: Dictionary, chosen_slot: int, complex_dir: Dictionary) ->
 		var selected = slots[chosen_slot]
 		selected.start_move(resolve_complex_direction(complex_dir, slots))
 
+func desc_move_facing() -> String:
+	return "entity|The entity starts moving this way [compl_move:DirectionInput:1] while facing this way [compl_face:DirectionInput:1]"
+func cmd_move_facing(slots: Dictionary, chosen_slot: int, compl_move: Dictionary, compl_face: Dictionary) -> void:
+	if Commands.slot_is_entity(chosen_slot) and slots[chosen_slot]:
+		var selected: BaseEntity = slots[chosen_slot]
+		selected.set_facing(resolve_complex_direction(compl_face, slots))
+		selected.start_move(resolve_complex_direction(compl_move, slots), false)
+
 func desc_a_swap_tiles() -> String:
 	return "pos|Swap the tiles here, switching [a_name:TileNameInput] and [b_name:TileNameInput]"
 func cmd_a_swap_tiles(slots: Dictionary, chosen_slot: int, a_name: String, b_name: String) -> void:
@@ -397,24 +438,17 @@ func cmd_erase_tiles(slots: Dictionary, chosen_slot: int) -> void:
 	MapManager.erase_tiles_and_effects_at_array(slots[chosen_slot])
 
 func desc_a_set_property() -> String:
-	return "entity,pos|Set the entity or tile's [property_name:PropertyInput] property to [value:StringInput]"
-func cmd_a_set_property(slots: Dictionary, chosen_slot: int, property_name: String, value: String) -> void:
-	var converted_value: Variant = value
-	if value == "true" or value == "false":
-		converted_value = value == "true"
-	elif value.is_valid_float():
-		if value.is_valid_int():
-			converted_value = int(value)
-		else:
-			converted_value = float(value)
+	return "entity,pos|Set the entity or tile's [property_name:PropertyInput] property to [value:ComplexPropValueInput:compat]"
+func cmd_a_set_property(slots: Dictionary, chosen_slot: int, property_name: String, value: Variant) -> void:
+	var converted_value: Variant = resolve_complex_compat_prop_value(value, slots)
 
-	if Commands.slot_is_entity(chosen_slot):
-		if slots[chosen_slot]:
-			slots[chosen_slot].set_local_property(property_name, converted_value)
+	if Commands.slot_is_entity(chosen_slot) and slots[chosen_slot]:
+		slots[chosen_slot].set_local_property(property_name, converted_value)
 	elif Commands.slot_is_positions(chosen_slot):
 		var positions: Array = slots[chosen_slot]
-		if positions.size() > 0:
-			MapManager.set_tile_property_at_multiple(positions, property_name, converted_value)
+		if positions.size() == 0:
+			positions = MapManager.get_used_positions_in_all_layers()
+		MapManager.set_tile_property_at_multiple(positions, property_name, converted_value)
 
 func desc_a_property_add() -> String:
 	return "entity|Add [amount:ComplexScalarInput] to the entity's [property_name:PropertyInput] property"
@@ -474,6 +508,14 @@ func desc_a_load_checkpoint() -> String:
 func cmd_a_load_checkpoint(_slots: Dictionary) -> void:
 	GameManager.load_checkpoint.call_deferred()
 
+func _create_entity_at(e_id: int, pos: Vector2i, facing: int, is_moving: bool) -> BaseEntity:
+	var new_entity = EntityManager.create_entity(e_id, pos, facing)
+	if is_moving:
+		if new_entity.get_native_steps_per_tile() <= 0:
+			new_entity.set_steps_per_tile_override(EntityManager.get_default_spt())
+		new_entity.start_move(facing)
+	return new_entity
+
 func desc_a_create_entity() -> String:
 	return "pos|Create a new [entity_name:EntityNameInput:1] entity here\n" \
 	     + "facing this way [direction:DirectionInput] which is [is_moving:BoolChoice:false,moving,stationary]"
@@ -484,11 +526,24 @@ func cmd_a_create_entity(slots: Dictionary, chosen_slot: int, entity_name: Varia
 		return
 	var facing = Utility.resolve_full_direction_to_facing(direction, slots)
 	for pos in slots[chosen_slot]:
-		var new_entity = EntityManager.create_entity(e_id, pos, facing)
-		if is_moving:
-			if new_entity.get_native_steps_per_tile() <= 0:
-				new_entity.set_steps_per_tile_override(EntityManager.get_default_spt())
-			new_entity.start_move(facing)
+		_create_entity_at(e_id, pos, facing, is_moving)
+
+func desc_select_created_entity() -> String:
+	return "entity|<= Select a new [entity_name:EntityNameInput] entity created at [pos_slot:SlotInput:pos,entity]\n" \
+		+ "facing this way [compl_dir:DirectionInput:1] which is [is_moving:BoolChoice:false,moving,stationary]"
+func cmd_select_created_entity(slots: Dictionary, chosen_slot: int, entity_name: Dictionary, pos_slot: int, compl_dir: Dictionary, is_moving: bool) -> void:
+	if not Commands.slot_is_entity(chosen_slot) or not Commands.slot_has_position(pos_slot):
+		push_error("Invalid slots to select created entity: %s and %s" % [chosen_slot, pos_slot])
+		return
+	var e_id: = get_id_of_complex_entity_name(entity_name, slots)
+	if e_id < 0:
+		push_error("Entity name does not exist: %s" % get_complex_string_value(entity_name, slots))
+		return
+
+	var pos: Vector2i = get_single_position_from_slot(pos_slot, slots)
+	var facing: int = resolve_complex_direction(compl_dir, slots)
+	slots[chosen_slot] = _create_entity_at(e_id, pos, facing, is_moving)
+
 
 func desc_a_turn() -> String:
 	return "entity,pos|Turn the entity/tile to face this way [complex_dir:DirectionInput:1]"
@@ -667,3 +722,49 @@ func desc_false() -> String:
 	return "none|Set this step's result to False"
 func cmd_false(_slots: Dictionary) -> Dictionary:
 	return {"step_result": false}
+
+func desc_make_entity_dependent() -> String:
+	return "entity|Make the entity dependent on this entity [on_entity_slot:SlotInput:entity]"
+func cmd_make_entity_dependent(slots: Dictionary, chosen_slot: int, on_entity_slot: int) -> void:
+	if not Commands.slot_is_entity(chosen_slot) or not Commands.slot_is_entity(on_entity_slot):
+		push_error("Invalid slots to make entity dependent: %s and %s" % [chosen_slot, on_entity_slot])
+		return
+	if on_entity_slot == chosen_slot or not slots[on_entity_slot] or not slots[chosen_slot]:
+		return
+	slots[on_entity_slot].add_dependant_entity(slots[chosen_slot])
+
+func desc_make_entity_independent() -> String:
+	return "entity|Make the entity stop depending on this entity [on_entity_slot:SlotInput:entity]"
+func cmd_make_entity_independent(slots: Dictionary, chosen_slot: int, on_entity_slot: int) -> void:
+	if not Commands.slot_is_entity(chosen_slot) or not Commands.slot_is_entity(on_entity_slot):
+		push_error("Invalid slots to make entity independent: %s and %s" % [chosen_slot, on_entity_slot])
+		return
+	if on_entity_slot == chosen_slot or not slots[on_entity_slot] or not slots[chosen_slot]:
+		return
+	slots[on_entity_slot].remove_dependant_entity(slots[chosen_slot])
+
+func desc_make_entity_fully_independent() -> String:
+	return "entity|Make the entity stop depending on all other entities"
+func cmd_make_entity_fully_independent(slots: Dictionary, chosen_slot: int) -> void:
+	if not Commands.slot_is_entity(chosen_slot) or not slots[chosen_slot]:
+		push_error("Invalid slot or empty slot to make entity fully independent: %s" % chosen_slot)
+		return
+	slots[chosen_slot].stop_depending_on_all()
+
+func desc_set_entity_as_active() -> String:
+	return "entity|Set the entity as [is_active:BoolChoice:true,active,inactive]"
+func cmd_set_entity_as_active(slots: Dictionary, chosen_slot: int, is_active: bool) -> void:
+	if not Commands.slot_is_entity(chosen_slot) or not slots[chosen_slot]:
+		push_error("Invalid slot or empty slot to set entity as active: %s" % chosen_slot)
+		return
+	if slots[chosen_slot]:
+		slots[chosen_slot].set_active(is_active)
+
+func desc_apply_effect_to_entity() -> String:
+	return "entity|Apply the effect [effect_name:SpecialEffectInput] to the entity"
+func cmd_apply_effect_to_entity(slots: Dictionary, chosen_slot: int, effect_name: String) -> void:
+	if not Commands.slot_is_entity(chosen_slot) or not slots[chosen_slot]:
+		push_error("Invalid slot or empty slot to apply effect to entity: %s" % chosen_slot)
+		return
+	if slots[chosen_slot]:
+		EntityManager.apply_special_effect(slots[chosen_slot], effect_name)

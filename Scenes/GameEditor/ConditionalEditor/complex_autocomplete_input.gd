@@ -13,6 +13,7 @@ var plain_value_as_string: bool = false
 
 var autocomplete_list_data_sources: Dictionary[String, Callable] = {
     "Entity Name": EntityManager.get_all_entity_names,
+    "Property Name": GameManager.get_all_used_prop_names,
 }
 
 var arg_name: String = ""

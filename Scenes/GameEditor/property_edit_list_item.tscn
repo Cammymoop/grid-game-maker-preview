@@ -1,60 +1,21 @@
 [gd_scene format=3 uid="uid://8ltfb41oda7k"]
 
-[ext_resource type="StyleBox" uid="uid://bjfdm7g0ured8" path="res://assets/ui/button_styles/thin_button_disabled.tres" id="1_dbpd2"]
+[ext_resource type="Theme" uid="uid://b2btk08yskrx0" path="res://assets/ui/property_edit_list_item_theme.tres" id="1_dbpd2"]
 [ext_resource type="StyleBox" uid="uid://e8hy20htok11" path="res://assets/ui/property_list_item_inactive.tres" id="1_iue0q"]
 [ext_resource type="Script" uid="uid://doft6456w5f4e" path="res://Scenes/GameEditor/property_edit_list_item.gd" id="2_dh7t6"]
-[ext_resource type="StyleBox" uid="uid://dwpyvi0mnhxyx" path="res://assets/ui/button_styles/thin_button_hover.tres" id="2_t1kqt"]
 [ext_resource type="StyleBox" uid="uid://chwejgkh5xprx" path="res://assets/ui/property_list_item_active.tres" id="3_58pcx"]
-[ext_resource type="StyleBox" uid="uid://cu78oa72kple8" path="res://assets/ui/button_styles/thin_button_normal.tres" id="3_bjote"]
-[ext_resource type="StyleBox" uid="uid://cf4b0mxp54ien" path="res://assets/ui/button_styles/thin_button_pressed.tres" id="4_ibb43"]
 [ext_resource type="StyleBox" uid="uid://cr7tvl662vo8e" path="res://assets/ui/property_list_item_highlight.tres" id="4_mspwa"]
-[ext_resource type="StyleBox" uid="uid://esdhmf0o1vp8" path="res://assets/ui/property_edit_list_input_bg.tres" id="5_bjote"]
 [ext_resource type="Texture2D" uid="uid://ceh21i1ehclje" path="res://assets/img/property_list/conditional_icon.png" id="5_dbpd2"]
-[ext_resource type="StyleBox" uid="uid://ogiwpnowrwpm" path="res://assets/ui/property_list_input_box_focus.tres" id="5_ibb43"]
 [ext_resource type="Texture2D" uid="uid://b5udrkwc2cuu5" path="res://assets/img/property_list/special_prop_icon.png" id="6_t1kqt"]
 [ext_resource type="PackedScene" uid="uid://cemds60k8ytal" path="res://Scenes/UI/icon_button.tscn" id="7_bjote"]
 [ext_resource type="StyleBox" uid="uid://dx222rj1bhqkw" path="res://assets/ui/property_list_item_active_highlight.tres" id="9_t1kqt"]
 [ext_resource type="Texture2D" uid="uid://bo4frkvshv8li" path="res://assets/img/property_list/edit_value.png" id="14_ciyhn"]
 [ext_resource type="PackedScene" uid="uid://ba6ojoxwk1drt" path="res://Scenes/GameEditor/multi_type_input.tscn" id="15_5uy45"]
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_5uy45"]
-content_margin_left = 4.0
-content_margin_top = 4.0
-content_margin_right = 4.0
-content_margin_bottom = 4.0
-bg_color = Color(0.1, 0.1, 0.1, 0.6)
-corner_radius_top_left = 3
-corner_radius_top_right = 3
-corner_radius_bottom_right = 3
-corner_radius_bottom_left = 3
-corner_detail = 5
-
-[sub_resource type="Theme" id="Theme_06inb"]
-Button/font_sizes/font_size = 14
-Button/styles/disabled = ExtResource("1_dbpd2")
-Button/styles/hover = ExtResource("2_t1kqt")
-Button/styles/normal = ExtResource("3_bjote")
-Button/styles/pressed = ExtResource("4_ibb43")
-Label/font_sizes/font_size = 14
-LineEdit/font_sizes/font_size = 14
-LineEdit/styles/focus = ExtResource("5_ibb43")
-LineEdit/styles/normal = ExtResource("5_bjote")
-LineEdit/styles/read_only = ExtResource("5_bjote")
-PopupPanel/styles/panel = SubResource("StyleBoxFlat_5uy45")
-RichTextLabel/colors/selection_color = Color(0.14389294, 0.27054524, 0.46817178, 1)
-RichTextLabel/constants/strikethrough_alpha = 100
-RichTextLabel/font_sizes/bold_font_size = 14
-RichTextLabel/font_sizes/bold_italics_font_size = 14
-RichTextLabel/font_sizes/italics_font_size = 14
-RichTextLabel/font_sizes/mono_font_size = 14
-RichTextLabel/font_sizes/normal_font_size = 14
-TextEdit/constants/line_spacing = 0
-TextEdit/font_sizes/font_size = 14
-
 [node name="PropertyEditListItem" type="PanelContainer" unique_id=161799549 node_paths=PackedStringArray("sub_item_container", "icon_1", "icon_2", "name_section", "name_label", "name_edit", "value_section", "edit_value_button", "value_label", "value_edit", "override_button", "remove_button")]
 offset_right = 425.0
 offset_bottom = 27.0
-theme = SubResource("Theme_06inb")
+theme = ExtResource("1_dbpd2")
 theme_override_styles/panel = ExtResource("1_iue0q")
 script = ExtResource("2_dh7t6")
 sub_item_container = NodePath("ListItemSections")

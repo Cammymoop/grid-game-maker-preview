@@ -42,7 +42,6 @@ func get_value() -> Variant:
 	if not is_reference_position:
 		return get_int_value()
 	else:
-		prints("complex direction value", get_complex_value())
 		return get_complex_value()
 
 func get_int_value() -> int:

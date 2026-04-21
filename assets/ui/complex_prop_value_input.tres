@@ -1,0 +1,9 @@
+[gd_resource type="Theme" format=3 uid="uid://bsgfiyn76a5op"]
+
+[ext_resource type="StyleBox" uid="uid://ch63py1vky05t" path="res://assets/ui/plain_input_bg.tres" id="1_n44b6"]
+
+[resource]
+LineEdit/font_sizes/font_size = 16
+LineEdit/styles/focus = null
+LineEdit/styles/normal = ExtResource("1_n44b6")
+LineEdit/styles/read_only = ExtResource("1_n44b6")

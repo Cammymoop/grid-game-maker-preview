@@ -12,6 +12,7 @@ enum InputTypes {
 	
 	StringInput,
 	ComplexStringInput,
+
 	
 	OrderComparison,
 	
@@ -23,6 +24,11 @@ enum InputTypes {
 	SlotInput,
 	
 	MoveAnimStyleInput,
+
+	ComplexPropValueInput,
+	
+	# Janky stuff
+	SpecialEffectInput,
 }
 
 # either scene or a script
@@ -49,6 +55,10 @@ var templates: = {
 	InputTypes.SlotInput: preload("res://Scenes/GameEditor/ConditionalEditor/slot_input.tscn"),
 	
 	InputTypes.MoveAnimStyleInput: preload("res://Scenes/GameEditor/ConditionalEditor/move_anim_style_input.tscn"),
+	
+	InputTypes.ComplexPropValueInput: preload("res://Scenes/GameEditor/ConditionalEditor/complex_prop_value_input.tscn"),
+	
+	InputTypes.SpecialEffectInput: preload("res://Scenes/GameEditor/ConditionalEditor/special_effect_input.tscn"),
 }
 
 func get_template(input_type: InputTypes) -> Control:

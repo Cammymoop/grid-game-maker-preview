@@ -5,10 +5,6 @@
 [ext_resource type="PackedScene" uid="uid://bleyoj5f36kfy" path="res://Scenes/GameEditor/ConditionalEditor/scalar_value_input.tscn" id="2_re830"]
 [ext_resource type="PackedScene" uid="uid://durty3gycutfy" path="res://Scenes/GameEditor/bool_toggle_input.tscn" id="3_ql4rr"]
 
-[sub_resource type="Theme" id="Theme_6qn5y"]
-SpinBoxInnerLineEdit/base_type = &"LineEdit"
-SpinBoxInnerLineEdit/font_sizes/font_size = 14
-
 [node name="MultiTypeInput" type="HBoxContainer" unique_id=1750676706 node_paths=PackedStringArray("type_picker", "text_input", "bool_input", "number_input", "edit_conditional_button")]
 offset_right = 343.0
 offset_bottom = 31.0
@@ -38,14 +34,12 @@ popup/item_3/id = 3
 
 [node name="AdaptiveMultiLineEdit" parent="." unique_id=634600988 instance=ExtResource("2_ql4rr")]
 layout_mode = 2
+size_flags_vertical = 4
 
 [node name="ScalarValueInput" parent="." unique_id=1458729988 instance=ExtResource("2_re830")]
 visible = false
 custom_minimum_size = Vector2(90, 0)
 layout_mode = 2
-
-[node name="Value" parent="ScalarValueInput" index="0" unique_id=1193418551]
-theme = SubResource("Theme_6qn5y")
 
 [node name="BoolToggleInput" parent="." unique_id=546195378 instance=ExtResource("3_ql4rr")]
 visible = false
@@ -54,5 +48,3 @@ layout_mode = 2
 [node name="EditConditionalButton" type="Button" parent="." unique_id=615535427]
 visible = false
 layout_mode = 2
-
-[editable path="ScalarValueInput"]

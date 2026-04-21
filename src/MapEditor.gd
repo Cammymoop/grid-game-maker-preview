@@ -81,10 +81,10 @@ func _ready() -> void:
 	
 	GameManager.level_state_loaded.connect(on_level_state_loaded)
 
-func _physics_process(_delta: float) -> void:
+func _physics_process(delta: float) -> void:
 	if edit_mode and not is_other_paused():
 		if not EntityManager.can_process():
-			EntityManager.paused_visual_process()
+			EntityManager.paused_visual_process(delta)
 
 func on_level_state_loaded() -> void:
 	_refresh_edited_entity_indicators()
