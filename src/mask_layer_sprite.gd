@@ -8,6 +8,7 @@ var clipping_spr_scn: PackedScene = preload("res://src/Utility/sub_vp_friendly_c
 
 var layers: Array[Dictionary] = []
 var current_rotation: float = 0
+var elapsed_time: float = 0.0
 
 var preview_info: Dictionary = {}
 
@@ -43,7 +44,9 @@ func _enter_tree() -> void:
 func _notify_local_prop_updated() -> void:
     _local_prop_updated = true
 
-func sprite_process() -> void:
+func sprite_process(delta_time: float) -> void:
+    elapsed_time += delta_time
+    update_spinning_layers()
     if _local_prop_updated:
         _local_prop_updated = false
         if parent_entity:
@@ -70,12 +73,29 @@ func set_as_single(single_texture_id: int, tex_index: int, rotates: bool = true)
     }
     set_main_layers([layer_info])
 
+# a bit hacky but we want to keep any extra info we save to layers for the updated layers, based on the layer order passed in
 func set_main_layers(new_layers: Array) -> void:
+    # get the _keys and order_id from all the current main layers, ignore all other keys so we dont add them into a layer which doesnt have that key set
+    var old_main_layers: Dictionary[int, Dictionary] = {}
+    for layer_info in layers:
+        if layer_info.get("is_main_layer", false):
+            var old_layer_copy: = {}
+            for key in layer_info.keys():
+                if key.begins_with("_") or key == "order_id":
+                    old_layer_copy[key] = layer_info[key]
+            old_main_layers[layer_info["main_layer_index"]] = old_layer_copy
+
     remove_main_layers()
     new_layers = new_layers.duplicate_deep()
-    for new_main_layer in new_layers:
+    for main_layer_idx in new_layers.size():
+        var new_main_layer: Dictionary = new_layers[main_layer_idx]
         new_main_layer["is_main_layer"] = true
-        _append_layer(new_main_layer)
+        new_main_layer["main_layer_index"] = main_layer_idx
+        var new_layer_order_id: int = -1
+        if old_main_layers.has(main_layer_idx):
+            new_main_layer.merge(old_main_layers[main_layer_idx], false)
+            new_layer_order_id = old_main_layers[main_layer_idx]["order_id"]
+        _append_layer(new_main_layer, new_layer_order_id)
     refresh_layers()
 
 func remove_main_layers() -> void:
@@ -87,21 +107,49 @@ func remove_main_layers() -> void:
             new_layers.append(layer)
     layers = new_layers
 
-func append_layer(layer_info: Dictionary) -> void:
-    _append_layer(layer_info.duplicate_deep())
+func append_layer(layer_info: Dictionary, with_order_id: int = -1) -> void:
+    _append_layer(layer_info.duplicate_deep(), with_order_id)
     refresh_layers()
 
-func _append_layer(layer_info: Dictionary) -> void:
+func _append_layer(layer_info: Dictionary, with_order_id: int = -1) -> void:
     if not layer_info.has("mode"):
         layer_info["mode"] = "normal"
-    layer_info["order_id"] = layer_order_id
-    layer_order_id += 1
+    if with_order_id != -1:
+        layer_info["order_id"] = with_order_id
+    else:
+        layer_info["order_id"] = layer_order_id
+        layer_order_id += 1
     layers.append(layer_info)
+
+# any time layers are changed, recalculate the zero time for the spinning layers based on the current visual angle the layer based on that layer info was at
+# this way changing layer rotation mode to spinning or changing spin speed doesn't cause any sudden jumps and spin speed can even be animated
+func _track_layer_angles() -> void:
+    for layer in layers:
+        if not layer.get("rotates", true):
+            layer.erase("_spin_time_zero")
+            layer.erase("_prev_spinning")
+            layer["_was_fixed"] = true
+        else:
+            if layer.has("spinning"):
+                if layer.has("_prev_spinning"): # spin speed is changing
+                    if layer["_prev_spinning"] != layer["spinning"]:
+                        var cur_angle: float = _spin_angle(layer["_prev_spinning"], layer["_spin_time_zero"])
+                        layer["_spin_time_zero"] = _reculculate_spin_zero_time(cur_angle, layer["spinning"])
+                else: # changing to spinning from fixed or rotates with sprite
+                    var prev_layer_angle: float = 0.0 if layer.get("_was_fixed", false) else current_rotation
+                    layer["_spin_time_zero"] = _reculculate_spin_zero_time(prev_layer_angle, layer["spinning"])
+                layer["_prev_spinning"] = layer["spinning"]
+            else:
+                layer.erase("_spin_time_zero")
+                layer.erase("_prev_spinning")
+            layer["_was_fixed"] = false
 
 func refresh_layers() -> void:
     resort_layers()
     clear_children()
     prop_update_response.clear()
+    
+    _track_layer_angles()
     if preview_info and is_preview_mode:
         create_and_add_nodes_for_layer(preview_info, 0)
     else:
@@ -272,12 +320,19 @@ func create_and_add_nodes_for_layer(layer_info: Dictionary, layer_index: int) ->
     var sub_layer_rotates: bool = layer_rotates
     if is_masked:
         sub_layer_rotates = layer_info.get("mask_rotates", true)
-        prints("layer_rotates: %s, sub_layer_rotates: %s" % [layer_rotates, sub_layer_rotates])
 
-    main_layer_node.set_meta("rotates", layer_rotates)
+    main_layer_node.set_meta("spinning_speed", layer_info.get("spinning", 0.0))
+    main_layer_node.set_meta("spins", layer_info.has("spinning"))
+
+    main_layer_node.set_meta("rotates_with_sprite", layer_rotates)
     main_layer_node.set_meta("sub_layer_rotates", sub_layer_rotates)
+    
+    main_layer_node.set_meta("spin_zero_time", layer_info.get("_spin_time_zero", 0.0))
 
-    set_sprite_rotation(current_rotation)
+    if main_layer_node.get_meta("spins", false):
+        _update_spinning_layer(main_layer_node)
+    else:
+        _set_sprite_layer_rotation(main_layer_node, current_rotation)
 
 func _add_prop_upate_callable(prop_name: String, update_func: Callable) -> void:
     if not prop_update_response.has(prop_name):
@@ -330,11 +385,39 @@ func set_sprite_facing(facing: int) -> void:
 func set_sprite_rotation(new_rotation: float) -> void:
     current_rotation = new_rotation
     for layer_node in get_children():
-        var layer_rotates: bool = layer_node.get_meta("rotates")
-        if layer_rotates:
-            layer_node.rotation = new_rotation
-        if layer_node.get_meta("sub_layer_rotates") != layer_rotates and layer_node.get_child_count() > 0:
-            layer_node.get_child(0).rotation = (-2 * layer_node.rotation) + new_rotation
+        if not layer_node.get_meta("spins", false):
+            _set_sprite_layer_rotation(layer_node, current_rotation)
+
+func _set_sprite_layer_rotation(layer_node: Node2D, new_rotation: float) -> void:
+    var layer_rotates: bool = layer_node.get_meta("rotates_with_sprite", true)
+    if layer_rotates:
+        layer_node.rotation = new_rotation
+    if layer_node.get_meta("sub_layer_rotates") != layer_rotates and layer_node.get_child_count() > 0:
+        layer_node.get_child(0).rotation = (-2 * layer_node.rotation) + new_rotation
+
+func update_spinning_layers() -> void:
+    for layer_node in get_children():
+        if layer_node.get_meta("spins", false):
+            _update_spinning_layer(layer_node)
+
+func _update_spinning_layer(layer_node: Node2D) -> void:
+    var spin_speed: float = layer_node.get_meta("spinning_speed", 0.0)
+    layer_node.rotation = _spin_angle(spin_speed, layer_node.get_meta("spin_zero_time"))
+    if layer_node.get_child_count() > 0:
+        if layer_node.get_meta("sub_layer_rotates") == false:
+            layer_node.get_child(0).rotation = -layer_node.rotation
+        else:
+            layer_node.get_child(0).rotation = 0
+
+func _spin_angle(spin_speed: float, zero_time_offset: float) -> float:
+    if spin_speed == 0:
+        return zero_time_offset
+    return Utility.normalize_angle((elapsed_time - zero_time_offset) * spin_speed * TAU)
+
+func _reculculate_spin_zero_time(cur_angle: float, target_spin_speed: float) -> float:
+    if target_spin_speed == 0:
+        return cur_angle
+    return elapsed_time - Utility.normalize_angle(cur_angle) / (target_spin_speed * TAU)
 
 # Helpers for making expanded mask textures
 func create_bw_mask_from_texture_region(tex: Texture2D, tex_rect: Rect2i, tex_is_bw_mask: bool, clip_outer: bool) -> Texture:

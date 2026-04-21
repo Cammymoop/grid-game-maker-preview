@@ -10,6 +10,7 @@ signal changed()
 
 const Vec2IInput: = preload("res://src/GameEditor/ConditionalEditor/vector_2i_input.gd")
 const BetterTextureDialog: = preload("res://src/GameEditor/BetterTextureDialog.gd")
+const ScalarValueInput: = preload("res://src/GameEditor/ConditionalEditor/scalar_value_input.gd")
 
 static var texture_picker_scene: = preload("res://Scenes/GameEditor/BetterTextureDialog.tscn")
 
@@ -27,6 +28,17 @@ const OFFSET_OFFSET: = "Offset"
 const OFFSET_PIVOT: = "Pivot"
 const OFFSET_BOTH: = "Both"
 
+const ROTATES_ROTATES: = 0
+const ROTATES_FIXED: = 1
+const ROTATES_SPINS: = 2
+const RotatesModeNames: Dictionary[int, String] = {
+    ROTATES_ROTATES: "rotates",
+    ROTATES_FIXED: "fixed",
+    ROTATES_SPINS: "spins",
+}
+static var rotates_modes: Dictionary[String, int] = {}
+const DEF_ROTATES_TEXT: = "rotates"
+
 @export var empty_layer_button_icon: Texture2D
 
 @export var remove_button: ButtonContainer
@@ -35,7 +47,9 @@ const OFFSET_BOTH: = "Both"
 @export var offset_input: Vec2IInput
 @export var mode_selector: OptionButton
 @export var reorder_buttons: Control
-@export var rotates_toggle: CheckButton
+@export var rotates_option: Control
+@export var rotates_mode_select: OptionButton
+@export var spin_speed_input: ScalarValueInput
 
 @export var digits_settings: Control
 @export var digits_pad_zeros_toggle: CheckButton
@@ -53,6 +67,8 @@ var cur_offs_type: String = OFFSET_OFFSET
 
 var layer_info: Dictionary = {}
 
+var last_spinning_value: float = 2
+
 const CONTEXT_MENU_MOVE_UP = 10
 const CONTEXT_MENU_MOVE_DOWN = 11
 const CONTEXT_MENU_MOVE_TOP = 12
@@ -61,6 +77,10 @@ const CONTEXT_MENU_MOVE_BOTTOM = 13
 const CONTEXT_MENU_DUPLICATE = 20
 const CONTEXT_MENU_DELETE = 22
 const CONTEXT_MENU_DELETE_OTHERS = 23
+
+static func _static_init() -> void:
+    for rotate_mode_id in RotatesModeNames:
+        rotates_modes[RotatesModeNames[rotate_mode_id]] = rotate_mode_id
 
 func _ready() -> void:
     if reorder_buttons:
@@ -82,8 +102,17 @@ func _ready() -> void:
     offset_type_selector.item_selected.connect(on_offset_type_changed)
     offset_input.value_changed.connect(on_offset_changed)
     
-    rotates_toggle.toggled.connect(on_rotates_toggled)
-    rotates_toggle.set_pressed_no_signal(layer_info.get("rotates", true))
+    #rotates_toggle.toggled.connect(on_rotates_toggled)
+    #rotates_toggle.set_pressed_no_signal(layer_info.get("rotates", true))
+    
+    rotates_mode_select.clear()
+    for rotate_mode_id in [ROTATES_ROTATES, ROTATES_FIXED, ROTATES_SPINS]:
+        rotates_mode_select.add_item(RotatesModeNames[rotate_mode_id], rotate_mode_id)
+    Utility.opbtn_select_id(rotates_mode_select, ROTATES_ROTATES)
+    rotates_mode_select.item_selected.connect(on_rotates_mode_selected)
+    
+    spin_speed_input.value_changed.connect(on_spin_speed_changed)
+    spin_speed_input.set_value(last_spinning_value)
     
     digits_pad_zeros_toggle.toggled.connect(on_digits_pad_zeros_toggled)
     digits_max_digits_input.value_changed.connect(on_digits_max_digits_changed)
@@ -97,6 +126,15 @@ func _ready() -> void:
 
     if layer_info and layer_info.has("mode"):
         refresh_ui()
+
+func _current_rotates_mode() -> int:
+    if layer_info.get("mode", MODE_EMPTY) == MODE_EMPTY:
+        return ROTATES_ROTATES
+    if not layer_info.get("rotates", true):
+        return ROTATES_FIXED
+    elif layer_info.has("spinning"):
+        return ROTATES_SPINS
+    return ROTATES_ROTATES
 
 func _req_remove() -> void:
     request_remove.emit(self)
@@ -190,12 +228,23 @@ func refresh_ui() -> void:
         
         digits_property_input.set_value(layer_info.get("property", ""))
         digits_color_picker.color = Utility.get_dict_color(layer_info, "mod_color", Color.WHITE)
+
+    rotates_mode_select.visible = layer_info['mode'] != MODE_EMPTY
+    if layer_info['mode'] != MODE_EMPTY:
+        var cur_rotates_mode: = _current_rotates_mode()
+        Utility.opbtn_select_id(rotates_mode_select, cur_rotates_mode)
+        refresh_spin_speed_input()
     
     visibility_option.visible = layer_info['mode'] != MODE_EMPTY
     
     digits_settings.visible = layer_info['mode'] == MODE_DIGITS
     layer_image_button.visible = layer_info['mode'] != MODE_DIGITS
     update_image_button_texture()
+
+func refresh_spin_speed_input() -> void:
+    spin_speed_input.visible = _current_rotates_mode() == ROTATES_SPINS
+    if layer_info.has("spinning"):
+        spin_speed_input.set_value(layer_info["spinning"])
 
 func update_image_button_texture() -> void:
     var button_texture: Texture2D = null
@@ -298,4 +347,25 @@ func on_digits_color_changed(new_color: Color) -> void:
 
 func on_visibility_prop_changed(prop_name: String) -> void:
     layer_info['when_property'] = prop_name
+    changed.emit()
+
+func on_rotates_mode_selected(index: int) -> void:
+    var new_rotates_mode: = rotates_mode_select.get_item_id(index)
+    if new_rotates_mode == ROTATES_ROTATES:
+        layer_info['rotates'] = true
+        layer_info.erase('spinning')
+    elif new_rotates_mode == ROTATES_FIXED:
+        layer_info['rotates'] = false
+        layer_info.erase('spinning')
+    elif new_rotates_mode == ROTATES_SPINS:
+        layer_info['rotates'] = true
+        layer_info['spinning'] = last_spinning_value
+    refresh_spin_speed_input()
+    changed.emit()
+
+func on_spin_speed_changed(new_value: float) -> void:
+    last_spinning_value = new_value
+    if _current_rotates_mode() != ROTATES_SPINS:
+        return
+    layer_info['spinning'] = new_value
     changed.emit()

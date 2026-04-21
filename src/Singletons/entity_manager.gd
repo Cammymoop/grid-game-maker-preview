@@ -110,11 +110,11 @@ var process_phase: int = 0
 
 var is_entity_preview_mode: bool = false
 
-func paused_visual_process() -> void:
+func paused_visual_process(delta_time: float) -> void:
     for e in entity_list:
-        e.sprite_process()
+        e.sprite_process(delta_time)
 
-func entity_list_process() -> void:
+func entity_list_process(delta_time: float) -> void:
     var active_entities: Array[BaseEntity] = []
     var moving_entities: Array[BaseEntity] = []
     var idle_entities: Array[BaseEntity] = []
@@ -138,7 +138,7 @@ func entity_list_process() -> void:
                 moving_entities.append(e)
             else:
                 idle_entities.append(e)
-        e.sprite_process()
+        e.sprite_process(delta_time)
     
     # Phase 2 - Update idle tick counter (for non-moving) and idle actions
     process_phase = 2
@@ -185,8 +185,8 @@ func should_bump_move() -> bool:
     return false
     #return process_phase >= 3
 
-func _physics_process(_delta):
-    entity_list_process()
+func _physics_process(delta: float) -> void:
+    entity_list_process(delta)
 
     if movements_enabled:
         frame_counter += 1
@@ -343,6 +343,11 @@ func on_entity_added(entity: BaseEntity) -> void:
     entity_instance_map[entity.instance_id] = entity
     on_entity_list_changed()
 
+func on_entities_removed() -> void:
+    for e in entity_list:
+        e._handle_removed_entities()
+    on_entity_list_changed()
+
 func on_entity_list_changed() -> void:
     entity_list_updated.emit()
 
@@ -379,6 +384,9 @@ func request_move(entity: BaseEntity, request_frames: int = -1) -> void:
         else:
             requested_turn_frames = idle_delay_frames
     turn_requested = true
+
+func has_instance(instance_id: int) -> bool:
+    return instance_id in entity_instance_map
 
 func get_instance(instance_id: int) -> BaseEntity:
     if not instance_id in entity_instance_map:
@@ -1197,9 +1205,10 @@ func remove_entity_definition(entity_index: int) -> void:
 func erase_all_entities_with_id(entity_index: int) -> void:
     for entity in entity_list:
         if entity.entity_index == entity_index:
-            remove_entity(entity)
+            remove_entity(entity, false)
+    on_entities_removed()
 
-func remove_entity(entity: BaseEntity) -> void:
+func remove_entity(entity: BaseEntity, do_emit: bool = true) -> void:
     if entity in entity_signal_connections:
         for connected_sig in entity_signal_connections.get(entity, []):
             var signal_connections = get_signal_connection_list(connected_sig)
@@ -1214,7 +1223,8 @@ func remove_entity(entity: BaseEntity) -> void:
     entity.set_active(false)
     entity.call_deferred("queue_free")
     
-    on_entity_list_changed()
+    if do_emit:
+        on_entities_removed()
 
 func get_all_entity_indexes() -> Array:
     var keys = entity_defs.keys()

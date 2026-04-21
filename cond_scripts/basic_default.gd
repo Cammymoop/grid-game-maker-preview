@@ -98,6 +98,20 @@ func cmd_select_nearest_named_entity(slots: Dictionary, chosen_slot: int, ref_en
 		return
 	slots[chosen_slot] = EntityManager.find_closest_entity_with_id(e_id, ref_entity.get_moving_position(), [ref_entity])
 
+func desc_select_name_of_entity() -> String:
+	return "string|<= Select the name of the entity in [target_slot:SlotInput:entity]"
+func cmd_select_name_of_entity(slots: Dictionary, chosen_slot: int, target_slot: int) -> void:
+	if not Commands.slot_is_string(chosen_slot):
+		push_error("Invalid slot to select entity name into: %s" % chosen_slot)
+		return
+	if not Commands.slot_is_entity(target_slot):
+		push_error("Invalid slot to select entity name from: %s" % target_slot)
+		return
+	if slots[target_slot]:
+		slots[chosen_slot] = slots[target_slot].entity_name
+	else:
+		slots[chosen_slot] = ""
+
 func desc_select_number() -> String:
 	return "number,string|<= Select the number [complex_num:ComplexScalarInput]"
 func cmd_select_number(slots: Dictionary, chosen_slot: int, complex_num: Dictionary) -> void:

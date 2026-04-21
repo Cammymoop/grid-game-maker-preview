@@ -19,6 +19,8 @@ var rotation_interp_target: float = 0
 var rotation_interp_from: float = 0
 var interp_timer: float = 0
 
+var _sprite_is_setup: bool = false
+
 func _ready() -> void:
     update_preview_size()
     if spin_sprite_toggle:
@@ -42,6 +44,7 @@ func _process(delta: float) -> void:
         var interp_progress: = minf(1.0, 1.0 - interp_timer / interp_duration)
         sprite_rotation = lerp_angle(rotation_interp_from, rotation_interp_target, interp_progress)
     the_sprite.set_sprite_rotation(sprite_rotation)
+    the_sprite.sprite_process(delta)
 
 func on_spin_sprite_toggled(button_pressed: bool) -> void:
     is_spinning = button_pressed
@@ -55,8 +58,11 @@ func update_sprite_config(entity_def: Dictionary) -> void:
     if not the_sprite:
         return
     
-    the_sprite.clear()
     var sprite_config: = entity_def.get("sprite_config", {}) as Dictionary
+    if not _sprite_is_setup:
+        the_sprite.set_sprite_rotation(0)
+        the_sprite.clear()
+        _sprite_is_setup = true
     if not sprite_config:
         update_simple_sprite(entity_def)
     else:
@@ -85,3 +91,7 @@ func set_preview_spr_rotation(rotation_val: float) -> void:
 
 func set_rotation_immediate(rotation_val: float) -> void:
     the_sprite.set_sprite_rotation(rotation_val)
+
+func reset_sprite(entity_def: Dictionary) -> void:
+    _sprite_is_setup = false
+    update_sprite_config(entity_def)

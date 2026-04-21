@@ -100,6 +100,8 @@ func make_slots(owning_entity: BaseEntity, target_entity: BaseEntity, tile_posit
     slots[Slot.RED] = owning_entity
     slots[Slot.BLUE] = target_entity
     slots[Slot.GREY] = tile_positions
+    if owning_entity and owning_entity.friend_instance_id > -1:
+        slots[Slot.PINK] = EntityManager.get_instance(owning_entity.friend_instance_id)
     
     if arguments:
         var arg_slots = [Slot.DARK_RED, Slot.DARK_BLUE, Slot.DARK_GREEN, Slot.DARK_ORANGE,]
@@ -220,6 +222,8 @@ func _resolve_conditional(conditional: Array[Dictionary], slots: Dictionary) -> 
         this_step_result = _resolve_conditional_step(i, conditional[i], this_step_result, slots)
         if this_step_result["quit"]:
             break
+    if reset_slots[Slot.RED] and slots[Slot.PINK]:
+        reset_slots[Slot.RED].friend_instance_id = slots[Slot.PINK].instance_id
     return this_step_result
     
 func _resolve_conditional_step(step_index: int, cond_step: Dictionary, overall_result: Dictionary, slots: Dictionary) -> Dictionary:

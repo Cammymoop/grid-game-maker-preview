@@ -89,7 +89,7 @@ func get_snapshot() -> ViewportTexture:
     if not sprite_previewer:
         prints("No sprite previewer, returning null")
         return null
-    sprite_previewer.set_rotation_immediate(0)
+    sprite_previewer.reset_sprite(entity_def)
     sprite_previewer.find_child("PreviewBG").hide()
     await RenderingServer.frame_post_draw
     return sprite_previewer.preview_subviewport.get_texture()

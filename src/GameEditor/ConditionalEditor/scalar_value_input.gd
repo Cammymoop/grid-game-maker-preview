@@ -6,6 +6,8 @@ signal focus_out()
 @export var value_input: SpinBox
 @export var is_int_type: bool = false
 
+@export var default_value: float = 0.0
+
 @export var min_value: float = 0.0
 @export var max_value: float = 100.0
 
@@ -15,11 +17,16 @@ signal focus_out()
 @export var is_expand_to_text: bool = true
 
 var arg_name: String = ""
+var _value_set: bool = false
 
 func _ready() -> void:
+    if not _value_set:
+        value_input.set_value_no_signal(default_value)
     value_input.value_changed.connect(on_value_changed)
     update_input_settings()
     value_input.get_line_edit().gui_input.connect(on_line_edit_gui_input)
+    
+    value_input.tooltip_text = tooltip_text
 
 func update_input_settings() -> void:
     value_input.min_value = min_value
@@ -53,6 +60,7 @@ func get_value() -> Variant:
         return value_input.value
 
 func set_value(new_val: Variant) -> void:
+    _value_set = true
     value_input.set_value_no_signal(float(new_val))
 
 func on_value_changed(new_value: float) -> void:

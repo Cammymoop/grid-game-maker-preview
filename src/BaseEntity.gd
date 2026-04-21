@@ -68,6 +68,8 @@ var entity_name: String = ""
 var bond_group: Array = []
 var tailing: Node = null
 
+var depends_on_entities: Array[int] = []
+
 var friend_instance_id: int = -1
 
 var has_idle_update_conditional: = false
@@ -151,6 +153,26 @@ func check_visual_turn_on_move() -> void:
 		else:
 			visual_turn_on_move = bool(move_turn.get_value())
 
+func add_depends_on_entity(on_entity: BaseEntity) -> void:
+	if not on_entity.instance_id in depends_on_entities:
+		depends_on_entities.append(on_entity.instance_id)
+
+func remove_depends_on_entity(on_entity: BaseEntity) -> void:
+	depends_on_entities.erase(on_entity.instance_id)
+
+func _handle_removed_entities() -> void:
+	if depends_on_entities.size() > 0:
+		var new_depends_on_entities: Array[int] = []
+		for on_inst_id in depends_on_entities:
+			if EntityManager.has_instance(on_inst_id):
+				new_depends_on_entities.append(on_inst_id)
+		depends_on_entities = new_depends_on_entities
+	if tailing:
+		if tailing.is_queued_for_deletion() or not EntityManager.has_instance(tailing.instance_id):
+			untail()
+	if friend_instance_id > -1 and not EntityManager.has_instance(friend_instance_id):
+		friend_instance_id = -1
+
 func serialize() -> Dictionary:
 	var important_stuff = {}
 	important_stuff['entity_index'] = entity_index
@@ -184,6 +206,9 @@ func serialize() -> Dictionary:
 	important_stuff['entity_class'] = "BaseEntity"
 	
 	important_stuff['deferred_signals'] = JSON.from_native(deferred_signals)
+	
+	if depends_on_entities.size() > 0:
+		important_stuff['depends_on_entities'] = depends_on_entities
 	
 	return important_stuff
 
@@ -226,6 +251,9 @@ func deserialize(data: Dictionary) -> void:
 	if 'friend_instance_id' in data:
 		friend_instance_id = int(data['friend_instance_id'])
 	
+	if 'depends_on_entities' in data:
+		depends_on_entities.assign(data['depends_on_entities'])
+	
 	if data.get('is_move_interp_override', false):
 		is_move_interp_override = true
 		set_move_interp_override(read_move_interp_style_string(data['override_move_interp_style']))
@@ -242,8 +270,8 @@ func deserialize(data: Dictionary) -> void:
 func set_active(new_active: bool) -> void:
 	EntityManager.set_entity_active(self, new_active)
 
-func sprite_process() -> void:
-	sprite.sprite_process()
+func sprite_process(delta_time: float) -> void:
+	sprite.sprite_process(delta_time)
 
 func entity_process_starting_actions() -> void:
 	if not moving:
@@ -615,7 +643,7 @@ func set_tailing(entity_to_tail) -> void:
 		tailing.started_move.connect(tail_follow)
 
 func untail() -> void:
-	if tailing and is_instance_valid(tailing):
+	if tailing:
 		if tailing.started_move.is_connected(tail_follow):
 			tailing.started_move.disconnect(tail_follow)
 	tailing = null

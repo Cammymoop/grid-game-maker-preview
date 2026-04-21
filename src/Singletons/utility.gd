@@ -682,3 +682,53 @@ func key_to_vec2i(key: String) -> Vector2i:
 func arr_add_if_not_included(arr: Array, item: Variant) -> void:
 	if not item in arr:
 		arr.append(item)
+
+func opbtn_get_text_from_id(opbtn: OptionButton, id: int, default_value: String = "") -> String:
+	for i in opbtn.get_item_count():
+		if opbtn.get_item_id(i) == id:
+			return opbtn.get_item_text(i)
+	return default_value
+
+func opbtn_get_index_from_id(opbtn: OptionButton, id: int) -> int:
+	for i in opbtn.get_item_count():
+		if opbtn.get_item_id(i) == id:
+			return i
+	return -1
+
+func opbtn_get_id_from_text(opbtn: OptionButton, text: String, default_value: int = -1) -> int:
+	for i in opbtn.get_item_count():
+		if opbtn.get_item_text(i) == text:
+			return opbtn.get_item_id(i)
+	return default_value
+
+func opbtn_get_index_from_text(opbtn: OptionButton, text: String) -> int:
+	for i in opbtn.get_item_count():
+		if opbtn.get_item_text(i) == text:
+			return i
+	return -1
+
+func opbtn_has_id(opbtn: OptionButton, id: int) -> bool:
+	for i in opbtn.get_item_count():
+		if opbtn.get_item_id(i) == id:
+			return true
+	return false
+
+func opbtn_has_text(opbtn: OptionButton, text: String) -> bool:
+	for i in opbtn.get_item_count():
+		if opbtn.get_item_text(i) == text:
+			return true
+	return false
+
+func opbtn_set_text_for_id(opbtn: OptionButton, id: int, new_text: String) -> void:
+	var index: int = opbtn_get_index_from_id(opbtn, id)
+	if index >= 0:
+		opbtn.set_item_text(index, new_text)
+
+func opbtn_select_id(opbtn: OptionButton, id: int) -> void:
+	opbtn.selected = opbtn_get_index_from_id(opbtn, id)
+
+func opbtn_select_text(opbtn: OptionButton, text: String) -> void:
+	opbtn.selected = opbtn_get_index_from_text(opbtn, text)
+
+func normalize_angle(angle_radians: float) -> float:
+	return fposmod(angle_radians, TAU)
