@@ -1,2 +1,3 @@
 Windows Desktop|windows|GridGameMaker.exe
 Linux|linux|GridGameMaker.x86_64
+macOS|mac|GridGameMaker.app

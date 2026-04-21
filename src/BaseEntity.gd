@@ -68,6 +68,8 @@ var entity_name: String = ""
 var bond_group: Array = []
 var tailing: Node = null
 
+var friend_instance_id: int = -1
+
 var has_idle_update_conditional: = false
 var idle_update_cache: Property = null
 var idle_update_sleep: int = 1
@@ -177,6 +179,8 @@ func serialize() -> Dictionary:
 		important_stuff['is_move_interp_override'] = true
 		important_stuff['override_move_interp_style'] = get_move_interp_style_string(override_move_interp_style)
 	
+	important_stuff['friend_instance_id'] = friend_instance_id
+	
 	important_stuff['entity_class'] = "BaseEntity"
 	
 	important_stuff['deferred_signals'] = JSON.from_native(deferred_signals)
@@ -219,6 +223,9 @@ func deserialize(data: Dictionary) -> void:
 	if "_this_move_steps" in data:
 		_this_move_steps = int(data["_this_move_steps"])
 	
+	if 'friend_instance_id' in data:
+		friend_instance_id = int(data['friend_instance_id'])
+	
 	if data.get('is_move_interp_override', false):
 		is_move_interp_override = true
 		set_move_interp_override(read_move_interp_style_string(data['override_move_interp_style']))
@@ -228,6 +235,8 @@ func deserialize(data: Dictionary) -> void:
 	
 	if data.has('tailing'):
 		await EntityManager.post_deserialize
+
+	if data.get('tailing', -1) > -1:
 		set_tailing(EntityManager.get_instance(data['tailing']))
 
 func set_active(new_active: bool) -> void:
@@ -602,7 +611,8 @@ func die() -> void:
 
 func set_tailing(entity_to_tail) -> void:
 	tailing = entity_to_tail
-	tailing.started_move.connect(tail_follow)
+	if tailing:
+		tailing.started_move.connect(tail_follow)
 
 func untail() -> void:
 	if tailing and is_instance_valid(tailing):

@@ -482,7 +482,7 @@ func _on_vis_changed():
 func update_sprite_style_picker() -> void:
 	var sprite_style_picker: = find_child("SpriteStylePicker") as OptionButton
 	sprite_style_picker.visible = tile_entity_mode == "entity"
-	if tile_entity_mode != "tile":
+	if tile_entity_mode != "entity":
 		return
 	var is_simple: bool = the_definition.get("sprite_config", {}).is_empty()
 	var set_selected_to: String = SPRITE_SIMPLE if is_simple else SPRITE_FANCY
