@@ -438,6 +438,12 @@ func get_arr_from_vector2(vec: Vector2) -> Array:
 func get_arr_from_vector2i(vec: Vector2i) -> Array:
 	return [vec.x, vec.y]
 
+func get_transform2d_from_arr(arr: Array) -> Transform2D:
+	return Transform2D(get_vector2_from_arr(arr[0]), get_vector2_from_arr(arr[1]), get_vector2_from_arr(arr[2]))
+
+func get_arr_from_transform2d(transform: Transform2D) -> Array:
+	return [get_arr_from_vector2(transform.origin), get_arr_from_vector2(transform.x), get_arr_from_vector2(transform.y)]
+
 func string_list_union(list_a: Array, list_b: Array) -> Array:
 	for item in list_b:
 		if not item in list_a:

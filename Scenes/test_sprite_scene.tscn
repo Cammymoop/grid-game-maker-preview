@@ -1,0 +1,15 @@
+[gd_scene format=3 uid="uid://g3mvbwaax5xe"]
+
+[ext_resource type="Shader" uid="uid://bowu6niq5all7" path="res://src/Effects/sprite_with_replace_color.gdshader" id="1_5de3c"]
+[ext_resource type="Texture2D" uid="uid://d0uyc2rshryrj" path="res://assets/img/entityTiles.png" id="2_sl5mv"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_5de3c"]
+shader = ExtResource("1_5de3c")
+shader_parameter/replace_amt = 0.0
+shader_parameter/replace_color = Color(0.67879146, 0.060357764, 0.71634626, 1)
+
+[node name="Sprite2D" type="Sprite2D" unique_id=1226434332]
+texture_filter = 1
+material = SubResource("ShaderMaterial_5de3c")
+position = Vector2(200, 204)
+texture = ExtResource("2_sl5mv")

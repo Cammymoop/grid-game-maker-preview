@@ -4,6 +4,7 @@
 [ext_resource type="Script" uid="uid://bdtdlmb13w2mf" path="res://Scenes/digit_sprite.gd" id="2_kfjh5"]
 
 [node name="DigitSprite" type="Sprite2D" unique_id=700422016]
+use_parent_material = true
 texture = ExtResource("1_dyyd2")
 region_enabled = true
 region_rect = Rect2(0, 0, 8, 8)

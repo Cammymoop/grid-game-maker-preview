@@ -223,6 +223,10 @@ func serialize() -> Dictionary:
 	if subordinate_entities.size() > 0:
 		important_stuff['subordinate_entities'] = subordinate_entities
 	
+	var serialized_sprite: Dictionary = sprite.get_serialized_info()
+	if serialized_sprite:
+		important_stuff['serialized_sprite'] = serialized_sprite
+	
 	return important_stuff
 
 func deserialize(data: Dictionary) -> void:
@@ -279,6 +283,10 @@ func deserialize(data: Dictionary) -> void:
 
 	if data.get('tailing', -1) > -1:
 		set_tailing(EntityManager.get_instance(data['tailing']))
+
+func deserialize_sprite(data: Dictionary) -> void:
+	if "serialized_sprite" in data:
+		sprite.deserialize_sprite_info(data['serialized_sprite'].duplicate_deep())
 
 func set_active(new_active: bool) -> void:
 	EntityManager.set_entity_active(self, new_active)
@@ -589,7 +597,7 @@ func set_facing(new_facing):
 	var no_rotate = EntityManager.get_entity_property(self, "no-rotate")
 	if no_rotate != null and no_rotate.get_value():
 		return
-	sprite.set_sprite_rotation(Utility.facing_rotation(facing))
+	sprite.set_sprite_facing(facing)
 
 func set_move_facing(new_facing):
 	move_facing = new_facing

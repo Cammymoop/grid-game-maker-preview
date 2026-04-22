@@ -19,6 +19,13 @@
 
 [sub_resource type="StyleBoxEmpty" id="4"]
 
+[sub_resource type="Theme" id="Theme_qrjoe"]
+CheckButton/font_sizes/font_size = 12
+Label/font_sizes/font_size = 12
+LineEdit/font_sizes/font_size = 14
+MenuButton/font_sizes/font_size = 14
+OptionButton/font_sizes/font_size = 14
+
 [sub_resource type="Theme" id="3"]
 default_font = ExtResource("9")
 
@@ -62,12 +69,13 @@ theme = ExtResource("3_qrjoe")
 current_tab = 0
 tab_0/title = "Game"
 
-[node name="GameDefinition" type="VBoxContainer" parent="MarginContainer/UIRoot/TabContainer" unique_id=1146228055 node_paths=PackedStringArray("show_level_title_option_picker", "move_interp_option_picker", "action_signal_sent_to_option_picker")]
+[node name="GameDefinition" type="VBoxContainer" parent="MarginContainer/UIRoot/TabContainer" unique_id=1146228055 node_paths=PackedStringArray("show_level_title_option_picker", "move_interp_option_picker", "action_signal_sent_to_option_picker", "turn_animation_option_picker")]
 layout_mode = 2
 script = ExtResource("6")
-show_level_title_option_picker = NodePath("ScrollContainer/VBoxContainer/GameSettingsSection/MarginContainer/VBoxContainer/HBoxContainer11/OptionButton")
-move_interp_option_picker = NodePath("ScrollContainer/VBoxContainer/GameSettingsSection/MarginContainer/VBoxContainer/HBoxContainer10/MoveInterpSelect")
-action_signal_sent_to_option_picker = NodePath("ScrollContainer/VBoxContainer/GameSettingsSection/MarginContainer/VBoxContainer/HBoxContainer12/ActionSentToSelect")
+show_level_title_option_picker = NodePath("ScrollContainer/VBoxContainer/GameSettingsSection/MarginContainer/HFlowContainer/HFlowContainer/HBoxContainer11/OptionButton")
+move_interp_option_picker = NodePath("ScrollContainer/VBoxContainer/GameSettingsSection/MarginContainer/HFlowContainer/VBoxContainer/HBoxContainer/HBoxContainer10/MoveInterpSelect")
+action_signal_sent_to_option_picker = NodePath("ScrollContainer/VBoxContainer/GameSettingsSection/MarginContainer/HFlowContainer/HFlowContainer/HBoxContainer12/ActionSentToSelect")
+turn_animation_option_picker = NodePath("ScrollContainer/VBoxContainer/GameSettingsSection/MarginContainer/HFlowContainer/VBoxContainer/HBoxContainer/HBoxContainer13/TurnAnimSelect")
 metadata/_tab_index = 0
 metadata/_tab_name = "Game"
 
@@ -115,12 +123,13 @@ size_flags_horizontal = 3
 [node name="ScrollContainer" type="ScrollContainer" parent="MarginContainer/UIRoot/TabContainer/GameDefinition" unique_id=867284119]
 layout_mode = 2
 size_flags_vertical = 3
+theme = SubResource("Theme_qrjoe")
 follow_focus = true
 scroll_hint_mode = 1
 
 [node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer" unique_id=1512902127]
 layout_mode = 2
-size_flags_horizontal = 6
+size_flags_horizontal = 3
 size_flags_vertical = 3
 
 [node name="GameSettingsSection" type="FoldableContainer" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer" unique_id=531323634]
@@ -132,33 +141,54 @@ title_alignment = 1
 layout_mode = 2
 theme_override_constants/margin_bottom = 4
 
-[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer/GameSettingsSection/MarginContainer" unique_id=284815528]
+[node name="HFlowContainer" type="HFlowContainer" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer/GameSettingsSection/MarginContainer" unique_id=1957460444]
+layout_mode = 2
+theme_override_constants/h_separation = 12
+alignment = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer/GameSettingsSection/MarginContainer/HFlowContainer" unique_id=571668406]
+layout_mode = 2
+size_flags_horizontal = 8
+
+[node name="HSeparator" type="HSeparator" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer/GameSettingsSection/MarginContainer/HFlowContainer/VBoxContainer" unique_id=609795772]
 layout_mode = 2
 
-[node name="HBoxContainer9" type="HBoxContainer" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer/GameSettingsSection/MarginContainer/VBoxContainer" unique_id=761041775]
+[node name="Label" type="Label" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer/GameSettingsSection/MarginContainer/HFlowContainer/VBoxContainer" unique_id=533812704]
+layout_mode = 2
+text = "Default Animation For"
+horizontal_alignment = 1
+
+[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer/GameSettingsSection/MarginContainer/HFlowContainer/VBoxContainer" unique_id=1914419427]
+layout_mode = 2
+alignment = 1
+
+[node name="HBoxContainer13" type="HBoxContainer" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer/GameSettingsSection/MarginContainer/HFlowContainer/VBoxContainer/HBoxContainer" unique_id=523318500]
 layout_mode = 2
 alignment = 2
 
-[node name="Label" type="Label" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer/GameSettingsSection/MarginContainer/VBoxContainer/HBoxContainer9" unique_id=1347001610]
+[node name="Label" type="Label" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer/GameSettingsSection/MarginContainer/HFlowContainer/VBoxContainer/HBoxContainer/HBoxContainer13" unique_id=1791443746]
 layout_mode = 2
-text = "Movement Mode:"
+text = "Turning:"
 
-[node name="MovementModeMenuButton" type="MenuButton" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer/GameSettingsSection/MarginContainer/VBoxContainer/HBoxContainer9" unique_id=1152217431]
-custom_minimum_size = Vector2(160, 30)
+[node name="TurnAnimSelect" type="OptionButton" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer/GameSettingsSection/MarginContainer/HFlowContainer/VBoxContainer/HBoxContainer/HBoxContainer13" unique_id=1138871454]
 layout_mode = 2
-text = "Continuous"
-flat = false
+alignment = 1
+selected = 0
+item_count = 2
+popup/item_0/text = "quick"
+popup/item_0/id = 0
+popup/item_1/text = "none"
+popup/item_1/id = 1
 
-[node name="HBoxContainer10" type="HBoxContainer" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer/GameSettingsSection/MarginContainer/VBoxContainer" unique_id=1496833117]
+[node name="HBoxContainer10" type="HBoxContainer" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer/GameSettingsSection/MarginContainer/HFlowContainer/VBoxContainer/HBoxContainer" unique_id=1496833117]
 layout_mode = 2
 alignment = 2
 
-[node name="Label" type="Label" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer/GameSettingsSection/MarginContainer/VBoxContainer/HBoxContainer10" unique_id=533812704]
+[node name="Label2" type="Label" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer/GameSettingsSection/MarginContainer/HFlowContainer/VBoxContainer/HBoxContainer/HBoxContainer10" unique_id=1080277253]
 layout_mode = 2
-text = "Default Movement Animation:"
+text = "Moving:"
 
-[node name="MoveInterpSelect" type="OptionButton" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer/GameSettingsSection/MarginContainer/VBoxContainer/HBoxContainer10" unique_id=1819177372]
-custom_minimum_size = Vector2(160, 30)
+[node name="MoveInterpSelect" type="OptionButton" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer/GameSettingsSection/MarginContainer/HFlowContainer/VBoxContainer/HBoxContainer/HBoxContainer10" unique_id=1819177372]
 layout_mode = 2
 alignment = 1
 selected = 1
@@ -174,15 +204,38 @@ popup/item_3/id = 3
 popup/item_4/text = "jerky-stepped"
 popup/item_4/id = 4
 
-[node name="HBoxContainer12" type="HBoxContainer" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer/GameSettingsSection/MarginContainer/VBoxContainer" unique_id=1992105014]
+[node name="HSeparator2" type="HSeparator" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer/GameSettingsSection/MarginContainer/HFlowContainer/VBoxContainer" unique_id=950934069]
+layout_mode = 2
+
+[node name="HFlowContainer" type="HFlowContainer" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer/GameSettingsSection/MarginContainer/HFlowContainer" unique_id=2017167320]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/h_separation = 10
+alignment = 2
+
+[node name="HBoxContainer9" type="HBoxContainer" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer/GameSettingsSection/MarginContainer/HFlowContainer/HFlowContainer" unique_id=761041775]
 layout_mode = 2
 alignment = 2
 
-[node name="Label" type="Label" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer/GameSettingsSection/MarginContainer/VBoxContainer/HBoxContainer12" unique_id=405563408]
+[node name="Label" type="Label" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer/GameSettingsSection/MarginContainer/HFlowContainer/HFlowContainer/HBoxContainer9" unique_id=1347001610]
+layout_mode = 2
+text = "Movement Mode:"
+
+[node name="MovementModeMenuButton" type="MenuButton" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer/GameSettingsSection/MarginContainer/HFlowContainer/HFlowContainer/HBoxContainer9" unique_id=1152217431]
+custom_minimum_size = Vector2(100, 0)
+layout_mode = 2
+text = "Continuous"
+flat = false
+
+[node name="HBoxContainer12" type="HBoxContainer" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer/GameSettingsSection/MarginContainer/HFlowContainer/HFlowContainer" unique_id=1992105014]
+layout_mode = 2
+alignment = 2
+
+[node name="Label" type="Label" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer/GameSettingsSection/MarginContainer/HFlowContainer/HFlowContainer/HBoxContainer12" unique_id=405563408]
 layout_mode = 2
 text = "Entities respond to"
 
-[node name="Label2" type="Label" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer/GameSettingsSection/MarginContainer/VBoxContainer/HBoxContainer12" unique_id=549139783]
+[node name="Label2" type="Label" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer/GameSettingsSection/MarginContainer/HFlowContainer/HFlowContainer/HBoxContainer12" unique_id=549139783]
 layout_mode = 2
 tooltip_text = "Z, X, C
 Space, Shift, E
@@ -193,8 +246,7 @@ mouse_default_cursor_shape = 16
 theme_override_colors/font_color = Color(0.44167724, 0.8426321, 1, 1)
 text = "[input actions]:"
 
-[node name="ActionSentToSelect" type="OptionButton" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer/GameSettingsSection/MarginContainer/VBoxContainer/HBoxContainer12" unique_id=2076752340]
-custom_minimum_size = Vector2(0, 30)
+[node name="ActionSentToSelect" type="OptionButton" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer/GameSettingsSection/MarginContainer/HFlowContainer/HFlowContainer/HBoxContainer12" unique_id=2076752340]
 layout_mode = 2
 alignment = 1
 selected = 0
@@ -204,15 +256,15 @@ popup/item_0/id = 0
 popup/item_1/text = "camera_target"
 popup/item_1/id = 1
 
-[node name="HBoxContainer11" type="HBoxContainer" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer/GameSettingsSection/MarginContainer/VBoxContainer" unique_id=1380201629]
+[node name="HBoxContainer11" type="HBoxContainer" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer/GameSettingsSection/MarginContainer/HFlowContainer/HFlowContainer" unique_id=1380201629]
 layout_mode = 2
 alignment = 2
 
-[node name="Label" type="Label" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer/GameSettingsSection/MarginContainer/VBoxContainer/HBoxContainer11" unique_id=1316488706]
+[node name="Label" type="Label" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer/GameSettingsSection/MarginContainer/HFlowContainer/HFlowContainer/HBoxContainer11" unique_id=1316488706]
 layout_mode = 2
 text = "Show Level Title:"
 
-[node name="OptionButton" type="OptionButton" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer/GameSettingsSection/MarginContainer/VBoxContainer/HBoxContainer11" unique_id=584782591]
+[node name="OptionButton" type="OptionButton" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer/GameSettingsSection/MarginContainer/HFlowContainer/HFlowContainer/HBoxContainer11" unique_id=584782591]
 layout_mode = 2
 selected = 0
 item_count = 3
@@ -232,8 +284,9 @@ title_alignment = 1
 layout_mode = 2
 theme_override_constants/margin_bottom = 4
 
-[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer/WindowSection/MarginContainer" unique_id=515106861]
+[node name="VBoxContainer" type="HFlowContainer" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer/WindowSection/MarginContainer" unique_id=294252666]
 layout_mode = 2
+alignment = 2
 
 [node name="HBoxContainer3" type="HBoxContainer" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer/WindowSection/MarginContainer/VBoxContainer" unique_id=55029724]
 layout_mode = 2
@@ -299,41 +352,43 @@ title_alignment = 1
 layout_mode = 2
 theme_override_constants/margin_bottom = 4
 
-[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer/DefaultCameraSection/MarginContainer" unique_id=1042047347]
+[node name="HFlowContainer" type="HFlowContainer" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer/DefaultCameraSection/MarginContainer" unique_id=2020647641]
 layout_mode = 2
+alignment = 1
+reverse_fill = true
 
-[node name="HBoxContainer6" type="HBoxContainer" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer/DefaultCameraSection/MarginContainer/VBoxContainer" unique_id=1658482809]
+[node name="HBoxContainer6" type="HBoxContainer" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer/DefaultCameraSection/MarginContainer/HFlowContainer" unique_id=1658482809]
 layout_mode = 2
 alignment = 2
 
-[node name="LabelLabelLabel" type="Label" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer/DefaultCameraSection/MarginContainer/VBoxContainer/HBoxContainer6" unique_id=625328399]
+[node name="LabelLabelLabel" type="Label" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer/DefaultCameraSection/MarginContainer/HFlowContainer/HBoxContainer6" unique_id=625328399]
 layout_mode = 2
 text = "Follow Entity by:"
 
-[node name="FollowBy" type="MenuButton" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer/DefaultCameraSection/MarginContainer/VBoxContainer/HBoxContainer6" unique_id=1920892838]
+[node name="FollowBy" type="MenuButton" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer/DefaultCameraSection/MarginContainer/HFlowContainer/HBoxContainer6" unique_id=1920892838]
 layout_mode = 2
 text = "property"
 flat = false
 script = ExtResource("15")
 
-[node name="FollowEntity" type="LineEdit" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer/DefaultCameraSection/MarginContainer/VBoxContainer/HBoxContainer6" unique_id=482357832]
+[node name="FollowEntity" type="LineEdit" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer/DefaultCameraSection/MarginContainer/HFlowContainer/HBoxContainer6" unique_id=482357832]
 custom_minimum_size = Vector2(140, 0)
 layout_mode = 2
 script = ExtResource("7_73cj6")
 
-[node name="HBoxContainer7" type="HBoxContainer" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer/DefaultCameraSection/MarginContainer/VBoxContainer" unique_id=733011440]
+[node name="HBoxContainer7" type="HBoxContainer" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer/DefaultCameraSection/MarginContainer/HFlowContainer" unique_id=733011440]
 layout_mode = 2
 alignment = 2
 
-[node name="EnableLimitsToggle" type="CheckButton" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer/DefaultCameraSection/MarginContainer/VBoxContainer/HBoxContainer7" unique_id=331745706]
+[node name="EnableLimitsToggle" type="CheckButton" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer/DefaultCameraSection/MarginContainer/HFlowContainer/HBoxContainer7" unique_id=331745706]
 layout_mode = 2
 text = "Stop At Map Edge:"
 
-[node name="Label" type="Label" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer/DefaultCameraSection/MarginContainer/VBoxContainer/HBoxContainer7" unique_id=1502058678]
+[node name="Label" type="Label" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer/DefaultCameraSection/MarginContainer/HFlowContainer/HBoxContainer7" unique_id=1502058678]
 layout_mode = 2
 text = "Extend Camera Limits:"
 
-[node name="ExtendCamLimits" type="SpinBox" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer/DefaultCameraSection/MarginContainer/VBoxContainer/HBoxContainer7" unique_id=1741488458]
+[node name="ExtendCamLimits" type="SpinBox" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer/DefaultCameraSection/MarginContainer/HFlowContainer/HBoxContainer7" unique_id=1741488458]
 layout_mode = 2
 max_value = 300.0
 suffix = "px"
@@ -598,9 +653,9 @@ max_brightness = 0.3
 [connection signal="value_changed" from="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer/WindowSection/MarginContainer/VBoxContainer/HBoxContainer2/SetWindowHeight" to="MarginContainer/UIRoot/TabContainer/GameDefinition" method="_on_SetWindowHeight_value_changed"]
 [connection signal="toggled" from="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer/WindowSection/MarginContainer/VBoxContainer/HBoxContainer8/AutoAspect" to="MarginContainer/UIRoot/TabContainer/GameDefinition" method="_on_AutoAspect_toggled"]
 [connection signal="pressed" from="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer/WindowSection/MarginContainer/VBoxContainer/HBoxContainer4/UpdateWindow" to="MarginContainer/UIRoot/TabContainer/GameDefinition" method="_on_UpdateWindow_pressed"]
-[connection signal="text_changed" from="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer/DefaultCameraSection/MarginContainer/VBoxContainer/HBoxContainer6/FollowEntity" to="MarginContainer/UIRoot/TabContainer/GameDefinition" method="_on_FollowEntity_text_changed"]
-[connection signal="toggled" from="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer/DefaultCameraSection/MarginContainer/VBoxContainer/HBoxContainer7/EnableLimitsToggle" to="MarginContainer/UIRoot/TabContainer/GameDefinition" method="_on_EnableLimitsToggle_toggled"]
-[connection signal="value_changed" from="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer/DefaultCameraSection/MarginContainer/VBoxContainer/HBoxContainer7/ExtendCamLimits" to="MarginContainer/UIRoot/TabContainer/GameDefinition" method="_on_ExtendCamLimits_value_changed"]
+[connection signal="text_changed" from="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer/DefaultCameraSection/MarginContainer/HFlowContainer/HBoxContainer6/FollowEntity" to="MarginContainer/UIRoot/TabContainer/GameDefinition" method="_on_FollowEntity_text_changed"]
+[connection signal="toggled" from="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer/DefaultCameraSection/MarginContainer/HFlowContainer/HBoxContainer7/EnableLimitsToggle" to="MarginContainer/UIRoot/TabContainer/GameDefinition" method="_on_EnableLimitsToggle_toggled"]
+[connection signal="value_changed" from="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer/DefaultCameraSection/MarginContainer/HFlowContainer/HBoxContainer7/ExtendCamLimits" to="MarginContainer/UIRoot/TabContainer/GameDefinition" method="_on_ExtendCamLimits_value_changed"]
 [connection signal="pressed" from="MarginContainer/UIRoot/TabContainer/GameDefinition/HBoxContainer6/SetDefault" to="MarginContainer/UIRoot/TabContainer/GameDefinition" method="_on_SetDefault_pressed"]
 [connection signal="pressed" from="MarginContainer/UIRoot/TabContainer/GameDefinition/HBoxContainer6/OpenGameDir" to="MarginContainer/UIRoot" method="_on_OpenGameDir_pressed"]
 [connection signal="pressed" from="MarginContainer/UIRoot/TabContainer/GameDefinition/HBoxContainer5/HBoxContainer/NewEmpty" to="MarginContainer/UIRoot/TabContainer/GameDefinition" method="_on_new_empty_pressed"]

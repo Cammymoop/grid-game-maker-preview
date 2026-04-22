@@ -30,7 +30,7 @@
       "name": "playerVariants.png",
       "texture_id": 3.0
     }
-    ],
+  ],
   "entity_definitions": {
     "0": {
       "name": "player",
@@ -165,7 +165,8 @@
         "z-index": 1,
         "solid": true,
         "fire-resistant": true,
-        "eats": true
+        "eats": true,
+        "no-rotate": true
       },
       "intended_move_speed": 0.0
     },
@@ -261,7 +262,8 @@
         "forced-move": true,
         "orange-keys": true,
         "blue-keys": true,
-        "green-keys": true
+        "green-keys": true,
+        "no-museum": true
       },
       "intended_move_speed": 0.0
     },
@@ -701,7 +703,8 @@
         },
         "creature": true,
         "solid": true,
-        "fire-averse": true
+        "fire-averse": true,
+        "turn-animation": "none"
       },
       "intended_move_speed": 4.0,
       "controller": "random_creature_controller",
@@ -1966,7 +1969,7 @@
       }
     }
   },
-  "window_width": 18.0,
+  "window_width": 19.0,
   "window_height": 14.0,
   "game_metadata": {
     "credits": {

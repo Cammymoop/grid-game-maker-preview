@@ -6,17 +6,22 @@ const DigitDisplay = preload("res://Scenes/digit_display.gd")
 var digit_display_scn: PackedScene = preload("res://Scenes/digit_display.tscn")
 var clipping_spr_scn: PackedScene = preload("res://src/Utility/sub_vp_friendly_clipping_sprite.tscn")
 
+var replace_color_mat: ShaderMaterial = preload("res://src/Effects/sprite_with_replace_color.tres")
+
 var layers: Array[Dictionary] = []
 var current_rotation: float = 0
+var _facing_rotation: float = 0.0
+var _current_facing: int = 0
 var elapsed_time: float = 0.0
 
 var preview_info: Dictionary = {}
 
 var layer_order_id: int = 0
 
+var _all_modifiers: Dictionary = {}
+
 var modifier_masks: Dictionary = {}
-var modifier_transforms: Dictionary = {}
-var modifier_scales: Dictionary = {}
+var modifier_effects: Dictionary = {}
 
 var prop_update_response: Dictionary[String, Array] = {}
 
@@ -24,6 +29,11 @@ var is_preview_mode: bool = false
 
 var _local_prop_updated: = false
 var parent_entity: BaseEntity = null
+
+var interpolate_facing_enabled: bool = true
+var interp_facing_timer: float = 0.0
+@export var interp_duration: float = 0.24
+@export_exp_easing() var interp_ease_param: float = 0.2
 
 var rotation_prop: float = 0:
     get:
@@ -53,6 +63,15 @@ func sprite_process(delta_time: float) -> void:
         _local_prop_updated = false
         if parent_entity:
             on_local_prop_update_frame(parent_entity)
+    if interpolate_facing_enabled:
+        if interp_facing_timer > 0:
+            interp_facing_timer = maxf(0, interp_facing_timer - delta_time)
+            var eased_progress: float = ease(1 - (interp_facing_timer / interp_duration), interp_ease_param)
+
+            var to_angle: float = Utility.facing_rotation(parent_entity.facing)
+            var interp_angle: float = lerp_angle(_facing_rotation, to_angle, eased_progress)
+            set_sprite_rotation(interp_angle)
+
 
 func on_entity_preview_mode_changed(enable_preview: bool) -> void:
     is_preview_mode = enable_preview
@@ -175,17 +194,6 @@ func _layer_sort_compare(layer_a: Dictionary, layer_b: Dictionary) -> bool:
 func resort_layers() -> void:
     layers.sort_custom(_layer_sort_compare)
 
-func apply_modifier(modifier_name: String, modifier_layers: Array = [], modifier_mask_info: Dictionary = {}) -> void:
-    if not modifier_name or has_applied_modifier(modifier_name):
-        return
-    for layer in modifier_layers:
-        layer["modifier"] = modifier_name
-        _append_layer(layer)
-    modifier_masks[modifier_name] = modifier_mask_info.duplicate_deep()
-    if modifier_mask_info:
-        _apply_modifier_mask_modifier(modifier_name)
-    refresh_layers()
-
 func apply_modifier_info(modifier_info: Dictionary) -> void:
     modifier_info = modifier_info.duplicate_deep()
     if not modifier_info.has("name"):
@@ -199,10 +207,10 @@ func apply_modifier_info(modifier_info: Dictionary) -> void:
     modifier_masks[modifier_name] = modifier_info.get("mask_info", {})
     if modifier_masks[modifier_name]:
         _apply_modifier_mask_modifier(modifier_name)
-    if modifier_info.has("transform"):
-        modifier_transforms[modifier_name] = modifier_info["transform"]
-    if modifier_info.has("scale"):
-        modifier_scales[modifier_name] = modifier_info["scale"]
+    if modifier_info.has("effects"):
+        for effect_name in modifier_info["effects"]:
+            _add_modifier_effect_stuff(effect_name, modifier_name, modifier_info["effects"][effect_name])
+    _all_modifiers[modifier_name] = modifier_info.duplicate_deep()
     refresh_layers()
 
 func has_applied_modifier(modifier_name: String) -> bool:
@@ -212,17 +220,31 @@ func remove_modifier(modifier_name: String) -> void:
     if not has_applied_modifier(modifier_name):
         return
     modifier_masks.erase(modifier_name)
-    modifier_transforms.erase(modifier_name)
-    modifier_scales.erase(modifier_name)
+    _remove_modifier_effect_stuff(modifier_name)
     _remove_modifier_layers(modifier_name)
     _apply_most_recent_modifier_mask()
+    _all_modifiers.erase(modifier_name)
     refresh_layers()
 
 func clear_modifiers() -> void:
     modifier_masks.clear()
+    modifier_effects.clear()
     _remove_all_modifier_layers()
     _remove_main_layers_mask()
+    _all_modifiers.clear()
     refresh_layers()
+
+func get_serialized_info() -> Dictionary:
+    if _all_modifiers.is_empty():
+        return {}
+    return {
+        "modifiers": _all_modifiers.duplicate_deep(),
+    }
+
+func deserialize_sprite_info(info: Dictionary) -> void:
+    clear_modifiers()
+    for modifier_name in info["modifiers"]:
+        apply_modifier_info(info["modifiers"][modifier_name])
 
 func _remove_all_modifier_layers() -> void:
     var new_layers: Array[Dictionary] = []
@@ -278,7 +300,7 @@ func create_and_add_nodes_for_layer(layer_info: Dictionary, layer_index: int) ->
             var mask_spr: = clipping_spr.get_child(0)
             mask_spr.texture = create_bw_mask_from_texture_region(mask_src_tex, mask_tex_rect, mask_is_bw, mask_clip_outer)
         else:
-            var layer_spr: = Sprite2D.new()
+            var layer_spr: = _get_new_unmasked_sprite()
             layer_spr.texture = layer_tex
             layer_spr.region_rect = layer_tex_rect
             layer_spr.region_enabled = true
@@ -358,8 +380,8 @@ func create_and_add_nodes_for_layer(layer_info: Dictionary, layer_index: int) ->
     else:
         _set_sprite_layer_rotation(main_layer_node, current_rotation)
     
-    if layer_info.get("is_main_layer", false) and modifier_transforms.size() > 0:
-        _apply_modifier_transforms_to(main_layer_node)
+    if layer_info.get("is_main_layer", false) or layer_info.get("receives_effects", true):
+        _apply_modifier_effects_to(main_layer_node)
 
 func _add_prop_upate_callable(prop_name: String, update_func: Callable) -> void:
     if not prop_update_response.has(prop_name):
@@ -402,17 +424,29 @@ func _remove_main_layers_mask() -> void:
             continue
         layer["masked"] = false
 
-func _apply_modifier_transforms_to(layer_node: Node2D) -> void:
-    for modifier_name in modifier_transforms:
-        var m_transform: Transform2D = modifier_transforms[modifier_name]
-        layer_node.transform = m_transform * layer_node.transform
+func _add_modifier_effect_stuff(effect_name: String, modifier_name: String, effect_stuff: Variant) -> void:
+    if not modifier_effects.has(effect_name):
+        modifier_effects[effect_name] = {}
+    modifier_effects[effect_name][modifier_name] = effect_stuff
+
+func _remove_modifier_effect_stuff(modifier_name: String) -> void:
+    for effect_name in modifier_effects:
+        if modifier_effects[effect_name].has(modifier_name):
+            modifier_effects[effect_name].erase(modifier_name)
+            if modifier_effects[effect_name].size() == 0:
+                modifier_effects.erase(effect_name)
 
 func clear_children() -> void:
     for child in get_children():
         child.queue_free()
 
 func set_sprite_facing(facing: int) -> void:
-    set_sprite_rotation(Utility.facing_rotation(facing))
+    if interpolate_facing_enabled:
+        _facing_rotation = current_rotation
+        _current_facing = facing
+        interp_facing_timer = interp_duration
+    else:
+        set_sprite_rotation(Utility.facing_rotation(facing))
 
 func set_sprite_rotation(new_rotation: float) -> void:
     current_rotation = new_rotation
@@ -543,9 +577,45 @@ func show_hide_layer_expression(new_prop_value: Variant, expression: Expression,
         layer_node.show()
     else:
         layer_node.hide()
-    
+
+func _apply_modifier_effects_to(layer_node: Node2D) -> void:
+    layer_node.scale *= _get_modifiers_scale()
+    _apply_modifier_transforms_to(layer_node)
+    _apply_mod_replace_color_to(layer_node)
+    _apply_mod_modulate_to(layer_node)
+
+func _apply_mod_replace_color_to(layer_node: Node2D) -> void:
+    var replace_color_modifiers: Array = modifier_effects.get("replace_color", {}).keys()
+    if replace_color_modifiers.size() < 1:
+        return
+    var active_replace_color: Dictionary = modifier_effects.get("replace_color", {})[replace_color_modifiers[-1]]
+    var replace_color: Color = Utility.get_dict_color(active_replace_color, "color", Color.WHITE)
+    var replace_amt: float = active_replace_color.get("amount", 0.0)
+    if layer_node.material and layer_node.material is ShaderMaterial:
+        layer_node.material.set_shader_parameter("replace_color", replace_color)
+        layer_node.material.set_shader_parameter("replace_amt", replace_amt)
+
+func _apply_mod_modulate_to(layer_node: Node2D) -> void:
+    var modulate_modifiers: Array = modifier_effects.get("modulate", {}).keys()
+    if modulate_modifiers.size() < 1:
+        return
+    var active_modulate: Dictionary = modifier_effects.get("modulate", {})[modulate_modifiers[-1]]
+    layer_node.modulate = Utility.get_dict_color(active_modulate, "color", Color.WHITE)
+
 func _get_modifiers_scale() -> Vector2:
     var m_scale: Vector2 = Vector2.ONE
-    for m_name in modifier_scales:
-        m_scale *= modifier_scales[m_name]
+    for mod_name in modifier_effects.get("scale", {}):
+        m_scale *= Utility.get_vector2_from_arr(modifier_effects["scale"][mod_name])
     return m_scale
+
+func _apply_modifier_transforms_to(layer_node: Node2D) -> void:
+    var m_transform: Transform2D = Transform2D.IDENTITY
+    for modifier_name in modifier_effects.get("transform", {}):
+        var this_transform: Transform2D = Utility.get_transform2d_from_arr(modifier_effects["transform"][modifier_name])
+        m_transform = this_transform * m_transform
+    layer_node.transform = m_transform * layer_node.transform
+
+func _get_new_unmasked_sprite() -> Sprite2D:
+    var new_sprite: Sprite2D = Sprite2D.new()
+    new_sprite.material = replace_color_mat.duplicate()
+    return new_sprite

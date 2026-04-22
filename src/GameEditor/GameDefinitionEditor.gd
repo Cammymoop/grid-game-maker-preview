@@ -13,6 +13,7 @@ var invalid_field_color = Color(0.7, 0.4, 0.4)
 
 @export var move_interp_option_picker: OptionButton
 @export var action_signal_sent_to_option_picker: OptionButton
+@export var turn_animation_option_picker: OptionButton
 
 func _ready():
 	var name_box = find_child("NameInput")
@@ -65,6 +66,9 @@ func _ready():
 		interp_id = BaseEntity.read_move_interp_style_string(cur_interp)
 	var interp_index: int = move_interp_option_picker.get_item_index(interp_id)
 	move_interp_option_picker.select(interp_index)
+	
+	turn_animation_option_picker.item_selected.connect(on_turn_animation_option_picked)
+	Utility.opbtn_select_text(turn_animation_option_picker, GameManager.get_game_setting("default_turn_animation", "quick"))
 	
 	action_signal_sent_to_option_picker.item_selected.connect(on_action_signal_sent_to_option_picked)
 	var cur_action_signal_sent_to: = GameManager.get_game_setting("action_signal_sent_to", "all_entities") as String
@@ -189,4 +193,9 @@ func on_move_interp_option_picked(index: int) -> void:
 func on_action_signal_sent_to_option_picked(index: int) -> void:
 	var item_text: = action_signal_sent_to_option_picker.get_item_text(index)
 	GameManager.set_game_setting("action_signal_sent_to", item_text)
+	GameManager.game_settings_changed.emit()
+
+func on_turn_animation_option_picked(index: int) -> void:
+	var turn_anim: = turn_animation_option_picker.get_item_text(index)
+	GameManager.set_game_setting("default_turn_animation", turn_anim)
 	GameManager.game_settings_changed.emit()

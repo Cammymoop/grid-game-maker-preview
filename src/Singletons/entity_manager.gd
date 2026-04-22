@@ -557,7 +557,7 @@ func create_entity(entity_index: int, tile_position: Vector2i, facing: int = 0, 
     entity.next_tile_pos = tile_position
     add_entity_to_world(entity)
     entity.initialize()
-    setup_entity_texture(entity)
+    setup_entity_sprite(entity)
     
     entity.set_move_facing(facing)
     if entity.visual_turn_on_move:
@@ -654,14 +654,15 @@ func restore_entity(serialized_entity: Dictionary, refresh: bool = false) -> voi
     entity.initialize() # initialize after deserializing
     
     reset_entity_move_interp_style(entity)
-    setup_entity_texture(entity)
+    setup_entity_sprite(entity)
+    entity.deserialize_sprite(serialized_entity)
     
     MapManager.check_terrain_spr_mod_for_created(entity)
     
     if refresh:
         refresh_entity_list()
 
-func setup_entity_texture(entity: BaseEntity) -> void:
+func setup_entity_sprite(entity: BaseEntity) -> void:
     var texture_index = entity_defs[entity.entity_index]['texture']
     var texture_sub_index = entity_defs[entity.entity_index]['tex_index']
     var sprite_config: Dictionary = entity_defs[entity.entity_index].get("sprite_config", {})
@@ -674,6 +675,11 @@ func setup_entity_texture(entity: BaseEntity) -> void:
 
     if entity_defs[entity.entity_index].get("preview_variant", {}):
         sprite.set_preview_info(entity_defs[entity.entity_index]["preview_variant"])
+    
+    var turn_anim: String = GameManager.get_game_setting("default_turn_animation", "quick")
+    if entity_has_property(entity, "turn-animation"):
+        turn_anim = get_entity_prop_with_default(entity, "turn-animation", turn_anim)
+    sprite.interpolate_facing_enabled = turn_anim != "none"
 
 func serialize() -> Dictionary:
     var serialized_entities: Array = []
@@ -1328,11 +1334,15 @@ func get_all_active_entities() -> Array[BaseEntity]:
 var special_effects: Dictionary = {
     "Shrink": {
         "name": "effect-shrink",
-        "scale": Vector2(0.65, 0.65),
+        "effects": {
+            "scale": [0.65, 0.65],
+        },
     },
     "Grow": {
         "name": "effect-grow",
-        "scale": Vector2(1.25, 1.25),
+        "effects": {
+            "scale": [1.25, 1.25],
+        },
     },
 }
 

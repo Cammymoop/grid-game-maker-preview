@@ -1,6 +1,8 @@
 [gd_scene format=3 uid="uid://1pr8oa44c54n"]
 
 [ext_resource type="Script" uid="uid://ft6f62yqt2hf" path="res://Scenes/digit_display.gd" id="1_iiemw"]
+[ext_resource type="Material" uid="uid://dji5rufvfdxig" path="res://src/Effects/sprite_with_replace_color.tres" id="1_le6w3"]
 
 [node name="DigitDisplay" type="Node2D" unique_id=162028677]
+material = ExtResource("1_le6w3")
 script = ExtResource("1_iiemw")

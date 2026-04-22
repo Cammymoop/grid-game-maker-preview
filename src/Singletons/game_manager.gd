@@ -46,6 +46,7 @@ const SPECIAL_PROPS: Array[String] = [
 	"edit_place_multiple",
 	"no-museum", "museum-active",
 	"move-animation", "controller-disabled",
+	"turn-animation",
 	"actions-disabled",
 	"no-rotate",
 ]

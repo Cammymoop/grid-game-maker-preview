@@ -62,6 +62,7 @@ func update_sprite_config(entity_def: Dictionary) -> void:
     if not _sprite_is_setup:
         the_sprite.set_sprite_rotation(0)
         the_sprite.clear()
+        the_sprite.interpolate_facing_enabled = false
         _sprite_is_setup = true
     if not sprite_config:
         update_simple_sprite(entity_def)

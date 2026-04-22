@@ -4,6 +4,8 @@
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_f5q02"]
 shader = ExtResource("1_8bg45")
+shader_parameter/replace_amt = 0.0
+shader_parameter/replace_color = Color(0, 0, 0, 1)
 
 [node name="SubVPFriendlyClippingSprite" type="Sprite2D" unique_id=1889967894]
 clip_children = 1

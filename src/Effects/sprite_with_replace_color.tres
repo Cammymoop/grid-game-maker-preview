@@ -1,0 +1,9 @@
+[gd_resource type="ShaderMaterial" format=3 uid="uid://dji5rufvfdxig"]
+
+[ext_resource type="Shader" uid="uid://bowu6niq5all7" path="res://src/Effects/sprite_with_replace_color.gdshader" id="1_13ba2"]
+
+[resource]
+resource_local_to_scene = true
+shader = ExtResource("1_13ba2")
+shader_parameter/replace_amt = 0.0
+shader_parameter/replace_color = Color(0, 0, 0, 1)
