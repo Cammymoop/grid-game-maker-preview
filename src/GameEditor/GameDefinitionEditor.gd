@@ -231,8 +231,8 @@ func renaming_game_dir() -> void:
 		_open_save_as_dialog(FilesManager.get_unique_game_name(new_game_dir_name))
 	else:
 		var old_game_name: = GameManager.get_game_name()
-		GameManager.rename_and_save_current_game_definition(new_game_dir_name)
-		GlobalToaster.show_toast_message("Moved %s Game Definition to %s" % [old_game_name, GameManager.get_game_name()])
+		if GameManager.rename_and_save_current_game_definition(new_game_dir_name):
+			GlobalToaster.show_toast_message("Moved %s Game Definition to %s" % [old_game_name, GameManager.get_game_name()])
 	_disable_name_input()
 	
 func _open_save_as_dialog(new_game_dir_name: String = "") -> void:

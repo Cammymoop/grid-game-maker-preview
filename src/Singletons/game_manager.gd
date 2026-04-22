@@ -714,24 +714,28 @@ func save_current_game_definition_as(as_game_name: String, delete_on_overwrite: 
 	if as_game_name == get_game_name() and is_current_game_resavable():
 		save_current_game_definition(false)
 		return
+
 	if delete_on_overwrite and is_name_overwriting(as_game_name):
-		FilesManager.delete_game(as_game_name)
+		if not FilesManager.delete_game(as_game_name):
+			GlobalToaster.show_toast_message("Failed to overwrite game directory %s" % [FilesManager.get_game_dir_from_name(as_game_name)])
+			return
+
 	var copy_assets_and_levels_from: = ""
 	if loaded_from_game_name and loaded_from_game_name != as_game_name:
 		copy_assets_and_levels_from = loaded_from_game_name
 
-	cur_game_name = as_game_name
 	if not get_game_setting("title", ""):
 		set_game_setting("title", get_game_implicit_title() + " (copy)")
 	elif not get_game_setting("title", "").ends_with(" (copy)"):
 		set_game_setting("title", get_game_setting("title", "") + " (copy)")
 	save_current_game_definition()
+	cur_game_name = as_game_name
 	
 	if copy_assets_and_levels_from:
 		FilesManager.copy_assets_and_levels_to(copy_assets_and_levels_from, as_game_name)
 	game_dir_name_changed.emit(cur_game_name)
 
-func rename_and_save_current_game_definition(new_game_name: String) -> bool:
+func rename_and_save_current_game_definition(new_game_name: String, delete_on_overwrite: bool = false) -> bool:
 	if not is_current_game_saved():
 		_set_game_name(new_game_name)
 		return false
@@ -739,9 +743,17 @@ func rename_and_save_current_game_definition(new_game_name: String) -> bool:
 		_set_game_name(new_game_name)
 		save_current_game_definition()
 		return true
+	
+	if delete_on_overwrite and is_name_overwriting(new_game_name):
+		if not FilesManager.delete_game(new_game_name):
+			GlobalToaster.show_toast_message("Failed to overwrite game directory %s" % [FilesManager.get_game_dir_from_name(new_game_name)])
+			return false
 
-	if FilesManager.rename_game(get_game_name(), new_game_name):
+	var old_game_name: = get_game_name()
+	if FilesManager.rename_game(old_game_name, new_game_name):
 		_set_game_name(new_game_name)
+		if FilesManager.get_default_game() == old_game_name:
+			FilesManager.save_default_game(new_game_name)
 	else:
 		GlobalToaster.show_toast_message("Failed to move game directory")
 		return false

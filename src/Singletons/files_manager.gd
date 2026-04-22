@@ -518,3 +518,14 @@ func smarter_make_dir_absolute(dir_path: String) -> void:
 func smarter_file_exists(file_path: String) -> bool:
 	var path_abs: = ProjectSettings.globalize_path(file_path)
 	return FileAccess.file_exists(path_abs)
+
+func delete_game(game_name: String) -> bool:
+	var game_dir: = get_game_base_dir(game_name)
+	if not smarter_dir_exists(game_dir):
+		push_error("Game directory %s does not exist" % [game_dir])
+		return false
+	var error: = DirAccess.remove_absolute(ProjectSettings.globalize_path(game_dir))
+	if error != OK:
+		push_error("Error deleting game directory %s: %s" % [game_dir, error_string(error)])
+		return false
+	return true
