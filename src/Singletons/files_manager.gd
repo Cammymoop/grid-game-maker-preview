@@ -407,11 +407,13 @@ func import_all_example_games() -> void:
 	for example_game_name: String in get_example_games_list():
 		import_example_game(example_game_name)
 
-func import_example_game(example_game_name: String) -> Dictionary:
+func import_example_game(example_game_name: String, ensure_unique: bool = true) -> Dictionary:
 	var example_game_dir_name: = get_game_dir_from_name(example_game_name)
 	const EXAMPLE_GAMES_DIR: = "res://example_games"
 	var example_game_dir_path: = EXAMPLE_GAMES_DIR + "/" + example_game_dir_name
-	var target_game_name: = get_unique_game_name(example_game_name)
+	var target_game_name: = example_game_name
+	if ensure_unique:
+		target_game_name = get_unique_game_name(example_game_name)
 	var target_game_dir: = get_game_base_dir(target_game_name)
 	if not smarter_dir_exists(example_game_dir_path):
 		push_error("Example game directory %s does not exist" % [example_game_dir_path])
@@ -506,6 +508,20 @@ func rename_game(old_game_name: String, new_game_name: String) -> bool:
 			push_error("Error renaming game directory from %s to %s: %s" % [old_game_dir_abs, new_game_dir_abs, error_string(error)])
 			return false
 	return true
+
+func fix_game_name(game_name: String) -> void:
+	if not game_exists(game_name):
+		push_error("Game %s does not exist" % [game_name])
+		return
+	var game_def_path: = get_game_definition_path(game_name)
+	var game_definition: = _get_dict_from_json_file(game_def_path)
+	if not game_definition:
+		push_error("Error parsing game definition at file: " + game_def_path)
+		return
+	game_definition['game_name'] = game_name.strip_edges()
+	if not serialize_and_save_data_to_json(game_definition, game_def_path.get_base_dir(), GAME_DEF_FILENAME, FORMAT_GAME_JSON):
+		push_error("Error saving fixed game definition at file: " + game_def_path)
+		return
 
 func smarter_dir_exists(dir_path: String) -> bool:
 	var path_abs: = ProjectSettings.globalize_path(dir_path)
