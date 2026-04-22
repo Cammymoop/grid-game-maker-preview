@@ -1,6 +1,6 @@
 extends Node
 
-static func make_backup_of_game(game_name: String) -> bool:
+func make_backup_of_game(game_name: String) -> bool:
     var game_dir: = FilesManager.get_game_base_dir(game_name)
     var result: Dictionary = ArchiveCopier.copy_and_zip_directory(game_dir, game_name + "_backup")
     if not result.get("ok", false):
@@ -8,7 +8,7 @@ static func make_backup_of_game(game_name: String) -> bool:
         return false
     return true
 
-static func import_example_game(example_game_name: String, as_new_game: bool) -> bool:
+func import_example_game(example_game_name: String, as_new_game: bool) -> bool:
     var example_games_list: = FilesManager.get_example_games_list()
     if not example_game_name in example_games_list:
         return false
@@ -23,10 +23,17 @@ static func import_example_game(example_game_name: String, as_new_game: bool) ->
         return false
     return true
 
-static func import_game_zip(zip_file_path: String, as_new_game: bool, new_game_name: String = "") -> bool:
+func reimport_all_example_games() -> Array[String]:
+    var failed_games: Array[String] = []
+    for example_game_name: String in FilesManager.get_example_games_list():
+        if not import_example_game(example_game_name, false):
+            failed_games.append(example_game_name)
+    return failed_games
+
+func import_game_zip(zip_file_path: String, as_new_game: bool, new_game_name: String = "") -> String:
     var importing_game_name: = ImportZipExtractor.get_game_name_from_zip(zip_file_path)
     if not importing_game_name:
-        return false
+        return ""
     
     if FilesManager.game_exists(importing_game_name):
         if as_new_game:
@@ -40,21 +47,21 @@ static func import_game_zip(zip_file_path: String, as_new_game: bool, new_game_n
             new_game_name = FilesManager.get_unique_game_name(new_game_name)
         importing_game_name = new_game_name
     
+    FilesManager.create_game_directory_if_not_exists(importing_game_name)
+    
     var result: = ImportZipExtractor.import_game_zip_with_backup(zip_file_path, importing_game_name)
     if not result.get("ok", false):
-        return false
+        return ""
     FilesManager.fix_game_name(importing_game_name)
 
-    return true
+    return importing_game_name
 
-static func export_game_zip(game_name: String, save_to_directory: String = "") -> String:
+func export_game_zip(game_name: String, save_to_directory: String = "") -> String:
     if not FilesManager.game_exists(game_name):
         return ""
     if save_to_directory:
         if not save_to_directory.is_absolute_path() and not save_to_directory.is_relative_path():
             return ""
-        # remove filename if it was passed
-        save_to_directory = save_to_directory.get_base_dir()
         if save_to_directory.is_relative_path() or save_to_directory.begins_with("res://"):
             save_to_directory = OS.get_executable_path().get_base_dir().path_join(save_to_directory)
         if save_to_directory.begins_with("user://"):

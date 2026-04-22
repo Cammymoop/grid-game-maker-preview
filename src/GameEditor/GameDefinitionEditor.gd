@@ -130,14 +130,15 @@ func on_game_dir_name_changed(new_game_name: String) -> void:
 
 func load_game_file(dialog) -> void:
 	var game_name = dialog.get_selected_game()
-	GameManager.load_game_definition_from_file(game_name)
-	#show_settings(GameManager.game_definition)
+	if game_name:
+		GameManager.load_game_definition_from_file(game_name)
+	dialog.close_dialog()
 
 func _on_LoadButton_pressed():
 	var dialog = load_dialog.instantiate()
 	
 	add_child(dialog)
-	dialog.connect("confirmed", Callable(self, "load_game_file").bind(dialog))
+	dialog.confirmed.connect(load_game_file.bind(dialog))
 	dialog.popup_centered()
 
 
@@ -249,3 +250,24 @@ func _on_edit_game_dir_button_pressed() -> void:
 		return
 	_enable_name_input()
 	name_input.grab_focus.call_deferred()
+
+
+func _on_export_zip_pressed() -> void:
+	var file_dialog: FileDialog = FileDialog.new()
+	file_dialog.title = "Export Game .zip To Folder..."
+	file_dialog.file_mode = FileDialog.FILE_MODE_OPEN_DIR
+	file_dialog.access = FileDialog.ACCESS_FILESYSTEM
+	file_dialog.dir_selected.connect(_export_destination_picked.bind(file_dialog))
+	file_dialog.close_requested.connect(file_dialog.queue_free)
+	file_dialog.canceled.connect(file_dialog.queue_free)
+	file_dialog.popup_file_dialog()
+
+func _export_destination_picked(path: String, file_dialog: FileDialog) -> void:
+	prints("export destination picked: ", path)
+	file_dialog.queue_free()
+	var zip_path: String = ImporterExporter.export_game_zip(GameManager.get_game_name(), path)
+	if zip_path:
+		GlobalToaster.show_toast_message("Exported Game .zip to\n%s" % [zip_path])
+	else:
+		GlobalToaster.show_toast_message("Failed to export Game .zip")
+

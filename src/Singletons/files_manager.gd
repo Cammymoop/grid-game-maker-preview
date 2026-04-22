@@ -136,12 +136,15 @@ func save_default_game(game_name) -> void:
 		push_error("Error saving default game. file path: %s" % [_data_path("default_game")])
 
 func save_game_info(game_info: Dictionary) -> void:
-	create_game_directory_if_not_exists(game_info)
+	if not game_info.get('game_name', ''):
+		push_error("Game info does not contain a game name")
+		return
+	create_game_directory_if_not_exists(game_info['game_name'])
 	var game_dir: = get_game_base_dir(game_info['game_name'])
 	return serialize_and_save_data_to_json(game_info, game_dir, GAME_DEF_FILENAME, FORMAT_GAME_JSON)
 
-func create_game_directory_if_not_exists(game_info: Dictionary) -> void:
-	var game_data_path: = get_game_base_dir(game_info['game_name'])
+func create_game_directory_if_not_exists(game_name: String) -> void:
+	var game_data_path: = get_game_base_dir(game_name)
 	if not ensure_dir_exists_absolute(game_data_path):
 		return
 	_create_directories_recursively(game_data_path, game_dir_default_structure)

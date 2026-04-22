@@ -5,27 +5,47 @@
 [node name="LoadGameDialog" type="ConfirmationDialog" unique_id=966137286]
 oversampling_override = 1.0
 title = "Load Game"
+position = Vector2i(0, 25)
+size = Vector2i(398, 157)
 visible = true
 script = ExtResource("2")
 
-[node name="VBoxContainer" type="VBoxContainer" parent="." unique_id=1982379268]
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
+[node name="HBoxContainer" type="HBoxContainer" parent="." unique_id=810277099]
 offset_left = 8.0
 offset_top = 8.0
-offset_right = -8.0
-offset_bottom = -45.0
+offset_right = 390.0
+offset_bottom = 112.0
+theme_override_constants/separation = 14
 
-[node name="Label" type="Label" parent="VBoxContainer" unique_id=1882357838]
+[node name="VBoxContainer" type="VBoxContainer" parent="HBoxContainer" unique_id=1982379268]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Label" type="Label" parent="HBoxContainer/VBoxContainer" unique_id=1882357838]
 layout_mode = 2
 text = "Load Game Definition:"
 horizontal_alignment = 1
 
-[node name="GamesList" type="ItemList" parent="VBoxContainer" unique_id=1658591457]
+[node name="GamesList" type="ItemList" parent="HBoxContainer/VBoxContainer" unique_id=1658591457]
 layout_mode = 2
 size_flags_vertical = 3
 auto_width = true
 auto_height = true
 
-[connection signal="item_activated" from="VBoxContainer/GamesList" to="." method="_on_GamesList_item_activated"]
+[node name="VBoxContainer2" type="VBoxContainer" parent="HBoxContainer" unique_id=1696661555]
+layout_mode = 2
+theme_override_constants/separation = 8
+alignment = 1
+
+[node name="ImportExamplesButton" type="Button" parent="HBoxContainer/VBoxContainer2" unique_id=237560862]
+layout_mode = 2
+text = "(Re)import
+example games"
+
+[node name="ImportGameZipButton" type="Button" parent="HBoxContainer/VBoxContainer2" unique_id=1406537135]
+layout_mode = 2
+text = "Import game .zip"
+
+[connection signal="item_activated" from="HBoxContainer/VBoxContainer/GamesList" to="." method="_on_GamesList_item_activated"]
+[connection signal="pressed" from="HBoxContainer/VBoxContainer2/ImportExamplesButton" to="." method="_on_import_examples_button_pressed"]
+[connection signal="pressed" from="HBoxContainer/VBoxContainer2/ImportGameZipButton" to="." method="_on_import_game_zip_button_pressed"]

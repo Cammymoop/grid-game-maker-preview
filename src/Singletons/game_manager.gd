@@ -774,3 +774,10 @@ func is_name_overwriting(new_game_name: String) -> bool:
 
 func is_current_game_saved() -> bool:
 	return loaded_from_game_name != ""
+
+func import_and_load_game_zip(zip_file_path: String) -> bool:
+	var imported_name: String = ImporterExporter.import_game_zip(zip_file_path, true)
+	if not imported_name:
+		return false
+	load_game_definition_from_file(imported_name)
+	return true
