@@ -60,7 +60,6 @@ func set_value(new_val: Variant) -> void:
     
     if typeof(new_val) == TYPE_STRING or new_val["type"] == "plain":
         if typeof(new_val) == TYPE_DICTIONARY:
-            prints("new val is dictionary plain value", new_val)
             new_val = new_val["value"]
         set_plain_value(new_val)
         return

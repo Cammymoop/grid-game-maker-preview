@@ -440,8 +440,8 @@ func clear_children() -> void:
     for child in get_children():
         child.queue_free()
 
-func set_sprite_facing(facing: int) -> void:
-    if interpolate_facing_enabled:
+func set_sprite_facing(facing: int, immediate: bool = false) -> void:
+    if interpolate_facing_enabled and not immediate:
         _facing_rotation = current_rotation
         _current_facing = facing
         interp_facing_timer = interp_duration

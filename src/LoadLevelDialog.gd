@@ -47,6 +47,8 @@ func _shortcut_input(event: InputEvent) -> void:
 		close_dialog()
 
 func _on_LoadFileButton_pressed():
+	if GameManager.queued_level_load:
+		GameManager.cancel_queued_level_load()
 	var selected_index: = select_level_option.selected
 	var selected_level: = select_level_option.get_item_text(selected_index)
 	if selected_index == 0:

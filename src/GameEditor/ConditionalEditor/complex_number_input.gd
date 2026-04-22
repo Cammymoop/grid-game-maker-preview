@@ -45,6 +45,13 @@ func set_input_args(new_args: Array) -> void:
     if "int" in new_args:
         is_int_only = true
         _update_int_only()
+    for arg in new_args:
+        if arg.begins_with("default="):
+            set_value({"type": "plain", "value": float(arg.split("=")[1])})
+        elif arg.begins_with("step="):
+            plain_value_step = float(arg.split("=")[1])
+            plain_value_input.custom_step = true
+    refresh_ui()
 
 func get_value() -> Dictionary:
     if current_slot_id == SlotSelectorButton.NUMBER_VALUE:

@@ -251,10 +251,10 @@ func deserialize(data: Dictionary) -> void:
 	# handle old format of 'visual_facing'
 	if data.has('visual_facing'):
 		set_move_facing(int(data['facing']))
-		set_facing(int(data['visual_facing']))
+		set_facing(int(data['visual_facing']), true)
 	else:
 		set_move_facing(int(data['move_facing']))
-		set_facing(int(data['facing']))
+		set_facing(int(data['facing']), true)
 	moving = data['moving']
 	_pending_half_move = data.get('_pending_half_move', false)
 	position = Utility.get_vector2_from_arr(data['position'])
@@ -592,19 +592,19 @@ func set_controller(new_controller) -> void:
 	if "controller_optiops" in definition:
 		controller.set_options(definition["controller_options"])
 
-func set_facing(new_facing):
+func set_facing(new_facing: int, immediate: bool = false) -> void:
 	facing = new_facing
 	var no_rotate = EntityManager.get_entity_property(self, "no-rotate")
 	if no_rotate != null and no_rotate.get_value():
 		return
-	sprite.set_sprite_facing(facing)
+	sprite.set_sprite_facing(facing, immediate)
 
-func set_move_facing(new_facing):
+func set_move_facing(new_facing: int) -> void:
 	move_facing = new_facing
 
-func turn_to_facing(new_facing):
+func turn_to_facing(new_facing: int, immediate: bool = false) -> void:
 	set_move_facing(new_facing)
-	set_facing(new_facing)
+	set_facing(new_facing, immediate)
 
 static func _speed_to_spt(speed: float) -> int:
 	if speed <= 0:

@@ -560,8 +560,7 @@ func create_entity(entity_index: int, tile_position: Vector2i, facing: int = 0, 
     setup_entity_sprite(entity)
     
     entity.set_move_facing(facing)
-    if entity.visual_turn_on_move:
-        entity.set_facing(facing)
+    entity.set_facing(facing, true)
     
     if "groups" in entity_info:
         for g in entity_info["groups"]:

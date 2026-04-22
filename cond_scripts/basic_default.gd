@@ -405,7 +405,7 @@ func desc_a_move() -> String:
 	return "entity|The entity starts moving this way [complex_dir:DirectionInput:1]"
 func cmd_a_move(slots: Dictionary, chosen_slot: int, complex_dir: Dictionary) -> void:
 	if Commands.slot_is_entity(chosen_slot):
-		var selected = slots[chosen_slot]
+		var selected: BaseEntity = slots[chosen_slot]
 		selected.start_move(resolve_complex_direction(complex_dir, slots))
 
 func desc_move_facing() -> String:
@@ -561,10 +561,11 @@ func cmd_next_level_exists(_slots: Dictionary) -> bool:
 	return MapManager.has_next_level()
 
 func desc_load_next_level() -> String:
-	return "none|Load the next level"
-func cmd_load_next_level(_slots: Dictionary) -> void:
+	return "none|Load the next level, with a [delay:ComplexScalarInput:default=1,step=0.1] second delay"
+func cmd_load_next_level(slots: Dictionary, _slot: int, delay: Dictionary = {"type": "plain", "value": 1.0}) -> void:
 	prints("loading next level")
-	GameManager.try_load_next_level()
+	var delay_val: float = resolve_complex_scalar(delay, slots)
+	GameManager.try_load_next_level(delay_val)
 
 func desc_take_a_turn() -> String:
 	return "entity|The entity takes a turn"
@@ -768,3 +769,12 @@ func cmd_apply_effect_to_entity(slots: Dictionary, chosen_slot: int, effect_name
 		return
 	if slots[chosen_slot]:
 		EntityManager.apply_special_effect(slots[chosen_slot], effect_name)
+
+func desc_do_screen_shake() -> String:
+	return "none|Shake the screen! Intensity [intensity:ComplexScalarInput:default=2.0,step=0.1]" \
+	       + " for [duration:ComplexScalarInput:default=1.5,step=0.1] seconds"
+func cmd_do_screen_shake(slots: Dictionary, _slot: int, intensity: Dictionary, duration: Dictionary) -> void:
+	if GameManager.game_camera and GameManager.game_camera.active:
+		var intensity_val: float = resolve_complex_scalar(intensity, slots)
+		var duration_val: float = resolve_complex_scalar(duration, slots)
+		GameManager.game_camera.do_screen_shake(intensity_val, duration_val)

@@ -24,6 +24,9 @@ var most_recent_is_horizontal: = false
 
 var parent_entity: BaseEntity = null
 
+var level_load_delay_frames: int = 20
+var load_delay_left: int = 0
+
 var available_options = {
 	"stop_repeat_after_bonk": {"display_name": "Stop repeating movement after being blocked", "type": "bool"},
 	"lock_for_idle_delay_after_bonk": {"display_name": "Prevent movement briefly after being blocked", "type": "bool"},
@@ -38,6 +41,10 @@ func _ready():
 		return
 	parent_entity.blocked.connect(got_blocked)
 	parent_entity.started_move.connect(on_start_move)
+	GameManager.level_state_loaded.connect(on_level_state_loaded)
+
+func on_level_state_loaded() -> void:
+	load_delay_left = level_load_delay_frames
 
 func get_max_move_intentions() -> int:
 	if is_delay_locked and parent_entity.idle_ticks_elapsed + 1 < EntityManager.idle_delay_frames:
@@ -58,6 +65,12 @@ func get_options() -> Dictionary:
 	return available_options
 
 func _physics_process(_delta):
+	if load_delay_left > 0:
+		if GameManager.get_is_half_tick_rate():
+			load_delay_left -= 2
+		else:
+			load_delay_left -= 1
+		return
 	var is_pressed = false
 	
 	up_held = true
@@ -138,6 +151,8 @@ func got_blocked(_facing_dir) -> void:
 			is_delay_locked = true
 
 func on_start_move(_facing_dir) -> void:
+	if load_delay_left > 0:
+		load_delay_left = 0
 	cancelled = false
 	is_delay_locked = false
 

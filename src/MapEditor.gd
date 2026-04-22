@@ -129,6 +129,8 @@ func on_edit_mode_disabled(do_save_state: bool) -> void:
 	after_edit_mode_switched()
 
 func on_edit_mode_enabled() -> void:
+	if GameManager.queued_level_load:
+		GameManager.cancel_queued_level_load()
 	has_edited_something = false
 	var vp = get_viewport()
 	if vp.has_method("rescale"):
@@ -358,6 +360,7 @@ func _standard_delete_at_cursor(force_everything: bool = false, force_only_entit
 			EntityManager.remove_entity(e)
 			deleted_something = true	
 	if deleted_something:
+		_refresh_edited_entity_indicators()
 		$DustParticles.emit_at(MapManager.tile_to_world_position_centered(cursor_tile_pos))
 
 func inspect_at_cursor() -> void:

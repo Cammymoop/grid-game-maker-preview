@@ -29,6 +29,9 @@ var loaded = false
 var editor_live_edit_mode: = false
 var current_level_is_museum: = false
 
+var queued_level_load: bool = false
+var queued_level_load_timer: Timer = null
+
 var scenes: = {
 	"Menu": "res://Scenes/Menu.tscn",
 	"Loading": "res://Scenes/Loading.tscn",
@@ -235,7 +238,7 @@ func load_serialized_play_state(serialized_state: Dictionary, as_level_load: boo
 	if cur_scene != "Play":
 		print("Can't deserialize play state, not in play scene")
 		return
-	if not serialized_state:
+	if not serialized_state or queued_level_load:
 		return
 	
 	set_pause("gm_loading_state", true)
@@ -347,11 +350,19 @@ func has_editor_autosave() -> bool:
 	return FilesManager.level_exists(cur_game_name, "editor_autosave")
 
 func load_editor_autosave() -> void:
+	if queued_level_load:
+		return
 	var autosave_data: = FilesManager.get_level_data(cur_game_name, "editor_autosave")
 	load_level_data(autosave_data)
 	loaded_is_autosave = true
 
-func load_level_data(level_data):
+func load_level_data(level_data: Dictionary, process_queued_load: bool = false):
+	if not process_queued_load and queued_level_load:
+		return
+	if process_queued_load and not queued_level_load:
+		# it was cancelled
+		return
+	queued_level_load = false
 	loaded_is_autosave = false
 	current_level_is_museum = false
 	loaded_level_name = level_data["name"]
@@ -359,16 +370,30 @@ func load_level_data(level_data):
 	load_edited()
 	close_pause_menu()
 
-func try_load_next_level():
-	if not MapManager.has_next_level():
+func try_load_next_level(with_delay: float = 0.5):
+	if not MapManager.has_next_level() or queued_level_load:
 		return
 	
 	var next_level_name: String = MapManager.get_metadata_value("next_level")
 	var next_level_data: = FilesManager.get_level_data(cur_game_name, next_level_name)
-	load_level_data(next_level_data)
+	queued_level_load = true
+
+	queued_level_load_timer = Timer.new()
+	queued_level_load_timer.one_shot = true
+	queued_level_load_timer.timeout.connect(load_level_data.bind(next_level_data, true))
+	queued_level_load_timer.timeout.connect(queued_level_load_timer.queue_free)
+	add_child(queued_level_load_timer)
+	queued_level_load_timer.start(with_delay)
+
+func cancel_queued_level_load() -> void:
+	queued_level_load = false
+	if queued_level_load_timer:
+		queued_level_load_timer.stop()
+		queued_level_load_timer.queue_free()
+		queued_level_load_timer = null
 
 func try_load_level(level_name: String):
-	if not FilesManager.level_exists(cur_game_name, level_name):
+	if not FilesManager.level_exists(cur_game_name, level_name) or queued_level_load:
 		return
 	var the_level_data: = FilesManager.get_level_data(cur_game_name, level_name)
 	load_level_data(the_level_data)
@@ -419,6 +444,7 @@ func change_scene(new_scene: String):
 		return
 	
 	if cur_scene == "Play":
+		cancel_queued_level_load()
 		transition_left = true
 		if editor_save:
 			loaded_level = editor_save

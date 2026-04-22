@@ -19,6 +19,10 @@ var override_target_interp_style: = true
 var smoothing_enabled: = true
 var smoothing_amount: = 32
 
+var is_shaking: = false
+var shake_intensity: float = 0.0
+var shake_timer: float = 0.0
+
 func _ready():
 	EntityManager.entity_list_updated.connect(on_entity_list_updated)
 	EntityManager.entity_became_active.connect(on_entity_became_active)
@@ -90,6 +94,13 @@ func _process(delta):
 		position = position.lerp(pos_target, smoothing_amount * delta)
 	else:
 		position = pos_target
+	
+	if is_shaking and shake_timer > 0:
+		shake_timer -= delta
+		if shake_timer <= 0:
+			shake_timer = 0
+			is_shaking = false
+		position += Vector2(randf() * 2 - 1, randf() * 2 - 1) * shake_intensity
 
 func is_target_active() -> bool:
 	return target_entity and is_instance_valid(target_entity) and target_entity.active
@@ -196,3 +207,7 @@ func get_target_iterpolated_pos() -> Vector2:
 	var target_to_pos: = MapManager.tile_to_world_position(target_entity.next_tile_pos)
 	return target_from_pos.lerp(target_to_pos, target_entity.get_move_progress()) + ent_center_offset
 	
+func do_screen_shake(intensity: float, duration: float) -> void:
+	is_shaking = true
+	shake_intensity = intensity
+	shake_timer = maxf(shake_timer, duration)
