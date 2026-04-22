@@ -70,6 +70,7 @@ func deactivate():
 
 func _process(delta):
 	if not active:
+		offset = Vector2.ZERO
 		return
 	
 	if Input.is_action_just_pressed("camera_next_target"):
@@ -100,7 +101,9 @@ func _process(delta):
 		if shake_timer <= 0:
 			shake_timer = 0
 			is_shaking = false
-		position += Vector2(randf() * 2 - 1, randf() * 2 - 1) * shake_intensity
+		offset = Vector2(randf() * 2 - 1, randf() * 2 - 1) * shake_intensity
+	else:
+		offset = Vector2.ZERO
 
 func is_target_active() -> bool:
 	return target_entity and is_instance_valid(target_entity) and target_entity.active

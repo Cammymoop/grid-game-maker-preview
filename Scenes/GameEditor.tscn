@@ -248,10 +248,12 @@ text = "Entities respond to"
 
 [node name="Label2" type="Label" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer/GameSettingsSection/MarginContainer/HFlowContainer/HFlowContainer/HBoxContainer12" unique_id=549139783]
 layout_mode = 2
-tooltip_text = "Z, X, C
+tooltip_text = "Use event props like \"do_action_1\"
+Default Bindings:
+Z, X, C
 Space, Shift, E
 Xbox: B, A, X
-Use event props like \"do_action_1\""
+"
 mouse_filter = 1
 mouse_default_cursor_shape = 16
 theme_override_colors/font_color = Color(0.44167724, 0.8426321, 1, 1)

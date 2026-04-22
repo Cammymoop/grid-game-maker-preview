@@ -787,7 +787,7 @@ func _handle_action_signal(deferred_sig: Dictionary) -> void:
 	var action_signal_handler: Property = EntityManager.get_entity_property(self, action_signal)
 	if not action_signal_handler or not action_signal_handler.is_conditional():
 		return
-	action_signal_handler.resolve(self, null, tile_position, deferred_sig["args"])
+	action_signal_handler.resolve(self, null, [tile_position], [])
 
 func has_local_data() -> bool:
 	if local_properties.size() > 0 or removed_properties.size() > 0:
