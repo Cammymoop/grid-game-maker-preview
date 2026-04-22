@@ -1,0 +1,77 @@
+[gd_scene format=3 uid="uid://c25gnk613ij6d"]
+
+[ext_resource type="Script" uid="uid://br6ch50bvl4ja" path="res://Scenes/GameEditor/save_game_as_dialog.gd" id="1_m70ll"]
+[ext_resource type="FontFile" uid="uid://biuf4hpin33j3" path="res://assets/font/medium_font.tres" id="2_r0s0b"]
+
+[node name="SaveGameAsDialog" type="Window" unique_id=842653498 node_paths=PackedStringArray("game_title_label", "game_name_input")]
+oversampling_override = 1.0
+title = "Save Game As:"
+position = Vector2i(0, 36)
+size = Vector2i(450, 129)
+wrap_controls = true
+script = ExtResource("1_m70ll")
+game_title_label = NodePath("MarginContainer/PanelContainer/HBoxContainer3/GameTitleLabel")
+game_name_input = NodePath("MarginContainer/PanelContainer/HBoxContainer/GameNameInput")
+
+[node name="MarginContainer" type="MarginContainer" parent="." unique_id=1862138852]
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 40.0
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 8
+
+[node name="PanelContainer" type="VBoxContainer" parent="MarginContainer" unique_id=704589257]
+layout_mode = 2
+
+[node name="HBoxContainer3" type="HBoxContainer" parent="MarginContainer/PanelContainer" unique_id=1082295493]
+layout_mode = 2
+alignment = 1
+
+[node name="Label" type="Label" parent="MarginContainer/PanelContainer/HBoxContainer3" unique_id=1571167574]
+layout_mode = 2
+text = "Title:"
+
+[node name="GameTitleLabel" type="Label" parent="MarginContainer/PanelContainer/HBoxContainer3" unique_id=777503925]
+layout_mode = 2
+text = "GAME"
+
+[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/PanelContainer" unique_id=1888031286]
+layout_mode = 2
+alignment = 1
+
+[node name="Label" type="Label" parent="MarginContainer/PanelContainer/HBoxContainer" unique_id=1606339387]
+layout_mode = 2
+text = "Game Directory Name:"
+
+[node name="GameNameInput" type="LineEdit" parent="MarginContainer/PanelContainer/HBoxContainer" unique_id=1171438562]
+custom_minimum_size = Vector2(240, 0)
+layout_mode = 2
+select_all_on_focus = true
+
+[node name="HBoxContainer2" type="HBoxContainer" parent="MarginContainer/PanelContainer" unique_id=1898577205]
+layout_mode = 2
+alignment = 1
+
+[node name="SaveFileButton" type="Button" parent="MarginContainer/PanelContainer/HBoxContainer2" unique_id=2043888591]
+layout_mode = 2
+size_flags_horizontal = 4
+theme_type_variation = &"BigTextButton"
+theme_override_fonts/font = ExtResource("2_r0s0b")
+text = "Save As"
+
+[node name="Spacer" type="Control" parent="MarginContainer/PanelContainer/HBoxContainer2" unique_id=547421395]
+custom_minimum_size = Vector2(10, 0)
+layout_mode = 2
+
+[node name="CancelButton" type="Button" parent="MarginContainer/PanelContainer/HBoxContainer2" unique_id=1924460264]
+layout_mode = 2
+size_flags_horizontal = 4
+theme_type_variation = &"BigTextButton"
+theme_override_fonts/font = ExtResource("2_r0s0b")
+text = "Cancel"
+
+[connection signal="text_submitted" from="MarginContainer/PanelContainer/HBoxContainer/GameNameInput" to="." method="_on_game_name_input_text_submitted"]
+[connection signal="pressed" from="MarginContainer/PanelContainer/HBoxContainer2/SaveFileButton" to="." method="_on_SaveFileButton_pressed"]
+[connection signal="pressed" from="MarginContainer/PanelContainer/HBoxContainer2/CancelButton" to="." method="_on_cancel_button_pressed"]

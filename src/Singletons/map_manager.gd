@@ -17,62 +17,7 @@ var is_empty_blocking: = true
 
 var tile_width: int = 32
 
-var tile_defs: = {
-    0: {
-        "name": "floor",
-        "texture": 0,
-        "tex_index": 18,
-        "properties": {
-            "f1": true,
-        },
-    },
-    1: {
-        "name": "wall",
-        "texture": 0,
-        "tex_index": 19,
-        "properties": {
-            "blocks": true,
-        },
-    },
-    2: {
-        "name": "floor2",
-        "texture": 0,
-        "tex_index": 22,
-        "properties": {
-            "f2": true,
-        },
-    },
-    3: {
-        "name": "water",
-        "texture": 0,
-        "tex_index": 15,
-        "properties": {
-            "finish_move_onto_tile": {
-                "condition": "has_no_property floats",
-                "actions": ["kill"],
-            },
-            "wet": true,
-        },
-    },
-    4: {
-        "name": "greenery",
-        "texture": 0,
-        "tex_index": 27,
-        "properties": {
-            "blocks": {"condition": "has_no_property treads"},
-            "finish_move_onto_tile": {
-                "conditions": ["has_property treads"],
-                "actions": ["replace_tile was_greenery"]
-            }
-        },
-    },
-    5: {
-        "name": "was_greenery",
-        "texture": 0,
-        "tex_index": 28,
-        "properties": {},
-    },
-}
+var tile_defs: = {}
 @onready var loaded_tile_defs: = tile_defs
 
 var tile_index_map: = {}

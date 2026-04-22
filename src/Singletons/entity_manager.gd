@@ -15,63 +15,7 @@ var controller_templates: = {
     "direct_chase_controller": preload("res://Scenes/Controllers/direct_chase_controller.tscn"),
 }
 
-var entity_defs: Dictionary = {
-    0: {
-        "name": "player",
-        "texture": 1,
-        "tex_index": 0,
-        "intended_move_speed": 6,
-        "controller": "InputController",
-        "properties": {
-            "pusher": true,
-            "treads": true,
-        },
-        "groups": ["Player"],
-    },
-    1: {
-        "name": "green_box",
-        "texture": 1,
-        "tex_index": 1,
-        "properties": {
-            "blocks": {"condition": "has_no_property pusher"},
-            "move_onto": {"condition": "be_pushed forward"},
-            "i_finish_move_onto_tile": {
-                "condition": "tile_has_property wet",
-                "actions": ["replace_tile greenery", "die"]
-            }
-        },
-    },
-    2: {
-        "name": "bouncer",
-        "texture": 1,
-        "tex_index": 6,
-        "intended_move_speed": 4,
-        "controller": "BounceController",
-        "properties": {
-            "kills": true,
-        },
-    },
-    3: {
-        "name": "swap_box",
-        "texture": 1,
-        "tex_index": 8,
-        "properties": {
-            "blocks": {"condition": "has_no_property pusher"},
-            "move_onto": {"condition": "be_pushed reverse"},
-        },
-    },
-    4: {
-        "name": "rotate_box",
-        "texture": 1,
-        "tex_index": 13,
-        "properties": {
-            "pusher": true,
-            "no_rotation": true,
-            "blocks": {"condition": "has_no_property pusher"},
-            "move_onto": {"condition": "be_pushed turn_right"},
-        },
-    },
-}
+var entity_defs: Dictionary = {}
 @onready var loaded_entity_defs: = entity_defs
 
 var entity_index_map: = {}

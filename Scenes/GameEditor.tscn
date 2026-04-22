@@ -69,10 +69,12 @@ theme = ExtResource("3_qrjoe")
 current_tab = 0
 tab_0/title = "Game"
 
-[node name="GameDefinition" type="VBoxContainer" parent="MarginContainer/UIRoot/TabContainer" unique_id=1146228055 node_paths=PackedStringArray("show_level_title_option_picker", "move_interp_option_picker", "action_signal_sent_to_option_picker", "turn_animation_option_picker")]
+[node name="GameDefinition" type="VBoxContainer" parent="MarginContainer/UIRoot/TabContainer" unique_id=1146228055 node_paths=PackedStringArray("show_level_title_option_picker", "name_input", "edit_game_dir_button", "move_interp_option_picker", "action_signal_sent_to_option_picker", "turn_animation_option_picker")]
 layout_mode = 2
 script = ExtResource("6")
 show_level_title_option_picker = NodePath("ScrollContainer/VBoxContainer/GameSettingsSection/MarginContainer/HFlowContainer/HFlowContainer/HBoxContainer11/OptionButton")
+name_input = NodePath("HBoxContainer/VBoxContainer/HBoxContainer/NameInput")
+edit_game_dir_button = NodePath("HBoxContainer/VBoxContainer/HBoxContainer/EditGameDirButton")
 move_interp_option_picker = NodePath("ScrollContainer/VBoxContainer/GameSettingsSection/MarginContainer/HFlowContainer/VBoxContainer/HBoxContainer/HBoxContainer10/MoveInterpSelect")
 action_signal_sent_to_option_picker = NodePath("ScrollContainer/VBoxContainer/GameSettingsSection/MarginContainer/HFlowContainer/HFlowContainer/HBoxContainer12/ActionSentToSelect")
 turn_animation_option_picker = NodePath("ScrollContainer/VBoxContainer/GameSettingsSection/MarginContainer/HFlowContainer/VBoxContainer/HBoxContainer/HBoxContainer13/TurnAnimSelect")
@@ -112,9 +114,18 @@ size_flags_horizontal = 3
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="NameInput" type="LineEdit" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/HBoxContainer/VBoxContainer" unique_id=1146516637]
+[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/HBoxContainer/VBoxContainer" unique_id=135185799]
+layout_mode = 2
+
+[node name="NameInput" type="LineEdit" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/HBoxContainer/VBoxContainer/HBoxContainer" unique_id=1146516637]
 layout_mode = 2
 size_flags_horizontal = 3
+editable = false
+select_all_on_focus = true
+
+[node name="EditGameDirButton" type="Button" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/HBoxContainer/VBoxContainer/HBoxContainer" unique_id=844035251]
+layout_mode = 2
+text = "Change Game Directory"
 
 [node name="HBoxContainer10" type="HBoxContainer" parent="MarginContainer/UIRoot/TabContainer/GameDefinition" unique_id=2137570543]
 layout_mode = 2
@@ -647,7 +658,9 @@ size_factor = 0.5
 max_brightness = 0.3
 
 [connection signal="text_changed" from="MarginContainer/UIRoot/TabContainer/GameDefinition/HBoxContainer/VBoxContainer/TitleInput" to="MarginContainer/UIRoot/TabContainer/GameDefinition" method="_on_title_input_text_changed"]
-[connection signal="text_changed" from="MarginContainer/UIRoot/TabContainer/GameDefinition/HBoxContainer/VBoxContainer/NameInput" to="MarginContainer/UIRoot/TabContainer/GameDefinition" method="_on_NameInput_text_changed"]
+[connection signal="editing_toggled" from="MarginContainer/UIRoot/TabContainer/GameDefinition/HBoxContainer/VBoxContainer/HBoxContainer/NameInput" to="MarginContainer/UIRoot/TabContainer/GameDefinition" method="_on_name_input_editing_toggled"]
+[connection signal="text_submitted" from="MarginContainer/UIRoot/TabContainer/GameDefinition/HBoxContainer/VBoxContainer/HBoxContainer/NameInput" to="MarginContainer/UIRoot/TabContainer/GameDefinition" method="_on_name_input_text_submitted"]
+[connection signal="pressed" from="MarginContainer/UIRoot/TabContainer/GameDefinition/HBoxContainer/VBoxContainer/HBoxContainer/EditGameDirButton" to="MarginContainer/UIRoot/TabContainer/GameDefinition" method="_on_edit_game_dir_button_pressed"]
 [connection signal="value_changed" from="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer/WindowSection/MarginContainer/VBoxContainer/HBoxContainer3/PixelScaleInput" to="MarginContainer/UIRoot/TabContainer/GameDefinition" method="_on_PixelScaleInput_value_changed"]
 [connection signal="value_changed" from="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer/WindowSection/MarginContainer/VBoxContainer/HBoxContainer2/SetWindowWidth" to="MarginContainer/UIRoot/TabContainer/GameDefinition" method="_on_SetWindowWidth_value_changed"]
 [connection signal="value_changed" from="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer/WindowSection/MarginContainer/VBoxContainer/HBoxContainer2/SetWindowHeight" to="MarginContainer/UIRoot/TabContainer/GameDefinition" method="_on_SetWindowHeight_value_changed"]

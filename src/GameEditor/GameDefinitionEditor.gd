@@ -2,6 +2,8 @@ extends VBoxContainer
 
 const PropOrEntityNameInput = preload("res://src/GameEditor/ConditionalEditor/prop_or_entity_name_input.gd")
 
+var save_as_dialog_scn: = preload("res://Scenes/GameEditor/save_game_as_dialog.tscn")
+
 var generic_confirm = preload("res://Scenes/GameEditor/GenericConfirm.tscn")
 var load_dialog = preload("res://Scenes/GameEditor/LoadGameDialog.tscn")
 
@@ -11,14 +13,19 @@ var invalid_field_color = Color(0.7, 0.4, 0.4)
 
 @export var show_level_title_option_picker: OptionButton
 
+@export var name_input: LineEdit
+@export var edit_game_dir_button: Button
+
 @export var move_interp_option_picker: OptionButton
 @export var action_signal_sent_to_option_picker: OptionButton
 @export var turn_animation_option_picker: OptionButton
 
+var _save_as_dialog_open: bool = false
+
 func _ready():
-	var name_box = find_child("NameInput")
+	GameManager.game_dir_name_changed.connect(on_game_dir_name_changed)
 	var game_name = GameManager.get_game_name()
-	name_box.text = game_name
+	name_input.text = game_name
 	find_child("SetWindowWidth").value = GameManager.game_view.x
 	find_child("SetWindowHeight").value = GameManager.game_view.y
 	init_movement_modes()
@@ -105,30 +112,21 @@ func movement_mode_picked(mode_id: int) -> void:
 	
 	game_settings["movement_mode"] = mode_id
 
-func _on_SaveButton_pressed():
-	var is_resave: = GameManager.loaded_from_game_name == GameManager.get_game_name()
-	if is_resave or not FilesManager.game_exists(GameManager.get_game_name()):
+func _on_SaveButton_pressed() -> void:
+	if not GameManager.is_save_current_overwriting():
 		_real_save()
 	else:
-		var popup = generic_confirm.instantiate()
-		var title = "Do you want to override"
-		var text = "A game with this name already exists, do you want to override it?"
-		add_child(popup)
-		popup.confirm_with_callbacks(title, text, _real_save)
+		_open_save_as_dialog()
 
-func _real_save():
-	var def_data: = GameManager.get_serialized_game_definition()
-	FilesManager.save_game_info(def_data)
-	GameManager.loaded_from_game_name = GameManager.get_game_name()
-	
-	GlobalToaster.show_toast_message("Saved Game Definition")
+func _real_save() -> void:
+	GameManager.save_current_game_definition()
+	GlobalToaster.show_toast_message("Saved %s Game Definition" % [GameManager.get_game_name()])
 
 
-func _on_NameInput_text_changed(new_name: String) -> void:
-	GameManager.set_game_name(new_name)
-
+func on_game_dir_name_changed(new_game_name: String) -> void:
 	var title_input: LineEdit = find_child("TitleInput")
-	title_input.placeholder_text = new_name
+	title_input.placeholder_text = GameManager.get_game_implicit_title()
+	name_input.text = new_game_name
 
 func load_game_file(dialog) -> void:
 	var game_name = dialog.get_selected_game()
@@ -199,3 +197,55 @@ func on_turn_animation_option_picked(index: int) -> void:
 	var turn_anim: = turn_animation_option_picker.get_item_text(index)
 	GameManager.set_game_setting("default_turn_animation", turn_anim)
 	GameManager.game_settings_changed.emit()
+
+func _disable_name_input() -> void:
+	name_input.editable = false
+	edit_game_dir_button.disabled = false
+
+func _enable_name_input() -> void:
+	name_input.editable = true
+	edit_game_dir_button.disabled = true
+
+func _on_name_input_editing_toggled(toggled_on: bool) -> void:
+	if name_input.editable and not toggled_on and not _save_as_dialog_open:
+		renaming_game_dir()
+
+func _on_name_input_text_submitted(_new_text: String) -> void:
+	if _save_as_dialog_open:
+		name_input.text = GameManager.get_game_name()
+		_disable_name_input()
+		return
+	renaming_game_dir()
+
+func renaming_game_dir() -> void:
+	var new_game_dir_name: = name_input.text
+	if new_game_dir_name == GameManager.get_game_name():
+		_disable_name_input()
+		return
+	if not GameManager.is_current_game_saved() or FilesManager.is_game_name_equivalent(new_game_dir_name, GameManager.get_game_name()):
+		GameManager._set_game_name(new_game_dir_name)
+		_disable_name_input()
+		return
+	
+	if GameManager.is_name_overwriting(new_game_dir_name):
+		_open_save_as_dialog(FilesManager.get_unique_game_name(new_game_dir_name))
+	else:
+		var old_game_name: = GameManager.get_game_name()
+		GameManager.rename_and_save_current_game_definition(new_game_dir_name)
+		GlobalToaster.show_toast_message("Moved %s Game Definition to %s" % [old_game_name, GameManager.get_game_name()])
+	_disable_name_input()
+	
+func _open_save_as_dialog(new_game_dir_name: String = "") -> void:
+	var save_as_dialog: = save_as_dialog_scn.instantiate() as Window
+	save_as_dialog.use_game_name = new_game_dir_name
+	save_as_dialog.hidden.connect(set.bind("_save_as_dialog_open", false))
+	add_child(save_as_dialog)
+	save_as_dialog.move_to_center()
+	_save_as_dialog_open = true
+	prints("opening save as dialog with game name: ", new_game_dir_name)
+
+func _on_edit_game_dir_button_pressed() -> void:
+	if _save_as_dialog_open:
+		return
+	_enable_name_input()
+	name_input.grab_focus.call_deferred()

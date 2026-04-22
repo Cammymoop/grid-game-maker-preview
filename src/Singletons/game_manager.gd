@@ -3,6 +3,7 @@ extends Node
 signal level_state_loaded
 signal game_camera_target_changed(entity: BaseEntity)
 signal game_settings_changed
+signal game_dir_name_changed(new_game_dir_name: String)
 
 const FULL_TICK_RATE: int = 60
 @onready var TICK_RATE: int = ProjectSettings.get_setting_with_override("physics/common/physics_ticks_per_second")
@@ -98,10 +99,11 @@ func _ready():
 		load_game_definition_data(builtin_default_game_definition)
 		start_managers()
 	else:
-		set_game_name("Basic")
-		loaded_from_game_name = cur_game_name
-		game_definition["game_settings"] = {"pixel_scale": 2}
 		start_managers()
+		new_empty_game_definition()
+		_set_game_name(FilesManager.get_unique_game_name("Empty Game"), false)
+		save_current_game_definition()
+		FilesManager.save_default_game(get_game_name())
 	
 	MapManager.refresh_definition()
 	EntityManager.refresh_definition()
@@ -148,7 +150,7 @@ func load_game_definition_data(definition_data: Dictionary) -> void:
 		definition_data["game_settings"] = {}
 	game_definition = definition_data
 	
-	set_game_name(definition_data['game_name'])
+	_set_game_name(definition_data['game_name'], false)
 	loaded_from_game_name = cur_game_name
 	
 	editor_save = {}
@@ -210,12 +212,20 @@ func get_default_pixel_scale() -> float:
 func get_game_name() -> String:
 	return cur_game_name
 
-func get_game_title() -> String:
-	var cur_title: String = get_game_setting("title", "")
-	return cur_title if cur_title else cur_game_name
+func get_game_implicit_title() -> String:
+	if "[" not in cur_game_name:
+		return cur_game_name
+	return cur_game_name.split("[")[0]
 
-func set_game_name(new_name: String) -> void:
+func get_game_title() -> String:
+	if not get_game_setting("title", ""):
+		return get_game_implicit_title()
+	return get_game_setting("title", "")
+
+func _set_game_name(new_name: String, do_emit: bool = true) -> void:
 	cur_game_name = new_name.strip_edges()
+	if do_emit:
+		game_dir_name_changed.emit(cur_game_name)
 
 func get_credits_info() -> Dictionary:
 	return game_definition.get("game_metadata", {}).get("credits", {})
@@ -352,7 +362,7 @@ func has_editor_autosave() -> bool:
 func load_editor_autosave() -> void:
 	if queued_level_load:
 		return
-	var autosave_data: = FilesManager.get_level_data(cur_game_name, "editor_autosave")
+	var autosave_data: Dictionary = FilesManager.get_level_data(cur_game_name, "editor_autosave")
 	load_level_data(autosave_data)
 	loaded_is_autosave = true
 
@@ -688,3 +698,67 @@ func is_entity_followed_by_camera(entity: BaseEntity) -> bool:
 	if game_camera.target_entity == entity:
 		return true
 	return false
+
+func save_current_game_definition(copy_from_loaded_game: bool = true) -> void:
+	var definition_data: = get_serialized_game_definition()
+	var copy_from_game: = ""
+	if copy_from_loaded_game and loaded_from_game_name and loaded_from_game_name != get_game_name():
+		copy_from_game = loaded_from_game_name
+	FilesManager.save_game_info(definition_data)
+	loaded_from_game_name = get_game_name()
+
+	if copy_from_game:
+		FilesManager.copy_assets_and_levels_to(copy_from_game, get_game_name())
+
+func save_current_game_definition_as(as_game_name: String, delete_on_overwrite: bool = false) -> void:
+	if as_game_name == get_game_name() and is_current_game_resavable():
+		save_current_game_definition(false)
+		return
+	if delete_on_overwrite and is_name_overwriting(as_game_name):
+		FilesManager.delete_game(as_game_name)
+	var copy_assets_and_levels_from: = ""
+	if loaded_from_game_name and loaded_from_game_name != as_game_name:
+		copy_assets_and_levels_from = loaded_from_game_name
+
+	cur_game_name = as_game_name
+	if not get_game_setting("title", ""):
+		set_game_setting("title", get_game_implicit_title() + " (copy)")
+	elif not get_game_setting("title", "").ends_with(" (copy)"):
+		set_game_setting("title", get_game_setting("title", "") + " (copy)")
+	save_current_game_definition()
+	
+	if copy_assets_and_levels_from:
+		FilesManager.copy_assets_and_levels_to(copy_assets_and_levels_from, as_game_name)
+	game_dir_name_changed.emit(cur_game_name)
+
+func rename_and_save_current_game_definition(new_game_name: String) -> bool:
+	if not is_current_game_saved():
+		_set_game_name(new_game_name)
+		return false
+	if FilesManager.is_game_name_equivalent(new_game_name, get_game_name()):
+		_set_game_name(new_game_name)
+		save_current_game_definition()
+		return true
+
+	if FilesManager.rename_game(get_game_name(), new_game_name):
+		_set_game_name(new_game_name)
+	else:
+		GlobalToaster.show_toast_message("Failed to move game directory")
+		return false
+	return true
+
+func is_current_game_resavable() -> bool:
+	return loaded_from_game_name == get_game_name()
+
+func is_save_current_overwriting() -> bool:
+	if is_current_game_resavable():
+		return false
+	return FilesManager.game_exists(get_game_name())
+
+func is_name_overwriting(new_game_name: String) -> bool:
+	if new_game_name == loaded_from_game_name:
+		return false
+	return FilesManager.game_exists(new_game_name)
+
+func is_current_game_saved() -> bool:
+	return loaded_from_game_name != ""

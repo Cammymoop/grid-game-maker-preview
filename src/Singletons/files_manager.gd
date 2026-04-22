@@ -13,6 +13,8 @@ var local_data_subdir: = "player"
 var images_asset_subdir: = "images"
 var audio_asset_subdir: = "audio"
 
+var auto_import_all_example_games_if_first_run: = true
+
 var game_dir_default_structure: = {
 	"game_data": {
 		"assets": {
@@ -26,11 +28,18 @@ var game_dir_default_structure: = {
 }
 
 func init_folders():
-	ensure_data_dir_exists(games_subdir)
+	var games_dir_created: = ensure_data_dir_exists(games_subdir)
 	ensure_data_dir_exists(shared_assets_subdir)
 	ensure_data_dir_exists(shared_assets_subdir, images_asset_subdir)
 
 	ensure_data_dir_exists(local_data_subdir)
+
+	if auto_import_all_example_games_if_first_run and games_dir_created:
+		import_all_example_games()
+		var games_list: = get_games_list()
+		if games_list:
+			var new_default_game: String = "Basic" if "Basic" in games_list else games_list[0]
+			save_default_game(new_default_game)
 
 
 func _data_path(...path_parts: Array) -> String:
@@ -66,14 +75,14 @@ func get_games_dir() -> String:
 
 
 func ensure_data_dir_exists(...path_parts: Array) -> bool:
-	if not DirAccess.dir_exists_absolute(_data_path_from_arr(path_parts)):
-		DirAccess.make_dir_absolute(_data_path_from_arr(path_parts))
+	if not smarter_dir_exists(_data_path_from_arr(path_parts)):
+		smarter_make_dir_absolute(_data_path_from_arr(path_parts))
 		return true
 	return false
 
 func ensure_dir_exists_absolute(abs_path: String) -> bool:
-	if not DirAccess.dir_exists_absolute(abs_path):
-		DirAccess.make_dir_absolute(abs_path)
+	if not smarter_dir_exists(abs_path):
+		smarter_make_dir_absolute(abs_path)
 	return true
 
 func _serialize_dict_to_json_string(data: Dictionary, with_formatting: bool = false) -> String:
@@ -140,8 +149,8 @@ func create_game_directory_if_not_exists(game_info: Dictionary) -> void:
 func _create_directories_recursively(base_path: String, directory_structure: Dictionary) -> void:
 	for key in directory_structure:
 		var dir_path = base_path.path_join(key)
-		if not DirAccess.dir_exists_absolute(dir_path):
-			DirAccess.make_dir_absolute(dir_path)
+		if not smarter_dir_exists(dir_path):
+			smarter_make_dir_absolute(dir_path)
 		
 		if typeof(directory_structure[key]) == TYPE_DICTIONARY and not directory_structure[key].is_empty():
 			_create_directories_recursively(dir_path, directory_structure[key])
@@ -152,7 +161,7 @@ func get_game_dir_from_name(game_name: String) -> String:
 func game_exists(game_name: String) -> bool:
 	if not game_name:
 		return false
-	if not DirAccess.dir_exists_absolute(get_game_base_dir(game_name)):
+	if not smarter_dir_exists(get_game_base_dir(game_name)):
 		return false
 	return FileAccess.file_exists(get_game_definition_path(game_name))
 
@@ -373,3 +382,139 @@ func get_editor_autosave_is_newer(game_name: String) -> bool:
 	if editor_autosave_timestamp > autosaved_level_timestamp:
 		return true
 	return false
+
+func get_example_games_list() -> Array:
+	const EXAMPLE_GAMES_DIR: = "res://example_games"
+	var example_game_directories: = _iter_directory_flat_filtered(EXAMPLE_GAMES_DIR, [], true, true, true)
+	var example_games_list: Array[String] = []
+	for ex_dir in example_game_directories:
+		if not FileAccess.file_exists(EXAMPLE_GAMES_DIR + "/" + ex_dir + "/" + GAME_DEF_FILENAME):
+			continue
+		var example_game_definition: = _get_dict_from_json_file(EXAMPLE_GAMES_DIR + "/" + ex_dir + "/" + GAME_DEF_FILENAME)
+		if example_game_definition:
+			example_games_list.append(example_game_definition['game_name'])
+	return example_games_list
+
+func get_unique_game_name(base_name: String) -> String:
+	var existing_games: = get_games_list()
+	var unique_name: = base_name
+	var counter: = 1
+	while unique_name in existing_games:
+		unique_name = base_name + "[%d]" % [counter]
+	return unique_name
+
+func import_all_example_games() -> void:
+	for example_game_name: String in get_example_games_list():
+		import_example_game(example_game_name)
+
+func import_example_game(example_game_name: String) -> Dictionary:
+	var example_game_dir_name: = get_game_dir_from_name(example_game_name)
+	const EXAMPLE_GAMES_DIR: = "res://example_games"
+	var example_game_dir_path: = EXAMPLE_GAMES_DIR + "/" + example_game_dir_name
+	var target_game_name: = get_unique_game_name(example_game_name)
+	var target_game_dir: = get_game_base_dir(target_game_name)
+	if not smarter_dir_exists(example_game_dir_path):
+		push_error("Example game directory %s does not exist" % [example_game_dir_path])
+		return {}
+	
+	var example_game_dir_contents: = _iter_directory_flat_filtered(example_game_dir_path, [], true, true, true)
+	if not GAME_DEF_FILENAME in example_game_dir_contents:
+		push_error("Example game definition file not found in example game directory: " + example_game_dir_path)
+		return {}
+	
+	var ex_game_info: = _get_dict_from_json_file(example_game_dir_path + "/" + GAME_DEF_FILENAME)
+	if not ex_game_info:
+		push_error("Error parsing example game definition at file: " + example_game_dir_path + "/" + GAME_DEF_FILENAME)
+		return {}
+	ex_game_info['game_name'] = target_game_name
+	save_game_info(ex_game_info)
+	
+	var warnings: = import_example_game_levels_and_assets(example_game_dir_path, target_game_dir)
+	
+	return { "game_name": target_game_name, "warnings": warnings }
+
+func import_example_game_levels_and_assets(example_game_dir_path: String, target_game_dir: String) -> Array[String]:
+	var LEVELS: = "game_data/levels"
+	var IMAGES: = "game_data/assets/images"
+	var AUDIO: = "game_data/assets/audio"
+	
+	var warnings: Array[String] = []
+	
+	for subdir: String in [LEVELS, IMAGES, AUDIO]:
+		var from_dir: = example_game_dir_path.path_join(subdir)
+		if not smarter_dir_exists(from_dir):
+			continue
+		var to_dir: = target_game_dir.path_join(subdir)
+		for a_file: String in _iter_directory_flat_filtered(from_dir, [], true, false):
+			if a_file == "editor_autosave.json":
+				continue
+			var from_absolute_path: = ProjectSettings.globalize_path(from_dir.path_join(a_file))
+			var to_absolute_path: = ProjectSettings.globalize_path(to_dir.path_join(a_file))
+			var error: = DirAccess.copy_absolute(from_absolute_path, to_absolute_path)
+			if error != OK:
+				push_warning("Error copying example game asset/level file %s to %s: %s" % [a_file, to_absolute_path, error_string(error)])
+				warnings.append("Failed to copy %s" % [subdir + "/" + a_file])
+	return warnings
+
+func copy_assets_and_levels_to(from_game_name: String, to_game_name: String) -> void:
+	if not game_exists(from_game_name) or not game_exists(to_game_name):
+		push_error("Game %s or %s does not exist" % [from_game_name, to_game_name])
+		return
+	
+	var from_game_gamedata_dir: = get_game_gamedata_dir(from_game_name)
+	var to_game_gamedata_dir: = get_game_gamedata_dir(to_game_name)
+	
+	var game_data_subdirs: = ["levels", "assets/images", "assets/audio"]
+
+	for subdir in game_data_subdirs:
+		var abs_from_dir: = ProjectSettings.globalize_path(from_game_gamedata_dir.path_join(subdir))
+		if not smarter_dir_exists(abs_from_dir):
+			continue
+		var abs_to_dir: = ProjectSettings.globalize_path(to_game_gamedata_dir.path_join(subdir))
+		for asset_file in iterate_directory_flat_filelist(abs_from_dir):
+			var error: = DirAccess.copy_absolute(abs_from_dir.path_join(asset_file), abs_to_dir.path_join(asset_file))
+			if error != OK:
+				push_warning("Error copying game data file %s from %s to %s: %s" % [asset_file, abs_from_dir, abs_to_dir, error_string(error)])
+
+func is_game_name_equivalent(game_name_1: String, game_name_2: String) -> bool:
+	return get_game_dir_from_name(game_name_1) == get_game_dir_from_name(game_name_2)
+
+func rename_game(old_game_name: String, new_game_name: String) -> bool:
+	if not game_exists(old_game_name):
+		push_error("Game %s does not exist" % [old_game_name])
+		return false
+	if game_exists(new_game_name):
+		push_error("Game directory %s already exists, cannot rename %s to it" % [new_game_name, old_game_name])
+		return false
+	var rename_dir: = not is_game_name_equivalent(old_game_name, new_game_name)
+	
+	var def_path: = get_game_definition_path(old_game_name)
+	var game_definition_data: = _get_dict_from_json_file(def_path)
+	if not game_definition_data:
+		push_error("Error parsing game definition at file: " + def_path)
+		return false
+	game_definition_data['game_name'] = new_game_name.strip_edges()
+	if not serialize_and_save_data_to_json(game_definition_data, def_path.get_base_dir(), GAME_DEF_FILENAME, FORMAT_GAME_JSON):
+		push_error("Error saving renamed game definition at file: " + def_path)
+		return false
+
+	if rename_dir:
+		var old_game_dir_abs: = ProjectSettings.globalize_path(get_game_base_dir(old_game_name))
+		var new_game_dir_abs: = ProjectSettings.globalize_path(get_game_base_dir(new_game_name))
+		var error: = DirAccess.rename_absolute(old_game_dir_abs, new_game_dir_abs)
+		if error != OK:
+			push_error("Error renaming game directory from %s to %s: %s" % [old_game_dir_abs, new_game_dir_abs, error_string(error)])
+			return false
+	return true
+
+func smarter_dir_exists(dir_path: String) -> bool:
+	var path_abs: = ProjectSettings.globalize_path(dir_path)
+	return DirAccess.dir_exists_absolute(path_abs)
+
+func smarter_make_dir_absolute(dir_path: String) -> void:
+	var path_abs: = ProjectSettings.globalize_path(dir_path)
+	DirAccess.make_dir_absolute(path_abs)
+
+func smarter_file_exists(file_path: String) -> bool:
+	var path_abs: = ProjectSettings.globalize_path(file_path)
+	return FileAccess.file_exists(path_abs)
