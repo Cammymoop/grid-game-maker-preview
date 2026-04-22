@@ -91,19 +91,32 @@ func _ready():
 	bake_scene_transition_curve()
 	
 	var default_game = FilesManager.get_default_game()
-	if default_game and FilesManager.game_exists(default_game):
-		load_game_definition_from_file(default_game)
-		start_managers()
-	elif builtin_default_game_file:
-		builtin_default_game_definition = FilesManager._get_dict_from_json_file(builtin_default_game_file)
-		load_game_definition_data(builtin_default_game_definition)
-		start_managers()
-	else:
-		start_managers()
-		new_empty_game_definition()
-		_set_game_name(FilesManager.get_unique_game_name("Empty Game"), false)
-		save_current_game_definition()
-		FilesManager.save_default_game(get_game_name())
+	var loaded_default_game: = false
+	if default_game: 
+		if FilesManager.game_exists(default_game):
+			load_game_definition_from_file(default_game)
+			start_managers()
+			loaded_default_game = true
+		else:
+			var games_list: = FilesManager.get_games_list()
+			if games_list.size() > 0:
+				default_game = games_list[0]
+				FilesManager.save_default_game(default_game)
+				load_game_definition_from_file(default_game)
+				start_managers()
+				loaded_default_game = true
+
+	if not loaded_default_game:
+		if builtin_default_game_file:
+			builtin_default_game_definition = FilesManager._get_dict_from_json_file(builtin_default_game_file)
+			load_game_definition_data(builtin_default_game_definition)
+			start_managers()
+		else:
+			start_managers()
+			new_empty_game_definition()
+			_set_game_name(FilesManager.get_unique_game_name("Empty Game"), false)
+			save_current_game_definition()
+			FilesManager.save_default_game(get_game_name())
 	
 	MapManager.refresh_definition()
 	EntityManager.refresh_definition()
