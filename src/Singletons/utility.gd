@@ -869,3 +869,13 @@ func is_vec2i_adjacent(a: Vector2i, b: Vector2i, with_diagonal: bool = false) ->
 		return abs_delta.x <= 1 and abs_delta.y <= 1
 	else:
 		return abs_delta.x + abs_delta.y == 1
+
+func check_string_start_end_contains(text: String, start_end: String, filter_text: String) -> bool:
+	if not text:
+		return false
+	if start_end == "start":
+		return text.begins_with(filter_text)
+	elif start_end == "end":
+		return text.ends_with(filter_text)
+	else:
+		return text.contains(filter_text)

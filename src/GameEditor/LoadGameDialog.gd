@@ -19,9 +19,13 @@ func _on_GamesList_item_activated(_index):
 	emit_signal("confirmed")
 
 func _on_import_examples_button_pressed() -> void:
+	close_dialog()
 	var failed_games: Array[String] = ImporterExporter.reimport_all_example_games()
 	if failed_games.size() > 0:
+		GlobalToaster.show_toast_message("Reimported example games")
 		GlobalToaster.show_toast_message("Failed to reimport some example games:\n%s" % [", ".join(failed_games)])
+	else:
+		GlobalToaster.show_toast_message("Reimported all example games")
 
 func _on_import_game_zip_button_pressed() -> void:
 	prints("import game zip button pressed")

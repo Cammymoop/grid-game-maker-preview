@@ -1,0 +1,18 @@
+[gd_scene format=3 uid="uid://dfwjg6bdfc21o"]
+
+[ext_resource type="Script" uid="uid://b2e3vs73ts471" path="res://Scenes/GameEditor/ConditionalEditor/generic_option_button_input.gd" id="1_li0w0"]
+
+[node name="StartEndContain" type="OptionButton" unique_id=744951564]
+offset_right = 24.0
+offset_bottom = 24.0
+theme_override_font_sizes/font_size = 20
+alignment = 1
+selected = 2
+item_count = 3
+popup/item_0/text = "start with"
+popup/item_0/id = 0
+popup/item_1/text = "end with"
+popup/item_1/id = 1
+popup/item_2/text = "contain"
+popup/item_2/id = 2
+script = ExtResource("1_li0w0")

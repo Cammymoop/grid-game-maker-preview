@@ -1,0 +1,47 @@
+[gd_scene format=3 uid="uid://dw7mu8ugnfrg1"]
+
+[ext_resource type="Script" uid="uid://dc6un6ptlaqqc" path="res://Scenes/GameEditor/ConditionalEditor/exclude_dir_input.gd" id="1_kqa21"]
+[ext_resource type="Script" uid="uid://ch4u8x2lf07ik" path="res://src/GameEditor/ConditionalEditor/DirectionInput.gd" id="1_yu1ie"]
+[ext_resource type="PackedScene" uid="uid://btsrkqu51paxy" path="res://Scenes/GameEditor/DirectionSelectorButton.tscn" id="2_kqa21"]
+[ext_resource type="PackedScene" path="res://Scenes/UI/EasyMenuButton.tscn" id="3_ntdtv"]
+[ext_resource type="PackedScene" uid="uid://bh1w4w8i5hk66" path="res://Scenes/GameEditor/SlotSelectorButton.tscn" id="4_45ow1"]
+
+[node name="ExcludeDirInput" type="HBoxContainer" unique_id=347514782 node_paths=PackedStringArray("dir_input", "exclude_mode_select")]
+offset_right = 103.0
+offset_bottom = 31.0
+script = ExtResource("1_kqa21")
+dir_input = NodePath("DirectionInput")
+exclude_mode_select = NodePath("OptionButton")
+
+[node name="OptionButton" type="OptionButton" parent="." unique_id=2097411143]
+layout_mode = 2
+selected = 0
+item_count = 3
+popup/item_0/text = "(no exclusion)"
+popup/item_0/id = 0
+popup/item_1/text = "exclude:"
+popup/item_1/id = 1
+popup/item_2/text = "force include:"
+popup/item_2/id = 2
+
+[node name="DirectionInput" type="HBoxContainer" parent="." unique_id=2062565202]
+visible = false
+layout_mode = 2
+script = ExtResource("1_yu1ie")
+is_reference_position = true
+
+[node name="DirectionSelectorButton" parent="DirectionInput" unique_id=1002943204 instance=ExtResource("2_kqa21")]
+layout_mode = 2
+
+[node name="AbsoluteModeSelect" parent="DirectionInput" unique_id=887490751 instance=ExtResource("3_ntdtv")]
+layout_mode = 2
+
+[node name="SlotSelectorButton" parent="DirectionInput" unique_id=469124289 instance=ExtResource("4_45ow1")]
+visible = false
+layout_mode = 2
+default_slot_id = 1
+
+[node name="EntityRelativeMode" parent="DirectionInput" unique_id=148265278 instance=ExtResource("3_ntdtv")]
+visible = false
+layout_mode = 2
+text = "Entity's Direction"

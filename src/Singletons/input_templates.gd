@@ -12,10 +12,11 @@ enum InputTypes {
 	
 	StringInput,
 	ComplexStringInput,
-
 	
+
 	OrderComparison,
 	BinaryMathOperatorInput,
+	RandomDirectionOptionsInput,
 	
 	DirectionInput,
 	BoolChoice,
@@ -30,6 +31,7 @@ enum InputTypes {
 	
 	# Janky stuff
 	SpecialEffectInput,
+	ExcludeDirectionInput,
 }
 
 # either scene or a script
@@ -47,6 +49,7 @@ var templates: = {
 	
 	InputTypes.OrderComparison: preload("res://Scenes/GameEditor/ConditionalEditor/order_comparison_input.tscn"),
 	InputTypes.BinaryMathOperatorInput: preload("res://Scenes/GameEditor/ConditionalEditor/binary_math_op_input.tscn"),
+	InputTypes.RandomDirectionOptionsInput: preload("res://Scenes/GameEditor/ConditionalEditor/random_dir_options_input.tscn"),
 	
 	InputTypes.DirectionInput: preload("res://Scenes/GameEditor/ConditionalEditor/DirectionInput.tscn"),
 	InputTypes.BoolChoice: preload("res://Scenes/GameEditor/ConditionalEditor/bool_choice_input.tscn"),
@@ -61,6 +64,7 @@ var templates: = {
 	InputTypes.ComplexPropValueInput: preload("res://Scenes/GameEditor/ConditionalEditor/complex_prop_value_input.tscn"),
 	
 	InputTypes.SpecialEffectInput: preload("res://Scenes/GameEditor/ConditionalEditor/special_effect_input.tscn"),
+	InputTypes.ExcludeDirectionInput: preload("res://Scenes/GameEditor/ConditionalEditor/exclude_dir_input.tscn"),
 }
 
 func get_template(input_type: InputTypes) -> Control:

@@ -314,10 +314,37 @@ func cmd_is_the_same_entity(slots: Dictionary, chosen_slot: int, ref_entity_slot
 		return false
 	return selected.instance_id == ref_entity.instance_id
 
+func desc_select_direction() -> String:
+	return "int|<= Select the direction [complex_dir:DirectionInput:1]"
+func cmd_select_direction(slots: Dictionary, chosen_slot: int, complex_dir: Dictionary) -> void:
+	set_value_slot_as_number(slots, chosen_slot, resolve_complex_direction(complex_dir, slots))
+
+var rand_dir_options: Dictionary = {
+	"any": [0, 1, 2, 3],
+	"horizontal": [0, 1],
+	"vertical": [2, 3],
+	"up/right": [0, 1],
+	"up/left": [0, 1],
+	"down/right": [2, 3],
+	"down/left": [2, 3],
+	"not up": [1, 2, 3],
+	"not down": [0, 1, 3],
+	"not left": [0, 2, 3],
+	"not right": [0, 1, 2],
+}
+
 func desc_select_random_direction() -> String:
-	return "int|<= Select a random direction"
-func cmd_select_random_direction(slots: Dictionary, chosen_slot: int) -> void:
-	set_value_slot_as_number(slots, chosen_slot, Utility.random_direction())
+	return "int|<= Select a random [dir_options:RandomDirectionOptionsInput] direction [exclude_dir:ExcludeDirectionInput]"
+func cmd_select_random_direction(slots: Dictionary, chosen_slot: int, dir_options: String, exclude_dir: Dictionary) -> void:
+	var choose_from: Array = rand_dir_options.get(dir_options, [0])
+	if exclude_dir.get("type", "") != "ignore":
+		var exclude_dir_val: int = resolve_complex_direction(exclude_dir, slots)
+		var is_exclude: bool = exclude_dir.get("is_exclude", true)
+		if is_exclude and exclude_dir_val in choose_from:
+			choose_from.erase(exclude_dir_val)
+		elif not is_exclude and exclude_dir_val not in choose_from:
+			choose_from.append(exclude_dir_val)
+	set_value_slot_as_number(slots, chosen_slot, Utility.random_list_element(choose_from))
 
 func desc_add_text() -> String:
 	return "string|<= Add [inserted_text:ComplexStringInput] to the [is_end:BoolChoice:true,end,beginning] of the slot\n" + \
@@ -824,7 +851,7 @@ func cmd_has_intended_move_direction(slots: Dictionary, chosen_slot: int) -> boo
 	return slots[chosen_slot].soft_check_intended_move_facing() != -1
 
 func desc_is_intended_move_direction() -> String:
-	return "entity|If the entity is intended to move this way [complex_dir:DirectionInput:1]"
+	return "entity|If the entity is intending to move this way [complex_dir:DirectionInput:1]"
 func cmd_is_intended_move_direction(slots: Dictionary, chosen_slot: int, complex_dir: Dictionary) -> bool:
 	if not _entity_has_controller_intention_count(slots, chosen_slot):
 		return false
@@ -834,7 +861,8 @@ func cmd_is_intended_move_direction(slots: Dictionary, chosen_slot: int, complex
 	return intended_move_facing == resolve_complex_direction(complex_dir, slots)
 	
 func desc_show_mini_text_at() -> String:
-	return "pos,entity|Temporarily show the text [text_slot:SlotInput:string,number] [is_above:BoolChoice:true,above,at] this position/entity"
+	return "pos,entity|Temporarily show the text [text_slot:SlotInput:string,number]\n" \
+	       + "[is_above:BoolChoice:true,above,at] this position/entity"
 func cmd_show_mini_text_at(slots: Dictionary, chosen_slot: int, text_slot: int, is_above: bool) -> void:
 	if not Commands.slot_is_positions(chosen_slot) and not Commands.slot_is_entity(chosen_slot):
 		push_error("Invalid slot to show mini text at: %s" % chosen_slot)
@@ -1098,7 +1126,8 @@ func cmd_if_entity_can_teleport_in_direction(slots: Dictionary, chosen_slot: int
 	return slots[chosen_slot].can_i_teleport_to(from_pos + Utility.facing_vector_i(direction) * dist_val)
 
 func desc_if_entity_gets_teleported_in_direction() -> String:
-	return "entity|If the entity successfully gets teleported [dist:ComplexScalarInput:int:default=2] spaces in this direction [compl_dir:DirectionInput:1]"
+	return "entity|If the entity successfully gets teleported [dist:ComplexScalarInput:int:default=2] spaces\n" \
+	       + "in this direction [compl_dir:DirectionInput:1]"
 func cmd_if_entity_gets_teleported_in_direction(slots: Dictionary, chosen_slot: int, compl_dir: Dictionary, dist: Dictionary) -> bool:
 	if not Commands.slot_is_entity(chosen_slot):
 		push_error("Invalid slot or empty slot to teleport in direction: %s" % chosen_slot)
@@ -1174,7 +1203,7 @@ func cmd_bond_entity_with(slots: Dictionary, chosen_slot: int, bond_to_entity_sl
 	EntityManager.merge_entity_bond_groups(slots[chosen_slot], slots[bond_to_entity_slot])
 
 func desc_select_math() -> String:
-	return "number|<= Select the result of [a:ComplexScalarInput] [operator:BinaryMathOperatorInput] [b:ComplexScalarInput]"
+	return "number|<= Select the numerical result of [a:ComplexScalarInput] [operator:BinaryMathOperatorInput] [b:ComplexScalarInput]"
 func cmd_select_math(slots: Dictionary, chosen_slot: int, a: Dictionary, operator: String, b: Dictionary) -> void:
 	var a_val: float = resolve_complex_scalar(a, slots)
 	var b_val: float = resolve_complex_scalar(b, slots)
@@ -1188,6 +1217,136 @@ func cmd_select_math(slots: Dictionary, chosen_slot: int, a: Dictionary, operato
 		else:
 			set_value_slot_as_number(slots, chosen_slot, a_val / b_val)
 	elif operator == "%":
-		set_value_slot_as_number(slots, chosen_slot, fmod(a_val, b_val))
+		set_value_slot_as_number(slots, chosen_slot, fposmod(a_val, b_val))
 	elif operator == "^":
 		set_value_slot_as_number(slots, chosen_slot, pow(a_val, b_val))
+
+func desc_select_random_number() -> String:
+	return "number|<= Select a random number between [min_scalar:ComplexScalarInput] and [max_scalar:ComplexScalarInput] inclusive"
+func cmd_select_random_number(slots: Dictionary, chosen_slot: int, min_scalar: Dictionary, max_scalar: Dictionary) -> void:
+	var min_val: float = resolve_complex_scalar(min_scalar, slots)
+	var max_val: float = resolve_complex_scalar(max_scalar, slots)
+	set_value_slot_as_number(slots, chosen_slot, randf_range(min_val, max_val))
+
+func desc_select_number_clamped() -> String:
+	return "number|<= Select the number [value:ComplexScalarInput] clamped between [min_scalar:ComplexScalarInput] and [max_scalar:ComplexScalarInput]"
+func cmd_select_number_clamped(slots: Dictionary, chosen_slot: int, value: Dictionary, min_scalar: Dictionary, max_scalar: Dictionary) -> void:
+	var value_val: float = resolve_complex_scalar(value, slots)
+	var min_val: float = resolve_complex_scalar(min_scalar, slots)
+	var max_val: float = resolve_complex_scalar(max_scalar, slots)
+	set_value_slot_as_number(slots, chosen_slot, clampf(value_val, min_val, max_val))
+
+func desc_select_random_tile() -> String:
+	return "pos|<= Select a random tile position in [from_pos_slot:SlotInput:pos]"
+func cmd_select_random_tile(slots: Dictionary, chosen_slot: int, from_pos_slot: int) -> void:
+	if not Commands.slot_has_position(from_pos_slot) or not Commands.slot_is_positions(chosen_slot):
+		push_error("Invalid slots to select random tile position: %s and %s" % [chosen_slot, from_pos_slot])
+		return
+	var from_positions: Array = slots[from_pos_slot]
+	if not from_positions:
+		from_positions = MapManager.get_used_positions_in_all_layers()
+	slots[chosen_slot] = [Utility.random_list_element(from_positions)]
+
+func desc_select_random_entity() -> String:
+	return "entity|<= Select a random active entity at [from_pos_slot:SlotInput:pos] ignoring [ignore_entity_slot:SlotInput:entity]"
+func cmd_select_random_entity(slots: Dictionary, chosen_slot: int, from_pos_slot: int, ignore_entity_slot: int) -> void:
+	if not Commands.slot_is_positions(from_pos_slot) or not Commands.slot_is_entity(chosen_slot) or not Commands.slot_is_entity(ignore_entity_slot):
+		push_error("Invalid slots to select random entity: %s, %s and %s" % [chosen_slot, from_pos_slot, ignore_entity_slot])
+		return
+	var from_positions: Array = slots[from_pos_slot]
+	var all_entities: Array[BaseEntity] = []
+	if not from_positions:
+		all_entities = EntityManager.get_all_active_entities()
+	else:
+		all_entities = EntityManager.get_entities_at_multiple(from_positions)
+	all_entities.erase(slots[ignore_entity_slot])
+	if all_entities.size() == 0:
+		slots[chosen_slot] = null
+	else:
+		slots[chosen_slot] = Utility.random_list_element(all_entities)
+
+func desc_select_random_filtered_entity() -> String:
+	return "entity|<= Select a random active entity at [from_pos_slot:SlotInput:pos] ignoring [ignore_entity_slot:SlotInput:entity]\n" \
+			+ "with a [truthy:BoolChoice:true,true or non-zero,false or zero] [prop_name:PropertyInput] property"
+func cmd_select_random_filtered_entity(slots: Dictionary, chosen_slot: int, from_pos_slot: int, ignore_entity_slot: int, truthy: bool, prop_name: String) -> void:
+	if not Commands.slot_is_positions(from_pos_slot) or not Commands.slot_is_entity(chosen_slot) or not Commands.slot_is_entity(ignore_entity_slot):
+		push_error("Invalid slots to select random entity: %s, %s and %s" % [chosen_slot, from_pos_slot, ignore_entity_slot])
+		return
+	var from_positions: Array = slots[from_pos_slot]
+	var all_entities: Array[BaseEntity] = []
+	if not from_positions:
+		all_entities = EntityManager.get_all_active_entities()
+	else:
+		all_entities = EntityManager.get_entities_at_multiple(from_positions)
+	all_entities.erase(slots[ignore_entity_slot])
+	all_entities = EntityManager.filter_entities_by_property(prop_name, all_entities, not truthy)
+	if all_entities.size() == 0:
+		slots[chosen_slot] = null
+	else:
+		slots[chosen_slot] = Utility.random_list_element(all_entities)
+
+func desc_select_random_entity_name() -> String:
+	return "string|<= Select the name of a random type of entity"
+func cmd_select_random_entity_name(slots: Dictionary, chosen_slot: int) -> void:
+	slots[chosen_slot] = Utility.random_list_element(EntityManager.get_all_entity_names())
+
+func desc_select_random_tile_name() -> String:
+	return "string|<= Select the name of a random type of tile"
+func cmd_select_random_tile_name(slots: Dictionary, chosen_slot: int) -> void:
+	slots[chosen_slot] = Utility.random_list_element(MapManager.get_all_tile_names())
+
+func _select_random_string_s_e_filtered(slots: Dictionary, all_strings: Array[String], chosen_slot: int, invert: bool, start_end: String, filter: Dictionary) -> void:
+	var filtered_strings: Array[String] = _filter_strings_s_e_contains(slots, all_strings, invert, start_end, filter)
+	if filtered_strings.size() == 0:
+		slots[chosen_slot] = ""
+	else:
+		slots[chosen_slot] = Utility.random_list_element(filtered_strings)
+
+func _filter_strings_s_e_contains(slots: Dictionary, all_strings: Array[String], invert: bool, start_end: String, filter: Dictionary) -> Array[String]:
+	var filtered_strings: Array[String] = []
+	var filter_text: String = get_complex_string_value(filter, slots)
+	for the_string in all_strings:
+		if Utility.check_string_start_end_contains(the_string, start_end, filter_text) != invert:
+			filtered_strings.append(the_string)
+	return filtered_strings
+
+func desc_select_random_entity_name_containing() -> String:
+	return "string|<= Select a random entity name that [invert:InertInput:does,doesn't] [start_end:StartEndContainInput] [filter:ComplexStringInput]"
+func cmd_select_random_entity_name_containing(slots: Dictionary, chosen_slot: int, invert: bool, start_end: String, filter: Dictionary) -> void:
+	_select_random_string_s_e_filtered(slots, EntityManager.get_all_entity_names(), chosen_slot, invert, start_end, filter)
+
+func desc_select_random_tile_name_containing() -> String:
+	return "string|<= Select a random tile name that [invert:InertInput:does,doesn't] [start_end:StartEndContainInput] [filter:ComplexStringInput]"
+func cmd_select_random_tile_name_containing(slots: Dictionary, chosen_slot: int, invert: bool, start_end: String, filter: Dictionary) -> void:
+	_select_random_string_s_e_filtered(slots, MapManager.get_all_tile_names(), chosen_slot, invert, start_end, filter)
+
+
+func _filter_items_by_default_property(item_definitions: Dictionary, invert: bool, prop_name: String, include_conditional: bool) -> Array[int]:
+	var filtered_item_ids: Array[int] = []
+	for item_id in item_definitions.keys():
+		var item_default_props: Dictionary = item_definitions[item_id].get("properties", {})
+		var or_false_val: Variant = item_default_props.get(prop_name, false)
+		var is_truthy: bool = false
+		if typeof(or_false_val) in [TYPE_DICTIONARY, TYPE_ARRAY]:
+			is_truthy = include_conditional
+		elif or_false_val:
+			is_truthy = true
+
+		if is_truthy != invert:
+			filtered_item_ids.append(item_id)
+	return filtered_item_ids
+
+func desc_select_random_entity_name_prop_filtered() -> String:
+	return "string|<= Select the name of a random entity which has a [truthy:BoolChoice:true,true or non-zero,false or zero] [prop_name:PropertyInput] default property" \
+			+ "[include_conditional:BoolChoice:true,include,exclude] if the default value is a conditional"
+func cmd_select_random_entity_name_prop_filtered(slots: Dictionary, chosen_slot: int, truthy: bool, prop_name: String, include_conditional: bool) -> void:
+	var filtered_entity_ids: Array[int] = _filter_items_by_default_property(EntityManager.entity_defs, truthy, prop_name, include_conditional)
+	slots[chosen_slot] = EntityManager.get_entity_name(Utility.random_list_element(filtered_entity_ids))
+
+func desc_select_random_tile_name_prop_filtered() -> String:
+	return "string|<= Select the name of a random tile which has a [truthy:BoolChoice:true,true or non-zero,false or zero] [prop_name:PropertyInput] default property" \
+			+ "[include_conditional:BoolChoice:true,include,exclude] if the default value is a conditional"
+func cmd_select_random_tile_name_prop_filtered(slots: Dictionary, chosen_slot: int, truthy: bool, prop_name: String, include_conditional: bool) -> void:
+	var filtered_tile_ids: Array[int] = _filter_items_by_default_property(MapManager.tile_defs, truthy, prop_name, include_conditional)
+	slots[chosen_slot] = MapManager.get_tile_name(Utility.random_list_element(filtered_tile_ids))
+

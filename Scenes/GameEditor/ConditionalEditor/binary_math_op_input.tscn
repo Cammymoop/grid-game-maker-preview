@@ -3,10 +3,13 @@
 [ext_resource type="Script" uid="uid://b2e3vs73ts471" path="res://Scenes/GameEditor/ConditionalEditor/generic_option_button_input.gd" id="1_rwfso"]
 
 [node name="BinaryMathOperatorInput" type="OptionButton" unique_id=744951564]
+custom_minimum_size = Vector2(46, 0)
 offset_right = 24.0
 offset_bottom = 24.0
 theme_override_font_sizes/font_size = 20
+alignment = 1
 selected = 0
+fit_to_longest_item = false
 item_count = 6
 popup/item_0/text = "+"
 popup/item_0/id = 5
@@ -21,4 +24,4 @@ popup/item_4/id = 4
 popup/item_5/text = "^"
 popup/item_5/id = 5
 script = ExtResource("1_rwfso")
-tooltips = Array[String](["plus", "minus", "times", "divide", "modulo", "power"])
+tooltips = Array[String](["plus", "minus", "times", "divided by", "modulo (positive remainder)", "to the power of"])
