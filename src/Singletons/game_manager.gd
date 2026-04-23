@@ -66,6 +66,8 @@ var game_definition = {}
 
 var game_camera: Camera2D = null
 
+var stateful_camera_settings: = {}
+
 var transitioning = false
 var transition_anim_target: Node
 var scene_transition_duration = 0.6
@@ -255,7 +257,13 @@ func get_serialized_play_state() -> Dictionary:
 	
 	var s_map = MapManager.serialize()
 	var s_ent = EntityManager.serialize()
-	return {"game_name": cur_game_name, "map": s_map, "entities": s_ent}
+	return {"game_name": cur_game_name, "map": s_map, "entities": s_ent, "game_state": serialize()}
+
+func serialize() -> Dictionary:
+	return {
+		"stateful_camera_settings": stateful_camera_settings.duplicate_deep(),
+		"camera_position": Utility.vector_to_list(get_gameplay_camera_position()),
+	}
 
 func load_serialized_play_state(serialized_state: Dictionary, as_level_load: bool = true) -> void:
 	if cur_scene != "Play":
@@ -267,13 +275,19 @@ func load_serialized_play_state(serialized_state: Dictionary, as_level_load: boo
 	set_pause("gm_loading_state", true)
 	
 	await get_tree().process_frame
-	#await get_tree().process_frame
+	deserialize(serialized_state.get("game_state", {}))
 	MapManager.deserialize(serialized_state['map'])
 	EntityManager.deserialize(serialized_state['entities'])
 	
 	if as_level_load:
 		level_state_loaded.emit()
 	set_pause("gm_loading_state", false)
+
+func deserialize(serialized_state: Dictionary) -> void:
+	stateful_camera_settings = serialized_state.get("stateful_camera_settings", {}).duplicate_deep()
+	if "camera_position" in serialized_state:
+		var game_camera_to: Vector2 = Utility.get_vector2_from_arr(serialized_state.get("camera_position", [0, 0]))
+		position_gameplay_camera(game_camera_to)
 
 func create_game_camera() -> void:
 	var cam = cameras["SimpleCamera"].instantiate()
@@ -794,3 +808,55 @@ func import_and_load_game_zip(zip_file_path: String) -> bool:
 		return false
 	load_game_definition_from_file(imported_name)
 	return true
+
+func change_camera_follow_to_entity_name(entity_name: String) -> void:
+	set_cam_setting("follow_entity", entity_name)
+	set_cam_setting("follow_entity_by", "name")
+	camera_refollow()
+
+func change_camera_follow_to_entity_property(property_name: String) -> void:
+	set_cam_setting("follow_entity", property_name)
+	set_cam_setting("follow_entity_by", "property")
+	camera_refollow()
+
+func add_camera_follow_instance(instance_id: int) -> void:
+	if get_cam_setting("follow_entity_by", "property") != "instance":
+		set_camera_follow_instances([instance_id])
+	else:
+		var cur_instances: Array = get_cam_setting("follow_entity_instances", [])
+		set_cam_setting("follow_entity_instances", cur_instances + [instance_id])
+
+func set_camera_follow_instances(instances: Array) -> void:
+	set_cam_setting("follow_entity_by", "instances")
+	set_cam_setting("follow_entity_instances", instances)
+
+func reset_camera_follow() -> void:
+	reset_cam_setting("follow_entity")
+	reset_cam_setting("follow_entity_by")
+	camera_refollow()
+
+func camera_refollow() -> void:
+	game_camera.find_entity_to_follow()
+
+func get_base_camera_setting(setting_name: String, default_value: Variant = null) -> Variant:
+	return get_game_setting("camera_settings", {}).get(setting_name, default_value)
+
+func get_cam_setting(setting_name: String, default_value: Variant = null) -> Variant:
+	if not stateful_camera_settings.has(setting_name):
+		return get_base_camera_setting(setting_name, default_value)
+	return stateful_camera_settings[setting_name]
+
+func set_cam_setting(setting_name: String, value: Variant) -> void:
+	stateful_camera_settings[setting_name] = value
+
+func reset_cam_setting(setting_name: String) -> void:
+	stateful_camera_settings.erase(setting_name)
+
+func reset_stateful_camera_settings() -> void:
+	stateful_camera_settings = {}
+
+func is_entity_current_camera_focus(entity: BaseEntity) -> bool:
+	var current_camera_focus: BaseEntity = game_camera.target_entity
+	if not current_camera_focus:
+		return false
+	return current_camera_focus.instance_id == entity.instance_id

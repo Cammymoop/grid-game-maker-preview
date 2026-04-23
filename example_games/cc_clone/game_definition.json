@@ -83,7 +83,19 @@
         },
         "move-animation": "stepped",
         "tasty-looking": true,
-        "eats": true
+        "eats": true,
+        "post_move": {
+          "v": "3",
+          "conditions": [
+            "basic_default.if_property_value::[\"i:0\",\"s:ice-skater\",false]",
+            "basic_default.if_property_value::[\"i:4\",\"s:slippery\",true]"
+          ],
+          "when true": [
+            "basic_default.override_move_animation::[\"i:0\",\"s:smooth\"]"
+          ],
+          "when false": [],
+          "when always": []
+        }
       },
       "groups": [
         "Player"
@@ -1424,7 +1436,8 @@
           ],
           "when false": [],
           "when always": []
-        }
+        },
+        "slippery": true
       }
     },
     "13": {
@@ -1507,7 +1520,8 @@
             "when false": [],
             "when always": []
           }
-        ]
+        ],
+        "slippery": true
       }
     },
     "14": {

@@ -34,6 +34,7 @@ var im_ready: = false
 var instance_counter: int = 0
 
 var frame_counter: int = 0
+var animation_frame_counter: int = 0
 
 var movements_enabled: bool = true
 var turn_requested: bool = false
@@ -54,6 +55,8 @@ var process_phase: int = 0
 
 var is_entity_preview_mode: bool = false
 
+var timed_entity_events: Dictionary[int, Array] = {}
+
 func paused_visual_process(delta_time: float) -> void:
     for e in entity_list:
         e.sprite_process(delta_time)
@@ -70,10 +73,29 @@ func entity_list_process(delta_time: float) -> void:
     
     # Phased processing so each entity completes a phase before any entity processes the next phase
     
-    # Phase 1 - Starting movement and start of move actions
+    # Phase 1 - Timed entity events, Starting movement and start of move actions
     process_phase = 1
     for e in entity_list:
+        var events_this_tick: Array[Dictionary] = []
+        if e.instance_id in timed_entity_events.keys():
+            var pending_events: Array[Dictionary] = []
+            for event_info in timed_entity_events[e.instance_id]:
+                var relevant_tick_counter: int = frame_counter
+                if event_info.get("animation_tick", true):
+                    relevant_tick_counter = animation_frame_counter
+                if event_info["timeout_tick"] < relevant_tick_counter:
+                    prints("expired event: " + str(event_info))
+                    continue
+                elif event_info["timeout_tick"] > relevant_tick_counter:
+                    pending_events.append(event_info)
+                else:
+                    prints("event running now: " + str(event_info))
+                    events_this_tick.append(event_info)
+            timed_entity_events[e.instance_id] = pending_events
+
         if e.active:
+            for event_info in events_this_tick:
+                run_entity_event(e, event_info)
             active_entities.append(e)
             if new_action_activations:
                 e.got_action_signals(new_action_activations)
@@ -119,12 +141,17 @@ func entity_list_process(delta_time: float) -> void:
     
     process_phase = 0
 
+func run_entity_event(entity: BaseEntity, event_info: Dictionary) -> void:
+    if event_info.get("property_event", ""):
+        resolve_entity_interaction_event(event_info["property_event"], entity, null, [entity.get_moving_position()])
+
 func queue_half_move_actions_for(entity: BaseEntity) -> void:
     if process_phase != 3:
         push_error("ERROR: tried to queue half move actions for an entity outside of the moving phase")
         return
     _pending_half_move_actions.append(entity)
 
+# this didn't work out, maybe revisit later
 func should_bump_move() -> bool:
     return false
     #return process_phase >= 3
@@ -132,6 +159,7 @@ func should_bump_move() -> bool:
 func _physics_process(delta: float) -> void:
     entity_list_process(delta)
 
+    animation_frame_counter += 1
     if movements_enabled:
         frame_counter += 1
     
@@ -300,6 +328,8 @@ func clear():
     turn_requested = false
     update_movement_mode()
     process_phase = 0
+    animation_frame_counter = 0
+    frame_counter = 0
 
 func clear_entity_list():
     disconnect_all_custom_signals()
@@ -311,6 +341,7 @@ func clear_entity_list():
         entity.queue_free()
     entity_list = []
     entity_instance_map = {}
+    timed_entity_events.clear()
     clear_bond_groups()
 
 func clear_bond_groups():
@@ -625,15 +656,27 @@ func setup_entity_sprite(entity: BaseEntity) -> void:
     sprite.interpolate_facing_enabled = turn_anim != "none"
 
 func serialize() -> Dictionary:
+    var serialized_entity_system: Dictionary = {}
+    serialized_entity_system["frame_counter"] = frame_counter
+    serialized_entity_system["animation_frame_counter"] = animation_frame_counter
+    serialized_entity_system["timed_entity_events"] = timed_entity_events.duplicate_deep()
+
     var serialized_entities: Array = []
     for e in entity_list:
         serialized_entities.append(e.serialize())
+    serialized_entity_system["entity_list"] = serialized_entities
+    serialized_entity_system["bond_groups"] = bond_groups.duplicate_deep()
     
-    return {"entity_list": serialized_entities, "bond_groups": bond_groups.duplicate_deep()}
+    return serialized_entity_system
 
 func deserialize(data: Dictionary) -> void:
     clear()
+    frame_counter = data.get("frame_counter", 0)
+    animation_frame_counter = data.get("animation_frame_counter", 0)
+    if "timed_entity_events" in data:
+        timed_entity_events = data["timed_entity_events"].duplicate_deep()
     bond_groups = data["bond_groups"].duplicate_deep()
+
     for entity_data in data["entity_list"]:
         restore_entity(entity_data)
     refresh_entity_list()
@@ -1299,8 +1342,66 @@ func remove_special_effect(entity: BaseEntity, effect_name: String) -> void:
         return
     entity.remove_sprite_modifier(special_effects[effect_name])
 
-func clear_special_effects(entity: BaseEntity) -> void:
+func clear_entity_special_effects(entity: BaseEntity) -> void:
     if not entity:
         return
     for effect_name in special_effects:
         entity.remove_sprite_modifier(special_effects[effect_name])
+
+func get_camera_following_instances() -> Array:
+    if not GameManager.get_cam_setting("follow_entity_by", "property") != "instances":
+        return []
+    
+    var new_instance_list: Array = []
+    var follow_entities: Array = []
+    for instance_id in GameManager.get_cam_setting("follow_entity_instances", []):
+        if not instance_id in entity_instance_map:
+            continue
+        new_instance_list.append(instance_id)
+        follow_entities.append(get_instance(instance_id))
+    GameManager.set_cam_setting("follow_entity_instances", new_instance_list)
+    return follow_entities
+
+func remove_camera_following_instance(instance_id: int) -> void:
+    var cur_instances: Array = get_camera_following_instances()
+    if not cur_instances:
+        return
+    if instance_id in cur_instances:
+        cur_instances.erase(instance_id)
+        GameManager.set_cam_setting("follow_entity_instances", cur_instances)
+        GameManager.camera_refollow()
+
+func is_entity_in_camera_following(entity: BaseEntity) -> bool:
+    var follow_mode: String = GameManager.get_cam_setting("follow_entity_by", "property")
+    if follow_mode in ["name", "property"] and not GameManager.get_cam_setting("follow_entity", ""):
+        return false
+
+    if follow_mode == "name":
+        var follow_name: String = GameManager.get_cam_setting("follow_entity", "")
+        if entity_name_exists(follow_name) and get_entity_index(follow_name) == entity.entity_index:
+            return true
+        else:
+            return false
+    elif follow_mode == "property":
+        var follow_property: String = GameManager.get_cam_setting("follow_entity", "")
+        return get_entity_prop_is_truthy(entity, follow_property)
+    elif follow_mode == "instances":
+        var follow_instances: Array = get_camera_following_instances()
+        return entity.instance_id in follow_instances
+    return false
+
+func _add_timed_entity_event(instance_id: int, event_info: Dictionary) -> void:
+    if not instance_id in timed_entity_events:
+        timed_entity_events[instance_id] = []
+    timed_entity_events[instance_id].append(event_info)
+
+func _get_timeout_tick_after(delay_seconds: float, animtion_tick: bool = true) -> int:
+    var relevant_tick: int = animation_frame_counter if animtion_tick else frame_counter
+    return relevant_tick + roundi(delay_seconds * GameManager.get_tick_rate())
+
+func add_delayed_entity_prop_event(entity: BaseEntity, prop_event_name: String, delay: float, is_anim_delay: bool = true) -> void:
+    _add_timed_entity_event(entity.instance_id, {
+        "animtion_tick": is_anim_delay,
+        "timeout_tick": _get_timeout_tick_after(delay, is_anim_delay),
+        "property_event": prop_event_name,
+    })

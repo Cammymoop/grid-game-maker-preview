@@ -580,7 +580,7 @@ func actually_started_move() -> void:
 	started_move.emit(move_facing)
 	var post_move = EntityManager.get_entity_property(self, "post_move")
 	if post_move and post_move.is_conditional():
-		post_move.resolve(self, null, next_tile_pos)
+		post_move.resolve(self, null, get_moving_position())
 
 func is_settled() -> bool:
 	return not moving

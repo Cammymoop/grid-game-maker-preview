@@ -656,6 +656,18 @@ func cmd_trigger_custom_event_for_each_entity(
 		for e in final_entities:
 			MapManager.resolve_tiles_events(slots[chosen_slot], event_name, e)
 
+func desc_delayed_custom_entity_event() -> String:
+	return "entity|Trigger the [event_name:PropertyInput] custom event of the entity after a [delay:ComplexScalarInput:default=0.5,step=0.1] second delay\n" \
+			+ "(If the entity is still active)"
+func cmd_delayed_custom_entity_event(slots: Dictionary, chosen_slot: int, event_name: String, delay: Dictionary) -> void:
+	if not Commands.slot_is_entity(chosen_slot):
+		push_error("Invalid slot or empty slot to trigger delayed custom entity event: %s" % chosen_slot)
+		return
+	if not slots[chosen_slot]:
+		return
+	EntityManager.add_delayed_entity_prop_event(slots[chosen_slot], event_name, resolve_complex_scalar(delay, slots))
+		
+
 func _entity_has_controller_intention_count(slots: Dictionary, chosen_slot: int) -> bool:
 	if not Commands.slot_is_entity(chosen_slot) or not slots[chosen_slot] or slots[chosen_slot].moving:
 		return false
@@ -772,9 +784,126 @@ func cmd_apply_effect_to_entity(slots: Dictionary, chosen_slot: int, effect_name
 
 func desc_do_screen_shake() -> String:
 	return "none|Shake the screen! Intensity [intensity:ComplexScalarInput:default=2.0,step=0.1]" \
-	       + " for [duration:ComplexScalarInput:default=1.5,step=0.1] seconds"
+	       + " for [duration:ComplexScalarInput:default=0.5,step=0.1] seconds"
 func cmd_do_screen_shake(slots: Dictionary, _slot: int, intensity: Dictionary, duration: Dictionary) -> void:
 	if GameManager.game_camera and GameManager.game_camera.active:
 		var intensity_val: float = resolve_complex_scalar(intensity, slots)
 		var duration_val: float = resolve_complex_scalar(duration, slots)
 		GameManager.game_camera.do_screen_shake(intensity_val, duration_val)
+
+func desc_if_action_1_is_held() -> String:
+	return "none|If the input action 1 is currently held down"
+func cmd_if_action_1_is_held(_slots: Dictionary) -> bool:
+	return Input.is_action_pressed(&"input_action_1")
+
+func desc_if_action_2_is_held() -> String:
+	return "none|If the input action 2 is currently held down"
+func cmd_if_action_2_is_held(_slots: Dictionary) -> bool:
+	return Input.is_action_pressed(&"input_action_2")
+
+func desc_if_action_3_is_held() -> String:
+	return "none|If the input action 3 is currently held down"
+func cmd_if_action_3_is_held(_slots: Dictionary) -> bool:
+	return Input.is_action_pressed(&"input_action_3")
+
+func _get_directional_input_vector() -> Vector2:
+	return Utility.input_vector_by_prefix("move_")
+
+func _direction_approximately_matches(check_vec: Vector2, input_vec: Vector2) -> bool:
+	if input_vec.length() < 0.2:
+		return false
+	if check_vec.abs().max_axis_index() != input_vec.abs().max_axis_index():
+		return false
+	if check_vec.dot(input_vec) < 0.0:
+		return false
+	return true
+
+func desc_if_direction_is_held() -> String:
+	return "none|If the directional intput is currently pointing this way [compl_dir:DirectionInput:1]"
+func cmd_if_direction_is_held(slots: Dictionary, _slot: int, compl_dir: Dictionary) -> bool:
+	var direction: int = resolve_complex_direction(compl_dir, slots)
+	if direction == -1:
+		return false
+	return _direction_approximately_matches(Utility.facing_vector(direction), _get_directional_input_vector())
+
+func desc_if_direction_is_not_held() -> String:
+	return "none|If the directional input is not currently held"
+func cmd_if_direction_is_not_held(_slots: Dictionary) -> bool:
+	var directional_vec: = _get_directional_input_vector()
+	return directional_vec.length() < 0.2
+
+
+func desc_camera_next_focus() -> String:
+	return "none|Move the camera focus to the next valid target"
+func cmd_camera_next_focus(_slots: Dictionary) -> void:
+	GameManager.game_camera.follow_next(1)
+
+func desc_camera_previous_focus() -> String:
+	return "none|Move the camera focus to the previous valid target"
+func cmd_camera_previous_focus(_slots: Dictionary) -> void:
+	GameManager.game_camera.follow_next(-1)
+
+func desc_camera_focus_default() -> String:
+	return "none|Change the camera targets and focus to the default setting"
+func cmd_camera_focus_default(_slots: Dictionary) -> void:
+	GameManager.reset_camera_follow()
+
+func desc_if_entity_is_camera_target() -> String:
+	return "entity|If the entity is currently a valid camera target"
+func cmd_if_entity_is_camera_target(slots: Dictionary, chosen_slot: int) -> bool:
+	if not Commands.slot_is_entity(chosen_slot):
+		push_error("Invalid slot or empty slot to check if entity is camera target: %s" % chosen_slot)
+		return false
+	if not slots[chosen_slot]:
+		return false
+	return EntityManager.is_entity_in_camera_following(slots[chosen_slot])
+
+func desc_if_entity_is_camera_focus() -> String:
+	return "entity|If the entity is currently the camera focus"
+func cmd_if_entity_is_camera_focus(slots: Dictionary, chosen_slot: int) -> bool:
+	if not Commands.slot_is_entity(chosen_slot):
+		push_error("Invalid slot or empty slot to check if entity is camera focus: %s" % chosen_slot)
+		return false
+	if not slots[chosen_slot]:
+		return false
+	return GameManager.is_entity_current_camera_focus(slots[chosen_slot])
+
+func desc_focus_camera_on_named_entity() -> String:
+	return "none|Set the camera targets to be entities named [compl_ent_name:EntityNameInput]"
+func cmd_focus_camera_on_named_entity(slots: Dictionary, _slot: int, compl_ent_name: Dictionary) -> void:
+	var ent_name: String = get_complex_string_value(compl_ent_name, slots)
+	GameManager.change_camera_follow_to_entity_name(ent_name)
+
+func desc_focus_camera_on_entity_by_property() -> String:
+	return "none|Set the camera targets to be entities with a true or non-zero [property_name:PropertyInput] property"
+func cmd_focus_camera_on_entity_by_property(_slots: Dictionary, _slot: int, property_name: String) -> void:
+	GameManager.change_camera_follow_to_entity_property(property_name)
+
+func desc_focus_camera_on_specific_entity() -> String:
+	return "entity|Set the camera target and focus to only this entity"
+func cmd_focus_camera_on_specific_entity(slots: Dictionary, chosen_slot: int) -> void:
+	if not Commands.slot_is_entity(chosen_slot):
+		push_error("Invalid slot or empty slot to focus camera on specific entity: %s" % chosen_slot)
+		return
+	if slots[chosen_slot]:
+		GameManager.set_camera_follow_instances([slots[chosen_slot].instance_id])
+	else:
+		GameManager.set_camera_follow_instances([])
+
+func desc_focus_camera_add_specific_entity() -> String:
+	return "entity|Add this entity to the camera follow list (removes focus by name/property)"
+func cmd_focus_camera_add_specific_entity(slots: Dictionary, chosen_slot: int) -> void:
+	if not Commands.slot_is_entity(chosen_slot):
+		push_error("Invalid slot or empty slot to add specific entity to camera follow list: %s" % chosen_slot)
+		return
+	if slots[chosen_slot]:
+		EntityManager.add_camera_following_instance(slots[chosen_slot].instance_id)
+
+func desc_focus_camera_remove_specific_entity() -> String:
+	return "entity|Remove this entity from the camera follow list (if following by list of specific entities)"
+func cmd_focus_camera_remove_specific_entity(slots: Dictionary, chosen_slot: int) -> void:
+	if not Commands.slot_is_entity(chosen_slot):
+		push_error("Invalid slot or empty slot to remove specific entity from camera follow list: %s" % chosen_slot)
+		return
+	if slots[chosen_slot]:
+		EntityManager.remove_camera_following_instance(slots[chosen_slot].instance_id)
