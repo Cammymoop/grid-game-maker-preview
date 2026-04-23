@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://b0nx61j31pwcv"]
 
-[ext_resource type="Script" uid="uid://bor5n2kiwqj2v" path="res://src/GameEditor/ConditionalEditor/order_comparison_input.gd" id="1_p8wul"]
+[ext_resource type="Script" path="res://src/GameEditor/ConditionalEditor/order_comparison_input.gd" id="1_p8wul"]
 
 [node name="OrderComparisonInput" type="OptionButton" unique_id=744951564]
 offset_right = 24.0

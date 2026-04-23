@@ -1172,3 +1172,22 @@ func cmd_bond_entity_with(slots: Dictionary, chosen_slot: int, bond_to_entity_sl
 	if not slots[chosen_slot] or not slots[bond_to_entity_slot]:
 		return
 	EntityManager.merge_entity_bond_groups(slots[chosen_slot], slots[bond_to_entity_slot])
+
+func desc_select_math() -> String:
+	return "number|<= Select the result of [a:ComplexScalarInput] [operator:BinaryMathOperatorInput] [b:ComplexScalarInput]"
+func cmd_select_math(slots: Dictionary, chosen_slot: int, a: Dictionary, operator: String, b: Dictionary) -> void:
+	var a_val: float = resolve_complex_scalar(a, slots)
+	var b_val: float = resolve_complex_scalar(b, slots)
+	if operator == "+" or operator == "-":
+		set_value_slot_as_number(slots, chosen_slot, a_val + (b_val * (1 if operator == "+" else -1)))
+	elif operator == "*":
+		set_value_slot_as_number(slots, chosen_slot, a_val * b_val)
+	elif operator == "/":
+		if Commands.slot_is_int(chosen_slot):
+			set_value_slot_as_number(slots, chosen_slot, floori(a_val / b_val))
+		else:
+			set_value_slot_as_number(slots, chosen_slot, a_val / b_val)
+	elif operator == "%":
+		set_value_slot_as_number(slots, chosen_slot, fmod(a_val, b_val))
+	elif operator == "^":
+		set_value_slot_as_number(slots, chosen_slot, pow(a_val, b_val))

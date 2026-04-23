@@ -12,6 +12,10 @@ var showing_text: = ""
 
 func _ready() -> void:
     set_text_and_adjust_anim(text_label.text)
+    GameManager.level_state_loaded.connect(on_level_state_loaded)
+
+func on_level_state_loaded() -> void:
+    dismiss()
 
 func show_with_text(text: String) -> void:
     set_text_and_adjust_anim(text)

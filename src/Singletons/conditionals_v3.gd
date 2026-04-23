@@ -57,6 +57,8 @@ const all_events: Array[String] = [
 	"post_move",
     
     "do_action_1", "do_action_2", "do_action_3",
+    
+    "was_blocked",
 
 	"idle_update",
     "idle_on",

@@ -524,8 +524,12 @@ func _start_move_common(to_tile_pos: Vector2i, is_group_move: bool, is_teleport:
 		return true
 	else:
 		if not is_group_move:
-			blocked.emit()
+			on_move_was_blocked()
 		return false
+
+func on_move_was_blocked() -> void:
+	EntityManager.resolve_entity_interaction_event("was_blocked", self, null, [tile_position])
+	blocked.emit()
 
 func _move_bump_check() -> void:
 	if EntityManager.should_bump_move():

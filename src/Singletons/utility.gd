@@ -791,6 +791,13 @@ func opbtn_select_id(opbtn: OptionButton, id: int) -> void:
 func opbtn_select_text(opbtn: OptionButton, text: String) -> void:
 	opbtn.selected = opbtn_get_index_from_text(opbtn, text)
 
+func opbtn_enumerate_non_separator_idx(opbtn: OptionButton) -> Array[int]:
+	var indices: Array[int] = []
+	for i in opbtn.get_item_count():
+		if not opbtn.is_item_separator(i):
+			indices.append(i)
+	return indices
+
 func normalize_angle(angle_radians: float) -> float:
 	return fposmod(angle_radians, TAU)
 

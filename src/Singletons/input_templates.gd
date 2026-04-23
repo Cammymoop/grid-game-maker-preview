@@ -15,6 +15,7 @@ enum InputTypes {
 
 	
 	OrderComparison,
+	BinaryMathOperatorInput,
 	
 	DirectionInput,
 	BoolChoice,
@@ -45,6 +46,7 @@ var templates: = {
 	InputTypes.ComplexStringInput: preload("res://Scenes/GameEditor/ConditionalEditor/complex_string_input.tscn"),
 	
 	InputTypes.OrderComparison: preload("res://Scenes/GameEditor/ConditionalEditor/order_comparison_input.tscn"),
+	InputTypes.BinaryMathOperatorInput: preload("res://Scenes/GameEditor/ConditionalEditor/binary_math_op_input.tscn"),
 	
 	InputTypes.DirectionInput: preload("res://Scenes/GameEditor/ConditionalEditor/DirectionInput.tscn"),
 	InputTypes.BoolChoice: preload("res://Scenes/GameEditor/ConditionalEditor/bool_choice_input.tscn"),
