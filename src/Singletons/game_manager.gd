@@ -45,14 +45,15 @@ var cameras = {
 }
 
 const SPECIAL_PROPS: Array[String] = [
-	"z-index", "move_turns", "inherit_properties",
-	"auto_bond", "auto_tail", "auto_scale",
-	"edit_place_multiple",
+	"z-index", "move-turns", "inherit-properties",
+	"auto-bond", "auto-tail", "auto-scale",
+	"edit-place-multiple",
 	"no-museum", "museum-active",
 	"move-animation", "controller-disabled",
 	"turn-animation",
 	"actions-disabled",
 	"no-rotate",
+	"teleport-duration",
 ]
 
 @export_file("*.json") var builtin_default_game_file: String = ""
@@ -860,3 +861,14 @@ func is_entity_current_camera_focus(entity: BaseEntity) -> bool:
 	if not current_camera_focus:
 		return false
 	return current_camera_focus.instance_id == entity.instance_id
+
+func get_camera_focus_entity() -> BaseEntity:
+	if not game_camera or not game_camera.active:
+		return null
+	return game_camera.target_entity
+
+func get_next_prev_camera_focus(dir: int = 1) -> BaseEntity:
+	var cur_focus: BaseEntity = get_camera_focus_entity()
+	if not cur_focus:
+		return null
+	return game_camera.get_next_prev_follow_target(dir)

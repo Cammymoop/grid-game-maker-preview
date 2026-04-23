@@ -155,8 +155,9 @@ func resolve_complex_direction(complex_direction: Dictionary, slots: Dictionary)
 	if complex_direction["type"] == "plain":
 		return resolve_direction_value(complex_direction["direction"], slots)
 	elif complex_direction["type"] == "slot_reference":
-		var referenced_facing: int = slots[complex_direction["slot_id"]]
-		return resolve_direction_value(complex_direction.get("direction", 0) | referenced_facing, slots)
+		var slot_facing_val: int = Utility.valid_direction_or(slots[complex_direction["slot_id"]], 0)
+		var relative_bits: int = complex_direction.get("direction", 0) & ~Utility.DIR_MASK
+		return resolve_direction_value(relative_bits | slot_facing_val, slots)
 	else:
 		push_error("Invalid complex direction type: %s" % [complex_direction["type"]])
 		return 0

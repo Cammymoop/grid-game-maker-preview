@@ -329,7 +329,7 @@ func _primary_action_at_cursor(holding: bool = false) -> void:
 		# remove existing entities of the same index
 		for e in entities_here:
 			if e.entity_index == current_entity_index:
-				if EntityManager.get_entity_prop_with_default(e, "edit_place_multiple", false):
+				if EntityManager.get_entity_prop_with_default(e, "edit-place-multiple", false):
 					continue
 				EntityManager.remove_entity(e)
 		EntityManager.create_entity(current_entity_index, cursor_tile_pos, current_entity_facing)

@@ -6,26 +6,12 @@ signal finished_move
 signal blocked
 signal local_prop_changed
 
-enum MoveInterpStyle {
-	NONE,
-	CONTINUOUS_LINEAR,
-	EASE_OUT,
-	JUMP_LINEAR,
-	JUMP_EASE_OUT,
-}
+const PosInterpStyle = Utility.PosInterpStyle
 
-static var move_interp_style_strings: Dictionary[MoveInterpStyle, String] = {
-	MoveInterpStyle.NONE: "none",
-	MoveInterpStyle.CONTINUOUS_LINEAR: "smooth",
-	MoveInterpStyle.EASE_OUT: "stepped",
-	MoveInterpStyle.JUMP_LINEAR: "jerky",
-	MoveInterpStyle.JUMP_EASE_OUT: "jerky-stepped",
-}
-
-var move_interp_style: MoveInterpStyle = MoveInterpStyle.EASE_OUT
+var move_interp_style: = PosInterpStyle.CONTINUOUS_LINEAR
 var is_move_interp_override: = false
-var override_move_interp_style: MoveInterpStyle = MoveInterpStyle.NONE
-var teleport_interp_style: MoveInterpStyle = MoveInterpStyle.NONE
+var override_move_interp_style: = PosInterpStyle.NONE
+var teleport_interp_style: = PosInterpStyle.MID_DISCRETE
 
 var jump_interp_amount: float = 0.5
 var interp_out_ease_param: float = 0.36
@@ -40,7 +26,7 @@ var _pending_half_move: = false
 var _this_move_steps: int = 0
 var steps_remaining: int = 0
 
-var _revert_position: Vector2 = Vector2(0, 0)
+var _this_move_is_teleport: = false
 
 var idle_ticks_elapsed: int = 0
 
@@ -53,6 +39,7 @@ var DEPRECATED_steps_per_tile: int = 0
 var current_move_speed: float = 0
 
 var _cached_definition_spt: int = 0
+var _cached_tele_steps: int = 0
 var is_spt_override: bool = false
 var override_steps_per_tile: int = 0
 
@@ -116,6 +103,7 @@ func initialize() -> void:
 	connect_to_signals()
 	
 	update_z()
+	update_cached_tele_steps()
 
 func update_z():
 	var z = EntityManager.get_entity_property(self, "z-index")
@@ -146,7 +134,7 @@ func check_for_idle_update_conditional() -> void:
 		has_idle_update_conditional = true
 	
 func check_visual_turn_on_move() -> void:
-	var move_turn = EntityManager.get_entity_property(self, "move_turns")
+	var move_turn = EntityManager.get_entity_property(self, "move-turns")
 	if move_turn:
 		if move_turn.is_conditional():
 			visual_turn_on_move = move_turn.resolve(self, null, tile_position)
@@ -206,6 +194,7 @@ func serialize() -> Dictionary:
 	if moving:
 		important_stuff['steps_remaining'] = steps_remaining
 		important_stuff['_this_move_steps'] = _this_move_steps
+		important_stuff['_this_move_is_teleport'] = _this_move_is_teleport
 	
 	if tailing and is_instance_valid(tailing):
 		important_stuff['tailing'] = tailing.instance_id
@@ -264,6 +253,8 @@ func deserialize(data: Dictionary) -> void:
 		steps_remaining = int(data["steps_remaining"])
 	if "_this_move_steps" in data:
 		_this_move_steps = int(data["_this_move_steps"])
+	if "_this_move_is_teleport" in data:
+		_this_move_is_teleport = data['_this_move_is_teleport']
 	
 	if 'friend_instance_id' in data:
 		friend_instance_id = int(data['friend_instance_id'])
@@ -296,23 +287,6 @@ func sprite_process(delta_time: float) -> void:
 
 func entity_process_starting_actions() -> void:
 	if not moving:
-		#if has_idle_update_conditional:
-		#	if not idle_update_cache:
-		#		idle_update_cache = EntityManager.get_entity_property(self, "idle_update")
-		#		var idle_update_sleep_prop = EntityManager.get_entity_property(self, "idle_update_sleep")
-		#		if idle_update_sleep_prop:
-		#			if idle_update_sleep_prop.is_conditional():
-		#				pass
-		#				# I might make idle_update_sleep conditional run only on start, 
-		#				# and also whenever it gets set as a local property
-		#			else:
-		#				idle_update_sleep = int(idle_update_sleep_prop.get_value())
-		#	if idle_update_sleep == 1 or EntityManager.frame_counter % idle_update_sleep == 0:
-		#		idle_update_cache.resolve(self, null, tile_position)
-		#		if not active:
-		#			# we died or were deactivated in idle update
-		#			return
-		
 		var max_intentions: int = get_max_move_intentions()
 		if max_intentions > 0:
 			var pre_fetch_move_list: Array = get_pre_fetch_move_list()
@@ -378,28 +352,8 @@ func interpolate_pos() -> void:
 	var move_progress: float = get_move_progress()
 	var prev_pos: = MapManager.tile_to_world_position(tile_position)
 	var next_pos: = MapManager.tile_to_world_position(next_tile_pos)
-	var interp_style: MoveInterpStyle = get_move_interp_style()
-	if interp_style == MoveInterpStyle.NONE:
-		position = next_pos
-	elif interp_style == MoveInterpStyle.CONTINUOUS_LINEAR:
-		#var pixel_speed_per_tick: float = MapManager.tile_width * (current_move_speed / GameManager.get_full_tick_rate())
-		#position += Utility.facing_vector(move_facing) * pixel_speed_per_tick
-		position = prev_pos.lerp(next_pos, move_progress)
-	elif interp_style == MoveInterpStyle.EASE_OUT:
-		position = prev_pos.lerp(next_pos, ease(move_progress, interp_out_ease_param))
-	elif interp_style in [MoveInterpStyle.JUMP_LINEAR, MoveInterpStyle.JUMP_EASE_OUT]:
-		move_progress = remap(move_progress, 0, 1, jump_interp_amount, 1)
-		if interp_style == MoveInterpStyle.JUMP_LINEAR:
-			position = prev_pos.lerp(next_pos, move_progress)
-		elif interp_style == MoveInterpStyle.JUMP_EASE_OUT:
-			position = prev_pos.lerp(next_pos, ease(move_progress, interp_out_ease_param))
-	else:
-		push_error("Unknown move interpolation style: " + str(interp_style))
-		if is_move_interp_override:
-			clear_move_interp_override()
-		else:
-			move_interp_style = MoveInterpStyle.NONE
-		position = next_pos
+	var interp: = get_move_interp_style()
+	position = Utility.apply_vec2_interpolation(interp, prev_pos, next_pos, move_progress, interp_out_ease_param)
 
 func has_local_property(property_name: String) -> bool:
 	if property_name in removed_properties:
@@ -416,14 +370,19 @@ func set_local_property(property_name: String, value: Variant) -> void:
 	_set_local_property(property_name, value)
 	_local_prop_changed()
 
+func refresh_cached_prop(prop_name: String) -> void:
+	if prop_name == "z-index":
+		update_z()
+	elif prop_name == "teleport-duration":
+		update_cached_tele_steps()
+
 func _set_local_property(property_name: String, value: Variant) -> void:
 	if property_name in removed_properties:
 		removed_properties.erase(property_name)
 	local_properties[property_name] = value
 	if property_name == "idle_update":
 		check_for_idle_update_conditional()
-	if property_name == "z-index":
-		update_z()
+	refresh_cached_prop(property_name)
 
 func remove_local_property(property_name: String) -> void:
 	_remove_local_property(property_name)
@@ -433,8 +392,7 @@ func _remove_local_property(property_name: String) -> void:
 	local_properties.erase(property_name)
 	if EntityManager.entity_has_property(self, property_name):
 		removed_properties.append(property_name)
-	if property_name == "z-index":
-		update_z()
+	refresh_cached_prop(property_name)
 
 func reset_local_property(property_name: String) -> void:
 	_reset_local_property(property_name)
@@ -443,8 +401,7 @@ func reset_local_property(property_name: String) -> void:
 func _reset_local_property(property_name: String) -> void:
 	local_properties.erase(property_name)
 	removed_properties.erase(property_name)
-	if property_name == "z-index":
-		update_z()
+	refresh_cached_prop(property_name)
 
 func _local_prop_changed() -> void:
 	local_prop_changed.emit(self)
@@ -525,27 +482,49 @@ func start_move(in_facing_dir: int, change_visual_facing: bool = true, group_mov
 	if not group_move and bond_group:
 		return EntityManager.bond_group_start_move(bond_group, get_steps_per_tile(), in_facing_dir)
 	
-	next_tile_pos = tile_position + Utility.facing_vector_i(in_facing_dir)
-	var move_has_started = MapManager.attempt_move(self, [tile_position], [next_tile_pos], group_move)
+	var to_pos: = tile_position + Utility.facing_vector_i(in_facing_dir)
+	return _start_move_common(to_pos, group_move, false)
 
-	if move_has_started:
+func start_teleport_to(to_tile_pos: Vector2i, face_closest_dir: bool = false, group_move: bool = false, override_steps: int = -1) -> bool:
+	if moving:
+		return false
+	var facing_dir: = _get_teleport_implicit_facing(to_tile_pos)
+	if facing_dir != facing and face_closest_dir and visual_turn_on_move:
+		var do_turn_interp: = sprite.interpolate_facing_enabled
+		if not Utility.is_interp_style_smooth(get_teleport_interp_style(_is_diagonal_adj(to_tile_pos))):
+			do_turn_interp = false
+		set_facing(facing_dir, not do_turn_interp)
+	set_move_facing(facing_dir)
+	
+	if override_steps > 0:
+		set_steps_per_tile_override(override_steps)
+	
+	if not group_move and bond_group:
+		return EntityManager.bond_group_start_teleport(bond_group, get_teleport_steps(), facing_dir)
+	
+	return _start_move_common(to_tile_pos, group_move, true)
+
+func _is_diagonal_adj(to_tile_pos: Vector2i) -> bool:
+	if (get_moving_position() - to_tile_pos).abs() == Vector2i.ONE:
+		return true
+	return false
+
+func _start_move_common(to_tile_pos: Vector2i, is_group_move: bool, is_teleport: bool) -> bool:
+	if MapManager.attempt_move(self, [tile_position], [to_tile_pos], is_group_move):
 		moving = true
+		next_tile_pos = to_tile_pos
 		_pending_half_move = true
-		steps_remaining = get_steps_per_tile()
+		steps_remaining = get_teleport_steps() if is_teleport else get_steps_per_tile()
 		_this_move_steps = steps_remaining
-		if not group_move:
+		_this_move_is_teleport = is_teleport
+		if not is_group_move:
 			EntityManager.post_move_actions(self, tile_position, next_tile_pos)
 			actually_started_move()
-		else:
-			# save position before a bump to revert to if the group move is reverted
-			_revert_position = position
-			# during a bonded move, entity manager handles calling post_move_actions and actually_started_move if the group move succeeds
 		_move_bump_check()
 		return true
 	else:
-		next_tile_pos = tile_position
-		if not group_move:
-			blocked.emit(in_facing_dir)
+		if not is_group_move:
+			blocked.emit()
 		return false
 
 func _move_bump_check() -> void:
@@ -569,9 +548,9 @@ func next_step_has_actions() -> bool:
 # Used by bond groups to stop members moving when one member can't
 func revert_move_start() -> void:
 	moving = false
-	position = _revert_position
 	steps_remaining = 0
 	_this_move_steps = 0
+	_this_move_is_teleport = false
 	next_tile_pos = tile_position
 	blocked.emit(move_facing)
 
@@ -621,6 +600,13 @@ func update_cached_spt() -> void:
 	_cached_definition_spt = _speed_to_spt(entity_speed)
 	update_move_speed()
 
+func update_cached_tele_steps() -> void:
+	if not EntityManager.entity_has_property(self, "teleport-duration"):
+		_cached_tele_steps = maxi(1, EntityManager.get_default_tele_steps())
+		return
+	var tele_duration = EntityManager.get_entity_prop_with_default(self, "teleport-duration", EntityManager.default_teleport_duration)
+	_cached_tele_steps = maxi(1, ceili(tele_duration * GameManager.get_full_tick_rate()))
+
 func set_steps_per_tile_override(override_spt: int) -> void:
 	is_spt_override = true
 	override_steps_per_tile = override_spt
@@ -641,20 +627,41 @@ func get_steps_per_tile() -> int:
 func get_native_steps_per_tile() -> int:
 	return _cached_definition_spt
 
+func get_teleport_steps() -> int:
+	if is_spt_override:
+		return override_steps_per_tile
+	return _cached_tele_steps
+
+func get_moving_steps_per_tile() -> int:
+	if not moving:
+		return 0
+	if _this_move_is_teleport:
+		return get_teleport_steps()
+	return get_steps_per_tile()
+
 func update_move_speed() -> void:
 	current_move_speed = _spt_to_speed(get_steps_per_tile())
 
+func _get_teleport_implicit_facing(to_tile_pos: Vector2i) -> int:
+	return Utility.vector_to_facing_from_facing(to_tile_pos - get_moving_position(), facing)
 
 func can_i_move(at_facing: int) -> bool:
 	var my_pos: = tile_position if not moving else next_tile_pos
 	var target_pos: = my_pos + Utility.facing_vector_i(at_facing)
 	
 	# temporarily face the movement direction, so that blocking conditionals can read it
-	var old_facing = move_facing
+	var old_move_facing = move_facing
 	set_move_facing(at_facing)
 	var result = MapManager.can_move_to(self, target_pos)
-	set_move_facing(old_facing)
+	set_move_facing(old_move_facing)
 	
+	return result
+
+func can_i_teleport_to(to_tile_pos: Vector2i) -> bool:
+	var old_move_facing = move_facing
+	set_move_facing(_get_teleport_implicit_facing(to_tile_pos))
+	var result: = MapManager.can_move_to(self, to_tile_pos)
+	set_move_facing(old_move_facing)
 	return result
 
 func die() -> void:
@@ -673,24 +680,30 @@ func untail() -> void:
 	if tailing:
 		if tailing.started_move.is_connected(tail_follow):
 			tailing.started_move.disconnect(tail_follow)
+		add_deferred_event("stopped_tailing", tailing.instance_id)
 	tailing = null
 
 func tail_follow(_move_facing) -> void:
 	if not tailing:
 		return
-	if get_steps_per_tile() != tailing.get_steps_per_tile():
+	if get_steps_per_tile() != tailing.get_moving_steps_per_tile():
 		set_steps_per_tile_override(tailing.get_steps_per_tile())
 	
 	var target_tile = tailing.get_stationary_position()
+	if target_tile == tile_position:
+		return
 	if (target_tile - tile_position).length() > 1:
-		print_debug('tail detached')
-		untail()
-	
-	var new_facing = Utility.facing_from_adjacent_positions(tile_position, target_tile)
-	var moved = start_move(new_facing)
-	if not moved:
-		print_debug('tail failed to move')
-		untail()
+		if GameManager.get_game_setting("tails_teleport", true):
+			if not start_teleport_to(target_tile, true):
+				untail()
+		else:
+			untail()
+	else:
+		var new_facing = Utility.facing_from_adjacent_positions(tile_position, target_tile)
+		if not start_move(new_facing):
+			untail()
+	if moving and not _this_move_is_teleport and not tailing._this_move_is_teleport:
+		set_move_interp_override(tailing.get_move_interp_style())
 
 func can_i_move_relative(relative_direction) -> bool:
 	return can_i_move(Utility.resolve_relative_direction(relative_direction, move_facing))
@@ -769,10 +782,18 @@ func add_deferred_signal(signaling_entity: BaseEntity, args: Array, signal_name:
 		"signal_name": signal_name
 	})
 
+func add_deferred_event(event_name: String, context_instance_id: int = -1) -> void:
+	deferred_signals.append({
+		"context_entity": context_instance_id,
+		"event_name": event_name,
+	})
+
 func process_deferred_signals() -> void:
 	for deferred_sig in deferred_signals:
 		if deferred_sig.get("is_action_signal", false):
 			_handle_action_signal(deferred_sig)
+		elif deferred_sig.get("event_name", ""):
+			_handle_deferred_event(deferred_sig)
 		else:
 			var signaling_entity = EntityManager.get_instance(deferred_sig["signaling_entity"])
 			_handle_signal(signaling_entity, deferred_sig["args"], deferred_sig["signal_name"])
@@ -789,30 +810,47 @@ func _handle_action_signal(deferred_sig: Dictionary) -> void:
 		return
 	action_signal_handler.resolve(self, null, [tile_position], [])
 
+func _handle_deferred_event(deferred_sig: Dictionary) -> void:
+	var event_name = deferred_sig.get("event_name", "")
+	var context_entity: BaseEntity = null
+	if deferred_sig.has("context_entity") and EntityManager.has_instance(deferred_sig["context_entity"]):
+		context_entity = EntityManager.get_instance(deferred_sig["context_entity"])
+	EntityManager.resolve_entity_interaction_event(event_name, self, context_entity, [tile_position])
+
 func has_local_data() -> bool:
 	if local_properties.size() > 0 or removed_properties.size() > 0:
 		return true
 	return false
 
-static func read_move_interp_style_string(style_str: String) -> MoveInterpStyle:
+static func read_move_interp_style_string(style_str: String, default_style: PosInterpStyle = PosInterpStyle.NONE) -> PosInterpStyle:
 	style_str = style_str.to_lower()
-	var found_style: Variant = move_interp_style_strings.find_key(style_str)
+	var found_style: Variant = Utility.POS_INTERP_STRINGS.find_key(style_str)
 	if found_style:
-		return found_style as MoveInterpStyle
-	return MoveInterpStyle.NONE
+		return found_style as PosInterpStyle
+	return default_style
 
-static func get_move_interp_style_string(style: MoveInterpStyle) -> String:
-	return move_interp_style_strings.get(style, "none")
+static func get_move_interp_style_string(style: PosInterpStyle) -> String:
+	return Utility.POS_INTERP_STRINGS.get(style, "none")
 
-func set_move_interp_override(style: MoveInterpStyle) -> void:
+func set_move_interp_override(style: PosInterpStyle) -> void:
 	is_move_interp_override = true
 	override_move_interp_style = style
 
 func clear_move_interp_override() -> void:
 	is_move_interp_override = false
-	override_move_interp_style = MoveInterpStyle.NONE
+	override_move_interp_style = PosInterpStyle.NONE
 
-func get_move_interp_style() -> MoveInterpStyle:
+func get_move_interp_style(is_diagonal_adj: bool = false) -> PosInterpStyle:
+	if _this_move_is_teleport:
+		return get_teleport_interp_style(is_diagonal_adj)
+	return move_interp_style
+
+func get_teleport_interp_style(is_diagonal_adj: bool) -> PosInterpStyle:
 	if is_move_interp_override:
 		return override_move_interp_style
-	return move_interp_style
+	elif is_diagonal_adj:
+		return move_interp_style
+	return teleport_interp_style
+
+func is_teleporting() -> bool:
+	return moving and _this_move_is_teleport

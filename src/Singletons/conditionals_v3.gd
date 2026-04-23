@@ -61,6 +61,12 @@ const all_events: Array[String] = [
 	"idle_update",
     "idle_on",
 	"dying",
+    
+    "started_tailing",
+    "stopped_tailing",
+    
+    "joined_bond_group",
+    "left_bond_group",
 ]
 
 enum ScriptType { GDSCRIPT, ORCHESTRATOR }

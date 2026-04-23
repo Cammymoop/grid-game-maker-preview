@@ -144,7 +144,7 @@ func get_move(attempt_num: int = 0):
 		is_repeat = false
 	return input_dir
 
-func got_blocked(_facing_dir) -> void:
+func got_blocked() -> void:
 	if stop_repeat_after_bonk or lock_for_idle_delay_after_bonk:
 		cancelled = true
 		if lock_for_idle_delay_after_bonk:

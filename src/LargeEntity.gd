@@ -15,7 +15,7 @@ func get_half_size() -> Vector2:
 
 func update_sprite_pos_scale() -> void:
 	sprite.position = Vector2(MapManager.tile_width * entity_size.x, MapManager.tile_width * entity_size.y) / 2
-	if EntityManager.get_entity_prop_with_default(self, "auto_scale", true):
+	if EntityManager.get_entity_prop_with_default(self, "auto-scale", true):
 		sprite.scale = entity_size
 	else:
 		sprite.scale = Vector2.ONE

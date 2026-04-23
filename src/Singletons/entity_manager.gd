@@ -44,12 +44,14 @@ var controller_frame: bool = true
 var movement_mode: int
 
 var default_move_speed: float = 6
+var default_teleport_duration: float = 1/6.0
 var default_idle_delay: float = 1/10.0
 var idle_delay_frames: int = -1
 
 var actions_only_for_camera_target: bool = false
 
-var default_move_interp_style: BaseEntity.MoveInterpStyle = BaseEntity.MoveInterpStyle.CONTINUOUS_LINEAR
+var default_move_interp_style: Utility.PosInterpStyle = Utility.PosInterpStyle.CONTINUOUS_LINEAR
+var default_teleport_interp_style: Utility.PosInterpStyle = Utility.PosInterpStyle.NONE
 
 var process_phase: int = 0
 
@@ -81,7 +83,7 @@ func entity_list_process(delta_time: float) -> void:
             var pending_events: Array[Dictionary] = []
             for event_info in timed_entity_events[e.instance_id]:
                 var relevant_tick_counter: int = frame_counter
-                if event_info.get("animation_tick", true):
+                if event_info.get("is_animation_tick", true):
                     relevant_tick_counter = animation_frame_counter
                 if event_info["timeout_tick"] < relevant_tick_counter:
                     prints("expired event: " + str(event_info))
@@ -96,13 +98,17 @@ func entity_list_process(delta_time: float) -> void:
         if e.active:
             for event_info in events_this_tick:
                 run_entity_event(e, event_info)
+            if not e.moving and e.deferred_signals.size() > 0:
+                e.process_deferred_signals()
             active_entities.append(e)
-            if new_action_activations:
+            if new_action_activations and (not actions_only_for_camera_target or GameManager.is_entity_current_camera_focus(e)):
                 e.got_action_signals(new_action_activations)
             e.entity_process_starting_actions()
             if e.moving:
                 moving_entities.append(e)
             else:
+                if e.deferred_signals.size() > 0:
+                    e.process_deferred_signals()
                 idle_entities.append(e)
         e.sprite_process(delta_time)
     
@@ -268,7 +274,7 @@ func update_movement_mode():
     
     var def_move_interp_string: = GameManager.get_game_setting("default_move_interp", "") as String
     if not def_move_interp_string:
-        default_move_interp_style = BaseEntity.MoveInterpStyle.CONTINUOUS_LINEAR
+        default_move_interp_style = Utility.PosInterpStyle.CONTINUOUS_LINEAR
     else:
         default_move_interp_style = BaseEntity.read_move_interp_style_string(def_move_interp_string)
     
@@ -499,14 +505,14 @@ func add_entity_to_world(entity: BaseEntity) -> void:
 
 func reset_entity_move_interp_style(entity: BaseEntity) -> void:
     entity.move_interp_style = default_move_interp_style
+    entity.teleport_interp_style = default_teleport_interp_style
     var base_props: Dictionary = entity_defs[entity.entity_index]["properties"]
     if "move-animation" in base_props:
-        var def: = BaseEntity.MoveInterpStyle.NONE
-        var move_interp_str: Variant = get_entity_prop_with_default(entity, "move-animation", def)
-        if move_interp_str:
-            entity.move_interp_style = BaseEntity.read_move_interp_style_string(str(move_interp_str))
-        else:
-            entity.move_interp_style = default_move_interp_style
+        var move_interp_str: Variant = get_entity_prop_with_default(entity, "move-animation", "")
+        entity.move_interp_style = BaseEntity.read_move_interp_style_string(str(move_interp_str), default_move_interp_style)
+    if "teleport-animation" in base_props:
+        var teleport_interp_str: Variant = get_entity_prop_with_default(entity, "teleport-animation", "")
+        entity.teleport_interp_style = BaseEntity.read_move_interp_style_string(str(teleport_interp_str), default_teleport_interp_style)
 
 func create_entity(entity_index: int, tile_position: Vector2i, facing: int = 0, activate: bool = true) -> Node2D:
     var entity_info = entity_defs[entity_index]
@@ -584,7 +590,7 @@ func setup_entity_controller(entity: BaseEntity) -> void:
             entity.set_controller(controller)
 
 func auto_tail_handler(entity: BaseEntity) -> void:
-    var auto_tail_val: Variant = get_entity_prop_with_default(entity, "auto_tail", false)
+    var auto_tail_val: Variant = get_entity_prop_with_default(entity, "auto-tail", false)
     if not auto_tail_val:
         return
     if typeof(auto_tail_val) == TYPE_STRING and auto_tail_val.to_lower() == "true":
@@ -595,13 +601,15 @@ func auto_tail_handler(entity: BaseEntity) -> void:
     for e in entities_in_front:
         if typeof(auto_tail_val) == TYPE_STRING and get_entity_prop_with_default(e, auto_tail_val, false):
             entity.set_tailing(e)
+            entity.add_deferred_event("started_tailing", e.instance_id)
             break
         elif auto_tail_val:
             entity.set_tailing(e)
+            entity.add_deferred_event("started_tailing", e.instance_id)
             break
 
 func auto_bond_handler(entity: BaseEntity) -> void:
-    if get_entity_prop_with_default(entity, "auto_bond", false):
+    if get_entity_prop_with_default(entity, "auto-bond", false):
         var bonded: = false
         for potential_group in bond_groups:
             # This doesn't keep track of which groups were created as auto-bond groups for specific entities, more work to do later
@@ -690,20 +698,29 @@ func create_bond_group(entities: Array) -> void:
     var group = []
     bond_groups.append(group)
     for e in entities:
+        if e.bond_group:
+            unbond_entity(e, false)
+        else:
+            e.add_deferred_event("joined_bond_group")
         group.append(e.instance_id)
         e.bond_group = group
+    #bond_group_cull()
 
 func bond_entity(entity, bond_group) -> void:
     entity.bond_group = bond_group
     bond_group.append(entity.instance_id)
+    entity.add_deferred_event("joined_bond_group")
 
-func unbond_entity(entity: BaseEntity, cull_empty: bool = true) -> void:
+func unbond_entity(entity: BaseEntity, with_event: bool = false) -> void:
     if entity.bond_group:
         var bg: Array = entity.bond_group
-        bg.remove_at(bg.find(entity.instance_id))
+        if bg.size() == 1:
+            bond_groups.erase(bg)
+        else:
+            bg.remove_at(bg.find(entity.instance_id))
         entity.bond_group = []
-        if cull_empty:
-            bond_group_cull()
+        if with_event:
+            entity.add_deferred_event("left_bond_group")
 
 func bond_group_cull() -> void:
     var to_remove: Array[int] = []
@@ -1115,8 +1132,8 @@ func get_entity_property(entity: BaseEntity, property_name: String) -> Property:
         var def_props = entity_defs[entity.entity_index]["properties"]
         if property_name in def_props:
             raw_property_val = def_props[property_name]
-        elif "inherit_properties" in def_props:
-            var inherit_from: = get_entity_index(def_props["inherit_properties"])
+        elif "inherit-properties" in def_props:
+            var inherit_from: = get_entity_index(def_props["inherit-properties"])
             var inherit_props: Dictionary = entity_defs[inherit_from]["properties"]
             if not property_name in inherit_props:
                 return null
@@ -1167,8 +1184,8 @@ func entity_has_property(entity: BaseEntity, property_name: String) -> bool:
     var entity_props: Dictionary = entity_defs[entity.entity_index]["properties"]
     var has = entity.has_local_property(property_name) 
     has = has or property_name in entity_props
-    if "inherit_properties" in entity_props:
-        var from = get_entity_index(entity_props["inherit_properties"])
+    if "inherit-properties" in entity_props:
+        var from = get_entity_index(entity_props["inherit-properties"])
         has = has or property_name in entity_defs[from]["properties"]
     return has
 
@@ -1177,8 +1194,8 @@ func get_entity_property_list(entity: BaseEntity) -> Array:
     var definition_props = entity_defs[entity.entity_index]["properties"]
     Utility.set_keys(props, definition_props.keys())
     Utility.set_keys(props, entity.local_properties.keys())
-    if "inherit_properties" in definition_props:
-        var inherit_from = get_entity_index(definition_props["inherit_properties"])
+    if "inherit-properties" in definition_props:
+        var inherit_from = get_entity_index(definition_props["inherit-properties"])
         Utility.set_keys(props, entity_defs[inherit_from]["properties"].keys())
     for removed_prop in entity.removed_properties:
         props.erase(removed_prop)
@@ -1235,7 +1252,7 @@ func _remove_entities(to_remove_entities: Array[BaseEntity], do_emit: bool = tru
         entity_instance_map.erase(entity.instance_id)
         entity_list.erase(entity)
         if entity.bond_group:
-            unbond_entity(entity)
+            unbond_entity(entity, false)
         entity.remove_from_group("_entity_")
         entity.set_active(false)
         entity.call_deferred("queue_free")
@@ -1281,6 +1298,9 @@ func get_pos_above(entity: BaseEntity) -> Vector2i:
 
 func get_default_spt() -> int:
     return BaseEntity._speed_to_spt(default_move_speed)
+
+func get_default_tele_steps() -> int:
+    return ceili(default_teleport_duration * GameManager.get_full_tick_rate())
 
 func switch_entities_preview_mode(enable_preview: bool) -> void:
     is_entity_preview_mode = enable_preview
@@ -1401,7 +1421,31 @@ func _get_timeout_tick_after(delay_seconds: float, animtion_tick: bool = true) -
 
 func add_delayed_entity_prop_event(entity: BaseEntity, prop_event_name: String, delay: float, is_anim_delay: bool = true) -> void:
     _add_timed_entity_event(entity.instance_id, {
-        "animtion_tick": is_anim_delay,
+        "is_animation_tick": is_anim_delay,
         "timeout_tick": _get_timeout_tick_after(delay, is_anim_delay),
         "property_event": prop_event_name,
     })
+
+func merge_entity_bond_groups(entity1: BaseEntity, entity2: BaseEntity) -> void:
+    if not entity1.bond_group and not entity2.bond_group:
+        create_bond_group([entity1, entity2])
+    elif not entity1.bond_group or not entity2.bond_group:
+        bond_entity(entity2 if entity1.bond_group else entity1, entity1.bond_group if entity1.bond_group else entity2.bond_group)
+    
+    var all_entities: Array[BaseEntity] = []
+    for inst_id in entity1.bond_group:
+        if has_instance(inst_id):
+            all_entities.append(get_instance(inst_id))
+    for inst_id in entity2.bond_group:
+        if has_instance(inst_id):
+            all_entities.append(get_instance(inst_id))
+    create_bond_group(all_entities)
+
+func disolve_entity_bond_group(entity: BaseEntity) -> void:
+    if not entity.bond_group:
+        return
+    var bond_group_of_entity: Array = find_bond_group_of_entity(entity)
+    for inst_id in bond_group_of_entity:
+        if has_instance(inst_id):
+            var bonded_entity: BaseEntity = get_instance(inst_id)
+            unbond_entity(bonded_entity, true)

@@ -19,6 +19,8 @@ var override_target_interp_style: = true
 var smoothing_enabled: = true
 var smoothing_amount: = 32
 
+var teleport_override_interp: = false
+
 var is_shaking: = false
 var shake_intensity: float = 0.0
 var shake_timer: float = 0.0
@@ -147,27 +149,18 @@ func follow_next(dir: int = 1) -> void:
 	if not target_entity or not is_instance_valid(target_entity):
 		find_entity_to_follow()
 		return
-
-	var follow_targets: = get_follow_targets()
-	if not follow_targets.has(target_entity):
-		find_entity_to_follow()
-		return
-	elif follow_targets.size() < 2:
-		return
-
-	var target_instance_ids: Array[int] = []
-	for entity in follow_targets:
-		target_instance_ids.append(entity.instance_id)
-	
-	target_instance_ids.sort()
-	var cur_index: = target_instance_ids.find(target_entity.instance_id)
-	var new_index: = posmod(cur_index + dir, target_instance_ids.size())
-	follow_entity(EntityManager.get_instance(target_instance_ids[new_index]))
-	explicitly_following = true
+	var new_target: = get_next_prev_follow_target(dir)
+	if new_target:
+		explicitly_following = true
+		follow_entity(new_target)
 	
 func get_follow_targets() -> Array[BaseEntity]:
 	var follow_this = Utility.get_camera_setting("follow_entity", "")
 	var by_mode = Utility.get_camera_setting("follow_entity_by", "property")
+	if by_mode == "instances":
+		var ent_arr: Array[BaseEntity] = []
+		ent_arr.assign(EntityManager.get_camera_following_instances())
+		return ent_arr
 	
 	var follow_targets: Array[BaseEntity] = []
 	if follow_this:
@@ -195,6 +188,24 @@ func find_entity_to_follow() -> void:
 		for entity in follow_targets:
 			follow_entity(entity)
 
+func get_next_prev_follow_target(dir: int = 1) -> BaseEntity:
+	if not active or dir == 0:
+		return null
+	dir = signi(dir)
+	var follow_targets: = get_follow_targets()
+	var cur_index: = follow_targets.find(target_entity)
+	if cur_index == -1:
+		cur_index = follow_targets.size() - 1 if dir > 0 else 0
+	# Prefer active entities
+	var next_index: = posmod(cur_index + dir, follow_targets.size())
+	while next_index != cur_index:
+		if follow_targets[next_index].active:
+			return follow_targets[next_index]
+		next_index = posmod(next_index + dir, follow_targets.size())
+
+	# now for any regardless of active status
+	return follow_targets[posmod(cur_index + dir, follow_targets.size())]
+
 func teleport(pos: Vector2) -> void:
 	position = pos
 
@@ -203,7 +214,10 @@ func on_level_state_loaded() -> void:
 		teleport(get_target_iterpolated_pos())
 
 func get_target_iterpolated_pos() -> Vector2:
-	if not override_target_interp_style or not target_entity.moving:
+	var use_entity_interp_pos: = not override_target_interp_style or not target_entity.moving
+	if target_entity.is_teleporting():
+		use_entity_interp_pos = not teleport_override_interp
+	if use_entity_interp_pos:
 		return target_entity.global_position + ent_center_offset
 	
 	var target_from_pos: = MapManager.tile_to_world_position(target_entity.get_stationary_position())
@@ -211,6 +225,12 @@ func get_target_iterpolated_pos() -> Vector2:
 	return target_from_pos.lerp(target_to_pos, target_entity.get_move_progress()) + ent_center_offset
 	
 func do_screen_shake(intensity: float, duration: float) -> void:
+	if not is_shaking:
+		shake_timer = 0
 	is_shaking = true
 	shake_intensity = intensity
 	shake_timer = maxf(shake_timer, duration)
+
+func stop_screen_shake() -> void:
+	is_shaking = false
+	shake_timer = 0

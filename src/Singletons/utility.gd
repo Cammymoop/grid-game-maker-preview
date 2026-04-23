@@ -1,6 +1,43 @@
 @tool
 extends Node
 
+enum PosInterpStyle {
+	NONE,
+	CONTINUOUS_LINEAR,
+	EASE_OUT,
+	JUMP_LINEAR,
+	JUMP_EASE_OUT,
+	DOUBLE_EASE_OUT,
+	DOUBLE_NONE,
+	MID_DISCRETE,
+	LATE_DISCRETE,
+}
+
+const NON_SMOOTH_INTERP: Array[PosInterpStyle] = [
+	PosInterpStyle.NONE, PosInterpStyle.LATE_DISCRETE
+]
+
+const POS_INTERP_STRINGS: Dictionary[PosInterpStyle, String] = {
+	PosInterpStyle.NONE: "none",
+	PosInterpStyle.DOUBLE_NONE: "2-frames",
+	PosInterpStyle.CONTINUOUS_LINEAR: "smooth",
+	PosInterpStyle.EASE_OUT: "stepped",
+	PosInterpStyle.DOUBLE_EASE_OUT: "stepped-twice",
+	PosInterpStyle.JUMP_LINEAR: "jerky",
+	PosInterpStyle.JUMP_EASE_OUT: "jerky-stepped",
+	PosInterpStyle.MID_DISCRETE: "none-middle",
+	PosInterpStyle.LATE_DISCRETE: "none-late",
+}
+
+const JUMP_INTERP_AMOUNT = 0.5
+const DEF_INTERP_EASE = 0.36
+
+const DIR_RELATIVE_BIT = 4
+const DIR_RELATIVE_MODE_BIT = 8
+const DIR_SLOT_SHIFT = 4
+
+const DIR_MASK = 3
+
 const TILE_TANSFORM_MASK: int = TileSetAtlasSource.TRANSFORM_FLIP_H | TileSetAtlasSource.TRANSFORM_FLIP_V | TileSetAtlasSource.TRANSFORM_TRANSPOSE
 
 const FACING_TO_TILE_TRANSFORMS: Dictionary = {
@@ -70,6 +107,14 @@ func vector_to_facing_alternate(vector: Vector2, with_bias: bool = false, bias_v
 	vector[vector.abs().max_axis_index()] = 0
 	if vector == Vector2.ZERO:
 		return -1
+	return vector_to_facing(vector)
+
+func vector_to_facing_from_facing(vector: Vector2, from_facing: int) -> int:
+	var v2f: = vector_to_facing(vector)
+	if v2f != -1:
+		return v2f
+	var delta_angle: = vector.angle_to(facing_vector(from_facing))
+	vector = vector.rotated(signf(delta_angle) * 0.1)
 	return vector_to_facing(vector)
 
 func facing_vector(what_facing: int) -> Vector2:
@@ -748,3 +793,72 @@ func opbtn_select_text(opbtn: OptionButton, text: String) -> void:
 
 func normalize_angle(angle_radians: float) -> float:
 	return fposmod(angle_radians, TAU)
+
+func valid_direction_or(direction: int, default_val: int = -1) -> int:
+	if direction >= 0 and direction < 4:
+		return direction
+	return default_val
+
+func double_ease_out(progress: float, ease_param: float) -> float:
+	return ease(fmod(progress, 0.5) * 2, ease_param) + roundf(progress) * 0.5
+
+func apply_vec2_interpolation(interp_style: PosInterpStyle, from: Vector2, to: Vector2, progress: float, ease_param: float = DEF_INTERP_EASE) -> Vector2:
+	progress = clampf(progress, 0, 1)
+	if interp_style == PosInterpStyle.CONTINUOUS_LINEAR:
+		return from.lerp(to, progress)
+	elif interp_style == PosInterpStyle.NONE:
+		return to
+	elif interp_style == PosInterpStyle.LATE_DISCRETE:
+		return from if progress < 0.5 else to
+	elif interp_style == PosInterpStyle.LATE_DISCRETE:
+		return from if progress < 1 else to
+	elif interp_style == PosInterpStyle.DOUBLE_NONE:
+		return from.lerp(to, ceilf(progress * 2) * .5)
+	elif interp_style == PosInterpStyle.EASE_OUT:
+		return from.lerp(to, ease(progress, ease_param))
+	elif interp_style == PosInterpStyle.DOUBLE_EASE_OUT:
+		return from.lerp(to, double_ease_out(progress, ease_param))
+	elif interp_style in [PosInterpStyle.JUMP_LINEAR, PosInterpStyle.JUMP_EASE_OUT]:
+		progress = remap(progress, 0, 1, JUMP_INTERP_AMOUNT, 1)
+		if interp_style == PosInterpStyle.JUMP_LINEAR:
+			return from.lerp(to, progress)
+		else: # interp_style == PosInterpStyle.JUMP_EASE_OUT:
+			return from.lerp(to, ease(progress, ease_param))
+	else:
+		push_error("Unknown move interpolation style: %s" % interp_style)
+		return to
+
+func is_interp_style_smooth(interp_style: PosInterpStyle) -> bool:
+	return interp_style not in NON_SMOOTH_INTERP
+
+func vec2i_reading_order_cmp(a: Vector2i, b: Vector2i) -> bool:
+	if a.y == b.y:
+		return a.x < b.x
+	return a.y < b.y
+
+func get_reading_order_sorted_positions(positions: Array[Vector2i]) -> Array[Vector2i]:
+	positions = positions.duplicate()
+	positions.sort_custom(vec2i_reading_order_cmp)
+	return positions
+
+func next_prev_pos_reading_order(positions: Array[Vector2i], reference_pos: Vector2i, previous: bool = false) -> Vector2i:
+	if not positions:
+		return Vector2i.ZERO
+	elif positions.size() == 1:
+		return positions[0]
+	var sorted_positions: = get_reading_order_sorted_positions(positions)
+	var ref_index: int = sorted_positions.find(reference_pos)
+	if ref_index == -1:
+		return sorted_positions[-1 if previous else 0]
+	else:
+		var delta: = -1 if previous else 1
+		return sorted_positions[posmod(ref_index + delta, sorted_positions.size())]
+
+func is_vec2i_adjacent(a: Vector2i, b: Vector2i, with_diagonal: bool = false) -> bool:
+	if a == b:
+		return false
+	var abs_delta: = (b - a).abs()
+	if with_diagonal:
+		return abs_delta.x <= 1 and abs_delta.y <= 1
+	else:
+		return abs_delta.x + abs_delta.y == 1

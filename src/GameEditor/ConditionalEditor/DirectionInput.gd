@@ -1,11 +1,5 @@
 extends HBoxContainer
 
-const RELATIVE_BIT = 4
-const RELATIVE_MODE_BIT = 8
-const SLOT_SHIFT = 4
-
-const DIRECTION_ONLY = 3
-
 @export var is_reference_position: bool = false
 
 var is_absolute_mode: = true
@@ -61,10 +55,10 @@ func _relativify(plain_value: int) -> int:
 	var is_tile_pos: bool = Commands.slot_is_positions(slot_id)
 	var modified_value: int = plain_value
 	if not is_absolute_mode:
-		modified_value = modified_value | RELATIVE_BIT
+		modified_value = modified_value | Utility.DIR_RELATIVE_BIT
 		if not is_tile_pos and $EntityRelativeMode.selected_value == "Facing":
-			modified_value = modified_value | RELATIVE_MODE_BIT
-		modified_value = modified_value | (slot_id << SLOT_SHIFT)
+			modified_value = modified_value | Utility.DIR_RELATIVE_MODE_BIT
+		modified_value = modified_value | (slot_id << Utility.DIR_SLOT_SHIFT)
 	return modified_value
 
 
@@ -80,12 +74,12 @@ func set_value(new_val) -> void:
 	else:
 		facing_dir = int(new_val)
 
-	var is_relative = facing_dir & RELATIVE_BIT > 0
-	var rel_mode = facing_dir & RELATIVE_MODE_BIT > 0
-	var rel_slot = (facing_dir >> SLOT_SHIFT)
+	var is_relative = facing_dir & Utility.DIR_RELATIVE_BIT > 0
+	var rel_mode = facing_dir & Utility.DIR_RELATIVE_MODE_BIT > 0
+	var rel_slot = (facing_dir >> Utility.DIR_SLOT_SHIFT)
 
 	if set_direction_button_to_facing:
-		$DirectionSelectorButton.set_direction(facing_dir & DIRECTION_ONLY)
+		$DirectionSelectorButton.set_direction(facing_dir & Utility.DIR_MASK)
 
 	$AbsoluteModeSelect.select_index(1 if is_relative else 0)
 	if is_relative:

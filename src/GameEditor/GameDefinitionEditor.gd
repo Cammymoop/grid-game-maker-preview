@@ -66,13 +66,16 @@ func _ready():
 			break
 	show_level_title_option_picker.item_selected.connect(on_show_level_title_option_picked)
 	
+	move_interp_option_picker.clear()
+	for intertp_id in Utility.POS_INTERP_STRINGS.keys():
+		move_interp_option_picker.add_item(Utility.POS_INTERP_STRINGS[intertp_id], intertp_id)
+
 	move_interp_option_picker.item_selected.connect(on_move_interp_option_picked)
 	var cur_interp: = GameManager.get_game_setting("default_move_interp", "") as String
-	var interp_id: int = BaseEntity.MoveInterpStyle.CONTINUOUS_LINEAR
+	var interp_id: int = Utility.PosInterpStyle.CONTINUOUS_LINEAR
 	if cur_interp:
 		interp_id = BaseEntity.read_move_interp_style_string(cur_interp)
-	var interp_index: int = move_interp_option_picker.get_item_index(interp_id)
-	move_interp_option_picker.select(interp_index)
+	Utility.opbtn_select_id(move_interp_option_picker, interp_id)
 	
 	turn_animation_option_picker.item_selected.connect(on_turn_animation_option_picked)
 	Utility.opbtn_select_text(turn_animation_option_picker, GameManager.get_game_setting("default_turn_animation", "quick"))
@@ -185,7 +188,7 @@ func _on_new_empty_pressed() -> void:
 	GameManager.new_empty_game_definition()
 
 func on_move_interp_option_picked(index: int) -> void:
-	var interp_style: = move_interp_option_picker.get_item_id(index) as BaseEntity.MoveInterpStyle
+	var interp_style: = move_interp_option_picker.get_item_id(index) as Utility.PosInterpStyle
 	GameManager.set_game_setting("default_move_interp", BaseEntity.get_move_interp_style_string(interp_style))
 	GameManager.game_settings_changed.emit()
 
