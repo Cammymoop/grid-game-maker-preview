@@ -80,7 +80,9 @@
               "basic_default.a_die::[\"i:1\"]",
               "basic_default.a_create_entity::[\"i:4\",\"s:player-pickaxe\",\"i:12\",false]"
             ],
-            "when false": [],
+            "when false": [
+              "basic_default.quit::[\"i:-1\"]"
+            ],
             "when always": []
           },
           {
@@ -173,7 +175,8 @@
           "when false": [],
           "when always": []
         },
-        "geode": true
+        "geode": true,
+        "museum-active": false
       },
       "intended_move_speed": 0.0
     },
@@ -329,15 +332,20 @@
       "intended_move_speed": 10.0
     }
   },
-  "window_width": 18.0,
-  "window_height": 14.0,
   "game_settings": {
     "pixel_scale": 2.0,
     "camera_settings": {
       "follow_entity": "player",
-      "enable_limits": true
+      "enable_limits": true,
+      "extend_limits": 32.0
     },
-    "default_move_interp": "stepped"
+    "default_move_interp": "stepped",
+    "game_view_size": [
+      16.0,
+      12.0
+    ],
+    "window_width": 16.0,
+    "window_height": 12.0
   },
   "game_metadata": {
     "credits": {
