@@ -1,6 +1,8 @@
 class_name BaseConditionalScript
 extends Node
 
+const SlotSelectorButton = preload("res://src/GameEditor/SlotSelectorButton.gd")
+
 const CondResolver = preload("res://src/Singletons/conditionals_v3.gd")
 const Slot = Commands.Slot
 
@@ -308,3 +310,11 @@ func resolve_complex_prop_value(complex_prop_value: Dictionary, slots: Dictionar
 	else:
 		push_error("Invalid complex prop value native type: %s" % [complex_prop_value["type"]])
 		return 0
+
+func get_entity_from_slot(slot_id: int, slots: Dictionary) -> BaseEntity:
+	if slot_id == SlotSelectorButton.NONE_SLOTS:
+		return null
+	if not Commands.slot_is_entity(slot_id):
+		push_error("Invalid slot to get entity from: %s" % [slot_id])
+		return null
+	return slots[slot_id]

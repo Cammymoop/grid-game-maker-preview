@@ -898,12 +898,13 @@ func vec2i_reading_order_cmp(a: Vector2i, b: Vector2i) -> bool:
 		return a.x < b.x
 	return a.y < b.y
 
-func get_reading_order_sorted_positions(positions: Array[Vector2i]) -> Array[Vector2i]:
-	positions = positions.duplicate()
-	positions.sort_custom(vec2i_reading_order_cmp)
-	return positions
+func get_reading_order_sorted_positions(positions: Array) -> Array[Vector2i]:
+	var sorted_positions: Array[Vector2i] = []
+	sorted_positions.assign(positions)
+	sorted_positions.sort_custom(vec2i_reading_order_cmp)
+	return sorted_positions
 
-func next_prev_pos_reading_order(positions: Array[Vector2i], reference_pos: Vector2i, previous: bool = false) -> Vector2i:
+func next_prev_pos_reading_order(positions: Array, reference_pos: Vector2i, previous: bool = false) -> Vector2i:
 	if not positions:
 		return Vector2i.ZERO
 	elif positions.size() == 1:

@@ -13,6 +13,9 @@ func _ready():
 func set_input_args(new_args: Array) -> void:
 	if not new_args:
 		return
+	if new_args.size() > 1 and "none" in new_args:
+		slot_button.show_none_option = true
+		new_args.erase("none")
 	slot_button.set_valid_slot_categories(new_args)
 
 func set_arg_name(new_arg_name: String) -> void:

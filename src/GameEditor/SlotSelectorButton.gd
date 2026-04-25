@@ -2,6 +2,7 @@ extends CenterContainer
 
 signal slot_changed(new_slot_id)
 
+@export var show_none_option: bool = false
 @export var show_any_option: bool = false
 @export var show_number_option: bool = false
 @export var show_text_option: bool = false
@@ -18,6 +19,7 @@ const ANY_SLOT: int = -2
 const NUMBER_VALUE: int = -3
 const TEXT_VALUE: int = -4
 const BOOL_VALUE: int = -5
+const NONE_SLOTS: int = -6
 
 var slot_textures: = {
     Commands.Slot.RED:    preload("res://assets/img/button_icons/slot_icons/red_diamond.png"),
@@ -49,6 +51,7 @@ var slot_textures: = {
     NUMBER_VALUE: preload("res://assets/img/button_icons/slot_icons/num.png"),
     TEXT_VALUE: preload("res://assets/img/button_icons/slot_icons/text.png"),
     BOOL_VALUE: preload("res://assets/img/button_icons/slot_icons/true_false.png"),
+    NONE_SLOTS: preload("res://assets/img/button_icons/slot_icons/none.png"),
 }
 
 var slot_ids: = {
@@ -81,6 +84,7 @@ var slot_ids: = {
     num= NUMBER_VALUE,
     text= TEXT_VALUE,
     tf= BOOL_VALUE,
+    none= NONE_SLOTS,
 }
 
 var disabled_slots: Array = []
@@ -131,18 +135,23 @@ func get_slot_id_from_button_texture(button_node: ButtonContainer) -> int:
     
     return slot_textures.find_key(texture_rect.texture)
 
+func any_special_enabled() -> bool:
+    return (show_any_option or show_number_option or show_text_option or show_none_option or show_bool_option)
+
 func set_valid_slot_categories(categories: Array) -> void:
     show_categories.assign(categories)
     
-    var has_special_column: bool = show_any_option or show_number_option or show_text_option
+    var has_special_column: bool = any_special_enabled()
     var special_column: Node = find_child("SpecialColumn")
     
     special_column.visible = has_special_column
     find_child("SpecialSeparator").visible = has_special_column
 
+    special_column.find_child("PickNone").visible = show_none_option
     special_column.find_child("PickAny").visible = show_any_option
     special_column.find_child("PickNumber").visible = show_number_option
     special_column.find_child("PickText").visible = show_text_option
+    special_column.find_child("PickTrueFalse").visible = show_bool_option
 
     if len(show_categories) == 0:
         $ButtonContainer.set_disabled(true)

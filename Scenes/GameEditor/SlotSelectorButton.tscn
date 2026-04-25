@@ -6,6 +6,7 @@
 [ext_resource type="Script" uid="uid://b6ywa5nkprkff" path="res://src/GameEditor/SlotSelectorButton.gd" id="4"]
 [ext_resource type="Texture2D" uid="uid://bqgvr4y6l7w6x" path="res://assets/img/button_icons/slot_icons/pink_heart.png" id="5"]
 [ext_resource type="Texture2D" uid="uid://dpp6xku4eq8cc" path="res://assets/img/button_icons/slot_icons/any.png" id="5_gh5vf"]
+[ext_resource type="Texture2D" uid="uid://dbflnhbgd2xr2" path="res://assets/img/button_icons/slot_icons/none.png" id="5_tbnff"]
 [ext_resource type="Texture2D" uid="uid://b0k5ggbxb23rv" path="res://assets/img/button_icons/slot_icons/white_triangle.png" id="6"]
 [ext_resource type="Texture2D" uid="uid://bo5gpwatetuxl" path="res://assets/img/button_icons/slot_icons/num.png" id="6_666yx"]
 [ext_resource type="PackedScene" path="res://Scenes/GameEditor/VSeparator.tscn" id="7"]
@@ -63,7 +64,7 @@ texture = ExtResource("2")
 
 [node name="PopupPicker" type="Popup" parent="." unique_id=1988138473]
 oversampling_override = 1.0
-size = Vector2i(280, 145)
+size = Vector2i(280, 175)
 
 [node name="PopupPanel" type="PanelContainer" parent="PopupPicker" unique_id=1003956299]
 anchors_preset = 15
@@ -88,6 +89,19 @@ alignment = 1
 layout_mode = 2
 size_flags_horizontal = 4
 alignment = 1
+
+[node name="PickNone" parent="PopupPicker/PopupPanel/MarginContainer/CategoryContainer/SpecialColumn" unique_id=1820908734 instance=ExtResource("1")]
+layout_mode = 2
+size_flags_horizontal = 4
+
+[node name="CenterContainer" type="CenterContainer" parent="PopupPicker/PopupPanel/MarginContainer/CategoryContainer/SpecialColumn/PickNone" unique_id=1360283760]
+layout_mode = 2
+mouse_filter = 2
+
+[node name="TextureRect" type="TextureRect" parent="PopupPicker/PopupPanel/MarginContainer/CategoryContainer/SpecialColumn/PickNone/CenterContainer" unique_id=648740995]
+layout_mode = 2
+mouse_filter = 2
+texture = ExtResource("5_tbnff")
 
 [node name="PickAny" parent="PopupPicker/PopupPanel/MarginContainer/CategoryContainer/SpecialColumn" unique_id=209940707 instance=ExtResource("1")]
 layout_mode = 2
@@ -438,6 +452,7 @@ mouse_filter = 2
 texture = ExtResource("14")
 
 [connection signal="pressed" from="ButtonContainer" to="." method="_on_ButtonContainer_pressed"]
+[connection signal="pressed" from="PopupPicker/PopupPanel/MarginContainer/CategoryContainer/SpecialColumn/PickNone" to="." method="_on_SlotSelected" binds= ["none"]]
 [connection signal="pressed" from="PopupPicker/PopupPanel/MarginContainer/CategoryContainer/SpecialColumn/PickAny" to="." method="_on_SlotSelected" binds= ["any"]]
 [connection signal="pressed" from="PopupPicker/PopupPanel/MarginContainer/CategoryContainer/SpecialColumn/PickNumber" to="." method="_on_SlotSelected" binds= ["num"]]
 [connection signal="pressed" from="PopupPicker/PopupPanel/MarginContainer/CategoryContainer/SpecialColumn/PickText" to="." method="_on_SlotSelected" binds= ["text"]]
