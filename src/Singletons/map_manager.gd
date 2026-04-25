@@ -864,7 +864,7 @@ func conditional_tile_event(at_tile_positions: Array, tile_event_name: String, c
     return is_all
 
 func attempt_move(moving_entity: BaseEntity, leaving_ps: Array[Vector2i], entering_ps: Array[Vector2i], is_group_move: bool = false) -> bool:
-    var result: = conditional_tile_event(leaving_ps, "move_off_of", moving_entity, true, -1, true)
+    var result: = conditional_tile_event(leaving_ps, "move_off_of", moving_entity, true)
 
     var skip_collection: Array[int] = []
     if not EntityManager.attempt_move_leave(moving_entity, leaving_ps, skip_collection, is_group_move):

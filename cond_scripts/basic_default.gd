@@ -253,6 +253,24 @@ func cmd_select_entity_at(slots: Dictionary, chosen_slot: int, at_pos_slot: int,
 		filtered_entities = EntityManager.filter_entities_by_property(prop_name, filtered_entities, invert)
 	slots[chosen_slot] = filtered_entities[0] if filtered_entities else null
 
+func desc_select_named_entity_at() -> String:
+	return "entity|<= Select an active entity (ignoring self) named [e_name:EntityNameInput] at [at_pos_slot:SlotInput:pos]"
+func cmd_select_named_entity_at(slots: Dictionary, chosen_slot: int, at_pos_slot: int, e_name: Dictionary) -> void:
+	if not Commands.slot_is_entity(chosen_slot) or not Commands.slot_is_positions(at_pos_slot):
+		push_error("Invalid slots to select named entity at: %s and %s" % [chosen_slot, at_pos_slot])
+		return
+	var e_id: = get_id_of_complex_entity_name(e_name, slots)
+	var at_positions: Array = slots[at_pos_slot]
+	if not at_positions:
+		slots[chosen_slot] = null
+		return
+	var filtered_entities: Array = EntityManager.get_entities_at_multiple(at_positions, slots[Slot.RED], [], true, false)
+	for e in filtered_entities:
+		if e.entity_index == e_id:
+			slots[chosen_slot] = e
+			return
+	slots[chosen_slot] = null
+
 func desc_select_nearest_entity() -> String:
 	return "entity|<= Select the nearest entity to [ref_entity_slot:SlotInput:entity] (ignoring itself) with a [truthy:BoolChoice:true,true or non-zero,false or zero] [prop_name:PropertyInput] property"
 func cmd_select_nearest_entity(slots: Dictionary, chosen_slot: int, ref_entity_slot: int, truthy: bool, prop_name: String) -> void:
