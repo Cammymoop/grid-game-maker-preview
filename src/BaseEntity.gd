@@ -865,6 +865,8 @@ func clear_move_interp_override() -> void:
 func get_move_interp_style(is_diagonal_adj: bool = false) -> PosInterpStyle:
 	if _this_move_is_teleport:
 		return get_teleport_interp_style(is_diagonal_adj)
+	elif is_move_interp_override:
+		return override_move_interp_style
 	return move_interp_style
 
 func get_teleport_interp_style(is_diagonal_adj: bool) -> PosInterpStyle:

@@ -842,7 +842,7 @@ func resolve_tile_individual_events(at_tile_positions: Array, tile_event_name: S
             if event_property and event_property.is_conditional():
                 event_property.resolve(null, context_entity, at_pos, [], extra_debug)
 
-func conditional_tile_event(at_tile_positions: Array, tile_event_name: String, context_entity: BaseEntity, is_all: bool = false, only_index: int = -1) -> bool:
+func conditional_tile_event(at_tile_positions: Array, tile_event_name: String, context_entity: BaseEntity, is_all: bool = false, only_index: int = -1, extra_debug: bool = false) -> bool:
     for at_pos in at_tile_positions:
         var resolved_indices: Array[int] = []
         for l in layers:
@@ -855,7 +855,7 @@ func conditional_tile_event(at_tile_positions: Array, tile_event_name: String, c
             var event_property: = get_tile_property_for_index_at(at_pos, tile_event_name, ti)
             if not event_property:
                 continue
-            var result: Variant = event_property.get_or_resolve(null, context_entity, at_pos, [], false)
+            var result: Variant = event_property.get_or_resolve(null, context_entity, at_pos, [], extra_debug)
             if not is_all and result:
                 return true
             if is_all and not result:
@@ -864,7 +864,7 @@ func conditional_tile_event(at_tile_positions: Array, tile_event_name: String, c
     return is_all
 
 func attempt_move(moving_entity: BaseEntity, leaving_ps: Array[Vector2i], entering_ps: Array[Vector2i], is_group_move: bool = false) -> bool:
-    var result: = conditional_tile_event(leaving_ps, "move_off_of", moving_entity, true)
+    var result: = conditional_tile_event(leaving_ps, "move_off_of", moving_entity, true, -1, true)
 
     var skip_collection: Array[int] = []
     if not EntityManager.attempt_move_leave(moving_entity, leaving_ps, skip_collection, is_group_move):

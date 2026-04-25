@@ -1482,6 +1482,7 @@
             "when always": []
           }
         ],
+        "slippery": true,
         "move_off_of": {
           "v": "3",
           "conditions": [
@@ -1491,10 +1492,11 @@
             "basic_default.override_move_speed::[\"i:1\",{\"args\":[\"s:type\",\"s:plain\",\"s:value\",\"f:10.0\"],\"type\":\"Dictionary\"}]",
             "basic_default.override_move_animation::[\"i:1\",\"s:smooth\"]"
           ],
-          "when false": [],
+          "when false": [
+            "basic_default.true::[\"i:-1\"]"
+          ],
           "when always": []
-        },
-        "slippery": true
+        }
       }
     },
     "13": {
@@ -1562,7 +1564,9 @@
               "not"
             ],
             "when true": [],
-            "when false": [],
+            "when false": [
+              "basic_default.quit::[\"i:-1\"]"
+            ],
             "when always": []
           },
           {
@@ -1574,7 +1578,9 @@
               "basic_default.override_move_speed::[\"i:1\",{\"args\":[\"s:type\",\"s:plain\",\"s:value\",\"f:10.0\"],\"type\":\"Dictionary\"}]",
               "basic_default.override_move_animation::[\"i:1\",\"s:smooth\"]"
             ],
-            "when false": [],
+            "when false": [
+              "basic_default.true::[\"i:-1\"]"
+            ],
             "when always": []
           }
         ],
