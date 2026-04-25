@@ -4,7 +4,9 @@
 [ext_resource type="PackedScene" uid="uid://dp8klau6une1m" path="res://Scenes/GameEditor/TileEntityEditorWindow.tscn" id="2"]
 [ext_resource type="Script" uid="uid://bx6f17nxjwie5" path="res://src/GameEditor/TilesEntitiesEditor.gd" id="3"]
 [ext_resource type="Theme" uid="uid://d02pi6tltv1cc" path="res://assets/ui/game_editor_tab_theme.tres" id="3_qrjoe"]
+[ext_resource type="Script" uid="uid://x80wuvd66lkn" path="res://Scenes/GameEditor/game_def_display_settings.gd" id="4_32qri"]
 [ext_resource type="Script" uid="uid://cakuc61ui0t57" path="res://src/GameEditor/ImagesEditor.gd" id="5"]
+[ext_resource type="PackedScene" uid="uid://bgbv61t8v8ji5" path="res://Scenes/GameEditor/ConditionalEditor/vector2f_input.tscn" id="5_73cj6"]
 [ext_resource type="Script" uid="uid://benwn44a0nm5f" path="res://src/GameEditor/GameDefinitionEditor.gd" id="6"]
 [ext_resource type="PackedScene" uid="uid://b6fax3dpo74i4" path="res://Scenes/GameEditor/credits_list.tscn" id="6_qrjoe"]
 [ext_resource type="Script" uid="uid://bh535vdhldxn6" path="res://src/GameEditor/ConditionalEditor/prop_or_entity_name_input.gd" id="7_73cj6"]
@@ -288,10 +290,13 @@ popup/item_1/id = 1
 popup/item_2/text = "Hide"
 popup/item_2/id = 2
 
-[node name="WindowSection" type="FoldableContainer" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer" unique_id=740921175]
+[node name="WindowSection" type="FoldableContainer" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer" unique_id=740921175 node_paths=PackedStringArray("expand_crop_option_picker", "window_size_vec_input")]
 layout_mode = 2
 title = "Window Settings:"
 title_alignment = 1
+script = ExtResource("4_32qri")
+expand_crop_option_picker = NodePath("MarginContainer/VBoxContainer/HBoxContainer8/ExpandCropView")
+window_size_vec_input = NodePath("MarginContainer/VBoxContainer/HBoxContainer5/WindowTileSizeVecInput")
 
 [node name="MarginContainer" type="MarginContainer" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer/WindowSection" unique_id=1603241429]
 layout_mode = 2
@@ -307,7 +312,7 @@ alignment = 2
 
 [node name="Label" type="Label" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer/WindowSection/MarginContainer/VBoxContainer/HBoxContainer3" unique_id=674785261]
 layout_mode = 2
-text = " Default Zoom Level (Windowed):"
+text = "Windowed Default Zoom"
 
 [node name="PixelScaleInput" type="SpinBox" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer/WindowSection/MarginContainer/VBoxContainer/HBoxContainer3" unique_id=235024528]
 layout_mode = 2
@@ -315,38 +320,43 @@ min_value = 0.1
 step = 0.1
 value = 1.0
 
-[node name="HBoxContainer2" type="HBoxContainer" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer/WindowSection/MarginContainer/VBoxContainer" unique_id=1842180820]
+[node name="HBoxContainer5" type="HBoxContainer" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer/WindowSection/MarginContainer/VBoxContainer" unique_id=254084083]
 layout_mode = 2
 alignment = 2
 
-[node name="Label" type="Label" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer/WindowSection/MarginContainer/VBoxContainer/HBoxContainer2" unique_id=82436683]
+[node name="Label" type="Label" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer/WindowSection/MarginContainer/VBoxContainer/HBoxContainer5" unique_id=2032421419]
 layout_mode = 2
 size_flags_horizontal = 3
-text = "Game View Size (In Tiles) Width:"
+text = "Game View Size (Tiles):"
 horizontal_alignment = 2
 
-[node name="SetWindowWidth" type="SpinBox" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer/WindowSection/MarginContainer/VBoxContainer/HBoxContainer2" unique_id=314379242]
+[node name="WindowTileSizeVecInput" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer/WindowSection/MarginContainer/VBoxContainer/HBoxContainer5" unique_id=2047234622 instance=ExtResource("5_73cj6")]
 layout_mode = 2
-min_value = 2.0
-value = 12.0
-
-[node name="Label2" type="Label" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer/WindowSection/MarginContainer/VBoxContainer/HBoxContainer2" unique_id=1001203741]
-layout_mode = 2
-text = "Height:"
-horizontal_alignment = 2
-
-[node name="SetWindowHeight" type="SpinBox" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer/WindowSection/MarginContainer/VBoxContainer/HBoxContainer2" unique_id=956752844]
-layout_mode = 2
-min_value = 2.0
-value = 12.0
+label_is_w_h = true
+starting_value = Vector2(12, 12)
+starting_step = Vector2(1, 1)
 
 [node name="HBoxContainer8" type="HBoxContainer" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer/WindowSection/MarginContainer/VBoxContainer" unique_id=729833972]
 layout_mode = 2
 alignment = 2
 
 [node name="AutoAspect" type="CheckButton" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer/WindowSection/MarginContainer/VBoxContainer/HBoxContainer8" unique_id=1615923820]
+visible = false
 layout_mode = 2
 text = "Expand Game View To Fit Window Aspect"
+
+[node name="Label" type="Label" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer/WindowSection/MarginContainer/VBoxContainer/HBoxContainer8" unique_id=566198474]
+layout_mode = 2
+text = "Aspect Ratio Handling:"
+
+[node name="ExpandCropView" type="OptionButton" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer/WindowSection/MarginContainer/VBoxContainer/HBoxContainer8" unique_id=791322447]
+layout_mode = 2
+selected = 0
+item_count = 2
+popup/item_0/text = "Expand View"
+popup/item_0/id = 0
+popup/item_1/text = "Crop View"
+popup/item_1/id = 1
 
 [node name="HBoxContainer4" type="HBoxContainer" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer/WindowSection/MarginContainer/VBoxContainer" unique_id=1334245388]
 layout_mode = 2
@@ -671,8 +681,6 @@ max_brightness = 0.3
 [connection signal="text_submitted" from="MarginContainer/UIRoot/TabContainer/GameDefinition/HBoxContainer/VBoxContainer/HBoxContainer/NameInput" to="MarginContainer/UIRoot/TabContainer/GameDefinition" method="_on_name_input_text_submitted"]
 [connection signal="pressed" from="MarginContainer/UIRoot/TabContainer/GameDefinition/HBoxContainer/VBoxContainer/HBoxContainer/EditGameDirButton" to="MarginContainer/UIRoot/TabContainer/GameDefinition" method="_on_edit_game_dir_button_pressed"]
 [connection signal="value_changed" from="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer/WindowSection/MarginContainer/VBoxContainer/HBoxContainer3/PixelScaleInput" to="MarginContainer/UIRoot/TabContainer/GameDefinition" method="_on_PixelScaleInput_value_changed"]
-[connection signal="value_changed" from="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer/WindowSection/MarginContainer/VBoxContainer/HBoxContainer2/SetWindowWidth" to="MarginContainer/UIRoot/TabContainer/GameDefinition" method="_on_SetWindowWidth_value_changed"]
-[connection signal="value_changed" from="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer/WindowSection/MarginContainer/VBoxContainer/HBoxContainer2/SetWindowHeight" to="MarginContainer/UIRoot/TabContainer/GameDefinition" method="_on_SetWindowHeight_value_changed"]
 [connection signal="toggled" from="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer/WindowSection/MarginContainer/VBoxContainer/HBoxContainer8/AutoAspect" to="MarginContainer/UIRoot/TabContainer/GameDefinition" method="_on_AutoAspect_toggled"]
 [connection signal="pressed" from="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer/WindowSection/MarginContainer/VBoxContainer/HBoxContainer4/UpdateWindow" to="MarginContainer/UIRoot/TabContainer/GameDefinition" method="_on_UpdateWindow_pressed"]
 [connection signal="text_changed" from="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer/DefaultCameraSection/MarginContainer/HFlowContainer/HBoxContainer6/FollowEntity" to="MarginContainer/UIRoot/TabContainer/GameDefinition" method="_on_FollowEntity_text_changed"]

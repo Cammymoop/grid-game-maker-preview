@@ -86,12 +86,10 @@ func entity_list_process(delta_time: float) -> void:
                 if event_info.get("is_animation_tick", true):
                     relevant_tick_counter = animation_frame_counter
                 if event_info["timeout_tick"] < relevant_tick_counter:
-                    prints("expired event: " + str(event_info))
                     continue
                 elif event_info["timeout_tick"] > relevant_tick_counter:
                     pending_events.append(event_info)
                 else:
-                    prints("event running now: " + str(event_info))
                     events_this_tick.append(event_info)
             timed_entity_events[e.instance_id] = pending_events
 
@@ -415,8 +413,8 @@ func _get_museum_entity_ids() -> Array[int]:
     return entity_ids
 
 func is_entity_id_museum_active(entity_id: int) -> bool:
-    if entity_defs[entity_id].has("museum-active"):
-        return true if entity_defs[entity_id]["museum-active"] else false
+    if entity_defs[entity_id]["properties"].has("museum-active"):
+        return true if entity_defs[entity_id]["properties"]["museum-active"] else false
     return GameManager.get_game_setting("museum_all_without_controller_active", true) and not entity_id_has_controller(entity_id)
 
 func create_museum(player_pos: Vector2i, museum_start_pos: Vector2i, museum_spacing: Vector2i) -> Vector2i:
@@ -682,7 +680,7 @@ func deserialize(data: Dictionary) -> void:
     frame_counter = data.get("frame_counter", 0)
     animation_frame_counter = data.get("animation_frame_counter", 0)
     if "timed_entity_events" in data:
-        timed_entity_events = data["timed_entity_events"].duplicate_deep()
+        timed_entity_events.assign(data["timed_entity_events"].duplicate_deep())
     bond_groups = data["bond_groups"].duplicate_deep()
 
     for entity_data in data["entity_list"]:

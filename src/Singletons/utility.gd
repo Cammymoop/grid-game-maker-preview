@@ -83,6 +83,50 @@ func vector_to_facing(vector: Vector2) -> int:
 	else:
 		return 2 if vector.y > 0 else 0
 
+
+func dict_map(dict: Dictionary, callback: Callable) -> Dictionary:
+	var new_dict: = Dictionary({}, 
+		dict.get_typed_key_builtin(), dict.get_typed_key_class_name(), dict.get_typed_key_script(),
+		dict.get_typed_value_builtin(), dict.get_typed_value_class_name(), dict.get_typed_value_script())
+
+	for k in dict:
+		var kv: Array = callback.call(k, dict[k])
+		new_dict[kv[0]] = kv[1]
+	return new_dict
+
+func dict_keymap(dict: Dictionary, callback: Callable) -> Dictionary:
+	var new_dict: = Dictionary({}, 
+		dict.get_typed_key_builtin(), dict.get_typed_key_class_name(), dict.get_typed_key_script(),
+		dict.get_typed_value_builtin(), dict.get_typed_value_class_name(), dict.get_typed_value_script())
+	
+	if callback.get_argument_count() == 1:
+		for old_key in dict:
+			new_dict[callback.call(old_key)] = dict[old_key]
+	else:
+		for old_key in dict:
+			new_dict[callback.call(old_key, dict[old_key])] = dict[old_key]
+
+	return new_dict
+
+func dict_inplace_map(dict: Dictionary, map_func: Callable) -> void:
+	var keys: = dict.keys()
+	var vals: = dict.values()
+	dict.clear()
+	for i in keys.size():
+		var kv: Array = map_func.call(keys[i], vals[i])
+		dict[kv[0]] = kv[1]
+
+func dict_inplace_keymap(dict: Dictionary, map_func: Callable) -> void:
+	var keys: = dict.keys()
+	var vals: = dict.values()
+	dict.clear()
+	if map_func.get_argument_count() == 1:
+		for i in keys.size():
+			dict[map_func.call(keys[i])] = vals[i]
+	else:
+		for i in keys.size():
+			dict[map_func.call(keys[i], vals[i])] = vals[i]
+
 func biased_vector_to_facing(vector: Vector2, bias_vertical: bool) -> int:
 	if vector == Vector2.ZERO:
 		return -1
@@ -386,17 +430,28 @@ func parse_json(text: String):
 func callv_with_errors(callable: Callable, args: Array) -> Variant:
 	return callable.bindv(args).call()
 
+func any_to_float(value: Variant) -> float:
+	if typeof(value) in [TYPE_FLOAT, TYPE_INT]:
+		return float(value)
+	
+	var str_val: = str(value)
+	if str_val.is_valid_hex_number(true) or str_val.is_valid_hex_number():
+		return str_val.hex_to_int()
+	elif str_val.is_valid_float():
+		return float(str_val)
+	return 0.0
+
 func any_to_int(value: Variant) -> int:
 	if typeof(value) == TYPE_INT:
 		return value
 	elif typeof(value) == TYPE_FLOAT:
-		return int(value)
+		return roundi(value)
 	
 	var str_val: = str(value)
 	if str_val.is_valid_hex_number(true):
 		return str_val.hex_to_int()
 	elif str_val.is_valid_float():
-		return int(float(str_val))
+		return roundi(float(str_val))
 	return 0
 
 func tile_transform_from_facing(facing: int) -> int:
@@ -879,3 +934,23 @@ func check_string_start_end_contains(text: String, start_end: String, filter_tex
 		return text.ends_with(filter_text)
 	else:
 		return text.contains(filter_text)
+
+func get_float_step_from_float(float_val: float, min_step: float = 0.00001) -> float:
+	var snapped_val: float = snappedf(float_val, min_step)
+	if is_float_integer(snapped_val) or min_step >= 1:
+		return 1
+	var decimals_in_step: int = -1 if min_step == 0 else step_decimals(min_step)
+	var val_string: String = String.num(snapped_val, decimals_in_step)
+	if not val_string.contains("."):
+		return 1
+	return pow(10, -len(val_string.split(".", true, 1)[1]))
+
+func count_trailing_digits_with_zeros(float_string: String) -> int:
+	float_string = float_string.strip_edges()
+	if not float_string.is_valid_float() or not float_string.contains("."):
+		return 0
+	
+	var trailing: String = float_string.split(".", true, 1)[1]
+	if not trailing or not trailing.ends_with("0"):
+		return 0
+	return trailing.length()

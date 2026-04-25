@@ -125,6 +125,17 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
+[node name="SubViewportContainer" type="SubViewportContainer" parent="." unique_id=268370649]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+stretch = true
+
+[node name="AspectRatioContainer" type="AspectRatioContainer" parent="." unique_id=2088856485]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
 [node name="Display" type="TextureRect" parent="." unique_id=1709416986 node_paths=PackedStringArray("forward_to")]
 layout_mode = 0
 anchor_right = 1.0

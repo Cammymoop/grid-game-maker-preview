@@ -26,8 +26,6 @@ func _ready():
 	GameManager.game_dir_name_changed.connect(on_game_dir_name_changed)
 	var game_name = GameManager.get_game_name()
 	name_input.text = game_name
-	find_child("SetWindowWidth").value = GameManager.game_view.x
-	find_child("SetWindowHeight").value = GameManager.game_view.y
 	init_movement_modes()
 	
 	game_settings = GameManager.game_definition["game_settings"]
@@ -38,8 +36,6 @@ func _ready():
 	
 	if "pixel_scale" in game_settings:
 		find_child("PixelScaleInput").value = game_settings["pixel_scale"]
-	if "auto_aspect" in game_settings:
-		find_child("AutoAspect").button_pressed = game_settings["auto_aspect"]
 	if "movement_mode" in game_settings:
 		find_child("MovementModeMenuButton").text = GameManager.describe_movement_mode(game_settings["movement_mode"])
 	
@@ -149,12 +145,6 @@ func _on_SetDefault_pressed():
 	FilesManager.save_default_game(GameManager.cur_game_name)
 	GlobalToaster.show_toast_message("Default Game Set")
 
-
-func _on_SetWindowWidth_value_changed(value):
-	GameManager.set_game_view(value, GameManager.game_view.y)
-func _on_SetWindowHeight_value_changed(value):
-	GameManager.set_game_view(GameManager.game_view.x, value)
-
 func _on_UpdateWindow_pressed():
 	GameManager.rescale_window()
 
@@ -173,9 +163,6 @@ func _on_ExtendCamLimits_value_changed(value):
 
 func _on_PixelScaleInput_value_changed(value):
 	game_settings["pixel_scale"] = value
-
-func _on_AutoAspect_toggled(button_pressed):
-	game_settings["auto_aspect"] = button_pressed
 
 func _on_title_input_text_changed(new_text: String) -> void:
 	game_settings["title"] = new_text

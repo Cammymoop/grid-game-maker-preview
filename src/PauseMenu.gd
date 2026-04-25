@@ -23,6 +23,16 @@ func _ready():
 	if level_title_edit:
 		level_title_edit.text_changed.connect(on_level_title_edited)
 
+func _unhandled_input(event: InputEvent) -> void:
+	if not active:
+		return
+	if Utility.fixed_just_pressed_by_event("escape", event):
+		if not main_panel.visible:
+			switch_panel("main")
+		else:
+			toggle()
+		accept_event()
+
 func switch_panel(to_panel: String) -> void:
 	var is_main_panel: = to_panel == "main"
 	main_panel.visible = is_main_panel
@@ -122,13 +132,12 @@ func refresh_next_level_list() -> void:
 	level_list.push_front("[None]")
 
 	for level in level_list:
-		if level == "editor_autosave":
+		if level == "editor_autosave" or level == "editor autosave":
 			continue
 		next_level_list.add_item(level)
 
 	if MapManager.has_next_level():
-		var index = level_list.find(MapManager.get_metadata_value("next_level"))
-		next_level_list.selected = index
+		Utility.opbtn_select_text(next_level_list, MapManager.get_metadata_value("next_level"))
 	else:
 		next_level_list.selected = 0
 

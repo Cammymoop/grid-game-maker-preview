@@ -1,14 +1,14 @@
-[gd_scene format=3 uid="uid://yskjico8qrbl"]
+[gd_scene format=3 uid="uid://bgbv61t8v8ji5"]
 
-[ext_resource type="StyleBox" uid="uid://cw7cqsfd2oaqh" path="res://assets/ui/input_box_panel.tres" id="1_fqw2b"]
-[ext_resource type="Script" uid="uid://dmfsa56dqenr" path="res://src/GameEditor/ConditionalEditor/vector2i_input.gd" id="1_rfa5f"]
+[ext_resource type="StyleBox" uid="uid://cw7cqsfd2oaqh" path="res://assets/ui/input_box_panel.tres" id="1_0rmiy"]
+[ext_resource type="Script" uid="uid://dbhp50upf4p0v" path="res://src/GameEditor/ConditionalEditor/vector2f_input.gd" id="2_0rmiy"]
 
-[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_rfa5f"]
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_dxwao"]
 
-[sub_resource type="Theme" id="Theme_50ets"]
-LineEdit/constants/minimum_character_width = 1
-LineEdit/styles/normal = SubResource("StyleBoxEmpty_rfa5f")
-PanelContainer/styles/panel = ExtResource("1_fqw2b")
+[sub_resource type="Theme" id="Theme_v8hix"]
+LineEdit/constants/minimum_character_width = 2
+LineEdit/styles/normal = SubResource("StyleBoxEmpty_dxwao")
+PanelContainer/styles/panel = ExtResource("1_0rmiy")
 
 [sub_resource type="StyleBoxLine" id="StyleBoxLine_rfa5f"]
 color = Color(0.1728327, 0.17283267, 0.17283267, 1)
@@ -16,20 +16,22 @@ grow_begin = -1.0
 grow_end = -1.0
 vertical = true
 
-[node name="VecInput" type="PanelContainer" unique_id=2047234622 node_paths=PackedStringArray("x_input", "y_input")]
+[node name="VecInput" type="PanelContainer" unique_id=2047234622 node_paths=PackedStringArray("x_label", "x_input", "y_label", "y_input")]
 offset_right = 70.0
 offset_bottom = 31.0
 size_flags_vertical = 4
-theme = SubResource("Theme_50ets")
-script = ExtResource("1_rfa5f")
+theme = SubResource("Theme_v8hix")
+script = ExtResource("2_0rmiy")
+x_label = NodePath("HBoxContainer/XLabel")
 x_input = NodePath("HBoxContainer/XInput")
+y_label = NodePath("HBoxContainer/YLabel")
 y_input = NodePath("HBoxContainer/YInput")
 
 [node name="HBoxContainer" type="HBoxContainer" parent="." unique_id=96841244]
 layout_mode = 2
 theme_override_constants/separation = 2
 
-[node name="Label" type="Label" parent="HBoxContainer" unique_id=2095592117]
+[node name="XLabel" type="Label" parent="HBoxContainer" unique_id=2095592117]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.9062634, 0.39507174, 0.3248219, 1)
 text = "x"
@@ -37,10 +39,12 @@ text = "x"
 [node name="XInput" type="SpinBox" parent="HBoxContainer" unique_id=973043942]
 layout_mode = 2
 min_value = -100.0
-rounded = true
+step = 0.01
 allow_greater = true
 allow_lesser = true
 alignment = 2
+custom_arrow_step = 0.1
+custom_arrow_round = true
 select_all_on_focus = true
 
 [node name="Spacer" type="Control" parent="HBoxContainer" unique_id=1626839014]
@@ -52,16 +56,18 @@ layout_mode = 2
 layout_mode = 2
 theme_override_styles/separator = SubResource("StyleBoxLine_rfa5f")
 
-[node name="Label2" type="Label" parent="HBoxContainer" unique_id=683053561]
+[node name="YLabel" type="Label" parent="HBoxContainer" unique_id=683053561]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.5503686, 0.88291764, 0.37408233, 1)
 text = "y"
 
-[node name="YInput" type="SpinBox" parent="HBoxContainer" unique_id=1931814337]
+[node name="YInput" type="SpinBox" parent="HBoxContainer" unique_id=39447581]
 layout_mode = 2
 min_value = -100.0
-rounded = true
+step = 0.01
 allow_greater = true
 allow_lesser = true
 alignment = 2
+custom_arrow_step = 0.1
+custom_arrow_round = true
 select_all_on_focus = true

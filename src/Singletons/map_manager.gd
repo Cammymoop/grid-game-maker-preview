@@ -85,7 +85,7 @@ func create_plain_layer():
             floor_tile_index = tile_defs.keys()[0]
         map_layer.single_init(floor_tile_index)
     
-    emit_signal("level_size_changed")
+    level_size_changed.emit()
 
 func _get_tile_id_from_partial_name_insensitive(partial_name: String) -> int:
     partial_name = partial_name.to_lower()
@@ -125,6 +125,8 @@ func create_museum_layer(player_pos: Vector2i, tile_start: Vector2i, tile_spacin
     if tile_spacing.y > 0:
         reversed_rect.size.y *= -1
     _place_tile_museum(reversed_rect.end + tile_spacing.sign(), tile_spacing, floor_id, outer_walk_space)
+    
+    level_size_changed.emit()
 
 func _place_tile_museum(museum_start: Vector2i, museum_spacing: Vector2i, floor_id: int, outer_walk_space: int) -> Rect2i:
     if museum_spacing.x == 0: museum_spacing.x = 1
@@ -317,7 +319,7 @@ func deserialize(data: Dictionary) -> void:
     
     recreate_persistant_effects()
     
-    emit_signal("level_size_changed")
+    level_size_changed.emit()
 
 func recreate_persistant_effects() -> void:
     for effect_pos_key in map_metadata.get("persistant_effects", {}).keys():

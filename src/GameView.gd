@@ -1,12 +1,14 @@
 extends SubViewport
 
-var scale_factor = 4
+# render to an oversized subviewport and scale the resulting texture to the actual screen res for good looking but still soft interpolation
+var overscale_factor: int = 2
+
 var resolution = Vector2(384, 384)
 var intended_resolution = Vector2(384, 384)
 
 var parent_vp
 
-var update_aspect: = true
+var aspect_expand: = true
 
 var cached_pixel_scale = null
 var cached_tl_offset = null
@@ -22,33 +24,23 @@ func _ready():
 	canvas_item_default_texture_filter = Viewport.DEFAULT_CANVAS_ITEM_TEXTURE_FILTER_NEAREST
 
 	parent_vp = parent.get_viewport()
-	parent_vp.connect("size_changed", Callable(self, "rescale"))
+	parent_vp.size_changed.connect(rescale)
 	
 func set_update_aspect(new_val) -> void:
-	update_aspect = new_val
-	if update_aspect:
-		# When we are updating our own aspect ratio, scale the short side to fit the texture
-		# This is important because we are rounding up to the nearest pixel for the side that 
-		# we are extending so it's often going to be longer than the window when scaled up
-		get_parent().stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
-	else:
-		get_parent().stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	aspect_expand = new_val
+	get_parent().stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
 
 func rescale() -> void:
 	cached_pixel_scale = null
 	cached_tl_offset = null
 	
-	if update_aspect:
-		set_resolution(intended_resolution)
+	set_resolution(intended_resolution)
 
 func set_resolution(new_resolution: Vector2) -> void:
+	#get_window().min_size = Vector2i(new_resolution / 2)
 	intended_resolution = new_resolution
-	resolution = new_resolution
-	if update_aspect:
-		resolution = fit_resolution_into_aspect()
-		#var window_size = Vector2(get_window().size)
-		#prints("fitting", new_resolution, "into aspect", window_size.x/window_size.y, "result:", resolution)
-	size = resolution * scale_factor
+	resolution = fit_resolution_into_aspect(aspect_expand)
+	size = resolution * overscale_factor
 	size_2d_override = resolution
 	
 	# Let the texture rect know it needs to scale the texture again
@@ -56,7 +48,7 @@ func set_resolution(new_resolution: Vector2) -> void:
 	tex_rect.stretch_mode = TextureRect.STRETCH_KEEP
 	tex_rect.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
 
-func fit_resolution_into_aspect() -> Vector2:
+func fit_resolution_into_aspect(is_expand: bool) -> Vector2:
 	var window_size: Vector2 = Vector2(get_window().size)
 	var intended_aspect = intended_resolution.x/intended_resolution.y
 	var window_aspect = window_size.x/window_size.y
@@ -66,7 +58,7 @@ func fit_resolution_into_aspect() -> Vector2:
 		return out_res
 	
 	# window is relatively wider than intended resolution
-	if intended_aspect < window_aspect:
+	if intended_aspect < window_aspect == is_expand:
 		out_res.x = ceil(intended_resolution.y * window_aspect)
 	# window is relatively taller than intended resolution
 	else:
@@ -79,13 +71,14 @@ func get_resolution() -> Vector2:
 func get_current_pixel_scale() -> float:
 	#if cached_pixel_scale:
 		#return cached_pixel_scale
-	var window_size = get_window().size
-	return window_size.y / resolution.y
+	#var window: = get_window()
+	#var window_size = window.size
+	return get_window().size.y / resolution.y
 
 func get_viewport_tl_offset() -> Vector2:
 	#if cached_tl_offset:
 		#return cached_tl_offset
-	var window_size = get_window().size
+	var window_size = get_window().size / get_window().content_scale_factor
 	
 	var pixel_scale = get_current_pixel_scale()
 	var x_off = (window_size.x - (resolution.x*pixel_scale))/2
@@ -95,8 +88,10 @@ func get_viewport_tl_offset() -> Vector2:
 	
 
 func get_scaled_mouse_position():
-	var mouse_pos = parent_vp.get_mouse_position()
+	var mouse_pos = parent_vp.get_mouse_position() * get_window().content_scale_factor
 	#return mouse_pos
 
-	mouse_pos -= get_viewport_tl_offset()
+	#mouse_pos -= get_viewport_tl_offset()
+	#var stretch_transform = get_window().get_stretch_transform()
+	#prints("stretch transform pos:", stretch_transform.origin, "scale:", stretch_transform.x.length(), " -- ", stretch_transform)
 	return mouse_pos / get_current_pixel_scale()

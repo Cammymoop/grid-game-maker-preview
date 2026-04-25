@@ -8,7 +8,7 @@ signal request_move_to_bottom(item: Control)
 signal request_delete_others(item: Control)
 signal changed()
 
-const Vec2IInput: = preload("res://src/GameEditor/ConditionalEditor/vector_2i_input.gd")
+const Vec2IInput: = preload("res://src/GameEditor/ConditionalEditor/vector2i_input.gd")
 const BetterTextureDialog: = preload("res://src/GameEditor/BetterTextureDialog.gd")
 const ScalarValueInput: = preload("res://src/GameEditor/ConditionalEditor/scalar_value_input.gd")
 

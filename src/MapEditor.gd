@@ -87,7 +87,8 @@ func _physics_process(delta: float) -> void:
 			EntityManager.paused_visual_process(delta)
 
 func on_level_state_loaded() -> void:
-	_refresh_edited_entity_indicators()
+	if edit_mode:
+		_refresh_edited_entity_indicators()
 
 func is_holding_cursor_move() -> bool:
 	if not edit_mode or not _input_priority:

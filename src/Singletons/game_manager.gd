@@ -25,6 +25,8 @@ var quicksave_state: = {}
 var loaded_level_name: = ""
 var loaded_is_autosave: = false
 
+var is_in_level_edit_mode: = true
+
 var loaded = false
 
 var editor_live_edit_mode: = false
@@ -61,8 +63,6 @@ var builtin_default_game_definition: Dictionary = {}
 
 var pauses = {}
 
-var game_view: = Vector2(12, 12)
-
 var game_definition = {}
 
 var game_camera: Camera2D = null
@@ -80,6 +80,10 @@ enum MovementMode {
 }
 
 func _ready():
+	# Automatically use the display scaling from the OS if it's detected, because of how the gameplay display auto scales this mainly affects UI
+	var cur_screen_scale: float = DisplayServer.screen_get_scale()
+	if cur_screen_scale != get_window().content_scale_factor:
+		get_window().content_scale_factor = cur_screen_scale
 	# run _process even when the game is paused
 	process_mode = PROCESS_MODE_ALWAYS
 	cur_scene = get_tree().current_scene.name
@@ -187,10 +191,13 @@ func load_game_definition_data(definition_data: Dictionary) -> void:
 	if EntityManager.im_ready:
 		EntityManager.refresh_definition()
 	
-	if "window_width" in definition_data:
-		set_game_view(definition_data['window_width'], definition_data['window_height'])
-	else:
-		set_game_view(12, 12)
+	# compatibility
+	if "window_width" in definition_data and "window_height" in definition_data:
+		var compatibility_window_size: = Vector2(definition_data['window_width'], definition_data['window_height'])
+		set_game_view(compatibility_window_size)
+		set_game_setting("window_width", definition_data['window_width'])
+		definition_data.erase('window_width')
+		definition_data.erase('window_height')
 	
 	# Set the window size when loading a new game definition
 	rescale_window()
@@ -207,8 +214,6 @@ func get_serialized_game_definition() -> Dictionary:
 	serialized_def["textures"] = TextureManager.get_texture_spec()
 	serialized_def["entity_definitions"] = EntityManager.entity_defs.duplicate_deep()
 	serialized_def["tile_definitions"] = MapManager.tile_defs.duplicate_deep()
-	serialized_def["window_width"] = game_view.x
-	serialized_def["window_height"] = game_view.y
 	return serialized_def
 
 func get_game_setting(setting_name, default):
@@ -221,6 +226,15 @@ func set_game_setting(setting_name: String, value: Variant) -> void:
 		game_definition["game_settings"] = {}
 	game_definition["game_settings"][setting_name] = value
 	game_settings_changed.emit()
+
+func get_window_size_setting() -> Vector2:
+	return Utility.get_vector2_from_arr(get_game_setting("game_view_size", [12, 12]))
+
+func get_base_window_size() -> Vector2:
+	return get_window_size_setting() * MapManager.tile_width
+
+func set_game_view(new_game_view_size: Vector2) -> void:
+	set_game_setting("game_view_size", Utility.vector_to_list(new_game_view_size))
 
 func get_default_pixel_scale() -> float:
 	return get_game_setting("pixel_scale", 1)
@@ -564,25 +578,26 @@ func post_scene_change() -> void:
 
 func update_game_viewport() -> void:
 	var vp = Utility.get_world().get_viewport()
-	vp.update_aspect = get_game_setting("auto_aspect", true)
-	vp.set_resolution(game_view * MapManager.tile_width)
-
-func set_game_view(width, height) -> void:
-	game_view = Vector2(width, height)
+	vp.aspect_expand = get_game_setting("auto_aspect", true)
+	vp.set_resolution(get_base_window_size())
 
 func rescale_window() -> void:
+	if Engine.is_embedded_in_editor():
+		return
 	var window: = get_window()
 	if window.mode == Window.MODE_FULLSCREEN or window.mode == Window.MODE_MAXIMIZED:
+		prints("current window mode: ", window.mode)
 		return
 	
 	var available_size: Vector2i = DisplayServer.screen_get_usable_rect().size
-	var intended_size: = Vector2(game_view * MapManager.tile_width * get_default_pixel_scale())
+	var intended_size: = get_base_window_size() * get_default_pixel_scale()
 	var decoration_size: = window.get_size_with_decorations() - window.size
 	var intended_with_dec: = intended_size + Vector2(decoration_size)
 	if intended_with_dec.x > available_size.x or intended_with_dec.y > available_size.y:
 		var scale_factor: float = minf(available_size.x / intended_with_dec.x, available_size.y / intended_with_dec.y)
 		intended_size = (intended_with_dec * scale_factor).floor() - Vector2(decoration_size)
 	window.size = Vector2i(intended_size)
+
 	window.move_to_center()
 
 func toggle_pause_menu():
