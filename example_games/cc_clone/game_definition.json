@@ -1236,7 +1236,7 @@
           {
             "v": "3",
             "conditions": [
-              "basic_default.select_next_tile_after::[\"i:4\",\"i:4\",\"i:0\",false]",
+              "basic_default.select_next_tile_after::[\"i:4\",\"i:4\",\"i:0\",true]",
               "basic_default.if_entity_can_teleport_to::[\"i:1\",\"i:4\"]"
             ],
             "when true": [
