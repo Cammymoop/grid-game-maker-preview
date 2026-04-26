@@ -1,6 +1,7 @@
 extends VBoxContainer
 
 signal layers_changed
+signal layer_height_changed
 
 const FancySpriteLayerListItem: = preload("res://Scenes/GameEditor/fancy_sprite_layer_list_item.gd")
 var layer_list_item_scene: = preload("res://Scenes/GameEditor/fancy_sprite_layer_list_item.tscn")
@@ -59,6 +60,7 @@ func _append_default_layer() -> void:
 func _append_layer_info(layer_info: Dictionary) -> void:
     var layer_item: = layer_list_item_scene.instantiate()
     layer_item.changed.connect(on_layer_changed)
+    layer_item.height_changed.connect(layer_height_changed.emit)
     layer_item.request_move_relative.connect(move_layer_item_relative)
     layer_item.request_move_to_top.connect(layer_item_to_top)
     layer_item.request_move_to_bottom.connect(layer_item_to_bottom)

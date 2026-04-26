@@ -7,6 +7,7 @@ signal request_move_to_top(item: Control)
 signal request_move_to_bottom(item: Control)
 signal request_delete_others(item: Control)
 signal changed()
+signal height_changed()
 
 const Vec2IInput: = preload("res://src/GameEditor/ConditionalEditor/vector2i_input.gd")
 const BetterTextureDialog: = preload("res://src/GameEditor/BetterTextureDialog.gd")
@@ -39,6 +40,13 @@ const RotatesModeNames: Dictionary[int, String] = {
 static var rotates_modes: Dictionary[String, int] = {}
 const DEF_ROTATES_TEXT: = "rotates"
 
+const DIGITS_SOURCE_NUMBER: = 0
+const DIGITS_SOURCE_PROPERTY: = 1
+const DigitsSourceTexts: Dictionary[int, String] = {
+    DIGITS_SOURCE_NUMBER: "Number:",
+    DIGITS_SOURCE_PROPERTY: "Property:",
+}
+
 @export var empty_layer_button_icon: Texture2D
 
 @export var remove_button: ButtonContainer
@@ -50,18 +58,26 @@ const DEF_ROTATES_TEXT: = "rotates"
 @export var rotates_option: Control
 @export var rotates_mode_select: OptionButton
 @export var spin_speed_input: ScalarValueInput
+@export var offset_degrees_input: ScalarValueInput
 
 @export var digits_settings: Control
-@export var digits_pad_zeros_toggle: CheckButton
-@export var digits_max_digits_input: Range
-@export var digits_property_input: LineEdit
+@export var digits_max_digits_input: ScalarValueInput
 @export var digits_color_picker: ColorPickerButton
+@export var digits_pad_zeros_toggle: CheckButton
+@export var digits_source_selector: OptionButton
+@export var digits_number_input: ScalarValueInput
+@export var digits_property_input: LineEdit
 
-@export var visibility_option: Control
-@export var visibility_input: FuzzyAutocompleteInput
+@export var visibility_property_input: FuzzyAutocompleteInput
+@export var mod_color_input: ColorPickerButton
 
 @export var show_reorder_buttons: bool = true
 @export var enable_context_menu: bool = true
+
+
+@export var subsection_container: Control
+@export var subsection_nav_forward: ButtonContainer
+@export var subsection_nav_back: ButtonContainer
 
 var cur_offs_type: String = OFFSET_OFFSET
 
@@ -111,6 +127,14 @@ func _ready() -> void:
     Utility.opbtn_select_id(rotates_mode_select, ROTATES_ROTATES)
     rotates_mode_select.item_selected.connect(on_rotates_mode_selected)
     
+    offset_degrees_input.value_changed.connect(on_offset_degrees_changed)
+    
+    digits_source_selector.clear()
+    for source_id in DigitsSourceTexts:
+        digits_source_selector.add_item(DigitsSourceTexts[source_id], source_id)
+    Utility.opbtn_select_id(digits_source_selector, DIGITS_SOURCE_NUMBER)
+    digits_source_selector.item_selected.connect(on_digits_source_selected)
+
     spin_speed_input.value_changed.connect(on_spin_speed_changed)
     spin_speed_input.set_value(last_spinning_value)
     
@@ -122,7 +146,13 @@ func _ready() -> void:
     
     layer_image_button.pressed.connect(on_layer_image_button_pressed)
     
-    visibility_input.text_changed.connect(on_visibility_prop_changed)
+    visibility_property_input.text_changed.connect(on_visibility_prop_changed)
+    mod_color_input.color_changed.connect(on_mod_color_changed)
+    
+    subsection_nav_forward.pressed.connect(on_navigate_subsection.bind(1))
+    subsection_nav_back.pressed.connect(on_navigate_subsection.bind(-1))
+    if subsection_container.get_child_count() > 0:
+        _set_current_subsection_index(0)
 
     if layer_info and layer_info.has("mode"):
         refresh_ui()
@@ -170,16 +200,15 @@ func on_mode_selected(_index: int) -> void:
 
     if layer_info['mode'] == MODE_DIGITS:
         layer_info['pad_zeros'] = digits_pad_zeros_toggle.button_pressed
-        layer_info['max_digits'] = int(digits_max_digits_input.value)
+        layer_info['max_digits'] = int(digits_max_digits_input.get_value())
         layer_info['property'] = digits_property_input.text
-        layer_info['mod_color'] = Utility.color_string(digits_color_picker.color)
     else:
         layer_info.erase('pad_zeros')
         layer_info.erase('max_digits')
         layer_info.erase('property')
 
-    changed.emit()
     refresh_ui()
+    changed.emit()
 
 func _set_default_texture_and_index() -> void:
     if not 'texture' in layer_info:
@@ -217,17 +246,27 @@ func on_offset_changed(new_offset: Vector2i) -> void:
 
 func refresh_ui() -> void:
     update_offset_vec_input()
-    visibility_input.set_value(layer_info.get("when_property", ""))
+    visibility_property_input.set_value(layer_info.get("when_property", ""))
 
     set_mode_picker_value(layer_info['mode'])
     if layer_info['mode'] == MODE_EMPTY:
         layer_image_button.disabled = true
     elif layer_info['mode'] == MODE_DIGITS:
         digits_pad_zeros_toggle.set_pressed_no_signal(layer_info.get("pad_zeros", true))
-        digits_max_digits_input.set_value_no_signal(layer_info.get("max_digits", 1))
+        digits_max_digits_input.set_value(layer_info.get("max_digits", 1))
         
-        digits_property_input.set_value(layer_info.get("property", ""))
+        var digits_source: = DIGITS_SOURCE_NUMBER
+        if layer_info.has("property"):
+            digits_source = DIGITS_SOURCE_PROPERTY
+        Utility.opbtn_select_id(digits_source_selector, digits_source)
+
+        if digits_source == DIGITS_SOURCE_NUMBER:
+            digits_number_input.set_value(layer_info.get("digits_number", 1))
+        elif digits_source == DIGITS_SOURCE_PROPERTY:
+            digits_property_input.set_value(layer_info.get("property", ""))
         digits_color_picker.color = Utility.get_dict_color(layer_info, "mod_color", Color.WHITE)
+    
+    mod_color_input.color = Utility.get_dict_color(layer_info, "mod_color", Color.WHITE)
 
     rotates_mode_select.visible = layer_info['mode'] != MODE_EMPTY
     if layer_info['mode'] != MODE_EMPTY:
@@ -235,7 +274,7 @@ func refresh_ui() -> void:
         Utility.opbtn_select_id(rotates_mode_select, cur_rotates_mode)
         refresh_spin_speed_input()
     
-    visibility_option.visible = layer_info['mode'] != MODE_EMPTY
+    offset_degrees_input.set_value(layer_info.get("offset_degrees", 0))
     
     digits_settings.visible = layer_info['mode'] == MODE_DIGITS
     layer_image_button.visible = layer_info['mode'] != MODE_DIGITS
@@ -321,6 +360,7 @@ func _layer_mode_index(layer_mode: String) -> int:
             return i
     return -1
 
+
 func on_digits_pad_zeros_toggled(is_pad_zeros: bool) -> void:
     if not layer_info["mode"] == MODE_DIGITS:
         return
@@ -333,17 +373,45 @@ func on_digits_max_digits_changed(new_value: float) -> void:
     layer_info['max_digits'] = int(new_value)
     changed.emit()
 
-func on_digits_property_changed(prop_name: String) -> void:
+func on_digits_property_changed(_prop_name: String) -> void:
     if not layer_info["mode"] == MODE_DIGITS:
         return
-    layer_info['property'] = prop_name
+    _update_digits_source_from_selector()
     changed.emit()
+
+func _update_digits_source_from_selector() -> void:
+    var current_digits_source: = _get_digits_source_from_selector()
+    if current_digits_source == DIGITS_SOURCE_PROPERTY:
+        layer_info['property'] = digits_property_input.text
+        layer_info.erase('digits_number')
+    elif current_digits_source == DIGITS_SOURCE_NUMBER:
+        layer_info['digits_number'] = int(digits_number_input.get_value())
+        layer_info.erase('property')
+
+func _get_digits_source_from_selector() -> int:
+    return digits_source_selector.get_item_id(digits_source_selector.selected)
+    
+func on_digits_source_selected(index: int) -> void:
+    var new_source_id: = digits_source_selector.get_item_id(index)
+    digits_number_input.disabled = new_source_id == DIGITS_SOURCE_PROPERTY
+    digits_property_input.disabled = new_source_id == DIGITS_SOURCE_NUMBER
+    _update_digits_source_from_selector()
 
 func on_digits_color_changed(new_color: Color) -> void:
     if not layer_info["mode"] == MODE_DIGITS:
         return
-    layer_info['mod_color'] = Utility.color_string(new_color)
+    _on_mod_color_picked(new_color)
+
+func on_mod_color_changed(new_color: Color) -> void:
+    _on_mod_color_picked(new_color)
+
+func _on_mod_color_picked(new_color: Color) -> void:
+    if new_color == Color.WHITE:
+        layer_info.erase('mod_color')
+    else:
+        layer_info['mod_color'] = Utility.color_string(new_color)
     changed.emit()
+
 
 func on_visibility_prop_changed(prop_name: String) -> void:
     layer_info['when_property'] = prop_name
@@ -368,4 +436,37 @@ func on_spin_speed_changed(new_value: float) -> void:
     if _current_rotates_mode() != ROTATES_SPINS:
         return
     layer_info['spinning'] = new_value
+    changed.emit()
+
+func _get_current_subsection_index() -> int:
+    for subsection in subsection_container.get_children():
+        if subsection.visible:
+            return subsection.get_index()
+    return -1
+
+func _set_current_subsection_index(index: int) -> void:
+    for i in subsection_container.get_child_count():
+        subsection_container.get_child(i).visible = i == index
+    subsection_nav_back.disabled = index == 0
+    subsection_nav_forward.disabled = index == subsection_container.get_child_count() - 1
+
+func on_navigate_subsection(direction: int) -> void:
+    var num_subsections: = subsection_container.get_child_count()
+    if num_subsections == 0:
+        return
+    var new_index: = clampi(_get_current_subsection_index() + direction, 0, num_subsections - 1)
+    _set_current_subsection_index(new_index)
+    height_changed.emit()
+
+func on_offset_degrees_changed(new_value: float) -> void:
+    var wrapped_value: = fposmod(new_value, 360)
+    if wrapped_value == 360:
+        wrapped_value = 0
+    if wrapped_value != new_value:
+        offset_degrees_input.set_value(wrapped_value)
+
+    if new_value == 0:
+        layer_info.erase('offset_degrees')
+    else:
+        layer_info['offset_degrees'] = new_value
     changed.emit()

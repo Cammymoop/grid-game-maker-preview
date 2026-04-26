@@ -5,12 +5,34 @@
 [ext_resource type="Script" uid="uid://mmq6q1nx8xn" path="res://Scenes/GameEditor/fancy_sprite_layer_list_item.gd" id="1_ya7sx"]
 [ext_resource type="Texture2D" uid="uid://clvyilalbfs0l" path="res://assets/img/cursor_delete.png" id="2_x76fy"]
 [ext_resource type="Script" uid="uid://bq446sgdivroo" path="res://ButtonContainer.gd" id="2_ya7sx"]
-[ext_resource type="Texture2D" uid="uid://tpslcq3ccosh" path="res://assets/img/button_icons/up_small.png" id="3_60pnq"]
 [ext_resource type="Texture2D" uid="uid://b6lj5qghhre2t" path="res://assets/img/tiles.png" id="3_jxcnp"]
 [ext_resource type="PackedScene" uid="uid://cemds60k8ytal" path="res://Scenes/UI/icon_button.tscn" id="4_60pnq"]
-[ext_resource type="Texture2D" uid="uid://c1h0arduxil1j" path="res://assets/img/button_icons/down_small.png" id="4_x76fy"]
+[ext_resource type="Texture2D" uid="uid://byrc346tgh55x" path="res://assets/img/button_icons/up_layer_small.png" id="5_bytot"]
+[ext_resource type="Texture2D" uid="uid://c0i7dg7wf45sj" path="res://assets/img/button_icons/down_layer_small.png" id="6_ppigu"]
 [ext_resource type="PackedScene" uid="uid://bleyoj5f36kfy" path="res://Scenes/GameEditor/ConditionalEditor/scalar_value_input.tscn" id="7_101gm"]
 [ext_resource type="Script" uid="uid://di2eyvsiqwsee" path="res://src/GameEditor/ConditionalEditor/PropertyInput.gd" id="7_d3nlp"]
+[ext_resource type="Texture2D" uid="uid://c8uoricgpavvk" path="res://assets/img/button_icons/next_small.png" id="7_fo32p"]
+[ext_resource type="StyleBox" uid="uid://bjfdm7g0ured8" path="res://assets/ui/button_styles/thin_button_disabled.tres" id="7_wveom"]
+[ext_resource type="StyleBox" uid="uid://dwpyvi0mnhxyx" path="res://assets/ui/button_styles/thin_button_hover.tres" id="8_5xfb3"]
+[ext_resource type="Texture2D" uid="uid://dbewldhewludm" path="res://assets/img/button_icons/prev_small.png" id="8_k3uxh"]
+[ext_resource type="StyleBox" uid="uid://cu78oa72kple8" path="res://assets/ui/button_styles/thin_button_normal.tres" id="9_vov2b"]
+[ext_resource type="StyleBox" uid="uid://cf4b0mxp54ien" path="res://assets/ui/button_styles/thin_button_pressed.tres" id="10_jq3ql"]
+
+[sub_resource type="Theme" id="Theme_tghr5"]
+Button/font_sizes/font_size = 14
+Button/styles/disabled = ExtResource("7_wveom")
+Button/styles/hover = ExtResource("8_5xfb3")
+Button/styles/normal = ExtResource("9_vov2b")
+Button/styles/pressed = ExtResource("10_jq3ql")
+
+[sub_resource type="StyleBoxLine" id="StyleBoxLine_wveom"]
+content_margin_left = 0.0
+content_margin_top = 4.0
+content_margin_right = 0.0
+content_margin_bottom = 4.0
+color = Color(0.334955, 0.31812483, 0.44406027, 1)
+grow_end = 3.0
+vertical = true
 
 [sub_resource type="Theme" id="Theme_x76fy"]
 LineEdit/constants/minimum_character_width = 2
@@ -19,7 +41,7 @@ LineEdit/constants/minimum_character_width = 2
 atlas = ExtResource("3_jxcnp")
 region = Rect2(0, 64, 32, 32)
 
-[node name="FancySpriteLayerListItem" type="MarginContainer" unique_id=1110623540 node_paths=PackedStringArray("remove_button", "layer_image_button", "offset_type_selector", "offset_input", "mode_selector", "reorder_buttons", "rotates_option", "rotates_mode_select", "spin_speed_input", "digits_settings", "digits_pad_zeros_toggle", "digits_max_digits_input", "digits_property_input", "digits_color_picker", "visibility_option", "visibility_input")]
+[node name="FancySpriteLayerListItem" type="MarginContainer" unique_id=1110623540 node_paths=PackedStringArray("remove_button", "layer_image_button", "offset_type_selector", "offset_input", "mode_selector", "reorder_buttons", "rotates_option", "rotates_mode_select", "spin_speed_input", "offset_degrees_input", "digits_settings", "digits_max_digits_input", "digits_color_picker", "digits_pad_zeros_toggle", "digits_source_selector", "digits_number_input", "digits_property_input", "visibility_property_input", "mod_color_input", "subsection_container", "subsection_nav_forward", "subsection_nav_back")]
 offset_right = 503.0
 offset_bottom = 75.0
 theme = ExtResource("1_pj4t0")
@@ -31,37 +53,43 @@ script = ExtResource("1_ya7sx")
 empty_layer_button_icon = ExtResource("2_x76fy")
 remove_button = NodePath("HBoxContainer/RemoveLayerButton")
 layer_image_button = NodePath("HBoxContainer/PanelContainer/HBoxContainer/HBoxContainer/LayerImageButton")
-offset_type_selector = NodePath("HBoxContainer/PanelContainer/HBoxContainer/VBoxContainer/HBoxContainer2/OffsetTypeSelect")
-offset_input = NodePath("HBoxContainer/PanelContainer/HBoxContainer/VBoxContainer/HBoxContainer2/OffsetInput")
-mode_selector = NodePath("HBoxContainer/PanelContainer/HBoxContainer/VBoxContainer/HBoxContainer/HBoxContainer2/OptionButton")
-reorder_buttons = NodePath("HBoxContainer/VBoxContainer2")
-rotates_option = NodePath("HBoxContainer/PanelContainer/HBoxContainer/VBoxContainer/HBoxContainer/RotatesOption")
-rotates_mode_select = NodePath("HBoxContainer/PanelContainer/HBoxContainer/VBoxContainer/HBoxContainer/RotatesOption/RotatesModeSelect")
-spin_speed_input = NodePath("HBoxContainer/PanelContainer/HBoxContainer/VBoxContainer/HBoxContainer/RotatesOption/SpinSpeedInput")
+offset_type_selector = NodePath("HBoxContainer/PanelContainer/HBoxContainer/SubsectionContainer/MainSubsection/VBoxContainer/HBoxContainer2/OffsetTypeSelect")
+offset_input = NodePath("HBoxContainer/PanelContainer/HBoxContainer/SubsectionContainer/MainSubsection/VBoxContainer/HBoxContainer2/OffsetInput")
+mode_selector = NodePath("HBoxContainer/PanelContainer/HBoxContainer/SubsectionContainer/MainSubsection/VBoxContainer/HBoxContainer/HBoxContainer2/OptionButton")
+reorder_buttons = NodePath("HBoxContainer/OrderButtons")
+rotates_option = NodePath("HBoxContainer/PanelContainer/HBoxContainer/SubsectionContainer/MainSubsection/VBoxContainer2/RotatesOption")
+rotates_mode_select = NodePath("HBoxContainer/PanelContainer/HBoxContainer/SubsectionContainer/MainSubsection/VBoxContainer2/RotatesOption/RotatesModeSelect")
+spin_speed_input = NodePath("HBoxContainer/PanelContainer/HBoxContainer/SubsectionContainer/MainSubsection/VBoxContainer2/RotatesOption/SpinSpeedInput")
+offset_degrees_input = NodePath("HBoxContainer/PanelContainer/HBoxContainer/SubsectionContainer/MainSubsection/VBoxContainer2/AngleOffsetOption/OffsetDegreesInput")
 digits_settings = NodePath("HBoxContainer/PanelContainer/HBoxContainer/HBoxContainer/DigitSettings")
-digits_pad_zeros_toggle = NodePath("HBoxContainer/PanelContainer/HBoxContainer/HBoxContainer/DigitSettings/HBoxContainer/PadZerosToggle")
-digits_max_digits_input = NodePath("HBoxContainer/PanelContainer/HBoxContainer/HBoxContainer/DigitSettings/HBoxContainer2/DigitsInput")
-digits_property_input = NodePath("HBoxContainer/PanelContainer/HBoxContainer/HBoxContainer/DigitSettings/HBoxContainer3/DigitPropertyInput")
+digits_max_digits_input = NodePath("HBoxContainer/PanelContainer/HBoxContainer/HBoxContainer/DigitSettings/HBoxContainer2/DigitCountInput")
 digits_color_picker = NodePath("HBoxContainer/PanelContainer/HBoxContainer/HBoxContainer/DigitSettings/HBoxContainer4/DigitColorPicker")
-visibility_option = NodePath("HBoxContainer/PanelContainer/HBoxContainer/HBoxContainer/VisibilityOption")
-visibility_input = NodePath("HBoxContainer/PanelContainer/HBoxContainer/HBoxContainer/VisibilityOption/VisPropInput")
+digits_pad_zeros_toggle = NodePath("HBoxContainer/PanelContainer/HBoxContainer/HBoxContainer/DigitSettings/HBoxContainer/PadZerosToggle")
+digits_source_selector = NodePath("HBoxContainer/PanelContainer/HBoxContainer/HBoxContainer/DigitSettings/HBoxContainer3/DigitsSourcePicker")
+digits_number_input = NodePath("HBoxContainer/PanelContainer/HBoxContainer/HBoxContainer/DigitSettings/HBoxContainer3/DigitNumberInput")
+digits_property_input = NodePath("HBoxContainer/PanelContainer/HBoxContainer/HBoxContainer/DigitSettings/HBoxContainer3/DigitPropertyInput")
+visibility_property_input = NodePath("HBoxContainer/PanelContainer/HBoxContainer/SubsectionContainer/VisibilitySection/VisibilityProp/VisPropInput")
+mod_color_input = NodePath("HBoxContainer/PanelContainer/HBoxContainer/SubsectionContainer/VisibilitySection/VBoxContainer/HBoxContainer/ModColorPicker")
+subsection_container = NodePath("HBoxContainer/PanelContainer/HBoxContainer/SubsectionContainer")
+subsection_nav_forward = NodePath("HBoxContainer/PanelContainer/HBoxContainer/SectionNavButtons/NextSubsection")
+subsection_nav_back = NodePath("HBoxContainer/PanelContainer/HBoxContainer/SectionNavButtons/PrevSubsection")
 
 [node name="HBoxContainer" type="HBoxContainer" parent="." unique_id=209136135]
 layout_mode = 2
 
-[node name="VBoxContainer2" type="VBoxContainer" parent="HBoxContainer" unique_id=515207632]
+[node name="OrderButtons" type="VBoxContainer" parent="HBoxContainer" unique_id=515207632]
 layout_mode = 2
 alignment = 1
 
-[node name="UpButton" parent="HBoxContainer/VBoxContainer2" unique_id=451892711 instance=ExtResource("4_60pnq")]
+[node name="UpButton" parent="HBoxContainer/OrderButtons" unique_id=451892711 instance=ExtResource("4_60pnq")]
 layout_mode = 2
 tooltip_text = "move up"
-icon = ExtResource("3_60pnq")
+icon = ExtResource("5_bytot")
 
-[node name="DownButton" parent="HBoxContainer/VBoxContainer2" unique_id=1049922120 instance=ExtResource("4_60pnq")]
+[node name="DownButton" parent="HBoxContainer/OrderButtons" unique_id=1049922120 instance=ExtResource("4_60pnq")]
 layout_mode = 2
 tooltip_text = "move down"
-icon = ExtResource("4_x76fy")
+icon = ExtResource("6_ppigu")
 
 [node name="PanelContainer" type="PanelContainer" parent="HBoxContainer" unique_id=1362961099]
 layout_mode = 2
@@ -71,23 +99,44 @@ mouse_filter = 1
 [node name="HBoxContainer" type="HBoxContainer" parent="HBoxContainer/PanelContainer" unique_id=396024966]
 layout_mode = 2
 
-[node name="VBoxContainer" type="VBoxContainer" parent="HBoxContainer/PanelContainer/HBoxContainer" unique_id=860413154]
+[node name="SectionNavButtons" type="VBoxContainer" parent="HBoxContainer/PanelContainer/HBoxContainer" unique_id=1512539942]
+layout_mode = 2
+theme = SubResource("Theme_tghr5")
+alignment = 1
+
+[node name="NextSubsection" parent="HBoxContainer/PanelContainer/HBoxContainer/SectionNavButtons" unique_id=1857802207 instance=ExtResource("4_60pnq")]
+layout_mode = 2
+icon = ExtResource("7_fo32p")
+
+[node name="PrevSubsection" parent="HBoxContainer/PanelContainer/HBoxContainer/SectionNavButtons" unique_id=99523593 instance=ExtResource("4_60pnq")]
+layout_mode = 2
+icon = ExtResource("8_k3uxh")
+disabled = true
+
+[node name="SubsectionContainer" type="HBoxContainer" parent="HBoxContainer/PanelContainer/HBoxContainer" unique_id=1507851791]
+layout_mode = 2
+size_flags_horizontal = 3
+alignment = 1
+
+[node name="MainSubsection" type="HBoxContainer" parent="HBoxContainer/PanelContainer/HBoxContainer/SubsectionContainer" unique_id=1247727667]
+layout_mode = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="HBoxContainer/PanelContainer/HBoxContainer/SubsectionContainer/MainSubsection" unique_id=860413154]
 layout_mode = 2
 alignment = 1
 
-[node name="HBoxContainer" type="HFlowContainer" parent="HBoxContainer/PanelContainer/HBoxContainer/VBoxContainer" unique_id=224716595]
+[node name="HBoxContainer" type="HBoxContainer" parent="HBoxContainer/PanelContainer/HBoxContainer/SubsectionContainer/MainSubsection/VBoxContainer" unique_id=1551424300]
 layout_mode = 2
-alignment = 1
 
-[node name="HBoxContainer2" type="HBoxContainer" parent="HBoxContainer/PanelContainer/HBoxContainer/VBoxContainer/HBoxContainer" unique_id=1109487204]
+[node name="HBoxContainer2" type="HBoxContainer" parent="HBoxContainer/PanelContainer/HBoxContainer/SubsectionContainer/MainSubsection/VBoxContainer/HBoxContainer" unique_id=1109487204]
 layout_mode = 2
 theme_override_constants/separation = 2
 
-[node name="Label" type="Label" parent="HBoxContainer/PanelContainer/HBoxContainer/VBoxContainer/HBoxContainer/HBoxContainer2" unique_id=805874057]
+[node name="Label" type="Label" parent="HBoxContainer/PanelContainer/HBoxContainer/SubsectionContainer/MainSubsection/VBoxContainer/HBoxContainer/HBoxContainer2" unique_id=805874057]
 layout_mode = 2
 text = "Mode:"
 
-[node name="OptionButton" type="OptionButton" parent="HBoxContainer/PanelContainer/HBoxContainer/VBoxContainer/HBoxContainer/HBoxContainer2" unique_id=911801953]
+[node name="OptionButton" type="OptionButton" parent="HBoxContainer/PanelContainer/HBoxContainer/SubsectionContainer/MainSubsection/VBoxContainer/HBoxContainer/HBoxContainer2" unique_id=911801953]
 layout_mode = 2
 size_flags_vertical = 4
 mouse_filter = 1
@@ -96,41 +145,11 @@ item_count = 1
 popup/item_0/text = "normal"
 popup/item_0/id = 0
 
-[node name="RotatesToggle" type="CheckButton" parent="HBoxContainer/PanelContainer/HBoxContainer/VBoxContainer/HBoxContainer" unique_id=974809]
-visible = false
+[node name="HBoxContainer2" type="HBoxContainer" parent="HBoxContainer/PanelContainer/HBoxContainer/SubsectionContainer/MainSubsection/VBoxContainer" unique_id=1726006408]
 layout_mode = 2
-mouse_filter = 1
-text = "Rotates:"
+size_flags_horizontal = 4
 
-[node name="RotatesOption" type="HBoxContainer" parent="HBoxContainer/PanelContainer/HBoxContainer/VBoxContainer/HBoxContainer" unique_id=1700984186]
-layout_mode = 2
-theme_override_constants/separation = 3
-
-[node name="RotatesModeSelect" type="OptionButton" parent="HBoxContainer/PanelContainer/HBoxContainer/VBoxContainer/HBoxContainer/RotatesOption" unique_id=788272724]
-layout_mode = 2
-selected = 0
-item_count = 3
-popup/item_0/text = "rotates"
-popup/item_0/id = 0
-popup/item_1/text = "fixed"
-popup/item_1/id = 1
-popup/item_2/text = "spins"
-popup/item_2/id = 2
-
-[node name="SpinSpeedInput" parent="HBoxContainer/PanelContainer/HBoxContainer/VBoxContainer/HBoxContainer/RotatesOption" unique_id=1458729988 instance=ExtResource("7_101gm")]
-visible = false
-z_index = 1
-layout_mode = 2
-tooltip_text = "Revolutions per second. Positive = Clockwise"
-default_value = 2.0
-min_value = -50.0
-max_value = 50.0
-
-[node name="HBoxContainer2" type="HBoxContainer" parent="HBoxContainer/PanelContainer/HBoxContainer/VBoxContainer" unique_id=1726006408]
-layout_mode = 2
-size_flags_horizontal = 0
-
-[node name="OffsetTypeSelect" type="OptionButton" parent="HBoxContainer/PanelContainer/HBoxContainer/VBoxContainer/HBoxContainer2" unique_id=895392219]
+[node name="OffsetTypeSelect" type="OptionButton" parent="HBoxContainer/PanelContainer/HBoxContainer/SubsectionContainer/MainSubsection/VBoxContainer/HBoxContainer2" unique_id=895392219]
 layout_mode = 2
 size_flags_vertical = 4
 selected = 0
@@ -142,36 +161,121 @@ popup/item_1/id = 1
 popup/item_2/text = "Both"
 popup/item_2/id = 2
 
-[node name="Label" type="Label" parent="HBoxContainer/PanelContainer/HBoxContainer/VBoxContainer/HBoxContainer2" unique_id=273727419]
+[node name="Label" type="Label" parent="HBoxContainer/PanelContainer/HBoxContainer/SubsectionContainer/MainSubsection/VBoxContainer/HBoxContainer2" unique_id=273727419]
 layout_mode = 2
 text = ":"
 
-[node name="OffsetInput" parent="HBoxContainer/PanelContainer/HBoxContainer/VBoxContainer/HBoxContainer2" unique_id=2047234622 instance=ExtResource("1_s7nl1")]
+[node name="OffsetInput" parent="HBoxContainer/PanelContainer/HBoxContainer/SubsectionContainer/MainSubsection/VBoxContainer/HBoxContainer2" unique_id=2047234622 instance=ExtResource("1_s7nl1")]
 layout_mode = 2
 
-[node name="HBoxContainer" type="HBoxContainer" parent="HBoxContainer/PanelContainer/HBoxContainer" unique_id=642636696]
+[node name="VBoxContainer2" type="VBoxContainer" parent="HBoxContainer/PanelContainer/HBoxContainer/SubsectionContainer/MainSubsection" unique_id=633439951]
 layout_mode = 2
-size_flags_horizontal = 3
-theme_override_constants/separation = 2
-alignment = 2
-
-[node name="VisibilityOption" type="VBoxContainer" parent="HBoxContainer/PanelContainer/HBoxContainer/HBoxContainer" unique_id=825182032]
-custom_minimum_size = Vector2(76, 0)
-layout_mode = 2
-size_flags_horizontal = 3
 alignment = 1
 
-[node name="Label" type="Label" parent="HBoxContainer/PanelContainer/HBoxContainer/HBoxContainer/VisibilityOption" unique_id=808575088]
+[node name="RotatesOption" type="HBoxContainer" parent="HBoxContainer/PanelContainer/HBoxContainer/SubsectionContainer/MainSubsection/VBoxContainer2" unique_id=1700984186]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 3
+
+[node name="RotatesModeSelect" type="OptionButton" parent="HBoxContainer/PanelContainer/HBoxContainer/SubsectionContainer/MainSubsection/VBoxContainer2/RotatesOption" unique_id=788272724]
+layout_mode = 2
+selected = 0
+item_count = 3
+popup/item_0/text = "rotates"
+popup/item_0/id = 0
+popup/item_1/text = "fixed"
+popup/item_1/id = 1
+popup/item_2/text = "spins"
+popup/item_2/id = 2
+
+[node name="SpinSpeedInput" parent="HBoxContainer/PanelContainer/HBoxContainer/SubsectionContainer/MainSubsection/VBoxContainer2/RotatesOption" unique_id=1458729988 instance=ExtResource("7_101gm")]
+visible = false
+z_index = 1
+layout_mode = 2
+tooltip_text = "Revolutions per second. Positive = Clockwise"
+default_value = 2.0
+min_value = -50.0
+max_value = 50.0
+
+[node name="AngleOffsetOption" type="HBoxContainer" parent="HBoxContainer/PanelContainer/HBoxContainer/SubsectionContainer/MainSubsection/VBoxContainer2" unique_id=1874813944]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="HBoxContainer/PanelContainer/HBoxContainer/SubsectionContainer/MainSubsection/VBoxContainer2/AngleOffsetOption" unique_id=2122565688]
+layout_mode = 2
+text = "Angle Offset:"
+
+[node name="OffsetDegreesInput" parent="HBoxContainer/PanelContainer/HBoxContainer/SubsectionContainer/MainSubsection/VBoxContainer2/AngleOffsetOption" unique_id=880956066 instance=ExtResource("7_101gm")]
+custom_minimum_size = Vector2(60, 0)
+layout_mode = 2
+is_int_type = true
+max_value = 360.0
+custom_step = true
+
+[node name="Value" parent="HBoxContainer/PanelContainer/HBoxContainer/SubsectionContainer/MainSubsection/VBoxContainer2/AngleOffsetOption/OffsetDegreesInput" index="0" unique_id=1193418551]
+allow_greater = true
+allow_lesser = true
+suffix = "°"
+
+[node name="VisibilitySection" type="HBoxContainer" parent="HBoxContainer/PanelContainer/HBoxContainer/SubsectionContainer" unique_id=1756168412]
+visible = false
+layout_mode = 2
+
+[node name="VisibilityProp" type="VBoxContainer" parent="HBoxContainer/PanelContainer/HBoxContainer/SubsectionContainer/VisibilitySection" unique_id=825182032]
+custom_minimum_size = Vector2(76, 0)
+layout_mode = 2
+alignment = 1
+
+[node name="Label" type="Label" parent="HBoxContainer/PanelContainer/HBoxContainer/SubsectionContainer/VisibilitySection/VisibilityProp" unique_id=808575088]
 layout_mode = 2
 theme_override_constants/line_spacing = 1
 theme_override_font_sizes/font_size = 12
-text = "Visibility
-Prop:"
+text = "Visibility Property:"
 horizontal_alignment = 1
 
-[node name="VisPropInput" type="LineEdit" parent="HBoxContainer/PanelContainer/HBoxContainer/HBoxContainer/VisibilityOption" unique_id=1000030449]
+[node name="VisPropInput" type="LineEdit" parent="HBoxContainer/PanelContainer/HBoxContainer/SubsectionContainer/VisibilitySection/VisibilityProp" unique_id=1000030449]
+custom_minimum_size = Vector2(180, 0)
 layout_mode = 2
 script = ExtResource("7_d3nlp")
+override_default_min_size = Vector2(180, -1)
+
+[node name="VBoxContainer" type="VBoxContainer" parent="HBoxContainer/PanelContainer/HBoxContainer/SubsectionContainer/VisibilitySection" unique_id=2067204801]
+layout_mode = 2
+alignment = 1
+
+[node name="HBoxContainer" type="HBoxContainer" parent="HBoxContainer/PanelContainer/HBoxContainer/SubsectionContainer/VisibilitySection/VBoxContainer" unique_id=499940092]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="HBoxContainer/PanelContainer/HBoxContainer/SubsectionContainer/VisibilitySection/VBoxContainer/HBoxContainer" unique_id=300957757]
+layout_mode = 2
+text = "Modify Color:"
+
+[node name="ModColorPicker" type="ColorPickerButton" parent="HBoxContainer/PanelContainer/HBoxContainer/SubsectionContainer/VisibilitySection/VBoxContainer/HBoxContainer" unique_id=1409117670]
+custom_minimum_size = Vector2(32, 28)
+layout_mode = 2
+color = Color(1, 1, 1, 1)
+edit_intensity = false
+
+[node name="Section" type="VBoxContainer" parent="HBoxContainer/PanelContainer/HBoxContainer/SubsectionContainer" unique_id=1296096512]
+visible = false
+custom_minimum_size = Vector2(76, 0)
+layout_mode = 2
+alignment = 1
+
+[node name="Label" type="Label" parent="HBoxContainer/PanelContainer/HBoxContainer/SubsectionContainer/Section" unique_id=1230763582]
+layout_mode = 2
+theme_override_constants/line_spacing = 1
+theme_override_font_sizes/font_size = 12
+text = "Visibility Property:"
+horizontal_alignment = 1
+
+[node name="VSeparator" type="VSeparator" parent="HBoxContainer/PanelContainer/HBoxContainer" unique_id=71806959]
+layout_mode = 2
+theme_override_styles/separator = SubResource("StyleBoxLine_wveom")
+
+[node name="HBoxContainer" type="HBoxContainer" parent="HBoxContainer/PanelContainer/HBoxContainer" unique_id=642636696]
+layout_mode = 2
+theme_override_constants/separation = 2
+alignment = 2
 
 [node name="DigitSettings" type="HFlowContainer" parent="HBoxContainer/PanelContainer/HBoxContainer/HBoxContainer" unique_id=897502454]
 visible = false
@@ -186,7 +290,17 @@ layout_mode = 2
 layout_mode = 2
 text = "Digits:"
 
-[node name="DigitsInput" type="SpinBox" parent="HBoxContainer/PanelContainer/HBoxContainer/HBoxContainer/DigitSettings/HBoxContainer2" unique_id=371833828]
+[node name="DigitCountInput" parent="HBoxContainer/PanelContainer/HBoxContainer/HBoxContainer/DigitSettings/HBoxContainer2" unique_id=472280868 instance=ExtResource("7_101gm")]
+layout_mode = 2
+size_flags_vertical = 4
+is_int_type = true
+default_value = 1.0
+min_value = 1.0
+max_value = 20.0
+custom_step = true
+
+[node name="DigitsInput_" type="SpinBox" parent="HBoxContainer/PanelContainer/HBoxContainer/HBoxContainer/DigitSettings/HBoxContainer2" unique_id=371833828]
+visible = false
 layout_mode = 2
 theme = SubResource("Theme_x76fy")
 min_value = 1.0
@@ -215,17 +329,31 @@ layout_mode = 2
 layout_mode = 2
 mouse_filter = 1
 button_pressed = true
-text = "Leading 0s:"
+text = "Show Leading 0s:"
 
 [node name="HBoxContainer3" type="HBoxContainer" parent="HBoxContainer/PanelContainer/HBoxContainer/HBoxContainer/DigitSettings" unique_id=83345334]
 layout_mode = 2
 size_flags_horizontal = 3
 
+[node name="DigitsSourcePicker" type="OptionButton" parent="HBoxContainer/PanelContainer/HBoxContainer/HBoxContainer/DigitSettings/HBoxContainer3" unique_id=704370275]
+layout_mode = 2
+selected = 0
+item_count = 2
+popup/item_0/text = "Number:"
+popup/item_0/id = 0
+popup/item_1/text = "Property:"
+popup/item_1/id = 1
+
+[node name="DigitNumberInput" parent="HBoxContainer/PanelContainer/HBoxContainer/HBoxContainer/DigitSettings/HBoxContainer3" unique_id=460676186 instance=ExtResource("7_101gm")]
+layout_mode = 2
+
 [node name="Label" type="Label" parent="HBoxContainer/PanelContainer/HBoxContainer/HBoxContainer/DigitSettings/HBoxContainer3" unique_id=1406306363]
+visible = false
 layout_mode = 2
 text = "Property:"
 
 [node name="DigitPropertyInput" type="LineEdit" parent="HBoxContainer/PanelContainer/HBoxContainer/HBoxContainer/DigitSettings/HBoxContainer3" unique_id=249245980]
+visible = false
 custom_minimum_size = Vector2(100, 0)
 layout_mode = 2
 size_flags_horizontal = 3
@@ -262,5 +390,7 @@ stretch_mode = 5
 layout_mode = 2
 tooltip_text = "remove layer"
 
-[node name="Control" type="Control" parent="HBoxContainer" unique_id=519738425]
+[node name="Spacer" type="Control" parent="HBoxContainer" unique_id=519738425]
 layout_mode = 2
+
+[editable path="HBoxContainer/PanelContainer/HBoxContainer/SubsectionContainer/MainSubsection/VBoxContainer2/AngleOffsetOption/OffsetDegreesInput"]

@@ -324,6 +324,11 @@ func create_and_add_nodes_for_layer(layer_info: Dictionary, layer_index: int) ->
                 set_digit_display_number.call_deferred(prop_val, digit_display)
             else:
                 set_digit_display_number.call_deferred(layer_info.get("preview_number", 0), digit_display)
+        else:
+            set_digit_display_number.call_deferred(layer_info.get("digits_number", 1), digit_display)
+    
+    var offset_degrees: float = layer_info.get("offset_degrees", 0)
+    main_layer_node.set_meta("offset_degrees", offset_degrees)
     
     if layer_info.get("when_property", ""):
         var when_property_name: String = layer_info["when_property"]
@@ -337,7 +342,9 @@ func create_and_add_nodes_for_layer(layer_info: Dictionary, layer_index: int) ->
         else:
             _add_prop_upate_callable(when_property_name, show_hide_layer.bind(main_layer_node))
 
-    main_layer_node.modulate = Utility.get_dict_color(layer_info, "mod_color", Color.WHITE)
+    var base_mod_color: Color = Utility.get_dict_color(layer_info, "mod_color", Color.WHITE)
+    main_layer_node.set_meta("base_mod_color", base_mod_color)
+    main_layer_node.modulate = base_mod_color
     
     var layer_offset: Vector2 = Utility.get_vector2_from_arr(layer_info.get("offset", [0,0]))
     var layer_pivot_offset: Vector2 = Utility.get_vector2_from_arr(layer_info.get("pivot", [0,0]))
@@ -346,13 +353,16 @@ func create_and_add_nodes_for_layer(layer_info: Dictionary, layer_index: int) ->
         var relative_offset: Vector2 = layer_offset - layer_pivot_offset
         if is_masked:
             main_layer_node.position = layer_pivot_offset
-            main_layer_node.offset = relative_offset
+            var rotated_layer_offset: = relative_offset.rotated(-deg_to_rad(offset_degrees))
+            main_layer_node.offset = rotated_layer_offset
         else:
             var pivot_node: Node2D = Node2D.new()
             pivot_node.add_child(main_layer_node)
             main_layer_node.position = relative_offset
+            main_layer_node.rotation = deg_to_rad(offset_degrees)
             pivot_node.position = layer_pivot_offset
             main_layer_node = pivot_node
+            main_layer_node.set_meta("offset_degrees", 0)
     main_layer_node.name = layer_info.get("mode", "MODE") + str(layer_index)
 
     add_child(main_layer_node, true)
@@ -367,11 +377,11 @@ func create_and_add_nodes_for_layer(layer_info: Dictionary, layer_index: int) ->
     if is_masked:
         sub_layer_rotates = layer_info.get("mask_rotates", true)
 
-    main_layer_node.set_meta("spinning_speed", layer_info.get("spinning", 0.0))
-    main_layer_node.set_meta("spins", layer_info.has("spinning"))
-
     main_layer_node.set_meta("rotates_with_sprite", layer_rotates)
     main_layer_node.set_meta("sub_layer_rotates", sub_layer_rotates)
+
+    main_layer_node.set_meta("spinning_speed", layer_info.get("spinning", 0.0))
+    main_layer_node.set_meta("spins", layer_info.has("spinning"))
     
     main_layer_node.set_meta("spin_zero_time", layer_info.get("_spin_time_zero", 0.0))
 
@@ -456,10 +466,13 @@ func set_sprite_rotation(new_rotation: float) -> void:
 
 func _set_sprite_layer_rotation(layer_node: Node2D, new_rotation: float) -> void:
     var layer_rotates: bool = layer_node.get_meta("rotates_with_sprite", true)
+    var offset_rotation: float = deg_to_rad(layer_node.get_meta("offset_degrees", 0))
     if layer_rotates:
-        layer_node.rotation = new_rotation
+        new_rotation += offset_rotation
+    layer_node.rotation = new_rotation
+    var main_layer_rotation: float = layer_node.rotation - offset_rotation
     if layer_node.get_meta("sub_layer_rotates") != layer_rotates and layer_node.get_child_count() > 0:
-        layer_node.get_child(0).rotation = (-2 * layer_node.rotation) + new_rotation
+        layer_node.get_child(0).rotation = (-2 * main_layer_rotation) + new_rotation
 
 func update_spinning_layers() -> void:
     for layer_node in get_children():
@@ -468,12 +481,13 @@ func update_spinning_layers() -> void:
 
 func _update_spinning_layer(layer_node: Node2D) -> void:
     var spin_speed: float = layer_node.get_meta("spinning_speed", 0.0)
-    layer_node.rotation = _spin_angle(spin_speed, layer_node.get_meta("spin_zero_time"))
+    var offset_rotation: float = deg_to_rad(layer_node.get_meta("offset_degrees", 0))
+    layer_node.rotation = _spin_angle(spin_speed, layer_node.get_meta("spin_zero_time")) + offset_rotation
     if layer_node.get_child_count() > 0:
         if layer_node.get_meta("sub_layer_rotates") == false:
-            layer_node.get_child(0).rotation = -layer_node.rotation
+            layer_node.get_child(0).rotation = -(layer_node.rotation - offset_rotation)
         else:
-            layer_node.get_child(0).rotation = 0
+            layer_node.get_child(0).rotation = -offset_rotation
 
 func _spin_angle(spin_speed: float, zero_time_offset: float) -> float:
     if spin_speed == 0:
@@ -599,8 +613,9 @@ func _apply_mod_modulate_to(layer_node: Node2D) -> void:
     var modulate_modifiers: Array = modifier_effects.get("modulate", {}).keys()
     if modulate_modifiers.size() < 1:
         return
+    var base_mod_color: Color = layer_node.get_meta("base_mod_color", Color.WHITE)
     var active_modulate: Dictionary = modifier_effects.get("modulate", {})[modulate_modifiers[-1]]
-    layer_node.modulate = Utility.get_dict_color(active_modulate, "color", Color.WHITE)
+    layer_node.modulate = Utility.get_dict_color(active_modulate, "color", Color.WHITE) * base_mod_color
 
 func _get_modifiers_scale() -> Vector2:
     var m_scale: Vector2 = Vector2.ONE

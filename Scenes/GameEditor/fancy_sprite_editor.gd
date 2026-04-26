@@ -21,6 +21,7 @@ func _ready() -> void:
     close_requested.connect(close_sprite_editor)
     if layer_list:
         layer_list.layers_changed.connect(on_layers_changed)
+        layer_list.layer_height_changed.connect(on_layer_height_changed)
     await get_tree().process_frame
     update_scroll_container_size()
 
@@ -48,6 +49,9 @@ func on_layers_changed() -> void:
     get_layers_info_from_list()
     sprite_config_changed.emit(sprite_config)
     refresh_previewer()
+
+func on_layer_height_changed() -> void:
+    update_scroll_container_size()
 
 func get_layers_info_from_list() -> void:
     if not layer_list:
