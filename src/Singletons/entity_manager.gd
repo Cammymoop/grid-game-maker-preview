@@ -1447,3 +1447,6 @@ func disolve_entity_bond_group(entity: BaseEntity) -> void:
         if has_instance(inst_id):
             var bonded_entity: BaseEntity = get_instance(inst_id)
             unbond_entity(bonded_entity, true)
+
+func removing_texture_id(_texture_id: int) -> void:
+    pass

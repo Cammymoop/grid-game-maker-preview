@@ -1007,3 +1007,6 @@ func idle_actions() -> void:
             continue
         var positions_of_tile: = get_all_positions_of_tile(t_id)
         resolve_tile_individual_events(positions_of_tile, "idle_update", null, t_id, false)
+
+func removing_texture_id(_texture_id: int) -> void:
+    pass

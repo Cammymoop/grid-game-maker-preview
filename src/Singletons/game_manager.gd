@@ -120,8 +120,7 @@ func _ready():
 			start_managers()
 		else:
 			start_managers()
-			new_empty_game_definition()
-			_set_game_name(FilesManager.get_unique_game_name("Empty Game"), false)
+			new_empty_game_definition(FilesManager.get_unique_game_name("Empty Game"))
 			save_current_game_definition()
 			FilesManager.save_default_game(get_game_name())
 	
@@ -146,9 +145,18 @@ func describe_movement_mode(mode: int) -> String:
 			return "Discrete+ (wait for all moves to stop)"
 	return ""
 
-func new_empty_game_definition() -> void:
+func new_empty_game_definition(with_name: String = "") -> void:
+	if not with_name:
+		var safety: int = 10000
+		while true:
+			with_name = "%s Game" % Utility.random_animal()
+			if not FilesManager.game_exists(with_name):
+				break
+			safety -= 1
+			if safety <= 0:
+				break
 	var empty_game: = {
-		"game_name": "%s Game" % Utility.random_animal(),
+		"game_name": with_name,
 		"textures": TextureManager.get_default_texture_spec(),
 		"game_settings": {
 			"pixel_scale": 2,

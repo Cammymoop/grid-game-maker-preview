@@ -1,56 +1,92 @@
 extends VBoxContainer
 
-var item_scene = preload("res://Scenes/GameEditor/SelectableTexItem.tscn")
+signal selected_item_changed(item: SelectableTexture)
 
-var enabled_textures = []
-var enabled_builtin_tex = []
+const SelectableTexture = preload("res://src/GameEditor/SelectableTexture.gd")
+const ImagesTab = preload("res://src/GameEditor/ImagesEditor.gd")
 
-var images_editor
+var item_scene: = preload("res://Scenes/GameEditor/SelectableTexItem.tscn")
 
-func init(editor) -> void:
+var all_textures: Array = []
+var enabled_textures: Array = []
+
+var images_editor: ImagesTab
+
+func init(editor: ImagesTab) -> void:
 	images_editor = editor
 
 func clear_all() -> void:
 	for c in get_children():
 		c.queue_free()
 	enabled_textures = []
-	enabled_builtin_tex = []
+	all_textures = []
 
-func add_texture(texture_name, texture, builtin: bool, enabled: bool):
+func add_texture(texture_name: String, texture: Texture, builtin: bool, enabled: bool, is_shared: bool = true) -> void:
+	all_textures.append(texture_name)
 	if enabled:
 		enabled_textures.append(texture_name)
 	
-	var list_item = item_scene.instantiate()
-	list_item.set_texture(texture_name, texture, builtin)
+	var list_item: = item_scene.instantiate() as SelectableTexture
+	list_item.set_texture(texture_name, texture, builtin, is_shared)
 	list_item.set_enabled(enabled)
-	list_item.connect("selected", Callable(self, "list_item_selected"))
-	list_item.connect("enabled", Callable(self, "list_item_enabled"))
-	list_item.connect("double_clicked", Callable(images_editor, "_on_EditTexButton_pressed"))
+	list_item.selected.connect(on_item_selected)
+	list_item.enable_toggled.connect(images_editor.set_texture_item_enabled)
+	list_item.double_clicked.connect(on_item_double_clicked)
 	
 	add_child(list_item)
 
-func get_selected() -> Node:
+func on_item_double_clicked(item: SelectableTexture) -> void:
+	images_editor.edit_texture_from_selectable_texture(item)
+
+func select_first_item() -> void:
+	if get_child_count() > 0:
+		var first_item: = get_child(0) as SelectableTexture
+		if first_item:
+			deselect_other_items(first_item)
+			first_item.select()
+
+func get_selected() -> SelectableTexture:
 	for c in get_children():
 		if c.is_selected:
 			return c
 	return null
 
-func list_item_selected(item) -> void:
+func deselect_other_items(item: SelectableTexture) -> void:
 	for c in get_children():
 		if item == c:
 			continue
 		c.deselect()
+
+func on_item_selected(item: SelectableTexture) -> void:
+	deselect_other_items(item)
+	selected_item_changed.emit(item)
 	images_editor.enable_edit_button()
 
-func list_item_enabled(on_off: bool, is_builtin: bool, texture_name, checkbox) -> void:
-	if on_off:
-		if is_builtin:
-			TextureManager.add_builtin_texture(texture_name)
-		else:
-			TextureManager.add_local_texture(texture_name)
-#			if not texture_name in enabled_textures:
-#				enabled_textures.append(texture_name)
-#		elif not texture_name in enabled_builtin_tex:
-#				enabled_builtin_tex.append(texture_name)
-	else:
-		checkbox.set_pressed_no_signal(false)
+func sort_items() -> void:
+	var items: Array[SelectableTexture] = []
+	for child_item in get_children():
+		if child_item is SelectableTexture:
+			items.append(child_item)
+			remove_child(child_item)
+	items.sort_custom(texture_item_order)
+	for sorted_item in items:
+		add_child(sorted_item)
+
+func texture_item_order(item_a: SelectableTexture, item_b: SelectableTexture) -> bool:
+	var name_a: = item_a.get_texture_name()
+	var name_b: = item_b.get_texture_name()
+	if not name_b in all_textures or not name_a in all_textures:
+		return true
+	
+	var score_a: int = 0
+	var score_b: int = 0
+	
+	score_a += 100 * int(item_a.is_enabled())
+	score_b += 100 * int(item_b.is_enabled())
+	
+	score_a += int(item_a.get_is_builtin())
+	score_a += int(item_a.get_is_builtin())
+	
+	if score_a != score_b:
+		return score_a > score_b
+	return name_a.nocasecmp_to(name_b) < 0

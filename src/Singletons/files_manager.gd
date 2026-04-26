@@ -278,6 +278,15 @@ func get_local_image_metadata(local_image_name: String, for_game_name: String = 
 		return local_meta[local_image_name]
 	return {}
 
+func has_local_image_metadata(local_image_name: String, for_game_name: String = "") -> bool:
+	if for_game_name:
+		push_error("Images specific to games not supported yet")
+		return false
+	var local_meta = _get_local_images_metadata()
+	if not local_meta or not local_image_name in local_meta:
+		return false
+	return true
+
 func _get_local_images_metadata() -> Dictionary:
 	if not FileAccess.file_exists(_data_path("local_image_meta.json")):
 		print_debug("No local image meta")

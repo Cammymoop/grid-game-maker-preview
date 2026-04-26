@@ -74,7 +74,7 @@ func set_new_texture_size(new_size: Vector2) -> void:
 func set_metadata(metadata: Dictionary) -> void:
 	image_meta = metadata
 
-func set_save_path(file_name: String) -> void:
+func set_filename(file_name: String) -> void:
 	save_as_name = file_name
 	if save_as_name:
 		find_child("SaveFileButton").disabled = false
@@ -602,7 +602,7 @@ func _on_SaveAsDialog_file_selected(path: String):
 		GlobalToaster.show_toast_message("Please save to shared images directory")
 		return
 	GlobalToaster.show_toast_message("Saved Image")
-	set_save_path(path.get_file())
+	set_filename(path.get_file())
 	FilesManager.update_local_image_metadata(save_as_name, image_meta)
 
 

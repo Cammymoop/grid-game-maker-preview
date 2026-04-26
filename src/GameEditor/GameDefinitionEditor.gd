@@ -173,6 +173,10 @@ func on_show_level_title_option_picked(index: int) -> void:
 
 func _on_new_empty_pressed() -> void:
 	GameManager.new_empty_game_definition()
+	GameManager.save_current_game_definition()
+	var default_game: = FilesManager.get_default_game()
+	if not default_game or not FilesManager.game_exists(default_game):
+		FilesManager.save_default_game(GameManager.get_game_name())
 
 func on_move_interp_option_picked(index: int) -> void:
 	var interp_style: = move_interp_option_picker.get_item_id(index) as Utility.PosInterpStyle
