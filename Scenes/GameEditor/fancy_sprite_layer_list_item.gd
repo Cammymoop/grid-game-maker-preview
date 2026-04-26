@@ -60,6 +60,8 @@ const DigitsSourceTexts: Dictionary[int, String] = {
 @export var spin_speed_input: ScalarValueInput
 @export var offset_degrees_input: ScalarValueInput
 
+@export var z_offset_input: ScalarValueInput
+
 @export var digits_settings: Control
 @export var digits_max_digits_input: ScalarValueInput
 @export var digits_color_picker: ColorPickerButton
@@ -109,6 +111,8 @@ func _ready() -> void:
     for mode_name in LayerModeOptions:
         mode_selector.add_item(LayerModeOptions[mode_name])
     mode_selector.item_selected.connect(on_mode_selected)
+    
+    z_offset_input.value_changed.connect(on_z_offset_changed)
     
     offset_type_selector.clear()
     for offs_type_name in [OFFSET_OFFSET, OFFSET_PIVOT, OFFSET_BOTH]:
@@ -265,6 +269,8 @@ func refresh_ui() -> void:
         elif digits_source == DIGITS_SOURCE_PROPERTY:
             digits_property_input.set_value(layer_info.get("property", ""))
         digits_color_picker.color = Utility.get_dict_color(layer_info, "mod_color", Color.WHITE)
+    
+    z_offset_input.set_value(layer_info.get("z_offset", 0))
     
     mod_color_input.color = Utility.get_dict_color(layer_info, "mod_color", Color.WHITE)
 
@@ -469,4 +475,11 @@ func on_offset_degrees_changed(new_value: float) -> void:
         layer_info.erase('offset_degrees')
     else:
         layer_info['offset_degrees'] = new_value
+    changed.emit()
+
+func on_z_offset_changed(new_value: float) -> void:
+    if new_value == 0:
+        layer_info.erase('z_offset')
+    else:
+        layer_info['z_offset'] = new_value
     changed.emit()

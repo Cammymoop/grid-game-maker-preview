@@ -364,6 +364,8 @@ func create_and_add_nodes_for_layer(layer_info: Dictionary, layer_index: int) ->
             main_layer_node = pivot_node
             main_layer_node.set_meta("offset_degrees", 0)
     main_layer_node.name = layer_info.get("mode", "MODE") + str(layer_index)
+    
+    main_layer_node.z_index = int(layer_info.get("z_offset", 0))
 
     add_child(main_layer_node, true)
     var layer_scale: Vector2 = Utility.get_vector2_from_arr(layer_info.get("scale", [1,1]))

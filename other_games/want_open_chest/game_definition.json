@@ -130,7 +130,7 @@
     "2": {
       "name": "closed-chest",
       "texture": 2,
-      "tex_index": 0,
+      "tex_index": 1,
       "properties": {
         "blocks": {
           "v": "3",
@@ -199,6 +199,21 @@
             "when true": [],
             "when false": [],
             "when always": []
+          }
+        ]
+      },
+      "sprite_config": {
+        "layers": [
+          {
+            "mode": "normal",
+            "texture": 2,
+            "tex_index": 0
+          },
+          {
+            "mode": "normal",
+            "texture": 2,
+            "tex_index": 1,
+            "z_offset": 1.0
           }
         ]
       }

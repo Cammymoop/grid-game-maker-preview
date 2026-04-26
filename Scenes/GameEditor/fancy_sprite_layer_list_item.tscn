@@ -41,7 +41,7 @@ LineEdit/constants/minimum_character_width = 2
 atlas = ExtResource("3_jxcnp")
 region = Rect2(0, 64, 32, 32)
 
-[node name="FancySpriteLayerListItem" type="MarginContainer" unique_id=1110623540 node_paths=PackedStringArray("remove_button", "layer_image_button", "offset_type_selector", "offset_input", "mode_selector", "reorder_buttons", "rotates_option", "rotates_mode_select", "spin_speed_input", "offset_degrees_input", "digits_settings", "digits_max_digits_input", "digits_color_picker", "digits_pad_zeros_toggle", "digits_source_selector", "digits_number_input", "digits_property_input", "visibility_property_input", "mod_color_input", "subsection_container", "subsection_nav_forward", "subsection_nav_back")]
+[node name="FancySpriteLayerListItem" type="MarginContainer" unique_id=1110623540 node_paths=PackedStringArray("remove_button", "layer_image_button", "offset_type_selector", "offset_input", "mode_selector", "reorder_buttons", "rotates_option", "rotates_mode_select", "spin_speed_input", "offset_degrees_input", "z_offset_input", "digits_settings", "digits_max_digits_input", "digits_color_picker", "digits_pad_zeros_toggle", "digits_source_selector", "digits_number_input", "digits_property_input", "visibility_property_input", "mod_color_input", "subsection_container", "subsection_nav_forward", "subsection_nav_back")]
 offset_right = 503.0
 offset_bottom = 75.0
 theme = ExtResource("1_pj4t0")
@@ -61,6 +61,7 @@ rotates_option = NodePath("HBoxContainer/PanelContainer/HBoxContainer/Subsection
 rotates_mode_select = NodePath("HBoxContainer/PanelContainer/HBoxContainer/SubsectionContainer/MainSubsection/VBoxContainer2/RotatesOption/RotatesModeSelect")
 spin_speed_input = NodePath("HBoxContainer/PanelContainer/HBoxContainer/SubsectionContainer/MainSubsection/VBoxContainer2/RotatesOption/SpinSpeedInput")
 offset_degrees_input = NodePath("HBoxContainer/PanelContainer/HBoxContainer/SubsectionContainer/MainSubsection/VBoxContainer2/AngleOffsetOption/OffsetDegreesInput")
+z_offset_input = NodePath("HBoxContainer/PanelContainer/HBoxContainer/SubsectionContainer/MainSubsection/VBoxContainer/HBoxContainer/HBoxContainer/ZOffsetInput")
 digits_settings = NodePath("HBoxContainer/PanelContainer/HBoxContainer/HBoxContainer/DigitSettings")
 digits_max_digits_input = NodePath("HBoxContainer/PanelContainer/HBoxContainer/HBoxContainer/DigitSettings/HBoxContainer2/DigitCountInput")
 digits_color_picker = NodePath("HBoxContainer/PanelContainer/HBoxContainer/HBoxContainer/DigitSettings/HBoxContainer4/DigitColorPicker")
@@ -145,6 +146,24 @@ item_count = 1
 popup/item_0/text = "normal"
 popup/item_0/id = 0
 
+[node name="HBoxContainer" type="HBoxContainer" parent="HBoxContainer/PanelContainer/HBoxContainer/SubsectionContainer/MainSubsection/VBoxContainer/HBoxContainer" unique_id=652619837]
+layout_mode = 2
+tooltip_text = "Relative to the entity"
+
+[node name="Label" type="Label" parent="HBoxContainer/PanelContainer/HBoxContainer/SubsectionContainer/MainSubsection/VBoxContainer/HBoxContainer/HBoxContainer" unique_id=1915166771]
+layout_mode = 2
+text = "Z-offset:"
+
+[node name="ZOffsetInput" parent="HBoxContainer/PanelContainer/HBoxContainer/SubsectionContainer/MainSubsection/VBoxContainer/HBoxContainer/HBoxContainer" unique_id=1458729988 instance=ExtResource("7_101gm")]
+layout_mode = 2
+is_int_type = true
+min_value = -50.0
+max_value = 50.0
+custom_step = true
+
+[node name="Value" parent="HBoxContainer/PanelContainer/HBoxContainer/SubsectionContainer/MainSubsection/VBoxContainer/HBoxContainer/HBoxContainer/ZOffsetInput" index="0" unique_id=1193418551]
+tooltip_text = "Relative to the entity"
+
 [node name="HBoxContainer2" type="HBoxContainer" parent="HBoxContainer/PanelContainer/HBoxContainer/SubsectionContainer/MainSubsection/VBoxContainer" unique_id=1726006408]
 layout_mode = 2
 size_flags_horizontal = 4
@@ -188,7 +207,7 @@ popup/item_1/id = 1
 popup/item_2/text = "spins"
 popup/item_2/id = 2
 
-[node name="SpinSpeedInput" parent="HBoxContainer/PanelContainer/HBoxContainer/SubsectionContainer/MainSubsection/VBoxContainer2/RotatesOption" unique_id=1458729988 instance=ExtResource("7_101gm")]
+[node name="SpinSpeedInput" parent="HBoxContainer/PanelContainer/HBoxContainer/SubsectionContainer/MainSubsection/VBoxContainer2/RotatesOption" unique_id=220046228 instance=ExtResource("7_101gm")]
 visible = false
 z_index = 1
 layout_mode = 2
@@ -393,4 +412,5 @@ tooltip_text = "remove layer"
 [node name="Spacer" type="Control" parent="HBoxContainer" unique_id=519738425]
 layout_mode = 2
 
+[editable path="HBoxContainer/PanelContainer/HBoxContainer/SubsectionContainer/MainSubsection/VBoxContainer/HBoxContainer/HBoxContainer/ZOffsetInput"]
 [editable path="HBoxContainer/PanelContainer/HBoxContainer/SubsectionContainer/MainSubsection/VBoxContainer2/AngleOffsetOption/OffsetDegreesInput"]
