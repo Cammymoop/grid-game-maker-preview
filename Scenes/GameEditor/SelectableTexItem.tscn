@@ -31,6 +31,8 @@ visible = false
 layout_mode = 2
 size_flags_horizontal = 4
 size_flags_vertical = 4
+tooltip_text = "Built-in"
+mouse_default_cursor_shape = 16
 texture = ExtResource("4")
 
 [node name="Label" type="Label" parent="HB" unique_id=1340523356]

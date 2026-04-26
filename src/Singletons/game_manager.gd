@@ -119,8 +119,8 @@ func _ready():
 			load_game_definition_data(builtin_default_game_definition)
 			start_managers()
 		else:
-			start_managers()
 			new_empty_game_definition(FilesManager.get_unique_game_name("Empty Game"))
+			start_managers()
 			save_current_game_definition()
 			FilesManager.save_default_game(get_game_name())
 	
@@ -173,10 +173,7 @@ func load_game_definition_from_file(game_name) -> void:
 	load_game_definition_data(definition)
 
 func load_game_definition_data(definition_data: Dictionary) -> void:
-	# required section, but older saves didn't have it, remove this once they all do
-	if not "game_settings" in definition_data:
-		definition_data["game_settings"] = {}
-	game_definition = definition_data
+	game_definition = definition_data.duplicate_deep()
 	
 	_set_game_name(definition_data['game_name'], false)
 	loaded_from_game_name = cur_game_name

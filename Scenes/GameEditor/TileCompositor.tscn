@@ -299,19 +299,13 @@ mouse_filter = 2
 texture = ExtResource("12")
 stretch_mode = 3
 
-[node name="Panel" type="Panel" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer" unique_id=1040660696]
+[node name="Panel" type="PanelContainer" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer" unique_id=559098519]
 custom_minimum_size = Vector2(140, 175)
 layout_mode = 2
 theme_override_styles/panel = SubResource("10")
 
 [node name="VBoxContainer" type="VBoxContainer" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/Panel" unique_id=423919233]
-layout_mode = 0
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-grow_horizontal = 2
-grow_vertical = 2
+layout_mode = 2
 alignment = 1
 
 [node name="BrushWrap" type="CheckButton" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/Panel/VBoxContainer" unique_id=525458573]
@@ -327,9 +321,9 @@ text = "Wraps Around"
 
 [node name="MarginContainer" type="MarginContainer" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/Panel/VBoxContainer" unique_id=1490630763]
 layout_mode = 2
-theme_override_constants/margin_left = 13
-theme_override_constants/margin_top = 13
-theme_override_constants/margin_right = 13
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 16
+theme_override_constants/margin_right = 16
 
 [node name="AspectRatioContainer" type="AspectRatioContainer" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/Panel/VBoxContainer/MarginContainer" unique_id=676508865]
 layout_mode = 2

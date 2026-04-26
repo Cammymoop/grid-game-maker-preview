@@ -37,9 +37,10 @@ var im_ready: = false
 const BUILTIN_IMAGE_DIR: = "res://assets/img/"
 
 func setup() -> void:
-    for t in builtin_textures:
-        add_builtin_texture(t)
-    reload_spec()
+    if texture_spec.size() == 0:
+        for builtin_tex_name in default_textures:
+            add_builtin_texture(builtin_tex_name)
+    refresh_textures()
 #
 #	emit_signal("textures_loaded")
 #	im_ready = true
@@ -69,6 +70,7 @@ func fix_vecs_texture_meta(meta: Dictionary) -> Dictionary:
     return new_dict
 
 func clear() -> void:
+    next_texture_id = 0
     textures = {}
     texture_rows = {}
     tiles_per_row = {}
@@ -83,15 +85,13 @@ func add_texture(tex_spec: Dictionary) -> void:
 
 func is_builtin_loaded(builtin_tex_name: String) -> bool:
     for t in texture_spec:
-        if t["type"] != "builtin":
-            continue
-        if t["name"] == builtin_tex_name:
+        if t["type"] == "builtin" and t["name"] == builtin_tex_name:
             return true
     return false
 
-func is_local_file_loaded(file_name: String) -> bool:
+func is_local_file_loaded(file_name: String, is_shared: bool = true) -> bool:
     for t in texture_spec:
-        if t["type"] != "local_file":
+        if t["type"] != "local_file" or t.get("is_shared", true) != is_shared:
             continue
         if t["image_name"] == file_name:
             return true
@@ -109,6 +109,8 @@ func add_local_texture(file_name: String) -> void:
     }
     add_texture(spec)
 func add_builtin_texture(tex_name: String) -> void:
+    prints("adding builtin texture", tex_name)
+    print_stack()
     if is_builtin_loaded(tex_name):
         return
     var spec = {
@@ -120,8 +122,10 @@ func add_builtin_texture(tex_name: String) -> void:
     add_texture(spec)
 
 func set_default_textures() -> void:
+    next_texture_id = 0
     texture_spec = get_default_texture_spec()
-    reload_spec()
+    next_texture_id = texture_spec.size()
+    refresh_textures()
 
 func get_default_texture_spec() -> Array:
     var spec: = []
@@ -132,15 +136,21 @@ func get_default_texture_spec() -> Array:
     return spec
 
 func set_textures(from_texture_spec: Array) -> void:
+    if not from_texture_spec:
+        set_default_textures()
+        return
+    next_texture_id = 0
     texture_spec = from_texture_spec
-    reload_spec()
+    for spec_stuff in texture_spec:
+        next_texture_id = maxi(next_texture_id, int(spec_stuff.get("texture_id", -1)) + 1)
+    refresh_textures()
 
-func reload_spec() -> void:
+func refresh_textures() -> void:
     im_ready = false
     for tex in texture_spec:
         load_texture(tex)
     
-    emit_signal("textures_loaded")
+    textures_loaded.emit()
     im_ready = true
 
 func load_texture(tex: Dictionary):
@@ -230,12 +240,14 @@ func get_new_texture_id() -> int:
 func get_texture_name(texture_id: int) -> String:
     return texture_names[texture_id]
 
-func get_texture_name_list() -> Array:
-    var tlist = []
-    for i in textures:
-        tlist.append(get_texture_name(i))
-    
-    return tlist
+func get_current_texture_ids() -> Array:
+    return texture_names.keys()
+
+func get_current_texture_names() -> Array:
+    var name_list: = []
+    for texture_id in get_current_texture_ids():
+        name_list.append(get_texture_name(texture_id))
+    return name_list
 
 func get_all_indexes() -> Array:
     return textures.keys()
@@ -366,12 +378,13 @@ func get_unloaded_texture_meta(texture_name: String, is_builtin: bool = false, i
     return fix_vecs_texture_meta(raw_meta)
 
 func _convert_texture_meta_for_saving(metadata: Dictionary) -> Dictionary:
+    metadata = metadata.duplicate_deep()
     for key in metadata:
         if metadata[key] is Vector2:
             metadata[key] = Utility.vector_to_list(metadata[key])
     return metadata
 
-func save_texture_metadata(texture_id: int, is_builtin: bool = false, is_shared: bool = true) -> void:
+func save_loaded_texture_metadata(texture_id: int, is_builtin: bool = false, is_shared: bool = true) -> void:
     if is_builtin:
         push_error("Can't change builtin texture metadata")
         return
@@ -380,3 +393,18 @@ func save_texture_metadata(texture_id: int, is_builtin: bool = false, is_shared:
     var texture_name: = get_texture_name(texture_id)
     var local_meta: = get_texture_metadata(texture_id)
     FilesManager.update_local_image_metadata(texture_name, _convert_texture_meta_for_saving(local_meta))
+
+func set_texture_meta_by_name(texture_name: String, is_builtin: bool, is_shared: bool, new_meta: Dictionary) -> void:
+    if is_builtin:
+        push_error("Can't change builtin texture metadata")
+        return
+    new_meta = new_meta.duplicate_deep()
+    var texture_id: = get_loaded_texture_id(texture_name, is_builtin, is_shared)
+    if texture_id >= 0:
+        texture_meta[texture_id] = new_meta
+        save_loaded_texture_metadata(texture_id, is_builtin, is_shared)
+        refresh_textures()
+    elif not is_shared:
+        push_error("Texture inside game not implemented yet")
+    else:
+        FilesManager.update_local_image_metadata(texture_name, _convert_texture_meta_for_saving(new_meta))

@@ -53,16 +53,28 @@ func local_pos_to_tile_pos(pos: Vector2) -> Vector2:
 func tile_pos_to_index(pos: Vector2) -> int:
 	return int(pos.x) + (int(pos.y) * tpr)
 
-func set_raw_texture(tex: Texture2D, meta: Dictionary) -> void:
+func _generate_size_in_tiles(metadata: Dictionary, texture_size: Vector2) -> Vector2i:
+	var border: = Vector2(metadata['border'])
+	var inner_image: = texture_size - border * 2
+	# add one extra separation to make it easy to calculate the number of tiles
+	inner_image += Vector2(metadata['separation'])
+
+	var tex_tile_size: = Vector2(metadata['tile_size'])
+	return Vector2i((inner_image / tex_tile_size).floor())
+
+
+func set_raw_texture(tex: Texture2D, metadata: Dictionary) -> void:
 	index_of_texture = -1
-	tpr = meta['size_in_tiles'].x
-	rows = meta['size_in_tiles'].y
-	tile_size = meta['tile_size']
-	origin = meta['border']
-	separation = meta['separation']
+	var grid_cells: = Vector2i(metadata.get("size_in_tiles", Vector2(1, 1)))
+	if not metadata.has("size_in_tiles"):
+		grid_cells = _generate_size_in_tiles(metadata, tex.get_size())
+	tpr = grid_cells.x
+	rows = grid_cells.y
+	tile_size = metadata['tile_size']
+	origin = metadata['border']
+	separation = metadata['separation']
 	texture = tex.duplicate()
-	#texture.flags = 0
-	
+
 	raw_mode = true
 	
 	make_atlas_tex()
@@ -73,7 +85,9 @@ func set_picking_texture(texture_index) -> void:
 	index_of_texture = texture_index
 	
 	var tex = TextureManager.get_texture(texture_index)
-	var meta = TextureManager.get_texture_metadata(texture_index)
+	var meta = TextureManager.get_texture_metadata(texture_index).duplicate_deep()
+	if not meta.has("size_in_tiles"):
+		meta["size_in_tiles"] = _generate_size_in_tiles(meta, tex.get_size())
 	tpr = meta['size_in_tiles'].x
 	rows = meta['size_in_tiles'].y
 	tile_size = meta['tile_size']
@@ -113,8 +127,8 @@ func get_picked_region() -> Rect2:
 	return Utility.get_texture_index_rect(selected_sub_index, tile_size, origin, separation, tpr)
 
 func highlight_index(hovered_index):
-	var base_offset = Utility.get_texture_index_offset(hovered_index, tile_size, origin, separation, tpr)
-	var offset = base_offset * view_scale
+	var base_offset: = Utility.get_texture_index_offset(hovered_index, tile_size, origin, separation, tpr)
+	var offset: = base_offset * view_scale
 	$HighlightedTile.offset_left = offset.x
 	$HighlightedTile.offset_top = offset.y
 	$HighlightedTile.offset_right = offset.x + (tile_size.x * view_scale)

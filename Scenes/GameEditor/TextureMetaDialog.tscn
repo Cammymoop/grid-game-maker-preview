@@ -1,14 +1,22 @@
 [gd_scene format=3 uid="uid://c04dlt6snybs7"]
 
 [ext_resource type="Script" uid="uid://ck6l6jqps4gc6" path="res://src/GameEditor/TextureMetaDialog.gd" id="1"]
+[ext_resource type="PackedScene" uid="uid://yskjico8qrbl" path="res://Scenes/GameEditor/ConditionalEditor/vector2i_input.tscn" id="2_soxja"]
 
-[node name="TextureMetaDialog" type="ConfirmationDialog" unique_id=668637704]
+[node name="TextureMetaDialog" type="ConfirmationDialog" unique_id=668637704 node_paths=PackedStringArray("grid_size_input", "image_size_in_tiles_input", "border_width_input", "separation_input", "image_size_label", "image_size_node_2")]
 oversampling_override = 1.0
 title = "New Image"
-size = Vector2i(503, 213)
+position = Vector2i(0, 25)
+size = Vector2i(503, 209)
 visible = true
 ok_button_text = "Create Image"
 script = ExtResource("1")
+grid_size_input = NodePath("MarginContainer/VBoxContainer/GridContainer/HBoxContainer6/GridSizeInput")
+image_size_in_tiles_input = NodePath("MarginContainer/VBoxContainer/GridContainer/ImageSize2/ImageSizeInput")
+border_width_input = NodePath("MarginContainer/VBoxContainer/GridContainer/HBoxContainer8/BorderSizeInput")
+separation_input = NodePath("MarginContainer/VBoxContainer/GridContainer/HBoxContainer9/SeparationInput")
+image_size_label = NodePath("MarginContainer/VBoxContainer/GridContainer/ImageSizeLabel")
+image_size_node_2 = NodePath("MarginContainer/VBoxContainer/GridContainer/ImageSize2")
 
 [node name="MarginContainer" type="MarginContainer" parent="." unique_id=324907220]
 offset_left = 8.0
@@ -23,98 +31,80 @@ theme_override_constants/margin_bottom = 10
 [node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer" unique_id=2126677588]
 layout_mode = 2
 
-[node name="HBoxContainer5" type="HBoxContainer" parent="MarginContainer/VBoxContainer" unique_id=1284692437]
+[node name="GridContainer" type="GridContainer" parent="MarginContainer/VBoxContainer" unique_id=23815241]
 layout_mode = 2
-alignment = 2
+size_flags_horizontal = 4
+columns = 2
 
-[node name="Label" type="Label" parent="MarginContainer/VBoxContainer/HBoxContainer5" unique_id=1799555766]
+[node name="Label" type="Label" parent="MarginContainer/VBoxContainer/GridContainer" unique_id=99001759]
 layout_mode = 2
-text = "Tile Size Width:"
+text = "Grid Size:"
+horizontal_alignment = 2
 
-[node name="TileWidth" type="SpinBox" parent="MarginContainer/VBoxContainer/HBoxContainer5" unique_id=138750835]
+[node name="HBoxContainer6" type="HBoxContainer" parent="MarginContainer/VBoxContainer/GridContainer" unique_id=1333091203]
 layout_mode = 2
-min_value = 1.0
-max_value = 256.0
-value = 32.0
-suffix = "px"
+alignment = 1
 
-[node name="Label2" type="Label" parent="MarginContainer/VBoxContainer/HBoxContainer5" unique_id=723912692]
+[node name="GridSizeInput" parent="MarginContainer/VBoxContainer/GridContainer/HBoxContainer6" unique_id=2047234622 instance=ExtResource("2_soxja")]
 layout_mode = 2
-text = "Height:"
+starting_value = Vector2i(32, 32)
 
-[node name="TileHeight" type="SpinBox" parent="MarginContainer/VBoxContainer/HBoxContainer5" unique_id=1475662719]
+[node name="Pixels" type="Label" parent="MarginContainer/VBoxContainer/GridContainer/HBoxContainer6" unique_id=299261007]
+custom_minimum_size = Vector2(58, 0)
 layout_mode = 2
-min_value = 1.0
-max_value = 256.0
-value = 32.0
-suffix = "px"
+theme_override_font_sizes/font_size = 14
+text = "pixels"
 
-[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer" unique_id=1343549064]
+[node name="ImageSizeLabel" type="Label" parent="MarginContainer/VBoxContainer/GridContainer" unique_id=469537650]
 layout_mode = 2
-alignment = 2
+text = "Image Size:"
 
-[node name="Label" type="Label" parent="MarginContainer/VBoxContainer/HBoxContainer" unique_id=1504287985]
+[node name="ImageSize2" type="HBoxContainer" parent="MarginContainer/VBoxContainer/GridContainer" unique_id=2100169969]
 layout_mode = 2
-text = "Image Size (in tiles) Width:"
+alignment = 1
 
-[node name="TexWidth" type="SpinBox" parent="MarginContainer/VBoxContainer/HBoxContainer" unique_id=1227029025]
+[node name="ImageSizeInput" parent="MarginContainer/VBoxContainer/GridContainer/ImageSize2" unique_id=1519690231 instance=ExtResource("2_soxja")]
 layout_mode = 2
-min_value = 1.0
-max_value = 50.0
-value = 10.0
+starting_value = Vector2i(8, 4)
 
-[node name="Label2" type="Label" parent="MarginContainer/VBoxContainer/HBoxContainer" unique_id=1281953896]
+[node name="Tiles" type="Label" parent="MarginContainer/VBoxContainer/GridContainer/ImageSize2" unique_id=1165585766]
+custom_minimum_size = Vector2(58, 0)
 layout_mode = 2
-text = "Height:"
+theme_override_font_sizes/font_size = 14
+text = "grid cells"
 
-[node name="TexHeight" type="SpinBox" parent="MarginContainer/VBoxContainer/HBoxContainer" unique_id=171604941]
+[node name="Label3" type="Label" parent="MarginContainer/VBoxContainer/GridContainer" unique_id=662247783]
 layout_mode = 2
-min_value = 1.0
-max_value = 50.0
-value = 4.0
+text = "Border Size:"
 
-[node name="HBoxContainer2" type="HBoxContainer" parent="MarginContainer/VBoxContainer" unique_id=1277054848]
+[node name="HBoxContainer8" type="HBoxContainer" parent="MarginContainer/VBoxContainer/GridContainer" unique_id=1848091035]
 layout_mode = 2
-alignment = 2
+alignment = 1
 
-[node name="Label" type="Label" parent="MarginContainer/VBoxContainer/HBoxContainer2" unique_id=1298671873]
+[node name="BorderSizeInput" parent="MarginContainer/VBoxContainer/GridContainer/HBoxContainer8" unique_id=794737700 instance=ExtResource("2_soxja")]
 layout_mode = 2
-text = "Borders Horizontal:"
 
-[node name="HBorder" type="SpinBox" parent="MarginContainer/VBoxContainer/HBoxContainer2" unique_id=1632281060]
+[node name="Pixels" type="Label" parent="MarginContainer/VBoxContainer/GridContainer/HBoxContainer8" unique_id=1581552256]
+custom_minimum_size = Vector2(58, 0)
 layout_mode = 2
-max_value = 50.0
-suffix = "px"
+theme_override_font_sizes/font_size = 14
+text = "pixels"
 
-[node name="Label2" type="Label" parent="MarginContainer/VBoxContainer/HBoxContainer2" unique_id=492281492]
+[node name="Label4" type="Label" parent="MarginContainer/VBoxContainer/GridContainer" unique_id=638849712]
 layout_mode = 2
-text = "Vertical:"
+text = "Separation:"
 
-[node name="VBorder" type="SpinBox" parent="MarginContainer/VBoxContainer/HBoxContainer2" unique_id=465637811]
+[node name="HBoxContainer9" type="HBoxContainer" parent="MarginContainer/VBoxContainer/GridContainer" unique_id=1055752509]
 layout_mode = 2
-max_value = 50.0
-suffix = "px"
+alignment = 1
 
-[node name="HBoxContainer4" type="HBoxContainer" parent="MarginContainer/VBoxContainer" unique_id=1869922957]
+[node name="SeparationInput" parent="MarginContainer/VBoxContainer/GridContainer/HBoxContainer9" unique_id=1026820180 instance=ExtResource("2_soxja")]
 layout_mode = 2
-alignment = 2
 
-[node name="Label" type="Label" parent="MarginContainer/VBoxContainer/HBoxContainer4" unique_id=1945661192]
+[node name="Pixels" type="Label" parent="MarginContainer/VBoxContainer/GridContainer/HBoxContainer9" unique_id=2071696819]
+custom_minimum_size = Vector2(58, 0)
 layout_mode = 2
-text = "Separation Horizontal:"
-
-[node name="HSep" type="SpinBox" parent="MarginContainer/VBoxContainer/HBoxContainer4" unique_id=1581967740]
-layout_mode = 2
-max_value = 50.0
-suffix = "px"
-
-[node name="Label2" type="Label" parent="MarginContainer/VBoxContainer/HBoxContainer4" unique_id=1862280127]
-layout_mode = 2
-text = "Vertical:"
-
-[node name="VSep" type="SpinBox" parent="MarginContainer/VBoxContainer/HBoxContainer4" unique_id=201768953]
-layout_mode = 2
-max_value = 50.0
-suffix = "px"
+theme_override_font_sizes/font_size = 14
+text = "pixels"
 
 [connection signal="confirmed" from="." to="." method="_on_TextureMetaDialog_confirmed"]

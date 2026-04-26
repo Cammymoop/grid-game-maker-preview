@@ -41,7 +41,7 @@ func refresh_list():
 
 func images_updated() -> void:
 	refresh_list()
-	TextureManager.reload_spec()
+	TextureManager.refresh_textures()
 
 func on_selected_item_changed(_item: SelectableTexture) -> void:
 	enable_edit_button()
@@ -82,13 +82,19 @@ func edit_texture_from_selectable_texture(sel_tex: SelectableTexture) -> void:
 			push_error("Builtin texture %s failed to get metadata" % texture_name)
 			return
 		var dialog: = metadata_dialog.instantiate() as TextureMetaDialog
+		dialog.is_new_mode = false
 		add_child(dialog)
 		dialog.popup_centered()
-		dialog.meta_confirmed.connect(edit_tex_continue.bind(sel_tex))
+		dialog.meta_confirmed.connect(create_texture_meta_and_edit.bind(sel_tex))
 	else:
 		var meta: Dictionary = TextureManager.get_unloaded_texture_meta(texture_name, is_builtin, is_shared)
 		edit_tex_continue(meta, sel_tex)
 
+func create_texture_meta_and_edit(new_meta: Dictionary, selected_item: SelectableTexture) -> void:
+	var t_name: = selected_item.get_texture_name()
+	var is_shared: = selected_item.get_is_shared()
+	TextureManager.set_texture_meta_by_name(t_name, false, is_shared, new_meta)
+	edit_tex_continue(new_meta, selected_item)
 
 func edit_tex_continue(meta: Dictionary, selected_item: SelectableTexture) -> void:
 	var tile_compositor: = tile_compositor_scn.instantiate() as TileCompositor
@@ -119,6 +125,7 @@ func set_texture_item_enabled(item: SelectableTexture, new_is_enabled: bool) -> 
 		enable_texture_item(item)
 	else:
 		disable_texture_item(item)
+	images_updated()
 
 func disable_texture_item(item: SelectableTexture) -> void:
 	TextureManager.remove_loaded_texture_by_name(item.get_texture_name(), item.get_is_builtin(), item.get_is_shared())

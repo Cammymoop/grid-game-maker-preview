@@ -76,16 +76,14 @@ func texture_item_order(item_a: SelectableTexture, item_b: SelectableTexture) ->
 	var name_a: = item_a.get_texture_name()
 	var name_b: = item_b.get_texture_name()
 	if not name_b in all_textures or not name_a in all_textures:
+		prints("texture not found in all_textures", name_a, name_b)
 		return true
 	
-	var score_a: int = 0
-	var score_b: int = 0
-	
-	score_a += 100 * int(item_a.is_enabled())
-	score_b += 100 * int(item_b.is_enabled())
+	var score_a: int = 100 * int(item_a.is_enabled())
+	var score_b: int = 100 * int(item_b.is_enabled())
 	
 	score_a += int(item_a.get_is_builtin())
-	score_a += int(item_a.get_is_builtin())
+	score_b += int(item_b.get_is_builtin())
 	
 	if score_a != score_b:
 		return score_a > score_b

@@ -31,8 +31,8 @@ const MAX_TILE_BRUSH_UNDOS = 100
 const MAX_TEXTURE_UNDOS = 10
 
 @onready var tile_brush_canvas: TextureRect = find_child("BrushView")
-const TBC_MAX_WIDTH: = 96
-const TBC_MAX_HEIGHT: = 96
+const TBC_MAX_WIDTH: = 128
+const TBC_MAX_HEIGHT: = 128
 
 const PICKED_BRUSH_MAX: Vector2 = Vector2(70, 70)
 
@@ -121,8 +121,6 @@ func _ready():
 	var brushColorModes = find_child("BrushColorModes")
 	if brushColorModes and brushColorModes.get_child_count() > 0:
 		brushColorModes.get_child(0).button_group.connect("pressed", Callable(self, "_on_BrushColorModeChange"))
-	
-	
 	
 	if picked_brush_tex:
 		update_picked_brush()

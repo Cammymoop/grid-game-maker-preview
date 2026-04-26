@@ -8,7 +8,8 @@ var HEIGHT_ADD = 110
 
 func setup(texture_index, sub_index):
 	visibility_changed.connect(Callable(self, "_on_vis_changed"))
-	var tex_list = TextureManager.get_texture_name_list()
+	var tex_list = TextureManager.get_current_texture_names()
+	prints("tex_list", tex_list)
 	
 	var tex_menu:PopupMenu = find_child("TextureSelector").get_popup()
 	tex_menu.clear()
