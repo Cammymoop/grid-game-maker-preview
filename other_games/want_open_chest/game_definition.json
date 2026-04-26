@@ -55,12 +55,12 @@
           {
             "v": "3",
             "conditions": [
-              "basic_default.c_is_moving::[\"i:0\",false,\"i:12\"]",
-              "basic_default.c_is_moving::[\"i:0\",false,\"i:14\"]",
+              "basic_default.c_is_moving::[\"i:0\",false,\"i:13\"]",
+              "basic_default.c_is_moving::[\"i:0\",false,\"i:15\"]",
               "or"
             ],
             "when true": [
-              "basic_default.a_turn::[\"i:0\",{\"args\":[\"s:type\",\"s:plain\",\"s:direction\",\"i:5\"],\"type\":\"Dictionary\"}]"
+              "basic_default.a_turn::[\"i:0\",{\"args\":[\"s:type\",\"s:plain\",\"s:direction\",\"i:4\"],\"type\":\"Dictionary\"}]"
             ],
             "when false": [
               "basic_default.true::[\"i:-1\"]"
@@ -118,9 +118,10 @@
             "mode": "normal",
             "texture": 1.0,
             "tex_index": 29.0,
+            "offset_degrees": 90.0,
             "offset": [
-              3.0,
-              0.0
+              0,
+              2
             ]
           }
         ]
@@ -182,7 +183,7 @@
             "v": "3",
             "conditions": [
               "basic_default.c_is_moving::[\"i:1\",false,\"i:12\"]",
-              "basic_default.c_is_facing::[\"i:1\",false,\"i:13\"]"
+              "basic_default.c_is_facing::[\"i:1\",false,\"i:12\"]"
             ],
             "when true": [
               "basic_default.quit::[\"i:-1\"]"
