@@ -13,6 +13,7 @@
 [ext_resource type="FontFile" uid="uid://cxxr3l22y0327" path="res://assets/font/NotoSans-Regular.ttf" id="5_mgbrl"]
 [ext_resource type="Texture2D" uid="uid://dlftqhv4kuv7q" path="res://assets/ui/foldable_collapsed_icon.tres" id="6_xr878"]
 [ext_resource type="StyleBox" uid="uid://bg5tmd1718hxa" path="res://assets/ui/tooltip_stylebox.tres" id="8_xr878"]
+[ext_resource type="Texture2D" uid="uid://3xo0n45j2h8g" path="res://assets/ui/vsplit_grabber_vector_icon.tres" id="13_5mvo3"]
 
 [sub_resource type="StyleBoxEmpty" id="9"]
 content_margin_left = 4.0
@@ -191,12 +192,16 @@ FoldableContainer/styles/title_collapsed_hover_panel = SubResource("StyleBoxFlat
 FoldableContainer/styles/title_collapsed_panel = SubResource("StyleBoxFlat_xr878")
 FoldableContainer/styles/title_hover_panel = SubResource("StyleBoxFlat_aql4b")
 FoldableContainer/styles/title_panel = SubResource("StyleBoxFlat_ayaws")
+HSplitContainer/constants/autohide = 0
 MenuButton/styles/disabled = ExtResource("2")
 MenuButton/styles/hover = ExtResource("1")
 MenuButton/styles/normal = ExtResource("3")
 MenuButton/styles/pressed = ExtResource("4")
 PanelContainer/styles/panel = ExtResource("5_8mgp1")
+SplitContainer/constants/autohide = 0
 TooltipPanel/styles/panel = ExtResource("8_xr878")
+VSplitContainer/constants/autohide = 0
+VSplitContainer/icons/grabber = ExtResource("13_5mvo3")
 Window/colors/title_color = Color(0, 0, 0, 1)
 Window/constants/close_h_offset = 18
 Window/constants/close_v_offset = 20

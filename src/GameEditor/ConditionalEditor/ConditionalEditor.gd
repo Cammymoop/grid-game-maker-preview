@@ -1,5 +1,7 @@
 extends Window
 
+const ActionsTabs = preload("res://src/GameEditor/ConditionalEditor/ActionsTabs.gd")
+
 signal cancelled
 signal save_conditional(conditional_data: Variant)
 
@@ -12,10 +14,9 @@ signal save_conditional(conditional_data: Variant)
 var when_lists: Dictionary = {}
 @export var when_list_container: Control
 
-@onready var add_condition_dialog = find_child("AddConditionDialog")
-@onready var add_action_dialog = find_child("AddActionDialog")
+@onready var add_command_dialog = find_child("AddCommandDialog")
 
-@onready var action_tabs: TabContainer = find_child("ActionsTabs")
+@onready var action_tabs: ActionsTabs = find_child("ActionsTabs")
 
 @onready var steps_ui = find_child("StepsUI")
 
@@ -40,10 +41,10 @@ var has_them_entity_slot: bool = true
 
 func _ready():
     var add_new_command_func = add_new_v3_command if use_conditionalv3 else add_v2_command
-    add_condition_dialog.connect("command_selected", add_new_command_func.bind("conditions"))
-    add_condition_dialog.hidden.connect(on_add_condition_hidden)
-    add_action_dialog.connect("command_selected", add_new_command_func.bind("actions"))
-    add_action_dialog.hidden.connect(on_add_action_hidden)
+    add_command_dialog.connect("command_selected", add_new_command_func.bind("conditions"))
+    add_command_dialog.hidden.connect(on_add_command_hidden)
+    #_old_add_action_dialog.connect("command_selected", add_new_command_func.bind("actions"))
+    #_old_add_action_dialog.hidden.connect(on_add_action_hidden)
     
     if not use_conditionalv3:
         steps_ui.hide()
@@ -118,7 +119,7 @@ func add_new_v3_command(qualified_cmd: String, slot_id: int, destination: String
 
     var list_name: String = destination
     if destination == "actions":
-        var cur_list_node = action_tabs.get_current_tab_control()
+        var cur_list_node: = action_tabs.get_current_list()
         if not cur_list_node in when_lists.values():
             push_error("Current action list is not a when list")
             return
@@ -304,10 +305,24 @@ func make_command_data(command_input_node) -> Dictionary:
     return command_input_node.get_command_data()
 
 func _on_NewConditionButton_pressed():
-    add_condition_dialog.popup_centered()
+    add_command_dialog.set_list_and_mode("Conditions", true)
+    add_command_dialog.popup_centered()
     
 func _on_NewActionButton_pressed():
-    add_action_dialog.popup_centered()
+    var action_list_name: = get_current_action_list_tab_name()
+    add_command_dialog.set_list_and_mode(action_list_name, false)
+    add_command_dialog.popup_centered()
+    #_old_add_action_dialog.popup_centered()
+
+func open_new_command_for_replace(command_list: Control, command_index: int) -> void:
+    is_new_command_replace = true
+    replace_to_index = command_index
+    replace_from_list = command_list
+    if command_list == cond_list:
+        add_command_dialog.set_list_and_mode("Conditions", true)
+    else:
+        add_command_dialog.set_list_and_mode(get_current_action_list_tab_name(), false)
+    add_command_dialog.popup_centered()
 
 func _on_SaveButton_pressed():
     save_conditional.emit(get_full_conditional_data())
@@ -365,21 +380,10 @@ func cancel() -> void:
     emit_signal("cancelled")
     queue_free()
 
-func open_new_command_for_replace(command_list: Control, command_index: int) -> void:
-    is_new_command_replace = true
-    replace_to_index = command_index
-    replace_from_list = command_list
-    if command_list == cond_list:
-        add_condition_dialog.popup_centered()
-    else:
-        add_action_dialog.popup_centered()
-
-func on_add_condition_hidden() -> void:
+func on_add_command_hidden() -> void:
     await get_tree().process_frame
     if is_new_command_replace:
         is_new_command_replace = false
 
-func on_add_action_hidden() -> void:
-    await get_tree().process_frame
-    if is_new_command_replace:
-        is_new_command_replace = false
+func get_current_action_list_tab_name() -> String:
+    return action_tabs.get_tab_title(action_tabs.current_tab)

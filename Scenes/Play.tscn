@@ -8,6 +8,7 @@
 [ext_resource type="PackedScene" uid="uid://ccr48mbb8s5et" path="res://Scenes/bg_effect_5.tscn" id="4_nsvgp"]
 [ext_resource type="Script" uid="uid://jw5fk1ax6p18" path="res://src/GameView.gd" id="5"]
 [ext_resource type="Script" uid="uid://evq6x474ma1n" path="res://Scenes/text_box_anim_root.gd" id="5_q86eb"]
+[ext_resource type="Script" uid="uid://c7i1r81fa2kcl" path="res://Scenes/auto_width_scroll_container.gd" id="6_4cgsu"]
 
 [sub_resource type="Animation" id="Animation_nsvgp"]
 length = 0.001
@@ -255,6 +256,32 @@ layout_mode = 2
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="OverlayLayer/OverlayUI/BottomCenter/TextBoxAnimRoot" unique_id=100291838]
 libraries/ = SubResource("AnimationLibrary_hagi3")
+
+[node name="CreditsUI" type="Control" parent="OverlayLayer" unique_id=1563443002]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="OverlayLayer/CreditsUI" unique_id=1068317885]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+alignment = 1
+
+[node name="AutoWidthScrollContainer" type="ScrollContainer" parent="OverlayLayer/CreditsUI/HBoxContainer" unique_id=548233106]
+layout_mode = 2
+script = ExtResource("6_4cgsu")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="OverlayLayer/CreditsUI/HBoxContainer/AutoWidthScrollContainer" unique_id=1529172787]
+custom_minimum_size = Vector2(100, 0)
+layout_mode = 2
 
 [node name="MapEditorUILayer" type="CanvasLayer" parent="." unique_id=1275328928]
 layer = 10

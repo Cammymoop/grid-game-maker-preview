@@ -20,6 +20,8 @@ corner_radius_top_right = 6
 expand_margin_left = 8.0
 expand_margin_right = 8.0
 
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_wqvmh"]
+
 [sub_resource type="StyleBoxFlat" id="2"]
 bg_color = Color(0.137255, 0.117647, 0.117647, 1)
 
@@ -32,7 +34,7 @@ size = Vector2i(700, 640)
 wrap_controls = true
 transparent = true
 script = ExtResource("6")
-when_list_container = NodePath("PanelContainer/MarginContainer/VBoxContainer2/VBoxContainer/HBoxContainer2/ActionsTabs")
+when_list_container = NodePath("PanelContainer/MarginContainer/VBoxContainer2/VBoxContainer/VSplitContainer/HBoxContainer2/ActionsTabs")
 
 [node name="PanelContainer" type="PanelContainer" parent="." unique_id=643923339]
 anchors_preset = 15
@@ -123,51 +125,56 @@ layout_mode = 2
 size_flags_vertical = 3
 theme_override_constants/separation = 12
 
-[node name="HBoxContainer" type="HBoxContainer" parent="PanelContainer/MarginContainer/VBoxContainer2/VBoxContainer" unique_id=2097436952]
+[node name="VSplitContainer" type="VSplitContainer" parent="PanelContainer/MarginContainer/VBoxContainer2/VBoxContainer" unique_id=1924364331]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_styles/split_bar_background = SubResource("StyleBoxEmpty_wqvmh")
+
+[node name="HBoxContainer" type="HBoxContainer" parent="PanelContainer/MarginContainer/VBoxContainer2/VBoxContainer/VSplitContainer" unique_id=2097436952]
 layout_mode = 2
 size_flags_vertical = 3
 theme_override_constants/separation = 8
 
-[node name="TabContainer" type="TabContainer" parent="PanelContainer/MarginContainer/VBoxContainer2/VBoxContainer/HBoxContainer" unique_id=972839437]
+[node name="TabContainer" type="TabContainer" parent="PanelContainer/MarginContainer/VBoxContainer2/VBoxContainer/VSplitContainer/HBoxContainer" unique_id=972839437]
 layout_mode = 2
 size_flags_horizontal = 3
 tab_alignment = 1
 current_tab = 0
 
-[node name="Conditions" type="ScrollContainer" parent="PanelContainer/MarginContainer/VBoxContainer2/VBoxContainer/HBoxContainer/TabContainer" unique_id=1041244154]
+[node name="Conditions" type="ScrollContainer" parent="PanelContainer/MarginContainer/VBoxContainer2/VBoxContainer/VSplitContainer/HBoxContainer/TabContainer" unique_id=1041244154]
 custom_minimum_size = Vector2(460, 120)
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 metadata/_tab_index = 0
 
-[node name="Panel" type="PanelContainer" parent="PanelContainer/MarginContainer/VBoxContainer2/VBoxContainer/HBoxContainer/TabContainer/Conditions" unique_id=168388457]
+[node name="Panel" type="PanelContainer" parent="PanelContainer/MarginContainer/VBoxContainer2/VBoxContainer/VSplitContainer/HBoxContainer/TabContainer/Conditions" unique_id=168388457]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 theme_override_styles/panel = SubResource("2")
 
-[node name="MarginContainer" type="MarginContainer" parent="PanelContainer/MarginContainer/VBoxContainer2/VBoxContainer/HBoxContainer/TabContainer/Conditions/Panel" unique_id=516125257]
+[node name="MarginContainer" type="MarginContainer" parent="PanelContainer/MarginContainer/VBoxContainer2/VBoxContainer/VSplitContainer/HBoxContainer/TabContainer/Conditions/Panel" unique_id=516125257]
 layout_mode = 2
 theme_override_constants/margin_left = 2
 theme_override_constants/margin_top = 10
 theme_override_constants/margin_right = 2
 theme_override_constants/margin_bottom = 10
 
-[node name="ConditionsList" parent="PanelContainer/MarginContainer/VBoxContainer2/VBoxContainer/HBoxContainer/TabContainer/Conditions/Panel/MarginContainer" unique_id=291498835 instance=ExtResource("6_k14si")]
+[node name="ConditionsList" parent="PanelContainer/MarginContainer/VBoxContainer2/VBoxContainer/VSplitContainer/HBoxContainer/TabContainer/Conditions/Panel/MarginContainer" unique_id=291498835 instance=ExtResource("6_k14si")]
 layout_mode = 2
 
-[node name="NewConditionButton" type="Button" parent="PanelContainer/MarginContainer/VBoxContainer2/VBoxContainer/HBoxContainer" unique_id=195764754]
+[node name="NewConditionButton" type="Button" parent="PanelContainer/MarginContainer/VBoxContainer2/VBoxContainer/VSplitContainer/HBoxContainer" unique_id=195764754]
 layout_mode = 2
 size_flags_vertical = 4
 icon = ExtResource("3")
 
-[node name="HBoxContainer2" type="HBoxContainer" parent="PanelContainer/MarginContainer/VBoxContainer2/VBoxContainer" unique_id=549658762]
+[node name="HBoxContainer2" type="HBoxContainer" parent="PanelContainer/MarginContainer/VBoxContainer2/VBoxContainer/VSplitContainer" unique_id=549658762]
 layout_mode = 2
 size_flags_vertical = 3
 theme_override_constants/separation = 8
 
-[node name="ActionsTabs" type="TabContainer" parent="PanelContainer/MarginContainer/VBoxContainer2/VBoxContainer/HBoxContainer2" unique_id=1974950153]
+[node name="ActionsTabs" type="TabContainer" parent="PanelContainer/MarginContainer/VBoxContainer2/VBoxContainer/VSplitContainer/HBoxContainer2" unique_id=1974950153]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_constants/tab_separation = 20
@@ -175,7 +182,7 @@ tab_alignment = 1
 current_tab = 2
 script = ExtResource("7")
 
-[node name="True Actions" type="ScrollContainer" parent="PanelContainer/MarginContainer/VBoxContainer2/VBoxContainer/HBoxContainer2/ActionsTabs" unique_id=1758110469]
+[node name="True Actions" type="ScrollContainer" parent="PanelContainer/MarginContainer/VBoxContainer2/VBoxContainer/VSplitContainer/HBoxContainer2/ActionsTabs" unique_id=1758110469]
 visible = false
 custom_minimum_size = Vector2(460, 120)
 layout_mode = 2
@@ -183,24 +190,24 @@ script = ExtResource("5")
 list = NodePath("Panel/MarginContainer/TrueActionsList")
 metadata/_tab_index = 0
 
-[node name="Panel" type="PanelContainer" parent="PanelContainer/MarginContainer/VBoxContainer2/VBoxContainer/HBoxContainer2/ActionsTabs/True Actions" unique_id=1895087873]
+[node name="Panel" type="PanelContainer" parent="PanelContainer/MarginContainer/VBoxContainer2/VBoxContainer/VSplitContainer/HBoxContainer2/ActionsTabs/True Actions" unique_id=1895087873]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 theme_override_styles/panel = SubResource("2")
 
-[node name="MarginContainer" type="MarginContainer" parent="PanelContainer/MarginContainer/VBoxContainer2/VBoxContainer/HBoxContainer2/ActionsTabs/True Actions/Panel" unique_id=996062562]
+[node name="MarginContainer" type="MarginContainer" parent="PanelContainer/MarginContainer/VBoxContainer2/VBoxContainer/VSplitContainer/HBoxContainer2/ActionsTabs/True Actions/Panel" unique_id=996062562]
 layout_mode = 2
 theme_override_constants/margin_left = 2
 theme_override_constants/margin_top = 10
 theme_override_constants/margin_right = 2
 theme_override_constants/margin_bottom = 10
 
-[node name="TrueActionsList" type="VBoxContainer" parent="PanelContainer/MarginContainer/VBoxContainer2/VBoxContainer/HBoxContainer2/ActionsTabs/True Actions/Panel/MarginContainer" unique_id=1044598477]
+[node name="TrueActionsList" type="VBoxContainer" parent="PanelContainer/MarginContainer/VBoxContainer2/VBoxContainer/VSplitContainer/HBoxContainer2/ActionsTabs/True Actions/Panel/MarginContainer" unique_id=1044598477]
 custom_minimum_size = Vector2(100, 20)
 layout_mode = 2
 
-[node name="False Actions" type="ScrollContainer" parent="PanelContainer/MarginContainer/VBoxContainer2/VBoxContainer/HBoxContainer2/ActionsTabs" unique_id=1765587463]
+[node name="False Actions" type="ScrollContainer" parent="PanelContainer/MarginContainer/VBoxContainer2/VBoxContainer/VSplitContainer/HBoxContainer2/ActionsTabs" unique_id=1765587463]
 visible = false
 custom_minimum_size = Vector2(460, 120)
 layout_mode = 2
@@ -208,48 +215,48 @@ script = ExtResource("5")
 list = NodePath("Panel/MarginContainer/FalseActionsList")
 metadata/_tab_index = 1
 
-[node name="Panel" type="PanelContainer" parent="PanelContainer/MarginContainer/VBoxContainer2/VBoxContainer/HBoxContainer2/ActionsTabs/False Actions" unique_id=471248604]
+[node name="Panel" type="PanelContainer" parent="PanelContainer/MarginContainer/VBoxContainer2/VBoxContainer/VSplitContainer/HBoxContainer2/ActionsTabs/False Actions" unique_id=471248604]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 theme_override_styles/panel = SubResource("2")
 
-[node name="MarginContainer" type="MarginContainer" parent="PanelContainer/MarginContainer/VBoxContainer2/VBoxContainer/HBoxContainer2/ActionsTabs/False Actions/Panel" unique_id=831435794]
+[node name="MarginContainer" type="MarginContainer" parent="PanelContainer/MarginContainer/VBoxContainer2/VBoxContainer/VSplitContainer/HBoxContainer2/ActionsTabs/False Actions/Panel" unique_id=831435794]
 layout_mode = 2
 theme_override_constants/margin_left = 2
 theme_override_constants/margin_top = 10
 theme_override_constants/margin_right = 2
 theme_override_constants/margin_bottom = 10
 
-[node name="FalseActionsList" type="VBoxContainer" parent="PanelContainer/MarginContainer/VBoxContainer2/VBoxContainer/HBoxContainer2/ActionsTabs/False Actions/Panel/MarginContainer" unique_id=144153354]
+[node name="FalseActionsList" type="VBoxContainer" parent="PanelContainer/MarginContainer/VBoxContainer2/VBoxContainer/VSplitContainer/HBoxContainer2/ActionsTabs/False Actions/Panel/MarginContainer" unique_id=144153354]
 custom_minimum_size = Vector2(100, 20)
 layout_mode = 2
 
-[node name="Always Actions" type="ScrollContainer" parent="PanelContainer/MarginContainer/VBoxContainer2/VBoxContainer/HBoxContainer2/ActionsTabs" unique_id=99594252]
+[node name="Always Actions" type="ScrollContainer" parent="PanelContainer/MarginContainer/VBoxContainer2/VBoxContainer/VSplitContainer/HBoxContainer2/ActionsTabs" unique_id=99594252]
 custom_minimum_size = Vector2(460, 120)
 layout_mode = 2
 script = ExtResource("5")
 list = NodePath("Panel/MarginContainer/AlwaysActionsList")
 metadata/_tab_index = 2
 
-[node name="Panel" type="PanelContainer" parent="PanelContainer/MarginContainer/VBoxContainer2/VBoxContainer/HBoxContainer2/ActionsTabs/Always Actions" unique_id=1911882534]
+[node name="Panel" type="PanelContainer" parent="PanelContainer/MarginContainer/VBoxContainer2/VBoxContainer/VSplitContainer/HBoxContainer2/ActionsTabs/Always Actions" unique_id=1911882534]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 theme_override_styles/panel = SubResource("2")
 
-[node name="MarginContainer" type="MarginContainer" parent="PanelContainer/MarginContainer/VBoxContainer2/VBoxContainer/HBoxContainer2/ActionsTabs/Always Actions/Panel" unique_id=939838264]
+[node name="MarginContainer" type="MarginContainer" parent="PanelContainer/MarginContainer/VBoxContainer2/VBoxContainer/VSplitContainer/HBoxContainer2/ActionsTabs/Always Actions/Panel" unique_id=939838264]
 layout_mode = 2
 theme_override_constants/margin_left = 2
 theme_override_constants/margin_top = 10
 theme_override_constants/margin_right = 2
 theme_override_constants/margin_bottom = 10
 
-[node name="AlwaysActionsList" type="VBoxContainer" parent="PanelContainer/MarginContainer/VBoxContainer2/VBoxContainer/HBoxContainer2/ActionsTabs/Always Actions/Panel/MarginContainer" unique_id=1072969222]
+[node name="AlwaysActionsList" type="VBoxContainer" parent="PanelContainer/MarginContainer/VBoxContainer2/VBoxContainer/VSplitContainer/HBoxContainer2/ActionsTabs/Always Actions/Panel/MarginContainer" unique_id=1072969222]
 custom_minimum_size = Vector2(100, 20)
 layout_mode = 2
 
-[node name="NewActionButton" type="Button" parent="PanelContainer/MarginContainer/VBoxContainer2/VBoxContainer/HBoxContainer2" unique_id=591077197]
+[node name="NewActionButton" type="Button" parent="PanelContainer/MarginContainer/VBoxContainer2/VBoxContainer/VSplitContainer/HBoxContainer2" unique_id=591077197]
 layout_mode = 2
 size_flags_vertical = 4
 icon = ExtResource("3")
@@ -277,15 +284,10 @@ text = "Cancel"
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="AddActionDialog" parent="." unique_id=646307895 instance=ExtResource("2")]
+[node name="AddCommandDialog" parent="." unique_id=24360205 instance=ExtResource("2")]
 visible = false
-exclude_conditions = true
 
-[node name="AddConditionDialog" parent="." unique_id=24360205 instance=ExtResource("2")]
-visible = false
-exclude_actions = true
-
-[connection signal="pressed" from="PanelContainer/MarginContainer/VBoxContainer2/VBoxContainer/HBoxContainer/NewConditionButton" to="." method="_on_NewConditionButton_pressed"]
-[connection signal="pressed" from="PanelContainer/MarginContainer/VBoxContainer2/VBoxContainer/HBoxContainer2/NewActionButton" to="." method="_on_NewActionButton_pressed"]
+[connection signal="pressed" from="PanelContainer/MarginContainer/VBoxContainer2/VBoxContainer/VSplitContainer/HBoxContainer/NewConditionButton" to="." method="_on_NewConditionButton_pressed"]
+[connection signal="pressed" from="PanelContainer/MarginContainer/VBoxContainer2/VBoxContainer/VSplitContainer/HBoxContainer2/NewActionButton" to="." method="_on_NewActionButton_pressed"]
 [connection signal="pressed" from="PanelContainer/MarginContainer/VBoxContainer2/VBoxContainer/HBoxContainer3/SaveButton" to="." method="_on_SaveButton_pressed"]
 [connection signal="pressed" from="PanelContainer/MarginContainer/VBoxContainer2/VBoxContainer/HBoxContainer3/CancelButton" to="." method="_on_CancelButton_pressed"]

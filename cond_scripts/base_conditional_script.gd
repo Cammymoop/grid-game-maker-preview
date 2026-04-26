@@ -20,20 +20,24 @@ func list_commands() -> Array[Dictionary]:
 		var method_name = method_info.name
 		if method_name.begins_with(CMD_FUNC_PREFIX):
 			var cmd_name = method_name.trim_prefix(CMD_FUNC_PREFIX)
+			var custom_meta_info: Dictionary = get_command_meta_info(cmd_name)
 			var meta_info: Dictionary = {
 				"name": cmd_name,
-				"display_name": get_command_display_name(cmd_name),
 				"args": get_command_arg_list(cmd_name, method_info),
 				"template_text": "",
 				"slot_type_hint": "all",
 			}
-			meta_info.merge(get_command_meta_info(cmd_name), true)
-			if meta_info.get("template_text", ""):
+			meta_info.merge(custom_meta_info, true)
+			meta_info["display_name"] = get_command_display_name(cmd_name, custom_meta_info)
+			if not meta_info.has("tooltip") and meta_info.get("template_text", ""):
 				meta_info["tooltip"] = _convert_template_to_tooltip(meta_info["template_text"])
 			cmd_infos.append(meta_info)
 	return cmd_infos
 
-func get_command_display_name(cmd_name: String) -> String:
+# override this to customize how command name is generated
+func get_command_display_name(cmd_name: String, custom_meta_info: Dictionary) -> String:
+	if custom_meta_info.get("display_name", ""):
+		return custom_meta_info["display_name"]
 	return cmd_name.capitalize()
 
 func get_command_meta_info(cmd: String) -> Dictionary:
@@ -42,18 +46,20 @@ func get_command_meta_info(cmd: String) -> Dictionary:
 			"template_text": cmd.capitalize(),
 		}
 	var result: Variant = Callable(self, DESC_FUNC_PREFIX + cmd).call()
-	if typeof(result) == TYPE_STRING:
-		if result.contains("|"):
-			return {
-				"slot_type_hint": result.split("|", true, 1)[0],
-				"template_text": result.split("|", true, 1)[1],
-			}
-		else:
-			return {
-				"template_text": result,
-			}
-	elif typeof(result) == TYPE_DICTIONARY:
+	if typeof(result) == TYPE_DICTIONARY:
 		return result
+	elif typeof(result) == TYPE_STRING:
+		var info: Dictionary = {
+			"template_text": result,
+		}
+		if result.contains("|"):
+			info["slot_type_hint"] = result.split("|", true, 1)[0]
+			info["template_text"] = result.split("|", true, 1)[1]
+		if cmd.begins_with("c_") and not cmd.begins_with("c_get_"):
+			info["non_action"] = true
+		elif cmd.begins_with("a_"):
+			info["non_condition"] = true
+		return info
 	else:
 		push_error("Invalid result type for command meta info: %s (for command %s)" % [result, cmd])
 		return {}

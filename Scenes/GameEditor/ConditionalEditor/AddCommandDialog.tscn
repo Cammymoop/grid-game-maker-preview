@@ -4,14 +4,16 @@
 [ext_resource type="PackedScene" uid="uid://bh1w4w8i5hk66" path="res://Scenes/GameEditor/SlotSelectorButton.tscn" id="2"]
 [ext_resource type="Theme" uid="uid://daswi5ker7ml0" path="res://src/UI/ConditionalEditorTheme.tres" id="3"]
 
-[node name="AddActionDialog" type="ConfirmationDialog" unique_id=1838505494]
+[node name="AddActionDialog" type="ConfirmationDialog" unique_id=1838505494 node_paths=PackedStringArray("filter_input", "item_list")]
 oversampling_override = 1.0
 title = "Add Command"
 position = Vector2i(0, 36)
-size = Vector2i(336, 394)
+size = Vector2i(336, 500)
 visible = true
 theme = ExtResource("3")
 script = ExtResource("1")
+filter_input = NodePath("VBoxContainer/HBoxContainer/FilterInput")
+item_list = NodePath("VBoxContainer/AllCommands")
 
 [node name="VBoxContainer" type="VBoxContainer" parent="." unique_id=1060331235]
 custom_minimum_size = Vector2(320, 0)
@@ -21,7 +23,7 @@ anchor_bottom = 1.0
 offset_left = 6.0
 offset_top = 4.0
 offset_right = -6.0
-offset_bottom = -49.0
+offset_bottom = -45.0
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_constants/separation = 6
@@ -40,11 +42,19 @@ size_flags_horizontal = 3
 size_flags_vertical = 4
 placeholder_text = "filter"
 clear_button_enabled = true
+select_all_on_focus = true
 
 [node name="AllCommands" type="ItemList" parent="VBoxContainer" unique_id=2020200961]
-custom_minimum_size = Vector2(0, 300)
+custom_minimum_size = Vector2(320, 300)
 layout_mode = 2
 size_flags_vertical = 3
+theme_override_constants/v_separation = 2
+theme_override_constants/line_separation = 1
+theme_override_font_sizes/font_size = 14
+allow_reselect = true
+scroll_hint_mode = 1
+max_columns = 2
+same_column_width = true
 
 [node name="Control" type="Control" parent="." unique_id=1993017353]
 visible = false
@@ -53,7 +63,7 @@ anchors_preset = 0
 offset_left = 6.0
 offset_top = 4.0
 offset_right = 330.0
-offset_bottom = 345.0
+offset_bottom = 455.0
 
 [node name="Button" type="Button" parent="Control" unique_id=841003041]
 layout_mode = 0

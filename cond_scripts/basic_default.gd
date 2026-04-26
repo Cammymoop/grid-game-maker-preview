@@ -1,9 +1,9 @@
 extends BaseConditionalScript
 
 
-func get_command_display_name(cmd_name: String) -> String:
+func get_command_display_name(cmd_name: String, custom_meta_info: Dictionary) -> String:
 	cmd_name = cmd_name.trim_prefix("a_").trim_prefix("c_")
-	return cmd_name.capitalize()
+	return super.get_command_display_name(cmd_name, custom_meta_info)
 
 # --- COMMANDS ---
 
@@ -12,8 +12,14 @@ func desc_select_defaults() -> String:
 func cmd_select_defaults(slots: Dictionary) -> void:
 	cond_resolver.select_reset(slots)
 
-func desc_quit() -> String:
-	return "none|Skip the rest of the conditional"
+func desc_quit() -> Dictionary:
+	return {
+		"display_name": "Quit conditional",
+		"slot_type_hint": "none",
+		"template_text": "Stop evaluating the rest of the conditional",
+		"tooltip": "Commands below in this list or in other lists will be skipped, all later steps will not be run.\n" \
+					+ "The result of this conditional will be whatever the result of this step is regardless of if there are later steps."
+	}
 func cmd_quit(_slots: Dictionary) -> Dictionary:
 	return {"result": true, "quit": true}
 
@@ -566,8 +572,12 @@ func cmd_c_get_pushed(slots: Dictionary, chosen_slot: int, direction: Variant, k
 	var got_pushed: bool = selected.start_move(facing, not keep_visual)
 	return got_pushed
 
-func desc_c_is_facing() -> String:
-	return "entity|If the entity [invert:InvertInput:is,is not] facing this way [direction:DirectionInput]"
+func desc_c_is_facing() -> Dictionary:
+	return {
+		"display_name": "If entity facing direction",
+		"slot_type_hint": "entity",
+		"template_text": "If the entity [invert:InvertInput:is,is not] facing this way [direction:DirectionInput]",
+	}
 func cmd_c_is_facing(slots: Dictionary, chosen_slot: int, invert: bool, direction: int) -> bool:
 	if not Commands.slot_is_entity(chosen_slot):
 		return false
@@ -576,8 +586,12 @@ func cmd_c_is_facing(slots: Dictionary, chosen_slot: int, invert: bool, directio
 	var result = selected.facing == resolve_direction_value(direction, slots)
 	return not result if invert else result
 
-func desc_c_is_moving() -> String:
-	return "entity|If the entity [invert:InvertInput:is,is not] moving this way [direction:DirectionInput]"
+func desc_c_is_moving() -> Dictionary:
+	return {
+		"display_name": "If entity moving direction",
+		"slot_type_hint": "entity",
+		"template_text": "If the entity [invert:InvertInput:is,is not] moving this way [direction:DirectionInput]",
+	}
 func cmd_c_is_moving(slots: Dictionary, chosen_slot: int, invert: bool, direction: int) -> bool:
 	if not Commands.slot_is_entity(chosen_slot):
 		return false
@@ -586,13 +600,17 @@ func cmd_c_is_moving(slots: Dictionary, chosen_slot: int, invert: bool, directio
 	var result = selected.move_facing == resolve_direction_value(direction, slots)
 	return not result if invert else result
 
-func desc_a_die() -> String:
-	return "entity|The entity dies now"
+func desc_a_die() -> Dictionary:
+	return {
+		"display_name": "Destroy entity (die)",
+		"slot_type_hint": "entity",
+		"template_text": "The entity dies now",
+	}
 func cmd_a_die(slots: Dictionary, chosen_slot: int) -> void:
 	if Commands.slot_is_entity(chosen_slot) and slots[chosen_slot]:
 		slots[chosen_slot].die()
 	else:
-		prints("failed to kill on slot %s" % chosen_slot)
+		prints("failed to die on slot %s" % chosen_slot)
 
 func desc_a_move() -> String:
 	return "entity|The entity starts moving this way [complex_dir:DirectionInput:1]"
@@ -962,13 +980,21 @@ func desc_dismiss_textbox() -> String:
 func cmd_dismiss_textbox(_slots: Dictionary) -> void:
 	GameManager.dismiss_the_textbox()
 	
-func desc_true() -> String:
-	return "none|Set this step's result to True"
+func desc_true() -> Dictionary:
+	return {
+		"non_condition": true,
+		"slot_type_hint": "none",
+		"template_text": "Set this step's result to True",
+	}
 func cmd_true(_slots: Dictionary) -> Dictionary:
 	return {"step_result": true}
 
-func desc_false() -> String:
-	return "none|Set this step's result to False"
+func desc_false() -> Dictionary:
+	return {
+		"non_condition": true,
+		"slot_type_hint": "none",
+		"template_text": "Set this step's result to False",
+	}
 func cmd_false(_slots: Dictionary) -> Dictionary:
 	return {"step_result": false}
 

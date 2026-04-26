@@ -26,11 +26,13 @@ var command_item_tab_template: StyleBoxFlat = preload("res://assets/ui/PropertyE
     Slot.DARK_GREEN: Color.GREEN * 0.6,
     Slot.DARK_ORANGE: Color.ORANGE * 0.6,
     
-    -1: Color.WHITE.darkened(0.2),
+    -1: Color(0.2, 0.9, 0.38),
 }
 
 func get_command_item_styleboxes_for_slot(slot_id: int) -> Dictionary:
     var slot_color = slot_colors.get(slot_id, Color.WHITE.darkened(0.2))
+    if not slot_colors.has(slot_id):
+        prints("no color for slot %s" % slot_id)
     var colored_bg = command_item_bg_template.duplicate()
     recolor_stylebox(colored_bg, slot_color)
     var colored_tab = command_item_tab_template.duplicate()

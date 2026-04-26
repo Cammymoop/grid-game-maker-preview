@@ -68,10 +68,11 @@ script = ExtResource("10")
 [node name="TabContainer" type="TabContainer" parent="MarginContainer/UIRoot" unique_id=540253846]
 layout_mode = 2
 theme = ExtResource("3_qrjoe")
-current_tab = 0
+current_tab = 1
 tab_0/title = "Game"
 
 [node name="GameDefinition" type="VBoxContainer" parent="MarginContainer/UIRoot/TabContainer" unique_id=1146228055 node_paths=PackedStringArray("show_level_title_option_picker", "name_input", "edit_game_dir_button", "move_interp_option_picker", "action_signal_sent_to_option_picker", "turn_animation_option_picker")]
+visible = false
 layout_mode = 2
 script = ExtResource("6")
 show_level_title_option_picker = NodePath("ScrollContainer/VBoxContainer/GameSettingsSection/MarginContainer/HFlowContainer/HFlowContainer/HBoxContainer11/OptionButton")
@@ -496,71 +497,83 @@ text = "New Empty
 Game"
 
 [node name="Tiles & Entities" type="VBoxContainer" parent="MarginContainer/UIRoot/TabContainer" unique_id=162263070 node_paths=PackedStringArray("tile_grid", "entity_grid")]
-visible = false
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 script = ExtResource("3")
-tile_grid = NodePath("TilesHBoxContainer/PanelContainer/ScrollContainer/EditTilesGrid")
-entity_grid = NodePath("EntitiesHBoxContainer/PanelContainer/ScrollContainer/EditEntitiesGrid")
+tile_grid = NodePath("VSplitContainer/VBoxContainer2/TilesHBoxContainer/PanelContainer/ScrollContainer/EditTilesGrid")
+entity_grid = NodePath("VSplitContainer/VBoxContainer/EntitiesHBoxContainer/PanelContainer/ScrollContainer/EditEntitiesGrid")
 metadata/_tab_index = 1
 
-[node name="EntitiesLabel" type="Label" parent="MarginContainer/UIRoot/TabContainer/Tiles & Entities" unique_id=956662050]
+[node name="VSplitContainer" type="VSplitContainer" parent="MarginContainer/UIRoot/TabContainer/Tiles & Entities" unique_id=955462173]
+layout_mode = 2
+size_flags_vertical = 3
+dragger_visibility = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/UIRoot/TabContainer/Tiles & Entities/VSplitContainer" unique_id=1013786753]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="EntitiesLabel" type="Label" parent="MarginContainer/UIRoot/TabContainer/Tiles & Entities/VSplitContainer/VBoxContainer" unique_id=956662050]
 layout_mode = 2
 text = "Entities:"
 horizontal_alignment = 1
 
-[node name="EntitiesHBoxContainer" type="HBoxContainer" parent="MarginContainer/UIRoot/TabContainer/Tiles & Entities" unique_id=1010499751]
+[node name="EntitiesHBoxContainer" type="HBoxContainer" parent="MarginContainer/UIRoot/TabContainer/Tiles & Entities/VSplitContainer/VBoxContainer" unique_id=1010499751]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 
-[node name="PanelContainer" type="PanelContainer" parent="MarginContainer/UIRoot/TabContainer/Tiles & Entities/EntitiesHBoxContainer" unique_id=1526537577]
+[node name="PanelContainer" type="PanelContainer" parent="MarginContainer/UIRoot/TabContainer/Tiles & Entities/VSplitContainer/VBoxContainer/EntitiesHBoxContainer" unique_id=1526537577]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 theme_override_styles/panel = SubResource("1")
 
-[node name="ScrollContainer" type="ScrollContainer" parent="MarginContainer/UIRoot/TabContainer/Tiles & Entities/EntitiesHBoxContainer/PanelContainer" unique_id=976704208]
+[node name="ScrollContainer" type="ScrollContainer" parent="MarginContainer/UIRoot/TabContainer/Tiles & Entities/VSplitContainer/VBoxContainer/EntitiesHBoxContainer/PanelContainer" unique_id=976704208]
 layout_mode = 2
 
-[node name="EditEntitiesGrid" type="GridContainer" parent="MarginContainer/UIRoot/TabContainer/Tiles & Entities/EntitiesHBoxContainer/PanelContainer/ScrollContainer" unique_id=1401090316]
+[node name="EditEntitiesGrid" type="GridContainer" parent="MarginContainer/UIRoot/TabContainer/Tiles & Entities/VSplitContainer/VBoxContainer/EntitiesHBoxContainer/PanelContainer/ScrollContainer" unique_id=1401090316]
 layout_mode = 2
 size_flags_horizontal = 7
 size_flags_vertical = 3
 columns = 4
 
-[node name="NewEntityButton" type="Button" parent="MarginContainer/UIRoot/TabContainer/Tiles & Entities/EntitiesHBoxContainer" unique_id=36066154]
+[node name="NewEntityButton" type="Button" parent="MarginContainer/UIRoot/TabContainer/Tiles & Entities/VSplitContainer/VBoxContainer/EntitiesHBoxContainer" unique_id=36066154]
 layout_mode = 2
 size_flags_vertical = 4
 icon = ExtResource("1")
 
-[node name="TilesLabel" type="Label" parent="MarginContainer/UIRoot/TabContainer/Tiles & Entities" unique_id=765376153]
+[node name="VBoxContainer2" type="VBoxContainer" parent="MarginContainer/UIRoot/TabContainer/Tiles & Entities/VSplitContainer" unique_id=1418902712]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="TilesLabel" type="Label" parent="MarginContainer/UIRoot/TabContainer/Tiles & Entities/VSplitContainer/VBoxContainer2" unique_id=765376153]
 layout_mode = 2
 text = "Tiles:"
 horizontal_alignment = 1
 
-[node name="TilesHBoxContainer" type="HBoxContainer" parent="MarginContainer/UIRoot/TabContainer/Tiles & Entities" unique_id=1233001839]
+[node name="TilesHBoxContainer" type="HBoxContainer" parent="MarginContainer/UIRoot/TabContainer/Tiles & Entities/VSplitContainer/VBoxContainer2" unique_id=1233001839]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 
-[node name="PanelContainer" type="PanelContainer" parent="MarginContainer/UIRoot/TabContainer/Tiles & Entities/TilesHBoxContainer" unique_id=66716290]
+[node name="PanelContainer" type="PanelContainer" parent="MarginContainer/UIRoot/TabContainer/Tiles & Entities/VSplitContainer/VBoxContainer2/TilesHBoxContainer" unique_id=66716290]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 theme_override_styles/panel = SubResource("1")
 
-[node name="ScrollContainer" type="ScrollContainer" parent="MarginContainer/UIRoot/TabContainer/Tiles & Entities/TilesHBoxContainer/PanelContainer" unique_id=1087145622]
+[node name="ScrollContainer" type="ScrollContainer" parent="MarginContainer/UIRoot/TabContainer/Tiles & Entities/VSplitContainer/VBoxContainer2/TilesHBoxContainer/PanelContainer" unique_id=1087145622]
 layout_mode = 2
 
-[node name="EditTilesGrid" type="GridContainer" parent="MarginContainer/UIRoot/TabContainer/Tiles & Entities/TilesHBoxContainer/PanelContainer/ScrollContainer" unique_id=2069001615]
+[node name="EditTilesGrid" type="GridContainer" parent="MarginContainer/UIRoot/TabContainer/Tiles & Entities/VSplitContainer/VBoxContainer2/TilesHBoxContainer/PanelContainer/ScrollContainer" unique_id=2069001615]
 layout_mode = 2
 size_flags_horizontal = 7
 size_flags_vertical = 3
 columns = 4
 
-[node name="NewTileButton" type="Button" parent="MarginContainer/UIRoot/TabContainer/Tiles & Entities/TilesHBoxContainer" unique_id=426118576]
+[node name="NewTileButton" type="Button" parent="MarginContainer/UIRoot/TabContainer/Tiles & Entities/VSplitContainer/VBoxContainer2/TilesHBoxContainer" unique_id=426118576]
 layout_mode = 2
 size_flags_vertical = 4
 icon = ExtResource("1")
@@ -695,8 +708,8 @@ max_brightness = 0.3
 [connection signal="pressed" from="MarginContainer/UIRoot/TabContainer/GameDefinition/HBoxContainer5/LoadButton" to="MarginContainer/UIRoot/TabContainer/GameDefinition" method="_on_LoadButton_pressed"]
 [connection signal="pressed" from="MarginContainer/UIRoot/TabContainer/GameDefinition/HBoxContainer5/HBoxContainer2/NewEmpty" to="MarginContainer/UIRoot/TabContainer/GameDefinition" method="_on_new_empty_pressed"]
 [connection signal="resized" from="MarginContainer/UIRoot/TabContainer/Tiles & Entities" to="MarginContainer/UIRoot/TabContainer/Tiles & Entities" method="_on_Tiles_resized"]
-[connection signal="pressed" from="MarginContainer/UIRoot/TabContainer/Tiles & Entities/EntitiesHBoxContainer/NewEntityButton" to="MarginContainer/UIRoot/TabContainer/Tiles & Entities" method="_on_NewEntityButton_pressed"]
-[connection signal="pressed" from="MarginContainer/UIRoot/TabContainer/Tiles & Entities/TilesHBoxContainer/NewTileButton" to="MarginContainer/UIRoot/TabContainer/Tiles & Entities" method="_on_NewTileButton_pressed"]
+[connection signal="pressed" from="MarginContainer/UIRoot/TabContainer/Tiles & Entities/VSplitContainer/VBoxContainer/EntitiesHBoxContainer/NewEntityButton" to="MarginContainer/UIRoot/TabContainer/Tiles & Entities" method="_on_NewEntityButton_pressed"]
+[connection signal="pressed" from="MarginContainer/UIRoot/TabContainer/Tiles & Entities/VSplitContainer/VBoxContainer2/TilesHBoxContainer/NewTileButton" to="MarginContainer/UIRoot/TabContainer/Tiles & Entities" method="_on_NewTileButton_pressed"]
 [connection signal="pressed" from="MarginContainer/UIRoot/TabContainer/Images/HBoxContainer/HBoxContainer/NewTexButton" to="MarginContainer/UIRoot/TabContainer/Images" method="_on_NewTexButton_pressed"]
 [connection signal="pressed" from="MarginContainer/UIRoot/TabContainer/Images/HBoxContainer/OpenImagesFolder" to="MarginContainer/UIRoot" method="_on_OpenImagesFolder_pressed"]
 [connection signal="pressed" from="MarginContainer/UIRoot/HBoxContainer/TestPlayButton" to="MarginContainer/UIRoot" method="_on_test_play_button_pressed"]

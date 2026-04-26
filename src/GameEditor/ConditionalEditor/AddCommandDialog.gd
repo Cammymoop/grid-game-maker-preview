@@ -3,56 +3,80 @@ extends ConfirmationDialog
 signal command_selected(command_id: int, slot_id: int)
 signal hidden
 
-@export var exclude_conditions: bool = false
-@export var exclude_actions: bool = false
+@export var filter_input: LineEdit
+@export var item_list: ItemList
 
-var names_to_ids: Dictionary = {}
-var names_to_categories: Dictionary = {}
+@export var enable_condition_action_filter: bool = false
 
-var use_v3: bool = true
+var ids_to_names: Dictionary[String, String] = {}
+var names_to_ids: Dictionary[String, String] = {}
+var ids_to_categories: Dictionary = {}
+var ids_condition_exclude: Dictionary[String, bool] = {}
+var ids_action_exclude: Dictionary[String, bool] = {}
+
+var condion_mode_includes_actions: bool = true
+
+var is_condition_mode: bool = true
+var is_generic_mode: bool = false
 
 func _ready():
 	visibility_changed.connect(_on_vis_changed)
 	close_requested.connect(close_dialog)
-	if use_v3:
-		build_v3_list()
-	else:
-		build_base_list()
+	size_changed.connect(on_resized)
+	build_v3_list()
 
-func build_base_list() -> void:
-	var list = find_child("AllCommands")
-	list.clear()
-	
-	for comm in Commands.Friendly:
-		if exclude_actions and Commands.is_action(comm):
-			continue
-		if exclude_conditions and Commands.is_condition(comm):
-			continue
-		var command_name = Commands.Friendly[comm].display_name
-		names_to_ids[command_name] = comm
-	
-	for command_name in names_to_ids:
-		list.add_item(command_name)
+func on_resized() -> void:
+	var col_size: = item_list.custom_minimum_size.x
+	item_list.max_columns = maxi(1, floori((item_list.size.x + (col_size * .5)) / col_size))
+
+func make_generic() -> void:
+	set_list_name("")
+	set_is_generic_mode(true)
+
+func set_list_and_mode(new_list_name: String, new_is_condition: bool, new_is_generic: bool = false) -> void:
+	is_generic_mode = new_is_generic
+	if not is_generic_mode:
+		is_condition_mode = new_is_condition
+	set_list_name(new_list_name)
+	if visible:
+		reapply_filters()
+
+func set_list_name(new_list_name: String) -> void:
+	if new_list_name == "":
+		title = "Add Command"
+	else:
+		title = "Add Command to %s" % [new_list_name]
 
 func build_v3_list() -> void:
 	var list: = find_child("AllCommands") as ItemList
 	list.clear()
 	
 	names_to_ids = {}
-	names_to_categories = {}
+	ids_to_names = {}
+	ids_to_categories = {}
+	ids_condition_exclude = {}
+	ids_action_exclude = {}
 	var tooltips: = {}
 	
 	for qualified_cmd in ConditionalsV3.all_commands:
 		var cmd_info = ConditionalsV3.get_command_info(qualified_cmd)
-		if exclude_conditions:
-			pass
-		if exclude_actions:
-			pass
-		var display_name = cmd_info["display_name"]
+		var base_display_name: String = cmd_info["display_name"]
+		var display_name: = base_display_name
+		for i in 1000:
+			if not names_to_ids.has(display_name):
+				break
+			display_name = base_display_name + " (%s)" % (i + 2)
+	
+		ids_to_names[qualified_cmd] = display_name
 		names_to_ids[display_name] = qualified_cmd
+
 		var category_hint = ConditionalsV3.get_command_slot_type_hint(qualified_cmd)
-		names_to_categories[display_name] = category_hint
+		ids_to_categories[qualified_cmd] = category_hint
 		tooltips[qualified_cmd] = cmd_info["tooltip"]
+		if cmd_info.get("non_condition", false):
+			ids_condition_exclude[qualified_cmd] = true
+		if cmd_info.get("non_action", false):
+			ids_action_exclude[qualified_cmd] = true
 	
 	var i: = 0
 	for display_name in names_to_ids:
@@ -60,7 +84,18 @@ func build_v3_list() -> void:
 		list.set_item_tooltip(i, tooltips[names_to_ids[display_name]])
 		i += 1
 
-func set_items(new_list) -> void:
+func set_condition_mode(new_is_condition_mode: bool) -> void:
+	is_generic_mode = false
+	is_condition_mode = new_is_condition_mode
+	if visible:
+		reapply_filters()
+
+func set_is_generic_mode(new_is_generic_mode: bool) -> void:
+	is_generic_mode = new_is_generic_mode
+	if visible:
+		reapply_filters()
+
+func set_cur_items(new_list) -> void:
 	var list = find_child("AllCommands")
 	list.clear()
 	
@@ -88,24 +123,38 @@ func get_current_slot_id() -> int:
 	return slot_selector.current_slot_id
 
 func get_slot_filtered_list(slot_id: int) -> Array:
-	if not use_v3 or slot_id < 0:
+	if slot_id < 0:
 		return names_to_ids.keys()
 	var cur_slot_category: String = Commands.SLOT_CATEGORIES[slot_id]
 	var filtered_names = []
-	for cmd_name in names_to_categories.keys():
-		var categories: Array = names_to_categories[cmd_name]
+	for qualified_cmd in ids_to_categories.keys():
+		var categories: Array = ids_to_categories[qualified_cmd]
 		if not categories or "all" in categories or cur_slot_category in categories:
-			filtered_names.append(cmd_name)
+			filtered_names.append(ids_to_names[qualified_cmd])
 	return filtered_names
+
+func filter_list_condition_action(list: Array) -> Array:
+	if is_condition_mode and not condion_mode_includes_actions:
+		return list
+	var cond_action_filtered: = []
+	for cmd_name in list:
+		var cmd_id = names_to_ids[cmd_name]
+		if is_condition_mode and ids_condition_exclude.has(cmd_id):
+			continue
+		elif not is_condition_mode and ids_action_exclude.has(cmd_id):
+			continue
+		cond_action_filtered.append(cmd_name)
+	return cond_action_filtered
 
 func get_current_slot_filtered_list() -> Array:
 	return get_slot_filtered_list(get_current_slot_id())
 
 
 func reapply_filters() -> void:
-	var filter_text = find_child("FilterInput").text
-	var all = get_current_slot_filtered_list()
-	set_items(apply_text_filter(all, filter_text))
+	var filtered_list: = get_current_slot_filtered_list()
+	if not is_generic_mode:
+		filtered_list = filter_list_condition_action(filtered_list)
+	set_cur_items(apply_text_filter(filtered_list, filter_input.text))
 
 func _on_Filter_text_changed(_new_text):
 	reapply_filters()
@@ -159,3 +208,8 @@ func _on_slot_selector_button_slot_changed(_new_slot_id: Variant) -> void:
 func _on_vis_changed():
 	if not visible:
 		hidden.emit()
+	else:
+		on_shown()
+
+func on_shown() -> void:
+	filter_input.grab_focus.call_deferred()
