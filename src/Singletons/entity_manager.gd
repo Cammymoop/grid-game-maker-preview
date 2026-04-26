@@ -961,6 +961,9 @@ func attempt_move_leave(moving_entity: BaseEntity, leaving_ps: Array[Vector2i], 
     var entities_here: = get_entities_at_multiple(leaving_ps, moving_entity, skip_entity_inst_ids)
     for e in entities_here:
         skip_entity_inst_ids.append(e.instance_id)
+        if not conditional_entity_interaction("i_move_off_of", moving_entity, e, leaving_ps, true):
+            result = false
+    for e in entities_here:
         if not conditional_entity_interaction("move_off_of", e, moving_entity, leaving_ps, true):
             result = false
     return result
