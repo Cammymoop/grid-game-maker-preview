@@ -91,12 +91,13 @@ script = ExtResource("2_l2fur")
 [node name="PreviewBG" type="Sprite2D" parent="PreviewSection/HBoxContainer/VBoxContainer/PanelContainer/MarginContainer/SubViewportContainer/SubViewport" unique_id=1822691038]
 texture_filter = 1
 texture_repeat = 2
-position = Vector2(-8.888889, -10.5)
+position = Vector2(-16, -16)
 texture = ExtResource("3_a1r42")
 region_enabled = true
 region_rect = Rect2(-64, -64, 192, 192)
 
 [node name="PreviewSprite" type="Node2D" parent="PreviewSection/HBoxContainer/VBoxContainer/PanelContainer/MarginContainer/SubViewportContainer/SubViewport" unique_id=184528650]
+texture_filter = 1
 script = ExtResource("4_kxp56")
 
 [node name="Sprite2D" type="Sprite2D" parent="PreviewSection/HBoxContainer/VBoxContainer/PanelContainer/MarginContainer/SubViewportContainer/SubViewport/PreviewSprite" unique_id=1423888991]
