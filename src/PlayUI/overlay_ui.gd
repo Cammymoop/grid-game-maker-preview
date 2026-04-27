@@ -23,6 +23,17 @@ func _ready() -> void:
     GameManager.level_state_loaded.connect(on_level_state_loaded)
     level_title_animator.animation_finished.connect(on_level_title_animation_finished)
     hide_delay_timer.timeout.connect(on_hide_delay_timer_timeout)
+    
+    var credits: = Utility.get_credits_ui()
+    if credits:
+        credits.credits_opened.connect(on_credits_opened)
+        credits.credits_closed.connect(on_credits_closed)
+
+func on_credits_opened() -> void:
+    hide()
+
+func on_credits_closed() -> void:
+    show()
 
 func on_level_state_loaded() -> void:
     if not level_title_label:

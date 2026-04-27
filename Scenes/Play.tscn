@@ -8,8 +8,7 @@
 [ext_resource type="PackedScene" uid="uid://ccr48mbb8s5et" path="res://Scenes/bg_effect_5.tscn" id="4_nsvgp"]
 [ext_resource type="Script" uid="uid://jw5fk1ax6p18" path="res://src/GameView.gd" id="5"]
 [ext_resource type="Script" uid="uid://evq6x474ma1n" path="res://Scenes/text_box_anim_root.gd" id="5_q86eb"]
-[ext_resource type="Script" uid="uid://c7i1r81fa2kcl" path="res://Scenes/auto_width_scroll_container.gd" id="6_4cgsu"]
-[ext_resource type="Theme" uid="uid://bqr82gmch2tuh" path="res://assets/ui/credits_theme.tres" id="7_i0j1v"]
+[ext_resource type="PackedScene" uid="uid://bnomndi6o3mmb" path="res://Scenes/credits_ui.tscn" id="6_4cgsu"]
 
 [sub_resource type="Animation" id="Animation_nsvgp"]
 length = 0.001
@@ -118,9 +117,6 @@ _data = {
 &"hide": SubResource("Animation_i0j1v"),
 &"show": SubResource("Animation_p1k4u")
 }
-
-[sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_i0j1v"]
-blend_mode = 3
 
 [node name="Play" type="Control" unique_id=357405740]
 layout_mode = 3
@@ -261,73 +257,8 @@ layout_mode = 2
 [node name="AnimationPlayer" type="AnimationPlayer" parent="OverlayLayer/OverlayUI/BottomCenter/TextBoxAnimRoot" unique_id=100291838]
 libraries/ = SubResource("AnimationLibrary_hagi3")
 
-[node name="CreditsUI" type="Control" parent="OverlayLayer" unique_id=1563443002]
+[node name="CreditsUI" parent="OverlayLayer" unique_id=1760736673 groups=["Credits"] instance=ExtResource("6_4cgsu")]
 visible = false
-layout_mode = 3
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
-
-[node name="MultiplyDarkenColor" type="ColorRect" parent="OverlayLayer/CreditsUI" unique_id=1464287187]
-material = SubResource("CanvasItemMaterial_i0j1v")
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
-color = Color(0.6913568, 0.69135684, 0.6913566, 1)
-
-[node name="HBoxContainer" type="HBoxContainer" parent="OverlayLayer/CreditsUI" unique_id=1068317885]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-alignment = 1
-
-[node name="AutoWidthScrollContainer" type="ScrollContainer" parent="OverlayLayer/CreditsUI/HBoxContainer" unique_id=548233106]
-custom_minimum_size = Vector2(101, 0)
-layout_mode = 2
-scroll_vertical = 3640
-horizontal_scroll_mode = 0
-vertical_scroll_mode = 3
-script = ExtResource("6_4cgsu")
-
-[node name="CreditsSpaceWrapper" type="VBoxContainer" parent="OverlayLayer/CreditsUI/HBoxContainer/AutoWidthScrollContainer" unique_id=1529172787]
-custom_minimum_size = Vector2(100, 0)
-layout_mode = 2
-
-[node name="Spacer" type="Control" parent="OverlayLayer/CreditsUI/HBoxContainer/AutoWidthScrollContainer/CreditsSpaceWrapper" unique_id=743161593]
-custom_minimum_size = Vector2(0, 4000)
-layout_mode = 2
-mouse_filter = 2
-
-[node name="CreditsVBox" type="VBoxContainer" parent="OverlayLayer/CreditsUI/HBoxContainer/AutoWidthScrollContainer/CreditsSpaceWrapper" unique_id=740548561]
-layout_mode = 2
-theme = ExtResource("7_i0j1v")
-
-[node name="TitleLabel" type="Label" parent="OverlayLayer/CreditsUI/HBoxContainer/AutoWidthScrollContainer/CreditsSpaceWrapper/CreditsVBox" unique_id=662427137]
-layout_mode = 2
-theme_type_variation = &"TitleText"
-text = "Game Title"
-horizontal_alignment = 1
-
-[node name="SubtitleLabel" type="Label" parent="OverlayLayer/CreditsUI/HBoxContainer/AutoWidthScrollContainer/CreditsSpaceWrapper/CreditsVBox" unique_id=44536174]
-layout_mode = 2
-theme_type_variation = &"SubtitleText"
-text = "Credits"
-horizontal_alignment = 1
-
-[node name="Spacer2" type="Control" parent="OverlayLayer/CreditsUI/HBoxContainer/AutoWidthScrollContainer/CreditsSpaceWrapper" unique_id=2040446650]
-custom_minimum_size = Vector2(0, 400)
-layout_mode = 2
-mouse_filter = 2
 
 [node name="MapEditorUILayer" type="CanvasLayer" parent="." unique_id=1275328928]
 layer = 10

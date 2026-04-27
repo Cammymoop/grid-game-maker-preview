@@ -57,6 +57,7 @@ window/stretch/scale=2.0
 [global_group]
 
 TextBox="the multipurpose textbox"
+Credits=""
 
 [gui]
 

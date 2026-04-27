@@ -29,6 +29,8 @@ const POS_INTERP_STRINGS: Dictionary[PosInterpStyle, String] = {
 	PosInterpStyle.LATE_DISCRETE: "none-late",
 }
 
+const CreditsUI = preload("res://Scenes/credits_ui.gd")
+
 const JUMP_INTERP_AMOUNT = 0.5
 const DEF_INTERP_EASE = 0.36
 
@@ -247,6 +249,14 @@ func get_world() -> Node:
 	if f:
 		return f[0]
 	print_debug("Error could not find world")
+	return null
+
+func get_credits_ui() -> CreditsUI:
+	var creditses: Array[Node] = get_tree().get_nodes_in_group("Credits")
+	for credits in creditses:
+		if not credits is CreditsUI:
+			continue
+		return credits
 	return null
 
 func get_map_editor() -> Node:
@@ -662,6 +672,7 @@ func fixed_just_released_by_event(action: String, event: InputEvent, exact: bool
 	return _fixed_just_press_released_by_event(action, event, exact, false)
 
 func input_vector_by_prefix(prefix: String) -> Vector2:
+	prefix = prefix.trim_suffix("_")
 	return Input.get_vector(prefix + "_left", prefix + "_right", prefix + "_up", prefix + "_down")
 
 func input_event_is_dir_action(event: InputEvent, dir_actions_prefix: String) -> bool:

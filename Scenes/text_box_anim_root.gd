@@ -1,5 +1,7 @@
 extends Node2D
 
+const CreditsUI = preload("res://Scenes/credits_ui.gd")
+
 @export var text_label: Label
 @export var text_box_panel: PanelContainer
 @export var animator: AnimationPlayer
@@ -13,6 +15,16 @@ var showing_text: = ""
 func _ready() -> void:
     set_text_and_adjust_anim(text_label.text)
     GameManager.level_state_loaded.connect(on_level_state_loaded)
+    
+    var credits: = Utility.get_credits_ui()
+    if credits:
+        credits.credits_opened.connect(on_credits_opened)
+
+func on_credits_opened() -> void:
+    hide()
+
+func on_credits_closed() -> void:
+    show()
 
 func on_level_state_loaded() -> void:
     dismiss()

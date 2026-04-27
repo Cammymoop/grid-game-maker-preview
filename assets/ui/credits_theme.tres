@@ -5,6 +5,9 @@
 [resource]
 NameCreditText/base_type = &"Label"
 NameCreditText/font_sizes/font_size = 20
+RoleNameGrid/base_type = &"GridContainer"
+RoleNameGrid/constants/h_separation = 20
+RoleNameGrid/constants/v_separation = 2
 RoleText/base_type = &"Label"
 RoleText/font_sizes/font_size = 20
 RoleText/fonts/font = ExtResource("1_ddr1f")
@@ -15,3 +18,4 @@ SubtitleText/font_sizes/font_size = 20
 TitleText/base_type = &"Label"
 TitleText/font_sizes/font_size = 24
 TitleText/fonts/font = ExtResource("1_ddr1f")
+VBoxContainer/constants/separation = 2

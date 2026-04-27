@@ -5,7 +5,7 @@
 [ext_resource type="Texture2D" uid="uid://c71dfd3j0223d" path="res://assets/img/button_icons/plus_small.png" id="3_m1ccg"]
 
 [node name="CreditsList" type="VBoxContainer" unique_id=493844250]
-offset_right = 166.0
+offset_right = 338.0
 offset_bottom = 92.0
 script = ExtResource("1_m1ccg")
 
@@ -35,19 +35,34 @@ layout_mode = 2
 layout_mode = 2
 alignment = 1
 
-[node name="CenterContainer" type="CenterContainer" parent="HBoxContainer2" unique_id=1672153714]
+[node name="HBoxContainer" type="HBoxContainer" parent="HBoxContainer2" unique_id=1193223916]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="NewCreditItem" type="Button" parent="HBoxContainer2/CenterContainer" unique_id=1219647165]
+[node name="Spacer" type="Control" parent="HBoxContainer2/HBoxContainer" unique_id=1426987425]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="NewCreditItem" type="Button" parent="HBoxContainer2/HBoxContainer" unique_id=1219647165]
 layout_mode = 2
 size_flags_vertical = 4
 text = "Add Credit"
 icon = ExtResource("3_m1ccg")
 icon_alignment = 2
 
+[node name="Spacer2" type="HBoxContainer" parent="HBoxContainer2/HBoxContainer" unique_id=70092423]
+layout_mode = 2
+size_flags_horizontal = 3
+alignment = 2
+
+[node name="ViewCreditsButton" type="Button" parent="HBoxContainer2/HBoxContainer/Spacer2" unique_id=1277074732]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "view credits"
+
 [node name="Control" type="Control" parent="HBoxContainer2" unique_id=1854739564]
 custom_minimum_size = Vector2(26, 26)
 layout_mode = 2
 
-[connection signal="pressed" from="HBoxContainer2/CenterContainer/NewCreditItem" to="." method="_on_new_credit_item_pressed"]
+[connection signal="pressed" from="HBoxContainer2/HBoxContainer/NewCreditItem" to="." method="_on_new_credit_item_pressed"]
+[connection signal="pressed" from="HBoxContainer2/HBoxContainer/Spacer2/ViewCreditsButton" to="." method="goto_view_credits"]

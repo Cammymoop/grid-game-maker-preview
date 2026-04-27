@@ -87,6 +87,12 @@ size_flags_horizontal = 4
 theme_override_fonts/font = ExtResource("2")
 text = "Restart Level"
 
+[node name="CreditsButton" type="Button" parent="CenterContainer/MainPausePanel/MarginContainer/VBoxContainer" unique_id=1802101938]
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_fonts/font = ExtResource("2")
+text = "Credits"
+
 [node name="QuitToMenu" type="Button" parent="CenterContainer/MainPausePanel/MarginContainer/VBoxContainer" unique_id=658198740]
 layout_mode = 2
 size_flags_horizontal = 4
@@ -236,6 +242,7 @@ text = "Quit to Main Menu"
 
 [connection signal="pressed" from="CenterContainer/MainPausePanel/MarginContainer/VBoxContainer/HBoxContainer5/ResumeButton" to="." method="_on_resume_button_pressed"]
 [connection signal="pressed" from="CenterContainer/MainPausePanel/MarginContainer/VBoxContainer/HBoxContainer5/RestartLevel" to="." method="_on_RestartLevel_pressed"]
+[connection signal="pressed" from="CenterContainer/MainPausePanel/MarginContainer/VBoxContainer/CreditsButton" to="." method="_on_credits_button_pressed"]
 [connection signal="pressed" from="CenterContainer/MainPausePanel/MarginContainer/VBoxContainer/QuitToMenu" to="." method="_on_QuitToMenu_pressed"]
 [connection signal="toggled" from="CenterContainer/MainPausePanel/MarginContainer/VBoxContainer/HBoxContainer2/LiveEditModeToggle" to="." method="_on_live_edit_mode_toggle_toggled"]
 [connection signal="pressed" from="CenterContainer/MainPausePanel/MarginContainer/VBoxContainer/HBoxContainer4/EditLevelSettingsButton" to="." method="_on_edit_level_settings_button_pressed"]

@@ -264,4 +264,3 @@ func _export_destination_picked(path: String, file_dialog: FileDialog) -> void:
 		GlobalToaster.show_toast_message("Exported Game .zip to\n%s" % [zip_path])
 	else:
 		GlobalToaster.show_toast_message("Failed to export Game .zip")
-

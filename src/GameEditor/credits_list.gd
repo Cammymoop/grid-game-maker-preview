@@ -11,10 +11,17 @@ func get_credits_list() -> Array:
         if not child.has_method("get_entry"):
             continue
         var entry = child.get_entry()
-        if not entry or (entry.get("role", "") == "" and entry.get("name", "") == ""):
+        if empty_credits_item(entry):
             continue
-        credits_list.append(child.get_entry())
+        credits_list.append(entry)
     return credits_list
+
+func empty_credits_item(item: Dictionary) -> bool:
+    if not item:
+        return true
+    if not item.get("type", "") and not item.get("role", "") and not item.get("name", ""):
+        return true
+    return false
 
 func clear_credits_list() -> void:
     for child in get_children():
@@ -51,3 +58,6 @@ func on_credit_changed() -> void:
 func update_credits_list() -> void:
     var credits_list: Array = get_credits_list()
     GameManager.set_credits_info({"credits_list": credits_list})
+
+func goto_view_credits() -> void:
+    GameManager.show_credits()

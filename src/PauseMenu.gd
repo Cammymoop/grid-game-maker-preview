@@ -148,3 +148,8 @@ func _on_back_button_pressed() -> void:
 func _on_museum_button_pressed() -> void:
 	GameManager.new_museum_level()
 	close_pause_menu()
+
+
+func _on_credits_button_pressed() -> void:
+	GameManager.show_credits()
+	toggle()

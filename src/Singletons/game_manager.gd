@@ -4,6 +4,9 @@ signal level_state_loaded
 signal game_camera_target_changed(entity: BaseEntity)
 signal game_settings_changed
 signal game_dir_name_changed(new_game_dir_name: String)
+signal scene_changed(new_scene: String)
+
+const CreditsUI = preload("res://Scenes/credits_ui.gd")
 
 const FULL_TICK_RATE: int = 60
 @onready var TICK_RATE: int = ProjectSettings.get_setting_with_override("physics/common/physics_ticks_per_second")
@@ -582,6 +585,7 @@ func post_scene_change() -> void:
 					load_editor_autosave()
 		else:
 			new_empty_level()
+	scene_changed.emit(cur_scene)
 
 func update_game_viewport() -> void:
 	var vp = Utility.get_world().get_viewport()
@@ -894,3 +898,16 @@ func get_next_prev_camera_focus(dir: int = 1) -> BaseEntity:
 	if not cur_focus:
 		return null
 	return game_camera.get_next_prev_follow_target(dir)
+
+func show_credits() -> void:
+	if not cur_scene == "Play":
+		change_scene("Play")
+		await scene_changed
+
+	var creditses: Array[Node] = get_tree().get_nodes_in_group("Credits")
+	for credits in creditses:
+		if not credits is CreditsUI:
+			push_warning("Node in Credits group is not a CreditsUI: %s" % credits.get_path())
+			continue
+		credits.show_credits()
+		break

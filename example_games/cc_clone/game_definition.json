@@ -2081,12 +2081,12 @@
     "credits": {
       "credits_list": [
         {
-          "role": "Recreation",
-          "name": "Cammymoop"
-        },
-        {
           "role": "Original Game",
           "name": "Chuck Sommerville"
+        },
+        {
+          "role": "Re-Creation",
+          "name": "Cammymoop"
         }
       ]
     }
