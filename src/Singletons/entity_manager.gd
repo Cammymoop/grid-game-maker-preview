@@ -1487,6 +1487,8 @@ func _get_snapshot_renderer() -> SpritePreviewer:
     sprite_previewer.hide_bg()
     sprite_previewer.set_custom_preview_size(1, 0.25)
     sprite_previewer.get_subviewport().recenter()
+    # setting it to hidden breaks the rendering, probably the subviewport container's fault
+    sprite_previewer.position.x = -10000
     return sprite_previewer
 
 func build_sprite_previews() -> void:

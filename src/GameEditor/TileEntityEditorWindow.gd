@@ -32,6 +32,7 @@ var sprite_style_options: = {
 }
 
 var sprite_snapshot_tex: ImageTexture = null
+var sprite_snapshot_scale: float = 1.0
 
 func _ready():
 	visibility_changed.connect(_on_vis_changed)
@@ -100,7 +101,9 @@ func set_controller(list_index) -> void:
 func load_entity_info(entity_index: int):
 	sprite_snapshot_tex = null
 	if EntityManager.entity_sprite_snapshots.has(entity_index):
-		sprite_snapshot_tex = EntityManager.entity_sprite_snapshots[entity_index]
+		sprite_snapshot_tex = EntityManager.get_entity_sprite_snapshot(entity_index)
+		# get the scale of the pixels in the snapshot, not the UI scale
+		sprite_snapshot_scale = 1 / EntityManager.get_entity_sprite_snapshot_scale(entity_index, false, false)
 	set_tile_entity_mode("entity")
 	the_index = entity_index
 	the_definition = EntityManager.get_entity_definition(entity_index)
@@ -127,6 +130,7 @@ func load_entity_info(entity_index: int):
 
 func load_tile_info(tile_index: int):
 	sprite_snapshot_tex = null
+	sprite_snapshot_scale = 1.0
 	set_tile_entity_mode("tile")
 	the_index = tile_index
 	the_definition = MapManager.get_tile_definition(tile_index)
@@ -157,10 +161,10 @@ func load_common():
 func update_image_button():
 	if sprite_snapshot_tex:
 		var clipped_tex: AtlasTexture = AtlasTexture.new()
-		var tex_size: Vector2 = Vector2(MapManager.tile_width, MapManager.tile_width) * GameManager.get_default_pixel_scale()
+		var target_size: Vector2 = Vector2(MapManager.tile_width, MapManager.tile_width) * sprite_snapshot_scale
 		clipped_tex.atlas = sprite_snapshot_tex
-		clipped_tex.region = Rect2(sprite_snapshot_tex.get_size() / 2 - tex_size / 2, tex_size)
-		_set_img_button_texture(find_child("ImageButton"), clipped_tex, false)
+		clipped_tex.region = Rect2((sprite_snapshot_tex.get_size()- target_size) / 2, target_size)
+		_set_img_button_texture(find_child("ImageButton"), clipped_tex, GameManager.get_default_pixel_scale() / sprite_snapshot_scale)
 	else:
 		update_image_simple()
 
@@ -176,10 +180,9 @@ func update_preview_image_button() -> void:
 	var atlas_tex: = Utility.atlas_texture_from_texture_index(texture_index, tex_sub_index)
 	_set_img_button_texture(find_child("PreviewImageButton"), atlas_tex)
 
-func _set_img_button_texture(the_image_button: Control, with_texture: Texture2D, auto_zoom: bool = true) -> void:
+func _set_img_button_texture(the_image_button: Control, with_texture: Texture2D, zoom_factor: float = 2) -> void:
 	var image_tex_rect: = the_image_button.find_child("TextureRect") as TextureRect
 	image_tex_rect.texture = with_texture
-	var zoom_factor: float = 1.0 if not auto_zoom else GameManager.get_default_pixel_scale()
 	image_tex_rect.custom_minimum_size = image_tex_rect.texture.get_size() * zoom_factor
 
 
@@ -558,5 +561,5 @@ func save_fancy_sprite_snapshot(fancy_sprite_editor: FancySpriteEditor) -> void:
 	if not fancy_sprite_editor.snapshot_tex:
 		return
 	sprite_snapshot_tex = ImageTexture.create_from_image(fancy_sprite_editor.snapshot_tex.get_image())
-	prints("saved fancy sprite snapshot, updating image button")
+	sprite_snapshot_scale = GameManager.get_default_pixel_scale()
 	update_image_button()

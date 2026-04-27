@@ -47,7 +47,6 @@ func _set_preview_size(preview_scale: float = 1.0, with_padding: float = 0) -> v
     else:
         preview_vp_container.custom_minimum_size = preview_size * preview_scale
         preview_subviewport.size_2d_override = preview_size
-    prints("preview size set to", preview_scale, preview_size, preview_vp_container.size, preview_subviewport.size_2d_override, preview_subviewport.size)
 
 func get_subviewport() -> SubViewport:
     return preview_subviewport
@@ -119,5 +118,7 @@ func set_rotation_immediate(rotation_val: float) -> void:
     the_sprite.set_sprite_rotation(rotation_val)
 
 func reset_sprite(entity_def: Dictionary) -> void:
+    stop_spinning()
+    sprite_rotation = 0
     _sprite_is_setup = false
     update_sprite_config(entity_def)
