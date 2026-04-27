@@ -2,7 +2,10 @@
 
 [ext_resource type="Script" uid="uid://bc85celttigae" path="res://src/MainMenu.gd" id="1"]
 [ext_resource type="PackedScene" uid="uid://csm4i61la0olb" path="res://Scenes/FallingEntitiesEffects.tscn" id="2"]
+[ext_resource type="FontFile" uid="uid://ctnllh13x3iqi" path="res://assets/font/NotoSans-Bold.ttf" id="2_s2c3o"]
 [ext_resource type="Theme" uid="uid://cqgddn3sedqqw" path="res://src/UI/MainMenuTheme.tres" id="3"]
+[ext_resource type="FontFile" uid="uid://cxxr3l22y0327" path="res://assets/font/NotoSans-Regular.ttf" id="3_idohh"]
+[ext_resource type="Texture2D" uid="uid://dqnmn0kgpkmm5" path="res://assets/cammy_birb_tiny.svg" id="3_ma218"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_syfuq"]
 content_margin_left = 16.0
@@ -20,6 +23,17 @@ corner_radius_top_left = 4
 corner_radius_top_right = 4
 corner_radius_bottom_right = 4
 corner_radius_bottom_left = 4
+
+[sub_resource type="GDScript" id="GDScript_idohh"]
+script/source = "extends RichTextLabel
+
+func _gui_input(event: InputEvent) -> void:
+	var mbe: = event as InputEventMouseButton
+	if mbe and mbe.button_index == MOUSE_BUTTON_LEFT:
+		hide()
+		get_node(\"../GGMLabel\").show()
+		queue_free()
+"
 
 [node name="Menu" type="Control" unique_id=151932809]
 layout_mode = 3
@@ -54,17 +68,50 @@ theme_override_styles/panel = SubResource("StyleBoxFlat_syfuq")
 [node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/VBoxContainer/PanelContainer" unique_id=714919006]
 layout_mode = 2
 
-[node name="GGMLabel" type="Label" parent="MarginContainer/VBoxContainer/PanelContainer/VBoxContainer" unique_id=160729093]
+[node name="HBoxContainer2" type="HBoxContainer" parent="MarginContainer/VBoxContainer/PanelContainer/VBoxContainer" unique_id=1765183926]
+layout_mode = 2
+
+[node name="GGMLabel" type="Label" parent="MarginContainer/VBoxContainer/PanelContainer/VBoxContainer/HBoxContainer2" unique_id=160729093]
+visible = false
 layout_mode = 2
 size_flags_horizontal = 4
-theme_override_font_sizes/font_size = 18
+theme_override_fonts/font = ExtResource("2_s2c3o")
+theme_override_font_sizes/font_size = 17
 text = "Grid Game Maker Preview"
 
-[node name="GGMLabel2" type="Label" parent="MarginContainer/VBoxContainer/PanelContainer/VBoxContainer" unique_id=447752656]
+[node name="GGMLabel2" type="RichTextLabel" parent="MarginContainer/VBoxContainer/PanelContainer/VBoxContainer/HBoxContainer2" unique_id=1954693297]
+clip_contents = false
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_default_cursor_shape = 2
+theme_override_fonts/normal_font = ExtResource("3_idohh")
+theme_override_fonts/bold_font = ExtResource("2_s2c3o")
+theme_override_font_sizes/normal_font_size = 17
+theme_override_font_sizes/bold_font_size = 17
+bbcode_enabled = true
+text = "[b]Grid Game Maker [rainbow sat=0.7 freq=0.3 speed=1.8][wave freq=3.6 amp=70 connected=0]Preview[/wave][/rainbow][/b]"
+fit_content = true
+scroll_active = false
+autowrap_mode = 0
+shortcut_keys_enabled = false
+script = SubResource("GDScript_idohh")
+
+[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer/PanelContainer/VBoxContainer" unique_id=1227890265]
+layout_mode = 2
+
+[node name="GGMLabel2" type="Label" parent="MarginContainer/VBoxContainer/PanelContainer/VBoxContainer/HBoxContainer" unique_id=447752656]
 layout_mode = 2
 size_flags_horizontal = 0
 theme_override_font_sizes/font_size = 11
 text = "by Cammymoop Games"
+
+[node name="TextureRect" type="TextureRect" parent="MarginContainer/VBoxContainer/PanelContainer/VBoxContainer/HBoxContainer" unique_id=274197294]
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+texture = ExtResource("3_ma218")
+stretch_mode = 2
+flip_h = true
 
 [node name="Spacer2" type="Control" parent="MarginContainer/VBoxContainer" unique_id=971559223]
 layout_mode = 2
@@ -87,6 +134,7 @@ alignment = 1
 [node name="GameTitleLabel" type="Label" parent="MarginContainer/MainMenu/VBoxContainer" unique_id=986413740]
 layout_mode = 2
 size_flags_horizontal = 4
+theme_override_fonts/font = ExtResource("2_s2c3o")
 theme_override_font_sizes/font_size = 24
 text = "Game Name"
 
@@ -100,11 +148,13 @@ alignment = 1
 [node name="PlayButton" type="Button" parent="MarginContainer/MainMenu/VBoxContainer/HBoxContainer" unique_id=1539786938]
 custom_minimum_size = Vector2(150, 0)
 layout_mode = 2
+theme_type_variation = &"BigTextButton"
 text = "Play"
 
 [node name="EditButton" type="Button" parent="MarginContainer/MainMenu/VBoxContainer/HBoxContainer" unique_id=284899672]
 custom_minimum_size = Vector2(150, 0)
 layout_mode = 2
+theme_type_variation = &"BigTextButton"
 text = "Edit Game"
 
 [node name="FallingEntities" parent="." unique_id=1839494414 instance=ExtResource("2")]

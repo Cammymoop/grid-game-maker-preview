@@ -45,7 +45,7 @@ func get_item_definition() -> Dictionary:
 		return EntityManager.get_entity_definition(the_index)
 
 func update_basic_item_display() -> void:
-	basic_item_display.fetch_textures(get_item_definition())
+	basic_item_display.fetch_textures(the_index, get_item_definition(), tile_entity_mode)
 
 func _on_TileDisplay_pressed():
 	if tile_entity_mode == "tile":

@@ -955,3 +955,16 @@ func count_trailing_digits_with_zeros(float_string: String) -> int:
 	if not trailing or not trailing.ends_with("0"):
 		return 0
 	return trailing.length()
+
+func force_rerender_subviewport(subviewport: SubViewport) -> void:
+	var scene_tree: = get_tree()
+	var root_viewport_rid: = scene_tree.root.get_viewport_rid()
+	# breaks if I disable the main viewport rendering, maybe because the subviewport container fucks with the size
+	#RenderingServer.viewport_set_active(root_viewport_rid, false)
+	
+	if subviewport.render_target_update_mode != SubViewport.UPDATE_ALWAYS:
+		RenderingServer.viewport_set_update_mode(subviewport.get_viewport_rid(), RenderingServer.VIEWPORT_UPDATE_ONCE)
+	RenderingServer.force_draw()
+	await RenderingServer.frame_post_draw
+	
+	#RenderingServer.viewport_set_active(root_viewport_rid, true)

@@ -1,3 +1,4 @@
+@tool
 extends ScrollContainer
 
 @export var custom_margin: float = 0

@@ -126,6 +126,7 @@ func _ready():
 	
 	MapManager.refresh_definition()
 	EntityManager.refresh_definition()
+	EntityManager.build_sprite_previews()
 
 func bake_scene_transition_curve() -> void:
 	scene_transition_curve.bake()
@@ -183,6 +184,17 @@ func load_game_definition_data(definition_data: Dictionary) -> void:
 	checkpoint_save = {}
 	loaded_level = {}
 	
+	# compatibility
+	if "window_width" in definition_data and "window_height" in definition_data:
+		var compatibility_window_size: = Vector2(definition_data['window_width'], definition_data['window_height'])
+		set_game_view(compatibility_window_size)
+		set_game_setting("window_width", definition_data['window_width'])
+		definition_data.erase('window_width')
+		definition_data.erase('window_height')
+	
+	# Set the window size when loading a new game definition
+	rescale_window()
+	
 	TextureManager.clear()
 	if "textures" in definition_data:
 		TextureManager.set_textures(definition_data['textures'])
@@ -195,17 +207,7 @@ func load_game_definition_data(definition_data: Dictionary) -> void:
 	EntityManager.entity_defs = definition_data['entity_definitions']
 	if EntityManager.im_ready:
 		EntityManager.refresh_definition()
-	
-	# compatibility
-	if "window_width" in definition_data and "window_height" in definition_data:
-		var compatibility_window_size: = Vector2(definition_data['window_width'], definition_data['window_height'])
-		set_game_view(compatibility_window_size)
-		set_game_setting("window_width", definition_data['window_width'])
-		definition_data.erase('window_width')
-		definition_data.erase('window_height')
-	
-	# Set the window size when loading a new game definition
-	rescale_window()
+		EntityManager.build_sprite_previews()
 	
 	if cur_scene != "Loading":
 		change_scene(cur_scene)

@@ -1,0 +1,17 @@
+[gd_resource type="Theme" format=3 uid="uid://bqr82gmch2tuh"]
+
+[ext_resource type="FontFile" uid="uid://ctnllh13x3iqi" path="res://assets/font/NotoSans-Bold.ttf" id="1_ddr1f"]
+
+[resource]
+NameCreditText/base_type = &"Label"
+NameCreditText/font_sizes/font_size = 20
+RoleText/base_type = &"Label"
+RoleText/font_sizes/font_size = 20
+RoleText/fonts/font = ExtResource("1_ddr1f")
+SectionText/base_type = &"Label"
+SectionText/font_sizes/font_size = 22
+SubtitleText/base_type = &"Label"
+SubtitleText/font_sizes/font_size = 20
+TitleText/base_type = &"Label"
+TitleText/font_sizes/font_size = 24
+TitleText/fonts/font = ExtResource("1_ddr1f")

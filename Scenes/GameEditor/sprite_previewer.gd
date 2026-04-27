@@ -20,6 +20,7 @@ var rotation_interp_from: float = 0
 var interp_timer: float = 0
 
 var _sprite_is_setup: bool = false
+var _has_custom_size: bool = false
 
 func _ready() -> void:
     update_preview_size()
@@ -27,12 +28,36 @@ func _ready() -> void:
         spin_sprite_toggle.toggled.connect(on_spin_sprite_toggled)
 
 func update_preview_size() -> void:
+    if _has_custom_size:
+        return
+    _set_preview_size(GameManager.get_default_pixel_scale(), preview_viewport_padding)
+
+func set_custom_preview_size(preview_scale: float = 1.0, with_padding: float = 0) -> void:
+    _has_custom_size = true
+    preview_vp_container.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+    _set_preview_size(preview_scale, with_padding)
+
+func _set_preview_size(preview_scale: float = 1.0, with_padding: float = 0) -> void:
     var base_grid_size: = Vector2.ONE * MapManager.tile_width
-    var preview_padding: = base_grid_size.y * preview_viewport_padding
-    var preview_size: = base_grid_size + (Vector2.ONE * preview_padding * 2.0)
-    preview_vp_container.custom_minimum_size = preview_size * GameManager.get_default_pixel_scale()
-    preview_vp_container.size = preview_vp_container.custom_minimum_size
-    preview_subviewport.size_2d_override = preview_size
+    var padding_size: = base_grid_size.y * with_padding
+    var preview_size: = base_grid_size + (Vector2.ONE * padding_size * 2.0)
+    if preview_scale == 1:
+        preview_vp_container.custom_minimum_size = preview_size
+        preview_subviewport.size_2d_override = Vector2i.ZERO
+    else:
+        preview_vp_container.custom_minimum_size = preview_size * preview_scale
+        preview_subviewport.size_2d_override = preview_size
+    prints("preview size set to", preview_scale, preview_size, preview_vp_container.size, preview_subviewport.size_2d_override, preview_subviewport.size)
+
+func get_subviewport() -> SubViewport:
+    return preview_subviewport
+
+func hide_bg() -> void:
+    preview_subviewport.find_child("PreviewBG").hide()
+
+func show_bg() -> void:
+    preview_subviewport.find_child("PreviewBG").show()
+
 
 func _process(delta: float) -> void:
     if not the_sprite:

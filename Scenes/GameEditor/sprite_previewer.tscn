@@ -1,0 +1,121 @@
+[gd_scene format=3 uid="uid://bte23yfoombed"]
+
+[ext_resource type="Script" uid="uid://sxkikutun5ce" path="res://Scenes/GameEditor/sprite_previewer.gd" id="1_44mtw"]
+[ext_resource type="Script" uid="uid://c2uppviixc87y" path="res://src/previewing_viewport.gd" id="2_l2fur"]
+[ext_resource type="Texture2D" uid="uid://paqnkrgyyol3" path="res://assets/img/preview_backgrounds/computer_green.png" id="3_a1r42"]
+[ext_resource type="Script" uid="uid://kgd8llopg4rb" path="res://src/mask_layer_sprite.gd" id="4_kxp56"]
+[ext_resource type="Texture2D" uid="uid://d1pgxolpq4uu5" path="res://icon.png" id="5_mb6s5"]
+[ext_resource type="PackedScene" uid="uid://rafo4lh58320" path="res://Scenes/GameEditor/directional_buttons.tscn" id="6_jxpck"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_6myec"]
+bg_color = Color(0.019411728, 0.02275991, 0.027590092, 0.32156864)
+border_color = Color(0.07601128, 0.070221595, 0.11531044, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+corner_detail = 7
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_b74fv"]
+content_margin_left = 2.0
+content_margin_top = 2.0
+content_margin_right = 2.0
+content_margin_bottom = 2.0
+bg_color = Color(0.019411728, 0.02275991, 0.027590092, 0.32156864)
+draw_center = false
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.07601128, 0.070221595, 0.11531044, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+corner_detail = 7
+
+[node name="SpritePreviewer" type="MarginContainer" unique_id=84080552 node_paths=PackedStringArray("preview_vp_container", "preview_subviewport", "the_sprite", "spin_sprite_toggle")]
+size_flags_vertical = 3
+script = ExtResource("1_44mtw")
+interp_duration = 0.12
+preview_vp_container = NodePath("PreviewSection/HBoxContainer/VBoxContainer/PanelContainer/MarginContainer/SubViewportContainer")
+preview_subviewport = NodePath("PreviewSection/HBoxContainer/VBoxContainer/PanelContainer/MarginContainer/SubViewportContainer/SubViewport")
+the_sprite = NodePath("PreviewSection/HBoxContainer/VBoxContainer/PanelContainer/MarginContainer/SubViewportContainer/SubViewport/PreviewSprite")
+spin_sprite_toggle = NodePath("PreviewSection/HBoxContainer/VBoxContainer/CheckButton")
+spin_speed = 2.4
+
+[node name="PreviewSection" type="VBoxContainer" parent="." unique_id=258202469]
+layout_mode = 2
+size_flags_vertical = 3
+alignment = 1
+
+[node name="HBoxContainer" type="HFlowContainer" parent="PreviewSection" unique_id=1790414700]
+layout_mode = 2
+alignment = 1
+
+[node name="VBoxContainer" type="VBoxContainer" parent="PreviewSection/HBoxContainer" unique_id=212114855]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="PreviewSection/HBoxContainer/VBoxContainer" unique_id=338631529]
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_font_sizes/font_size = 14
+text = "Preview:"
+
+[node name="PanelContainer" type="PanelContainer" parent="PreviewSection/HBoxContainer/VBoxContainer" unique_id=1528172869]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_6myec")
+
+[node name="MarginContainer" type="MarginContainer" parent="PreviewSection/HBoxContainer/VBoxContainer/PanelContainer" unique_id=1135023283]
+layout_mode = 2
+theme_override_constants/margin_left = 2
+theme_override_constants/margin_top = 2
+theme_override_constants/margin_right = 2
+theme_override_constants/margin_bottom = 2
+
+[node name="SubViewportContainer" type="SubViewportContainer" parent="PreviewSection/HBoxContainer/VBoxContainer/PanelContainer/MarginContainer" unique_id=468398897]
+custom_minimum_size = Vector2(64, 64)
+layout_mode = 2
+size_flags_vertical = 4
+stretch = true
+
+[node name="SubViewport" type="SubViewport" parent="PreviewSection/HBoxContainer/VBoxContainer/PanelContainer/MarginContainer/SubViewportContainer" unique_id=1607159026]
+transparent_bg = true
+handle_input_locally = false
+size = Vector2i(72, 64)
+size_2d_override = Vector2i(32, 32)
+size_2d_override_stretch = true
+render_target_update_mode = 4
+script = ExtResource("2_l2fur")
+
+[node name="PreviewBG" type="Sprite2D" parent="PreviewSection/HBoxContainer/VBoxContainer/PanelContainer/MarginContainer/SubViewportContainer/SubViewport" unique_id=1822691038]
+texture_filter = 1
+texture_repeat = 2
+position = Vector2(-8.888889, -10.5)
+texture = ExtResource("3_a1r42")
+region_enabled = true
+region_rect = Rect2(-64, -64, 192, 192)
+
+[node name="PreviewSprite" type="Node2D" parent="PreviewSection/HBoxContainer/VBoxContainer/PanelContainer/MarginContainer/SubViewportContainer/SubViewport" unique_id=184528650]
+script = ExtResource("4_kxp56")
+
+[node name="Sprite2D" type="Sprite2D" parent="PreviewSection/HBoxContainer/VBoxContainer/PanelContainer/MarginContainer/SubViewportContainer/SubViewport/PreviewSprite" unique_id=1423888991]
+visible = false
+texture = ExtResource("5_mb6s5")
+metadata/rotates = true
+metadata/sub_layer_rotates = true
+
+[node name="Panel" type="Panel" parent="PreviewSection/HBoxContainer/VBoxContainer/PanelContainer" unique_id=430590807]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_b74fv")
+
+[node name="CheckButton" type="CheckButton" parent="PreviewSection/HBoxContainer/VBoxContainer" unique_id=1337365076]
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_font_sizes/font_size = 14
+text = "spin"
+
+[node name="DirectionalButtons" parent="PreviewSection/HBoxContainer" unique_id=1971834257 instance=ExtResource("6_jxpck")]
+layout_mode = 2
+
+[connection signal="facing_pressed" from="PreviewSection/HBoxContainer/DirectionalButtons" to="." method="set_sprite_facing"]
