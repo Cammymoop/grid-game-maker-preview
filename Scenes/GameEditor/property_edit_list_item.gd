@@ -8,7 +8,8 @@ signal property_name_changed(old_name: String, new_name: String)
 signal property_name_change_finalized(new_name: String)
 signal property_value_changed(property_name: String, value: Variant)
 
-signal request_convert_conditional(property_name: String, is_conditional: bool)
+#signal request_convert_conditional(property_name: String, is_conditional: bool)
+signal request_conditional_editor(property_name: String)
 
 const MultiTypeInput = preload("res://Scenes/GameEditor/multi_type_input.gd")
 
@@ -26,6 +27,9 @@ const no_icon: Texture2D = preload("res://assets/img/property_list/no_icon.png")
 @export var local_props_enabled: bool = true
 @export var enable_edit_base_props: bool = true
 
+@export var enable_conditional_editor: bool = true
+@export var override_props_can_be_conditional: bool = false
+
 @export_group("UI Refs")
 @export var sub_item_container: Control
 
@@ -40,6 +44,10 @@ const no_icon: Texture2D = preload("res://assets/img/property_list/no_icon.png")
 @export var edit_value_button: Control
 @export var value_label: RichTextLabel
 @export var value_edit: MultiTypeInput
+
+@export var conditional_label_1: Label
+@export var conditional_label_2: Label
+@export var conditional_edit_button: Button
 
 @export var override_button: Button
 @export var remove_button: ButtonContainer
@@ -85,8 +93,20 @@ func _ready() -> void:
     value_edit.input_focus_out.connect(on_value_input_focus_out)
     value_edit.input_focus_in.connect(request_activate.emit.bind(self))
     
+    value_edit.conditional_editor_requested.connect(on_conditional_editor_requested)
+    
+    refresh_value_edit_conditional()
+    
     value_edit.hide()
     value_label.show()
+    
+    conditional_label_1.add_theme_color_override("font_color", conditional_desc_color)
+    conditional_label_1.hide()
+    conditional_label_2.add_theme_color_override("font_color", conditional_desc_color)
+    conditional_label_2.hide()
+    conditional_edit_button.hide()
+    
+    conditional_edit_button.pressed.connect(on_conditional_editor_requested)
     
     if not sub_item_container:
         sub_item_container = self
@@ -106,11 +126,27 @@ func _ready() -> void:
     add_theme_stylebox_override("panel", _normal_stylebox())
     set_prop_value(property_value)
 
+func is_conditional_edit_allowed() -> bool:
+    if not enable_conditional_editor:
+        return false
+    if not override_props_can_be_conditional:
+        if is_removed or is_overridden:
+            return false
+    return true
+
+func refresh_value_edit_conditional() -> void:
+    value_edit.set_enable_conditional(is_conditional_edit_allowed())
+
 func get_name_section_width() -> float:
     return name_section.get_minimum_size().x
 
 func set_name_section_fixed_width(new_width: float) -> void:
     name_section.custom_minimum_size.x = new_width
+    
+func on_conditional_editor_requested() -> void:
+    if not enable_conditional_editor:
+        return
+    request_conditional_editor.emit(property_name)
 
 func set_prop_value(new_value: Variant) -> void:
     property_value = new_value
@@ -193,6 +229,7 @@ func set_override_state(new_is_base: bool, new_is_override: bool, new_is_removed
     is_base_definition_property = new_is_base
     is_overridden = new_is_override
     is_removed = new_is_removed
+    refresh_value_edit_conditional()
     set_prop_value(new_value)
 
 func make_overridden() -> void:
@@ -266,6 +303,8 @@ func refresh_ui() -> void:
     name_label.visible = not name_edit.visible
     if name_label.visible:
         name_label.text = get_rich_name_text()
+    elif name_edit.visible:
+        update_name_edit_text_color()
     name_edit.text = property_name
     
     refresh_value_edit()
@@ -296,12 +335,21 @@ func refresh_ui() -> void:
         remove_button.disabled = false
 
 func refresh_value_edit() -> void:
+    conditional_label_1.hide()
+    conditional_label_2.hide()
+    conditional_edit_button.hide()
     value_edit.set_value(base_property_value)
 
     _show_hide_edit_value_button()
     value_label.visible = not _value_editting
     if value_label.visible:
-        value_label.text = get_rich_value_text()
+        if is_conditional() and is_conditional_edit_allowed():
+            value_label.visible = false
+            conditional_label_1.visible = true
+            conditional_label_2.visible = true
+            conditional_edit_button.visible = true
+        else:
+            value_label.text = get_rich_value_text()
 
 func _show_hide_edit_value_button() -> void:
     edit_value_button.visible = false
@@ -384,6 +432,20 @@ func is_fade_base_prop() -> bool:
 
 func _colored(in_text: String, as_color: Color) -> String:
     return "[color=%s]%s[/color]" % [Utility.color_string(as_color, false), in_text]
+
+func update_name_edit_text_color() -> void:
+    if is_special_prop_name(property_name):
+        name_edit.add_theme_color_override("font_color", special_prop_name_color)
+        name_edit.tooltip_text = GameManager.get_special_prop_hint_text(property_name)
+    elif is_event_name(property_name):
+        name_edit.add_theme_color_override("font_color", event_name_color)
+        name_edit.tooltip_text = ConditionalsV3.get_event_hint_text(property_name)
+    elif is_conditional():
+        name_edit.add_theme_color_override("font_color", event_name_color.lerp(Color.WHITE, 0.5))
+        name_edit.tooltip_text = "Custom conditional property"
+    else:
+        name_edit.remove_theme_color_override("font_color")
+        name_edit.tooltip_text = ""
 
 func get_rich_name_text() -> String:
     var prop_name = property_name

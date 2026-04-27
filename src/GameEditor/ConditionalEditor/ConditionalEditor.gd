@@ -13,6 +13,8 @@ signal save_conditional(conditional_data: Variant)
 
 var when_lists: Dictionary = {}
 @export var when_list_container: Control
+@export var event_name_label: Label
+@export var event_name: String = ""
 
 @onready var add_command_dialog = find_child("AddCommandDialog")
 
@@ -39,7 +41,25 @@ var replace_from_list: Control = null
 var has_me_entity_slot: bool = true
 var has_them_entity_slot: bool = true
 
+static var last_size: Vector2i = Vector2i(0, 0)
+
+func _init() -> void:
+    if last_size.x > 0 and last_size.y > 0:
+        size = last_size
+
 func _ready():
+    if not event_name:
+        event_name_label.hide()
+    else:
+        event_name_label.text = event_name
+        if event_name in GameManager.SPECIAL_PROPS:
+            event_name_label.tooltip_text = GameManager.get_special_prop_hint_text(event_name)
+            event_name_label.add_theme_color_override("font_color", Color(0.47, 0.77, 0.99))
+        elif event_name in ConditionalsV3.all_events:
+            event_name_label.tooltip_text = ConditionalsV3.get_event_hint_text(event_name)
+        else:
+            event_name_label.tooltip_text = "Custom conditional property or event"
+            event_name_label.add_theme_color_override("font_color", Color(0.7, 0.2, 0.2))
     var add_new_command_func = add_new_v3_command if use_conditionalv3 else add_v2_command
     add_command_dialog.connect("command_selected", add_new_command_func.bind("conditions"))
     add_command_dialog.hidden.connect(on_add_command_hidden)
@@ -62,7 +82,12 @@ func _ready():
     
     close_requested.connect(cancel)
     
+    size_changed.connect(on_size_changed)
+    
     popup()
+
+func on_size_changed() -> void:
+    last_size = size
 
 func _shortcut_input(event: InputEvent) -> void:
     if Utility.fixed_just_pressed_by_event("escape", event):

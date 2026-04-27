@@ -2,9 +2,14 @@ extends Window
 
 signal hidden
 
+const ConditionalEditor: = preload("res://src/GameEditor/ConditionalEditor/ConditionalEditor.gd")
+
 const FancySpriteEditor: = preload("res://Scenes/GameEditor/fancy_sprite_editor.gd")
 const FancySpriteLayerListItem: = preload("res://Scenes/GameEditor/fancy_sprite_layer_list_item.gd")
 
+const PropertyEditList: = preload("res://Scenes/GameEditor/property_edit_list.gd")
+
+var conditional_editor_scene: = preload("res://Scenes/GameEditor/ConditionalEditor/ConditionalEditor.tscn")
 var tex_popup_scene: = preload("res://Scenes/GameEditor/BetterTextureDialog.tscn")
 var fancy_sprite_editor_scene: = preload("res://Scenes/GameEditor/fancy_sprite_editor.tscn")
 var new_prop_popup_scene: = preload("res://Scenes/GameEditor/NewPropertyDialog.tscn")
@@ -34,6 +39,8 @@ var sprite_style_options: = {
 var sprite_snapshot_tex: ImageTexture = null
 var sprite_snapshot_scale: float = 1.0
 
+@export var property_edit_list: PropertyEditList
+
 func _ready():
 	visibility_changed.connect(_on_vis_changed)
 	var controller_list = find_child("EditController").get_popup()
@@ -55,8 +62,13 @@ func _ready():
 	update_sprite_style_picker()
 	sprite_style_picker.item_selected.connect(on_sprite_style_selected)
 	
+	property_edit_list.properties_changed.connect(on_properties_changed)
+	property_edit_list.request_conditional_editor.connect(on_conditional_editor_requested)
 	
 	close_requested.connect(close_window)
+
+func on_properties_changed() -> void:
+	the_definition["properties"] = property_edit_list.get_base_properties_dict()
 
 func update_preview_variant_settings() -> void:
 	var has_preview_variant: bool = not the_definition.get("preview_variant", {}).is_empty()
@@ -66,7 +78,26 @@ func update_preview_variant_settings() -> void:
 	add_preview_variant_button.visible = not has_preview_variant
 	if has_preview_variant:
 		update_preview_image_button()
-		
+
+func on_conditional_editor_requested(prop_name: String, current_value: Variant) -> void:
+	if typeof(current_value) not in [TYPE_DICTIONARY, TYPE_ARRAY]:
+		push_error("requesting to open conditional editor but value is not a dict or array: %s" % [current_value])
+		return
+	var new_conditional_editor: = conditional_editor_scene.instantiate() as ConditionalEditor
+	new_conditional_editor.event_name = prop_name
+	new_conditional_editor.has_me_entity_slot = tile_entity_mode == "entity"
+	new_conditional_editor.has_them_entity_slot = prop_name not in ConditionalsV3.NO_OTHER_EVENTS
+	if not current_value:
+		current_value = ConditionalsV3.EMPTY_CONDITIONAL
+	add_child(new_conditional_editor)
+	new_conditional_editor.load_conditional_data(current_value)
+	new_conditional_editor.save_conditional.connect(on_save_conditional_prop.bind(prop_name))
+	new_conditional_editor.transient = true
+
+	new_conditional_editor.popup_centered()
+
+func on_save_conditional_prop(new_conditional_value: Variant, prop_name: String) -> void:
+	the_definition["properties"][prop_name] = new_conditional_value
 
 func _shortcut_input(event: InputEvent) -> void:
 	if Input.is_action_just_pressed_by_event(&"escape", event):
@@ -156,7 +187,15 @@ func load_common():
 
 	update_image_button()
 	
-	show_property_list()
+	#show_property_list()
+	refresh_property_edit_list()
+
+func refresh_property_edit_list() -> void:
+	if property_edit_list:
+		property_edit_list.clear()
+		var is_entity_mode: bool = tile_entity_mode == "entity"
+		property_edit_list.load_item_definition_properties(the_definition, the_index, is_entity_mode)
+
 
 func update_image_button():
 	if sprite_snapshot_tex:
@@ -356,23 +395,24 @@ func show_alert(message, alert_title="Alert!"):
 
 
 func add_prop(new_prop_popup) -> void:
-	var new_key = new_prop_popup.find_child("SetName").text
-	if ":" in new_key or " " in new_key:
+	var new_prop_name: String = new_prop_popup.find_child("SetName").text
+	if ":" in new_prop_name or " " in new_prop_name:
 		show_alert('Property names cannot contain spaces or ":"')
 		new_prop_popup.queue_free()
 		return
-	the_definition['properties'][new_key] = true
+	the_definition['properties'][new_prop_name] = true
+	refresh_property_edit_list()
 	
-	show_property_list()
+	#show_property_list()
 	await get_tree().process_frame
-	fix_size()
+	#fix_size()
 	if new_prop_popup and not new_prop_popup.is_queued_for_deletion():
 		new_prop_popup.queue_free()
 
 func _on_AddPropertyButton_pressed():
 	var new_prop_popup = new_prop_popup_scene.instantiate()
 	
-	new_prop_popup.connect("confirmed", Callable(self, "add_prop").bind(new_prop_popup))
+	new_prop_popup.confirmed.connect(add_prop.bind(new_prop_popup))
 	new_prop_popup.hidden.connect(new_prop_popup.queue_free)
 	add_child(new_prop_popup)
 	new_prop_popup.popup_centered()
@@ -409,7 +449,7 @@ func update_property_to(prop_key, update_property_popup):
 		the_definition["properties"].erase(prop_key)
 	the_definition['properties'][new_key] = new_value
 	
-	show_property_list()
+	#show_property_list()
 	await get_tree().process_frame
 	fix_size()
 	if update_property_popup and not update_property_popup.is_queued_for_deletion():

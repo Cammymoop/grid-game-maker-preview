@@ -12,7 +12,7 @@
 [ext_resource type="Texture2D" uid="uid://bo4frkvshv8li" path="res://assets/img/property_list/edit_value.png" id="14_ciyhn"]
 [ext_resource type="PackedScene" uid="uid://ba6ojoxwk1drt" path="res://Scenes/GameEditor/multi_type_input.tscn" id="15_5uy45"]
 
-[node name="PropertyEditListItem" type="PanelContainer" unique_id=161799549 node_paths=PackedStringArray("sub_item_container", "icon_1", "icon_2", "name_section", "name_label", "name_edit", "value_section", "edit_value_button", "value_label", "value_edit", "override_button", "remove_button")]
+[node name="PropertyEditListItem" type="PanelContainer" unique_id=161799549 node_paths=PackedStringArray("sub_item_container", "icon_1", "icon_2", "name_section", "name_label", "name_edit", "value_section", "edit_value_button", "value_label", "value_edit", "conditional_label_1", "conditional_label_2", "conditional_edit_button", "override_button", "remove_button")]
 offset_right = 425.0
 offset_bottom = 27.0
 theme = ExtResource("1_dbpd2")
@@ -28,6 +28,9 @@ value_section = NodePath("ListItemSections/PropValueSection")
 edit_value_button = NodePath("ListItemSections/PropValueSection/EditValueTextureButton")
 value_label = NodePath("ListItemSections/PropValueSection/PropValueLabel")
 value_edit = NodePath("ListItemSections/PropValueSection/MultiTypeInput")
+conditional_label_1 = NodePath("ListItemSections/PropValueSection/CondEditLabel1")
+conditional_label_2 = NodePath("ListItemSections/PropValueSection/CondEditLabel2")
+conditional_edit_button = NodePath("ListItemSections/PropValueSection/EditConditionalButton")
 override_button = NodePath("ListItemSections/OverrideButton")
 remove_button = NodePath("ListItemSections/RemovePropButton")
 normal_text_color = Color(0.9471994, 0.9471994, 0.9471994, 1)
@@ -108,6 +111,7 @@ size_flags_horizontal = 3
 focus_mode = 2
 bbcode_enabled = true
 text = "[s]1 prop value asdf[/s]"
+fit_content = true
 scroll_active = false
 autowrap_mode = 0
 vertical_alignment = 1
@@ -117,6 +121,21 @@ drag_and_drop_selection_enabled = false
 [node name="MultiTypeInput" parent="ListItemSections/PropValueSection" unique_id=1750676706 instance=ExtResource("15_5uy45")]
 visible = false
 layout_mode = 2
+
+[node name="CondEditLabel1" type="Label" parent="ListItemSections/PropValueSection" unique_id=176443316]
+visible = false
+layout_mode = 2
+text = "{CONDITIONAL"
+
+[node name="EditConditionalButton" type="Button" parent="ListItemSections/PropValueSection" unique_id=1920678352]
+visible = false
+layout_mode = 2
+text = "Edit"
+
+[node name="CondEditLabel2" type="Label" parent="ListItemSections/PropValueSection" unique_id=46135279]
+visible = false
+layout_mode = 2
+text = "}"
 
 [node name="OverrideButton" type="Button" parent="ListItemSections" unique_id=1644408115]
 custom_minimum_size = Vector2(72, 0)

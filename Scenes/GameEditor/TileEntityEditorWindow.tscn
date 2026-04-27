@@ -6,13 +6,14 @@
 [ext_resource type="Texture2D" uid="uid://cv8l7ymc05wg5" path="res://assets/img/button_icons/plus.png" id="3"]
 [ext_resource type="Script" uid="uid://bq446sgdivroo" path="res://ButtonContainer.gd" id="3_obo3l"]
 [ext_resource type="Texture2D" uid="uid://b0qrxa5lu7j65" path="res://assets/img/button_icons/minus.png" id="4"]
+[ext_resource type="PackedScene" uid="uid://cxrfq7ld3ttmn" path="res://Scenes/GameEditor/property_edit_list.tscn" id="6_dlgud"]
 [ext_resource type="Texture2D" uid="uid://ctd2phj4knof4" path="res://assets/img/button_icons/x.png" id="6_h7da8"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_nnx4p"]
 atlas = ExtResource("1")
 region = Rect2(0, 64, 32, 32)
 
-[node name="TileEntityEditorWindow" type="Window" unique_id=1467937022]
+[node name="TileEntityEditorWindow" type="Window" unique_id=1467937022 node_paths=PackedStringArray("property_edit_list")]
 oversampling_override = 1.0
 title = "Edit"
 position = Vector2i(0, 25)
@@ -20,6 +21,7 @@ size = Vector2i(640, 555)
 wrap_controls = true
 popup_window = true
 script = ExtResource("2")
+property_edit_list = NodePath("PanelContainer/VBoxContainer/VBoxContainer/HBoxContainer4/PropertyEditList")
 
 [node name="PanelContainer" type="PanelContainer" parent="." unique_id=1898877842]
 anchors_preset = 15
@@ -239,10 +241,14 @@ layout_mode = 2
 size_flags_vertical = 3
 
 [node name="PropertyList" type="ItemList" parent="PanelContainer/VBoxContainer/VBoxContainer/HBoxContainer4" unique_id=1196399889]
+visible = false
 custom_minimum_size = Vector2(140, 100)
 layout_mode = 2
 size_flags_horizontal = 3
 scroll_hint_mode = 1
+
+[node name="PropertyEditList" parent="PanelContainer/VBoxContainer/VBoxContainer/HBoxContainer4" unique_id=1906411767 instance=ExtResource("6_dlgud")]
+layout_mode = 2
 
 [node name="VBoxContainer" type="VBoxContainer" parent="PanelContainer/VBoxContainer/VBoxContainer/HBoxContainer4" unique_id=1724675279]
 layout_mode = 2

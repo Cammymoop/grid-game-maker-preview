@@ -65,6 +65,19 @@ const FACING_TO_VECTOR: Dictionary = {
 
 func _ready():
 	randomize()
+	
+func truthy(value: Variant) -> bool:
+	return true if value else false
+
+func non_nullable_obj(obj: Object, default_obj: Object) -> Object:
+	if not obj:
+		return default_obj
+	return obj
+
+func non_nullable(value: Variant, default_value: Variant) -> Variant:
+	if typeof(value) == TYPE_NIL or (typeof(value) == TYPE_OBJECT and not value):
+		return default_value
+	return value
 
 func set_keys(dict : Dictionary, keys: Array) -> void:
 	for k in keys:
@@ -809,6 +822,13 @@ func key_to_vec2i(key: String) -> Vector2i:
 func arr_add_if_not_included(arr: Array, item: Variant) -> void:
 	if not item in arr:
 		arr.append(item)
+
+func arr_set_union(arr: Array, other_arr: Array) -> Array:
+	var union: Array = arr.duplicate_deep()
+	for item in other_arr:
+		if not item in arr:
+			union.append(item)
+	return union
 
 func opbtn_get_text_from_id(opbtn: OptionButton, id: int, default_value: String = "") -> String:
 	for i in opbtn.get_item_count():

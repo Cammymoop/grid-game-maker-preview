@@ -315,6 +315,8 @@ func entity_process_starting_actions() -> void:
 						first_attempt_v_facing = facing
 						first_attempt_move_facing = move_facing
 					if was_allowed:
+						if tailing:
+							untail()
 						break
 			
 			if not moving and first_attempt_v_facing > -1:
@@ -428,6 +430,8 @@ func get_pre_fetch_move_list() -> Array:
 
 func get_max_move_intentions() -> int:
 	if not controller or EntityManager.get_entity_prop_is_truthy(self, "controller-disabled"):
+		return 0
+	if tailing and EntityManager.has_instance(tailing.instance_id):
 		return 0
 	
 	if not controller.has_method("get_max_move_intentions"):

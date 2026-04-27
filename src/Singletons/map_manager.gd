@@ -29,6 +29,12 @@ var preview_tileset: TileSet = null
 
 var im_ready: = false
 
+var _positioned_props_set: Array[String] = []
+var _tile_ids_of_positioned_props: Dictionary[String, Array] = {}
+
+var _move_blocking_positions: Array[Vector2i] = []
+var _move_blocking_instances: Array[int] = []
+
 func setup() -> void:
     fix_string_keys()
     if not TextureManager.im_ready:
@@ -318,6 +324,7 @@ func deserialize(data: Dictionary) -> void:
     map_metadata = data.get("metadata", {}).duplicate(true)
     
     recreate_persistant_effects()
+    _rebuild_position_prop_cache()
     
     level_size_changed.emit()
 
@@ -384,6 +391,7 @@ func set_positioned_prop_value(at_pos: Vector2i, for_tile_index: int, property_n
     if not pos_prop:
         # tile index is not at this position
         return
+    _cache_added_positioned_prop(property_name, for_tile_index)
     pos_prop["local_properties"][property_name] = value
 
 func get_positioned_prop_value(at_pos: Vector2i, for_tile_index: int, property_name: String) -> Variant:
@@ -392,11 +400,75 @@ func get_positioned_prop_value(at_pos: Vector2i, for_tile_index: int, property_n
         return null
     return pos_prop["local_properties"][property_name]
 
-func remove_positioned_prop_value(at_pos: Vector2i, for_tile_index: int, property_name: String) -> void:
+func remove_positioned_prop_value(at_pos: Vector2i, for_tile_index: int, property_name: String, and_revalidate: bool = false) -> void:
     var pos_prop: = get_positioned_property_at(at_pos, for_tile_index)
     if not pos_prop or not pos_prop["local_properties"].has(property_name):
         return
     pos_prop["local_properties"].erase(property_name)
+    if and_revalidate:
+        _revalidate_cached_positioned_prop(property_name)
+
+func _cache_added_positioned_prop(property_name: String, for_tile_index: int) -> void:
+    if not property_name in _positioned_props_set:
+        _positioned_props_set.append(property_name)
+        _tile_ids_of_positioned_props[property_name] = [for_tile_index]
+    else:
+        Utility.arr_add_if_not_included(_tile_ids_of_positioned_props[property_name], for_tile_index)
+
+func _revalidate_cached_positioned_prop(property_name: String) -> void:
+    var is_set_for: Array[int] = []
+    var pos_props: Dictionary = map_metadata.get("positioned_properties", {})
+    for positioned_prop_pos in pos_props.keys():
+        var local_prop_layers: Dictionary = pos_props[positioned_prop_pos]["layers"]
+        for layer_idx in local_prop_layers.keys():
+            if property_name in local_prop_layers[layer_idx]["local_properties"]:
+                Utility.arr_add_if_not_included(is_set_for, local_prop_layers[layer_idx]["tile_index"])
+
+    # No longer set locally anywhere
+    if is_set_for.size() == 0:
+        _positioned_props_set.erase(property_name)
+        _tile_ids_of_positioned_props.erase(property_name)
+        return
+    
+    # Add to new ids, remove from old
+    if not property_name in _positioned_props_set:
+        _positioned_props_set.append(property_name)
+        _tile_ids_of_positioned_props[property_name] = []
+        _tile_ids_of_positioned_props[property_name].append_array(is_set_for)
+    else:
+        for for_ti in is_set_for:
+            Utility.arr_add_if_not_included(_tile_ids_of_positioned_props[property_name], for_ti)
+
+func _revalidate_all_positioned_props(include_prop_names: Array[String] = []) -> void:
+    include_prop_names = Utility.arr_set_union(_positioned_props_set, include_prop_names)
+    for prop_name in include_prop_names:
+        _revalidate_cached_positioned_prop(prop_name)
+
+func _rebuild_position_prop_cache() -> void:
+    _positioned_props_set = []
+    _tile_ids_of_positioned_props = {}
+    var pos_props: Dictionary = map_metadata.get("positioned_properties", {})
+    for at_pos in pos_props.keys():
+        for layer_local_props in pos_props[at_pos]["layers"].values():
+            if layer_local_props["local_properties"].size() == 0:
+                continue
+            var ti: int = layer_local_props["tile_index"]
+            for prop_name in layer_local_props["local_properties"].keys():
+                if not prop_name in _positioned_props_set:
+                    _positioned_props_set.append(prop_name)
+                    _tile_ids_of_positioned_props[prop_name] = [ti]
+                else:
+                    Utility.arr_add_if_not_included(_tile_ids_of_positioned_props[prop_name], ti)
+
+func is_prop_static(prop_name: String, only_for_tile_id: int = -1) -> bool:
+    if len(_positioned_props_set) == 0:
+        return true
+    if prop_name not in _positioned_props_set:
+        return true
+    elif only_for_tile_id < 0:
+        return false
+    return only_for_tile_id not in _tile_ids_of_positioned_props[prop_name]
+        
 
 func has_next_level() -> bool:
     var next_level_name: = map_metadata.get("next_level", "") as String
@@ -685,12 +757,14 @@ func any_pos_has_property(tile_positions: Array, property_name: String) -> bool:
 func remove_tile_property_multiple(tile_positions: Array, property_name: String, for_index: int = -1) -> void:
     for pos in tile_positions:
         remove_tile_property_for_all_tiles_at(pos, property_name, for_index)
+    _revalidate_cached_positioned_prop(property_name)
 
 func remove_tile_property_for_all_tiles_at(at_pos: Vector2i, property_name: String, for_index: int = -1) -> void:
     for layer in layers:
         var ti = layer.get_cell_s(at_pos)
         if ti != -1 and (for_index == -1 or ti == for_index):
             remove_positioned_prop_value(at_pos, ti, property_name)
+    _revalidate_cached_positioned_prop(property_name)
 
 func set_tile_property_at_multiple(tile_positions: Array, property_name: String, value: Variant, for_index: int = -1) -> void:
     for pos in tile_positions:
@@ -840,22 +914,25 @@ func resolve_tile_individual_events(at_tile_positions: Array, tile_event_name: S
             resolved_indices.append(ti)
             var event_property: = get_tile_property_for_index_at(at_pos, tile_event_name, ti)
             if event_property and event_property.is_conditional():
-                event_property.resolve(null, context_entity, at_pos, [], extra_debug)
+                event_property.resolve(null, context_entity, [at_pos], [], extra_debug)
 
 func conditional_tile_event(at_tile_positions: Array, tile_event_name: String, context_entity: BaseEntity, is_all: bool = false, only_index: int = -1, extra_debug: bool = false) -> bool:
+    var is_static: = is_prop_static(tile_event_name, only_index)
     for at_pos in at_tile_positions:
-        var resolved_indices: Array[int] = []
         for l in layers:
             var ti = l.get_cell_s(at_pos)
-            if only_index != -1 and ti != only_index:
+            if ti == -1 or (only_index != -1 and ti != only_index):
                 continue
-            if ti == -1 or ti in resolved_indices:
-                continue
-            resolved_indices.append(ti)
-            var event_property: = get_tile_property_for_index_at(at_pos, tile_event_name, ti)
-            if not event_property:
-                continue
-            var result: Variant = event_property.get_or_resolve(null, context_entity, at_pos, [], extra_debug)
+            var result: = false
+            if is_static:
+                if not get_tile_index_property(ti, tile_event_name):
+                    continue
+                result = _resolve_single_pos_static_prop_truthy(at_pos, ti, tile_event_name, context_entity, false, extra_debug)
+            else:
+                var event_property: = get_tile_property_for_index_at(at_pos, tile_event_name, ti)
+                if not event_property:
+                    continue
+                result = Utility.truthy(event_property.get_or_resolve(null, context_entity, [at_pos], [], extra_debug))
             if not is_all and result:
                 return true
             if is_all and not result:
@@ -863,8 +940,57 @@ func conditional_tile_event(at_tile_positions: Array, tile_event_name: String, c
     # If all, then yes all passed, if any, then no, none passed
     return is_all
 
+func _resolve_single_pos_static_prop_truthy(at_pos: Vector2i, tile_id: int, event_name: String, context_entity: BaseEntity, default_result: bool = false, extra_debug: bool = false) -> bool:
+    var static_prop: = get_tile_index_property(tile_id, event_name)
+    if not static_prop:
+        return default_result
+    return Utility.truthy(static_prop.get_or_resolve(null, context_entity, [at_pos], [], extra_debug))
+
+func _get_or_resolve_single_pos_static_prop(at_pos: Vector2i, tile_id: int, event_name: String, context_entity: BaseEntity, default_value: Variant = null, extra_debug: bool = false) -> Variant:
+    var static_prop: = get_tile_index_property(tile_id, event_name)
+    if not static_prop:
+        return default_value
+    return static_prop.get_or_resolve(null, context_entity, [at_pos], [], extra_debug)
+
+func _resolve_truthy_single_pos_prop_if_exists(is_static: bool, at_pos: Vector2i, tile_id: int, prop_name: String, context_entity: BaseEntity, default_result: bool = false, extra_debug: bool = false) -> bool:
+    if is_static:
+        return _resolve_single_pos_static_prop_truthy(at_pos, tile_id, prop_name, context_entity, default_result, extra_debug)
+    else:
+        var prop: = get_tile_property_for_index_at(at_pos, prop_name, tile_id)
+        if not prop:
+            return default_result
+        return Utility.truthy(prop.get_or_resolve(null, context_entity, [at_pos], [], extra_debug))
+
+func tracked_conditional_tile_event(at_tile_positions: Array, event_name: String, ctx_entity: BaseEntity, is_all: bool = false, only_index: int = -1, extra_debug: bool = false) -> Dictionary:
+    var result_info: Dictionary = {}
+    var overall_result: = false
+    var default_result: = true if is_all else false
+    for at_pos in at_tile_positions:
+        var resolved_here: Array[int] = []
+        for l in layers:
+            var ti: int = l.get_cell_s(at_pos)
+            if ti == -1 or (only_index != -1 and ti != only_index) or ti in resolved_here:
+                continue
+            resolved_here.append(ti)
+            var is_static: = is_prop_static(event_name, only_index)
+            var result: = _resolve_truthy_single_pos_prop_if_exists(is_static, at_pos, ti, event_name, ctx_entity, default_result, extra_debug)
+            if not result_info.has(ti):
+                result_info[ti] = {"true": [], "false": [], "overall": default_result}
+            result_info[ti][str(result)].append(at_pos)
+            if is_all:
+                overall_result = result and overall_result
+                result_info[ti]["overall"] = result and result_info[ti]["overall"]
+            else:
+                overall_result = result or overall_result
+                result_info[ti]["overall"] = result or result_info[ti]["overall"]
+    result_info["overall"] = overall_result
+    return result_info
+
+
 func attempt_move(moving_entity: BaseEntity, leaving_ps: Array[Vector2i], entering_ps: Array[Vector2i], is_group_move: bool = false) -> bool:
-    var result: = conditional_tile_event(leaving_ps, "move_off_of", moving_entity, true)
+    #var result: = conditional_tile_event(leaving_ps, "move_off_of", moving_entity, true)
+    var tracked_result: = tracked_conditional_tile_event(leaving_ps, "move_off_of", moving_entity, true)
+    var result: bool = tracked_result["overall"]
 
     var skip_collection: Array[int] = []
     if not EntityManager.attempt_move_leave(moving_entity, leaving_ps, skip_collection, is_group_move):

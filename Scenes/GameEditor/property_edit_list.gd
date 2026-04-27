@@ -2,6 +2,8 @@ extends PanelContainer
 
 signal list_size_changed()
 
+signal properties_changed()
+
 signal entity_instance_props_edited(entity: BaseEntity)
 
 signal request_conditional_editor(property_name: String, current_value: Variant)
@@ -45,7 +47,7 @@ const _default_sorting_info: Dictionary = {
     "sort_by": "property_name",
     "main_sort_order": "ascending",
     "sort_conditional_local": -1,
-    "sort_event_special": -1,
+    "sort_event_special": 2,
 }
 @export var sorting_info: Dictionary = {}
 
@@ -84,7 +86,7 @@ func get_base_properties_dict() -> Dictionary:
             if info["is_overridden"]:
                 push_error("trying to get base properties dict but one or more base properties are currently overridden")
                 return {}
-            base_properties[info["property_nam"]] = info["value"]
+            base_properties[info["property_name"]] = info["value"]
     return base_properties
 
 func apply_properties_to_entity(clear_other_local_props: bool, to_entity: BaseEntity = null) -> void:
@@ -140,12 +142,15 @@ func reset_sorting_info() -> void:
     sorting_info = _default_sorting_info.duplicate()
 
 func load_entity_definition_properties(the_definition: Dictionary, the_entity_index: int) -> void:
-    is_entity = true
+    load_item_definition_properties(the_definition, the_entity_index, true)
+
+func load_item_definition_properties(the_definition: Dictionary, the_definition_index: int, is_def_entity: bool = false) -> void:
+    is_entity = is_def_entity
     enable_local_props = false
     enable_edit_base_props = true
     if properties_info.size() > 0:
         clear()
-    editing_def_index = the_entity_index
+    editing_def_index = the_definition_index
     editing_entity = null
     _load_def_props(the_definition)
     create_list_items()
@@ -269,9 +274,13 @@ func _setup_list_item_signals(list_item: ListItem) -> void:
     list_item.property_name_changed.connect(on_property_name_changed)
     list_item.property_value_changed.connect(on_property_value_edited)
     list_item.property_name_change_finalized.connect(on_property_name_change_finalized)
-    list_item.request_convert_conditional.connect(convert_prop_is_conditional)
+    #list_item.request_convert_conditional.connect(convert_prop_is_conditional)
+    list_item.request_conditional_editor.connect(on_conditional_editor_requested.bind(list_item))
     
     list_item.request_activate.connect(set_active_list_item)
+
+func on_conditional_editor_requested(prop_name: String, list_item: ListItem) -> void:
+    request_conditional_editor.emit(prop_name, list_item.property_value)
 
 func convert_prop_is_conditional(prop_name: String, set_is_conditional: bool) -> void:
     var p_index: int = index_map.get(prop_name, -1)
@@ -291,6 +300,7 @@ func convert_prop_is_conditional(prop_name: String, set_is_conditional: bool) ->
         properties_info[p_index]["list_item"].set_prop_value(info["value"])
     prop_changed(prop_name)
     resort_list_items()
+    properties_changed.emit()
 
 func on_property_value_edited(prop_name: String, new_value: Variant) -> void:
     var p_index: int = index_map.get(prop_name, -1)
@@ -300,6 +310,7 @@ func on_property_value_edited(prop_name: String, new_value: Variant) -> void:
     properties_info[p_index]["value"] = new_value
     prop_changed(prop_name)
     resort_list_items()
+    properties_changed.emit()
 
 func is_instance_update() -> bool:
     return is_entity and auto_update_entity_instance and editing_entity
@@ -343,10 +354,12 @@ func on_property_name_changed(old_name: String, new_name: String) -> void:
     properties_info[p_index]["property_name"] = rename_to
     resort_list_items()
     on_prop_name_width_changed()
+    properties_changed.emit()
 
 func on_property_name_change_finalized(_new_prop_name: String) -> void:
     all_props_changed()
     resort_list_items()
+    properties_changed.emit()
 
 func resolve_name_conflict_as_overwrite() -> void:
     var conflicting_index: int = index_map.get(CONFLICTED_NAME, -1)
@@ -368,6 +381,7 @@ func resolve_name_conflict_as_overwrite() -> void:
     all_props_changed()
     list_size_changed.emit()
     resort_list_items()
+    properties_changed.emit()
 
 func remove_conflicting_property() -> void:
     var conflicting_index: int = index_map.get(CONFLICTED_NAME, -1)
@@ -378,6 +392,7 @@ func remove_conflicting_property() -> void:
     conflicting_property_name = ""
     all_props_changed()
     list_size_changed.emit()
+    properties_changed.emit()
     resort_list_items()
 
 func remove_prop_index(index: int) -> void:
@@ -401,6 +416,7 @@ func remove_prop_name(prop_name: String) -> void:
     else:
         remove_prop_index(index)
     list_size_changed.emit()
+    properties_changed.emit()
 
 func on_prop_remove_requested(prop_name: String) -> void:
     if prop_name and prop_name == conflicting_property_name:
@@ -676,3 +692,4 @@ func add_new_or_duplicate_property(property_name: String, as_conditional: bool, 
         list_size_changed.emit()
         if is_instance_update():
             apply_edited_instance_property_update(property_name)
+        properties_changed.emit()

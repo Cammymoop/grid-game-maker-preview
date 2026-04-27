@@ -1441,3 +1441,25 @@ func cmd_select_random_tile_name_prop_filtered(slots: Dictionary, chosen_slot: i
 	var filtered_tile_ids: Array[int] = _filter_items_by_default_property(MapManager.tile_defs, truthy, prop_name, include_conditional)
 	slots[chosen_slot] = MapManager.get_tile_name(Utility.random_list_element(filtered_tile_ids))
 
+
+func desc_is_entity_tailing() -> String:
+	return "entity|If the entity is currently [tailing:BoolChoice:true,tailing another entity,being tailed by another entity]"
+func cmd_is_entity_tailing(slots: Dictionary, chosen_slot: int, tailing: bool) -> bool:
+	if not Commands.slot_is_entity(chosen_slot):
+		push_error("Invalid slot or empty slot to check if entity is tailing: %s" % chosen_slot)
+		return false
+	if not slots[chosen_slot]:
+		return false
+	if tailing:
+		return slots[chosen_slot].tailing != null
+	return EntityManager.get_tailing_entities_of(slots[chosen_slot]).size() > 0
+
+func desc_select_tailing_entity() -> String:
+	return "entity|<= Select an entity [tailing:BoolChoice:true,being tailed by,that is tailing] [ref_entity_slot:SlotInput:entity]"
+func cmd_select_tailing_entity(slots: Dictionary, chosen_slot: int, tailing: bool, ref_entity_slot: int) -> void:
+	if not Commands.slot_is_entity(chosen_slot):
+		push_error("Invalid slot or empty slot to select tailing entity: %s" % chosen_slot)
+		return
+	if not slots[chosen_slot]:
+		return
+	slots[chosen_slot] = slots[chosen_slot].tailing

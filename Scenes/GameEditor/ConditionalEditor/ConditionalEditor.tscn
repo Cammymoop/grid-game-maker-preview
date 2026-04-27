@@ -4,6 +4,7 @@
 [ext_resource type="Theme" uid="uid://daswi5ker7ml0" path="res://src/UI/ConditionalEditorTheme.tres" id="2_wqvmh"]
 [ext_resource type="Texture2D" uid="uid://cv8l7ymc05wg5" path="res://assets/img/button_icons/plus.png" id="3"]
 [ext_resource type="StyleBox" uid="uid://bks823xpsbs2q" path="res://src/UI/ConditionalEditorBGTexture.tres" id="4"]
+[ext_resource type="FontFile" uid="uid://ctnllh13x3iqi" path="res://assets/font/NotoSans-Bold.ttf" id="4_1yhi8"]
 [ext_resource type="Script" uid="uid://c8wy06ic8wik5" path="res://Scenes/GameEditor/ConditionalEditor/steps.gd" id="4_k14si"]
 [ext_resource type="Script" uid="uid://bm1w1ctkp6sd7" path="res://src/GameEditor/ConditionalEditor/AnActionsTab.gd" id="5"]
 [ext_resource type="Texture2D" uid="uid://dn7c2cihicbkd" path="res://assets/img/button_icons/direction_icons/left.png" id="5_wqvmh"]
@@ -25,7 +26,7 @@ expand_margin_right = 8.0
 [sub_resource type="StyleBoxFlat" id="2"]
 bg_color = Color(0.137255, 0.117647, 0.117647, 1)
 
-[node name="ConditionalEditor" type="Window" unique_id=557924117 node_paths=PackedStringArray("when_list_container")]
+[node name="ConditionalEditor" type="Window" unique_id=557924117 node_paths=PackedStringArray("when_list_container", "event_name_label")]
 transparent_bg = true
 oversampling_override = 1.0
 title = "Conditional Editor"
@@ -35,6 +36,7 @@ wrap_controls = true
 transparent = true
 script = ExtResource("6")
 when_list_container = NodePath("PanelContainer/MarginContainer/VBoxContainer2/VBoxContainer/VSplitContainer/HBoxContainer2/ActionsTabs")
+event_name_label = NodePath("PanelContainer/MarginContainer/VBoxContainer2/ConditionalNameLabel")
 
 [node name="PanelContainer" type="PanelContainer" parent="." unique_id=643923339]
 anchors_preset = 15
@@ -55,6 +57,17 @@ theme_override_constants/margin_bottom = 10
 [node name="VBoxContainer2" type="VBoxContainer" parent="PanelContainer/MarginContainer" unique_id=672802075]
 layout_mode = 2
 theme_override_constants/separation = 12
+
+[node name="ConditionalNameLabel" type="Label" parent="PanelContainer/MarginContainer/VBoxContainer2" unique_id=1049989797]
+layout_mode = 2
+mouse_filter = 1
+mouse_default_cursor_shape = 16
+theme_override_colors/font_color = Color(0.7607843, 0.6431373, 0.12156863, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.7176471)
+theme_override_fonts/font = ExtResource("4_1yhi8")
+theme_override_font_sizes/font_size = 20
+text = "i_finish_move_onto_tile"
+horizontal_alignment = 1
 
 [node name="TitleBar" type="Control" parent="PanelContainer/MarginContainer/VBoxContainer2" unique_id=192343188]
 visible = false

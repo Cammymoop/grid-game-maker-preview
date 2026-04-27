@@ -1534,3 +1534,135 @@ func _update_sprite_preview_for_entity(entity_id: int, entity_def: Dictionary, s
     await Utility.force_rerender_subviewport(sub_vp)
     var img_tex: ImageTexture = ImageTexture.create_from_image(sub_vp.get_texture().get_image())
     save_entity_sprite_snapshot(entity_id, img_tex, 1)
+
+func get_tailing_entities_of(entity: BaseEntity, include_inactive: bool = false) -> Array[BaseEntity]:
+    var tailing_entities: Array[BaseEntity] = []
+    for check_entity in entity_list:
+        if not check_entity.active:
+            continue
+        if entity.tailing and entity.tailing.instance_id == check_entity.instance_id:
+            tailing_entities.append(check_entity)
+    return tailing_entities
+
+func _get_all_entities_that_are_tailing_something(include_inactive: bool = false) -> Array[BaseEntity]:
+    var tailing_entities: Array[BaseEntity] = []
+    for entity in entity_list:
+        if not entity.tailing or (not include_inactive and not entity.active):
+            continue
+        tailing_entities.append(entity)
+    return tailing_entities
+
+func get_entities_tailing_behind(head_entity: BaseEntity, include_self: bool = false) -> Array[BaseEntity]:
+    var exclude_list: Array[BaseEntity] = []
+    if not include_self:
+        exclude_list.append(head_entity)
+    return get_entity_tailing_chain(head_entity, true, false, exclude_list, false)
+
+func get_tailing_chain_head_entity(reference_entity: BaseEntity, allow_self: bool = true) -> BaseEntity:
+    if not reference_entity or not reference_entity.active:
+        return null
+    if not allow_self and not reference_entity.tailing:
+        return null
+    var front_chain: = get_entity_tailing_chain(reference_entity, false, true, [], false)
+    if front_chain.size() == 0:
+        return reference_entity if allow_self else null
+    for e in front_chain:
+        if not e.tailing:
+            return e
+    return null
+
+# tailing chain could branch tailward, this returns the first found tip entity with at least the maximum chain length
+func get_tailing_tail_tip(reference_entity: BaseEntity) -> BaseEntity:
+    if not reference_entity or not reference_entity.active:
+        return null
+    var tailing_behind: = get_entity_tailing_chain(reference_entity, true, false, [reference_entity], false)
+    if tailing_behind.size() == 0:
+        return null
+    var ref_inst_id: int = reference_entity.instance_id
+    var tailing_ref_ids: Array = tailing_behind.map(func(e: BaseEntity): return e.instance_id)
+    var chain_lengths: Dictionary[int, int] = {}
+    var max_chain_length: int = 0
+    for tailing_entity in tailing_behind:
+        var this_id: int = tailing_entity.instance_id
+        var tailing_id: int = tailing_entity.tailing.instance_id
+        var chain_length: int = 0
+        if tailing_id == ref_inst_id:
+            chain_length = 1
+        elif tailing_id in chain_lengths:
+            chain_length = chain_lengths[tailing_id] + 1
+        else:
+            var chain: Array[int] = [this_id]
+            var next_id: int = tailing_id
+            var safetey: = 10000
+            while next_id != ref_inst_id and next_id in tailing_ref_ids:
+                if not EntityManager.has_instance(next_id):
+                    push_error("Tailing entity instance id not found: " + str(next_id))
+                    return null
+                chain.append(next_id)
+                var next_entity: BaseEntity = get_instance(next_id)
+                if not next_entity.tailing:
+                    break
+                next_id = next_entity.tailing.instance_id
+                safetey -= 1
+                if safetey <= 0:
+                    push_error("Tailing tip loop max iterations reached, stopping")
+                    return null
+            chain_length = chain.size()
+        max_chain_length = maxi(max_chain_length, chain_length)
+        chain_lengths[this_id] = chain_length
+
+    if max_chain_length > 0:
+        for inst_id in chain_lengths:
+            if chain_lengths[inst_id] == max_chain_length:
+                return get_instance(inst_id)
+    push_error("Unable to find the tail tip for an unknown reason")
+    return null
+
+
+func get_entity_tailing_chain(reference_entity: BaseEntity, with_behind: bool, with_in_front: bool, exclude_list: Array[BaseEntity] = [], include_inactive: bool = false) -> Array[BaseEntity]:
+    if not reference_entity:
+        return []
+    var all_tailing: Array[BaseEntity] = _get_all_entities_that_are_tailing_something(include_inactive)
+
+    var exclude_instances: Array[int] = []
+    exclude_instances.assign(exclude_list.map(func(e: BaseEntity): return e.instance_id))
+    
+    var entire_chain: Array[BaseEntity] = [reference_entity]
+    var chain_instances: Array[int] = [reference_entity.instance_id]
+    var filtered_chain: Array[BaseEntity] = []
+    if reference_entity.instance_id not in exclude_instances and (reference_entity.active or include_inactive):
+        filtered_chain.append(reference_entity)
+
+    if not with_in_front and not with_behind:
+        return filtered_chain
+
+    var check_in_front: bool = with_in_front and reference_entity.tailing
+    
+    # loop until no more entities found
+    var new_added: bool = true
+    for i in 10000:
+        if not new_added:
+            break
+        new_added = false
+        for e in all_tailing:
+            if e.instance_id in chain_instances:
+                continue
+            if check_in_front:
+                for chain_entity in entire_chain:
+                    if chain_entity.tailing.instance_id != e.instance_id:
+                        continue
+                    new_added = true
+                    entire_chain.append(e)
+                    chain_instances.append(e.instance_id)
+                    if e.instance_id not in exclude_instances:
+                        filtered_chain.append(e)
+                    break
+
+            if with_behind and e.tailing.instance_id in chain_instances:
+                new_added = true
+                entire_chain.append(e)
+                chain_instances.append(e.instance_id)
+                if e.instance_id not in exclude_instances:
+                    filtered_chain.append(e)
+
+    return filtered_chain

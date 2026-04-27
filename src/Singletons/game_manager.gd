@@ -52,6 +52,7 @@ var cameras = {
 const SPECIAL_PROPS: Array[String] = [
 	"z-index", "move-turns", "inherit-properties",
 	"auto-bond", "auto-tail", "auto-scale",
+	"die-when-blocked",
 	"edit-place-multiple",
 	"no-museum", "museum-active",
 	"move-animation", "controller-disabled",
@@ -60,6 +61,25 @@ const SPECIAL_PROPS: Array[String] = [
 	"no-rotate",
 	"teleport-duration",
 ]
+
+const SPECIAL_PROPS_HINT_TEXT: Dictionary[String, String] = {
+	"z-index": "Relative sorting offset, Entities or tiles with a higher sorting offset will be shown over others, can be negative.\nBy default entities are 5 higher than tiles.",
+	"move-turns": "If false, the entity will not automatically turn it's facing direction to match it's moving direction when it moves.",
+	"inherit-properties": "[Experimental] If true, the entity will inherit properties it does not have from another entity type with this name.",
+	"auto-bond": "If true, this entity will automatically join a bond group with other entities of the same type when first created.",
+	"auto-tail": "If true, this entity will automatically start tailing an entity in front of it when first created (if there is one)",
+	"auto-scale": "[Experimental] if the entity is LARGE, this controls if it's sprite is automatically scaled up to cover the entire area taken up by the entity",
+	"die-when-blocked": "If true, when this entity tries to move and is blocked it will automatically be destroyed",
+	"edit-place-multiple": "If true, placing this entity using the level editor will not remove other entities of the same type at that location",
+	"no-museum": "If true, this entity will not be included in the automatically generated museum",
+	"museum-active": "If this property exists, it will determine whether or not the entities of this type will start as active in the automatically generated museum",
+	"move-animation": "Set this to define the default animation style for when this entity moves (see valid options in the Game tab)\nCan be overridden each movement by an \"Override Move Animation\" Conditional command.",
+	"turn-animation": "Set this to define the default animation style for when this entity turns (see valid options in the Game tab)",
+	"controller-disabled": "While this property is true the entity will ignore intended moves from it's controller",
+	"actions-disabled": "While this property is true the entity will ignore action events e.g. do_action_1",
+	"no-rotate": "If true, the entity's sprite will not rotate regardless of which way the entity is facing (or moving). Spinning layers will still spin.",
+	"teleport-duration": "The default duration for this entity to finish teleporting (in seconds).\nIf not set, the default is 1/6th of a second.",
+}
 
 @export_file("*.json") var builtin_default_game_file: String = ""
 var builtin_default_game_definition: Dictionary = {}
@@ -911,3 +931,6 @@ func show_credits() -> void:
 			continue
 		credits.show_credits()
 		break
+
+func get_special_prop_hint_text(prop_name: String) -> String:
+	return SPECIAL_PROPS_HINT_TEXT.get(prop_name, "")

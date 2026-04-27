@@ -71,6 +71,12 @@ const all_events: Array[String] = [
     "left_bond_group",
 ]
 
+const NO_OTHER_EVENTS: = [
+	"i_finish_move_onto_tile", "post_move", "idle_update", "dying",
+]
+
+const EMPTY_CONDITIONAL: = [{"v": "3", "conditions": []}]
+
 enum ScriptType { GDSCRIPT, ORCHESTRATOR }
 
 var scripts: Array[Dictionary] = []
@@ -409,3 +415,52 @@ func empty_slots() -> Dictionary:
         Slot.DARK_GREEN: null,
         Slot.DARK_ORANGE: null,
     }
+
+func get_event_hint_text(event_name: String) -> String:
+    if not event_name in EVENT_HINT_TEXT:
+        return ""
+    return EVENT_HINT_TEXT[event_name]
+
+const EVENT_HINT_TEXT: Dictionary[String, String] = {
+	"blocks": "Conditional Event.\nIf true, the incoming entity will be blocked and will not be able to move onto this entity/tile",
+	"move_onto": "Conditional Event.\nIf false, the incoming entity will not be allowed to move onto this entity/tile",
+    "move_off_of": "Conditional Event.\nIf false, the outgoing entity will not be allowed to move off of this entity/tile",
+    "i_move_onto": "Conditional Event.\nIf false, this entity will not be allowed to move onto the other entity at the target location",
+    "i_move_onto_tile": "Conditional Event.\nIf false, this entity will not be allowed to move onto the tile at the target location",
+    "i_move_off_of": "Conditional Event.\nIf false, this entity will not be allowed to move off of the other entity at this location",
+    "i_move_off_of_tile": "Conditional Event.\nIf false, this entity will not be allowed to move off of the tile at this location",
+
+	"finish_move_onto": "Unconditional Event.\nEntities only. Resolved when another entity finishes moving onto this entity",
+	"finish_move_onto_tile": "Unconditional Event.\nTiles only. Resolved every time an entity finishes moving to a tile position with this tile",
+	"i_finish_move_onto": "Unconditional Event.\nResolved when the entity finishes moving onto another entity",
+	"i_finish_move_onto_tile": "Unconditional Event.\nResolved every time the entity finishes moving to a new tile position",
+
+    "half_moved_onto": "Unconditional Event.\nEntities only. Resolved when this entity begins overlapping with another entity (past half-way point of movement)",
+    "half_moved_off_of": "Unconditional Event.\nEntities only. Resolved when this entity begins overlapping with another entity (past half-way point of movement)",
+    "half_moved_onto_tile": "Unconditional Event.\nTiles only. Resolved when an entity passes the half-way point moving to tile position with this tile",
+    "half_moved_off_of_tile": "Unconditional Event.\nTiles only. Resolved when an entity passes the half-way point moving from tile position with this tile",
+
+    "covered_by_[property]": "Not Implemented Yet x.x",
+    "uncovered_by_[property]": "Not Implemented Yet x.x",
+	"when_signal_[signal]": "Unconditional Event.\nResolved when any Conditional triggers a signal with this name (if moving, will resolve as soon as this entity is done moving)",
+
+	"post_move_onto": "Unconditional Event.\nEntities only. Resolved immediately once another entity has started moving onto this entity",
+    "post_move_off_of": "Unconditional Event.\nEntities only. Resolved immediately once another entity has started moving off of this entity",
+	"post_move": "Unconditional Event.\nEntities only. Resolved immediately once this entity has started moving to a new tile position",
+    
+    "do_action_1": "Unconditional Event.\nResolved when action 1 is pressed (if this entity can receive action events)",
+    "do_action_2": "Unconditional Event.\nResolved when action 2 is pressed (if this entity can receive action events)",
+    "do_action_3": "Unconditional Event.\nResolved when action 3 is pressed (if this entity can receive action events)",
+    
+    "was_blocked": "Unconditional Event.\nResolved when this entity is blocked from moving (by another entity or tile)",
+
+	"idle_update": "Unconditional Event.\nFor entities, resolved every idle interval after the entity stops moving.\nFor tiles, resolved every idle interval for every tile type",
+    "idle_on": "Unconditional Event.\nTiles only, resolved for any idle entity on this tile every idle interval (after that entity stopped moving)",
+	"dying": "Unconditional Event.\nEntities only, resolved when the entity is being destroyed",
+    
+    "started_tailing": "Unconditional Event.\nResolved when this entity starts tailing another entity",
+    "stopped_tailing": "Unconditional Event.\nResolved when this entity stops tailing another entity",
+    
+    "joined_bond_group": "Unconditional Event.\nResolved when this entity becomes bonded to a bond group of entities",
+    "left_bond_group": "Unconditional Event.\nResolved when this entity leaves all bond groups",
+}

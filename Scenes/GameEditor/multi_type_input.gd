@@ -4,6 +4,7 @@ signal value_changed(new_value: Variant)
 signal value_type_changed(new_native_type: int)
 signal input_focus_out()
 signal input_focus_in()
+signal conditional_editor_requested()
 
 const ScalarValueInput = preload("res://src/GameEditor/ConditionalEditor/scalar_value_input.gd")
 const AdaptableMultiLineEdit = preload("res://Scenes/GameEditor/adaptable_multi_line_edit.gd")
@@ -66,8 +67,21 @@ func _ready() -> void:
     text_input.multi_line_editing_toggled.connect(on_text_editing_toggled)
     text_input.focus_entered.connect(input_focus_in.emit)
     
+    edit_conditional_button.pressed.connect(conditional_editor_requested.emit)
+    var conditional_enabled: bool = enabled_types & 8 != 0
+    edit_conditional_button.disabled = not conditional_enabled
+    
     if not show_type_picker:
         type_picker.hide()
+
+func set_enable_conditional(new_enable: bool) -> void:
+    if new_enable:
+        enabled_types |= 8
+    else:
+        enabled_types &= ~8
+    edit_conditional_button.disabled = not new_enable
+    _setup_type_picker(enabled_types)
+    Utility.opbtn_select_id(type_picker, current_type_id)
 
 func on_value_edited(new_value: Variant) -> void:
     current_value = new_value

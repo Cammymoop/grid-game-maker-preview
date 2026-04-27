@@ -48,3 +48,4 @@ layout_mode = 2
 [node name="EditConditionalButton" type="Button" parent="." unique_id=615535427]
 visible = false
 layout_mode = 2
+text = "Edit Conditional"

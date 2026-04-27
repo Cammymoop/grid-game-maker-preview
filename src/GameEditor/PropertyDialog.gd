@@ -48,6 +48,7 @@ func _on_EditConditional_pressed():
 func open_conditional_editor() -> void:
 	var editor = conditional_editor_scn.instantiate()
 	set_conditional_editor_smart_slot_enable(editor, find_child("SetName").text)
+	editor.event_name = find_child("SetName").text
 	
 	var ui_root = find_parent("UIRoot")
 	if not ui_root:
