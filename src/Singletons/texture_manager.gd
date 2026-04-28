@@ -408,3 +408,18 @@ func set_texture_meta_by_name(texture_name: String, is_builtin: bool, is_shared:
         push_error("Texture inside game not implemented yet")
     else:
         FilesManager.update_local_image_metadata(texture_name, _convert_texture_meta_for_saving(new_meta))
+
+func has_loaded_texture_id(texture_id: int) -> bool:
+    return texture_id in texture_names
+
+func get_fallback_texture_id() -> int:
+    if texture_spec.size() == 0:
+        return -1
+    return texture_spec[0]['texture_id']
+
+func get_max_texture_index(texture_id: int) -> int:
+    if not texture_rows.has(texture_id):
+        return 0
+    var rows: int = texture_rows[texture_id]
+    var cols: int = tiles_per_row[texture_id]
+    return rows * cols - 1

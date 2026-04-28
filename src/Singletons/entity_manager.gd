@@ -1,6 +1,7 @@
 extends Node
 
 signal initial_sprite_previews_finished
+signal entity_snapshots_updated
 
 const SpritePreviewer: = preload("res://Scenes/GameEditor/sprite_previewer.gd")
 const sprite_previewer_scene: = preload("res://Scenes/GameEditor/sprite_previewer.tscn")
@@ -381,21 +382,52 @@ func get_instance(instance_id: int) -> BaseEntity:
         return null
     return entity_instance_map[instance_id]
 
-func update_entity_definition(entity_index, entity_definition):
-    if not entity_index in entity_defs:
-        print("ERROR tried to update non-existing entity: " + str(entity_index))
+func update_entity_definition(entity_id: int, entity_definition: Dictionary) -> void:
+    if not entity_id in entity_defs:
+        push_error("ERROR tried to update non-existing entity: " + str(entity_id))
         return
-    entity_defs[entity_index] = entity_definition
+    entity_defs[entity_id] = entity_definition.duplicate_deep()
+    refresh_definition()
+
+func update_entity_def_properties(entity_id: int, properties: Dictionary) -> void:
+    if not entity_id in entity_defs:
+        push_error("ERROR tried to update non-existing entity: " + str(entity_id))
+        return
+    entity_defs[entity_id]["properties"] = properties.duplicate_deep()
     refresh_definition()
 
 func get_all_controllers() -> Array:
     return controller_templates.keys()
 
-func new_entity(definition) -> int:
-    var new_index = max_entity_index() + 1
-    entity_defs[new_index] = definition
+func new_entity(new_entity_definition: Dictionary) -> int:
+    new_entity_definition = clean_for_existing_assets(new_entity_definition)
+    var new_id: = max_entity_index() + 1
+    entity_defs[new_id] = new_entity_definition
+    if new_entity_definition.get("sprite_config", {}):
+        render_single_sprite_preview(new_id)
     refresh_definition()
-    return new_index
+    return new_id
+
+func _clean_dict_texture_id_for_existing_assets(incoming_dict: Dictionary) -> void:
+    if not incoming_dict.has("texture"):
+        return
+    var texture_id: = int(incoming_dict["texture"])
+    if not TextureManager.has_loaded_texture_id(texture_id):
+        incoming_dict["texture"] = TextureManager.get_fallback_texture_id()
+        incoming_dict["tex_index"] = 0
+    else:
+        var max_index: = TextureManager.get_max_texture_index(texture_id)
+        incoming_dict["tex_index"] = mini(max_index, int(incoming_dict.get("tex_index", 0)))
+
+func clean_for_existing_assets(incoming_definition: Dictionary) -> Dictionary:
+    _clean_dict_texture_id_for_existing_assets(incoming_definition)
+    if incoming_definition.has("preview_variant"):
+        _clean_dict_texture_id_for_existing_assets(incoming_definition["preview_variant"])
+    
+    if incoming_definition.get("sprite_config", {}):
+        for layer_dict in incoming_definition["sprite_config"].get("layers", []):
+            _clean_dict_texture_id_for_existing_assets(layer_dict)
+    return incoming_definition
 
 func max_entity_index() -> int:
     var max_index = 0
@@ -1524,6 +1556,7 @@ func render_single_sprite_preview(entity_id: int) -> void:
     var img_tex: ImageTexture = ImageTexture.create_from_image(sub_vp.get_texture().get_image())
     save_entity_sprite_snapshot(entity_id, img_tex, 1)
     sprite_previewer.queue_free()
+    entity_snapshots_updated.emit()
 
 func _update_sprite_preview_for_entity(entity_id: int, entity_def: Dictionary, sprite_previewer: SpritePreviewer) -> void:
     if not entity_def.get("preview_variant", {}).is_empty():

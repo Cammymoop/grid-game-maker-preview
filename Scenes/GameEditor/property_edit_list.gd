@@ -51,6 +51,25 @@ const _default_sorting_info: Dictionary = {
 }
 @export var sorting_info: Dictionary = {}
 
+const CTX_DUPLICATE_PROPERTY = 4
+
+const CTX_COPY_PROPERTY = 10
+const CTX_COPY_ALL_PROPERTIES = 11
+const CTX_COPY_ALL_OVERRIDES = 12
+
+const CTX_PASTE_PROPERTIES_OVERWRITE = 20
+const CTX_PASTE_PROPERTIES_NO_OVERWRITE = 21
+
+const CTX_PASTE_LOCAL_PROPERTIES = 22
+const CTX_PASTE_LOCAL_PROP_NO_OVERWRITE = 23
+
+const CTX_PASTE_PROPERTY_VALUE = 28
+const CTX_PASTE_LOCAL_PROP_VALUE = 29
+
+const CTX_DELETE_PROPERTY = 40
+const CTX_REMOVE_LOCAL_PROP = 41
+const CTX_RESET_LOCAL_PROP = 42
+
 const CONFLICTED_NAME: String = "NAME_CONFLICT_"
 var conflicting_property_name: String = ""
 
@@ -65,6 +84,11 @@ func clear() -> void:
     index_map.clear()
     _next_index = 0
     list_size_changed.emit()
+
+func _gui_input(event: InputEvent) -> void:
+    if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_RIGHT and not event.pressed:
+        show_context_menu(null)
+        accept_event()
 
 func apply_edits_to_definition(to_definition_index: int = -1) -> void:
     if to_definition_index == -1:
@@ -82,12 +106,29 @@ func get_base_properties_dict() -> Dictionary:
     var base_properties: Dictionary = {}
     for i in properties_info.keys():
         var info: Dictionary[String, Variant] = properties_info[i]
+        if info["property_name"] == "" or info["property_name"] == CONFLICTED_NAME:
+            continue
         if info["is_base_definition_property"]:
             if info["is_overridden"]:
                 push_error("trying to get base properties dict but one or more base properties are currently overridden")
                 return {}
             base_properties[info["property_name"]] = info["value"]
     return base_properties
+
+func get_properties_overridden_dict(overrides_only: bool) -> Dictionary:
+    var overridden_props: Dictionary = {}
+    for i in properties_info.keys():
+        var info: Dictionary[String, Variant] = properties_info[i]
+        if info["property_name"] == "" or info["property_name"] == CONFLICTED_NAME:
+            continue
+        if info["is_removed"]:
+            if overrides_only:
+                overridden_props[info["property_name"]] = "--REMOVED--"
+            continue
+        if overrides_only and not info["is_overridden"]:
+            continue
+        overridden_props[info["property_name"]] = info["value"]
+    return overridden_props
 
 func apply_properties_to_entity(clear_other_local_props: bool, to_entity: BaseEntity = null) -> void:
     if not to_entity:
@@ -277,6 +318,8 @@ func _setup_list_item_signals(list_item: ListItem) -> void:
     #list_item.request_convert_conditional.connect(convert_prop_is_conditional)
     list_item.request_conditional_editor.connect(on_conditional_editor_requested.bind(list_item))
     
+    list_item.request_context_menu.connect(show_context_menu)
+    
     list_item.request_activate.connect(set_active_list_item)
 
 func on_conditional_editor_requested(prop_name: String, list_item: ListItem) -> void:
@@ -298,6 +341,50 @@ func convert_prop_is_conditional(prop_name: String, set_is_conditional: bool) ->
     info["is_conditional"] = set_is_conditional
     if info["list_item"]:
         properties_info[p_index]["list_item"].set_prop_value(info["value"])
+    prop_changed(prop_name)
+    resort_list_items()
+    properties_changed.emit()
+
+func set_prop_name_override_value(prop_name: String, new_value: Variant) -> void:
+    var p_index: int = index_map.get(prop_name, -1)
+    if not prop_name or p_index == -1:
+        push_error("Cannot set property override value: %s, not found in list" % prop_name)
+        return
+    set_prop_index_overridden(p_index)
+    change_prop_current_value(prop_name, new_value)
+
+func set_prop_base_value_only(prop_name: String, new_base_value: Variant) -> void:
+    var p_index: int = index_map.get(prop_name, -1)
+    if not prop_name or p_index == -1:
+        push_error("Cannot set property base value only: %s, not found in list" % prop_name)
+        return
+    var info: Dictionary[String, Variant] = properties_info[p_index]
+    if not info["is_base_definition_property"]:
+        push_error("Cannot set property base value only: %s, not a base definition property" % prop_name)
+        return
+
+    if info["is_overriden"]:
+        var overriden_value: Variant = info["value"]
+        restore_prop_name(prop_name)
+        change_prop_current_value(prop_name, new_base_value)
+        set_prop_name_override_value(prop_name, overriden_value)
+    elif info["is_removed"]:
+        restore_prop_name(prop_name)
+        change_prop_current_value(prop_name, new_base_value)
+        make_prop_removed(prop_name)
+    else:
+        change_prop_current_value(prop_name, new_base_value)
+
+
+func change_prop_current_value(prop_name: String, new_value: Variant) -> void:
+    var p_index: int = index_map.get(prop_name, -1)
+    if not prop_name or p_index == -1:
+        push_error("Cannot change property current value: %s, not found in list" % prop_name)
+        return
+    var info: Dictionary[String, Variant] = properties_info[p_index]
+    info["value"] = new_value
+    if info["list_item"]:
+        info["list_item"].set_prop_value(new_value)
     prop_changed(prop_name)
     resort_list_items()
     properties_changed.emit()
@@ -445,6 +532,24 @@ func on_prop_remove_requested(prop_name: String) -> void:
         set_prop_index_removed(p_index)
     prop_changed(prop_name)
     resort_list_items()
+    properties_changed.emit()
+
+func make_prop_removed(prop_name: String) -> void:
+    if not editing_entity or not enable_local_props:
+        push_error("Cannot make property removed: %s, not editing an entity or local props are disabled" % prop_name)
+        return
+    var p_index: int = index_map.get(prop_name, -1)
+    if p_index == -1:
+        push_error("Property to remove not found in list: %s" % prop_name)
+        return
+    var info: Dictionary[String, Variant] = properties_info[p_index]
+    if not info["is_base_definition_property"]:
+        push_error("Cannot set removed property: %s, not a base definition property" % info["property_name"])
+        return
+    set_prop_index_removed(p_index)
+    prop_changed(prop_name)
+    resort_list_items()
+    properties_changed.emit()
 
 func set_prop_index_removed(index: int) -> void:
     var info: Dictionary[String, Variant] = properties_info[index]
@@ -479,6 +584,7 @@ func restore_prop_name(prop_name: String) -> void:
         properties_info[p_index]["list_item"].set_override_state(true, false, false, info["value"])
     prop_changed(prop_name)
     resort_list_items()
+    properties_changed.emit()
 
 func on_prop_override_requested(prop_name: String) -> void:
     if not enable_local_props:
@@ -646,7 +752,7 @@ func get_minimum_list_height() -> float:
     var self_margin_height: float = get_minimum_size().y - scroll_container.get_minimum_size().y
     return self_margin_height + scroll_container.get_child(0).get_minimum_size().y
 
-func _add_new_property(property_name: String, as_conditional: bool) -> int:
+func _add_new_property(property_name: String, as_conditional: bool, include_value: bool = false, value: Variant = null, as_overridden: bool = false) -> int:
     if not enable_local_props and not enable_edit_base_props:
         push_error("Cannot add properties because local props are disabled and base property editing is disabled")
         return -1
@@ -663,14 +769,35 @@ func _add_new_property(property_name: String, as_conditional: bool) -> int:
     properties_info[new_index] = info
     index_map[property_name] = new_index
 
-    if enable_local_props:
+    if include_value:
+        info["is_base_definition_property"] = not as_overridden
+        info["is_overridden"] = as_overridden
+    elif enable_local_props:
         info["is_base_definition_property"] = false
         info["is_overridden"] = true
-    if as_conditional:
+
+    if (include_value and typeof(value) in [TYPE_DICTIONARY, TYPE_ARRAY]) or as_conditional:
         info["is_conditional"] = true
-        info["value"] = {}
+        if not include_value:
+            info["value"] = {}
+
+    if include_value:
+        info["value"] = value
     _add_list_item_for(new_index)
     return new_index
+
+func add_pasted_new_properties_with_values(property_names: Array, prop_values: Array, as_override: bool) -> void:
+    for i in property_names.size():
+        var property_name: String = property_names[i]
+        if property_name in index_map:
+            push_error("Property already exists: %s" % property_name)
+            continue
+        _add_new_property(property_name, false, true, prop_values[i], as_override)
+    on_prop_name_width_changed()
+    list_size_changed.emit()
+    resort_list_items()
+    all_props_changed()
+    properties_changed.emit()
 
 
 func add_new_or_duplicate_property(property_name: String, as_conditional: bool, is_duplicate_of: String = "") -> void:
@@ -693,3 +820,129 @@ func add_new_or_duplicate_property(property_name: String, as_conditional: bool, 
         if is_instance_update():
             apply_edited_instance_property_update(property_name)
         properties_changed.emit()
+
+func show_context_menu(for_list_item: ListItem) -> void:
+    var context_menu = Utility.get_empty_context_menu()
+    if for_list_item:
+        context_menu.add_item("Duplicate", CTX_DUPLICATE_PROPERTY)
+        context_menu.add_item("Copy Property", CTX_COPY_PROPERTY)
+    context_menu.add_item("Copy All Properties", CTX_COPY_ALL_PROPERTIES)
+    if enable_local_props and editing_entity:
+        context_menu.add_item("Copy All Property Overrides", CTX_COPY_ALL_OVERRIDES)
+    
+    if CurrentClipboard.has_properties():
+        context_menu.add_separator("Paste")
+        if enable_local_props and editing_entity:
+            context_menu.add_item("Paste Properties (Overrides)", CTX_PASTE_LOCAL_PROPERTIES)
+            context_menu.add_item("Paste Properties (Overrides, Don't Override Existing)", CTX_PASTE_LOCAL_PROP_NO_OVERWRITE)
+        if not editing_entity or edit_base_props_on_instance:
+            var base_text: = " as Default" if editing_entity else ""
+            context_menu.add_item("Paste%s Properties" % base_text, CTX_PASTE_PROPERTIES_OVERWRITE)
+            context_menu.add_item("Paste%s Properties (Only unset properties)" % base_text, CTX_PASTE_PROPERTIES_NO_OVERWRITE)
+        if for_list_item and CurrentClipboard.has_property_value():
+            if editing_entity and enable_local_props:
+                context_menu.add_item("Paste Property Value (Override)", CTX_PASTE_LOCAL_PROP_VALUE)
+            if not editing_entity or edit_base_props_on_instance:
+                var base_text: = " as Default" if editing_entity else ""
+                context_menu.add_item("Paste Property Value%s" % base_text, CTX_PASTE_PROPERTY_VALUE)
+    
+    if for_list_item:
+        context_menu.add_separator("Remove")
+        var is_base_def_prop: bool = for_list_item.is_base_definition_property
+        if editing_entity and enable_local_props:
+            if is_base_def_prop:
+                context_menu.add_item("Override As Removed", CTX_REMOVE_LOCAL_PROP)
+                context_menu.add_item("Reset Overriden Property", CTX_RESET_LOCAL_PROP)
+            else:
+                context_menu.add_item("Remove Property Override", CTX_RESET_LOCAL_PROP)
+        if not editing_entity or (edit_base_props_on_instance and is_base_def_prop):
+            var base_text: = " Default" if editing_entity else ""
+            context_menu.add_item("Delete%s Property" % base_text, CTX_DELETE_PROPERTY)
+    var is_for_single_prop: bool = for_list_item != null
+    context_menu.id_pressed.connect(on_context_menu_id_pressed.bind(is_for_single_prop, for_list_item))
+    Utility.popup_context_menu_at_mouse(context_menu)
+
+func on_context_menu_id_pressed(context_menu_id: int, is_for_single_prop: bool, for_list_item: ListItem = null) -> void:
+    if not get_window().has_focus():
+        get_window().grab_focus()
+    var prop_name: = for_list_item.property_name if for_list_item else ""
+    if context_menu_id == CTX_DUPLICATE_PROPERTY:
+        if is_for_single_prop:
+            request_duplicate_property.emit(for_list_item.property_name)
+    elif context_menu_id in [CTX_DELETE_PROPERTY, CTX_REMOVE_LOCAL_PROP, CTX_RESET_LOCAL_PROP]:
+        var index_of_prop: int = index_map.get(prop_name, -1)
+        if not is_for_single_prop or index_of_prop == -1:
+            return
+        var info: Dictionary[String, Variant] = properties_info[index_of_prop]
+        if not info["is_base_definition_property"] and context_menu_id == CTX_REMOVE_LOCAL_PROP:
+            return
+        if context_menu_id == CTX_DELETE_PROPERTY:
+            remove_prop_name(prop_name)
+        elif context_menu_id == CTX_REMOVE_LOCAL_PROP:
+            make_prop_removed(prop_name)
+        elif context_menu_id == CTX_RESET_LOCAL_PROP:
+            restore_prop_name(prop_name)
+    elif context_menu_id in [CTX_COPY_PROPERTY, CTX_COPY_ALL_PROPERTIES, CTX_COPY_ALL_OVERRIDES]:
+        var is_single_prop: = context_menu_id == CTX_COPY_PROPERTY and is_for_single_prop
+        var properties_dict: = get_properties_overridden_dict(context_menu_id == CTX_COPY_ALL_OVERRIDES)
+        if is_single_prop and prop_name in properties_dict:
+            CurrentClipboard.copy_property_value(prop_name, properties_dict[prop_name])
+        else:
+            CurrentClipboard.copy_properties(properties_dict)
+    else:
+        if not CurrentClipboard.has_properties():
+            return
+        #paste
+        if context_menu_id in [CTX_PASTE_PROPERTY_VALUE, CTX_PASTE_LOCAL_PROP_VALUE]:
+            if not is_for_single_prop or not prop_name in index_map:
+                return
+            var single_prop_value: Variant = CurrentClipboard.get_property_value()
+            if context_menu_id == CTX_PASTE_LOCAL_PROP_VALUE:
+                set_prop_name_override_value(prop_name, single_prop_value)
+            else:
+                set_prop_base_value_only(prop_name, single_prop_value)
+        elif context_menu_id in [CTX_PASTE_LOCAL_PROPERTIES, CTX_PASTE_LOCAL_PROP_NO_OVERWRITE]:
+            if not editing_entity or not enable_local_props:
+                return
+
+            var to_set_props: Dictionary = CurrentClipboard.get_properties()
+            var do_overwrite: = context_menu_id == CTX_PASTE_LOCAL_PROPERTIES
+            var new_properties: Array[String] = []
+            var new_property_values: Array = []
+            for to_set_prop_name in to_set_props.keys():
+                if not do_overwrite and index_map.has(to_set_prop_name):
+                    continue
+                if typeof(to_set_props[to_set_prop_name]) == TYPE_STRING and to_set_props[to_set_prop_name] == "--REMOVED--":
+                    make_prop_removed(to_set_prop_name)
+                else:
+                    if to_set_prop_name in index_map:
+                        set_prop_name_override_value(to_set_prop_name, to_set_props[to_set_prop_name])
+                    else:
+                        new_properties.append(to_set_prop_name)
+                        new_property_values.append(to_set_props[to_set_prop_name])
+            if new_properties.size() > 0:
+                add_pasted_new_properties_with_values(new_properties, new_property_values, true)
+        elif context_menu_id in [CTX_PASTE_PROPERTIES_OVERWRITE, CTX_PASTE_PROPERTIES_NO_OVERWRITE]:
+            if editing_entity and not edit_base_props_on_instance:
+                return
+            var do_overwrite: = context_menu_id == CTX_PASTE_PROPERTIES_OVERWRITE
+            var to_set_props: Dictionary = CurrentClipboard.get_properties()
+            
+            var new_properties: Array[String] = []
+            var new_property_values: Array = []
+            for to_set_prop_name in to_set_props.keys():
+                if typeof(to_set_props[to_set_prop_name]) == TYPE_STRING and to_set_props[to_set_prop_name] == "--REMOVED--":
+                    continue
+                if not do_overwrite and index_map.has(to_set_prop_name):
+                    continue
+                
+                if not to_set_prop_name in index_map:
+                    new_properties.append(to_set_prop_name)
+                    new_property_values.append(to_set_props[to_set_prop_name])
+                else:
+                    if editing_entity:
+                        set_prop_base_value_only(to_set_prop_name, to_set_props[to_set_prop_name])
+                    else:
+                        change_prop_current_value(to_set_prop_name, to_set_props[to_set_prop_name])
+            if new_properties.size() > 0:
+                add_pasted_new_properties_with_values(new_properties, new_property_values, false)

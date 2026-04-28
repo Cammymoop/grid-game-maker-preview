@@ -38,6 +38,7 @@ EffectsHelper="*uid://kxi1ld2dix41"
 ArchiveCopier="*uid://bexxadydwdpsw"
 ImportZipExtractor="*uid://bg40rb011v4ol"
 ImporterExporter="*uid://cff2g1aawe1xa"
+CurrentClipboard="*res://src/Singletons/current_clipboard.gd"
 
 [debug]
 

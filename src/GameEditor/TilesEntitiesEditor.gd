@@ -15,6 +15,22 @@ var grid_item_width: float = 60
 const CONTEXT_MENU_DELETE = 0
 const CONTEXT_MENU_DUPLICATE = 1
 
+const CTX_COPY_START = 8
+const CONTEXT_MENU_COPY_ITEM = 8
+const CONTEXT_MENU_COPY_ALL_ENTITIES = 9
+const CONTEXT_MENU_COPY_ALL_TILES = 10
+const CONTEXT_MENU_COPY_ALL_ITEMS = 11
+const CONTEXT_MENU_COPY_ITEM_PROPERTIES = 12
+const CONTEXT_MENU_COPY_ENTITY_SPRITE = 13
+const CTX_COPY_END = 12
+
+const CTX_PASTE_START = 18
+const CONTEXT_MENU_PASTE_ITEM = 18
+const CONTEXT_MENU_PASTE_ITEM_PROPERTIES = 19
+const CONTEXT_MENU_PASTE_ITEM_PROP_NO_OVERRIDE = 20
+const CONTEXT_MENU_PASTE_ENTITY_SPRITE = 21
+const CTX_PASTE_END = 20
+
 func _ready():
 	assert(tile_grid and entity_grid, "TilesEntitiesEditor must have tile_grid and entity_grid")
 	visibility_changed.connect(_on_vis_changed)
@@ -27,8 +43,11 @@ func _ready():
 	grid_item_width = temp_grid_item.get_combined_minimum_size().x
 	temp_grid_item.queue_free()
 	
+	EntityManager.entity_snapshots_updated.connect(update_the_grid.bind(false))
+	
 	im_ready = true
-	_on_vis_changed()
+	await get_tree().process_frame
+	update_all_grids()
 
 func set_grid_columns(the_grid: GridContainer) -> void:
 	var scroll_container: = the_grid.get_parent() as ScrollContainer
@@ -133,31 +152,90 @@ func _on_vis_changed():
 	await get_tree().process_frame
 	update_all_grids()
 
-func do_context_menu_for_item(the_item: TileEntityButton) -> void:
-	var is_entity = the_item.tile_entity_mode == "entity"
+func _gui_input(event: InputEvent) -> void:
+	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_RIGHT and not event.pressed:
+		do_background_context_menu()
+		accept_event()
+
+func do_background_context_menu() -> void:
 	var context_menu = Utility.get_empty_context_menu()
-	context_menu.add_item("Duplicate", CONTEXT_MENU_DUPLICATE)
-	context_menu.add_item("Delete", CONTEXT_MENU_DELETE)
-	context_menu.id_pressed.connect(on_context_menu_id_pressed.bind(is_entity, the_item.the_index))
+	context_menu.add_item("Copy All Entities", CONTEXT_MENU_COPY_ALL_ENTITIES)
+	context_menu.add_item("Copy All Tiles", CONTEXT_MENU_COPY_ALL_TILES)
+	context_menu.add_item("Copy All Items", CONTEXT_MENU_COPY_ALL_ITEMS)
+	if CurrentClipboard.has_items():
+		context_menu.add_separator("Paste")
+		context_menu.add_item("Paste Entity/Tile(s)", CONTEXT_MENU_PASTE_ITEM)
+	context_menu.id_pressed.connect(on_context_menu_id_pressed.bind(false))
 	Utility.popup_context_menu_at_mouse(context_menu)
 
-func on_context_menu_id_pressed(context_menu_id: int, is_entity: bool, item_index: int) -> void:
+func do_context_menu_for_item(the_item: TileEntityButton) -> void:
+	var is_entity = the_item.tile_entity_mode == "entity"
+	var item_text: = "Entity" if is_entity else "Tile"
+	var item_plural: = "Entities" if is_entity else "Tiles"
+	var context_menu = Utility.get_empty_context_menu()
+	context_menu.add_item("Duplicate", CONTEXT_MENU_DUPLICATE)
+	context_menu.add_item("Copy %s" % [item_text], CONTEXT_MENU_COPY_ITEM)
+	context_menu.add_item("Copy %s Properties" % [item_text], CONTEXT_MENU_COPY_ITEM_PROPERTIES)
+	context_menu.add_item("Copy All %s" % [item_plural], CONTEXT_MENU_COPY_ALL_ENTITIES if is_entity else CONTEXT_MENU_COPY_ALL_TILES)
+	context_menu.add_item("Copy All Items", CONTEXT_MENU_COPY_ALL_ITEMS)
+	if is_entity:
+		var entity_def: Dictionary = get_existing_item_definition(true, the_item.the_index)
+		if entity_def.get("sprite_config", {}):
+			context_menu.add_item("Copy Entity Sprite", CONTEXT_MENU_COPY_ENTITY_SPRITE)
+
+	if CurrentClipboard.has_items() or CurrentClipboard.has_properties() or CurrentClipboard.has_sprite_config():
+		context_menu.add_separator("Paste")
+		if CurrentClipboard.has_items():
+			context_menu.add_item("Paste Entity/Tile(s)", CONTEXT_MENU_PASTE_ITEM)
+		if CurrentClipboard.has_sprite_config():
+			context_menu.add_item("Paste Entity Sprite", CONTEXT_MENU_PASTE_ENTITY_SPRITE)
+		if CurrentClipboard.has_properties():
+			context_menu.add_item("Paste Entity/Tile Properties (Overwrite existing)", CONTEXT_MENU_PASTE_ITEM_PROPERTIES)
+			context_menu.add_item("Paste Entity/Tile Properties (Only unset properties)", CONTEXT_MENU_PASTE_ITEM_PROP_NO_OVERRIDE)
+
+	context_menu.add_separator("Delete")
+	context_menu.add_item("Delete", CONTEXT_MENU_DELETE)
+	context_menu.id_pressed.connect(on_context_menu_id_pressed.bind(true, is_entity, the_item.the_index))
+	Utility.popup_context_menu_at_mouse(context_menu)
+
+func add_item_as_definition(is_entity: bool, item_definition: Dictionary) -> int:
+	item_definition = item_definition.duplicate_deep()
+	item_definition["name"] = get_renumbered_name(is_entity, item_definition["name"])
+	if is_entity:
+		return EntityManager.new_entity(item_definition)
+	else:
+		return MapManager.make_new_tile(item_definition)
+
+func get_existing_item_definition(is_entity: bool, item_id: int) -> Dictionary:
+	if is_entity:
+		return EntityManager.get_entity_definition(item_id)
+	else:
+		return MapManager.get_tile_definition(item_id)
+
+func update_definition_properties(is_entity: bool, item_id: int, new_definition_props: Dictionary, overwrite: bool) -> void:
+	var new_props: Dictionary = get_existing_item_definition(is_entity, item_id).get("properties", {})
+	new_props.merge(new_definition_props, overwrite)
+	if is_entity:
+		EntityManager.update_entity_def_properties(item_id, new_props)
+	else:
+		MapManager.update_tile_def_properties(item_id, new_props)
+
+func on_context_menu_id_pressed(context_menu_id: int, is_clicked_item: bool, is_entity: bool = true, item_id: int = -1) -> void:
 	if context_menu_id == CONTEXT_MENU_DELETE:
-		if is_entity:
-			EntityManager.remove_entity_definition(item_index)
-		else:
-			MapManager.remove_tile_definition(item_index)
-		update_all_grids()
+		if is_clicked_item:
+			if is_entity:
+				EntityManager.remove_entity_definition(item_id)
+			else:
+				MapManager.remove_tile_definition(item_id)
+			update_all_grids()
 	elif context_menu_id == CONTEXT_MENU_DUPLICATE:
-		if is_entity:
-			var entity_def: Dictionary = EntityManager.get_entity_definition(item_index)
-			entity_def["name"] = get_renumbered_name(true, entity_def["name"])
-			EntityManager.new_entity(entity_def)
-		else:
-			var tile_def: Dictionary = MapManager.get_tile_definition(item_index)
-			tile_def["name"] = get_renumbered_name(false, tile_def["name"])
-			MapManager.make_new_tile(tile_def.duplicate(true))
-		update_all_grids()
+		if is_clicked_item:
+			add_item_as_definition(is_entity, get_existing_item_definition(is_entity, item_id))
+			update_all_grids()
+	elif context_menu_id >= CTX_COPY_START and context_menu_id <= CTX_COPY_END:
+		handle_ctx_copy(context_menu_id, is_clicked_item, is_entity, item_id)
+	elif context_menu_id >= CTX_PASTE_START and context_menu_id <= CTX_PASTE_END:
+		handle_ctx_paste(context_menu_id, is_clicked_item, is_entity, item_id)
 
 func get_renumbered_name(is_entity: bool, old_name: String) -> String:
 	var check_name: Callable = EntityManager.entity_name_exists if is_entity else MapManager.tile_name_exists
@@ -167,3 +245,59 @@ func get_renumbered_name(is_entity: bool, old_name: String) -> String:
 	while check_name.call(old_name + str(name_number)):
 		name_number += 1
 	return old_name + str(name_number)
+
+func handle_ctx_paste(context_menu_id: int, is_clicked_item: bool, clicked_is_entity: bool, clicked_item_id: int) -> void:
+	if context_menu_id == CONTEXT_MENU_PASTE_ITEM_PROPERTIES or context_menu_id == CONTEXT_MENU_PASTE_ITEM_PROP_NO_OVERRIDE:
+		if not is_clicked_item:
+			return
+		var do_overwrite: = context_menu_id == CONTEXT_MENU_PASTE_ITEM_PROPERTIES
+		update_definition_properties(clicked_is_entity, clicked_item_id, CurrentClipboard.get_properties(), do_overwrite)
+		update_all_grids()
+	elif context_menu_id == CONTEXT_MENU_PASTE_ITEM:
+		var items: Dictionary = CurrentClipboard.get_items()
+		for pasted_entity_def in items.get("entities", []):
+			add_item_as_definition(true, pasted_entity_def)
+		for pasted_tile_def in items.get("tiles", []):
+			add_item_as_definition(false, pasted_tile_def)
+		update_all_grids()
+	elif context_menu_id == CONTEXT_MENU_PASTE_ENTITY_SPRITE:
+		if not is_clicked_item or not clicked_is_entity:
+			return
+		var sprite_config: Dictionary = CurrentClipboard.get_sprite_config()
+		var entity_def: Dictionary = get_existing_item_definition(true, clicked_item_id)
+		entity_def["sprite_config"] = sprite_config
+		EntityManager.update_entity_definition(clicked_item_id, entity_def)
+		update_all_grids()
+			
+func handle_ctx_copy(context_menu_id: int, is_clicked_item: bool, clicked_is_entity: bool, clicked_item_id: int) -> void:
+	if context_menu_id in [CONTEXT_MENU_COPY_ALL_ENTITIES, CONTEXT_MENU_COPY_ALL_TILES, CONTEXT_MENU_COPY_ALL_ITEMS]:
+		var include_entities: = context_menu_id != CONTEXT_MENU_COPY_ALL_TILES
+		var include_tiles: = context_menu_id != CONTEXT_MENU_COPY_ALL_ENTITIES
+		var items: Dictionary = {}
+		if include_entities:
+			items["entities"] = []
+			for entity_id in EntityManager.get_all_entity_indexes():
+				items["entities"].append(EntityManager.get_entity_definition(entity_id))
+		if include_tiles:
+			items["tiles"] = []
+			for tile_id in MapManager.get_all_tile_indexes():
+				items["tiles"].append(MapManager.get_tile_definition(tile_id))
+		CurrentClipboard.copy_items(items)
+	elif context_menu_id == CONTEXT_MENU_COPY_ITEM:
+		if not is_clicked_item:
+			return
+		var item_definition: = get_existing_item_definition(clicked_is_entity, clicked_item_id)
+		if clicked_is_entity:
+			CurrentClipboard.copy_entity_type(item_definition)
+		else:
+			CurrentClipboard.copy_tile_type(item_definition)
+	elif context_menu_id == CONTEXT_MENU_COPY_ITEM_PROPERTIES:
+		if not is_clicked_item:
+			return
+		var item_definition: = get_existing_item_definition(clicked_is_entity, clicked_item_id)
+		CurrentClipboard.copy_properties(item_definition.get("properties", {}))
+	elif context_menu_id == CONTEXT_MENU_COPY_ENTITY_SPRITE:
+		if not is_clicked_item or not clicked_is_entity:
+			return
+		var entity_def: Dictionary = get_existing_item_definition(true, clicked_item_id)
+		CurrentClipboard.copy_sprite_config(entity_def.get("sprite_config", {}))

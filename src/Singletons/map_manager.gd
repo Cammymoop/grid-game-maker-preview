@@ -50,6 +50,7 @@ func refresh_definition():
     create_tileset()
     find_blocking()
     find_tiles_with_sprite_modifiers()
+    update_index_map()
 
 func fix_string_keys():
     var old_definition = tile_defs
@@ -617,18 +618,36 @@ func tile_exists_at(tile_position) -> bool:
             return true
     return false
 
-func update_tile_definition(tile_index, definition) -> void:
-    if not tile_index in tile_defs:
-        print("ERROR tried to update non-existing tile: " + str(tile_index))
+func update_tile_definition(tile_id: int, definition: Dictionary) -> void:
+    if not tile_id in tile_defs:
+        push_error("ERROR tried to update non-existing tile: " + str(tile_id))
         return
-    tile_defs[tile_index] = definition
-    update_index_map()
+    tile_defs[tile_id] = definition.duplicate_deep()
+    refresh_definition()
 
-func make_new_tile(definition) -> int:
-    var new_index = max_tile_index() + 1
-    tile_defs[new_index] = definition
-    update_index_map()
-    return new_index
+func make_new_tile(new_tile_definition: Dictionary) -> int:
+    new_tile_definition = clean_for_existing_assets(new_tile_definition)
+    var new_id: = max_tile_index() + 1
+    tile_defs[new_id] = new_tile_definition
+    refresh_definition()
+    return new_id
+
+func _clean_dict_texture_id_for_existing_assets(incoming_dict: Dictionary) -> void:
+    if not incoming_dict.has("texture"):
+        return
+    var texture_id: = int(incoming_dict["texture"])
+    if not TextureManager.has_loaded_texture_id(texture_id):
+        incoming_dict["texture"] = TextureManager.get_fallback_texture_id()
+        incoming_dict["tex_index"] = 0
+    else:
+        var max_index: = TextureManager.get_max_texture_index(texture_id)
+        incoming_dict["tex_index"] = mini(max_index, int(incoming_dict.get("tex_index", 0)))
+
+func clean_for_existing_assets(incoming_definition: Dictionary) -> Dictionary:
+    _clean_dict_texture_id_for_existing_assets(incoming_definition)
+    if incoming_definition.has("preview_variant"):
+        _clean_dict_texture_id_for_existing_assets(incoming_definition["preview_variant"])
+    return incoming_definition
 
 func max_tile_index() -> int:
     var max_index = 0

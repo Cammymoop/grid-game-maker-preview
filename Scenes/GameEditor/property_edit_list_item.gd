@@ -4,6 +4,9 @@ signal request_remove(property_name: String)
 signal request_override(property_name: String)
 signal request_restore(property_name: String)
 signal request_activate(list_item)
+
+signal request_context_menu(list_item)
+
 signal property_name_changed(old_name: String, new_name: String)
 signal property_name_change_finalized(new_name: String)
 signal property_value_changed(property_name: String, value: Variant)
@@ -368,6 +371,9 @@ func start_value_editting() -> void:
         return
     _value_editting = true
     value_label.hide()
+    conditional_label_1.hide()
+    conditional_label_2.hide()
+    conditional_edit_button.hide()
     value_edit.show()
     value_edit.set_value(property_value)
     value_edit.try_grab_focus()
@@ -378,8 +384,13 @@ func stop_value_editting() -> void:
         return
     _value_editting = false
     value_edit.hide()
-    value_label.show()
-    value_label.text = get_rich_value_text()
+    if is_conditional() and is_conditional_edit_allowed():
+        conditional_label_1.show()
+        conditional_label_2.show()
+        conditional_edit_button.show()
+    else:
+        value_label.show()
+        value_label.text = get_rich_value_text()
     _show_hide_edit_value_button()
 
 func is_special_prop_name(prop_name: String) -> bool:
@@ -390,25 +401,32 @@ func is_event_name(prop_name: String) -> bool:
 
 func sub_item_gui_input(event: InputEvent, sub_item: Control) -> void:
     if sub_item == edit_value_button:
-        if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.is_pressed():
-            start_value_editting()
-            accept_event()
-            return
+        if event is InputEventMouseButton:
+            if event.button_index == MOUSE_BUTTON_LEFT and event.is_pressed():
+                start_value_editting()
+                accept_event()
+                return
     any_gui_input(event)
 
 func _gui_input(event: InputEvent) -> void:
     any_gui_input(event)
 
 func any_gui_input(event: InputEvent) -> void:
-    if event is InputEventMouseButton and event.is_pressed():
-        if not is_active():
-            request_activate.emit(self)
-            return
-        if event.button_index == MOUSE_BUTTON_LEFT:
-            if event.double_click:
-                start_value_editting()
-            else:
-                stop_value_editting()
+    if event is InputEventMouseButton and Rect2(Vector2.ZERO, get_size()).has_point(get_local_mouse_position()):
+        if event.is_pressed():
+            if not is_active():
+                request_activate.emit(self)
+                return
+            if event.button_index == MOUSE_BUTTON_LEFT:
+                if event.double_click:
+                    start_value_editting()
+                else:
+                    stop_value_editting()
+        elif event.button_index == MOUSE_BUTTON_RIGHT and not event.is_pressed():
+            if is_active():
+                request_context_menu.emit(self)
+                accept_event()
+                return
 
 func sub_item_focus_entered(sub_item: Control) -> void:
     if sub_item and not (value_edit == sub_item or value_edit.is_ancestor_of(sub_item)):

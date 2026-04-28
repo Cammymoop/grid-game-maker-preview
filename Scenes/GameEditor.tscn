@@ -68,10 +68,11 @@ script = ExtResource("10")
 [node name="TabContainer" type="TabContainer" parent="MarginContainer/UIRoot" unique_id=540253846]
 layout_mode = 2
 theme = ExtResource("3_qrjoe")
-current_tab = 0
+current_tab = 1
 tab_0/title = "Game"
 
 [node name="GameDefinition" type="VBoxContainer" parent="MarginContainer/UIRoot/TabContainer" unique_id=1146228055 node_paths=PackedStringArray("show_level_title_option_picker", "name_input", "edit_game_dir_button", "move_interp_option_picker", "action_signal_sent_to_option_picker", "turn_animation_option_picker")]
+visible = false
 layout_mode = 2
 script = ExtResource("6")
 show_level_title_option_picker = NodePath("ScrollContainer/VBoxContainer/GameSettingsSection/MarginContainer/HFlowContainer/HFlowContainer/HBoxContainer11/OptionButton")
@@ -496,7 +497,6 @@ text = "New Empty
 Game"
 
 [node name="Tiles & Entities" type="VBoxContainer" parent="MarginContainer/UIRoot/TabContainer" unique_id=162263070 node_paths=PackedStringArray("tile_grid", "entity_grid")]
-visible = false
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
@@ -528,6 +528,7 @@ size_flags_vertical = 3
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
+mouse_filter = 1
 theme_override_styles/panel = SubResource("1")
 
 [node name="ScrollContainer" type="ScrollContainer" parent="MarginContainer/UIRoot/TabContainer/Tiles & Entities/VSplitContainer/VBoxContainer/EntitiesHBoxContainer/PanelContainer" unique_id=976704208]
@@ -562,6 +563,7 @@ size_flags_vertical = 3
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
+mouse_filter = 1
 theme_override_styles/panel = SubResource("1")
 
 [node name="ScrollContainer" type="ScrollContainer" parent="MarginContainer/UIRoot/TabContainer/Tiles & Entities/VSplitContainer/VBoxContainer2/TilesHBoxContainer/PanelContainer" unique_id=1087145622]
