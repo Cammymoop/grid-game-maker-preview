@@ -1,0 +1,28 @@
+[gd_scene format=3 uid="uid://brr455es30cwt"]
+
+[ext_resource type="Script" uid="uid://h5jh21tidsnm" path="res://Scenes/GameEditor/sfx_definer.gd" id="1_8prtj"]
+[ext_resource type="PackedScene" uid="uid://cemds60k8ytal" path="res://Scenes/UI/icon_button.tscn" id="3_iqlve"]
+[ext_resource type="Texture2D" uid="uid://cv8l7ymc05wg5" path="res://assets/img/button_icons/plus.png" id="4_so8bq"]
+
+[node name="SfxDefiner" type="VBoxContainer" unique_id=1205198633 node_paths=PackedStringArray("sfx_preview_player", "item_container", "add_item_button")]
+offset_right = 538.0
+offset_bottom = 40.0
+script = ExtResource("1_8prtj")
+sfx_preview_player = NodePath("AudioStreamPlayer")
+item_container = NodePath("ItemContainer")
+add_item_button = NodePath("HBoxContainer/AddItemButton")
+
+[node name="ItemContainer" type="VBoxContainer" parent="." unique_id=2135560960]
+layout_mode = 2
+size_flags_horizontal = 4
+
+[node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="." unique_id=2031841490]
+bus = &"PSSfxBus"
+
+[node name="HBoxContainer" type="HBoxContainer" parent="." unique_id=575919807]
+layout_mode = 2
+alignment = 1
+
+[node name="AddItemButton" parent="HBoxContainer" unique_id=451892711 instance=ExtResource("3_iqlve")]
+layout_mode = 2
+icon = ExtResource("4_so8bq")

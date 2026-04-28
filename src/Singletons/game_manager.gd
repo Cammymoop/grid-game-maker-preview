@@ -103,6 +103,7 @@ enum MovementMode {
 }
 
 func _ready():
+	PuzzleScriptRNG.test_example()
 	# Automatically use the display scaling from the OS if it's detected, because of how the gameplay display auto scales this mainly affects UI
 	var cur_screen_scale: float = DisplayServer.screen_get_scale()
 	if cur_screen_scale != get_window().content_scale_factor:
@@ -150,6 +151,8 @@ func _ready():
 	MapManager.refresh_definition()
 	EntityManager.refresh_definition()
 	EntityManager.build_sprite_previews()
+	
+	SfxPlayer.refresh_game_sfx()
 
 func bake_scene_transition_curve() -> void:
 	scene_transition_curve.bake()
@@ -541,6 +544,7 @@ func change_scene(new_scene: String):
 	
 	if new_scene == "Play":
 		transition_left = false
+		SfxPlayer.refresh_game_sfx()
 	elif new_scene == "GameEditor":
 		transition_left = true
 	
@@ -934,3 +938,9 @@ func show_credits() -> void:
 
 func get_special_prop_hint_text(prop_name: String) -> String:
 	return SPECIAL_PROPS_HINT_TEXT.get(prop_name, "")
+
+func get_sfx_definitions() -> Array:
+	return game_definition.get("sfx_definitions", []).duplicate_deep()
+
+func set_sfx_definitions(new_sfx_definitions: Array) -> void:
+	game_definition["sfx_definitions"] = new_sfx_definitions.duplicate_deep()

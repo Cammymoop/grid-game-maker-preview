@@ -5,11 +5,13 @@
 [ext_resource type="Script" uid="uid://bx6f17nxjwie5" path="res://src/GameEditor/TilesEntitiesEditor.gd" id="3"]
 [ext_resource type="Theme" uid="uid://d02pi6tltv1cc" path="res://assets/ui/game_editor_tab_theme.tres" id="3_qrjoe"]
 [ext_resource type="Script" uid="uid://x80wuvd66lkn" path="res://Scenes/GameEditor/game_def_display_settings.gd" id="4_32qri"]
+[ext_resource type="Script" uid="uid://trn0oh5htse0" path="res://Scenes/sfx_tester.gd" id="4_p28x1"]
 [ext_resource type="Script" uid="uid://cakuc61ui0t57" path="res://src/GameEditor/ImagesEditor.gd" id="5"]
 [ext_resource type="PackedScene" uid="uid://bgbv61t8v8ji5" path="res://Scenes/GameEditor/ConditionalEditor/vector2f_input.tscn" id="5_73cj6"]
 [ext_resource type="Script" uid="uid://benwn44a0nm5f" path="res://src/GameEditor/GameDefinitionEditor.gd" id="6"]
 [ext_resource type="PackedScene" uid="uid://b6fax3dpo74i4" path="res://Scenes/GameEditor/credits_list.tscn" id="6_qrjoe"]
 [ext_resource type="Script" uid="uid://bh535vdhldxn6" path="res://src/GameEditor/ConditionalEditor/prop_or_entity_name_input.gd" id="7_73cj6"]
+[ext_resource type="PackedScene" uid="uid://brr455es30cwt" path="res://Scenes/GameEditor/sfx_definer.tscn" id="7_d6qkc"]
 [ext_resource type="PackedScene" uid="uid://csm4i61la0olb" path="res://Scenes/FallingEntitiesEffects.tscn" id="8"]
 [ext_resource type="FontFile" uid="uid://biuf4hpin33j3" path="res://assets/font/medium_font.tres" id="9"]
 [ext_resource type="Script" uid="uid://b067pb4uemc40" path="res://src/GameEditor/UIRoot.gd" id="10"]
@@ -68,11 +70,10 @@ script = ExtResource("10")
 [node name="TabContainer" type="TabContainer" parent="MarginContainer/UIRoot" unique_id=540253846]
 layout_mode = 2
 theme = ExtResource("3_qrjoe")
-current_tab = 1
+current_tab = 0
 tab_0/title = "Game"
 
 [node name="GameDefinition" type="VBoxContainer" parent="MarginContainer/UIRoot/TabContainer" unique_id=1146228055 node_paths=PackedStringArray("show_level_title_option_picker", "name_input", "edit_game_dir_button", "move_interp_option_picker", "action_signal_sent_to_option_picker", "turn_animation_option_picker")]
-visible = false
 layout_mode = 2
 script = ExtResource("6")
 show_level_title_option_picker = NodePath("ScrollContainer/VBoxContainer/GameSettingsSection/MarginContainer/HFlowContainer/HFlowContainer/HBoxContainer11/OptionButton")
@@ -145,6 +146,61 @@ scroll_hint_mode = 1
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
+
+[node name="SfxTester" type="FoldableContainer" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer" unique_id=1000756803]
+visible = false
+layout_mode = 2
+title = "SFX TEST"
+title_alignment = 1
+
+[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer/SfxTester" unique_id=1990158893 node_paths=PackedStringArray("sfx_picker", "sfx_input", "play_button", "stream_player")]
+layout_mode = 2
+script = ExtResource("4_p28x1")
+sfx_picker = NodePath("OptionButton")
+sfx_input = NodePath("LineEdit")
+play_button = NodePath("Button")
+stream_player = NodePath("AudioStreamPlayer")
+
+[node name="OptionButton" type="OptionButton" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer/SfxTester/HBoxContainer" unique_id=1173670501]
+layout_mode = 2
+item_count = 13
+popup/item_0/text = "36772507"
+popup/item_0/id = 0
+popup/item_1/text = "98574507"
+popup/item_1/id = 6
+popup/item_2/text = "2845707"
+popup/item_2/id = 1
+popup/item_3/text = "74438701"
+popup/item_3/id = 2
+popup/item_4/text = "82957503"
+popup/item_4/id = 4
+popup/item_5/text = "90720904"
+popup/item_5/id = 5
+popup/item_6/text = "9703504"
+popup/item_6/id = 7
+popup/item_7/text = "68529302"
+popup/item_7/id = 8
+popup/item_8/text = "37228708"
+popup/item_8/id = 9
+popup/item_9/text = "23938708"
+popup/item_9/id = 3
+popup/item_10/text = "56523708"
+popup/item_10/id = 10
+popup/item_11/text = "55243708"
+popup/item_11/id = 11
+popup/item_12/text = "77067508"
+popup/item_12/id = 12
+
+[node name="LineEdit" type="LineEdit" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer/SfxTester/HBoxContainer" unique_id=1664629275]
+custom_minimum_size = Vector2(120, 0)
+layout_mode = 2
+
+[node name="Button" type="Button" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer/SfxTester/HBoxContainer" unique_id=1668556457]
+layout_mode = 2
+text = "PLAY"
+
+[node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer/SfxTester/HBoxContainer" unique_id=736859019]
+bus = &"PSSfxBus"
 
 [node name="GameSettingsSection" type="FoldableContainer" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer" unique_id=531323634]
 layout_mode = 2
@@ -367,6 +423,18 @@ alignment = 2
 layout_mode = 2
 text = "Update Window Size"
 
+[node name="WindowSection2" type="FoldableContainer" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer" unique_id=1949552966]
+layout_mode = 2
+title = "Sound Effects"
+title_alignment = 1
+
+[node name="MarginContainer" type="MarginContainer" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer/WindowSection2" unique_id=1395148722]
+layout_mode = 2
+theme_override_constants/margin_bottom = 4
+
+[node name="SfxDefiner" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer/WindowSection2/MarginContainer" unique_id=1205198633 instance=ExtResource("7_d6qkc")]
+layout_mode = 2
+
 [node name="DefaultCameraSection" type="FoldableContainer" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer" unique_id=1589251919]
 layout_mode = 2
 title = "Default Camera Settings:"
@@ -497,6 +565,7 @@ text = "New Empty
 Game"
 
 [node name="Tiles & Entities" type="VBoxContainer" parent="MarginContainer/UIRoot/TabContainer" unique_id=162263070 node_paths=PackedStringArray("tile_grid", "entity_grid")]
+visible = false
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
