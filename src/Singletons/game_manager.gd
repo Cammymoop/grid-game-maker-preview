@@ -944,3 +944,11 @@ func get_sfx_definitions() -> Array:
 
 func set_sfx_definitions(new_sfx_definitions: Array) -> void:
 	game_definition["sfx_definitions"] = new_sfx_definitions.duplicate_deep()
+
+func get_used_sfx_names() -> Array[String]:
+	var used_sfx_names: Array[String] = []
+	for sfx_definition in get_sfx_definitions():
+		if not sfx_definition.get("name", ""):
+			continue
+		used_sfx_names.append(sfx_definition["name"])
+	return used_sfx_names

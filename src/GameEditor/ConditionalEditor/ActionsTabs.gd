@@ -1,7 +1,7 @@
 extends TabContainer
 
 func get_current_list() -> Control:
-	return get_current_tab_control().get_list()
+	return get_current_tab_control()
 
 func set_current_list(list_name: String) -> void:
 	for tab_index in get_tab_count():

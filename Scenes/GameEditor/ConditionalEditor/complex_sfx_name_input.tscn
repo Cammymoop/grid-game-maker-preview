@@ -1,0 +1,29 @@
+[gd_scene format=3 uid="uid://bhml6d8whoglb"]
+
+[ext_resource type="Script" uid="uid://bgdkkaju61w15" path="res://Scenes/GameEditor/ConditionalEditor/complex_autocomplete_input.gd" id="1_lb4a1"]
+[ext_resource type="PackedScene" uid="uid://bh1w4w8i5hk66" path="res://Scenes/GameEditor/SlotSelectorButton.tscn" id="2_txdvs"]
+[ext_resource type="StyleBox" uid="uid://ch63py1vky05t" path="res://assets/ui/plain_input_bg.tres" id="3_cc473"]
+[ext_resource type="Script" uid="uid://bgrcxdoa3c0cb" path="res://src/GameEditor/ConditionalEditor/entity_name_input.gd" id="4_iq0rl"]
+
+[node name="ComplexSfxNameInput" type="HBoxContainer" unique_id=1726993889 node_paths=PackedStringArray("slot_selector", "plain_value_input")]
+offset_right = 40.0
+offset_bottom = 40.0
+script = ExtResource("1_lb4a1")
+slot_selector = NodePath("SlotSelectorButton")
+plain_value_input = NodePath("PlainValueInput")
+autocomplete_list = "SFX Name"
+
+[node name="SlotSelectorButton" parent="." unique_id=1264497244 instance=ExtResource("2_txdvs")]
+layout_mode = 2
+show_text_option = true
+default_slot_id = -4
+
+[node name="PlainValueInput" type="LineEdit" parent="." unique_id=1435025089]
+custom_minimum_size = Vector2(140, 0)
+layout_mode = 2
+size_flags_vertical = 4
+theme_override_styles/normal = ExtResource("3_cc473")
+placeholder_text = "sfx name"
+script = ExtResource("4_iq0rl")
+do_highlight_known = true
+highlight_known_color = Color(1.92523e-07, 0.96892077, 0.76753855, 1)

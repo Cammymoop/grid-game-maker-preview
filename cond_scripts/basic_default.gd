@@ -1455,11 +1455,38 @@ func cmd_is_entity_tailing(slots: Dictionary, chosen_slot: int, tailing: bool) -
 	return EntityManager.get_tailing_entities_of(slots[chosen_slot]).size() > 0
 
 func desc_select_tailing_entity() -> String:
-	return "entity|<= Select an entity [tailing:BoolChoice:true,being tailed by,that is tailing] [ref_entity_slot:SlotInput:entity]"
-func cmd_select_tailing_entity(slots: Dictionary, chosen_slot: int, tailing: bool, ref_entity_slot: int) -> void:
+	return "entity|<= Select an entity [tailing_me:BoolChoice:true,being tailed by,that is tailing] [ref_entity_slot:SlotInput:entity]"
+func cmd_select_tailing_entity(slots: Dictionary, chosen_slot: int, tailing_me: bool, ref_entity_slot: int) -> void:
 	if not Commands.slot_is_entity(chosen_slot):
 		push_error("Invalid slot or empty slot to select tailing entity: %s" % chosen_slot)
 		return
-	if not slots[chosen_slot]:
+	if not slots[ref_entity_slot]:
 		return
-	slots[chosen_slot] = slots[chosen_slot].tailing
+	if not tailing_me:
+		if not slots[chosen_slot].tailing or not EntityManager.has_instance(slots[chosen_slot].tailing.instance_id):
+			slots[chosen_slot] = null
+			return
+		slots[chosen_slot] = EntityManager.get_instance(slots[chosen_slot].tailing.instance_id)
+	else:
+		var tailing_entities: Array[BaseEntity] = EntityManager.get_tailing_entities_of(slots[ref_entity_slot])
+		if tailing_entities.size() == 0:
+			slots[chosen_slot] = null
+			return
+		slots[chosen_slot] = tailing_entities[0]
+
+
+func desc_play_named_sfx() -> String:
+	return "none|Play the [sfx_name:SFXNameInput] sound effect [do_restart:BoolChoice:false,restarting if already playing,if it isn't already playing]"
+func cmd_play_named_sfx(slots: Dictionary, _slot: int, sfx_name: Dictionary, do_restart: bool) -> void:
+	if not sfx_name:
+		return
+	var sfx_name_str: String = get_complex_string_value(sfx_name, slots)
+	SfxPlayer.play_named_sfx(sfx_name_str, do_restart, true)
+
+func desc_keep_named_sfx_playing() -> String:
+	return "none|Keep the [sfx_name:SFXNameInput] sound effect playing (start if it isn't playing)"
+func cmd_keep_named_sfx_playing(slots: Dictionary, _slot: int, sfx_name: Dictionary) -> void:
+	if not sfx_name:
+		return
+	var sfx_name_str: String = get_complex_string_value(sfx_name, slots)
+	SfxPlayer.keep_named_sfx_playing(sfx_name_str, true)

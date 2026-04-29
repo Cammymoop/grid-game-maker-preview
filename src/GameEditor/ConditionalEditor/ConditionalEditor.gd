@@ -41,6 +41,8 @@ var replace_from_list: Control = null
 var has_me_entity_slot: bool = true
 var has_them_entity_slot: bool = true
 
+var adding_command_to_destination: String = "conditions"
+
 static var last_size: Vector2i = Vector2i(0, 0)
 
 func _init() -> void:
@@ -61,7 +63,7 @@ func _ready():
             event_name_label.tooltip_text = "Custom conditional property or event"
             event_name_label.add_theme_color_override("font_color", Color(0.7, 0.2, 0.2))
     var add_new_command_func = add_new_v3_command if use_conditionalv3 else add_v2_command
-    add_command_dialog.connect("command_selected", add_new_command_func.bind("conditions"))
+    add_command_dialog.connect("command_selected", add_new_command_func)
     add_command_dialog.hidden.connect(on_add_command_hidden)
     #_old_add_action_dialog.connect("command_selected", add_new_command_func.bind("actions"))
     #_old_add_action_dialog.hidden.connect(on_add_action_hidden)
@@ -125,7 +127,8 @@ func add_v2_command(command_code: int, slot_id: int, destination: String, option
         new_list_item.generate_ui()
         new_list_item.set_option_values(option_values)
 
-func add_new_v3_command(qualified_cmd: String, slot_id: int, destination: String) -> void:
+func add_new_v3_command(qualified_cmd: String, slot_id: int) -> void:
+    var destination: String = adding_command_to_destination
 
     var short_name = ConditionalsV3.command_short_name(qualified_cmd)
     if not qualified_cmd:
@@ -146,7 +149,7 @@ func add_new_v3_command(qualified_cmd: String, slot_id: int, destination: String
     if destination == "actions":
         var cur_list_node: = action_tabs.get_current_list()
         if not cur_list_node in when_lists.values():
-            push_error("Current action list is not a when list")
+            push_error("Current action list is not a when list %s %s" % [cur_list_node, when_lists.values()])
             return
         list_name = when_lists.find_key(cur_list_node)
     append_item_to_command_list(new_list_item, list_name)
@@ -330,11 +333,13 @@ func make_command_data(command_input_node) -> Dictionary:
     return command_input_node.get_command_data()
 
 func _on_NewConditionButton_pressed():
+    adding_command_to_destination = "conditions"
     add_command_dialog.set_list_and_mode("Conditions", true)
     add_command_dialog.popup_centered()
     
 func _on_NewActionButton_pressed():
     var action_list_name: = get_current_action_list_tab_name()
+    adding_command_to_destination = "actions"
     add_command_dialog.set_list_and_mode(action_list_name, false)
     add_command_dialog.popup_centered()
     #_old_add_action_dialog.popup_centered()
@@ -344,8 +349,10 @@ func open_new_command_for_replace(command_list: Control, command_index: int) -> 
     replace_to_index = command_index
     replace_from_list = command_list
     if command_list == cond_list:
+        adding_command_to_destination = "conditions"
         add_command_dialog.set_list_and_mode("Conditions", true)
     else:
+        adding_command_to_destination = "actions"
         add_command_dialog.set_list_and_mode(get_current_action_list_tab_name(), false)
     add_command_dialog.popup_centered()
 

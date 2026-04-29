@@ -70,8 +70,8 @@ func fetch_now() -> void:
 
 func set_fetch_values_func(new_func: Callable) -> void:
 	fetch_values_func = new_func
-	if not _fetched:
-		fetch_now()
+	#if not _fetched:
+	fetch_now()
 	update_highlight()
 
 

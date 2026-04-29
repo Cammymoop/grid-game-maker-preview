@@ -6,6 +6,7 @@ enum InputTypes {
 	TileNameInput,
 	EntityNameInput,
 	SignalInput,
+	SFXNameInput,
 	
 	ScalarInput,
 	ComplexScalarInput,
@@ -41,6 +42,7 @@ var templates: = {
 	InputTypes.TileNameInput: preload("res://src/GameEditor/ConditionalEditor/tile_name_input.gd"),
 	InputTypes.EntityNameInput: preload("res://Scenes/GameEditor/ConditionalEditor/complex_entity_name_input.tscn"),
 	InputTypes.SignalInput: preload("res://Scenes/GameEditor/ConditionalEditor/generic_input.tscn"),
+	InputTypes.SFXNameInput: preload("res://Scenes/GameEditor/ConditionalEditor/complex_sfx_name_input.tscn"),
 	
 	InputTypes.ScalarInput: preload("res://Scenes/GameEditor/ConditionalEditor/scalar_value_input.tscn"),
 	InputTypes.ComplexScalarInput: preload("res://Scenes/GameEditor/ConditionalEditor/complex_scalar_input.tscn"),

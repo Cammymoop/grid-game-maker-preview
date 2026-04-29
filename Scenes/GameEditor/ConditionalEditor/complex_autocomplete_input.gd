@@ -9,11 +9,12 @@ var plain_value_as_string: bool = false
 @export var slot_selector: SlotSelectorButton
 @export var plain_value_input: FuzzyAutocompleteInput
 
-@export_enum("Entity Name") var autocomplete_list: String = ""
+@export_enum("Entity Name", "Property Name", "SFX Name") var autocomplete_list: String = "Entity Name"
 
 var autocomplete_list_data_sources: Dictionary[String, Callable] = {
     "Entity Name": EntityManager.get_all_entity_names,
     "Property Name": GameManager.get_all_used_prop_names,
+    "SFX Name": GameManager.get_used_sfx_names,
 }
 
 var arg_name: String = ""
@@ -26,6 +27,8 @@ func _ready():
     slot_selector.slot_changed.connect(on_slot_changed)
     
     if autocomplete_list in autocomplete_list_data_sources:
+        prints("setting fetch values func for %s" % autocomplete_list)
+        prints("values: %s" % [autocomplete_list_data_sources[autocomplete_list].call()])
         plain_value_input.set_fetch_values_func(autocomplete_list_data_sources[autocomplete_list])
     plain_value_input.text_changed.connect(on_plain_value_changed)
     refresh_ui()

@@ -197,7 +197,9 @@
               "basic_default.c_get_pushed::[\"i:0\",{\"args\":[\"s:type\",\"s:plain\",\"s:direction\",\"i:20\"],\"type\":\"Dictionary\"},true]"
             ],
             "when true": [],
-            "when false": [],
+            "when false": [
+              "basic_default.play_named_sfx::[\"i:-1\",{\"args\":[\"s:type\",\"s:plain\",\"s:value\",\"s:Fennec\"],\"type\":\"Dictionary\"},false]"
+            ],
             "when always": []
           }
         ]
@@ -238,5 +240,17 @@
         }
       ]
     }
-  }
+  },
+  "sfx_definitions": [
+    {
+      "type": "ps_sfx",
+      "name": "Fennec",
+      "ps_seed": 242447.0
+    },
+    {
+      "type": "ps_sfx",
+      "name": "Binturong",
+      "ps_seed": 607150.0
+    }
+  ]
 }

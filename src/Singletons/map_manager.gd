@@ -982,8 +982,8 @@ func _resolve_truthy_single_pos_prop_if_exists(is_static: bool, at_pos: Vector2i
 
 func tracked_conditional_tile_event(at_tile_positions: Array, event_name: String, ctx_entity: BaseEntity, is_all: bool = false, only_index: int = -1, extra_debug: bool = false) -> Dictionary:
     var result_info: Dictionary = {}
-    var overall_result: = false
     var default_result: = true if is_all else false
+    var overall_result: = default_result
     for at_pos in at_tile_positions:
         var resolved_here: Array[int] = []
         for l in layers:
@@ -1010,6 +1010,7 @@ func attempt_move(moving_entity: BaseEntity, leaving_ps: Array[Vector2i], enteri
     #var result: = conditional_tile_event(leaving_ps, "move_off_of", moving_entity, true)
     var tracked_result: = tracked_conditional_tile_event(leaving_ps, "move_off_of", moving_entity, true)
     var result: bool = tracked_result["overall"]
+    #prints("tracked result: %s" % [tracked_result])
 
     var skip_collection: Array[int] = []
     if not EntityManager.attempt_move_leave(moving_entity, leaving_ps, skip_collection, is_group_move):

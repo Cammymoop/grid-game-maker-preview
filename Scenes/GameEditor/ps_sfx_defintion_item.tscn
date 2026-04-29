@@ -4,10 +4,10 @@
 [ext_resource type="PackedScene" uid="uid://cemds60k8ytal" path="res://Scenes/UI/icon_button.tscn" id="2_4pn1v"]
 [ext_resource type="Texture2D" uid="uid://dqjupuymonk4t" path="res://assets/img/button_icons/dice.png" id="3_4pn1v"]
 
-[node name="PSSfxDefintionItem" type="HBoxContainer" unique_id=864187500 node_paths=PackedStringArray("sfx_name_input", "sfx_picker", "sfx_input", "play_button", "randomize_button")]
+[node name="PSSfxDefintionItem" type="HBoxContainer" unique_id=864187500 node_paths=PackedStringArray("sfx_name_input", "sfx_style_picker", "sfx_input", "play_button", "randomize_button")]
 script = ExtResource("1_c267v")
 sfx_name_input = NodePath("VBoxContainer/HBoxContainer/LineEdit")
-sfx_picker = NodePath("VBoxContainer/HBoxContainer2/HBoxContainer/PresetPSSFXPicker")
+sfx_style_picker = NodePath("VBoxContainer/HBoxContainer2/HBoxContainer/PSSfxStylePicker")
 sfx_input = NodePath("VBoxContainer/HBoxContainer2/HBoxContainer2/PSSfxSeedNum")
 play_button = NodePath("PlayButton")
 randomize_button = NodePath("RandomizeButton")
@@ -26,6 +26,7 @@ text = "Name:"
 [node name="LineEdit" type="LineEdit" parent="VBoxContainer/HBoxContainer" unique_id=178268080]
 custom_minimum_size = Vector2(140, 0)
 layout_mode = 2
+theme_override_colors/font_color = Color(0, 0.96862745, 0.76862746, 1)
 expand_to_text_length = true
 
 [node name="TypeLabel" type="Label" parent="VBoxContainer/HBoxContainer" unique_id=1612152725]
@@ -53,37 +54,10 @@ layout_mode = 2
 [node name="Label3" type="Label" parent="VBoxContainer/HBoxContainer2/HBoxContainer" unique_id=1471981692]
 layout_mode = 2
 theme_override_font_sizes/font_size = 14
-text = "Example Presets:"
+text = "Style:"
 
-[node name="PresetPSSFXPicker" type="OptionButton" parent="VBoxContainer/HBoxContainer2/HBoxContainer" unique_id=1933049943]
+[node name="PSSfxStylePicker" type="OptionButton" parent="VBoxContainer/HBoxContainer2/HBoxContainer" unique_id=1933049943]
 layout_mode = 2
-item_count = 13
-popup/item_0/text = "36772507"
-popup/item_0/id = 0
-popup/item_1/text = "98574507"
-popup/item_1/id = 6
-popup/item_2/text = "2845707"
-popup/item_2/id = 1
-popup/item_3/text = "74438701"
-popup/item_3/id = 2
-popup/item_4/text = "82957503"
-popup/item_4/id = 4
-popup/item_5/text = "90720904"
-popup/item_5/id = 5
-popup/item_6/text = "9703504"
-popup/item_6/id = 7
-popup/item_7/text = "68529302"
-popup/item_7/id = 8
-popup/item_8/text = "37228708"
-popup/item_8/id = 9
-popup/item_9/text = "23938708"
-popup/item_9/id = 3
-popup/item_10/text = "56523708"
-popup/item_10/id = 10
-popup/item_11/text = "55243708"
-popup/item_11/id = 11
-popup/item_12/text = "77067508"
-popup/item_12/id = 12
 
 [node name="Label4" type="Label" parent="VBoxContainer/HBoxContainer2" unique_id=142254925]
 layout_mode = 2
@@ -107,7 +81,7 @@ select_all_on_focus = true
 
 [node name="RandomizeButton" parent="." unique_id=451892711 instance=ExtResource("2_4pn1v")]
 layout_mode = 2
-tooltip_text = "Randomize"
+tooltip_text = "new random sfx in the same style"
 icon = ExtResource("3_4pn1v")
 
 [node name="PlayButton" type="Button" parent="." unique_id=1796671263]
