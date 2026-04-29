@@ -15,7 +15,7 @@ config/description="A powerful almost-all-in-one tool for quickly making all sor
 config/version="preview"
 run/main_scene="res://Scenes/Loading.tscn"
 config/features=PackedStringArray("4.6")
-config/icon="res://icon.png"
+config/icon="uid://dr2r046aw8ctw"
 
 [audio]
 
