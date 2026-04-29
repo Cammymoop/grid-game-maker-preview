@@ -17,6 +17,8 @@ var cur_scene = null
 var cur_game_name: = ""
 var loaded_from_game_name: = ""
 
+var current_level_list: String = ""
+
 var game_creators: Array[String] = []
 
 var checkpoint_save: = {}
@@ -200,6 +202,7 @@ func new_empty_game_definition(with_name: String = "") -> void:
 		},
 		"entity_definitions": {},
 		"tile_definitions": {},
+		"level_lists": [],
 	}
 	load_game_definition_data(empty_game)
 
@@ -490,6 +493,8 @@ func try_load_level(level_name: String):
 	if not FilesManager.level_exists(cur_game_name, level_name) or queued_level_load:
 		return
 	var the_level_data: = FilesManager.get_level_data(cur_game_name, level_name)
+	if not the_level_data["name"] == level_name:
+		the_level_data["name"] = level_name
 	load_level_data(the_level_data)
 
 func new_empty_level():
@@ -977,3 +982,201 @@ func get_used_sfx_names() -> Array[String]:
 			continue
 		used_sfx_names.append(sfx_definition["name"])
 	return used_sfx_names
+
+
+func _get_level_list(level_list_name: String) -> Dictionary:
+	for level_list_info in game_definition.get("level_lists", []):
+		if level_list_info.get("name", "") == level_list_name:
+			return level_list_info
+	return {}
+
+func _remove_level_from_all_lists(level_name: String) -> void:
+	for level_list_info in game_definition.get("level_lists", []):
+		level_list_info["level_names"].erase(level_name)
+
+func _get_level_list_index(level_list_name: String) -> int:
+	for i in game_definition.get("level_lists", []).size():
+		if game_definition.get("level_lists", [])[i].get("name", "") == level_list_name:
+			return i
+	return -1
+
+func has_any_unlocked_levels() -> bool:
+	var total_unlocked_levels: int = 0
+	for level_list_name in get_list_of_level_lists():
+		total_unlocked_levels += get_unlocked_levels_in_level_list(level_list_name).size()
+	return total_unlocked_levels > 0
+
+func get_list_of_level_lists() -> Array:
+	var ll_names: Array[String] = []
+	for level_list_info in game_definition.get("level_lists", []):
+		if not level_list_info.get("name", ""):
+			continue
+		ll_names.append(level_list_info["name"])
+	return ll_names
+
+func get_levels_in_level_list(level_list_name: String) -> Array:
+	var level_list_info: = _get_level_list(level_list_name)
+	var actual_level_names: = []
+	for level_name in level_list_info.get("level_names", []):
+		if FilesManager.level_exists(get_game_name(), level_name):
+			actual_level_names.append(level_name)
+	return actual_level_names
+
+func is_level_list_unlocked(level_list_name: String) -> bool:
+	var level_list_index: = _get_level_list_index(level_list_name)
+	if level_list_index < 0:
+		return false
+	if level_list_index == 0:
+		return true
+	else:
+		# Check if level list should be unlocked here
+		return true
+
+func get_unlocked_levels_in_level_list(level_list_name: String) -> Array:
+	if not is_level_list_unlocked(level_list_name):
+		return []
+	var level_list_info: = _get_level_list(level_list_name)
+	var existing_levels: = get_levels_in_level_list(level_list_name)
+	if level_list_info.get("progressive_locked_levels", 0) > 0:
+		return existing_levels.slice(0, level_list_info.get("progressive_locked_levels", 0))
+	else:
+		return existing_levels
+
+func get_first_existing_level_from_list(level_list_name: String) -> String:
+	var level_list_info: = _get_level_list(level_list_name)
+	for level_name in level_list_info.get("level_names", []):
+		if FilesManager.level_exists(get_game_name(), level_name):
+			return level_name
+	return ""
+
+func get_starting_level_name() -> String:
+	var lists: Array = get_list_of_level_lists()
+	if lists.size() < 1:
+		return ""
+	return get_first_existing_level_from_list(lists[0])
+
+
+func add_level_to_level_list(level_name: String, level_list_name: String) -> void:
+	var level_list_info: = _get_level_list(level_list_name)
+	if not level_list_info:
+		return
+	
+	if not level_name in level_list_info.get("level_names", []):
+		if not level_list_info.has("level_names"):
+			level_list_info["level_names"] = []
+		level_list_info["level_names"].append(level_name)
+
+func move_level_to_level_list(level_name: String, level_list_name: String) -> void:
+	_remove_level_from_all_lists(level_name)
+	add_level_to_level_list(level_name, level_list_name)
+
+func is_level_in_any_list(level_name: String) -> bool:
+	for level_list_info in game_definition.get("level_lists", []):
+		if level_name in level_list_info.get("level_names", []):
+			return true
+	return false
+
+
+func get_next_level_in_list(level_list_name: String, after_level: String = "") -> String:
+	var level_list_info: = _get_level_list(level_list_name)
+	if not level_list_info or level_list_info.get("level_names", []).size() < 1:
+		return ""
+
+	var found: int = level_list_info["level_names"].find(after_level)
+	if not after_level or found < 0:
+		found = 0
+	if found + 1 >= level_list_info["level_names"].size():
+		return ""
+	return level_list_info["level_names"][found + 1]
+
+
+func get_auto_load_list_after_list(level_list_name: String) -> String:
+	var level_list_info: = _get_level_list(level_list_name)
+	if not level_list_info:
+		return ""
+
+	if not level_list_info.get("auto_next_list", ""):
+		return level_list_info["auto_next_list"]
+	elif level_list_info.get("list_complete_to_lvlselect", false):
+		return ""
+	var index_of: = _get_level_list_index(level_list_name)
+	if index_of == game_definition.get("level_lists", []).size() - 1:
+		return ""
+	return game_definition.get("level_lists", [])[index_of + 1].get("name", "")
+
+
+func get_next_level_to_auto_load() -> Array:
+	if not current_level_list or not loaded_level_name:
+		return []
+	
+	var level_list_info: = _get_level_list(current_level_list)
+	if not level_list_info.get("auto_load_next", true):
+		return []
+	var next_level_in_list: = get_next_level_in_list(current_level_list, loaded_level_name)
+	if next_level_in_list:
+		return [current_level_list, next_level_in_list]
+
+	var next_list_name: = get_auto_load_list_after_list(current_level_list)
+	if not next_list_name or not is_level_list_unlocked(next_list_name):
+		return []
+	return [next_list_name, get_first_existing_level_from_list(next_list_name)]
+
+
+func goto_level_in_level_list(level_list_name: String, level_name: String) -> void:
+	if not cur_scene == "Play":
+		return
+	if is_in_level_edit_mode:
+		return
+	
+	var level_list_info: = _get_level_list(level_list_name)
+	if level_list_info:
+		if not level_name in level_list_info.get("level_names", []):
+			current_level_list = ""
+		else:
+			current_level_list = level_list_name
+	else:
+		current_level_list = ""
+	
+	try_load_level(level_name)
+
+
+func advance_level() -> void:
+	if cur_scene != "Play":
+		return
+	var adv_to_level_and_list: Array = get_advance_to_level_and_list()
+	if not adv_to_level_and_list:
+		return
+	if adv_to_level_and_list[0] == "end":
+		go_to_game_end()
+	elif adv_to_level_and_list[0] == "select":
+		go_to_level_select()
+	else:
+		goto_level_in_level_list(adv_to_level_and_list[0], adv_to_level_and_list[1])
+
+func get_advance_to_level_and_list() -> Array:
+	if not loaded_level_name or not current_level_list or current_level_is_museum:
+		return []
+	
+	var next_auto_load_level: Array = get_next_level_to_auto_load()
+	if next_auto_load_level:
+		return next_auto_load_level
+	
+	if not has_any_unlocked_levels():
+		return ["end", ""]
+	else:
+		return ["select", ""]
+	
+func has_level_advance() -> bool:
+	if cur_scene != "Play":
+		return false
+	var adv_to_level_and_list: Array = get_advance_to_level_and_list()
+	if adv_to_level_and_list.size() > 0:
+		return true
+	return false
+
+
+func go_to_level_select() -> void:
+	pass
+
+func go_to_game_end() -> void:
+	show_credits()
