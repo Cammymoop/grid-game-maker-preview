@@ -29,17 +29,18 @@
 [ext_resource type="Texture2D" uid="uid://dc53acgit1eml" path="res://assets/img/button_icons/slot_icons/dark_green_blob.png" id="22"]
 [ext_resource type="Theme" uid="uid://daswi5ker7ml0" path="res://src/UI/ConditionalEditorTheme.tres" id="23"]
 
+[sub_resource type="Theme" id="Theme_a2452"]
+
 [sub_resource type="StyleBoxFlat" id="1"]
-content_margin_bottom = 7.0
+content_margin_left = 4.0
+content_margin_top = 4.0
+content_margin_right = 4.0
+content_margin_bottom = 13.0
 bg_color = Color(0.231373, 0.231373, 0.231373, 1)
 corner_radius_top_left = 8
 corner_radius_top_right = 8
 corner_radius_bottom_right = 8
 corner_radius_bottom_left = 8
-expand_margin_left = 4.0
-expand_margin_top = 4.0
-expand_margin_right = 4.0
-expand_margin_bottom = 4.0
 shadow_color = Color(0, 0, 0, 0.505882)
 shadow_size = 3
 
@@ -63,416 +64,426 @@ mouse_filter = 2
 texture = ExtResource("2")
 
 [node name="PopupPicker" type="Popup" parent="." unique_id=1988138473]
+transparent_bg = true
 oversampling_override = 1.0
-size = Vector2i(280, 175)
+position = Vector2i(31, 26)
+size = Vector2i(254, 191)
+transparent = true
+theme = SubResource("Theme_a2452")
 
-[node name="PopupPanel" type="PanelContainer" parent="PopupPicker" unique_id=1003956299]
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
+[node name="MarginContainer" type="MarginContainer" parent="PopupPicker" unique_id=1822457870]
+offset_right = 40.0
+offset_bottom = 40.0
+theme_override_constants/margin_left = 3
+theme_override_constants/margin_top = 3
+theme_override_constants/margin_right = 3
+theme_override_constants/margin_bottom = 3
+
+[node name="PopupPanel" type="PanelContainer" parent="PopupPicker/MarginContainer" unique_id=1003956299]
+layout_mode = 2
 theme_override_styles/panel = SubResource("1")
 
-[node name="MarginContainer" type="MarginContainer" parent="PopupPicker/PopupPanel" unique_id=1384741734]
+[node name="MarginContainer" type="MarginContainer" parent="PopupPicker/MarginContainer/PopupPanel" unique_id=1384741734]
 layout_mode = 2
 theme_override_constants/margin_left = 6
 theme_override_constants/margin_top = 6
 theme_override_constants/margin_right = 6
 theme_override_constants/margin_bottom = 6
 
-[node name="CategoryContainer" type="HBoxContainer" parent="PopupPicker/PopupPanel/MarginContainer" unique_id=1169448289]
+[node name="CategoryContainer" type="HBoxContainer" parent="PopupPicker/MarginContainer/PopupPanel/MarginContainer" unique_id=1169448289]
 layout_mode = 2
 alignment = 1
 
-[node name="SpecialColumn" type="VBoxContainer" parent="PopupPicker/PopupPanel/MarginContainer/CategoryContainer" unique_id=1118722706]
+[node name="SpecialColumn" type="VBoxContainer" parent="PopupPicker/MarginContainer/PopupPanel/MarginContainer/CategoryContainer" unique_id=1118722706]
 layout_mode = 2
 size_flags_horizontal = 4
 alignment = 1
 
-[node name="PickNone" parent="PopupPicker/PopupPanel/MarginContainer/CategoryContainer/SpecialColumn" unique_id=1820908734 instance=ExtResource("1")]
+[node name="PickNone" parent="PopupPicker/MarginContainer/PopupPanel/MarginContainer/CategoryContainer/SpecialColumn" unique_id=1820908734 instance=ExtResource("1")]
 layout_mode = 2
 size_flags_horizontal = 4
 
-[node name="CenterContainer" type="CenterContainer" parent="PopupPicker/PopupPanel/MarginContainer/CategoryContainer/SpecialColumn/PickNone" unique_id=1360283760]
+[node name="CenterContainer" type="CenterContainer" parent="PopupPicker/MarginContainer/PopupPanel/MarginContainer/CategoryContainer/SpecialColumn/PickNone" unique_id=1360283760]
 layout_mode = 2
 mouse_filter = 2
 
-[node name="TextureRect" type="TextureRect" parent="PopupPicker/PopupPanel/MarginContainer/CategoryContainer/SpecialColumn/PickNone/CenterContainer" unique_id=648740995]
+[node name="TextureRect" type="TextureRect" parent="PopupPicker/MarginContainer/PopupPanel/MarginContainer/CategoryContainer/SpecialColumn/PickNone/CenterContainer" unique_id=648740995]
 layout_mode = 2
 mouse_filter = 2
 texture = ExtResource("5_tbnff")
 
-[node name="PickAny" parent="PopupPicker/PopupPanel/MarginContainer/CategoryContainer/SpecialColumn" unique_id=209940707 instance=ExtResource("1")]
+[node name="PickAny" parent="PopupPicker/MarginContainer/PopupPanel/MarginContainer/CategoryContainer/SpecialColumn" unique_id=209940707 instance=ExtResource("1")]
 layout_mode = 2
 size_flags_horizontal = 4
 
-[node name="CenterContainer" type="CenterContainer" parent="PopupPicker/PopupPanel/MarginContainer/CategoryContainer/SpecialColumn/PickAny" unique_id=552299822]
+[node name="CenterContainer" type="CenterContainer" parent="PopupPicker/MarginContainer/PopupPanel/MarginContainer/CategoryContainer/SpecialColumn/PickAny" unique_id=552299822]
 layout_mode = 2
 mouse_filter = 2
 
-[node name="TextureRect" type="TextureRect" parent="PopupPicker/PopupPanel/MarginContainer/CategoryContainer/SpecialColumn/PickAny/CenterContainer" unique_id=545037286]
+[node name="TextureRect" type="TextureRect" parent="PopupPicker/MarginContainer/PopupPanel/MarginContainer/CategoryContainer/SpecialColumn/PickAny/CenterContainer" unique_id=545037286]
 layout_mode = 2
 mouse_filter = 2
 texture = ExtResource("5_gh5vf")
 
-[node name="PickNumber" parent="PopupPicker/PopupPanel/MarginContainer/CategoryContainer/SpecialColumn" unique_id=1008670137 instance=ExtResource("1")]
+[node name="PickNumber" parent="PopupPicker/MarginContainer/PopupPanel/MarginContainer/CategoryContainer/SpecialColumn" unique_id=1008670137 instance=ExtResource("1")]
 layout_mode = 2
 size_flags_horizontal = 4
 
-[node name="CenterContainer" type="CenterContainer" parent="PopupPicker/PopupPanel/MarginContainer/CategoryContainer/SpecialColumn/PickNumber" unique_id=1522424511]
+[node name="CenterContainer" type="CenterContainer" parent="PopupPicker/MarginContainer/PopupPanel/MarginContainer/CategoryContainer/SpecialColumn/PickNumber" unique_id=1522424511]
 layout_mode = 2
 mouse_filter = 2
 
-[node name="TextureRect" type="TextureRect" parent="PopupPicker/PopupPanel/MarginContainer/CategoryContainer/SpecialColumn/PickNumber/CenterContainer" unique_id=223735887]
+[node name="TextureRect" type="TextureRect" parent="PopupPicker/MarginContainer/PopupPanel/MarginContainer/CategoryContainer/SpecialColumn/PickNumber/CenterContainer" unique_id=223735887]
 layout_mode = 2
 mouse_filter = 2
 texture = ExtResource("6_666yx")
 
-[node name="PickText" parent="PopupPicker/PopupPanel/MarginContainer/CategoryContainer/SpecialColumn" unique_id=2124471442 instance=ExtResource("1")]
+[node name="PickText" parent="PopupPicker/MarginContainer/PopupPanel/MarginContainer/CategoryContainer/SpecialColumn" unique_id=2124471442 instance=ExtResource("1")]
 layout_mode = 2
 size_flags_horizontal = 4
 
-[node name="CenterContainer" type="CenterContainer" parent="PopupPicker/PopupPanel/MarginContainer/CategoryContainer/SpecialColumn/PickText" unique_id=896858068]
+[node name="CenterContainer" type="CenterContainer" parent="PopupPicker/MarginContainer/PopupPanel/MarginContainer/CategoryContainer/SpecialColumn/PickText" unique_id=896858068]
 layout_mode = 2
 mouse_filter = 2
 
-[node name="TextureRect" type="TextureRect" parent="PopupPicker/PopupPanel/MarginContainer/CategoryContainer/SpecialColumn/PickText/CenterContainer" unique_id=478458106]
+[node name="TextureRect" type="TextureRect" parent="PopupPicker/MarginContainer/PopupPanel/MarginContainer/CategoryContainer/SpecialColumn/PickText/CenterContainer" unique_id=478458106]
 layout_mode = 2
 mouse_filter = 2
 texture = ExtResource("7_nhf5h")
 
-[node name="PickTrueFalse" parent="PopupPicker/PopupPanel/MarginContainer/CategoryContainer/SpecialColumn" unique_id=1676388911 instance=ExtResource("1")]
+[node name="PickTrueFalse" parent="PopupPicker/MarginContainer/PopupPanel/MarginContainer/CategoryContainer/SpecialColumn" unique_id=1676388911 instance=ExtResource("1")]
 layout_mode = 2
 size_flags_horizontal = 4
 
-[node name="CenterContainer" type="CenterContainer" parent="PopupPicker/PopupPanel/MarginContainer/CategoryContainer/SpecialColumn/PickTrueFalse" unique_id=958170168]
+[node name="CenterContainer" type="CenterContainer" parent="PopupPicker/MarginContainer/PopupPanel/MarginContainer/CategoryContainer/SpecialColumn/PickTrueFalse" unique_id=958170168]
 layout_mode = 2
 mouse_filter = 2
 
-[node name="TextureRect" type="TextureRect" parent="PopupPicker/PopupPanel/MarginContainer/CategoryContainer/SpecialColumn/PickTrueFalse/CenterContainer" unique_id=1012089515]
+[node name="TextureRect" type="TextureRect" parent="PopupPicker/MarginContainer/PopupPanel/MarginContainer/CategoryContainer/SpecialColumn/PickTrueFalse/CenterContainer" unique_id=1012089515]
 layout_mode = 2
 mouse_filter = 2
 texture = ExtResource("8_014w1")
 
-[node name="SpecialSeparator" parent="PopupPicker/PopupPanel/MarginContainer/CategoryContainer" unique_id=1835311705 instance=ExtResource("7")]
+[node name="SpecialSeparator" parent="PopupPicker/MarginContainer/PopupPanel/MarginContainer/CategoryContainer" unique_id=1835311705 instance=ExtResource("7")]
 custom_minimum_size = Vector2(0, 55)
 layout_mode = 2
 size_flags_vertical = 4
 
-[node name="EntitySlots" type="VBoxContainer" parent="PopupPicker/PopupPanel/MarginContainer/CategoryContainer" unique_id=691323555]
+[node name="EntitySlots" type="VBoxContainer" parent="PopupPicker/MarginContainer/PopupPanel/MarginContainer/CategoryContainer" unique_id=691323555]
 layout_mode = 2
 size_flags_horizontal = 4
 alignment = 1
 
-[node name="PickRed" parent="PopupPicker/PopupPanel/MarginContainer/CategoryContainer/EntitySlots" unique_id=1964346424 instance=ExtResource("1")]
+[node name="PickRed" parent="PopupPicker/MarginContainer/PopupPanel/MarginContainer/CategoryContainer/EntitySlots" unique_id=1964346424 instance=ExtResource("1")]
 layout_mode = 2
 size_flags_horizontal = 4
 
-[node name="CenterContainer" type="CenterContainer" parent="PopupPicker/PopupPanel/MarginContainer/CategoryContainer/EntitySlots/PickRed" unique_id=1108600831]
+[node name="CenterContainer" type="CenterContainer" parent="PopupPicker/MarginContainer/PopupPanel/MarginContainer/CategoryContainer/EntitySlots/PickRed" unique_id=1108600831]
 layout_mode = 2
 mouse_filter = 2
 
-[node name="TextureRect" type="TextureRect" parent="PopupPicker/PopupPanel/MarginContainer/CategoryContainer/EntitySlots/PickRed/CenterContainer" unique_id=649505339]
+[node name="TextureRect" type="TextureRect" parent="PopupPicker/MarginContainer/PopupPanel/MarginContainer/CategoryContainer/EntitySlots/PickRed/CenterContainer" unique_id=649505339]
 layout_mode = 2
 mouse_filter = 2
 texture = ExtResource("2")
 
-[node name="PickBlue" parent="PopupPicker/PopupPanel/MarginContainer/CategoryContainer/EntitySlots" unique_id=1973232950 instance=ExtResource("1")]
+[node name="PickBlue" parent="PopupPicker/MarginContainer/PopupPanel/MarginContainer/CategoryContainer/EntitySlots" unique_id=1973232950 instance=ExtResource("1")]
 layout_mode = 2
 
-[node name="CenterContainer" type="CenterContainer" parent="PopupPicker/PopupPanel/MarginContainer/CategoryContainer/EntitySlots/PickBlue" unique_id=1838412824]
+[node name="CenterContainer" type="CenterContainer" parent="PopupPicker/MarginContainer/PopupPanel/MarginContainer/CategoryContainer/EntitySlots/PickBlue" unique_id=1838412824]
 layout_mode = 2
 mouse_filter = 2
 
-[node name="TextureRect" type="TextureRect" parent="PopupPicker/PopupPanel/MarginContainer/CategoryContainer/EntitySlots/PickBlue/CenterContainer" unique_id=2001105937]
+[node name="TextureRect" type="TextureRect" parent="PopupPicker/MarginContainer/PopupPanel/MarginContainer/CategoryContainer/EntitySlots/PickBlue/CenterContainer" unique_id=2001105937]
 layout_mode = 2
 mouse_filter = 2
 texture = ExtResource("3")
 
-[node name="PickWhite" parent="PopupPicker/PopupPanel/MarginContainer/CategoryContainer/EntitySlots" unique_id=2027379039 instance=ExtResource("1")]
+[node name="PickWhite" parent="PopupPicker/MarginContainer/PopupPanel/MarginContainer/CategoryContainer/EntitySlots" unique_id=2027379039 instance=ExtResource("1")]
 layout_mode = 2
 
-[node name="CenterContainer" type="CenterContainer" parent="PopupPicker/PopupPanel/MarginContainer/CategoryContainer/EntitySlots/PickWhite" unique_id=208848401]
+[node name="CenterContainer" type="CenterContainer" parent="PopupPicker/MarginContainer/PopupPanel/MarginContainer/CategoryContainer/EntitySlots/PickWhite" unique_id=208848401]
 layout_mode = 2
 mouse_filter = 2
 
-[node name="TextureRect" type="TextureRect" parent="PopupPicker/PopupPanel/MarginContainer/CategoryContainer/EntitySlots/PickWhite/CenterContainer" unique_id=1498502438]
+[node name="TextureRect" type="TextureRect" parent="PopupPicker/MarginContainer/PopupPanel/MarginContainer/CategoryContainer/EntitySlots/PickWhite/CenterContainer" unique_id=1498502438]
 layout_mode = 2
 mouse_filter = 2
 texture = ExtResource("6")
 
-[node name="PickPink" parent="PopupPicker/PopupPanel/MarginContainer/CategoryContainer/EntitySlots" unique_id=1730691909 instance=ExtResource("1")]
+[node name="PickPink" parent="PopupPicker/MarginContainer/PopupPanel/MarginContainer/CategoryContainer/EntitySlots" unique_id=1730691909 instance=ExtResource("1")]
 layout_mode = 2
 size_flags_horizontal = 4
 
-[node name="CenterContainer" type="CenterContainer" parent="PopupPicker/PopupPanel/MarginContainer/CategoryContainer/EntitySlots/PickPink" unique_id=1815771973]
+[node name="CenterContainer" type="CenterContainer" parent="PopupPicker/MarginContainer/PopupPanel/MarginContainer/CategoryContainer/EntitySlots/PickPink" unique_id=1815771973]
 layout_mode = 2
 mouse_filter = 2
 
-[node name="TextureRect" type="TextureRect" parent="PopupPicker/PopupPanel/MarginContainer/CategoryContainer/EntitySlots/PickPink/CenterContainer" unique_id=736654267]
+[node name="TextureRect" type="TextureRect" parent="PopupPicker/MarginContainer/PopupPanel/MarginContainer/CategoryContainer/EntitySlots/PickPink/CenterContainer" unique_id=736654267]
 layout_mode = 2
 mouse_filter = 2
 texture = ExtResource("5")
 
-[node name="EntitySeparator" parent="PopupPicker/PopupPanel/MarginContainer/CategoryContainer" unique_id=852682824 instance=ExtResource("7")]
+[node name="EntitySeparator" parent="PopupPicker/MarginContainer/PopupPanel/MarginContainer/CategoryContainer" unique_id=852682824 instance=ExtResource("7")]
 custom_minimum_size = Vector2(0, 55)
 layout_mode = 2
 size_flags_vertical = 4
 
-[node name="TilePosSlots" type="VBoxContainer" parent="PopupPicker/PopupPanel/MarginContainer/CategoryContainer" unique_id=1976574768]
+[node name="TilePosSlots" type="VBoxContainer" parent="PopupPicker/MarginContainer/PopupPanel/MarginContainer/CategoryContainer" unique_id=1976574768]
 layout_mode = 2
 size_flags_horizontal = 4
 size_flags_vertical = 4
 
-[node name="PickGrey" parent="PopupPicker/PopupPanel/MarginContainer/CategoryContainer/TilePosSlots" unique_id=1762492041 instance=ExtResource("1")]
+[node name="PickGrey" parent="PopupPicker/MarginContainer/PopupPanel/MarginContainer/CategoryContainer/TilePosSlots" unique_id=1762492041 instance=ExtResource("1")]
 layout_mode = 2
 size_flags_horizontal = 4
 
-[node name="CenterContainer" type="CenterContainer" parent="PopupPicker/PopupPanel/MarginContainer/CategoryContainer/TilePosSlots/PickGrey" unique_id=1685216498]
+[node name="CenterContainer" type="CenterContainer" parent="PopupPicker/MarginContainer/PopupPanel/MarginContainer/CategoryContainer/TilePosSlots/PickGrey" unique_id=1685216498]
 layout_mode = 2
 mouse_filter = 2
 
-[node name="TextureRect" type="TextureRect" parent="PopupPicker/PopupPanel/MarginContainer/CategoryContainer/TilePosSlots/PickGrey/CenterContainer" unique_id=971765646]
+[node name="TextureRect" type="TextureRect" parent="PopupPicker/MarginContainer/PopupPanel/MarginContainer/CategoryContainer/TilePosSlots/PickGrey/CenterContainer" unique_id=971765646]
 layout_mode = 2
 mouse_filter = 2
 texture = ExtResource("9")
 
-[node name="PickBlack" parent="PopupPicker/PopupPanel/MarginContainer/CategoryContainer/TilePosSlots" unique_id=226896119 instance=ExtResource("1")]
+[node name="PickBlack" parent="PopupPicker/MarginContainer/PopupPanel/MarginContainer/CategoryContainer/TilePosSlots" unique_id=226896119 instance=ExtResource("1")]
 layout_mode = 2
 
-[node name="CenterContainer" type="CenterContainer" parent="PopupPicker/PopupPanel/MarginContainer/CategoryContainer/TilePosSlots/PickBlack" unique_id=625796587]
+[node name="CenterContainer" type="CenterContainer" parent="PopupPicker/MarginContainer/PopupPanel/MarginContainer/CategoryContainer/TilePosSlots/PickBlack" unique_id=625796587]
 layout_mode = 2
 mouse_filter = 2
 
-[node name="TextureRect" type="TextureRect" parent="PopupPicker/PopupPanel/MarginContainer/CategoryContainer/TilePosSlots/PickBlack/CenterContainer" unique_id=1355860336]
+[node name="TextureRect" type="TextureRect" parent="PopupPicker/MarginContainer/PopupPanel/MarginContainer/CategoryContainer/TilePosSlots/PickBlack/CenterContainer" unique_id=1355860336]
 layout_mode = 2
 mouse_filter = 2
 texture = ExtResource("8")
 
-[node name="TilePosSeparator" parent="PopupPicker/PopupPanel/MarginContainer/CategoryContainer" unique_id=1349228039 instance=ExtResource("7")]
+[node name="TilePosSeparator" parent="PopupPicker/MarginContainer/PopupPanel/MarginContainer/CategoryContainer" unique_id=1349228039 instance=ExtResource("7")]
 custom_minimum_size = Vector2(0, 55)
 layout_mode = 2
 size_flags_vertical = 4
 
-[node name="IntSlots" type="VBoxContainer" parent="PopupPicker/PopupPanel/MarginContainer/CategoryContainer" unique_id=1536025045]
+[node name="IntSlots" type="VBoxContainer" parent="PopupPicker/MarginContainer/PopupPanel/MarginContainer/CategoryContainer" unique_id=1536025045]
 layout_mode = 2
 size_flags_horizontal = 4
 size_flags_vertical = 4
 
-[node name="PickA" parent="PopupPicker/PopupPanel/MarginContainer/CategoryContainer/IntSlots" unique_id=460878914 instance=ExtResource("1")]
+[node name="PickA" parent="PopupPicker/MarginContainer/PopupPanel/MarginContainer/CategoryContainer/IntSlots" unique_id=460878914 instance=ExtResource("1")]
 layout_mode = 2
 size_flags_horizontal = 4
 
-[node name="CenterContainer" type="CenterContainer" parent="PopupPicker/PopupPanel/MarginContainer/CategoryContainer/IntSlots/PickA" unique_id=231294315]
+[node name="CenterContainer" type="CenterContainer" parent="PopupPicker/MarginContainer/PopupPanel/MarginContainer/CategoryContainer/IntSlots/PickA" unique_id=231294315]
 layout_mode = 2
 mouse_filter = 2
 
-[node name="TextureRect" type="TextureRect" parent="PopupPicker/PopupPanel/MarginContainer/CategoryContainer/IntSlots/PickA/CenterContainer" unique_id=1294740726]
+[node name="TextureRect" type="TextureRect" parent="PopupPicker/MarginContainer/PopupPanel/MarginContainer/CategoryContainer/IntSlots/PickA/CenterContainer" unique_id=1294740726]
 layout_mode = 2
 mouse_filter = 2
 texture = ExtResource("19")
 
-[node name="PickB" parent="PopupPicker/PopupPanel/MarginContainer/CategoryContainer/IntSlots" unique_id=918729617 instance=ExtResource("1")]
+[node name="PickB" parent="PopupPicker/MarginContainer/PopupPanel/MarginContainer/CategoryContainer/IntSlots" unique_id=918729617 instance=ExtResource("1")]
 layout_mode = 2
 
-[node name="CenterContainer" type="CenterContainer" parent="PopupPicker/PopupPanel/MarginContainer/CategoryContainer/IntSlots/PickB" unique_id=1295009023]
+[node name="CenterContainer" type="CenterContainer" parent="PopupPicker/MarginContainer/PopupPanel/MarginContainer/CategoryContainer/IntSlots/PickB" unique_id=1295009023]
 layout_mode = 2
 mouse_filter = 2
 
-[node name="TextureRect" type="TextureRect" parent="PopupPicker/PopupPanel/MarginContainer/CategoryContainer/IntSlots/PickB/CenterContainer" unique_id=778996303]
+[node name="TextureRect" type="TextureRect" parent="PopupPicker/MarginContainer/PopupPanel/MarginContainer/CategoryContainer/IntSlots/PickB/CenterContainer" unique_id=778996303]
 layout_mode = 2
 mouse_filter = 2
 texture = ExtResource("20")
 
-[node name="PickC" parent="PopupPicker/PopupPanel/MarginContainer/CategoryContainer/IntSlots" unique_id=1377673311 instance=ExtResource("1")]
+[node name="PickC" parent="PopupPicker/MarginContainer/PopupPanel/MarginContainer/CategoryContainer/IntSlots" unique_id=1377673311 instance=ExtResource("1")]
 layout_mode = 2
 
-[node name="CenterContainer" type="CenterContainer" parent="PopupPicker/PopupPanel/MarginContainer/CategoryContainer/IntSlots/PickC" unique_id=1929055456]
+[node name="CenterContainer" type="CenterContainer" parent="PopupPicker/MarginContainer/PopupPanel/MarginContainer/CategoryContainer/IntSlots/PickC" unique_id=1929055456]
 layout_mode = 2
 mouse_filter = 2
 
-[node name="TextureRect" type="TextureRect" parent="PopupPicker/PopupPanel/MarginContainer/CategoryContainer/IntSlots/PickC/CenterContainer" unique_id=1201588779]
+[node name="TextureRect" type="TextureRect" parent="PopupPicker/MarginContainer/PopupPanel/MarginContainer/CategoryContainer/IntSlots/PickC/CenterContainer" unique_id=1201588779]
 layout_mode = 2
 mouse_filter = 2
 texture = ExtResource("21")
 
-[node name="IntSeparator" parent="PopupPicker/PopupPanel/MarginContainer/CategoryContainer" unique_id=1456861108 instance=ExtResource("7")]
+[node name="IntSeparator" parent="PopupPicker/MarginContainer/PopupPanel/MarginContainer/CategoryContainer" unique_id=1456861108 instance=ExtResource("7")]
 custom_minimum_size = Vector2(0, 55)
 layout_mode = 2
 size_flags_vertical = 4
 
-[node name="FloatSlots" type="VBoxContainer" parent="PopupPicker/PopupPanel/MarginContainer/CategoryContainer" unique_id=1331927196]
+[node name="FloatSlots" type="VBoxContainer" parent="PopupPicker/MarginContainer/PopupPanel/MarginContainer/CategoryContainer" unique_id=1331927196]
 layout_mode = 2
 size_flags_horizontal = 4
 size_flags_vertical = 4
 
-[node name="PickX" parent="PopupPicker/PopupPanel/MarginContainer/CategoryContainer/FloatSlots" unique_id=1787223987 instance=ExtResource("1")]
+[node name="PickX" parent="PopupPicker/MarginContainer/PopupPanel/MarginContainer/CategoryContainer/FloatSlots" unique_id=1787223987 instance=ExtResource("1")]
 layout_mode = 2
 size_flags_horizontal = 4
 
-[node name="CenterContainer" type="CenterContainer" parent="PopupPicker/PopupPanel/MarginContainer/CategoryContainer/FloatSlots/PickX" unique_id=390643523]
+[node name="CenterContainer" type="CenterContainer" parent="PopupPicker/MarginContainer/PopupPanel/MarginContainer/CategoryContainer/FloatSlots/PickX" unique_id=390643523]
 layout_mode = 2
 mouse_filter = 2
 
-[node name="TextureRect" type="TextureRect" parent="PopupPicker/PopupPanel/MarginContainer/CategoryContainer/FloatSlots/PickX/CenterContainer" unique_id=67389748]
+[node name="TextureRect" type="TextureRect" parent="PopupPicker/MarginContainer/PopupPanel/MarginContainer/CategoryContainer/FloatSlots/PickX/CenterContainer" unique_id=67389748]
 layout_mode = 2
 mouse_filter = 2
 texture = ExtResource("17")
 
-[node name="PickY" parent="PopupPicker/PopupPanel/MarginContainer/CategoryContainer/FloatSlots" unique_id=1640002324 instance=ExtResource("1")]
+[node name="PickY" parent="PopupPicker/MarginContainer/PopupPanel/MarginContainer/CategoryContainer/FloatSlots" unique_id=1640002324 instance=ExtResource("1")]
 layout_mode = 2
 
-[node name="CenterContainer" type="CenterContainer" parent="PopupPicker/PopupPanel/MarginContainer/CategoryContainer/FloatSlots/PickY" unique_id=103080218]
+[node name="CenterContainer" type="CenterContainer" parent="PopupPicker/MarginContainer/PopupPanel/MarginContainer/CategoryContainer/FloatSlots/PickY" unique_id=103080218]
 layout_mode = 2
 mouse_filter = 2
 
-[node name="TextureRect" type="TextureRect" parent="PopupPicker/PopupPanel/MarginContainer/CategoryContainer/FloatSlots/PickY/CenterContainer" unique_id=1973539303]
+[node name="TextureRect" type="TextureRect" parent="PopupPicker/MarginContainer/PopupPanel/MarginContainer/CategoryContainer/FloatSlots/PickY/CenterContainer" unique_id=1973539303]
 layout_mode = 2
 mouse_filter = 2
 texture = ExtResource("13")
 
-[node name="PickZ" parent="PopupPicker/PopupPanel/MarginContainer/CategoryContainer/FloatSlots" unique_id=1225084315 instance=ExtResource("1")]
+[node name="PickZ" parent="PopupPicker/MarginContainer/PopupPanel/MarginContainer/CategoryContainer/FloatSlots" unique_id=1225084315 instance=ExtResource("1")]
 layout_mode = 2
 
-[node name="CenterContainer" type="CenterContainer" parent="PopupPicker/PopupPanel/MarginContainer/CategoryContainer/FloatSlots/PickZ" unique_id=983216282]
+[node name="CenterContainer" type="CenterContainer" parent="PopupPicker/MarginContainer/PopupPanel/MarginContainer/CategoryContainer/FloatSlots/PickZ" unique_id=983216282]
 layout_mode = 2
 mouse_filter = 2
 
-[node name="TextureRect" type="TextureRect" parent="PopupPicker/PopupPanel/MarginContainer/CategoryContainer/FloatSlots/PickZ/CenterContainer" unique_id=1083309234]
+[node name="TextureRect" type="TextureRect" parent="PopupPicker/MarginContainer/PopupPanel/MarginContainer/CategoryContainer/FloatSlots/PickZ/CenterContainer" unique_id=1083309234]
 layout_mode = 2
 mouse_filter = 2
 texture = ExtResource("10")
 
-[node name="FloatSeparator" parent="PopupPicker/PopupPanel/MarginContainer/CategoryContainer" unique_id=1391545994 instance=ExtResource("7")]
+[node name="FloatSeparator" parent="PopupPicker/MarginContainer/PopupPanel/MarginContainer/CategoryContainer" unique_id=1391545994 instance=ExtResource("7")]
 custom_minimum_size = Vector2(0, 55)
 layout_mode = 2
 size_flags_vertical = 4
 
-[node name="StringSlots" type="VBoxContainer" parent="PopupPicker/PopupPanel/MarginContainer/CategoryContainer" unique_id=1807017065]
+[node name="StringSlots" type="VBoxContainer" parent="PopupPicker/MarginContainer/PopupPanel/MarginContainer/CategoryContainer" unique_id=1807017065]
 layout_mode = 2
 size_flags_horizontal = 4
 size_flags_vertical = 4
 
-[node name="PickI" parent="PopupPicker/PopupPanel/MarginContainer/CategoryContainer/StringSlots" unique_id=153572979 instance=ExtResource("1")]
+[node name="PickI" parent="PopupPicker/MarginContainer/PopupPanel/MarginContainer/CategoryContainer/StringSlots" unique_id=153572979 instance=ExtResource("1")]
 layout_mode = 2
 size_flags_horizontal = 4
 
-[node name="CenterContainer" type="CenterContainer" parent="PopupPicker/PopupPanel/MarginContainer/CategoryContainer/StringSlots/PickI" unique_id=1351356867]
+[node name="CenterContainer" type="CenterContainer" parent="PopupPicker/MarginContainer/PopupPanel/MarginContainer/CategoryContainer/StringSlots/PickI" unique_id=1351356867]
 layout_mode = 2
 mouse_filter = 2
 
-[node name="TextureRect" type="TextureRect" parent="PopupPicker/PopupPanel/MarginContainer/CategoryContainer/StringSlots/PickI/CenterContainer" unique_id=209956961]
+[node name="TextureRect" type="TextureRect" parent="PopupPicker/MarginContainer/PopupPanel/MarginContainer/CategoryContainer/StringSlots/PickI/CenterContainer" unique_id=209956961]
 layout_mode = 2
 mouse_filter = 2
 texture = ExtResource("15")
 
-[node name="PickII" parent="PopupPicker/PopupPanel/MarginContainer/CategoryContainer/StringSlots" unique_id=1360722943 instance=ExtResource("1")]
+[node name="PickII" parent="PopupPicker/MarginContainer/PopupPanel/MarginContainer/CategoryContainer/StringSlots" unique_id=1360722943 instance=ExtResource("1")]
 layout_mode = 2
 
-[node name="CenterContainer" type="CenterContainer" parent="PopupPicker/PopupPanel/MarginContainer/CategoryContainer/StringSlots/PickII" unique_id=1657063934]
+[node name="CenterContainer" type="CenterContainer" parent="PopupPicker/MarginContainer/PopupPanel/MarginContainer/CategoryContainer/StringSlots/PickII" unique_id=1657063934]
 layout_mode = 2
 mouse_filter = 2
 
-[node name="TextureRect" type="TextureRect" parent="PopupPicker/PopupPanel/MarginContainer/CategoryContainer/StringSlots/PickII/CenterContainer" unique_id=427202576]
+[node name="TextureRect" type="TextureRect" parent="PopupPicker/MarginContainer/PopupPanel/MarginContainer/CategoryContainer/StringSlots/PickII/CenterContainer" unique_id=427202576]
 layout_mode = 2
 mouse_filter = 2
 texture = ExtResource("16")
 
-[node name="PickIII" parent="PopupPicker/PopupPanel/MarginContainer/CategoryContainer/StringSlots" unique_id=520007863 instance=ExtResource("1")]
+[node name="PickIII" parent="PopupPicker/MarginContainer/PopupPanel/MarginContainer/CategoryContainer/StringSlots" unique_id=520007863 instance=ExtResource("1")]
 layout_mode = 2
 
-[node name="CenterContainer" type="CenterContainer" parent="PopupPicker/PopupPanel/MarginContainer/CategoryContainer/StringSlots/PickIII" unique_id=553171918]
+[node name="CenterContainer" type="CenterContainer" parent="PopupPicker/MarginContainer/PopupPanel/MarginContainer/CategoryContainer/StringSlots/PickIII" unique_id=553171918]
 layout_mode = 2
 mouse_filter = 2
 
-[node name="TextureRect" type="TextureRect" parent="PopupPicker/PopupPanel/MarginContainer/CategoryContainer/StringSlots/PickIII/CenterContainer" unique_id=1808430787]
+[node name="TextureRect" type="TextureRect" parent="PopupPicker/MarginContainer/PopupPanel/MarginContainer/CategoryContainer/StringSlots/PickIII/CenterContainer" unique_id=1808430787]
 layout_mode = 2
 mouse_filter = 2
 texture = ExtResource("18")
 
-[node name="StringSeparator" parent="PopupPicker/PopupPanel/MarginContainer/CategoryContainer" unique_id=507354687 instance=ExtResource("7")]
+[node name="StringSeparator" parent="PopupPicker/MarginContainer/PopupPanel/MarginContainer/CategoryContainer" unique_id=507354687 instance=ExtResource("7")]
+visible = false
 custom_minimum_size = Vector2(0, 55)
 layout_mode = 2
 size_flags_vertical = 4
 
-[node name="ArgSlots" type="VBoxContainer" parent="PopupPicker/PopupPanel/MarginContainer/CategoryContainer" unique_id=8731693]
+[node name="ArgSlots" type="VBoxContainer" parent="PopupPicker/MarginContainer/PopupPanel/MarginContainer/CategoryContainer" unique_id=8731693]
+visible = false
 layout_mode = 2
 size_flags_horizontal = 4
 alignment = 1
 
-[node name="PickDarkRed" parent="PopupPicker/PopupPanel/MarginContainer/CategoryContainer/ArgSlots" unique_id=800662789 instance=ExtResource("1")]
+[node name="PickDarkRed" parent="PopupPicker/MarginContainer/PopupPanel/MarginContainer/CategoryContainer/ArgSlots" unique_id=800662789 instance=ExtResource("1")]
 layout_mode = 2
 size_flags_horizontal = 4
 
-[node name="CenterContainer" type="CenterContainer" parent="PopupPicker/PopupPanel/MarginContainer/CategoryContainer/ArgSlots/PickDarkRed" unique_id=139222673]
+[node name="CenterContainer" type="CenterContainer" parent="PopupPicker/MarginContainer/PopupPanel/MarginContainer/CategoryContainer/ArgSlots/PickDarkRed" unique_id=139222673]
 layout_mode = 2
 mouse_filter = 2
 
-[node name="TextureRect" type="TextureRect" parent="PopupPicker/PopupPanel/MarginContainer/CategoryContainer/ArgSlots/PickDarkRed/CenterContainer" unique_id=1805774647]
+[node name="TextureRect" type="TextureRect" parent="PopupPicker/MarginContainer/PopupPanel/MarginContainer/CategoryContainer/ArgSlots/PickDarkRed/CenterContainer" unique_id=1805774647]
 layout_mode = 2
 mouse_filter = 2
 texture = ExtResource("11")
 
-[node name="PickDarkBlue" parent="PopupPicker/PopupPanel/MarginContainer/CategoryContainer/ArgSlots" unique_id=1764101216 instance=ExtResource("1")]
+[node name="PickDarkBlue" parent="PopupPicker/MarginContainer/PopupPanel/MarginContainer/CategoryContainer/ArgSlots" unique_id=1764101216 instance=ExtResource("1")]
 layout_mode = 2
 
-[node name="CenterContainer" type="CenterContainer" parent="PopupPicker/PopupPanel/MarginContainer/CategoryContainer/ArgSlots/PickDarkBlue" unique_id=1930901368]
+[node name="CenterContainer" type="CenterContainer" parent="PopupPicker/MarginContainer/PopupPanel/MarginContainer/CategoryContainer/ArgSlots/PickDarkBlue" unique_id=1930901368]
 layout_mode = 2
 mouse_filter = 2
 
-[node name="TextureRect" type="TextureRect" parent="PopupPicker/PopupPanel/MarginContainer/CategoryContainer/ArgSlots/PickDarkBlue/CenterContainer" unique_id=1048604511]
+[node name="TextureRect" type="TextureRect" parent="PopupPicker/MarginContainer/PopupPanel/MarginContainer/CategoryContainer/ArgSlots/PickDarkBlue/CenterContainer" unique_id=1048604511]
 layout_mode = 2
 mouse_filter = 2
 texture = ExtResource("12")
 
-[node name="PickDarkGreen" parent="PopupPicker/PopupPanel/MarginContainer/CategoryContainer/ArgSlots" unique_id=311480069 instance=ExtResource("1")]
+[node name="PickDarkGreen" parent="PopupPicker/MarginContainer/PopupPanel/MarginContainer/CategoryContainer/ArgSlots" unique_id=311480069 instance=ExtResource("1")]
 layout_mode = 2
 
-[node name="CenterContainer" type="CenterContainer" parent="PopupPicker/PopupPanel/MarginContainer/CategoryContainer/ArgSlots/PickDarkGreen" unique_id=1746961905]
+[node name="CenterContainer" type="CenterContainer" parent="PopupPicker/MarginContainer/PopupPanel/MarginContainer/CategoryContainer/ArgSlots/PickDarkGreen" unique_id=1746961905]
 layout_mode = 2
 mouse_filter = 2
 
-[node name="TextureRect" type="TextureRect" parent="PopupPicker/PopupPanel/MarginContainer/CategoryContainer/ArgSlots/PickDarkGreen/CenterContainer" unique_id=1831384359]
+[node name="TextureRect" type="TextureRect" parent="PopupPicker/MarginContainer/PopupPanel/MarginContainer/CategoryContainer/ArgSlots/PickDarkGreen/CenterContainer" unique_id=1831384359]
 layout_mode = 2
 mouse_filter = 2
 texture = ExtResource("22")
 
-[node name="PickDarkOrange" parent="PopupPicker/PopupPanel/MarginContainer/CategoryContainer/ArgSlots" unique_id=1207983448 instance=ExtResource("1")]
+[node name="PickDarkOrange" parent="PopupPicker/MarginContainer/PopupPanel/MarginContainer/CategoryContainer/ArgSlots" unique_id=1207983448 instance=ExtResource("1")]
 layout_mode = 2
 size_flags_horizontal = 4
 
-[node name="CenterContainer" type="CenterContainer" parent="PopupPicker/PopupPanel/MarginContainer/CategoryContainer/ArgSlots/PickDarkOrange" unique_id=1593224320]
+[node name="CenterContainer" type="CenterContainer" parent="PopupPicker/MarginContainer/PopupPanel/MarginContainer/CategoryContainer/ArgSlots/PickDarkOrange" unique_id=1593224320]
 layout_mode = 2
 mouse_filter = 2
 
-[node name="TextureRect" type="TextureRect" parent="PopupPicker/PopupPanel/MarginContainer/CategoryContainer/ArgSlots/PickDarkOrange/CenterContainer" unique_id=536041125]
+[node name="TextureRect" type="TextureRect" parent="PopupPicker/MarginContainer/PopupPanel/MarginContainer/CategoryContainer/ArgSlots/PickDarkOrange/CenterContainer" unique_id=536041125]
 layout_mode = 2
 mouse_filter = 2
 texture = ExtResource("14")
 
 [connection signal="pressed" from="ButtonContainer" to="." method="_on_ButtonContainer_pressed"]
-[connection signal="pressed" from="PopupPicker/PopupPanel/MarginContainer/CategoryContainer/SpecialColumn/PickNone" to="." method="_on_SlotSelected" binds= ["none"]]
-[connection signal="pressed" from="PopupPicker/PopupPanel/MarginContainer/CategoryContainer/SpecialColumn/PickAny" to="." method="_on_SlotSelected" binds= ["any"]]
-[connection signal="pressed" from="PopupPicker/PopupPanel/MarginContainer/CategoryContainer/SpecialColumn/PickNumber" to="." method="_on_SlotSelected" binds= ["num"]]
-[connection signal="pressed" from="PopupPicker/PopupPanel/MarginContainer/CategoryContainer/SpecialColumn/PickText" to="." method="_on_SlotSelected" binds= ["text"]]
-[connection signal="pressed" from="PopupPicker/PopupPanel/MarginContainer/CategoryContainer/SpecialColumn/PickTrueFalse" to="." method="_on_SlotSelected" binds= ["tf"]]
-[connection signal="pressed" from="PopupPicker/PopupPanel/MarginContainer/CategoryContainer/EntitySlots/PickRed" to="." method="_on_SlotSelected" binds= ["red"]]
-[connection signal="pressed" from="PopupPicker/PopupPanel/MarginContainer/CategoryContainer/EntitySlots/PickBlue" to="." method="_on_SlotSelected" binds= ["blue"]]
-[connection signal="pressed" from="PopupPicker/PopupPanel/MarginContainer/CategoryContainer/EntitySlots/PickWhite" to="." method="_on_SlotSelected" binds= ["white"]]
-[connection signal="pressed" from="PopupPicker/PopupPanel/MarginContainer/CategoryContainer/EntitySlots/PickPink" to="." method="_on_SlotSelected" binds= ["pink"]]
-[connection signal="pressed" from="PopupPicker/PopupPanel/MarginContainer/CategoryContainer/TilePosSlots/PickGrey" to="." method="_on_SlotSelected" binds= ["grey"]]
-[connection signal="pressed" from="PopupPicker/PopupPanel/MarginContainer/CategoryContainer/TilePosSlots/PickBlack" to="." method="_on_SlotSelected" binds= ["black"]]
-[connection signal="pressed" from="PopupPicker/PopupPanel/MarginContainer/CategoryContainer/IntSlots/PickA" to="." method="_on_SlotSelected" binds= ["a"]]
-[connection signal="pressed" from="PopupPicker/PopupPanel/MarginContainer/CategoryContainer/IntSlots/PickB" to="." method="_on_SlotSelected" binds= ["b"]]
-[connection signal="pressed" from="PopupPicker/PopupPanel/MarginContainer/CategoryContainer/IntSlots/PickC" to="." method="_on_SlotSelected" binds= ["c"]]
-[connection signal="pressed" from="PopupPicker/PopupPanel/MarginContainer/CategoryContainer/FloatSlots/PickX" to="." method="_on_SlotSelected" binds= ["x"]]
-[connection signal="pressed" from="PopupPicker/PopupPanel/MarginContainer/CategoryContainer/FloatSlots/PickY" to="." method="_on_SlotSelected" binds= ["y"]]
-[connection signal="pressed" from="PopupPicker/PopupPanel/MarginContainer/CategoryContainer/FloatSlots/PickZ" to="." method="_on_SlotSelected" binds= ["z"]]
-[connection signal="pressed" from="PopupPicker/PopupPanel/MarginContainer/CategoryContainer/StringSlots/PickI" to="." method="_on_SlotSelected" binds= ["i"]]
-[connection signal="pressed" from="PopupPicker/PopupPanel/MarginContainer/CategoryContainer/StringSlots/PickII" to="." method="_on_SlotSelected" binds= ["ii"]]
-[connection signal="pressed" from="PopupPicker/PopupPanel/MarginContainer/CategoryContainer/StringSlots/PickIII" to="." method="_on_SlotSelected" binds= ["iii"]]
-[connection signal="pressed" from="PopupPicker/PopupPanel/MarginContainer/CategoryContainer/ArgSlots/PickDarkRed" to="." method="_on_SlotSelected" binds= ["dark_red"]]
-[connection signal="pressed" from="PopupPicker/PopupPanel/MarginContainer/CategoryContainer/ArgSlots/PickDarkBlue" to="." method="_on_SlotSelected" binds= ["dark_blue"]]
-[connection signal="pressed" from="PopupPicker/PopupPanel/MarginContainer/CategoryContainer/ArgSlots/PickDarkGreen" to="." method="_on_SlotSelected" binds= ["dark_green"]]
-[connection signal="pressed" from="PopupPicker/PopupPanel/MarginContainer/CategoryContainer/ArgSlots/PickDarkOrange" to="." method="_on_SlotSelected" binds= ["dark_orange"]]
+[connection signal="pressed" from="PopupPicker/MarginContainer/PopupPanel/MarginContainer/CategoryContainer/SpecialColumn/PickNone" to="." method="_on_SlotSelected" binds= ["none"]]
+[connection signal="pressed" from="PopupPicker/MarginContainer/PopupPanel/MarginContainer/CategoryContainer/SpecialColumn/PickAny" to="." method="_on_SlotSelected" binds= ["any"]]
+[connection signal="pressed" from="PopupPicker/MarginContainer/PopupPanel/MarginContainer/CategoryContainer/SpecialColumn/PickNumber" to="." method="_on_SlotSelected" binds= ["num"]]
+[connection signal="pressed" from="PopupPicker/MarginContainer/PopupPanel/MarginContainer/CategoryContainer/SpecialColumn/PickText" to="." method="_on_SlotSelected" binds= ["text"]]
+[connection signal="pressed" from="PopupPicker/MarginContainer/PopupPanel/MarginContainer/CategoryContainer/SpecialColumn/PickTrueFalse" to="." method="_on_SlotSelected" binds= ["tf"]]
+[connection signal="pressed" from="PopupPicker/MarginContainer/PopupPanel/MarginContainer/CategoryContainer/EntitySlots/PickRed" to="." method="_on_SlotSelected" binds= ["red"]]
+[connection signal="pressed" from="PopupPicker/MarginContainer/PopupPanel/MarginContainer/CategoryContainer/EntitySlots/PickBlue" to="." method="_on_SlotSelected" binds= ["blue"]]
+[connection signal="pressed" from="PopupPicker/MarginContainer/PopupPanel/MarginContainer/CategoryContainer/EntitySlots/PickWhite" to="." method="_on_SlotSelected" binds= ["white"]]
+[connection signal="pressed" from="PopupPicker/MarginContainer/PopupPanel/MarginContainer/CategoryContainer/EntitySlots/PickPink" to="." method="_on_SlotSelected" binds= ["pink"]]
+[connection signal="pressed" from="PopupPicker/MarginContainer/PopupPanel/MarginContainer/CategoryContainer/TilePosSlots/PickGrey" to="." method="_on_SlotSelected" binds= ["grey"]]
+[connection signal="pressed" from="PopupPicker/MarginContainer/PopupPanel/MarginContainer/CategoryContainer/TilePosSlots/PickBlack" to="." method="_on_SlotSelected" binds= ["black"]]
+[connection signal="pressed" from="PopupPicker/MarginContainer/PopupPanel/MarginContainer/CategoryContainer/IntSlots/PickA" to="." method="_on_SlotSelected" binds= ["a"]]
+[connection signal="pressed" from="PopupPicker/MarginContainer/PopupPanel/MarginContainer/CategoryContainer/IntSlots/PickB" to="." method="_on_SlotSelected" binds= ["b"]]
+[connection signal="pressed" from="PopupPicker/MarginContainer/PopupPanel/MarginContainer/CategoryContainer/IntSlots/PickC" to="." method="_on_SlotSelected" binds= ["c"]]
+[connection signal="pressed" from="PopupPicker/MarginContainer/PopupPanel/MarginContainer/CategoryContainer/FloatSlots/PickX" to="." method="_on_SlotSelected" binds= ["x"]]
+[connection signal="pressed" from="PopupPicker/MarginContainer/PopupPanel/MarginContainer/CategoryContainer/FloatSlots/PickY" to="." method="_on_SlotSelected" binds= ["y"]]
+[connection signal="pressed" from="PopupPicker/MarginContainer/PopupPanel/MarginContainer/CategoryContainer/FloatSlots/PickZ" to="." method="_on_SlotSelected" binds= ["z"]]
+[connection signal="pressed" from="PopupPicker/MarginContainer/PopupPanel/MarginContainer/CategoryContainer/StringSlots/PickI" to="." method="_on_SlotSelected" binds= ["i"]]
+[connection signal="pressed" from="PopupPicker/MarginContainer/PopupPanel/MarginContainer/CategoryContainer/StringSlots/PickII" to="." method="_on_SlotSelected" binds= ["ii"]]
+[connection signal="pressed" from="PopupPicker/MarginContainer/PopupPanel/MarginContainer/CategoryContainer/StringSlots/PickIII" to="." method="_on_SlotSelected" binds= ["iii"]]
+[connection signal="pressed" from="PopupPicker/MarginContainer/PopupPanel/MarginContainer/CategoryContainer/ArgSlots/PickDarkRed" to="." method="_on_SlotSelected" binds= ["dark_red"]]
+[connection signal="pressed" from="PopupPicker/MarginContainer/PopupPanel/MarginContainer/CategoryContainer/ArgSlots/PickDarkBlue" to="." method="_on_SlotSelected" binds= ["dark_blue"]]
+[connection signal="pressed" from="PopupPicker/MarginContainer/PopupPanel/MarginContainer/CategoryContainer/ArgSlots/PickDarkGreen" to="." method="_on_SlotSelected" binds= ["dark_green"]]
+[connection signal="pressed" from="PopupPicker/MarginContainer/PopupPanel/MarginContainer/CategoryContainer/ArgSlots/PickDarkOrange" to="." method="_on_SlotSelected" binds= ["dark_orange"]]

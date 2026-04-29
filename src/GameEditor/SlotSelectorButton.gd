@@ -238,7 +238,7 @@ func show_picker() -> void:
     picker.size = Vector2.ZERO
     var center_pos = $ButtonContainer.get_screen_position() + ($ButtonContainer.size/2)
     
-    var picker_size = picker.get_node("PopupPanel").size
+    var picker_size = picker.get_child(0).size
     picker.size = picker_size
     var viewport_size = get_viewport().size
     if picker.position.x < PICKER_SCREEN_MARGIN_H:
@@ -282,7 +282,7 @@ func _input(e):
         return
     
     if picker_open:
-        var panel = picker.get_node("PopupPanel")
+        var panel = picker.find_child("PopupPanel")
         var local_click = panel.make_input_local(click_event)
         var bounds = Rect2(Vector2.ZERO, panel.size)
         if not bounds.has_point(local_click.position):
