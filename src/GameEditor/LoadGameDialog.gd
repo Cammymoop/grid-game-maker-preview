@@ -1,6 +1,8 @@
 extends ConfirmationDialog
 
 func _ready():
+	if OS.has_feature("web"):
+		find_child("WebClearLocalDataButton").visible = true
 	var games = FilesManager.get_games_list()
 	
 	var list = find_child("GamesList")
@@ -28,7 +30,10 @@ func _on_import_examples_button_pressed() -> void:
 		GlobalToaster.show_toast_message("Reimported all example games")
 
 func _on_import_game_zip_button_pressed() -> void:
-	prints("import game zip button pressed")
+	if OS.has_feature("web"):
+		close_dialog()
+		import_game_zip_web_mode()
+		return
 	var file_dialog: FileDialog = FileDialog.new()
 	file_dialog.title = "Import game .zip"
 	file_dialog.file_mode = FileDialog.FILE_MODE_OPEN_FILE
@@ -37,7 +42,6 @@ func _on_import_game_zip_button_pressed() -> void:
 	file_dialog.file_selected.connect(GameManager.import_and_load_game_zip)
 	file_dialog.close_requested.connect(file_dialog.queue_free)
 	file_dialog.canceled.connect(file_dialog.queue_free)
-	prints("adding to", get_parent().get_viewport().get_path())
 	
 	get_parent().add_child(file_dialog)
 	var popup_call: = file_dialog.popup_file_dialog
@@ -49,3 +53,20 @@ func close_dialog() -> void:
 		hide()
 	queue_free()
 
+func import_game_zip_web_mode() -> void:
+	GameManager.file_access_web = FileAccessWeb.new()
+	GameManager.file_access_web.loaded.connect(GameManager.got_web_import_zip)
+	GameManager.file_access_web.open(".zip")
+
+func _on_web_clear_local_data_button_pressed() -> void:
+	var confirmation_dialog: ConfirmationDialog = ConfirmationDialog.new()
+	confirmation_dialog.title = "Clear All Local Data"
+	confirmation_dialog.dialog_text = "This will delete all local data saved in this browser for Grid Game Maker.\nAre you sure you want to do that?"
+	confirmation_dialog.confirmed.connect(actually_clear_local_data)
+	get_parent().add_child(confirmation_dialog)
+	confirmation_dialog.popup_centered()
+
+func actually_clear_local_data() -> void:
+	close_dialog()
+	FilesManager.___clear_local_data()
+	GlobalToaster.show_toast_message("All local data has been cleared\ncurrent game will not function properly if not saved again")

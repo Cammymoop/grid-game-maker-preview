@@ -61,7 +61,7 @@ func extract_zip_to_games(
 
 
 func import_game_zip_with_backup(
-	zip_file_path: String,
+	zip_file: Variant,
 	game_dir_name: String,
 	backup_name: String = ""
 ) -> Dictionary:
@@ -103,7 +103,18 @@ func import_game_zip_with_backup(
 
 			backup_result["skipped"] = false
 
-	var extract_result := extract_zip_to_games(zip_file_path, cleaned_dest_name)
+	var extract_result: Dictionary = {}
+	if zip_file is String:
+		extract_result = extract_zip_to_games(zip_file, cleaned_dest_name)
+	elif zip_file is PackedByteArray:
+		var temp_file_path: = FilesManager.save_temporary_data_as_file(zip_file, ".zip")
+		if not temp_file_path:
+			return {
+				"ok": false,
+				"error": "Failed to save temporary zip file.",
+			}
+		extract_result = extract_zip_to_games(temp_file_path, cleaned_dest_name)
+		FilesManager.delete_temporary_file(temp_file_path)
 	extract_result["backup_result"] = backup_result
 	return extract_result
 
@@ -306,6 +317,14 @@ func _ensure_dir_exists(path: String) -> int:
 
 func get_game_name_from_zip(zip_file_path: String) -> String:
 	return get_game_info_from_zip(zip_file_path).get("game_name", "")
+
+func get_game_name_from_zip_buffer(zip_buffer: PackedByteArray) -> String:
+	var temp_file_path: = FilesManager.save_temporary_data_as_file(zip_buffer, ".zip")
+	if not temp_file_path:
+		return ""
+	var game_name: = get_game_name_from_zip(temp_file_path)
+	FilesManager.delete_temporary_file(temp_file_path)
+	return game_name
 
 func get_game_info_from_zip(zip_file_path: String) -> Dictionary:
 	var result: = _read_game_definition_from_zip(zip_file_path)

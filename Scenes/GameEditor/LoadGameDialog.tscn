@@ -32,6 +32,14 @@ size_flags_vertical = 3
 auto_width = true
 auto_height = true
 
+[node name="WebClearLocalDataButton" type="Button" parent="HBoxContainer/VBoxContainer" unique_id=252200453]
+visible = false
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_colors/font_color = Color(0.9999985, 0.49951583, 0.57883704, 1)
+theme_override_font_sizes/font_size = 14
+text = "REMOVE ALL LOCAL DATA"
+
 [node name="VBoxContainer2" type="VBoxContainer" parent="HBoxContainer" unique_id=1696661555]
 layout_mode = 2
 theme_override_constants/separation = 8
@@ -47,5 +55,6 @@ layout_mode = 2
 text = "Import game .zip"
 
 [connection signal="item_activated" from="HBoxContainer/VBoxContainer/GamesList" to="." method="_on_GamesList_item_activated"]
+[connection signal="pressed" from="HBoxContainer/VBoxContainer/WebClearLocalDataButton" to="." method="_on_web_clear_local_data_button_pressed"]
 [connection signal="pressed" from="HBoxContainer/VBoxContainer2/ImportExamplesButton" to="." method="_on_import_examples_button_pressed"]
 [connection signal="pressed" from="HBoxContainer/VBoxContainer2/ImportGameZipButton" to="." method="_on_import_game_zip_button_pressed"]

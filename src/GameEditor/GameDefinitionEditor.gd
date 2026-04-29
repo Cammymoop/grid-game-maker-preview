@@ -26,6 +26,8 @@ var invalid_field_color = Color(0.7, 0.4, 0.4)
 var _save_as_dialog_open: bool = false
 
 func _ready():
+	if OS.has_feature("web"):
+		find_child("OpenGameDir").disabled = true
 	GameManager.game_dir_name_changed.connect(on_game_dir_name_changed)
 	var game_name = GameManager.get_game_name()
 	name_input.text = game_name
@@ -253,6 +255,9 @@ func _on_edit_game_dir_button_pressed() -> void:
 
 
 func _on_export_zip_pressed() -> void:
+	if OS.has_feature("web"):
+		export_web_mode()
+		return
 	var file_dialog: FileDialog = FileDialog.new()
 	file_dialog.title = "Export Game .zip To Folder..."
 	file_dialog.file_mode = FileDialog.FILE_MODE_OPEN_DIR
@@ -261,6 +266,11 @@ func _on_export_zip_pressed() -> void:
 	file_dialog.close_requested.connect(file_dialog.queue_free)
 	file_dialog.canceled.connect(file_dialog.queue_free)
 	file_dialog.popup_file_dialog()
+
+func export_web_mode() -> void:
+	var zip_path: String = ImporterExporter.export_game_zip(GameManager.get_game_name(), "")
+	var zip_byte_array: = FileAccess.get_file_as_bytes(zip_path)
+	JavaScriptBridge.download_buffer(zip_byte_array, zip_path.get_file(), "application/zip")
 
 func _export_destination_picked(path: String, file_dialog: FileDialog) -> void:
 	prints("export destination picked: ", path)

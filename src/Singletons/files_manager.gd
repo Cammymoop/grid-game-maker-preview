@@ -5,6 +5,8 @@ var SORT_JSON_KEYS: = false
 
 var GAME_DEF_FILENAME: = "game_definition.json"
 
+var TEMPORARY_FILE_PREFIX: = "_tmp_"
+
 var base_data_directory: = "user://"
 var games_subdir: = "games"
 var shared_assets_subdir: = "shared_assets"
@@ -40,6 +42,21 @@ func init_folders():
 		if games_list:
 			var new_default_game: String = "Basic" if "Basic" in games_list else games_list[0]
 			save_default_game(new_default_game)
+
+func ___clear_local_data() -> void:
+	var recursive_delete: = func(dir_path: String, recurse: Callable) -> void:
+		for subdirectory in DirAccess.get_directories_at(dir_path):
+			recurse.call(dir_path.path_join(subdirectory), recurse)
+		for file_name in DirAccess.get_files_at(dir_path):
+			DirAccess.remove_absolute(dir_path.path_join(file_name))
+	for data_dir in [games_subdir, shared_assets_subdir, local_data_subdir]:
+		var data_dir_path: = _data_path(data_dir)
+		if not smarter_dir_exists(data_dir_path):
+			continue
+		recursive_delete.call(data_dir_path, recursive_delete)
+	DirAccess.remove_absolute(_data_path("default_game"))
+	auto_import_all_example_games_if_first_run = false
+	init_folders()
 
 
 func _data_path(...path_parts: Array) -> String:
@@ -422,7 +439,7 @@ func import_all_example_games() -> void:
 func import_example_game(example_game_name: String, ensure_unique: bool = true) -> Dictionary:
 	var example_game_dir_name: = get_game_dir_from_name(example_game_name)
 	const EXAMPLE_GAMES_DIR: = "res://example_games"
-	var example_game_dir_path: = EXAMPLE_GAMES_DIR + "/" + example_game_dir_name
+	var example_game_dir_path: = EXAMPLE_GAMES_DIR.path_join(example_game_dir_name)
 	var target_game_name: = example_game_name
 	if ensure_unique:
 		target_game_name = get_unique_game_name(example_game_name)
@@ -436,9 +453,9 @@ func import_example_game(example_game_name: String, ensure_unique: bool = true) 
 		push_error("Example game definition file not found in example game directory: " + example_game_dir_path)
 		return {}
 	
-	var ex_game_info: = _get_dict_from_json_file(example_game_dir_path + "/" + GAME_DEF_FILENAME)
+	var ex_game_info: = _get_dict_from_json_file(example_game_dir_path.path_join(GAME_DEF_FILENAME))
 	if not ex_game_info:
-		push_error("Error parsing example game definition at file: " + example_game_dir_path + "/" + GAME_DEF_FILENAME)
+		push_error("Error parsing example game definition at file: " + example_game_dir_path.path_join(GAME_DEF_FILENAME))
 		return {}
 	ex_game_info['game_name'] = target_game_name
 	save_game_info(ex_game_info)
@@ -463,6 +480,8 @@ func import_example_game_levels_and_assets(example_game_dir_path: String, target
 			if a_file == "editor_autosave.json":
 				continue
 			var from_absolute_path: = ProjectSettings.globalize_path(from_dir.path_join(a_file))
+			if OS.has_feature("web"):
+				from_absolute_path = from_dir.path_join(a_file)
 			var to_absolute_path: = ProjectSettings.globalize_path(to_dir.path_join(a_file))
 			var error: = DirAccess.copy_absolute(from_absolute_path, to_absolute_path)
 			if error != OK:
@@ -536,8 +555,28 @@ func fix_game_name(game_name: String) -> void:
 		return
 
 func smarter_dir_exists(dir_path: String) -> bool:
+	if OS.has_feature("web"):
+		return web_dir_exists(dir_path)
 	var path_abs: = ProjectSettings.globalize_path(dir_path)
 	return DirAccess.dir_exists_absolute(path_abs)
+
+func web_dir_exists(dir_path: String) -> bool:
+	var path_localized: = ProjectSettings.localize_path(dir_path)
+	if path_localized.begins_with("user://"):
+		return DirAccess.dir_exists_absolute(path_localized)
+
+	prints("web localized path for %s: %s" % [dir_path, path_localized])
+	if not path_localized:
+		return false
+	if path_localized == "res://":
+		return true
+	var base_path: = path_localized.get_base_dir()
+	var dir_name: = path_localized.get_file().trim_suffix("/") + "/"
+	var listed_contents: = ResourceLoader.list_directory(base_path)
+	if not listed_contents or not dir_name in listed_contents:
+		prints("dir %s not found in %s" % [dir_name, listed_contents])
+		return false
+	return true
 
 func smarter_make_dir_absolute(dir_path: String) -> void:
 	var path_abs: = ProjectSettings.globalize_path(dir_path)
@@ -557,3 +596,26 @@ func delete_game(game_name: String) -> bool:
 		push_error("Error deleting game directory %s: %s" % [game_dir, error_string(error)])
 		return false
 	return true
+
+func save_temporary_data_as_file(data: PackedByteArray, with_extension: String = "") -> String:
+	var random_name: = String.num_int64(randi_range(1, 200000), 16)
+	var temp_file_path: = _data_path(TEMPORARY_FILE_PREFIX + random_name + with_extension)
+	var wr_file: = FileAccess.open(temp_file_path, FileAccess.WRITE)
+	if not wr_file:
+		push_error("Error creating temp file to write data to %s" % [temp_file_path])
+		return ""
+	if not wr_file.store_buffer(data):
+		push_error("Error writing data to temp file %s" % [temp_file_path])
+		return ""
+	return temp_file_path
+
+func delete_temporary_file(temp_file_path: String) -> void:
+	if not temp_file_path.begins_with(_data_path(TEMPORARY_FILE_PREFIX)):
+		push_error("Temp file path %s is not a temporary file path" % [temp_file_path])
+		return
+	if not FileAccess.file_exists(temp_file_path):
+		return
+	var error: = DirAccess.remove_absolute(temp_file_path)
+	if error != OK:
+		push_error("Error deleting temporary file %s: %s" % [temp_file_path, error_string(error)])
+		return

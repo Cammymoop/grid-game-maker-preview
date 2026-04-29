@@ -162,6 +162,8 @@ func on_value_edited(new_value: Variant) -> void:
     if not is_active():
         request_activate.emit(self)
     property_value = new_value
+    if is_base_definition_property and not is_overridden and not is_removed:
+        base_property_value = new_value
     property_value_changed.emit(property_name, new_value)
 
 func on_value_input_focus_out() -> void:

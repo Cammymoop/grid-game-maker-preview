@@ -955,4 +955,4 @@ func focus_in_edit_mode(property_name: String) -> void:
     var list_item: ListItem = properties_info[p_index]["list_item"]
     if not list_item.is_active():
         set_active_list_item(list_item)
-        list_item.start_value_editting()
+    list_item.start_value_editting()

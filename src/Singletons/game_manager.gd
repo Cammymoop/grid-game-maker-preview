@@ -38,6 +38,8 @@ var current_level_is_museum: = false
 var queued_level_load: bool = false
 var queued_level_load_timer: Timer = null
 
+var file_access_web: RefCounted = null
+
 var scenes: = {
 	"Menu": "res://Scenes/Menu.tscn",
 	"Loading": "res://Scenes/Loading.tscn",
@@ -626,6 +628,8 @@ func update_game_viewport() -> void:
 func rescale_window() -> void:
 	if Engine.is_embedded_in_editor():
 		return
+	if OS.has_feature("web") or OS.has_feature("mobile"):
+		return
 	var window: = get_window()
 	if window.mode == Window.MODE_FULLSCREEN or window.mode == Window.MODE_MAXIMIZED:
 		prints("current window mode: ", window.mode)
@@ -862,6 +866,20 @@ func is_current_game_saved() -> bool:
 
 func import_and_load_game_zip(zip_file_path: String) -> bool:
 	var imported_name: String = ImporterExporter.import_game_zip(zip_file_path, true)
+	if not imported_name:
+		return false
+	load_game_definition_from_file(imported_name)
+	return true
+
+func got_web_import_zip(_file_name: String, _file_type: String, b64_data: String) -> void:
+	var zip_byte_array: = Marshalls.base64_to_raw(b64_data)
+	if import_and_load_game_zip_buffer(zip_byte_array):
+		GlobalToaster.show_toast_message("Imported %s" % [get_game_name()])
+	else:
+		GlobalToaster.show_toast_message("Failed to import game")
+
+func import_and_load_game_zip_buffer(zip_buffer: PackedByteArray) -> bool:
+	var imported_name: String = ImporterExporter.import_game_zip(zip_buffer, true)
 	if not imported_name:
 		return false
 	load_game_definition_from_file(imported_name)

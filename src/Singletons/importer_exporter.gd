@@ -30,8 +30,13 @@ func reimport_all_example_games() -> Array[String]:
             failed_games.append(example_game_name)
     return failed_games
 
-func import_game_zip(zip_file_path: String, as_new_game: bool, new_game_name: String = "") -> String:
-    var importing_game_name: = ImportZipExtractor.get_game_name_from_zip(zip_file_path)
+func import_game_zip(zip_file: Variant, as_new_game: bool, new_game_name: String = "") -> String:
+    var importing_game_name: = ""
+    if zip_file is String:
+        importing_game_name = ImportZipExtractor.get_game_name_from_zip(zip_file)
+    else:
+        importing_game_name = ImportZipExtractor.get_game_name_from_zip_buffer(zip_file)
+
     if not importing_game_name:
         return ""
     
@@ -49,7 +54,7 @@ func import_game_zip(zip_file_path: String, as_new_game: bool, new_game_name: St
     
     FilesManager.create_game_directory_if_not_exists(importing_game_name)
     
-    var result: = ImportZipExtractor.import_game_zip_with_backup(zip_file_path, importing_game_name)
+    var result: = ImportZipExtractor.import_game_zip_with_backup(zip_file, importing_game_name)
     if not result.get("ok", false):
         return ""
     FilesManager.fix_game_name(importing_game_name)
