@@ -946,3 +946,13 @@ func on_context_menu_id_pressed(context_menu_id: int, is_for_single_prop: bool, 
                         change_prop_current_value(to_set_prop_name, to_set_props[to_set_prop_name])
             if new_properties.size() > 0:
                 add_pasted_new_properties_with_values(new_properties, new_property_values, false)
+
+func focus_in_edit_mode(property_name: String) -> void:
+    var p_index: int = index_map.get(property_name, -1)
+    if p_index == -1:
+        push_error("Property not found in list: %s" % property_name)
+        return
+    var list_item: ListItem = properties_info[p_index]["list_item"]
+    if not list_item.is_active():
+        set_active_list_item(list_item)
+        list_item.start_value_editting()

@@ -140,10 +140,6 @@ func load_entity_info(entity_index: int):
 	the_definition = EntityManager.get_entity_definition(entity_index)
 	
 	find_child("NameInput").text = EntityManager.get_entity_name(the_index)
-	if "intended_move_speed" in the_definition:
-		find_child("EditMoveSpeed").value = the_definition['intended_move_speed']
-	else:
-		find_child("EditMoveSpeed").value = 0
 	
 	var controller_select = find_child("EditController")
 	var text = "None"
@@ -400,14 +396,17 @@ func add_prop(new_prop_popup) -> void:
 		show_alert('Property names cannot contain spaces or ":"')
 		new_prop_popup.queue_free()
 		return
-	the_definition['properties'][new_prop_name] = true
-	refresh_property_edit_list()
+	_add_new_prop(new_prop_name, true)
 	
-	#show_property_list()
 	await get_tree().process_frame
-	#fix_size()
 	if new_prop_popup and not new_prop_popup.is_queued_for_deletion():
 		new_prop_popup.queue_free()
+
+func _add_new_prop(new_prop_name: String, new_prop_value: Variant, focus_in_edit_mode: bool = false) -> void:
+	the_definition['properties'][new_prop_name] = new_prop_value
+	refresh_property_edit_list()
+	if focus_in_edit_mode:
+		property_edit_list.focus_in_edit_mode(new_prop_name)
 
 func _on_AddPropertyButton_pressed():
 	var new_prop_popup = new_prop_popup_scene.instantiate()
@@ -476,11 +475,6 @@ func _on_PropertyList_item_activated(index):
 	update_property_popup.popup_centered()
 
 
-
-func _on_EditMoveSpeed_value_changed(value):
-	if tile_entity_mode != "entity":
-		return
-	the_definition['intended_move_speed'] = value
 
 func update_controller_options(the_popup):
 	the_definition["controller_options"] = the_popup.option_values.duplicate()
@@ -603,3 +597,10 @@ func save_fancy_sprite_snapshot(fancy_sprite_editor: FancySpriteEditor) -> void:
 	sprite_snapshot_tex = ImageTexture.create_from_image(fancy_sprite_editor.snapshot_tex.get_image())
 	sprite_snapshot_scale = GameManager.get_default_pixel_scale()
 	update_image_button()
+
+
+func _on_set_move_speed_button_pressed() -> void:
+	if the_definition.get("properties", {}).has("move-speed"):
+		property_edit_list.focus_in_edit_mode("move-speed")
+	else:
+		_add_new_prop("move-speed", EntityManager.get_default_move_speed(), true)

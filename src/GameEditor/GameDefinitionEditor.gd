@@ -1,6 +1,7 @@
 extends VBoxContainer
 
 const PropOrEntityNameInput = preload("res://src/GameEditor/ConditionalEditor/prop_or_entity_name_input.gd")
+const ScalarValueInput = preload("res://src/GameEditor/ConditionalEditor/scalar_value_input.gd")
 
 var save_as_dialog_scn: = preload("res://Scenes/GameEditor/save_game_as_dialog.tscn")
 
@@ -19,6 +20,8 @@ var invalid_field_color = Color(0.7, 0.4, 0.4)
 @export var move_interp_option_picker: OptionButton
 @export var action_signal_sent_to_option_picker: OptionButton
 @export var turn_animation_option_picker: OptionButton
+
+@export var default_move_speed_input: ScalarValueInput
 
 var _save_as_dialog_open: bool = false
 
@@ -75,6 +78,9 @@ func _ready():
 	
 	turn_animation_option_picker.item_selected.connect(on_turn_animation_option_picked)
 	Utility.opbtn_select_text(turn_animation_option_picker, GameManager.get_game_setting("default_turn_animation", "quick"))
+	
+	default_move_speed_input.set_value(GameManager.get_game_setting("entity_move_speed", EntityManager.DEFAULT_MOVE_SPEED))
+	default_move_speed_input.value_changed.connect(on_default_move_speed_changed)
 	
 	action_signal_sent_to_option_picker.item_selected.connect(on_action_signal_sent_to_option_picked)
 	var cur_action_signal_sent_to: = GameManager.get_game_setting("action_signal_sent_to", "all_entities") as String
@@ -264,3 +270,6 @@ func _export_destination_picked(path: String, file_dialog: FileDialog) -> void:
 		GlobalToaster.show_toast_message("Exported Game .zip to\n%s" % [zip_path])
 	else:
 		GlobalToaster.show_toast_message("Failed to export Game .zip")
+
+func on_default_move_speed_changed(value: float) -> void:
+	GameManager.set_game_setting("entity_move_speed", value)

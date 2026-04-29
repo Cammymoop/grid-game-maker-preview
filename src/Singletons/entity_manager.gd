@@ -51,7 +51,7 @@ var turn_frames_remaining = 0
 var controller_frame: bool = true
 var movement_mode: int
 
-var default_move_speed: float = 6
+const DEFAULT_MOVE_SPEED: float = 6
 var default_teleport_duration: float = 1/6.0
 var default_idle_delay: float = 1/10.0
 var idle_delay_frames: int = -1
@@ -260,12 +260,23 @@ func disconnect_all_custom_signals() -> void:
 
 func refresh_definition():
     update_movement_mode()
+    convert_legacy_format_stuff()
     fix_string_keys()
     fix_int_property_vals()
     create_index_map()
     create_defined_custom_signals()
     
     actions_only_for_camera_target = GameManager.get_game_setting("action_signal_sent_to", "all_entities") != "camera_target"
+
+func convert_legacy_format_stuff():
+    for entity_id in entity_defs:
+        if "intended_move_speed" in entity_defs[entity_id]:
+            var intended_move_speed: float = float(entity_defs[entity_id]["intended_move_speed"])
+            entity_defs[entity_id].erase("intended_move_speed")
+            if intended_move_speed <= 0:
+                continue
+            entity_defs[entity_id]["properties"]["move-speed"] = intended_move_speed
+                
 
 func on_game_settings_changed():
     update_movement_mode()
@@ -1187,6 +1198,15 @@ func get_entity_property(entity: BaseEntity, property_name: String) -> Property:
     property.set_name(property_name)
     return property
 
+func get_static_entity_prop_with_default(entity: BaseEntity, property_name: String, default_value: Variant) -> Variant:
+    if not entity_has_property(entity, property_name):
+        return default_value
+    var prop: Property = get_entity_property(entity, property_name)
+    if prop.is_conditional():
+        return false
+    else:
+        return prop.get_value()
+
 func get_entity_prop_with_default(entity: BaseEntity, property_name: String, default_value: Variant) -> Variant:
     if not entity_has_property(entity, property_name):
         return default_value
@@ -1338,8 +1358,11 @@ func get_pos_above(entity: BaseEntity) -> Vector2i:
     var entity_pos: = entity.get_center_position()
     return entity_pos + Vector2.UP * (entity.get_half_size().y + MapManager.tile_width * 0.25)
 
+func get_default_move_speed() -> float:
+    return GameManager.get_game_setting("entity_move_speed", DEFAULT_MOVE_SPEED)
+
 func get_default_spt() -> int:
-    return BaseEntity._speed_to_spt(default_move_speed)
+    return BaseEntity._speed_to_spt(get_default_move_speed())
 
 func get_default_tele_steps() -> int:
     return ceili(default_teleport_duration * GameManager.get_full_tick_rate())

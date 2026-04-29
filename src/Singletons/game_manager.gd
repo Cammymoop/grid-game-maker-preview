@@ -59,7 +59,7 @@ const SPECIAL_PROPS: Array[String] = [
 	"turn-animation",
 	"actions-disabled",
 	"no-rotate",
-	"teleport-duration",
+	"teleport-duration", "move-speed",
 ]
 
 const SPECIAL_PROPS_HINT_TEXT: Dictionary[String, String] = {
@@ -73,12 +73,17 @@ const SPECIAL_PROPS_HINT_TEXT: Dictionary[String, String] = {
 	"edit-place-multiple": "If true, placing this entity using the level editor will not remove other entities of the same type at that location",
 	"no-museum": "If true, this entity will not be included in the automatically generated museum",
 	"museum-active": "If this property exists, it will determine whether or not the entities of this type will start as active in the automatically generated museum",
-	"move-animation": "Set this to define the default animation style for when this entity moves (see valid options in the Game tab)\nCan be overridden each movement by an \"Override Move Animation\" Conditional command.",
-	"turn-animation": "Set this to define the default animation style for when this entity turns (see valid options in the Game tab)",
+	"move-animation": "Set this to define the animation style for when this entity moves (see valid options in the Game tab)\n" +
+		'Can be overridden for a single movement by the "Override Move Animation" Conditional command or automatically by the "Get Pushed" command.',
+	"turn-animation": "Set this to define the animation style for when this entity turns (see valid options in the Game tab)",
 	"controller-disabled": "While this property is true the entity will ignore intended moves from it's controller",
 	"actions-disabled": "While this property is true the entity will ignore action events e.g. do_action_1",
-	"no-rotate": "If true, the entity's sprite will not rotate regardless of which way the entity is facing (or moving). Spinning layers will still spin.",
-	"teleport-duration": "The default duration for this entity to finish teleporting (in seconds).\nIf not set, the default is 1/6th of a second.",
+	"no-rotate": "If true, the entity's sprite will not rotate regardless of which way the entity is facing (or moving).\n" +
+		"The entity will still be able to face different directions. Spinning sprite layers will still spin.",
+	"teleport-duration": "The default duration for this entity to finish teleporting (in seconds).\nIf not set, the default is 1/6th of a second." +
+		'This can be overridden for a single teleport using by using the "Override Move Speed" Conditional command (duration is = 1/move speed).',
+	"move-speed": "The default speed (grid spaces per second) that this entity moves at.\nIf not set, the default from the game settings is used.\n" +
+		'This speed can be overridden for a single movement using the "Override Move Speed" Conditional command or automatically by the "Get Pushed" command.',
 }
 
 @export_file("*.json") var builtin_default_game_file: String = ""
@@ -87,6 +92,7 @@ var builtin_default_game_definition: Dictionary = {}
 var pauses = {}
 
 var game_definition = {}
+var _unmodified_game_definition = {}
 
 var game_camera: Camera2D = null
 
@@ -201,6 +207,7 @@ func load_game_definition_from_file(game_name) -> void:
 
 func load_game_definition_data(definition_data: Dictionary) -> void:
 	game_definition = definition_data.duplicate_deep()
+	_unmodified_game_definition = definition_data.duplicate_deep()
 	
 	_set_game_name(definition_data['game_name'], false)
 	loaded_from_game_name = cur_game_name

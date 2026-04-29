@@ -4,10 +4,11 @@
 [ext_resource type="PackedScene" uid="uid://dp8klau6une1m" path="res://Scenes/GameEditor/TileEntityEditorWindow.tscn" id="2"]
 [ext_resource type="Script" uid="uid://bx6f17nxjwie5" path="res://src/GameEditor/TilesEntitiesEditor.gd" id="3"]
 [ext_resource type="Theme" uid="uid://d02pi6tltv1cc" path="res://assets/ui/game_editor_tab_theme.tres" id="3_qrjoe"]
-[ext_resource type="Script" uid="uid://x80wuvd66lkn" path="res://Scenes/GameEditor/game_def_display_settings.gd" id="4_32qri"]
-[ext_resource type="Script" uid="uid://trn0oh5htse0" path="res://Scenes/sfx_tester.gd" id="4_p28x1"]
+[ext_resource type="Script" path="res://Scenes/GameEditor/game_def_display_settings.gd" id="4_32qri"]
+[ext_resource type="Script" path="res://Scenes/sfx_tester.gd" id="4_p28x1"]
 [ext_resource type="Script" uid="uid://cakuc61ui0t57" path="res://src/GameEditor/ImagesEditor.gd" id="5"]
 [ext_resource type="PackedScene" uid="uid://bgbv61t8v8ji5" path="res://Scenes/GameEditor/ConditionalEditor/vector2f_input.tscn" id="5_73cj6"]
+[ext_resource type="PackedScene" uid="uid://bleyoj5f36kfy" path="res://Scenes/GameEditor/ConditionalEditor/scalar_value_input.tscn" id="5_ixkgg"]
 [ext_resource type="Script" uid="uid://benwn44a0nm5f" path="res://src/GameEditor/GameDefinitionEditor.gd" id="6"]
 [ext_resource type="PackedScene" uid="uid://b6fax3dpo74i4" path="res://Scenes/GameEditor/credits_list.tscn" id="6_qrjoe"]
 [ext_resource type="Script" uid="uid://bh535vdhldxn6" path="res://src/GameEditor/ConditionalEditor/prop_or_entity_name_input.gd" id="7_73cj6"]
@@ -73,7 +74,7 @@ theme = ExtResource("3_qrjoe")
 current_tab = 0
 tab_0/title = "Game"
 
-[node name="GameDefinition" type="VBoxContainer" parent="MarginContainer/UIRoot/TabContainer" unique_id=1146228055 node_paths=PackedStringArray("show_level_title_option_picker", "name_input", "edit_game_dir_button", "move_interp_option_picker", "action_signal_sent_to_option_picker", "turn_animation_option_picker")]
+[node name="GameDefinition" type="VBoxContainer" parent="MarginContainer/UIRoot/TabContainer" unique_id=1146228055 node_paths=PackedStringArray("show_level_title_option_picker", "name_input", "edit_game_dir_button", "move_interp_option_picker", "action_signal_sent_to_option_picker", "turn_animation_option_picker", "default_move_speed_input")]
 layout_mode = 2
 script = ExtResource("6")
 show_level_title_option_picker = NodePath("ScrollContainer/VBoxContainer/GameSettingsSection/MarginContainer/HFlowContainer/HFlowContainer/HBoxContainer11/OptionButton")
@@ -82,6 +83,7 @@ edit_game_dir_button = NodePath("HBoxContainer/VBoxContainer/HBoxContainer/EditG
 move_interp_option_picker = NodePath("ScrollContainer/VBoxContainer/GameSettingsSection/MarginContainer/HFlowContainer/VBoxContainer/HBoxContainer/HBoxContainer10/MoveInterpSelect")
 action_signal_sent_to_option_picker = NodePath("ScrollContainer/VBoxContainer/GameSettingsSection/MarginContainer/HFlowContainer/HFlowContainer/HBoxContainer12/ActionSentToSelect")
 turn_animation_option_picker = NodePath("ScrollContainer/VBoxContainer/GameSettingsSection/MarginContainer/HFlowContainer/VBoxContainer/HBoxContainer/HBoxContainer13/TurnAnimSelect")
+default_move_speed_input = NodePath("ScrollContainer/VBoxContainer/GameSettingsSection/MarginContainer/HFlowContainer/HFlowContainer/HBoxContainer10/DefMoveSpeedInput")
 metadata/_tab_index = 0
 metadata/_tab_name = "Game"
 
@@ -296,6 +298,22 @@ custom_minimum_size = Vector2(100, 0)
 layout_mode = 2
 text = "Continuous"
 flat = false
+
+[node name="HBoxContainer10" type="HBoxContainer" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer/GameSettingsSection/MarginContainer/HFlowContainer/HFlowContainer" unique_id=96940792]
+layout_mode = 2
+alignment = 2
+
+[node name="Label" type="Label" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer/GameSettingsSection/MarginContainer/HFlowContainer/HFlowContainer/HBoxContainer10" unique_id=19711673]
+layout_mode = 2
+text = "Default Move Speed:"
+
+[node name="DefMoveSpeedInput" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer/GameSettingsSection/MarginContainer/HFlowContainer/HFlowContainer/HBoxContainer10" unique_id=1458729988 instance=ExtResource("5_ixkgg")]
+layout_mode = 2
+default_value = 6.0
+min_value = 0.5
+max_value = 30.0
+custom_step = true
+custom_step_value = 0.5
 
 [node name="HBoxContainer12" type="HBoxContainer" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer/GameSettingsSection/MarginContainer/HFlowContainer/HFlowContainer" unique_id=1992105014]
 layout_mode = 2

@@ -102,7 +102,11 @@ func initialize() -> void:
 	
 	connect_to_signals()
 	
+	update_cached_special_props()
+	
+func update_cached_special_props() -> void:
 	update_z()
+	update_cached_spt()
 	update_cached_tele_steps()
 
 func update_z():
@@ -373,10 +377,8 @@ func set_local_property(property_name: String, value: Variant) -> void:
 	_local_prop_changed()
 
 func refresh_cached_prop(prop_name: String) -> void:
-	if prop_name == "z-index":
-		update_z()
-	elif prop_name == "teleport-duration":
-		update_cached_tele_steps()
+	if prop_name in GameManager.SPECIAL_PROPS:
+		update_cached_special_props()
 
 func _set_local_property(property_name: String, value: Variant) -> void:
 	if property_name in removed_properties:
@@ -611,15 +613,20 @@ static func _spt_to_speed(spt: int) -> float:
 	return 1 / (float(spt) / GameManager.get_full_tick_rate())
 
 func update_cached_spt() -> void:
-	var entity_speed = EntityManager.get_entity_definition(entity_index).get("intended_move_speed", EntityManager.default_move_speed)
-	_cached_definition_spt = _speed_to_spt(entity_speed)
+	var entity_type_base_speed: Variant = EntityManager.get_static_entity_prop_with_default(self, "move-speed", EntityManager.get_default_move_speed())
+	var base_speed_float: float = Utility.property_value_scalar(entity_type_base_speed, EntityManager.get_default_move_speed())
+	if typeof(entity_type_base_speed) == TYPE_BOOL:
+		base_speed_float = EntityManager.get_default_move_speed()
+	elif base_speed_float <= 0:
+		base_speed_float = EntityManager.get_default_move_speed()
+	_cached_definition_spt = _speed_to_spt(entity_type_base_speed)
 	update_move_speed()
 
 func update_cached_tele_steps() -> void:
 	if not EntityManager.entity_has_property(self, "teleport-duration"):
 		_cached_tele_steps = maxi(1, EntityManager.get_default_tele_steps())
 		return
-	var tele_duration = EntityManager.get_entity_prop_with_default(self, "teleport-duration", EntityManager.default_teleport_duration)
+	var tele_duration = EntityManager.get_static_entity_prop_with_default(self, "teleport-duration", EntityManager.default_teleport_duration)
 	_cached_tele_steps = maxi(1, ceili(tele_duration * GameManager.get_full_tick_rate()))
 
 func set_steps_per_tile_override(override_spt: int) -> void:
