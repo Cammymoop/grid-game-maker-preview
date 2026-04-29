@@ -15,11 +15,11 @@ config/description="A powerful almost-all-in-one tool for quickly making all sor
 config/version="preview"
 run/main_scene="res://Scenes/Loading.tscn"
 config/features=PackedStringArray("4.6")
-config/icon="uid://dr2r046aw8ctw"
+config/icon="res://assets/img/falling_items_icon.png"
 
 [audio]
 
-buses/default_bus_layout="uid://chtn5qobk3qt2"
+buses/default_bus_layout="uid://dkv816uxjrwm4"
 
 [autoload]
 
@@ -43,7 +43,7 @@ ArchiveCopier="*uid://bexxadydwdpsw"
 ImportZipExtractor="*uid://bg40rb011v4ol"
 ImporterExporter="*uid://cff2g1aawe1xa"
 CurrentClipboard="*res://src/Singletons/current_clipboard.gd"
-SfxPlayer="*uid://cgayvr2xivx5u"
+SfxPlayer="*uid://dm1nxrmglvk2b"
 
 [debug]
 
