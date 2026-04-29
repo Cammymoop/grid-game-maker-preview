@@ -471,6 +471,8 @@ func _set_sprite_layer_rotation(layer_node: Node2D, new_rotation: float) -> void
     var offset_rotation: float = deg_to_rad(layer_node.get_meta("offset_degrees", 0))
     if layer_rotates:
         new_rotation += offset_rotation
+    else:
+        new_rotation = offset_rotation
     layer_node.rotation = new_rotation
     var main_layer_rotation: float = layer_node.rotation - offset_rotation
     if layer_node.get_meta("sub_layer_rotates") != layer_rotates and layer_node.get_child_count() > 0:
