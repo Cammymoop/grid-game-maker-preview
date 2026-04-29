@@ -293,6 +293,10 @@ func on_prop_value_edited(new_value: Variant) -> void:
 func set_control_icon(control: Control, icon_tex: Texture, tooltip_txt: String = "", mod_color: Color = Color.WHITE) -> void:
     control.modulate = mod_color
     control.tooltip_text = tooltip_txt
+    if tooltip_txt != "":
+        control.mouse_default_cursor_shape = Control.CURSOR_HELP
+    else:
+        control.mouse_default_cursor_shape = Control.CURSOR_ARROW
     if control is Button:
         control.icon = icon_tex
     elif control is TextureRect:
@@ -306,8 +310,7 @@ func refresh_ui() -> void:
     name_label.visible = not name_edit.visible
     if name_label.visible:
         name_label.text = get_rich_name_text()
-    elif name_edit.visible:
-        update_name_edit_text_color()
+    update_name_color_and_tooltip()
     name_edit.text = property_name
     
     refresh_value_edit()
@@ -316,7 +319,7 @@ func refresh_ui() -> void:
         var override_tooltip: String = "Local Property Override" + (" (Overridden as Removed)" if is_removed else "")
         set_control_icon(icon_1, local_prop_icon, override_tooltip)
     elif is_conditional():
-        set_control_icon(icon_1, conditional_icon, "Conditional")
+        set_control_icon(icon_1, conditional_icon, "Conditional Property")
     else:
         set_control_icon(icon_1, no_icon)
     
@@ -451,19 +454,25 @@ func is_fade_base_prop() -> bool:
 func _colored(in_text: String, as_color: Color) -> String:
     return "[color=%s]%s[/color]" % [Utility.color_string(as_color, false), in_text]
 
-func update_name_edit_text_color() -> void:
+func update_name_color_and_tooltip() -> void:
+    var new_name_tooltip: String = ""
     if is_special_prop_name(property_name):
         name_edit.add_theme_color_override("font_color", special_prop_name_color)
-        name_edit.tooltip_text = GameManager.get_special_prop_hint_text(property_name)
+        new_name_tooltip = GameManager.get_special_prop_hint_text(property_name)
     elif is_event_name(property_name):
         name_edit.add_theme_color_override("font_color", event_name_color)
-        name_edit.tooltip_text = ConditionalsV3.get_event_hint_text(property_name)
+        new_name_tooltip = ConditionalsV3.get_event_hint_text(property_name)
     elif is_conditional():
         name_edit.add_theme_color_override("font_color", event_name_color.lerp(Color.WHITE, 0.5))
-        name_edit.tooltip_text = "Custom conditional property"
+        new_name_tooltip = "Custom conditional property"
     else:
         name_edit.remove_theme_color_override("font_color")
-        name_edit.tooltip_text = ""
+    name_label.tooltip_text = new_name_tooltip
+    name_edit.tooltip_text = new_name_tooltip
+    if new_name_tooltip != "":
+        name_label.mouse_default_cursor_shape = Control.CURSOR_HELP
+    else:
+        name_label.mouse_default_cursor_shape = Control.CURSOR_ARROW
 
 func get_rich_name_text() -> String:
     var prop_name = property_name

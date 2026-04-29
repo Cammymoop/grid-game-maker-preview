@@ -251,6 +251,7 @@ layout_mode = 2
 icon = ExtResource("3")
 
 [node name="RemovePropertyButton" type="Button" parent="PanelContainer/VBoxContainer/VBoxContainer/HBoxContainer4/VBoxContainer" unique_id=1407681144]
+visible = false
 custom_minimum_size = Vector2(0, 50)
 layout_mode = 2
 icon = ExtResource("4")

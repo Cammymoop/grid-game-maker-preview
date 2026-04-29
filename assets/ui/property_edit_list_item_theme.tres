@@ -7,6 +7,7 @@
 [ext_resource type="StyleBox" uid="uid://ogiwpnowrwpm" path="res://assets/ui/property_list_input_box_focus.tres" id="5_b17oo"]
 [ext_resource type="StyleBox" uid="uid://esdhmf0o1vp8" path="res://assets/ui/property_edit_list_input_bg.tres" id="6_jekxw"]
 [ext_resource type="StyleBox" uid="uid://cd1he4mv351ao" path="res://assets/ui/property_edit_list_disabled_input_bg.tres" id="7_u6dp8"]
+[ext_resource type="StyleBox" uid="uid://bg5tmd1718hxa" path="res://assets/ui/tooltip_stylebox.tres" id="8_s8b20"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_5uy45"]
 content_margin_left = 4.0
@@ -43,3 +44,4 @@ SpinBoxInnerLineEdit/base_type = &"LineEdit"
 SpinBoxInnerLineEdit/font_sizes/font_size = 14
 TextEdit/constants/line_spacing = 0
 TextEdit/font_sizes/font_size = 14
+TooltipPanel/styles/panel = ExtResource("8_s8b20")

@@ -12,6 +12,8 @@
 [ext_resource type="Texture2D" uid="uid://wo7nayhwkk8y" path="res://assets/img/button_icons/direction_icons/right.png" id="6_1yhi8"]
 [ext_resource type="PackedScene" uid="uid://b42u3p3nqtalk" path="res://Scenes/GameEditor/ConditionalEditor/conditions_command_list.tscn" id="6_k14si"]
 [ext_resource type="Script" uid="uid://wr87ai1n4tcw" path="res://src/GameEditor/ConditionalEditor/ActionsTabs.gd" id="7"]
+[ext_resource type="Script" uid="uid://pug70er83mb4" path="res://Scenes/GameEditor/ConditionalEditor/slot_category_reference.gd" id="12_4ctmb"]
+[ext_resource type="Texture2D" uid="uid://cuijgrj50yplx" path="res://assets/docs/SlotCategories.png" id="13_6syyh"]
 
 [sub_resource type="StyleBoxFlat" id="3"]
 content_margin_top = 6.0
@@ -296,6 +298,32 @@ text = "Cancel"
 [node name="Control3" type="Control" parent="PanelContainer/MarginContainer/VBoxContainer2/VBoxContainer/HBoxContainer3" unique_id=1212957850]
 layout_mode = 2
 size_flags_horizontal = 3
+
+[node name="Control" type="Control" parent="PanelContainer" unique_id=1615030798]
+layout_mode = 2
+mouse_filter = 2
+
+[node name="SlotCategoryReference" type="Label" parent="PanelContainer/Control" unique_id=260513733 node_paths=PackedStringArray("ref_image_node")]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 23.0
+mouse_filter = 1
+mouse_default_cursor_shape = 16
+theme_override_colors/font_color = Color(0.40568236, 0.8561052, 0.9905539, 1)
+theme_override_fonts/font = ExtResource("4_1yhi8")
+theme_override_font_sizes/font_size = 14
+text = "[Slot Categories]"
+script = ExtResource("12_4ctmb")
+ref_image_node = NodePath("TextureRect")
+
+[node name="TextureRect" type="TextureRect" parent="PanelContainer/Control/SlotCategoryReference" unique_id=239247996]
+visible = false
+layout_mode = 1
+anchors_preset = -1
+anchor_top = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+texture = ExtResource("13_6syyh")
 
 [node name="AddCommandDialog" parent="." unique_id=24360205 instance=ExtResource("2")]
 visible = false
