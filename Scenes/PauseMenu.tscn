@@ -103,7 +103,7 @@ text = "Level Select"
 
 [node name="PlayModeButton" type="Button" parent="CenterContainer/MainPausePanel/MarginContainer/VBoxContainer/HBoxContainer6" unique_id=32451149]
 layout_mode = 2
-text = "Switch To Play Mode"
+text = "Play Level in Play Mode"
 
 [node name="EditModeButton" type="Button" parent="CenterContainer/MainPausePanel/MarginContainer/VBoxContainer" unique_id=1075833075]
 layout_mode = 2

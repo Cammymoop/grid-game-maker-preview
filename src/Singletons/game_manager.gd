@@ -14,6 +14,8 @@ const FULL_TICK_RATE: int = 60
 var started = false
 var cur_scene = null
 
+var player_profile: PlayerProfile = null
+
 var cur_game_name: = ""
 var loaded_from_game_name: = ""
 
@@ -113,7 +115,8 @@ enum MovementMode {
 }
 
 func _ready():
-	PuzzleScriptRNG.test_example()
+	#PuzzleScriptRNG.test_example()
+	player_profile = ensure_basic_player_profile()
 	# Automatically use the display scaling from the OS if it's detected, because of how the gameplay display auto scales this mainly affects UI
 	var cur_screen_scale: float = DisplayServer.screen_get_scale()
 	if cur_screen_scale != get_window().content_scale_factor:
@@ -493,6 +496,34 @@ func try_load_next_level(with_delay: float = 0.5):
 	add_child(queued_level_load_timer)
 	queued_level_load_timer.start(with_delay)
 
+func queue_delayed_goto_level(with_delay: float, level_code: String) -> void:
+	if with_delay <= 0:
+		push_error("Trying to queue a delayed level load with no delay")
+	if queued_level_load:
+		cancel_queued_level_load()
+	
+	queued_level_load = true
+	queued_level_load_timer = Timer.new()
+	queued_level_load_timer.one_shot = true
+	queued_level_load_timer.timeout.connect(goto_level_code.bind(level_code))
+	queued_level_load_timer.timeout.connect(queued_level_load_timer.queue_free)
+	add_child(queued_level_load_timer)
+	queued_level_load_timer.start(with_delay)
+
+func queue_delayed_other_load(with_delay: float, callback: Callable) -> void:
+	if with_delay <= 0:
+		push_error("Trying to queue a delayed other load with no delay")
+	if queued_level_load:
+		cancel_queued_level_load()
+	
+	queued_level_load = true
+	queued_level_load_timer = Timer.new()
+	queued_level_load_timer.one_shot = true
+	queued_level_load_timer.timeout.connect(callback)
+	queued_level_load_timer.timeout.connect(queued_level_load_timer.queue_free)
+	add_child(queued_level_load_timer)
+	queued_level_load_timer.start(with_delay)
+
 func cancel_queued_level_load() -> void:
 	queued_level_load = false
 	if queued_level_load_timer:
@@ -636,7 +667,8 @@ func post_scene_change() -> void:
 			else:
 				new_empty_level()
 		else:
-			play_first_level()
+			play_current_save_level()
+			#play_first_level()
 	scene_changed.emit(cur_scene)
 
 func update_game_viewport() -> void:
@@ -1114,7 +1146,7 @@ func get_next_level_in_list(level_list_name: String, after_level: String = "") -
 	return level_list_info["level_names"][found + 1]
 
 
-func get_auto_load_list_after_list(level_list_name: String) -> String:
+func get_auto_load_list_after_list(level_list_name: String, current_level_as_complete: bool = false) -> String:
 	var level_list_info: = _get_level_list(level_list_name)
 	if not level_list_info:
 		return ""
@@ -1123,12 +1155,17 @@ func get_auto_load_list_after_list(level_list_name: String) -> String:
 		return level_list_info["auto_next_list"]
 	elif level_list_info.get("list_complete_to_lvlselect", false):
 		return ""
-	var index_of: = _get_level_list_index(level_list_name)
-	if index_of == game_definition.get("level_lists", []).size() - 1:
+	var unlocked_lists: Array = get_all_unlocked_level_lists(current_level_as_complete)
+	if unlocked_lists.size() <= 1:
 		return ""
-	return game_definition.get("level_lists", [])[index_of + 1].get("name", "")
+	var index_of: = unlocked_lists.find(level_list_name)
+	if index_of == -1:
+		return unlocked_lists[0]
+	elif index_of == unlocked_lists.size() - 1:
+		return ""
+	return unlocked_lists[index_of + 1]
 
-func get_all_unlocked_level_lists() -> Array:
+func get_all_unlocked_level_lists(_current_level_as_complete: bool = false) -> Array:
 	var lists: Array = []
 	for level_list_info in game_definition.get("level_lists", []):
 		if not level_list_info.get("name", "") or not level_list_info.get("level_names", []):
@@ -1138,28 +1175,50 @@ func get_all_unlocked_level_lists() -> Array:
 	return lists
 
 
-func get_next_level_to_auto_load() -> Array:
-	if not current_level_list or not loaded_level_name:
+func get_next_level_to_auto_load(after_level: String = "", current_level_as_complete: bool = false) -> Array:
+	if not after_level:
+		after_level = loaded_level_name
+	if not current_level_list or not after_level:
 		return []
 	
 	var level_list_info: = _get_level_list(current_level_list)
 	if not level_list_info.get("auto_load_next", true):
 		return []
-	var next_level_in_list: = get_next_level_in_list(current_level_list, loaded_level_name)
+	var next_level_in_list: = get_next_level_in_list(current_level_list, after_level)
 	if next_level_in_list:
 		return [current_level_list, next_level_in_list]
 
-	var next_list_name: = get_auto_load_list_after_list(current_level_list)
+	var next_list_name: = get_auto_load_list_after_list(current_level_list, current_level_as_complete)
 	if not next_list_name or not is_level_list_unlocked(next_list_name):
 		return []
 	return [next_list_name, get_first_existing_level_from_list(next_list_name)]
 
+
+func _level_code(level_list_name: String, level_name: String) -> String:
+	return level_list_name + "??" + level_name
+
+func _level_list_from_code(level_code: String) -> String:
+	return level_code.split("??")[0]
+
+func _level_name_from_code(level_code: String) -> String:
+	return level_code.split("??")[1]
+
+func goto_level_code(level_code: String) -> void:
+	goto_level_in_level_list(_level_list_from_code(level_code), _level_name_from_code(level_code))
 
 func goto_level_in_level_list(level_list_name: String, level_name: String) -> void:
 	if not cur_scene == "Play":
 		return
 	if is_in_level_edit_mode:
 		return
+	
+	var level_code: String = _level_code(level_list_name, level_name)
+	var played_levels: Array = get_game_save_data("played_levels", [])
+	if not level_code in played_levels:
+		played_levels.append(level_code)
+		set_game_save_data("played_levels", played_levels)
+	
+	set_game_save_data("last_played_level", level_code)
 	
 	var level_list_info: = _get_level_list(level_list_name)
 	if level_list_info:
@@ -1172,25 +1231,54 @@ func goto_level_in_level_list(level_list_name: String, level_name: String) -> vo
 	
 	try_load_level(level_name)
 
+func complete_level(level_list_name: String, level_name: String) -> void:
+	if is_in_level_edit_mode:
+		return
+	var level_code: String = _level_code(level_list_name, level_name)
+	var completed_levels: Array = get_game_save_data("completed_levels", [])
+	if not level_code in completed_levels:
+		completed_levels.append(level_code)
+		set_game_save_data("completed_levels", completed_levels)
 
-func advance_level() -> void:
+func complete_for_advance() -> void:
+	if is_in_level_edit_mode or not current_level_list or not loaded_level_name:
+		return
+	complete_level(current_level_list, loaded_level_name)
+	set_last_played_level_as_next_advance_to()
+
+
+func advance_level(with_delay: float = 0, complete_current_level: bool = true) -> void:
 	if cur_scene != "Play":
 		return
+	if complete_current_level:
+		complete_level(current_level_list, loaded_level_name)
 	var adv_to_level_and_list: Array = get_advance_to_level_and_list()
 	if not adv_to_level_and_list:
 		return
 	if adv_to_level_and_list[0] == "end":
-		go_to_game_end()
+		go_to_game_end(with_delay)
 	elif adv_to_level_and_list[0] == "select":
-		go_to_level_select()
+		go_to_level_select(with_delay)
 	else:
-		goto_level_in_level_list(adv_to_level_and_list[0], adv_to_level_and_list[1])
+		if with_delay <= 0:
+			goto_level_in_level_list(adv_to_level_and_list[0], adv_to_level_and_list[1])
+		else:
+			var level_code: = _level_code(adv_to_level_and_list[0], adv_to_level_and_list[1])
+			set_game_save_data("last_played_level", level_code)
+			queue_delayed_goto_level(with_delay, level_code)
 
-func get_advance_to_level_and_list() -> Array:
+func set_last_played_level_as_next_advance_to() -> void:
+	var adv_to_level_and_list: Array = get_advance_to_level_and_list()
+	if not adv_to_level_and_list or not adv_to_level_and_list[1]:
+		return
+	var adv_to_code: = _level_code(adv_to_level_and_list[0], adv_to_level_and_list[1])
+	set_game_save_data("last_played_level", adv_to_code)
+
+func get_advance_to_level_and_list(with_current_level_as_complete: bool = false) -> Array:
 	if not loaded_level_name or not current_level_list or current_level_is_museum:
 		return []
 	
-	var next_auto_load_level: Array = get_next_level_to_auto_load()
+	var next_auto_load_level: Array = get_next_level_to_auto_load("", with_current_level_as_complete)
 	if next_auto_load_level:
 		return next_auto_load_level
 	
@@ -1208,7 +1296,11 @@ func has_level_advance() -> bool:
 	return false
 
 
-func go_to_level_select() -> void:
+func go_to_level_select(with_delay: float = 0) -> void:
+	if with_delay > 0:
+		queue_delayed_other_load(with_delay, go_to_level_select)
+		return
+
 	if cur_scene != "Play":
 		return
 	if get_pause("pause_menu"):
@@ -1216,8 +1308,11 @@ func go_to_level_select() -> void:
 	var level_select_root = Utility.get_level_select_root()
 	level_select_root.open_level_select()
 
-func go_to_game_end() -> void:
-	show_credits()
+func go_to_game_end(with_delay: float = 0) -> void:
+	if with_delay <= 0:
+		show_credits()
+	else:
+		queue_delayed_other_load(with_delay, show_credits)
 
 func start_playing(in_level_edit_mode: bool = false) -> void:
 	if cur_scene == "Play":
@@ -1234,3 +1329,45 @@ func play_first_level() -> void:
 		new_empty_level()
 		return
 	goto_level_in_level_list(first_level_and_list[0], first_level_and_list[1])
+
+func play_current_save_level() -> void:
+	if is_in_level_edit_mode:
+		return
+	var cur_save_level: String = get_game_save_data("last_played_level", "")
+	if not cur_save_level:
+		play_first_level()
+		return
+	goto_level_in_level_list(_level_list_from_code(cur_save_level), _level_name_from_code(cur_save_level))
+
+
+func get_new_player_profile() -> PlayerProfile:
+	return FilesManager.create_player_profile(FilesManager.get_available_player_id())
+
+func load_player_profile(player_id: String) -> PlayerProfile:
+	return FilesManager.get_player_profile(player_id)
+
+func ensure_basic_player_profile() -> PlayerProfile:
+	var profile_list: Array = FilesManager.get_player_profile_list()
+	if profile_list.size() < 1:
+		return get_new_player_profile()
+	return load_player_profile(profile_list[0])
+
+func get_game_save_data(data_key: String, default_value: Variant = null) -> Variant:
+	if not player_profile:
+		EngineDebugger.debug()
+		push_error("No player profile loaded")
+		return default_value
+	if not get_game_name():
+		push_warning("Trying to get game save data but no current game")
+		return default_value
+	return player_profile.get_game_save_data(get_game_name(), data_key, default_value)
+
+func set_game_save_data(data_key: String, value: Variant, flush: bool = true) -> void:
+	if not player_profile:
+		EngineDebugger.debug()
+		push_error("No player profile loaded")
+		return
+	if not get_game_name():
+		push_warning("Trying to set game save data but no current game")
+		return
+	player_profile.set_game_save_data(get_game_name(), data_key, value, flush)

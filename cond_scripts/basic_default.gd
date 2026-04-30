@@ -780,7 +780,9 @@ func desc_load_next_level() -> String:
 func cmd_load_next_level(slots: Dictionary, _slot: int, delay: Dictionary = {"type": "plain", "value": 1.0}) -> void:
 	prints("loading next level")
 	var delay_val: float = resolve_complex_scalar(delay, slots)
-	GameManager.try_load_next_level(delay_val)
+	GameManager.complete_for_advance()
+	#GameManager.try_load_next_level(delay_val)
+	GameManager.advance_level(delay_val)
 
 func desc_take_a_turn() -> String:
 	return "entity|The entity takes a turn"

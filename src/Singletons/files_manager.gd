@@ -7,10 +7,14 @@ var GAME_DEF_FILENAME: = "game_definition.json"
 
 var TEMPORARY_FILE_PREFIX: = "_tmp_"
 
+var PLAYER_SETTINGS_FILENAME: = "player_settings.json"
+
 var base_data_directory: = "user://"
 var games_subdir: = "games"
 var shared_assets_subdir: = "shared_assets"
 var local_data_subdir: = "player"
+
+var game_saves_local_subdir: = "game_saves"
 
 var images_asset_subdir: = "images"
 var audio_asset_subdir: = "audio"
@@ -628,3 +632,67 @@ func delete_temporary_file(temp_file_path: String) -> void:
 	if error != OK:
 		push_error("Error deleting temporary file %s: %s" % [temp_file_path, error_string(error)])
 		return
+
+
+
+func get_available_player_id() -> String:
+	var id_num: = 1
+	var profile_list: = get_player_profile_list()
+	for i in 100000:
+		if not str(id_num) in profile_list:
+			return str(id_num)
+		id_num += 1
+	push_error("Maximum iterations reached when trying to get a new player id")
+	return ""
+
+func get_player_profile_list() -> Array:
+	if not smarter_dir_exists(_data_path(local_data_subdir)):
+		return []
+	var player_profile_list: Array = []
+	for player_id in DirAccess.get_directories_at(_data_path(local_data_subdir)):
+		if player_profile_exists(player_id):
+			player_profile_list.append(player_id)
+	return player_profile_list
+
+func create_player_profile(player_id: String) -> PlayerProfile:
+	if player_profile_exists(player_id):
+		push_error("Player profile %s already exists" % [player_id])
+		return
+	ensure_data_dir_exists(local_data_subdir, player_id)
+	ensure_data_dir_exists(local_data_subdir, player_id, game_saves_local_subdir)
+	var profile: PlayerProfile = PlayerProfile.new()
+	profile.player_id = player_id
+	profile.write_settings()
+	return profile
+
+func save_profile_settings(player_id: String, settings_data: Dictionary) -> bool:
+	return _save_json_string_absolute(JSON.stringify(settings_data), _data_path(local_data_subdir, player_id), PLAYER_SETTINGS_FILENAME)
+
+func player_profile_exists(player_id: String) -> bool:
+	if not smarter_dir_exists(_data_path(local_data_subdir, player_id)):
+		return false
+	return smarter_file_exists(_data_path(local_data_subdir, player_id, PLAYER_SETTINGS_FILENAME))
+
+func get_player_profile(player_id: String) -> PlayerProfile:
+	if not player_profile_exists(player_id):
+		return null
+	var settings_data: = _get_dict_from_json_file(_data_path(local_data_subdir, player_id, PLAYER_SETTINGS_FILENAME))
+	if not settings_data:
+		push_error("Error parsing player settings at file: " + _data_path(local_data_subdir, player_id, PLAYER_SETTINGS_FILENAME))
+		return null
+	var profile: PlayerProfile = PlayerProfile.get_profile_for_serialized_settings(player_id, settings_data)
+	if smarter_dir_exists(_data_path(local_data_subdir, player_id, game_saves_local_subdir)):
+		for game_save_file in iterate_directory_flat_filelist(_data_path(local_data_subdir, player_id, game_saves_local_subdir), "json"):
+			var game_save_data: = _get_dict_from_json_file(_data_path(local_data_subdir, player_id, game_saves_local_subdir, game_save_file))
+			if not game_save_data:
+				continue
+			profile.add_game_save(game_save_data)
+	return profile
+
+func save_game_save_for_player(player_id: String, game_name: String, game_save_data: Dictionary) -> void:
+	if not player_profile_exists(player_id):
+		push_error("Player profile %s does not exist" % [player_id])
+		return
+	var game_name_sanitized: = get_game_dir_from_name(game_name)
+	var profile_game_saves_dir: = _data_path(local_data_subdir, player_id, game_saves_local_subdir)
+	return serialize_and_save_data_to_json(game_save_data, profile_game_saves_dir, game_name_sanitized + ".json", FORMAT_GAME_JSON)
