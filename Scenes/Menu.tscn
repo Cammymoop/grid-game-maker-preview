@@ -124,7 +124,7 @@ layout_mode = 2
 size_flags_horizontal = 4
 size_flags_vertical = 4
 script = ExtResource("1")
-quit_button = NodePath("VBoxContainer/QuitButton")
+quit_button = NodePath("MarginContainer/VBoxContainer/QuitButton")
 
 [node name="MarginContainer" type="MarginContainer" parent="MarginContainer/MainMenu" unique_id=1377947446]
 layout_mode = 2
@@ -173,7 +173,7 @@ alignment = 1
 layout_mode = 2
 text = "Import Game .zip"
 
-[node name="QuitButton" type="Button" parent="MarginContainer/MainMenu/VBoxContainer" unique_id=425650131]
+[node name="QuitButton" type="Button" parent="MarginContainer/MainMenu/MarginContainer/VBoxContainer" unique_id=1411082331]
 layout_mode = 2
 size_flags_horizontal = 4
 theme_type_variation = &"BigTextButton"
