@@ -32,6 +32,9 @@ func _ready():
 		level_title_edit.text_changed.connect(on_level_title_edited)
 
 func _unhandled_input(event: InputEvent) -> void:
+	if Utility.fixed_just_pressed_by_event("pause_game", event):
+		toggle()
+		accept_event()
 	if not active:
 		return
 	if Utility.fixed_just_pressed_by_event("escape", event):
