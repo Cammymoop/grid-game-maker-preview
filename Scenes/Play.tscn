@@ -9,6 +9,9 @@
 [ext_resource type="Script" uid="uid://jw5fk1ax6p18" path="res://src/GameView.gd" id="5"]
 [ext_resource type="Script" uid="uid://evq6x474ma1n" path="res://Scenes/text_box_anim_root.gd" id="5_q86eb"]
 [ext_resource type="PackedScene" uid="uid://bnomndi6o3mmb" path="res://Scenes/credits_ui.tscn" id="6_4cgsu"]
+[ext_resource type="Script" uid="uid://bpb7t48ncq7im" path="res://Scenes/level_select_root.gd" id="7_hagi3"]
+[ext_resource type="Script" uid="uid://ce76sw1015ksr" path="res://Scenes/level_select_ui.gd" id="7_p1k4u"]
+[ext_resource type="PackedScene" uid="uid://c00jkbf64u78u" path="res://Scenes/single_level_list.tscn" id="8_hagi3"]
 
 [sub_resource type="Animation" id="Animation_nsvgp"]
 length = 0.001
@@ -263,7 +266,7 @@ libraries/ = SubResource("AnimationLibrary_hagi3")
 [node name="CreditsUI" parent="OverlayLayer" unique_id=1760736673 groups=["Credits"] instance=ExtResource("6_4cgsu")]
 visible = false
 
-[node name="LevelSelect" type="Control" parent="OverlayLayer" unique_id=718450970]
+[node name="LevelSelectRoot" type="Control" parent="OverlayLayer" unique_id=718450970 node_paths=PackedStringArray("level_select_ui") groups=["LevelSelectRoot"]]
 process_mode = 3
 layout_mode = 3
 anchors_preset = 15
@@ -272,8 +275,10 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
+script = ExtResource("7_hagi3")
+level_select_ui = NodePath("CenterContainer/PanelContainer/VBoxContainer/LOL")
 
-[node name="MultiplyDarkenColor" type="ColorRect" parent="OverlayLayer/LevelSelect" unique_id=1877095181]
+[node name="MultiplyDarkenColor" type="ColorRect" parent="OverlayLayer/LevelSelectRoot" unique_id=1877095181]
 material = SubResource("CanvasItemMaterial_4cgsu")
 layout_mode = 1
 anchors_preset = 15
@@ -284,7 +289,7 @@ grow_vertical = 2
 mouse_filter = 2
 color = Color(0.62152386, 0.6215239, 0.6215237, 1)
 
-[node name="CenterContainer" type="CenterContainer" parent="OverlayLayer/LevelSelect" unique_id=1135640931]
+[node name="CenterContainer" type="CenterContainer" parent="OverlayLayer/LevelSelectRoot" unique_id=1135640931]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -292,100 +297,31 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="PanelContainer" type="PanelContainer" parent="OverlayLayer/LevelSelect/CenterContainer" unique_id=276448297]
+[node name="PanelContainer" type="PanelContainer" parent="OverlayLayer/LevelSelectRoot/CenterContainer" unique_id=276448297]
 layout_mode = 2
 
-[node name="VBoxContainer" type="VBoxContainer" parent="OverlayLayer/LevelSelect/CenterContainer/PanelContainer" unique_id=67623878]
+[node name="VBoxContainer" type="VBoxContainer" parent="OverlayLayer/LevelSelectRoot/CenterContainer/PanelContainer" unique_id=67623878]
 layout_mode = 2
 
-[node name="Label" type="Label" parent="OverlayLayer/LevelSelect/CenterContainer/PanelContainer/VBoxContainer" unique_id=2095787770]
+[node name="Label" type="Label" parent="OverlayLayer/LevelSelectRoot/CenterContainer/PanelContainer/VBoxContainer" unique_id=2095787770]
 layout_mode = 2
 theme_override_font_sizes/font_size = 22
 text = "Select Level:"
 horizontal_alignment = 1
 
-[node name="Spacer" type="Control" parent="OverlayLayer/LevelSelect/CenterContainer/PanelContainer/VBoxContainer" unique_id=763642225]
+[node name="Spacer" type="Control" parent="OverlayLayer/LevelSelectRoot/CenterContainer/PanelContainer/VBoxContainer" unique_id=763642225]
 custom_minimum_size = Vector2(0, 12)
 layout_mode = 2
 
-[node name="LOL" type="VBoxContainer" parent="OverlayLayer/LevelSelect/CenterContainer/PanelContainer/VBoxContainer" unique_id=2125232342]
+[node name="LOL" type="VBoxContainer" parent="OverlayLayer/LevelSelectRoot/CenterContainer/PanelContainer/VBoxContainer" unique_id=2125232342 node_paths=PackedStringArray("level_list_container")]
+custom_minimum_size = Vector2(200, 0)
 layout_mode = 2
 theme_override_constants/separation = 12
+script = ExtResource("7_p1k4u")
+level_list_container = NodePath("LevelList")
 
-[node name="LevelList" type="VBoxContainer" parent="OverlayLayer/LevelSelect/CenterContainer/PanelContainer/VBoxContainer/LOL" unique_id=14466828]
+[node name="LevelList" parent="OverlayLayer/LevelSelectRoot/CenterContainer/PanelContainer/VBoxContainer/LOL" unique_id=407189420 instance=ExtResource("8_hagi3")]
 layout_mode = 2
-
-[node name="HBoxContainer" type="HBoxContainer" parent="OverlayLayer/LevelSelect/CenterContainer/PanelContainer/VBoxContainer/LOL/LevelList" unique_id=929029270]
-layout_mode = 2
-
-[node name="Label" type="Label" parent="OverlayLayer/LevelSelect/CenterContainer/PanelContainer/VBoxContainer/LOL/LevelList/HBoxContainer" unique_id=208712105]
-layout_mode = 2
-theme_override_font_sizes/font_size = 14
-text = "Level List A:"
-
-[node name="LevelItems" type="VBoxContainer" parent="OverlayLayer/LevelSelect/CenterContainer/PanelContainer/VBoxContainer/LOL/LevelList" unique_id=2142904606]
-layout_mode = 2
-
-[node name="LevelItem" type="HBoxContainer" parent="OverlayLayer/LevelSelect/CenterContainer/PanelContainer/VBoxContainer/LOL/LevelList/LevelItems" unique_id=1156480586]
-layout_mode = 2
-
-[node name="Label" type="Label" parent="OverlayLayer/LevelSelect/CenterContainer/PanelContainer/VBoxContainer/LOL/LevelList/LevelItems/LevelItem" unique_id=133916989]
-layout_mode = 2
-text = "LEVEL NAME HERE"
-
-[node name="Button" type="Button" parent="OverlayLayer/LevelSelect/CenterContainer/PanelContainer/VBoxContainer/LOL/LevelList/LevelItems/LevelItem" unique_id=1520413896]
-layout_mode = 2
-text = "Play"
-
-[node name="LevelList2" type="VBoxContainer" parent="OverlayLayer/LevelSelect/CenterContainer/PanelContainer/VBoxContainer/LOL" unique_id=1648778140]
-layout_mode = 2
-
-[node name="HBoxContainer" type="HBoxContainer" parent="OverlayLayer/LevelSelect/CenterContainer/PanelContainer/VBoxContainer/LOL/LevelList2" unique_id=1117169012]
-layout_mode = 2
-
-[node name="Label" type="Label" parent="OverlayLayer/LevelSelect/CenterContainer/PanelContainer/VBoxContainer/LOL/LevelList2/HBoxContainer" unique_id=1541995692]
-layout_mode = 2
-theme_override_font_sizes/font_size = 14
-text = "Level List A:"
-
-[node name="LevelItems" type="VBoxContainer" parent="OverlayLayer/LevelSelect/CenterContainer/PanelContainer/VBoxContainer/LOL/LevelList2" unique_id=1968594767]
-layout_mode = 2
-
-[node name="LevelItem" type="HBoxContainer" parent="OverlayLayer/LevelSelect/CenterContainer/PanelContainer/VBoxContainer/LOL/LevelList2/LevelItems" unique_id=89182863]
-layout_mode = 2
-
-[node name="Label" type="Label" parent="OverlayLayer/LevelSelect/CenterContainer/PanelContainer/VBoxContainer/LOL/LevelList2/LevelItems/LevelItem" unique_id=1494235873]
-layout_mode = 2
-text = "LEVEL NAME HERE"
-
-[node name="Button" type="Button" parent="OverlayLayer/LevelSelect/CenterContainer/PanelContainer/VBoxContainer/LOL/LevelList2/LevelItems/LevelItem" unique_id=2111857081]
-layout_mode = 2
-text = "Play"
-
-[node name="LevelList3" type="VBoxContainer" parent="OverlayLayer/LevelSelect/CenterContainer/PanelContainer/VBoxContainer/LOL" unique_id=711775990]
-layout_mode = 2
-
-[node name="HBoxContainer" type="HBoxContainer" parent="OverlayLayer/LevelSelect/CenterContainer/PanelContainer/VBoxContainer/LOL/LevelList3" unique_id=577922245]
-layout_mode = 2
-
-[node name="Label" type="Label" parent="OverlayLayer/LevelSelect/CenterContainer/PanelContainer/VBoxContainer/LOL/LevelList3/HBoxContainer" unique_id=1214900328]
-layout_mode = 2
-theme_override_font_sizes/font_size = 14
-text = "Level List A:"
-
-[node name="LevelItems" type="VBoxContainer" parent="OverlayLayer/LevelSelect/CenterContainer/PanelContainer/VBoxContainer/LOL/LevelList3" unique_id=52546089]
-layout_mode = 2
-
-[node name="LevelItem" type="HBoxContainer" parent="OverlayLayer/LevelSelect/CenterContainer/PanelContainer/VBoxContainer/LOL/LevelList3/LevelItems" unique_id=2112904709]
-layout_mode = 2
-
-[node name="Label" type="Label" parent="OverlayLayer/LevelSelect/CenterContainer/PanelContainer/VBoxContainer/LOL/LevelList3/LevelItems/LevelItem" unique_id=1851674580]
-layout_mode = 2
-text = "LEVEL NAME HERE"
-
-[node name="Button" type="Button" parent="OverlayLayer/LevelSelect/CenterContainer/PanelContainer/VBoxContainer/LOL/LevelList3/LevelItems/LevelItem" unique_id=2130849460]
-layout_mode = 2
-text = "Play"
 
 [node name="MapEditorUILayer" type="CanvasLayer" parent="." unique_id=1275328928]
 layer = 10

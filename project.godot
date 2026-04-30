@@ -68,6 +68,7 @@ enabled=PackedStringArray("res://addons/FileAccessWeb/plugin.cfg")
 
 TextBox="the multipurpose textbox"
 Credits=""
+LevelSelectRoot=""
 
 [gui]
 

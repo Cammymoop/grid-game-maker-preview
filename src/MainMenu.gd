@@ -9,7 +9,9 @@ func _ready():
 		
 
 func _on_PlayButton_pressed():
-	GameManager.change_scene("Play")
+	if GameManager.is_in_level_edit_mode:
+		GameManager.is_in_level_edit_mode = false
+	GameManager.start_playing()
 
 func _on_EditButton_pressed():
 	GameManager.change_scene("GameEditor")

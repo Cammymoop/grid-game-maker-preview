@@ -25,7 +25,8 @@ func _on_BackButton_pressed():
 	GameManager.change_scene("Menu")
 
 func _on_test_play_button_pressed() -> void:
-	GameManager.change_scene("Play")
+	GameManager.is_in_level_edit_mode = false
+	GameManager.start_playing()
 
 
 func _on_OpenGameDir_pressed():

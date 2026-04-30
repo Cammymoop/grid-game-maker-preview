@@ -10,10 +10,16 @@ var active = false
 @export var next_level_list: OptionButton
 @export var level_title_edit: LineEdit
 
+@export var play_mode_button: Button
+@export var level_edit_mode_button: Button
+
 @onready var main_panel: PanelContainer = find_child("MainPausePanel")
 @onready var level_settings_panel: PanelContainer = find_child("LevelSettingsPausePanel")
 
 func _ready():
+	play_mode_button.pressed.connect(switch_to_non_level_edit_mode)
+	level_edit_mode_button.pressed.connect(switch_to_level_edit_mode)
+
 	switch_panel("main")
 	visible = false
 	if next_level_list:
@@ -60,6 +66,9 @@ func on_show() -> void:
 	var load_button: BaseButton = find_child("LoadLevelButton")
 	load_button.disabled = not has_saved_levels
 	
+	play_mode_button.visible = GameManager.is_in_level_edit_mode
+	level_edit_mode_button.visible = not GameManager.is_in_level_edit_mode
+	
 	var live_edit_mode_toggle: CheckButton = find_child("LiveEditModeToggle")
 	live_edit_mode_toggle.disabled = GameManager.current_level_is_museum
 	if GameManager.current_level_is_museum:
@@ -67,6 +76,8 @@ func on_show() -> void:
 	else:
 		live_edit_mode_toggle.tooltip_text = ""
 	live_edit_mode_toggle.set_pressed_no_signal(GameManager.is_live_edit())
+	
+	live_edit_mode_toggle.visible = GameManager.is_in_level_edit_mode
 	
 	refresh_level_settings()
 
@@ -153,3 +164,29 @@ func _on_museum_button_pressed() -> void:
 func _on_credits_button_pressed() -> void:
 	GameManager.show_credits()
 	toggle()
+
+func go_to_level_select() -> void:
+	if active:
+		toggle()
+	var level_select_root = Utility.get_level_select_root()
+	level_select_root.open_level_select()
+
+func switch_to_level_edit_mode() -> void:
+	if GameManager.is_in_level_edit_mode:
+		return
+	if active:
+		toggle()
+	GameManager.is_in_level_edit_mode = true
+	GameManager.set_live_edit_mode_enabled(false)
+	var map_editor = Utility.get_map_editor()
+	if map_editor:
+		map_editor.switch_edit_mode(true)
+
+func switch_to_non_level_edit_mode() -> void:
+	if not GameManager.is_in_level_edit_mode:
+		return
+	if active:
+		toggle()
+	var map_editor = Utility.get_map_editor()
+	if map_editor:
+		map_editor.switch_to_non_level_edit_mode()

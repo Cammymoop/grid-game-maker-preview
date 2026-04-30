@@ -206,6 +206,14 @@ func new_empty_game_definition(with_name: String = "") -> void:
 	}
 	load_game_definition_data(empty_game)
 
+func put_all_existing_levels_into_single_level_list() -> void:
+	var all_levels: = FilesManager.get_level_list(get_game_name())
+	all_levels.erase("editor_autosave")
+	game_definition["level_lists"] = [{
+		"name": "Levels",
+		"level_names": all_levels,
+	}]
+
 func load_game_definition_from_file(game_name) -> void:
 	var definition = FilesManager.get_game_definition(game_name)
 	load_game_definition_data(definition)
@@ -216,6 +224,9 @@ func load_game_definition_data(definition_data: Dictionary) -> void:
 	
 	_set_game_name(definition_data['game_name'], false)
 	loaded_from_game_name = cur_game_name
+	
+	if not definition_data.has("level_lists"):
+		put_all_existing_levels_into_single_level_list()
 	
 	editor_save = {}
 	quicksave_state = {}
@@ -608,21 +619,24 @@ func post_scene_change() -> void:
 		create_game_camera()
 		activate_gameplay_camera()
 		EffectsHelper._fetch_effects_holder()
-		if loaded_level:
-			load_serialized_play_state(loaded_level)
-		elif has_editor_autosave():
-			if FilesManager.get_editor_autosave_is_newer(cur_game_name):
-				GlobalToaster.show_toast_message("Loading autosave")
-				load_editor_autosave()
-			else:
-				var autosave_level_name: String = FilesManager.get_editor_autosave_level_name(cur_game_name)
-				if autosave_level_name:
-					load_level_data(FilesManager.get_level_data(cur_game_name, autosave_level_name))
-				else:
+		if is_in_level_edit_mode:
+			if loaded_level:
+				load_serialized_play_state(loaded_level)
+			elif has_editor_autosave():
+				if FilesManager.get_editor_autosave_is_newer(cur_game_name):
 					GlobalToaster.show_toast_message("Loading autosave")
 					load_editor_autosave()
+				else:
+					var autosave_level_name: String = FilesManager.get_editor_autosave_level_name(cur_game_name)
+					if autosave_level_name:
+						load_level_data(FilesManager.get_level_data(cur_game_name, autosave_level_name))
+					else:
+						GlobalToaster.show_toast_message("Loading autosave")
+						load_editor_autosave()
+			else:
+				new_empty_level()
 		else:
-			new_empty_level()
+			play_first_level()
 	scene_changed.emit(cur_scene)
 
 func update_game_viewport() -> void:
@@ -1055,6 +1069,13 @@ func get_starting_level_name() -> String:
 		return ""
 	return get_first_existing_level_from_list(lists[0])
 
+func get_starting_level_and_list() -> Array:
+	var first_level_name: String = get_starting_level_name()
+	var first_level_list: String = get_list_of_level_lists()[0]
+	if not first_level_name or not first_level_list:
+		return []
+	return [first_level_list, first_level_name]
+
 
 func add_level_to_level_list(level_name: String, level_list_name: String) -> void:
 	var level_list_info: = _get_level_list(level_list_name)
@@ -1103,6 +1124,15 @@ func get_auto_load_list_after_list(level_list_name: String) -> String:
 	if index_of == game_definition.get("level_lists", []).size() - 1:
 		return ""
 	return game_definition.get("level_lists", [])[index_of + 1].get("name", "")
+
+func get_all_unlocked_level_lists() -> Array:
+	var lists: Array = []
+	for level_list_info in game_definition.get("level_lists", []):
+		if not level_list_info.get("name", "") or not level_list_info.get("level_names", []):
+			continue
+		if is_level_list_unlocked(level_list_info["name"]):
+			lists.append(level_list_info)
+	return lists
 
 
 func get_next_level_to_auto_load() -> Array:
@@ -1176,7 +1206,28 @@ func has_level_advance() -> bool:
 
 
 func go_to_level_select() -> void:
-	pass
+	if cur_scene != "Play":
+		return
+	if get_pause("pause_menu"):
+		close_pause_menu()
+	var level_select_root = Utility.get_level_select_root()
+	level_select_root.open_level_select()
 
 func go_to_game_end() -> void:
 	show_credits()
+
+func start_playing(in_level_edit_mode: bool = false) -> void:
+	if cur_scene == "Play":
+		return
+	is_in_level_edit_mode = in_level_edit_mode
+	change_scene("Play")
+
+func play_first_level() -> void:
+	if is_in_level_edit_mode:
+		push_warning("Trying to call play_first_level in level edit mode")
+		return
+	var first_level_and_list: Array = get_starting_level_and_list()
+	if not first_level_and_list:
+		new_empty_level()
+		return
+	goto_level_in_level_list(first_level_and_list[0], first_level_and_list[1])

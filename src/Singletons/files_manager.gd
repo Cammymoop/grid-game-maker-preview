@@ -371,6 +371,15 @@ func level_exists(game_name: String, level_name: String) -> bool:
 	var level_filename: = _level_filename(level_name)
 	return FileAccess.file_exists(get_game_levels_dir(game_name).path_join(level_filename))
 
+func get_level_title(game_name: String, level_name: String) -> String:
+	if not level_name or not game_exists(game_name):
+		push_error("Invalid game or level name: %s, %s" % [game_name, level_name])
+		return ""
+	var level_data: = get_level_data(game_name, level_name)
+	if not level_data:
+		return ""
+	return level_data.get("state", {}).get("map", {}).get("metadata", {}).get("title", level_name)
+
 func get_level_data(game_name: String, level_name: String) -> Dictionary:
 	if not level_name or not game_exists(game_name):
 		push_error("Invalid game or level name: %s, %s" % [game_name, level_name])

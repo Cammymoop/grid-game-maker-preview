@@ -851,7 +851,7 @@ func cmd_trigger_custom_event(slots: Dictionary, chosen_slot: int, event_name: S
 	if not pass_blue_entity:
 		pass_blue_entity = slots[Slot.BLUE]
 	if Commands.slot_is_entity(chosen_slot):
-		EntityManager.resolve_entity_interaction(event_name, slots[chosen_slot], pass_blue_entity, [slots[chosen_slot].get_moving_position()])
+		EntityManager.resolve_entity_interaction_event(event_name, slots[chosen_slot], pass_blue_entity, [slots[chosen_slot].get_moving_position()])
 	elif Commands.slot_is_positions(chosen_slot):
 		MapManager.resolve_tiles_events(slots[chosen_slot], event_name, pass_blue_entity)
 
@@ -876,7 +876,7 @@ func cmd_trigger_custom_event_for_each_entity(
 
 	if Commands.slot_is_entity(chosen_slot):
 		for e in final_entities:
-			EntityManager.resolve_entity_interaction(event_name, slots[chosen_slot], e, slots[chosen_slot].get_moving_position())
+			EntityManager.resolve_entity_interaction_event(event_name, slots[chosen_slot], e, [slots[chosen_slot].get_moving_position()])
 	elif Commands.slot_is_positions(chosen_slot):
 		for e in final_entities:
 			if slots[chosen_slot]:
@@ -903,7 +903,7 @@ func cmd_trigger_custom_event_for_each_bonded_entity(slots: Dictionary, chosen_s
 		if EntityManager.has_instance(inst_id):
 			var bonded_entity: BaseEntity = EntityManager.get_instance(inst_id)
 			if Commands.slot_is_entity(chosen_slot):
-				EntityManager.resolve_entity_interaction(event_name, slots[chosen_slot], bonded_entity, bonded_entity.get_moving_position())
+				EntityManager.resolve_entity_interaction_event(event_name, slots[chosen_slot], bonded_entity, [bonded_entity.get_moving_position()])
 			elif slots[chosen_slot]:
 				MapManager.resolve_tiles_events(slots[chosen_slot], event_name, bonded_entity)
 			else:

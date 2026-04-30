@@ -550,18 +550,36 @@ func forwarded_gui_input(event: InputEvent) -> void:
 		return
 
 func forwarded_shortcut_input(event: InputEvent) -> void:
-	if GameManager.get_pause("pause_menu"):
+	if GameManager.get_pause("pause_menu") or not GameManager.is_in_level_edit_mode:
 		return
 	if Utility.fixed_just_pressed_by_event("editor_start", event, true):
 		switch_edit_mode(not edit_mode)
-	elif Utility.fixed_just_pressed_by_event("reload_checkpoint", event, true) and not edit_mode:
-		GameManager.load_checkpoint()
+	#elif Utility.fixed_just_pressed_by_event("reload_checkpoint", event, true) and not edit_mode:
+		#GameManager.load_checkpoint()
 	elif Utility.fixed_just_pressed_by_event("editor_save_level", event, true) and edit_mode:
 		if GameManager.loaded_level_name:
 			GameManager.save_edited()
 			GameManager.save_edited_level_as(GameManager.loaded_level_name)
 	elif Utility.fixed_just_pressed_by_event("editor_new_map", event, true):
 		GameManager.new_empty_level()
+
+func switch_to_non_level_edit_mode() -> void:
+	if edit_mode:
+		switch_edit_mode(false)
+	GameManager.is_in_level_edit_mode = false
+	GameManager.set_live_edit_mode_enabled(false)
+	var list_of_current_level: String = ""
+	for level_list_name in GameManager.get_list_of_level_lists():
+		for level_name in GameManager.get_levels_in_level_list(level_list_name):
+			if level_name == GameManager.loaded_level_name:
+				list_of_current_level = level_list_name
+				break
+		if list_of_current_level:
+			break
+	if list_of_current_level:
+		GameManager.goto_level_in_level_list(list_of_current_level, GameManager.loaded_level_name)
+	else:
+		GameManager.play_first_level()
 
 func _auto_save(level_state: Dictionary) -> void:
 	var autosave_filename: = "editor_autosave"

@@ -272,6 +272,12 @@ func get_credits_ui() -> CreditsUI:
 		return credits
 	return null
 
+func get_level_select_root() -> Control:
+	var level_select_roots: Array[Node] = get_tree().get_nodes_in_group("LevelSelectRoot")
+	for level_select_root in level_select_roots:
+		return level_select_root
+	return null
+
 func get_map_editor() -> Node:
 	var world: = get_world()
 	if world:
