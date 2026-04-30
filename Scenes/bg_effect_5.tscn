@@ -1,5 +1,6 @@
 [gd_scene format=3 uid="uid://ccr48mbb8s5et"]
 
+[ext_resource type="Script" uid="uid://c0aaabcqit332" path="res://Scenes/bg_effect_5.gd" id="1_g4usv"]
 [ext_resource type="Texture2D" uid="uid://bifiewni3u0on" path="res://assets/img/particle_textures/puff.png" id="1_nkw3m"]
 [ext_resource type="Script" uid="uid://15x5jg4jwyc5" path="res://src/Effects/VoidParticles.gd" id="2_g4usv"]
 [ext_resource type="Script" uid="uid://c2ksw4bcxmkvq" path="res://src/Effects/ColorRect_FadeToBlack.gd" id="4_rdi2w"]
@@ -27,11 +28,14 @@ alpha_curve = SubResource("CurveTexture_nkw3m")
 hue_variation_min = -0.010000022
 hue_variation_max = 0.009999977
 
-[node name="BGEffects" type="Node" unique_id=1203754819]
+[node name="BGEffects" type="Node" unique_id=1203754819 node_paths=PackedStringArray("bg_color_rect", "dusty_particles")]
 process_mode = 3
+script = ExtResource("1_g4usv")
+bg_color_rect = NodePath("CanvasLayer2/SubViewportContainer/SubViewport/CanvasLayer/ColorRect")
+dusty_particles = NodePath("CanvasLayer2/SubViewportContainer/SubViewport/DustyParticles")
 
 [node name="CanvasLayer2" type="CanvasLayer" parent="." unique_id=131351098]
-layer = -2
+layer = -4
 
 [node name="SubViewportContainer" type="SubViewportContainer" parent="CanvasLayer2" unique_id=1971214824]
 anchors_preset = 15
@@ -45,7 +49,7 @@ handle_input_locally = false
 size = Vector2i(768, 768)
 render_target_update_mode = 4
 
-[node name="Darks" type="GPUParticles2D" parent="CanvasLayer2/SubViewportContainer/SubViewport" unique_id=201630246]
+[node name="DustyParticles" type="GPUParticles2D" parent="CanvasLayer2/SubViewportContainer/SubViewport" unique_id=201630246]
 self_modulate = Color(0.49770868, 0.37841958, 0.26097438, 1)
 position = Vector2(384, 384)
 amount = 40
