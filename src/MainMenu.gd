@@ -1,6 +1,12 @@
 extends PanelContainer
 
+@export var quit_button: Button
+
 func _ready():
+	if OS.has_feature("web"):
+		quit_button.hide()
+	quit_button.pressed.connect(get_tree().quit)
+
 	var game_title_label: Label = find_child("GameTitleLabel")
 	if GameManager.cur_game_name:
 		game_title_label.text = GameManager.get_game_title()

@@ -118,12 +118,13 @@ layout_mode = 2
 size_flags_vertical = 3
 size_flags_stretch_ratio = 8.0
 
-[node name="MainMenu" type="PanelContainer" parent="MarginContainer" unique_id=1211793288]
+[node name="MainMenu" type="PanelContainer" parent="MarginContainer" unique_id=1211793288 node_paths=PackedStringArray("quit_button")]
 custom_minimum_size = Vector2(450, 160)
 layout_mode = 2
 size_flags_horizontal = 4
 size_flags_vertical = 4
 script = ExtResource("1")
+quit_button = NodePath("VBoxContainer/QuitButton")
 
 [node name="MarginContainer" type="MarginContainer" parent="MarginContainer/MainMenu" unique_id=1377947446]
 layout_mode = 2
@@ -171,6 +172,12 @@ alignment = 1
 [node name="ImportNewGameButton" type="Button" parent="MarginContainer/MainMenu/MarginContainer/VBoxContainer/HBoxContainer2" unique_id=1756290664]
 layout_mode = 2
 text = "Import Game .zip"
+
+[node name="QuitButton" type="Button" parent="MarginContainer/MainMenu/VBoxContainer" unique_id=425650131]
+layout_mode = 2
+size_flags_horizontal = 4
+theme_type_variation = &"BigTextButton"
+text = "Quit"
 
 [node name="FallingEntities" parent="." unique_id=1839494414 instance=ExtResource("2")]
 

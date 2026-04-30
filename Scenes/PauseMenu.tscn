@@ -10,7 +10,7 @@ PanelContainer/styles/panel = ExtResource("1_5w4ur")
 [sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_qwhev"]
 blend_mode = 3
 
-[node name="PauseMenu" type="Control" unique_id=1906408289 node_paths=PackedStringArray("next_level_list", "level_title_edit", "play_mode_button", "level_edit_mode_button") groups=["PauseMenu"]]
+[node name="PauseMenu" type="Control" unique_id=1906408289 node_paths=PackedStringArray("next_level_list", "level_title_edit", "editor_stuff", "play_mode_button", "level_edit_mode_button") groups=["PauseMenu"]]
 process_mode = 3
 layout_mode = 3
 anchors_preset = 15
@@ -22,6 +22,7 @@ theme = SubResource("Theme_ey1tb")
 script = ExtResource("1")
 next_level_list = NodePath("CenterContainer/LevelSettingsPausePanel/MarginContainer/VBoxContainer/GridContainer/NextLevelChooser")
 level_title_edit = NodePath("CenterContainer/LevelSettingsPausePanel/MarginContainer/VBoxContainer/GridContainer/LevelTitleInput")
+editor_stuff = NodePath("CenterContainer/MainPausePanel/MarginContainer/VBoxContainer/EditorStuff")
 play_mode_button = NodePath("CenterContainer/MainPausePanel/MarginContainer/VBoxContainer/HBoxContainer6/PlayModeButton")
 level_edit_mode_button = NodePath("CenterContainer/MainPausePanel/MarginContainer/VBoxContainer/EditModeButton")
 
@@ -121,70 +122,74 @@ size_flags_horizontal = 4
 theme_override_fonts/font = ExtResource("2")
 text = "Quit to Main Menu"
 
-[node name="TextSeparator" type="HBoxContainer" parent="CenterContainer/MainPausePanel/MarginContainer/VBoxContainer" unique_id=263211364]
+[node name="EditorStuff" type="VBoxContainer" parent="CenterContainer/MainPausePanel/MarginContainer/VBoxContainer" unique_id=867772018]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="TextSeparator" type="HBoxContainer" parent="CenterContainer/MainPausePanel/MarginContainer/VBoxContainer/EditorStuff" unique_id=263211364]
 layout_mode = 2
 
-[node name="HSeparator" type="HSeparator" parent="CenterContainer/MainPausePanel/MarginContainer/VBoxContainer/TextSeparator" unique_id=485704460]
+[node name="HSeparator" type="HSeparator" parent="CenterContainer/MainPausePanel/MarginContainer/VBoxContainer/EditorStuff/TextSeparator" unique_id=485704460]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="Label" type="Label" parent="CenterContainer/MainPausePanel/MarginContainer/VBoxContainer/TextSeparator" unique_id=1115271428]
+[node name="Label" type="Label" parent="CenterContainer/MainPausePanel/MarginContainer/VBoxContainer/EditorStuff/TextSeparator" unique_id=1115271428]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.61745477, 0.61745477, 0.6174547, 1)
 theme_override_font_sizes/font_size = 14
 text = "Level Editor"
 
-[node name="HSeparator2" type="HSeparator" parent="CenterContainer/MainPausePanel/MarginContainer/VBoxContainer/TextSeparator" unique_id=1137352540]
+[node name="HSeparator2" type="HSeparator" parent="CenterContainer/MainPausePanel/MarginContainer/VBoxContainer/EditorStuff/TextSeparator" unique_id=1137352540]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="HBoxContainer2" type="HBoxContainer" parent="CenterContainer/MainPausePanel/MarginContainer/VBoxContainer" unique_id=318746137]
+[node name="HBoxContainer2" type="HBoxContainer" parent="CenterContainer/MainPausePanel/MarginContainer/VBoxContainer/EditorStuff" unique_id=318746137]
 layout_mode = 2
 size_flags_horizontal = 4
 
-[node name="Label" type="Label" parent="CenterContainer/MainPausePanel/MarginContainer/VBoxContainer/HBoxContainer2" unique_id=215894139]
+[node name="Label" type="Label" parent="CenterContainer/MainPausePanel/MarginContainer/VBoxContainer/EditorStuff/HBoxContainer2" unique_id=215894139]
 layout_mode = 2
 text = "Editor Live Mode Enabled:"
 
-[node name="LiveEditModeToggle" type="CheckButton" parent="CenterContainer/MainPausePanel/MarginContainer/VBoxContainer/HBoxContainer2" unique_id=867509530]
+[node name="LiveEditModeToggle" type="CheckButton" parent="CenterContainer/MainPausePanel/MarginContainer/VBoxContainer/EditorStuff/HBoxContainer2" unique_id=867509530]
 layout_mode = 2
 mouse_default_cursor_shape = 2
 
-[node name="HBoxContainer4" type="HBoxContainer" parent="CenterContainer/MainPausePanel/MarginContainer/VBoxContainer" unique_id=25173669]
+[node name="HBoxContainer4" type="HBoxContainer" parent="CenterContainer/MainPausePanel/MarginContainer/VBoxContainer/EditorStuff" unique_id=25173669]
 layout_mode = 2
 theme_override_constants/separation = 14
 alignment = 1
 
-[node name="EditLevelSettingsButton" type="Button" parent="CenterContainer/MainPausePanel/MarginContainer/VBoxContainer/HBoxContainer4" unique_id=666095709]
+[node name="EditLevelSettingsButton" type="Button" parent="CenterContainer/MainPausePanel/MarginContainer/VBoxContainer/EditorStuff/HBoxContainer4" unique_id=666095709]
 custom_minimum_size = Vector2(0, 30)
 layout_mode = 2
 text = "Edit Level Settings"
 
-[node name="LevelFileActionButtons" type="HBoxContainer" parent="CenterContainer/MainPausePanel/MarginContainer/VBoxContainer" unique_id=1941901720]
+[node name="LevelFileActionButtons" type="HBoxContainer" parent="CenterContainer/MainPausePanel/MarginContainer/VBoxContainer/EditorStuff" unique_id=1941901720]
 layout_mode = 2
 theme_override_constants/separation = 14
 alignment = 1
 
-[node name="SaveLevelButton" type="Button" parent="CenterContainer/MainPausePanel/MarginContainer/VBoxContainer/LevelFileActionButtons" unique_id=118268892]
+[node name="SaveLevelButton" type="Button" parent="CenterContainer/MainPausePanel/MarginContainer/VBoxContainer/EditorStuff/LevelFileActionButtons" unique_id=118268892]
 custom_minimum_size = Vector2(0, 30)
 layout_mode = 2
 text = "Save Level"
 
-[node name="NewLevelButton" type="Button" parent="CenterContainer/MainPausePanel/MarginContainer/VBoxContainer/LevelFileActionButtons" unique_id=1370810588]
+[node name="NewLevelButton" type="Button" parent="CenterContainer/MainPausePanel/MarginContainer/VBoxContainer/EditorStuff/LevelFileActionButtons" unique_id=1370810588]
 custom_minimum_size = Vector2(0, 30)
 layout_mode = 2
 text = "New Level"
 
-[node name="LoadLevelButton" type="Button" parent="CenterContainer/MainPausePanel/MarginContainer/VBoxContainer/LevelFileActionButtons" unique_id=522059445]
+[node name="LoadLevelButton" type="Button" parent="CenterContainer/MainPausePanel/MarginContainer/VBoxContainer/EditorStuff/LevelFileActionButtons" unique_id=522059445]
 layout_mode = 2
 text = "Load Level"
 
-[node name="HBoxContainer3" type="HBoxContainer" parent="CenterContainer/MainPausePanel/MarginContainer/VBoxContainer" unique_id=807373596]
+[node name="HBoxContainer3" type="HBoxContainer" parent="CenterContainer/MainPausePanel/MarginContainer/VBoxContainer/EditorStuff" unique_id=807373596]
 layout_mode = 2
 theme_override_constants/separation = 14
 alignment = 1
 
-[node name="MuseumButton" type="Button" parent="CenterContainer/MainPausePanel/MarginContainer/VBoxContainer/HBoxContainer3" unique_id=2074192254]
+[node name="MuseumButton" type="Button" parent="CenterContainer/MainPausePanel/MarginContainer/VBoxContainer/EditorStuff/HBoxContainer3" unique_id=2074192254]
 layout_mode = 2
 text = "Go To Museum"
 
@@ -267,11 +272,11 @@ text = "Quit to Main Menu"
 [connection signal="pressed" from="CenterContainer/MainPausePanel/MarginContainer/VBoxContainer/HBoxContainer6/LvlSelect" to="." method="go_to_level_select"]
 [connection signal="pressed" from="CenterContainer/MainPausePanel/MarginContainer/VBoxContainer/CreditsButton" to="." method="_on_credits_button_pressed"]
 [connection signal="pressed" from="CenterContainer/MainPausePanel/MarginContainer/VBoxContainer/QuitToMenu" to="." method="_on_QuitToMenu_pressed"]
-[connection signal="toggled" from="CenterContainer/MainPausePanel/MarginContainer/VBoxContainer/HBoxContainer2/LiveEditModeToggle" to="." method="_on_live_edit_mode_toggle_toggled"]
-[connection signal="pressed" from="CenterContainer/MainPausePanel/MarginContainer/VBoxContainer/HBoxContainer4/EditLevelSettingsButton" to="." method="_on_edit_level_settings_button_pressed"]
-[connection signal="pressed" from="CenterContainer/MainPausePanel/MarginContainer/VBoxContainer/LevelFileActionButtons/SaveLevelButton" to="." method="_on_SaveLevelButton_pressed"]
-[connection signal="pressed" from="CenterContainer/MainPausePanel/MarginContainer/VBoxContainer/LevelFileActionButtons/NewLevelButton" to="." method="_on_new_level_button_pressed"]
-[connection signal="pressed" from="CenterContainer/MainPausePanel/MarginContainer/VBoxContainer/LevelFileActionButtons/LoadLevelButton" to="." method="_on_LoadLevelButton_pressed"]
-[connection signal="pressed" from="CenterContainer/MainPausePanel/MarginContainer/VBoxContainer/HBoxContainer3/MuseumButton" to="." method="_on_museum_button_pressed"]
+[connection signal="toggled" from="CenterContainer/MainPausePanel/MarginContainer/VBoxContainer/EditorStuff/HBoxContainer2/LiveEditModeToggle" to="." method="_on_live_edit_mode_toggle_toggled"]
+[connection signal="pressed" from="CenterContainer/MainPausePanel/MarginContainer/VBoxContainer/EditorStuff/HBoxContainer4/EditLevelSettingsButton" to="." method="_on_edit_level_settings_button_pressed"]
+[connection signal="pressed" from="CenterContainer/MainPausePanel/MarginContainer/VBoxContainer/EditorStuff/LevelFileActionButtons/SaveLevelButton" to="." method="_on_SaveLevelButton_pressed"]
+[connection signal="pressed" from="CenterContainer/MainPausePanel/MarginContainer/VBoxContainer/EditorStuff/LevelFileActionButtons/NewLevelButton" to="." method="_on_new_level_button_pressed"]
+[connection signal="pressed" from="CenterContainer/MainPausePanel/MarginContainer/VBoxContainer/EditorStuff/LevelFileActionButtons/LoadLevelButton" to="." method="_on_LoadLevelButton_pressed"]
+[connection signal="pressed" from="CenterContainer/MainPausePanel/MarginContainer/VBoxContainer/EditorStuff/HBoxContainer3/MuseumButton" to="." method="_on_museum_button_pressed"]
 [connection signal="pressed" from="CenterContainer/LevelSettingsPausePanel/MarginContainer/VBoxContainer/BackButton" to="." method="_on_back_button_pressed"]
 [connection signal="pressed" from="CenterContainer/LevelSettingsPausePanel/MarginContainer/VBoxContainer/QuitToMenu2" to="." method="_on_QuitToMenu_pressed"]

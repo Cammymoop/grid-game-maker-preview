@@ -1,6 +1,7 @@
 extends Node2D
 
 signal lost_input_priority
+signal request_grab_gui_focus
 
 const EntityInstanceEditor = preload("res://Scenes/GameEditor/entity_instance_editor.gd")
 const EditorCam = preload("res://src/EditorCam.gd")
@@ -149,6 +150,7 @@ func on_edit_mode_enabled() -> void:
 	editor_cam.make_current()
 	_refresh_edited_entity_indicators()
 	after_edit_mode_switched()
+	request_grab_gui_focus.emit()
 
 func get_new_edited_entity_indicator() -> Sprite2D:
 	var indicator: Sprite2D = Sprite2D.new()
@@ -384,6 +386,8 @@ func update_input_priority() -> bool:
 	elif entity_instance_editor and entity_instance_editor.is_visible_in_tree():
 		drop_input_priority()
 	else:
+		if not _input_priority:
+			prints("gain input priority")
 		gain_input_priority()
 	return _input_priority
 
@@ -460,6 +464,9 @@ func forwarded_gui_input(event: InputEvent) -> void:
 	if not edit_mode or GameManager.get_pause("pause_menu"):
 		return
 	
+	#if event is InputEventMouseButton:
+		#prints(get_viewport().gui_get_focus_owner())
+	
 	if event is InputEventMouseMotion:
 		process_new_mouse_position()
 		return
@@ -516,6 +523,7 @@ func forwarded_gui_input(event: InputEvent) -> void:
 		return
 
 	if Utility.fixed_just_pressed_by_event("editor_pointer_pick", event, true):
+		prints("editor_pointer_pick")
 		var entities_here: = get_all_entities_at_tile_pos(cursor_tile_pos)
 		if entities_here.size() > 0:
 			if cursor_mode != "entity":
@@ -554,8 +562,6 @@ func forwarded_shortcut_input(event: InputEvent) -> void:
 		return
 	if Utility.fixed_just_pressed_by_event("editor_start", event, true):
 		switch_edit_mode(not edit_mode)
-	#elif Utility.fixed_just_pressed_by_event("reload_checkpoint", event, true) and not edit_mode:
-		#GameManager.load_checkpoint()
 	elif Utility.fixed_just_pressed_by_event("editor_save_level", event, true) and edit_mode:
 		if GameManager.loaded_level_name:
 			GameManager.save_edited()

@@ -707,6 +707,9 @@ func _process(_delta):
 				GlobalToaster.show_toast_message("Loaded quicksave")
 			else:
 				GlobalToaster.show_toast_message("No Quicksave")
+		elif Input.is_action_just_pressed(&"reload_checkpoint"):
+			if not get_tree().paused:
+				load_checkpoint()
 
 func _unhandled_input(event: InputEvent) -> void:
 	if Utility.fixed_just_pressed_by_event("escape", event):
