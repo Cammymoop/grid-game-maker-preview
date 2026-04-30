@@ -1,0 +1,26 @@
+[gd_resource type="ShaderMaterial" format=3 uid="uid://bxpdteawtwgay"]
+
+[ext_resource type="Shader" uid="uid://b2l3vkyrw0olv" path="res://Scenes/bg_lines_add.gdshader" id="1_8wuno"]
+
+[sub_resource type="Gradient" id="Gradient_exhar"]
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_n4cem"]
+seed = 1
+frequency = 0.0043
+fractal_octaves = 3
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_4d8kp"]
+width = 1024
+height = 1024
+noise = SubResource("FastNoiseLite_n4cem")
+color_ramp = SubResource("Gradient_exhar")
+seamless = true
+
+[resource]
+shader = ExtResource("1_8wuno")
+shader_parameter/scroll_speed = 0.06999999843536
+shader_parameter/scroll_angle = 0.83999998122432
+shader_parameter/displacement_tex = SubResource("NoiseTexture2D_4d8kp")
+shader_parameter/displacement_strength = 1.30000001937156
+shader_parameter/displacement_scroll_speed = 0.06999999843536
+shader_parameter/displacement_scroll_angle = 0.5499999877064

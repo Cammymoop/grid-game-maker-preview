@@ -5,6 +5,7 @@ signal game_camera_target_changed(entity: BaseEntity)
 signal game_settings_changed
 signal game_dir_name_changed(new_game_dir_name: String)
 signal scene_changed(new_scene: String)
+signal bg_style_changed
 
 const CreditsUI = preload("res://Scenes/credits_ui.gd")
 
@@ -1371,3 +1372,28 @@ func set_game_save_data(data_key: String, value: Variant, flush: bool = true) ->
 		push_warning("Trying to set game save data but no current game")
 		return
 	player_profile.set_game_save_data(get_game_name(), data_key, value, flush)
+
+
+func get_level_bg_info() -> Dictionary:
+	if MapManager.has_metadata_value("bg_style"):
+		return MapManager.get_metadata_value("bg_style")
+	return get_game_setting("bg_style", {})
+
+func set_game_bg_info_value(key: String, value: Variant) -> void:
+	if not "bg_style" in game_definition["game_settings"]:
+		game_definition["bg_style"] = {}
+	game_definition["bg_style"][key] = value
+
+func set_level_bg_info_value(key: String, value: Variant) -> void:
+	if not MapManager.has_metadata_value("bg_style"):
+		copy_game_bg_to_level()
+	var level_bg_info: Dictionary = MapManager.get_metadata_value("bg_style")
+	level_bg_info[key] = value
+	MapManager.set_metadata_value("bg_style", level_bg_info)
+	bg_style_changed.emit()
+
+func copy_game_bg_to_level() -> void:
+	if not loaded_level_name:
+		return
+	var game_bg_info: Dictionary = get_game_setting("bg_style", {}).duplicate_deep()
+	MapManager.set_metadata_value("bg_style", game_bg_info)

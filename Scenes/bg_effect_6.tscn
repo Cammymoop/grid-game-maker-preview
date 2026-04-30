@@ -1,0 +1,218 @@
+[gd_scene format=3 uid="uid://b4fp8ldktkvcd"]
+
+[ext_resource type="Script" uid="uid://c0aaabcqit332" path="res://Scenes/bg_effect_5.gd" id="1_2aks0"]
+[ext_resource type="Texture2D" uid="uid://bq5cmu4i8tgxn" path="res://assets/img/particle_textures/puffer.png" id="2_6ng66"]
+[ext_resource type="Shader" uid="uid://bi68mhe1xawmw" path="res://Scenes/bg_lines.gdshader" id="2_dyaob"]
+[ext_resource type="Material" uid="uid://bxpdteawtwgay" path="res://src/Effects/background/lines_as_water.tres" id="2_n4cem"]
+[ext_resource type="Script" uid="uid://15x5jg4jwyc5" path="res://src/Effects/VoidParticles.gd" id="3_dyaob"]
+[ext_resource type="Texture2D" uid="uid://by1uvj4gg53du" path="res://assets/img/square_shadow_white.png" id="4_6ng66"]
+[ext_resource type="Script" uid="uid://c2ksw4bcxmkvq" path="res://src/Effects/ColorRect_FadeToBlack.gd" id="4_n4cem"]
+
+[sub_resource type="Gradient" id="Gradient_exhar"]
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_n4cem"]
+seed = 1
+frequency = 0.0043
+fractal_octaves = 3
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_4d8kp"]
+width = 1024
+height = 1024
+noise = SubResource("FastNoiseLite_n4cem")
+color_ramp = SubResource("Gradient_exhar")
+seamless = true
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_exhar"]
+shader = ExtResource("2_dyaob")
+shader_parameter/scroll_speed = 0.06999999843536
+shader_parameter/scroll_angle = 0.83999998122432
+shader_parameter/displacement_tex = SubResource("NoiseTexture2D_4d8kp")
+shader_parameter/displacement_strength = 1.30000001937156
+shader_parameter/displacement_scroll_speed = 0.06999999843536
+shader_parameter/displacement_scroll_angle = 0.5499999877064
+
+[sub_resource type="Gradient" id="Gradient_n4cem"]
+offsets = PackedFloat32Array(0.5154867, 0.53318584)
+colors = PackedColorArray(1, 1, 1, 1, 1, 1, 1, 0)
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_7f2o1"]
+width = 1024
+height = 1024
+noise = SubResource("FastNoiseLite_n4cem")
+color_ramp = SubResource("Gradient_n4cem")
+seamless = true
+
+[sub_resource type="Gradient" id="Gradient_dyaob"]
+offsets = PackedFloat32Array(0.46238938, 0.4800885, 0.5154867, 0.53318584)
+colors = PackedColorArray(0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1)
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_exhar"]
+width = 1024
+height = 1024
+noise = SubResource("FastNoiseLite_n4cem")
+color_ramp = SubResource("Gradient_dyaob")
+seamless = true
+
+[sub_resource type="Curve" id="Curve_gkcwl"]
+_limits = [0.0, 2.0, 0.0, 1.0]
+_data = [Vector2(0, 0), 0.0, 0.0, 0, 0, Vector2(0.5724299, 2), 0.0, 0.0, 0, 0, Vector2(0.78738314, 2), 0.0, 0.0, 0, 0, Vector2(1, 0), 0.0, 0.0, 0, 0]
+point_count = 4
+
+[sub_resource type="CurveTexture" id="CurveTexture_nkw3m"]
+curve = SubResource("Curve_gkcwl")
+
+[sub_resource type="ParticleProcessMaterial" id="18"]
+particle_flag_disable_z = true
+emission_shape = 3
+emission_box_extents = Vector3(400, 400, 1)
+angle_min = -179.99998
+angle_max = 180.00002
+spread = 180.0
+initial_velocity_min = 2.5
+initial_velocity_max = 6.5
+gravity = Vector3(0, 0, 0)
+scale_min = 4.0
+scale_max = 6.0
+alpha_curve = SubResource("CurveTexture_nkw3m")
+hue_variation_min = -2.2351742e-08
+hue_variation_max = -2.2351742e-08
+
+[sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_dyaob"]
+blend_mode = 1
+
+[sub_resource type="Curve" id="Curve_6ng66"]
+_data = [Vector2(0, 0.46842098), 0.0, 0.0, 0, 0, Vector2(0.7406542, 1), 0.0, 0.0, 0, 0]
+point_count = 2
+
+[sub_resource type="CurveTexture" id="CurveTexture_dyaob"]
+curve = SubResource("Curve_6ng66")
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_n4cem"]
+particle_flag_disable_z = true
+emission_shape = 3
+emission_box_extents = Vector3(400, 400, 1)
+angle_min = -179.99998
+angle_max = 180.00002
+direction = Vector3(0, -1, 0)
+spread = 0.0
+initial_velocity_min = 48.0
+initial_velocity_max = 52.0
+gravity = Vector3(0, 9, 0)
+scale_min = 0.5
+scale_max = 1.1
+scale_curve = SubResource("CurveTexture_dyaob")
+alpha_curve = SubResource("CurveTexture_nkw3m")
+hue_variation_min = -0.4
+hue_variation_max = 0.39999998
+
+[sub_resource type="Gradient" id="Gradient_6ng66"]
+colors = PackedColorArray(1, 1, 1, 1, 1, 1, 1, 0)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_dyaob"]
+gradient = SubResource("Gradient_6ng66")
+fill_from = Vector2(0, 1)
+fill_to = Vector2(0, 0.2)
+metadata/_snap_enabled = true
+
+[node name="BGEffects" type="Control" unique_id=1715516889 node_paths=PackedStringArray("bg_color_rect", "dusty_particles", "pointy_particles", "bg_gradient", "lines", "lines_solid")]
+process_mode = 3
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("1_2aks0")
+bg_color_rect = NodePath("SubViewportContainer/SubViewport/CanvasLayer/ColorRect")
+dusty_particles = NodePath("SubViewportContainer/SubViewport/DustyParticles")
+pointy_particles = NodePath("SubViewportContainer/SubViewport/PointyParticles")
+bg_gradient = NodePath("SubViewportContainer/SubViewport/BGGradient")
+lines = NodePath("SubViewportContainer/SubViewport/Lines")
+lines_solid = NodePath("SubViewportContainer/SubViewport/LinesSolid")
+
+[node name="SubViewportContainer" type="SubViewportContainer" parent="." unique_id=1971214824]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+stretch = true
+
+[node name="SubViewport" type="SubViewport" parent="SubViewportContainer" unique_id=1347613943]
+handle_input_locally = false
+size = Vector2i(768, 768)
+render_target_update_mode = 4
+
+[node name="LinesSolid" type="Sprite2D" parent="SubViewportContainer/SubViewport" unique_id=1891106267]
+visible = false
+modulate = Color(0.14644936, 0.1573914, 0.6422503, 0.4509804)
+texture_repeat = 2
+material = SubResource("ShaderMaterial_exhar")
+position = Vector2(352, 327)
+texture = SubResource("NoiseTexture2D_7f2o1")
+region_enabled = true
+region_rect = Rect2(-1024, -1024, 4096, 4096)
+
+[node name="Lines" type="Sprite2D" parent="SubViewportContainer/SubViewport" unique_id=1181373835]
+modulate = Color(1, 1, 1, 0.2509804)
+texture_repeat = 2
+material = ExtResource("2_n4cem")
+position = Vector2(352, 327)
+texture = SubResource("NoiseTexture2D_exhar")
+region_enabled = true
+region_rect = Rect2(-1024, -1024, 4096, 4096)
+
+[node name="DustyParticles" type="GPUParticles2D" parent="SubViewportContainer/SubViewport" unique_id=201630246]
+modulate = Color(0.28503343, 0.5072171, 0.8768182, 0.27450982)
+z_index = 1
+position = Vector2(384, 384)
+amount = 66
+texture = ExtResource("2_6ng66")
+lifetime = 28.0
+preprocess = 30.0
+visibility_rect = Rect2(-1000, -1000, 2000, 2000)
+process_material = SubResource("18")
+script = ExtResource("3_dyaob")
+smooth_amount_reset = 0.1
+
+[node name="PointyParticles" type="GPUParticles2D" parent="SubViewportContainer/SubViewport" unique_id=1697535648]
+visible = false
+self_modulate = Color(0.41674656, 0.4167466, 0.41674656, 1)
+z_index = 1
+material = SubResource("CanvasItemMaterial_dyaob")
+position = Vector2(384, 384)
+amount = 140
+texture = ExtResource("4_6ng66")
+lifetime = 16.0
+preprocess = 15.0
+visibility_rect = Rect2(-1000, -1000, 2000, 2000)
+process_material = SubResource("ParticleProcessMaterial_n4cem")
+script = ExtResource("3_dyaob")
+MAX_AMOUNT = 20000
+smooth_amount_reset = 0.5
+
+[node name="BGGradient" type="TextureRect" parent="SubViewportContainer/SubViewport" unique_id=200735861]
+modulate = Color(0.25300944, 0.38964128, 0.9388648, 0.73333335)
+z_index = 2
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = SubResource("GradientTexture2D_dyaob")
+expand_mode = 1
+
+[node name="CanvasLayer" type="CanvasLayer" parent="SubViewportContainer/SubViewport" unique_id=51442697]
+layer = -5
+
+[node name="ColorRect" type="ColorRect" parent="SubViewportContainer/SubViewport/CanvasLayer" unique_id=601981259]
+show_behind_parent = true
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+color = Color(0.33752534, 0.75000954, 0.98557407, 1)
+script = ExtResource("4_n4cem")
+do_fade = false
+fade_length = 0.2
