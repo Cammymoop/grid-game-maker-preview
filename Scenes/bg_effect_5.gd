@@ -14,11 +14,12 @@ var default_bg_gradient_color: Color = Color.BLACK
 var default_particles_color: Color = Color.GRAY
 var default_pointy_particles_color: Color = Color.WHITE
 
+var dusty_particles_density: float = 1.0
 var dusty_particles_base_speed: float = 1
 
 var pointy_particles_rainbow_hue_var: float = 0
 var pointy_particles_base_speed: float = 1
-var pointy_particles_quant: int = 1
+var pointy_particles_density: float = 1.0
 
 var pointy_particles_dark_mode: bool = false
 
@@ -32,16 +33,18 @@ var lines_warp_scroll_speed: float = 0.05
 var lines_warp_scroll_angle: float = 0.4
 
 func _ready() -> void:
-    GameManager.bg_style_changed.connect(refresh_bg_style)
+    GameManager.bg_style_changed.connect(on_bg_style_changed)
     default_bg_color = bg_color_rect.color
     default_bg_gradient_color = bg_gradient.modulate
 
     default_particles_color = dusty_particles.modulate
     dusty_particles_base_speed = dusty_particles.speed_scale
+    
+    dusty_particles_density = dusty_particles.density
 
     default_pointy_particles_color = pointy_particles.modulate
     pointy_particles_base_speed = pointy_particles.speed_scale
-    pointy_particles_quant = pointy_particles.amount
+    pointy_particles_density = pointy_particles.density
     var pointy_mat: ParticleProcessMaterial = pointy_particles.process_material
     pointy_particles_rainbow_hue_var = pointy_mat.hue_variation_max
     
@@ -59,23 +62,32 @@ func _ready() -> void:
     lines_solid_color = lines_solid.modulate
     refresh_bg_style()
 
+func on_bg_style_changed() -> void:
+    refresh_bg_style()
+    var level_bg_info: Dictionary = GameManager.get_level_bg_info()
+    prints("bg style changed, dusty particles amount: %s : %s" % [level_bg_info.get("dusty_particles_amount", -2), dusty_particles.amount])
+
 func refresh_bg_style() -> void:
     var level_bg_info: Dictionary = GameManager.get_level_bg_info()
-    var background_color: Color = level_bg_info.get("background_color", default_bg_color)
-    var dusty_particles_color: Color = level_bg_info.get("dusty_particles_color", default_particles_color)
+    var background_color: Color = Utility.get_dict_color(level_bg_info, "background_color", default_bg_color)
+    var dusty_particles_color: Color = Utility.get_dict_color(level_bg_info, "dusty_particles_color", default_particles_color)
+    
+    dusty_particles.density = dusty_particles_density * level_bg_info.get("dusty_particles_amount", 1.0)
+    dusty_particles.real_update()
     
     bg_color_rect.color = background_color
     dusty_particles.modulate = dusty_particles_color
-    dusty_particles.speed_scale = dusty_particles_base_speed * level_bg_info.get("dusty_particles_speed", 1)
+    dusty_particles.speed_scale = dusty_particles_base_speed * level_bg_info.get("dusty_particles_speed", 1.0)
     dusty_particles.visible = level_bg_info.get("dusty_particles_on", true)
     
     var pointy_mat: ParticleProcessMaterial = pointy_particles.process_material
     pointy_mat.hue_variation_max = pointy_particles_rainbow_hue_var * int(level_bg_info.get("pointy_particles_rainbow_on", false))
     pointy_mat.hue_variation_min = -pointy_mat.hue_variation_max
 
-    pointy_particles.amount = ceili(pointy_particles_quant * level_bg_info.get("pointy_particles_amount", 1.0))
-    pointy_particles.speed_scale = pointy_particles_base_speed * level_bg_info.get("pointy_particles_speed", 1)
-    pointy_particles.modulate = level_bg_info.get("pointy_particles_color", default_pointy_particles_color)
+    pointy_particles.density = pointy_particles_density * level_bg_info.get("pointy_particles_amount", 1.0)
+    pointy_particles.real_update()
+    pointy_particles.speed_scale = pointy_particles_base_speed * level_bg_info.get("pointy_particles_speed", 1.0)
+    pointy_particles.modulate = Utility.get_dict_color(level_bg_info, "pointy_particles_color", default_pointy_particles_color)
     pointy_particles.visible = level_bg_info.get("pointy_particles_on", false)
     if level_bg_info.get("pointy_particles_dark_mode", pointy_particles_dark_mode):
         pointy_particles.material.blend_mode = CanvasItemMaterial.BLEND_MODE_SUB
@@ -83,15 +95,15 @@ func refresh_bg_style() -> void:
         pointy_particles.material.blend_mode = CanvasItemMaterial.BLEND_MODE_ADD
     
     bg_gradient.visible = level_bg_info.get("bg_gradient_on", true)
-    bg_gradient.modulate = level_bg_info.get("bg_gradient_color", default_bg_gradient_color)
+    bg_gradient.modulate = Utility.get_dict_color(level_bg_info, "bg_gradient_color", default_bg_gradient_color)
     
     var bg_gradient_above: String = level_bg_info.get("bg_gradient_above", "below")
     if bg_gradient_above == "below":
-        bg_gradient.z_index = -3
+        bg_gradient.z_index = -6
     elif bg_gradient_above == "between":
         bg_gradient.z_index = 0
     elif bg_gradient_above == "above":
-        bg_gradient.z_index = 3
+        bg_gradient.z_index = 6
     
     refresh_lines_style()
 
@@ -102,8 +114,8 @@ func refresh_lines_style() -> void:
     lines_solid.visible = level_bg_info.get("lines_solid_on", false)
     if not lines.visible and not lines_solid.visible:
         return
-    lines.modulate = level_bg_info.get("lines_color", lines_color)
-    lines_solid.modulate = level_bg_info.get("lines_solid_color", lines_solid_color)
+    lines.modulate = Utility.get_dict_color(level_bg_info, "lines_color", lines_color)
+    lines_solid.modulate = Utility.get_dict_color(level_bg_info, "lines_solid_color", lines_solid_color)
     var lines_shader: ShaderMaterial = lines.material
     var lines_solid_shader: ShaderMaterial = lines_solid.material
     
@@ -126,8 +138,11 @@ func refresh_lines_style() -> void:
     lines_solid_shader.set_shader_parameter("displacement_scroll_angle", warp_scroll_angle)
     
     var lines_above: String = level_bg_info.get("lines_above", "below")
-    lines.z_index = 2 if lines_above.begins_with("above") else -1
-    lines_solid.z_index = 2 if lines_above.begins_with("above") else -1 
+    lines.z_index = 3 if lines_above.begins_with("above") else -1
+    lines_solid.z_index = 3 if lines_above.begins_with("above") else -1 
     if lines_above.contains("solid"):
         lines_solid.z_index += 1
+    
+    if lines_above.begins_with("above") and level_bg_info.get("bg_gradient_above", "below") == "between":
+        bg_gradient.z_index = 2
     

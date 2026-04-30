@@ -24,6 +24,7 @@ func _ready():
 	else:
 		extents = process_material.get_shader_parameter("emission_box_extents")
 	density = amount / (extents.x * extents.y)
+	prints("starting density for %s: %s" % [self.name, density])
 	update_size(true)
 	get_viewport().size_changed.connect(update_size)
 
@@ -66,5 +67,6 @@ func real_update() -> void:
 	else:
 		process_material.set_shader_parameter("emission_box_extents", Vector3((vp.size.x/2) * 1.2, vp.size.y * 1.5, 1))
 	if DENSITY_UPDATES:
-		amount = min(MAX_AMOUNT, density * (vp.size.x * vp.size.y))
+		amount = mini(MAX_AMOUNT, maxi(10, density * (vp.size.x * vp.size.y)))
+		prints("new size for %s: %s, density: %s, amount: %s" % [self.name, vp.size, density, amount])
 	

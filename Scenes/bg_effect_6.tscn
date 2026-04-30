@@ -62,6 +62,7 @@ point_count = 4
 curve = SubResource("Curve_gkcwl")
 
 [sub_resource type="ParticleProcessMaterial" id="18"]
+resource_local_to_scene = true
 particle_flag_disable_z = true
 emission_shape = 3
 emission_box_extents = Vector3(400, 400, 1)
@@ -78,7 +79,7 @@ hue_variation_min = -2.2351742e-08
 hue_variation_max = -2.2351742e-08
 
 [sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_dyaob"]
-blend_mode = 1
+blend_mode = 2
 
 [sub_resource type="Curve" id="Curve_6ng66"]
 _data = [Vector2(0, 0.46842098), 0.0, 0.0, 0, 0, Vector2(0.7406542, 1), 0.0, 0.0, 0, 0]
@@ -88,6 +89,7 @@ point_count = 2
 curve = SubResource("Curve_6ng66")
 
 [sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_n4cem"]
+resource_local_to_scene = true
 particle_flag_disable_z = true
 emission_shape = 3
 emission_box_extents = Vector3(400, 400, 1)
@@ -101,9 +103,10 @@ gravity = Vector3(0, 9, 0)
 scale_min = 0.5
 scale_max = 1.1
 scale_curve = SubResource("CurveTexture_dyaob")
+color = Color(0.8262977, 0.41741502, 0, 1)
 alpha_curve = SubResource("CurveTexture_nkw3m")
-hue_variation_min = -0.4
-hue_variation_max = 0.39999998
+hue_variation_min = -2.2351742e-08
+hue_variation_max = -2.2351742e-08
 
 [sub_resource type="Gradient" id="Gradient_6ng66"]
 colors = PackedColorArray(1, 1, 1, 1, 1, 1, 1, 0)
@@ -155,6 +158,7 @@ region_enabled = true
 region_rect = Rect2(-1024, -1024, 4096, 4096)
 
 [node name="Lines" type="Sprite2D" parent="SubViewportContainer/SubViewport" unique_id=1181373835]
+visible = false
 modulate = Color(1, 1, 1, 0.2509804)
 texture_repeat = 2
 material = ExtResource("2_n4cem")
@@ -177,8 +181,7 @@ script = ExtResource("3_dyaob")
 smooth_amount_reset = 0.1
 
 [node name="PointyParticles" type="GPUParticles2D" parent="SubViewportContainer/SubViewport" unique_id=1697535648]
-visible = false
-self_modulate = Color(0.41674656, 0.4167466, 0.41674656, 1)
+self_modulate = Color(1, 1, 1, 0.3882353)
 z_index = 1
 material = SubResource("CanvasItemMaterial_dyaob")
 position = Vector2(384, 384)
@@ -212,7 +215,7 @@ anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 mouse_filter = 2
-color = Color(0.33752534, 0.75000954, 0.98557407, 1)
+color = Color(0.6399424, 0.8159995, 0.99695736, 1)
 script = ExtResource("4_n4cem")
 do_fade = false
 fade_length = 0.2

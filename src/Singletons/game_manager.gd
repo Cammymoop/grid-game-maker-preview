@@ -45,6 +45,8 @@ var queued_level_load_timer: Timer = null
 
 var file_access_web: RefCounted = null
 
+var default_bg_style: Dictionary = {}
+
 var scenes: = {
 	"Menu": "res://Scenes/Menu.tscn",
 	"Loading": "res://Scenes/Loading.tscn",
@@ -127,6 +129,8 @@ func _ready():
 	cur_scene = get_tree().current_scene.name
 	FilesManager.init_folders()
 	
+	setup_default_bg_style()
+	
 	var st_timer = Timer.new()
 	st_timer.set_name("SceneTransitionTimer")
 	add_child(st_timer)
@@ -167,6 +171,41 @@ func _ready():
 	EntityManager.build_sprite_previews()
 	
 	SfxPlayer.refresh_game_sfx()
+
+func setup_default_bg_style() -> void:
+	var customizable_bg: Node = preload("res://Scenes/bg_effect_6.tscn").instantiate()
+	add_child(customizable_bg)
+	default_bg_style = {
+		"background_color": Utility.color_string_no_alpha(customizable_bg.default_bg_color),
+		"bg_gradient_on": true,
+		"bg_gradient_color": Utility.color_string(customizable_bg.default_bg_gradient_color, true),
+		"bg_gradient_above": "below",
+
+		"dusty_particles_on": true,
+		"dusty_particles_amount": 1.0,
+		"dusty_particles_speed": 1.0,
+		"dusty_particles_color": Utility.color_string(customizable_bg.default_particles_color, true),
+		
+		"pointy_particles_on": false,
+		"pointy_particles_amount": 1.0,
+		"pointy_particles_speed": 1.0,
+		"pointy_particles_rainbow_on": false,
+		"pointy_particles_color": Utility.color_string(customizable_bg.default_pointy_particles_color, true),
+		"pointy_particles_dark_mode": customizable_bg.pointy_particles_dark_mode,
+		
+		"lines_on": false,
+		"lines_solid_on": false,
+		"lines_color": Utility.color_string(customizable_bg.lines_color, true),
+		"lines_solid_color": Utility.color_string(customizable_bg.lines_solid_color, true),
+		"lines_scroll_speed": customizable_bg.lines_scroll_speed,
+		"lines_scroll_angle": rad_to_deg(customizable_bg.lines_scroll_angle * TAU),
+		"lines_warp_strength": customizable_bg.lines_warp_strength,
+		"lines_warp_scroll_speed": customizable_bg.lines_warp_scroll_speed,
+		"lines_warp_scroll_angle": rad_to_deg(customizable_bg.lines_warp_scroll_angle * TAU),
+		"lines_above": "below",
+	}
+	remove_child(customizable_bg)
+	customizable_bg.queue_free()
 
 func bake_scene_transition_curve() -> void:
 	scene_transition_curve.bake()
@@ -1374,15 +1413,29 @@ func set_game_save_data(data_key: String, value: Variant, flush: bool = true) ->
 	player_profile.set_game_save_data(get_game_name(), data_key, value, flush)
 
 
+func get_game_bg_info() -> Dictionary:
+	var game_bg_info: Dictionary = get_game_setting("bg_style", {})
+	return game_bg_info.merged(default_bg_style)
+
 func get_level_bg_info() -> Dictionary:
+	if cur_scene != "Play":
+		return get_game_bg_info()
+
 	if MapManager.has_metadata_value("bg_style"):
 		return MapManager.get_metadata_value("bg_style")
-	return get_game_setting("bg_style", {})
+	return get_game_bg_info()
+
+func set_level_bg_info(bg_info: Dictionary) -> void:
+	MapManager.set_metadata_value("bg_style", bg_info)
+	bg_style_changed.emit()
+
+func _set_game_bg_info_value(key: String, value: Variant) -> void:
+	game_definition["game_settings"]["bg_style"][key] = value
 
 func set_game_bg_info_value(key: String, value: Variant) -> void:
 	if not "bg_style" in game_definition["game_settings"]:
-		game_definition["bg_style"] = {}
-	game_definition["bg_style"][key] = value
+		set_game_setting("bg_style", {})
+	_set_game_bg_info_value(key, value)
 
 func set_level_bg_info_value(key: String, value: Variant) -> void:
 	if not MapManager.has_metadata_value("bg_style"):
@@ -1392,8 +1445,15 @@ func set_level_bg_info_value(key: String, value: Variant) -> void:
 	MapManager.set_metadata_value("bg_style", level_bg_info)
 	bg_style_changed.emit()
 
+func set_auto_bg_info_value(key: String, value: Variant) -> void:
+	if cur_scene != "Play":
+		set_game_bg_info_value(key, value)
+		bg_style_changed.emit()
+	else:
+		set_level_bg_info_value(key, value)
+
 func copy_game_bg_to_level() -> void:
 	if not loaded_level_name:
 		return
 	var game_bg_info: Dictionary = get_game_setting("bg_style", {}).duplicate_deep()
-	MapManager.set_metadata_value("bg_style", game_bg_info)
+	set_level_bg_info(game_bg_info)
