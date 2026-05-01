@@ -76,6 +76,7 @@ func _ready() -> void:
 
 	visibility_changed.connect(on_visibility_changed)
 	var cursor_move_timer: = Utility.create_auto_repeat_delay_timer(self, 0.45, -1, is_holding_cursor_move, on_cursor_move_activated)
+	cursor_move_timer.set_check_changed_callable(get_cursor_hold_vector)
 	lost_input_priority.connect(cursor_move_timer.release)
 	
 	entity_instance_editor.closing.connect(entity_instance_editor_closed)
@@ -101,6 +102,10 @@ func is_holding_cursor_move() -> bool:
 	if not edit_mode or not _input_priority:
 		return false
 	return Utility.input_vector_by_prefix("editor_cursor").length_squared() > 0.01
+
+func get_cursor_hold_vector() -> Vector2:
+	var input_vector: = Utility.input_vector_by_prefix("editor_cursor")
+	return input_vector.snapped(Vector2.ONE)
 
 func on_cursor_move_activated() -> void:
 	_cursor_moved_from_directional_input = true
@@ -531,7 +536,8 @@ func forwarded_gui_input(event: InputEvent) -> void:
 		inspect_at_cursor()
 		return
 
-	if Utility.fixed_just_pressed_by_event("editor_pointer_pick", event, true):
+	var is_pointer_pick: = Utility.fixed_just_pressed_by_event("editor_pointer_pick", event, true)
+	if is_pointer_pick or Utility.fixed_just_pressed_by_event("editor_non_pointer_pick", event, false):
 		var entities_here: = get_all_entities_at_tile_pos(cursor_tile_pos)
 		if entities_here.size() > 0:
 			if cursor_mode != "entity":
