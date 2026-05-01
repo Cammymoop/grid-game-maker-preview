@@ -92,7 +92,7 @@ func on_size_changed() -> void:
     last_size = size
 
 func _shortcut_input(event: InputEvent) -> void:
-    if Utility.fixed_just_pressed_by_event("escape", event):
+    if Utility.event_is_menu_back_just_pressed(event):
         cancel()
 
 func add_new_command(command_code: int, slot_id: int, destination: String) -> void:

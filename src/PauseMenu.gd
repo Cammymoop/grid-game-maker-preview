@@ -1,6 +1,7 @@
 extends Control
 
 signal gameplay_paused
+signal pause_menu_closed
 
 var save_dialog = preload("res://Scenes/SaveLevelDialog.tscn")
 var load_dialog = preload("res://Scenes/LoadLevelDialog.tscn")
@@ -35,14 +36,37 @@ func _unhandled_input(event: InputEvent) -> void:
 	if Utility.fixed_just_pressed_by_event("pause_game", event):
 		toggle()
 		accept_event()
-	if not active:
-		return
-	if Utility.fixed_just_pressed_by_event("escape", event):
-		if not main_panel.visible:
-			switch_panel("main")
+
+	if active:
+		if Utility.event_is_menu_back_just_pressed(event):
+			if not main_panel.visible:
+				switch_panel("main")
+			else:
+				toggle()
+			accept_event()
 		else:
-			toggle()
-		accept_event()
+			check_should_focus_event(event)
+
+func check_should_focus_event(event: InputEvent) -> void:
+	prints("check_should_focus_event: ", event)
+	var current_focus_owner: = get_viewport().gui_get_focus_owner()
+	if current_focus_owner and is_ancestor_of(current_focus_owner):
+		return
+	var do_grab_focus: = false
+	for focus_dir_action in ["ui_up", "ui_down", "ui_left", "ui_right"]:
+		if Utility.fixed_just_pressed_by_event(focus_dir_action, event):
+			do_grab_focus = true
+	if do_grab_focus:
+		var first_visible_button: = _get_first_visible_button()
+		if first_visible_button:
+			first_visible_button.grab_focus.call_deferred()
+
+func _get_first_visible_button() -> Control:
+	if main_panel.visible:
+		return main_panel.find_child("ResumeButton")
+	else:
+		return level_settings_panel.find_child("BackButton")
+
 
 func switch_panel(to_panel: String) -> void:
 	var is_main_panel: = to_panel == "main"
@@ -61,6 +85,7 @@ func toggle():
 		on_show()
 	else:
 		visible = false
+		pause_menu_closed.emit()
 
 func on_show() -> void:
 	var restart_button = find_child("RestartLevel")

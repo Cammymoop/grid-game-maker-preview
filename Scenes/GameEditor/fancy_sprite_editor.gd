@@ -26,7 +26,7 @@ func _ready() -> void:
     update_scroll_container_size()
 
 func _shortcut_input(event: InputEvent) -> void:
-    if Utility.fixed_just_pressed_by_event("escape", event):
+    if Utility.event_is_menu_back_just_pressed(event):
         close_sprite_editor()
 
 func setup(new_entity_def: Dictionary) -> void:

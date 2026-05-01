@@ -372,7 +372,6 @@ func gen_birdSound() -> Params:
 func gen_pushSound() -> Params:
 	var params := Params.new()
 	var push_sound_wave_rand: float = frnd(WaveType.size())
-	prints("push_sound_wave_rand: %s out of %s" % [push_sound_wave_rand, WaveType.size()])
 	params.wave_type = floori(push_sound_wave_rand)
 	if params.wave_type == 2:
 		params.wave_type += 1

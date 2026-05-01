@@ -1005,3 +1005,10 @@ func force_rerender_subviewport(subviewport: SubViewport) -> void:
 	await RenderingServer.frame_post_draw
 	
 	#RenderingServer.viewport_set_active(root_viewport_rid, true)
+
+func event_is_menu_back_just_pressed(event: InputEvent) -> bool:
+	if fixed_just_pressed_by_event("escape", event):
+		return true
+	if fixed_just_pressed_by_event("controller_menu_back", event):
+		return true
+	return false

@@ -100,7 +100,7 @@ func on_save_conditional_prop(new_conditional_value: Variant, prop_name: String)
 	the_definition["properties"][prop_name] = new_conditional_value
 
 func _shortcut_input(event: InputEvent) -> void:
-	if Input.is_action_just_pressed_by_event(&"escape", event):
+	if Utility.event_is_menu_back_just_pressed(event):
 		close_window()
 
 func set_controller(list_index) -> void:

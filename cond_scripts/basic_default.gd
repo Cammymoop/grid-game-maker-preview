@@ -778,7 +778,6 @@ func cmd_next_level_exists(_slots: Dictionary) -> bool:
 func desc_load_next_level() -> String:
 	return "none|Load the next level, with a [delay:ComplexScalarInput:default=1,step=0.1] second delay"
 func cmd_load_next_level(slots: Dictionary, _slot: int, delay: Dictionary = {"type": "plain", "value": 1.0}) -> void:
-	prints("loading next level")
 	var delay_val: float = resolve_complex_scalar(delay, slots)
 	GameManager.complete_for_advance()
 	#GameManager.try_load_next_level(delay_val)

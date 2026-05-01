@@ -95,7 +95,7 @@ func on_line_edit_gui_input(event: InputEvent) -> void:
         value_input.set_value_no_signal(value_input.value + up_down * step_amt)
         value_input.get_line_edit().text = str(value_input.value)
         value_changed.emit(value_input.value)
-    elif Utility.fixed_just_pressed_by_event("escape", event, true):
+    elif Utility.event_is_menu_back_just_pressed(event):
         accept_event()
         if value_input.get_line_edit().is_editing():
             value_input.get_line_edit().unedit()

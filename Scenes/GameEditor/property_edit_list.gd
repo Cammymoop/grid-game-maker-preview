@@ -293,6 +293,18 @@ func resort_list_items() -> void:
         if list_item.get_index() != to_index:
             list_item_parent.move_child(list_item, to_index)
         to_index += 1
+    refresh_items_up_down_focus_neighbors()
+
+func refresh_items_up_down_focus_neighbors() -> void:
+    var all_list_items: Array[ListItem] = get_all_list_items()
+    for i in all_list_items.size():
+        var prev_item: ListItem = null
+        var next_item: ListItem = null
+        if i > 0:
+            prev_item = all_list_items[i - 1]
+        if i < all_list_items.size() - 1:
+            next_item = all_list_items[i + 1]
+        all_list_items[i].update_external_focus_neighbors(prev_item, next_item)
 
 func _setup_list_item(list_item: ListItem, prop_index: int) -> void:
     properties_info[prop_index]["list_item"] = list_item
@@ -696,6 +708,9 @@ func get_all_list_items() -> Array[ListItem]:
         else:
             list_items.append(list_item)
     return list_items
+
+func get_list_item_count() -> int:
+    return get_all_list_items().size()
 
 func on_prop_name_width_changed() -> void:
     var list_items: = get_all_list_items()

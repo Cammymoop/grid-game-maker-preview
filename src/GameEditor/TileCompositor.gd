@@ -130,7 +130,7 @@ func _ready():
 	hidden.connect(queue_free)
 
 func _shortcut_input(event: InputEvent) -> void:
-	if Utility.fixed_just_pressed_by_event("escape", event):
+	if Utility.event_is_menu_back_just_pressed(event):
 		hide()
 
 func on_scale() -> void:

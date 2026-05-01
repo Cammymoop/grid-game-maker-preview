@@ -27,7 +27,6 @@ func set_input_args(new_args: Array) -> void:
         return
 
     var x_val: int = Utility.any_to_int(new_args[0])
-    prints("x_val:", x_val)
     starting_value.x = x_val
     if new_args.size() < 2:
         starting_value.y = x_val

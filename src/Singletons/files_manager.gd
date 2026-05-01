@@ -578,7 +578,6 @@ func web_dir_exists(dir_path: String) -> bool:
 	if path_localized.begins_with("user://"):
 		return DirAccess.dir_exists_absolute(path_localized)
 
-	prints("web localized path for %s: %s" % [dir_path, path_localized])
 	if not path_localized:
 		return false
 	if path_localized == "res://":

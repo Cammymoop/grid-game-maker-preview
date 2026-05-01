@@ -16,13 +16,18 @@ const new_property_panel_scn: = preload("res://Scenes/GameEditor/new_property_pa
 
 @export var entity_active_toggle: CheckButton
 
+@export var add_property_button: ButtonContainer
+
 var non_expanded_v_size_flags: int = Control.SIZE_SHRINK_CENTER
 var prop_list_default_min_size: Vector2 = Vector2.ZERO
 var edited_entity: BaseEntity = null
 
 var edit_entity_pulse_period: float = 1.15
 
+var close_on_focus_lost: = true
+
 func _ready() -> void:
+    get_viewport().gui_focus_changed.connect(on_gui_focus_changed)
     if entity_active_toggle:
         entity_active_toggle.toggled.connect(on_entity_active_toggled)
     visibility_changed.connect(on_visibility_changed)
@@ -48,7 +53,9 @@ func _process(_delta: float) -> void:
         edited_entity.modulate = Color.WHITE * (1 + (pulse_amt * 0.2 + 0.1))
 
 func _shortcut_input(event: InputEvent) -> void:
-    if visible and Utility.fixed_just_pressed_by_event("escape", event):
+    if GameManager.get_pause("pause_menu"):
+        return
+    if visible and Utility.event_is_menu_back_just_pressed(event):
         close_instance_editor()
         get_viewport().set_input_as_handled()
 
@@ -69,6 +76,23 @@ func open_instance_editor(entity: BaseEntity) -> void:
         title_label.text = "Edit %s Instance" % entity_name
     if property_edit_list:
         property_edit_list.load_entity_instance_properties(entity)
+    get_gui_focus.call_deferred()
+
+func get_gui_focus() -> void:
+    var focus_owner = get_viewport().gui_get_focus_owner()
+    if focus_owner and (focus_owner == self or is_ancestor_of(focus_owner)):
+        return
+    var to_focus: Control = _first_element_to_focus()
+    if to_focus.get_focus_mode_with_override() != Control.FOCUS_NONE:
+        to_focus.grab_focus()
+    else:
+        prints("focus node %s is unable to grab focus" % to_focus.get_path())
+
+func _first_element_to_focus() -> Control:
+    var all_list_items: = property_edit_list.get_all_list_items()
+    if all_list_items.size() > 0:
+        return all_list_items[0]
+    return add_property_button
 
 func unedit_entity() -> void:
     if edited_entity:
@@ -127,3 +151,11 @@ func on_visibility_changed() -> void:
 func on_entity_active_toggled(active: bool) -> void:
     if edited_entity:
         edited_entity.set_active(active)
+
+func on_gui_focus_changed(to_focus_owner: Control) -> void:
+    if not visible or not is_visible_in_tree():
+        return
+
+    if close_on_focus_lost:
+        if to_focus_owner != self and not is_ancestor_of(to_focus_owner):
+            close_instance_editor()

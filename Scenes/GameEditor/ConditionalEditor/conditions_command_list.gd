@@ -98,7 +98,6 @@ func build_combiner_tree_for_incoming_combiners(incoming_combiners: Dictionary[i
     while to_check_indices.size() > 0:
         var build_combiner_tree_at: int = to_check_indices.pop_back()
         var new_combiner: Dictionary = build_combiner_for_incoming_at(incoming_combiners, build_combiner_tree_at, 0)
-        prints("new combiner before collapse: %s" % [new_combiner])
         new_combiner = collapse_redundant_combiners(new_combiner)
         var combiner_range: Array[int] = [new_combiner["first_command_index"], build_combiner_tree_at]
         to_check_indices = to_check_indices.filter(func(index: int): return not index_in_range(index, combiner_range))
@@ -588,7 +587,6 @@ func remove_command(command_item: CommandListItem) -> void:
         remove_command_at(command_index)
 
 func remove_command_at(command_index: int) -> void:
-    prints("removing command at index %d" % [command_index])
     var cur_command_count: int = get_command_count()
     if command_index < 0 or command_index >= get_command_count():
         push_error("Command index out of bounds: %s" % [command_index])
@@ -597,9 +595,7 @@ func remove_command_at(command_index: int) -> void:
         combiner_remove_all_commands()
     else:
         combiner_remove_index(command_index)
-    prints("removing from cmd list")
     command_list_items.remove_at(command_index)
-    prints("command list:", command_list_items)
     _dirty = true
 
 func move_command_to_before_index(command_item: CommandListItem, new_index: int) -> void:

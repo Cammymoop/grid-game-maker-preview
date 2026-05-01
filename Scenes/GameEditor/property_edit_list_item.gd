@@ -1,5 +1,7 @@
 extends PanelContainer
 
+const PropertyEditListItem = preload("res://Scenes/GameEditor/property_edit_list_item.gd")
+
 signal request_remove(property_name: String)
 signal request_override(property_name: String)
 signal request_restore(property_name: String)
@@ -86,7 +88,12 @@ var _value_editting: bool = false
 var _name_edited: bool = false
 var _name_edited_from: String = ""
 
+var _skip_internal_focus_neighbors_refresh: bool = false
+
 func _ready() -> void:
+    focus_entered.connect(list_item_focused)
+    focus_exited.connect(list_item_unfocused)
+
     remove_button.pressed.connect(on_remove_button_pressed)
     override_button.pressed.connect(on_override_button_pressed)
     name_edit.text_changed.connect(on_name_edit_text_changed)
@@ -95,8 +102,11 @@ func _ready() -> void:
     value_edit.value_changed.connect(on_value_edited)
     value_edit.input_focus_out.connect(on_value_input_focus_out)
     value_edit.input_focus_in.connect(request_activate.emit.bind(self))
+    value_edit.value_type_changed.connect(on_value_type_changed)
     
     value_edit.conditional_editor_requested.connect(on_conditional_editor_requested)
+
+    _skip_internal_focus_neighbors_refresh = true
     
     refresh_value_edit_conditional()
     
@@ -128,6 +138,9 @@ func _ready() -> void:
 
     add_theme_stylebox_override("panel", _normal_stylebox())
     set_prop_value(property_value)
+    
+    _skip_internal_focus_neighbors_refresh = false
+    refresh_internal_focus_neighbors()
 
 func is_conditional_edit_allowed() -> bool:
     if not enable_conditional_editor:
@@ -341,6 +354,8 @@ func refresh_ui() -> void:
         remove_button.disabled = true
     else:
         remove_button.disabled = false
+    
+    refresh_internal_focus_neighbors()
 
 func refresh_value_edit() -> void:
     conditional_label_1.hide()
@@ -383,6 +398,7 @@ func start_value_editting() -> void:
     value_edit.set_value(property_value)
     value_edit.try_grab_focus()
     _show_hide_edit_value_button()
+    refresh_internal_focus_neighbors()
 
 func stop_value_editting() -> void:
     if not _value_editting:
@@ -397,6 +413,7 @@ func stop_value_editting() -> void:
         value_label.show()
         value_label.text = get_rich_value_text()
     _show_hide_edit_value_button()
+    refresh_internal_focus_neighbors()
 
 func is_special_prop_name(prop_name: String) -> bool:
     return GameManager.is_special_prop_name(prop_name)
@@ -517,3 +534,130 @@ func get_rich_value_text() -> String:
     elif is_base_definition_property and not is_overridden:
         text_color.a = 0.75
     return _colored(val_text, text_color)
+
+# Setting property list items able to be focused, but they try to pass the focus on to sub-items if at all possible
+func list_item_focused() -> void:
+    if not is_active():
+        request_activate.emit(self)
+    var first_focusable_sub_control: = _first_focusable_sub_control()
+    if first_focusable_sub_control:
+        if first_focusable_sub_control.has_method("try_grab_focus"):
+            first_focusable_sub_control.try_grab_focus()
+        else:
+            first_focusable_sub_control.grab_focus.call_deferred()
+
+func _first_focusable_sub_control() -> Control:
+    if _value_editting:
+        return value_edit
+    elif name_edit.visible:
+        return name_edit
+    elif override_button.visible:
+        return override_button
+    elif name_label.visible:
+        return name_label
+    elif value_label.visible:
+        return value_label
+    elif remove_button.visible:
+        return remove_button
+    return null
+
+func list_item_unfocused() -> void:
+    pass
+
+func update_external_focus_neighbors(prev_list_item: PropertyEditListItem, next_list_item: PropertyEditListItem) -> void:
+    if prev_list_item:
+        set_focus_neighbor(SIDE_TOP, prev_list_item.get_path())
+    else:
+        set_focus_neighbor(SIDE_TOP, ^"")
+    if next_list_item:
+        set_focus_neighbor(SIDE_BOTTOM, next_list_item.get_path())
+    else:
+        set_focus_neighbor(SIDE_BOTTOM, "^")
+    _update_sub_item_focus_up_down(prev_list_item, next_list_item)
+
+func refresh_internal_focus_neighbors() -> void:
+    var target_name_node: Control = (name_edit as Control) if name_edit.visible else name_label
+    var target_value_node: Control = value_label
+    var target_value_node_end: Control = value_label
+    if value_edit.visible:
+        target_value_node = value_edit._get_current_first_focusable_control()
+        target_value_node_end = value_edit._get_current_last_focusable_control()
+    var rmv_button_focusable: Control = remove_button.button
+    var after_value_node: Control = (override_button as Control) if override_button.visible else rmv_button_focusable
+
+    for nn in [name_edit, name_label]:
+        nn.focus_neighbor_right = nn.get_path_to(target_value_node)
+        nn.focus_next = nn.focus_neighbor_right
+
+    value_label.focus_neighbor_left = value_label.get_path_to(target_name_node)
+    value_label.focus_previous = value_label.focus_neighbor_left
+    value_label.focus_neighbor_right = value_label.get_path_to(after_value_node)
+    value_label.focus_next = value_label.focus_neighbor_right
+    value_edit.set_focus_left_and_right(target_name_node.get_path(), after_value_node.get_path())
+    
+    override_button.focus_neighbor_left = override_button.get_path_to(target_value_node_end)
+    override_button.focus_previous = override_button.focus_neighbor_left
+    override_button.focus_neighbor_right = override_button.get_path_to(rmv_button_focusable)
+    override_button.focus_next = override_button.focus_neighbor_right
+    
+    if override_button.visible:
+        rmv_button_focusable.focus_neighbor_left = rmv_button_focusable.get_path_to(override_button)
+    else:
+        rmv_button_focusable.focus_neighbor_left = rmv_button_focusable.get_path_to(target_value_node_end)
+    rmv_button_focusable.focus_previous = rmv_button_focusable.focus_neighbor_left
+    
+        
+
+func _get_name_column_focus_target() -> NodePath:
+    if name_edit.visible:
+        return name_edit.get_path()
+    elif name_label.visible:
+        return name_label.get_path()
+    return get_path()
+
+func _get_value_column_focus_target() -> NodePath:
+    if _value_editting or value_edit.visible:
+        return value_edit._get_current_first_focusable_control().get_path()
+    elif value_label.visible:
+        return value_label.get_path()
+    return get_path()
+
+func _get_override_button_focus_target() -> NodePath:
+    if override_button.visible:
+        return override_button.get_path()
+    return _get_value_column_focus_target()
+
+func _get_remove_button_focus_target() -> NodePath:
+    if remove_button.visible:
+        return remove_button.button.get_path()
+    return get_path()
+
+func _unset_sub_item_focus_up_down() -> void:
+    for sub_item in [name_edit, name_label, value_label, override_button, remove_button.button]:
+        sub_item.focus_neighbor_top = ^""
+        sub_item.focus_neighbor_bottom = ^""
+    value_edit.unset_all_up_down_focus_neighbors()
+
+func _update_sub_item_focus_up_down(prev_list_item: PropertyEditListItem, next_list_item: PropertyEditListItem) -> void:
+    _unset_sub_item_focus_up_down()
+    var sides: Array[Side] = [SIDE_TOP, SIDE_BOTTOM]
+    var list_items: Array[PropertyEditListItem] = [prev_list_item, next_list_item]
+    for i in sides.size():
+        if not list_items[i]:
+            continue
+        var name_target: NodePath = list_items[i]._get_name_column_focus_target()
+        name_edit.set_focus_neighbor(sides[i], name_target)
+        name_label.set_focus_neighbor(sides[i], name_target)
+
+        value_label.set_focus_neighbor(sides[i], list_items[i]._get_value_column_focus_target())
+
+        override_button.set_focus_neighbor(sides[i], list_items[i]._get_override_button_focus_target())
+        remove_button.button.set_focus_neighbor(sides[i], list_items[i]._get_remove_button_focus_target())
+    
+    if prev_list_item or next_list_item:
+        var prev_value_target: NodePath = prev_list_item._get_value_column_focus_target() if prev_list_item else ^""
+        var next_value_target: NodePath = next_list_item._get_value_column_focus_target() if next_list_item else ^""
+        value_edit.set_focus_up_and_down(prev_value_target, next_value_target)
+
+func on_value_type_changed(_new_type_id: int) -> void:
+    refresh_internal_focus_neighbors()

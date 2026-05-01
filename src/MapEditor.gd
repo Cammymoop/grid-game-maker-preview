@@ -70,6 +70,7 @@ var _cursor_moved_from_directional_input: = false
 var _edited_entitys_indicators: Dictionary[int, Sprite2D] = {}
 
 func _ready() -> void:
+
 	editor_cam.edge_limit_tile_count = extend_camera_limits_by_tiles
 	editor_cam.update_bounds()
 
@@ -81,6 +82,11 @@ func _ready() -> void:
 	entity_instance_editor.entity_props_edited.connect(on_entity_props_edited)
 	
 	GameManager.level_state_loaded.connect(on_level_state_loaded)
+
+	await get_tree().process_frame
+	var pause_menu: Control = Utility.get_pause_menu()
+	if pause_menu:
+		pause_menu.pause_menu_closed.connect(pause_menu_closed)
 
 func _physics_process(delta: float) -> void:
 	if edit_mode and not is_other_paused():
@@ -285,6 +291,7 @@ func set_cursor_mode(new_mode: String):
 		return
 
 	cursor_mode = new_mode
+
 	if is_in_placing_mode():
 		_last_tile_entity_mode = new_mode
 		preview.visible = true
@@ -325,6 +332,8 @@ func show_item_name() -> void:
 
 func _primary_action_at_cursor(holding: bool = false) -> void:
 	has_edited_something = true
+	if cursor_mode == "none":
+		set_cursor_mode(_last_tile_entity_mode)
 	if cursor_mode == "tile":
 		MapManager.replace_tiles_at(cursor_tile_pos, current_tile_index, current_tile_facing)
 	elif cursor_mode == "entity":
@@ -523,7 +532,6 @@ func forwarded_gui_input(event: InputEvent) -> void:
 		return
 
 	if Utility.fixed_just_pressed_by_event("editor_pointer_pick", event, true):
-		prints("editor_pointer_pick")
 		var entities_here: = get_all_entities_at_tile_pos(cursor_tile_pos)
 		if entities_here.size() > 0:
 			if cursor_mode != "entity":
@@ -664,9 +672,15 @@ func get_display_world_size() -> Vector2:
 func entity_instance_editor_closed() -> void:
 	if entity_instance_editor.edited_entity:
 		_refresh_entity_is_edited(entity_instance_editor.edited_entity)
+	request_grab_gui_focus.emit()
 
 func on_entity_props_edited(entity: BaseEntity) -> void:
 	_refresh_entity_is_edited(entity)
 
 func get_all_entities_at_tile_pos(tile_pos: Vector2i) -> Array:
 	return EntityManager.get_entities_at(tile_pos, null, [], true, true)
+
+func pause_menu_closed() -> void:
+	if entity_instance_editor and entity_instance_editor.visible:
+		entity_instance_editor.get_gui_focus()
+	request_grab_gui_focus.emit()

@@ -149,7 +149,6 @@ func _gui_input(event: InputEvent) -> void:
             if event.shift_pressed == false if not swap_enter_and_shift_enter else true:
                 pass # use default to trigger text_submitted and unedit
             else:
-                prints("pretending to paste a newline")
                 do_change_text_multi_line("\n", true)
                 accept_event()
 
@@ -212,7 +211,7 @@ func on_multi_line_gui_input(event: InputEvent) -> void:
     var closing: bool = false
     if Utility.fixed_just_pressed_by_event("ui_cancel", event, true):
         closing = true
-    elif Utility.fixed_just_pressed_by_event("escape", event, true):
+    elif Utility.event_is_menu_back_just_pressed(event):
         closing = true
     if closing:
         multi_line_input.accept_event()

@@ -16,6 +16,7 @@ signal cancelled()
 signal closed()
 
 func _ready() -> void:
+    get_viewport().gui_focus_changed.connect(on_gui_focus_changed)
     if prefill_prop_name:
         property_name_input.text = prefill_prop_name
     property_name_input.grab_focus.call_deferred()
@@ -30,7 +31,7 @@ func set_title_text(title_text: String) -> void:
     find_child("TitleLabel").text = title_text
 
 func _shortcut_input(event: InputEvent) -> void:
-    if Utility.fixed_just_pressed_by_event("escape", event):
+    if Utility.event_is_menu_back_just_pressed(event):
         close_panel()
         _accept_event()
     elif Utility.fixed_just_pressed_by_event("ui_accept", event):
@@ -76,3 +77,9 @@ func close_panel() -> void:
     cancelled.emit()
     queue_free()
     closed.emit()
+
+func on_gui_focus_changed(to_focus_owner: Control) -> void:
+    if not visible or not is_visible_in_tree():
+        return
+    if not is_ancestor_of(to_focus_owner):
+        close_panel()

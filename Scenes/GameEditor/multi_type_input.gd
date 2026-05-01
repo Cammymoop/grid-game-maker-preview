@@ -43,6 +43,10 @@ var current_value: Variant = null
 var _last_conditional_value: Variant = {}
 
 func _ready() -> void:
+    if not show_type_picker:
+        change_type_picker_visibility(false)
+    else:
+        refresh_type_picker_focus_neighbors()
     number_input.set_step_and_arrow_step(lowest_step_size, 1)
     _setup_type_picker(enabled_types)
     if type_picker.item_count < 1:
@@ -71,8 +75,10 @@ func _ready() -> void:
     var conditional_enabled: bool = enabled_types & 8 != 0
     edit_conditional_button.disabled = not conditional_enabled
     
-    if not show_type_picker:
-        type_picker.hide()
+
+func change_type_picker_visibility(new_visible: bool) -> void:
+    type_picker.visible = new_visible
+    refresh_type_picker_focus_neighbors()
 
 func set_enable_conditional(new_enable: bool) -> void:
     if new_enable:
@@ -97,25 +103,25 @@ func _setup_type_picker(with_enabled_types: int) -> void:
             index += 1
 
 func set_value(new_value: Variant) -> void:
-    var old_type_id: int = current_type_id
+    var new_type_id: int = 1
     if not is_node_ready():
         push_error("Setting multi-type input value before ready")
         return
     if typeof(new_value) in [TYPE_ARRAY, TYPE_DICTIONARY]:
         current_value = new_value.duplicate_deep()
         _last_conditional_value = new_value.duplicate_deep()
-        current_type_id = 8
+        new_type_id = 8
     elif typeof(new_value) == TYPE_BOOL:
         current_value = new_value
-        current_type_id = 2
+        new_type_id = 2
     elif typeof(new_value) in [TYPE_INT, TYPE_FLOAT]:
         current_value = new_value
-        current_type_id = 4
+        new_type_id = 4
     else:
         current_value = str(new_value)
-        current_type_id = 1
-    if old_type_id != current_type_id:
-        pick_type_id(current_type_id)
+        new_type_id = 1
+    if current_type_id != new_type_id:
+        pick_type_id(new_type_id)
     set_input_value_from_current_value()
     show_input_for_current_type()
 
@@ -124,6 +130,9 @@ func get_value() -> Variant:
 
 # temporarily adds the type as a disabled item if we ended up with a type that is dissalowed
 func pick_type_id(type_id: int) -> void:
+    if type_id == current_type_id or not type_id in NATIVE_TYPES:
+        return
+    current_type_id = type_id
     _setup_type_picker(enabled_types | type_id)
     for i in type_picker.item_count:
         if type_picker.get_item_id(i) == type_id:
@@ -131,6 +140,7 @@ func pick_type_id(type_id: int) -> void:
             if enabled_types & type_id == 0:
                 type_picker.set_item_disabled(i, true)
     value_type_changed.emit(NATIVE_TYPES[type_id])
+    refresh_focus_neighbors_on_type_change()
 
 func set_type_from_gd_type(new_type: int) -> void:
     var my_type: int = 0
@@ -160,17 +170,23 @@ func on_type_selected(index: int, allow_grabbing_focus: bool = true, do_emit: bo
     if allow_grabbing_focus:
         try_grab_focus()
 
-    if emit_changed and do_emit:
-        value_type_changed.emit(typeof(current_value))
-        value_changed.emit(current_value)
+    if emit_changed:
+        if do_emit:
+            value_type_changed.emit(typeof(current_value))
+            value_changed.emit(current_value)
+        refresh_focus_neighbors_on_type_change()
     if show_type_picker != type_picker.visible:
         type_picker.visible = show_type_picker
 
 func try_grab_focus() -> void:
     if current_type_id == 1:
         text_input.grab_focus_and_edit.call_deferred()
+    elif current_type_id == 2:
+        bool_input.button_grab_focus.call_deferred()
     elif current_type_id == 4:
         number_input.line_edit_grab_focus.call_deferred()
+    elif current_type_id == 8:
+        edit_conditional_button.grab_focus.call_deferred()
 
 func convert_value(from_type_id: int, to_type_id: int) -> void:
     if from_type_id == 0:
@@ -250,3 +266,77 @@ func on_text_editing_toggled(is_editing: bool) -> void:
 func on_number_input_focus_out() -> void:
     if current_type_id == 4:
         input_focus_out.emit()
+
+
+func _focusable_controls() -> Array[Control]:
+    return [type_picker, text_input, number_input, edit_conditional_button]
+
+func _get_current_last_focusable_control() -> Control:
+    return _get_current_first_focusable_control(true)
+
+func _get_current_first_focusable_control(get_last: bool = false) -> Control:
+    if current_type_id == 1:
+        return text_input
+    elif current_type_id == 2:
+        return bool_input.false_button if get_last else bool_input.true_button
+    elif current_type_id == 4:
+        return number_input
+    elif current_type_id == 8:
+        return edit_conditional_button
+    return null
+
+func unset_all_up_down_focus_neighbors() -> void:
+    for focusable_control in _focusable_controls():
+        focusable_control.focus_neighbor_top = ^""
+        focusable_control.focus_neighbor_bottom = ^""
+    bool_input.unset_all_up_down_focus_neighbors()
+
+func set_focus_up_and_down(up: NodePath, down: NodePath) -> void:
+    for focusable_control in _focusable_controls():
+        if up:
+            focusable_control.set_focus_neighbor(SIDE_TOP, up)
+        if down:
+            focusable_control.set_focus_neighbor(SIDE_BOTTOM, down)
+    bool_input.set_focus_up_and_down(up, down)
+
+func set_focus_left_and_right(left: NodePath, right: NodePath) -> void:
+    focus_neighbor_left = left
+    focus_neighbor_right = right
+    refresh_left_right_focus_neighbors()
+
+    
+# Also refreshes all focus neighbors, mainly to ensure type picker becoming visible has the correct next focus
+func refresh_type_picker_focus_neighbors() -> void:
+    for focusable_control in _focusable_controls():
+        var focus_to: NodePath = ^""
+        if type_picker.visible:
+            focus_to = focusable_control.get_path_to(type_picker)
+        focusable_control.set_focus_neighbor(SIDE_LEFT, focus_to)
+        focusable_control.focus_previous = focus_to
+    refresh_focus_neighbors_on_type_change()
+
+func refresh_focus_neighbors_on_type_change() -> void:
+    refresh_left_right_focus_neighbors()
+    refresh_focus_from_type_picker()
+
+func refresh_focus_from_type_picker() -> void:
+    if not type_picker.visible:
+        return
+    var first_focusable_control: = _get_current_first_focusable_control()
+    if first_focusable_control:
+        var focus_to: NodePath = type_picker.get_path_to(first_focusable_control)
+        type_picker.set_focus_neighbor(SIDE_RIGHT, focus_to)
+        type_picker.focus_next = focus_to
+
+func refresh_left_right_focus_neighbors() -> void:
+    var set_prev_focus_on: Control = type_picker
+    if not type_picker.visible:
+        set_prev_focus_on = _get_current_first_focusable_control()
+    if set_prev_focus_on:
+        set_prev_focus_on.set_focus_neighbor(SIDE_LEFT, focus_neighbor_left)
+        set_prev_focus_on.focus_previous = focus_neighbor_left
+
+    var set_next_focus_on: Control = _get_current_last_focusable_control()
+    if set_next_focus_on:
+        set_next_focus_on.set_focus_neighbor(SIDE_RIGHT, focus_neighbor_right)
+        set_next_focus_on.focus_next = focus_neighbor_right

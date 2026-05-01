@@ -723,7 +723,6 @@ func rescale_window() -> void:
 		return
 	var window: = get_window()
 	if window.mode == Window.MODE_FULLSCREEN or window.mode == Window.MODE_MAXIMIZED:
-		prints("current window mode: ", window.mode)
 		return
 	
 	var available_size: Vector2i = DisplayServer.screen_get_usable_rect().size
@@ -784,7 +783,7 @@ func _process(_delta):
 				load_checkpoint()
 
 func _unhandled_input(event: InputEvent) -> void:
-	if Utility.fixed_just_pressed_by_event("escape", event):
+	if Utility.event_is_menu_back_just_pressed(event):
 		if cur_scene == "GameEditor":
 			change_scene("Menu")
 		elif cur_scene == "Menu":

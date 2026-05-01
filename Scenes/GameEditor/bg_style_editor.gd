@@ -100,7 +100,6 @@ func update_color_option(new_color: Color, color_key: String, no_alpha: bool = f
     GameManager.set_auto_bg_info_value(color_key, color_func.call(new_color))
 
 func update_scalar_option(new_value: float, scalar_key: String) -> void:
-    prints("scalar value changed: %s - %s" % [scalar_key, new_value])
     GameManager.set_auto_bg_info_value(scalar_key, new_value)
 
 func update_opbtn_option(new_index: int, opbtn: OptionButton, value_key: String) -> void:

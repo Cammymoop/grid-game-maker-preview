@@ -43,7 +43,7 @@ func _ready():
 	close_requested.connect(close_dialog)
 
 func _shortcut_input(event: InputEvent) -> void:
-	if Utility.fixed_just_pressed_by_event("escape", event):
+	if Utility.event_is_menu_back_just_pressed(event):
 		close_dialog()
 
 func _on_LoadFileButton_pressed():

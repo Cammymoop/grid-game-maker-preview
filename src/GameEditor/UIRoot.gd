@@ -5,13 +5,28 @@ var quick_msg = preload("res://Scenes/GameEditor/QuickMessage.tscn")
 
 var save_as_dialog_scn: = preload("res://Scenes/GameEditor/save_game_as_dialog.tscn")
 
+@export var tab_container: TabContainer
+@export var beside_tabs_buttons: HBoxContainer
+
 @onready var popup_layer = get_node("PopupLayerLayer/PopupLayer")
 @onready var message_layer = get_node("MessageLayer")
 
-#func _ready():
-#	if GameManager.loaded:
-#		GameManager.loaded = false
-#		show_message("Loaded " + GameManager.cur_game_name)
+func _ready():
+	var first_beside_tabs_button: Control = beside_tabs_buttons.get_child(0)
+	var tab_bar: = tab_container.get_tab_bar()
+	tab_bar.focus_neighbor_right = first_beside_tabs_button.get_path()
+	tab_bar.focus_next = focus_neighbor_right
+	first_beside_tabs_button.focus_neighbor_left = tab_bar.get_path()
+	first_beside_tabs_button.focus_previous = first_beside_tabs_button.focus_neighbor_left
+
+func _unhandled_input(event: InputEvent) -> void:
+	var current_focus_owner: = get_viewport().gui_get_focus_owner()
+	if current_focus_owner and is_ancestor_of(current_focus_owner):
+		return
+	for focus_dir_action in ["ui_up", "ui_down", "ui_left", "ui_right"]:
+		if Utility.fixed_just_pressed_by_event(focus_dir_action, event):
+			tab_container.get_tab_bar().grab_focus.call_deferred()
+			break
 
 #func show_message(message_text) -> void:
 #	var qm = quick_msg.instantiate()

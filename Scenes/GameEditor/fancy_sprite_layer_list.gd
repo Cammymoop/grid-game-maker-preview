@@ -23,7 +23,6 @@ func set_layers_or_default(new_layers: Array, entity_def: Dictionary = {}) -> vo
             _append_default_layer()
         else:
             var layer_info: = DEFAULT_LAYER_INFO.merged({"texture": entity_def["texture"], "tex_index": entity_def["tex_index"]}, true)
-            prints("setting up first layer from basic texture indices:", layer_info)
             _append_layer_info(layer_info)
     else:
         set_layers_info(new_layers)

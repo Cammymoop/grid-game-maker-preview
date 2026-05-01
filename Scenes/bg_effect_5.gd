@@ -64,8 +64,6 @@ func _ready() -> void:
 
 func on_bg_style_changed() -> void:
     refresh_bg_style()
-    var level_bg_info: Dictionary = GameManager.get_level_bg_info()
-    prints("bg style changed, dusty particles amount: %s : %s" % [level_bg_info.get("dusty_particles_amount", -2), dusty_particles.amount])
 
 func refresh_bg_style() -> void:
     var level_bg_info: Dictionary = GameManager.get_level_bg_info()
