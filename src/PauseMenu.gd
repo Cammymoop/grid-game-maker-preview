@@ -48,7 +48,6 @@ func _unhandled_input(event: InputEvent) -> void:
 			check_should_focus_event(event)
 
 func check_should_focus_event(event: InputEvent) -> void:
-	prints("check_should_focus_event: ", event)
 	var current_focus_owner: = get_viewport().gui_get_focus_owner()
 	if current_focus_owner and is_ancestor_of(current_focus_owner):
 		return

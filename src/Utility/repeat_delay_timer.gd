@@ -37,7 +37,6 @@ func start_hold() -> void:
 
 func hold() -> void:
     if not _is_held:
-        prints("starting hold!")
         start_hold()
 
 func change_process_callback_type(new_process_callback: int) -> void:
