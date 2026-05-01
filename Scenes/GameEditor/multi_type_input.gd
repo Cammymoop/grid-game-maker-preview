@@ -269,7 +269,7 @@ func on_number_input_focus_out() -> void:
 
 
 func _focusable_controls() -> Array[Control]:
-    return [type_picker, text_input, number_input, edit_conditional_button]
+    return [type_picker, text_input, number_input.value_input, edit_conditional_button]
 
 func _get_current_last_focusable_control() -> Control:
     return _get_current_first_focusable_control(true)
@@ -280,7 +280,7 @@ func _get_current_first_focusable_control(get_last: bool = false) -> Control:
     elif current_type_id == 2:
         return bool_input.false_button if get_last else bool_input.true_button
     elif current_type_id == 4:
-        return number_input
+        return number_input.value_input
     elif current_type_id == 8:
         return edit_conditional_button
     return null
@@ -307,8 +307,8 @@ func set_focus_left_and_right(left: NodePath, right: NodePath) -> void:
     
 # Also refreshes all focus neighbors, mainly to ensure type picker becoming visible has the correct next focus
 func refresh_type_picker_focus_neighbors() -> void:
-    for focusable_control in _focusable_controls():
-        var focus_to: NodePath = ^""
+    var focus_to: NodePath = ^""
+    for focusable_control in _focusable_controls() + [bool_input.true_button]:
         if type_picker.visible:
             focus_to = focusable_control.get_path_to(type_picker)
         focusable_control.set_focus_neighbor(SIDE_LEFT, focus_to)

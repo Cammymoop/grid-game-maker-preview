@@ -231,13 +231,6 @@ horizontal_alignment = 1
 layout_mode = 2
 size_flags_vertical = 3
 
-[node name="PropertyList" type="ItemList" parent="PanelContainer/VBoxContainer/VBoxContainer/HBoxContainer4" unique_id=1196399889]
-visible = false
-custom_minimum_size = Vector2(140, 100)
-layout_mode = 2
-size_flags_horizontal = 3
-scroll_hint_mode = 1
-
 [node name="PropertyEditList" parent="PanelContainer/VBoxContainer/VBoxContainer/HBoxContainer4" unique_id=1906411767 instance=ExtResource("6_dlgud")]
 layout_mode = 2
 
@@ -280,7 +273,6 @@ text = "Cancel"
 [connection signal="pressed" from="PanelContainer/VBoxContainer/HBoxContainer2/PreviewVariantSettings/PreviewImageButton" to="." method="_on_PreviewImageButton_pressed"]
 [connection signal="pressed" from="PanelContainer/VBoxContainer/HBoxContainer2/PreviewVariantSettings/RemovePreviewVariantButton" to="." method="_on_remove_preview_variant_button_pressed"]
 [connection signal="pressed" from="PanelContainer/VBoxContainer/HBoxContainer2/AddPreviewVariantButton" to="." method="_on_add_preview_variant_button_pressed"]
-[connection signal="item_activated" from="PanelContainer/VBoxContainer/VBoxContainer/HBoxContainer4/PropertyList" to="." method="_on_PropertyList_item_activated"]
 [connection signal="pressed" from="PanelContainer/VBoxContainer/VBoxContainer/HBoxContainer4/VBoxContainer/AddPropertyButton" to="." method="_on_AddPropertyButton_pressed"]
 [connection signal="pressed" from="PanelContainer/VBoxContainer/VBoxContainer/HBoxContainer4/VBoxContainer/RemovePropertyButton" to="." method="_on_RemovePropertyButton_pressed"]
 [connection signal="pressed" from="PanelContainer/VBoxContainer/HBoxContainer3/UpdateButton" to="." method="_on_UpdateButton_pressed"]

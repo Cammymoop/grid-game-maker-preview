@@ -76,7 +76,7 @@ func recursive_set_container_mouse_ignore(node: Node) -> void:
 func _notification(the_notification: int):
 	if the_notification == NOTIFICATION_SORT_CHILDREN:
 		for c in get_children():
-			if c == button:
+			if not c or c == button:
 				continue
 			fit_child_in_rect(c, Rect2(Vector2.ZERO, size))
 

@@ -438,6 +438,14 @@ controller_menu_back={
 "events": [Object(InputEventJoypadButton,"resource_local_to_scene":false,"resource_name":"","device":-1,"button_index":1,"pressure":0.0,"pressed":true,"script":null)
 ]
 }
+value_increase={
+"deadzone": 0.2,
+"events": []
+}
+value_decrease={
+"deadzone": 0.2,
+"events": []
+}
 
 [orchestrator]
 
