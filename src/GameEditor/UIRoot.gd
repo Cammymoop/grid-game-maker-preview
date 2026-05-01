@@ -27,6 +27,11 @@ func _unhandled_input(event: InputEvent) -> void:
 		if Utility.fixed_just_pressed_by_event(focus_dir_action, event):
 			tab_container.get_tab_bar().grab_focus.call_deferred()
 			break
+	if Utility.event_is_menu_back_just_pressed(event):
+		if tab_container.current_tab != 0:
+			tab_container.current_tab = 0
+		else:
+			GameManager.change_scene("Menu")
 
 #func show_message(message_text) -> void:
 #	var qm = quick_msg.instantiate()
@@ -63,6 +68,8 @@ func _shortcut_input(event: InputEvent) -> void:
 			_open_save_as_dialog(FilesManager.get_unique_game_name(GameManager.get_game_name()))
 	elif Utility.fixed_just_pressed_by_event("save_file_as_shortcut", event):
 		_open_save_as_dialog()
+	elif Utility.fixed_just_pressed_by_event("editor_start_no_kb", event):
+		GameManager.start_playing(true)
 
 func _open_save_as_dialog(with_name: String = "") -> void:
 	var save_as_dialog: = save_as_dialog_scn.instantiate()

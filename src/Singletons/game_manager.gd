@@ -784,11 +784,7 @@ func _process(_delta):
 
 func _unhandled_input(event: InputEvent) -> void:
 	if Utility.event_is_menu_back_just_pressed(event):
-		if cur_scene == "GameEditor":
-			change_scene("Menu")
-		elif cur_scene == "Menu":
-			get_tree().quit()
-		elif cur_scene == "Play":
+		if cur_scene == "Play":
 			toggle_pause_menu()
 
 func get_all_used_prop_names() -> Array[String]:

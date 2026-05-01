@@ -13,7 +13,11 @@ var metadata_dialog = preload("res://Scenes/GameEditor/TextureMetaDialog.tscn")
 @export var texture_item_list: SelectableTextureList
 @export var edit_texture_button: Button
 
+@export var open_images_folder_button: Button
+
 func _ready():
+	if OS.has_feature("web"):
+		open_images_folder_button.disabled = true
 	texture_item_list.init(self)
 	texture_item_list.selected_item_changed.connect(on_selected_item_changed)
 	

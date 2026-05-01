@@ -82,7 +82,7 @@ func set_command_list(new_list_items: Array) -> void:
             incoming_combiners[command_index].append(new_list_item)
 
     for command_item in just_commands:
-        command_item.parent_list = self
+        setup_command_item_as_own(command_item)
     command_list_items = just_commands
     
     combiner_tree = build_combiner_tree_for_incoming_combiners(incoming_combiners, get_command_count())
@@ -299,7 +299,7 @@ func remove_combiner(combiner_node: Dictionary) -> void:
         sort_combiner_children(parent_combiner)
     _dirty = true
 
-func add_child_combiner(parent_combiner: Dictionary) -> void:
+func add_child_combiner(parent_combiner: Dictionary) -> Dictionary:
     var new_combiner: Dictionary = {
         "first_command_index": parent_combiner["first_command_index"],
         "function": "and",
@@ -309,6 +309,22 @@ func add_child_combiner(parent_combiner: Dictionary) -> void:
         new_combiner["children"].append_array(parent_combiner["children"])
     parent_combiner["children"] = [new_combiner]
     _dirty = true
+    return new_combiner
+
+func add_leaf_child_combiner(parent_combiner: Dictionary, starting_index: int, function: String = "and") -> Dictionary:
+    var inner_most_range_at: Dictionary = find_inner_most_combiner_around_index(calculate_all_index_ranges(), starting_index)
+    if inner_most_range_at and not is_same(inner_most_range_at["root_node"], parent_combiner):
+        push_error("trying to add a leaf node at index %s, but this combiner already has children covering that index" % [starting_index])
+        return {}
+    var new_combiner: Dictionary = {
+        "first_command_index": starting_index,
+        "function": function,
+        "children": [],
+    }
+    parent_combiner["children"].append(new_combiner)
+    sort_combiner_children(parent_combiner)
+    _dirty = true
+    return new_combiner
 
 func get_v3_command_data() -> Array:
     if command_list_items.size() == 0:
@@ -396,7 +412,10 @@ func rebuild_grid() -> void:
     var command_count: int = get_command_count()
     var max_depth: int = get_combiner_subtree_depth(combiner_tree)
     if command_count < 2 and max_depth == 1:
-        max_depth = 0
+        if combiner_tree["function"] in UNARY_FUNCTIONS:
+            max_depth = 1
+        else:
+            max_depth = 0
     columns = max_depth + 1
 
     var index_ranges: Dictionary = calculate_all_index_ranges()
@@ -507,7 +526,7 @@ func _is_command_list_item(child: Control) -> bool:
     if child is CommandListItem and child in command_list_items:
         return true
     if child is MarginContainer:
-        return child.get_child(0) in command_list_items
+        return child.get_child_count() > 0 and child.get_child(0) in command_list_items
     return false
 
 func get_combiner_subtree_depth(combiner_subtree: Dictionary) -> int:
@@ -644,7 +663,7 @@ func insert_command_at(new_command: CommandListItem, insert_at_index: int) -> vo
     if insert_at_index == get_command_count():
         append_command(new_command)
         return
-    new_command.parent_list = self
+    setup_command_item_as_own(new_command)
     command_list_items.insert(insert_at_index, new_command)
     combiner_insert_index(calculate_all_index_ranges(), insert_at_index)
     _dirty = true
@@ -652,7 +671,7 @@ func insert_command_at(new_command: CommandListItem, insert_at_index: int) -> vo
 func replace_command_at(command_index: int, new_command: CommandListItem) -> void:
     if command_index < 0 or command_index >= get_command_count():
         push_error("Command index out of bounds: %s" % [command_index])
-    new_command.parent_list = self
+    setup_command_item_as_own(new_command)
     var replaced_command = command_list_items[command_index]
     replaced_command.queue_free()
     command_list_items[command_index] = new_command
@@ -661,11 +680,20 @@ func replace_command_at(command_index: int, new_command: CommandListItem) -> voi
 func append_command(new_command: CommandListItem) -> void:
     var top_level_combiner_command: String = combiner_tree["function"]
     if top_level_combiner_command in UNARY_FUNCTIONS:
+        combiner_tree["last_command_index"] = get_command_count() - 1
         combiner_tree = get_default_top_level_combiner([combiner_tree])
     unset_explicit_top_level_end()
-    new_command.parent_list = self
+    setup_command_item_as_own(new_command)
     command_list_items.append(new_command)
     _dirty = true
+
+func setup_command_item_as_own(command_item: CommandListItem) -> void:
+    command_item.parent_list = self
+    if not command_item.request_invert.is_connected(on_command_item_request_invert):
+        prints("binding request invert for", command_item)
+        command_item.request_invert.connect(on_command_item_request_invert.bind(command_item))
+    else:
+        prints("request invert already bound for", command_item)
 
 # deep version: Tries to put the new command at the deepest tree level possible at that index (not expanding adjacent combiners)
 func combiner_insert_index(index_ranges_subtree: Dictionary, inserted_index: int) -> void:
@@ -912,3 +940,57 @@ func on_combiner_context_id_pressed(context_id: int, local_row: int, local_colum
     elif context_id == CONTEXT_MENU_CHANGE_TO_NOT:
         change_combiner_func(combiner_node, "not")
     
+func on_command_item_request_invert(command_node: CommandListItem) -> void:
+    if not command_node:
+        return
+    prints("on_command_item_request_invert", command_node)
+    var command_index: int = command_list_items.find(command_node)
+    if command_index == -1:
+        return
+    
+    var all_combiner_ranges: Dictionary = calculate_all_index_ranges()
+    var inner_most_range: Dictionary = {}
+    if command_list_items.size() == 1:
+        var is_inverted: bool = combiner_tree["function"] == "not"
+        reset_combiner_tree()
+        if not is_inverted:
+            combiner_tree["function"] = "not"
+        _dirty = true
+    else:
+        inner_most_range = find_inner_most_single_index_range(all_combiner_ranges, command_index)
+        var is_inverted: bool = false
+        if inner_most_range:
+            is_inverted = inner_most_range["root_node"]["function"] == "not"
+        if is_inverted:
+            remove_combiner(inner_most_range["root_node"])
+        else:
+            if not inner_most_range:
+                inner_most_range = find_inner_most_combiner_around_index(all_combiner_ranges, command_index)
+            if not inner_most_range:
+                push_error("No inner most range found for command index: %s" % [command_index])
+                return
+            var new_sub_combiner: = add_leaf_child_combiner(inner_most_range["root_node"], command_index, "not")
+            if new_sub_combiner:
+                new_sub_combiner["last_command_index"] = command_index
+
+func find_inner_most_combiner_around_index(in_combiner_ranges: Dictionary, command_index: int, is_single_only: bool = false) -> Dictionary:
+    var index_range: Array[int] = in_combiner_ranges["index_range"]
+    if in_combiner_ranges["children"].size() == 0:
+        if is_single_only:
+            if index_range[0] == command_index and index_range[1] == command_index:
+                return in_combiner_ranges
+        elif index_range[0] <= command_index and index_range[1] >= command_index:
+            return in_combiner_ranges
+        return {}
+    for child_range in in_combiner_ranges["children"]:
+        var found: = find_inner_most_combiner_around_index(child_range, command_index, is_single_only)
+        if found:
+            return found
+    if not is_single_only:
+        # Has children but none of them contain, we are the innermost if we contain
+        if index_range[0] <= command_index and index_range[1] >= command_index:
+            return in_combiner_ranges
+    return {}
+
+func find_inner_most_single_index_range(in_combiner_ranges: Dictionary, command_index: int) -> Dictionary:
+    return find_inner_most_combiner_around_index(in_combiner_ranges, command_index, true)

@@ -384,7 +384,6 @@ func start_value_editting() -> void:
     if not is_active():
         request_activate.emit(self)
     if _value_editting:
-        prints("already value editting")
         return
     if is_removed or (not is_overridden and not enable_edit_base_props):
         if local_props_enabled:
@@ -392,7 +391,6 @@ func start_value_editting() -> void:
         else:
             prints("not allowed to edit value")
         return
-    prints("starting value editting")
     _value_editting = true
     value_label.hide()
     conditional_label_1.hide()
@@ -403,10 +401,8 @@ func start_value_editting() -> void:
     value_edit.try_grab_focus()
     _show_hide_edit_value_button()
     refresh_internal_focus_neighbors()
-    prints("end of start value editting")
 
 func stop_value_editting() -> void:
-    prints("stopping value editting", _value_editting)
     print_stack()
     if not _value_editting:
         return
@@ -434,10 +430,8 @@ func sub_item_gui_input(event: InputEvent, sub_item: Control) -> void:
         accept_event()
         return
     if sub_item == edit_value_button:
-        prints("event on edit val button", event)
         if event is InputEventMouseButton:
             if event.button_index == MOUSE_BUTTON_LEFT and event.is_pressed():
-                prints("edit val button left clicked, starting value editting")
                 start_value_editting()
                 accept_event()
                 return
@@ -465,7 +459,6 @@ func any_gui_input(event: InputEvent) -> void:
 
 func sub_item_focus_entered(sub_item: Control) -> void:
     if sub_item and not (value_edit == sub_item or value_edit.is_ancestor_of(sub_item)):
-        prints("sub item focus entered, not a value edit item:", sub_item, get_path_to(sub_item))
         stop_value_editting()
     request_activate.emit(self)
 

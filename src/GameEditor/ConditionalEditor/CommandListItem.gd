@@ -1,6 +1,13 @@
 extends PanelContainer
 
+signal request_invert()
+
+const ConditionsCommandList = preload("res://Scenes/GameEditor/ConditionalEditor/conditions_command_list.gd")
+const CommandListItem = preload("res://src/GameEditor/ConditionalEditor/CommandListItem.gd")
+
 const ConditionalEditor = preload("res://src/GameEditor/ConditionalEditor/ConditionalEditor.gd")
+
+var cmd_list_item_scn: PackedScene = preload("res://Scenes/GameEditor/ConditionalEditor/CommandListItem.tscn")
 
 const TAB_INTERNAL_MARGIN = 10
 
@@ -44,17 +51,26 @@ const CONTEXT_MENU_DUPLICATE = 20
 const CONTEXT_MENU_REPLACE = 21
 const CONTEXT_MENU_DELETE = 22
 
+const CONTEXT_MENU_LOGICAL_INVERT = 30
+
+var _is_in_conditions_list: bool = false
+
 func _ready():
     if _ungenerated:
         generate_ui()
 
+func _enter_tree() -> void:
+    if parent_list and parent_list is ConditionsCommandList:
+        _is_in_conditions_list = true
+
 func get_parent_list() -> Control:
     if not parent_list:
         parent_list = get_parent()
+        _is_in_conditions_list = parent_list is ConditionsCommandList
     return parent_list
 
-func _get_duplicate_item() -> Control:
-    var duplicate_item: Control = duplicate(Node.DUPLICATE_USE_INSTANTIATION)
+func _get_duplicate_item() -> CommandListItem:
+    var duplicate_item: CommandListItem = cmd_list_item_scn.instantiate()
     duplicate_item.parent_list = parent_list
     duplicate_item.set_v3_data(qualified_command_name, short_command_name, command_info)
     duplicate_item.set_arg_values(get_v3_arg_values())
@@ -353,6 +369,9 @@ func do_context_menu() -> void:
     context_menu.add_item("Duplicate", CONTEXT_MENU_DUPLICATE)
     context_menu.add_item("Replace", CONTEXT_MENU_REPLACE)
     context_menu.add_item("Delete", CONTEXT_MENU_DELETE)
+    if _is_in_conditions_list:
+        context_menu.add_separator()
+        context_menu.add_item('Invert Result', CONTEXT_MENU_LOGICAL_INVERT)
     context_menu.id_pressed.connect(on_context_menu_id_pressed)
     get_window().add_child(context_menu)
     Utility.popup_context_menu_at_mouse(context_menu)
@@ -373,6 +392,9 @@ func on_context_menu_id_pressed(context_menu_id: int) -> void:
             replace_with_new_command()
         CONTEXT_MENU_DELETE:
             delete_self()
+        CONTEXT_MENU_LOGICAL_INVERT:
+            prints("requesting invert")
+            request_invert.emit()
 
 func move_relative(relative_index: int) -> void:
     var my_index: int = get_my_index()
