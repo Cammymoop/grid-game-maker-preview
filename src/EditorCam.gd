@@ -6,6 +6,8 @@ var extend_limits = 0
 
 var _cached_center_limits: Rect2 = Rect2()
 
+var _enable_limits: = true
+
 func _ready():
 	MapManager.connect("level_size_changed", Callable(self, "update_bounds"))
 	
@@ -20,6 +22,10 @@ func set_position_immediate(pos: Vector2) -> void:
 	# wait for a frame so the camera is positioned properly before we re-enable smoothing and the level bounds
 	await get_tree().process_frame
 	position_smoothing_enabled = true
+	update_bounds()
+
+func set_enable_limits(new_enabled: bool) -> void:
+	_enable_limits = new_enabled
 	update_bounds()
 
 func get_limits() -> Rect2:
@@ -64,6 +70,9 @@ func outsize_bounds() -> void:
 	_cached_center_limits = Rect2()
 
 func update_bounds() -> void:
+	if not _enable_limits:
+		outsize_bounds()
+		return
 	extend_limits = MapManager.tile_width * edge_limit_tile_count
 
 	var game_render_size: Vector2 = vp.get_resolution()

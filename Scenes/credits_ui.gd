@@ -9,6 +9,7 @@ const ABOVE_CREDITS: int = 4000
 @export var credits_container: VBoxContainer
 
 @export var space_after_title: int = 30
+@export var space_before_section: int = 20
 @export var space_after_section: int = 10
 
 @export var default_autoscroll_speed: float = 200
@@ -70,19 +71,32 @@ func build_credits_list() -> void:
     _add_space(space_after_title)
     
     var current_role_name_grid: GridContainer = null
+    var current_just_names_flow: HFlowContainer = null
     for credit_item in credits_list:
-        if credit_item.get("type", ""):
-            if current_role_name_grid:
-                current_role_name_grid = null
-            if credit_item.get("type", "") == "section":
-                var section_label: Label = _get_centered_label(credit_item.get("text", ""), "SectionText")
-                credits_container.add_child(section_label)
-                if space_after_section > 0:
-                    _add_space(space_after_section)
-        elif credit_item.get("role", ""):
+        var item_type: String = credit_item.get("type", "role_name")
+        if item_type != "role_name" and current_role_name_grid:
+            current_role_name_grid = null
+        elif item_type != "just_name" and current_just_names_flow:
+            prints("dropping just names flow", item_type)
+            current_just_names_flow = null
+
+        if item_type == "section":
+            if space_before_section > 0:
+                _add_space(space_before_section)
+            var section_label: Label = _get_centered_label(credit_item.get("text", ""), "SectionText")
+            credits_container.add_child(section_label)
+            if space_after_section > 0:
+                _add_space(space_after_section)
+        elif item_type == "role_name":
             if not current_role_name_grid:
                 current_role_name_grid = _start_role_name_grid()
             _add_role_name_item(current_role_name_grid, credit_item.get("role", ""), credit_item.get("name", ""))
+        elif item_type == "just_name":
+            if not current_just_names_flow:
+                prints("adding new just names flow", credit_item)
+                current_just_names_flow = _start_just_names_flow()
+            var name_label: Label = _get_centered_label(credit_item.get("name", ""), "NameListName")
+            current_just_names_flow.add_child(name_label)
 
 func reset_scroll() -> void:
     credits_scroll.scroll_vertical = 0
@@ -116,6 +130,14 @@ func _start_role_name_grid() -> GridContainer:
     grid.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
     credits_container.add_child(grid)
     return grid
+
+func _start_just_names_flow() -> HFlowContainer:
+    var flow: HFlowContainer = HFlowContainer.new()
+    flow.alignment = FlowContainer.ALIGNMENT_CENTER
+    flow.theme_type_variation = "NameList"
+    flow.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+    credits_container.add_child(flow)
+    return flow
 
 func _add_space(spacer_height: int = 30) -> void:
     var spacer: Control = Control.new()

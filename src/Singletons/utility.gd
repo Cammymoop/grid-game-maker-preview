@@ -854,6 +854,12 @@ func opbtn_get_id_from_text(opbtn: OptionButton, text: String, default_value: in
 			return opbtn.get_item_id(i)
 	return default_value
 
+func opbtn_get_selected_id(opbtn: OptionButton) -> int:
+	return opbtn.get_item_id(opbtn.selected)
+
+func opbtn_get_selected_text(opbtn: OptionButton) -> String:
+	return opbtn.get_item_text(opbtn.selected)
+
 func opbtn_get_index_from_text(opbtn: OptionButton, text: String) -> int:
 	for i in opbtn.get_item_count():
 		if opbtn.get_item_text(i) == text:

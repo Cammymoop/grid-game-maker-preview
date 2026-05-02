@@ -11,12 +11,12 @@ func get_credits_list() -> Array:
         if not child.has_method("get_entry"):
             continue
         var entry = child.get_entry()
-        if empty_credits_item(entry):
+        if is_empty_credits_item(entry):
             continue
         credits_list.append(entry)
     return credits_list
 
-func empty_credits_item(item: Dictionary) -> bool:
+func is_empty_credits_item(item: Dictionary) -> bool:
     if not item:
         return true
     if not item.get("type", "") and not item.get("role", "") and not item.get("name", ""):
@@ -43,9 +43,9 @@ func _on_new_credit_item_pressed() -> void:
     
 func append_new_credit_item(with_entry: Dictionary) -> void:
     var new_credit_item = credits_list_item_scene.instantiate()
+    add_child(new_credit_item)
     if with_entry:
         new_credit_item.set_entry(with_entry)
-    add_child(new_credit_item)
     move_child(new_credit_item, get_child_count() - 2)
     new_credit_item.changed.connect(on_credit_changed)
 

@@ -463,18 +463,6 @@ alignment = 2
 layout_mode = 2
 text = "Update Window Size"
 
-[node name="WindowSection2" type="FoldableContainer" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer" unique_id=1949552966]
-layout_mode = 2
-title = "Sound Effects"
-title_alignment = 1
-
-[node name="MarginContainer" type="MarginContainer" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer/WindowSection2" unique_id=1395148722]
-layout_mode = 2
-theme_override_constants/margin_bottom = 4
-
-[node name="SfxDefiner" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer/WindowSection2/MarginContainer" unique_id=1205198633 instance=ExtResource("7_d6qkc")]
-layout_mode = 2
-
 [node name="DefaultCameraSection" type="FoldableContainer" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer" unique_id=1589251919]
 layout_mode = 2
 title = "Default Camera Settings:"
@@ -525,12 +513,28 @@ layout_mode = 2
 max_value = 300.0
 suffix = "px"
 
+[node name="SfxSection" type="FoldableContainer" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer" unique_id=1949552966]
+layout_mode = 2
+folded = true
+title = "Sound Effects"
+title_alignment = 1
+
+[node name="MarginContainer" type="MarginContainer" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer/SfxSection" unique_id=1395148722]
+visible = false
+layout_mode = 2
+theme_override_constants/margin_bottom = 4
+
+[node name="SfxDefiner" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer/SfxSection/MarginContainer" unique_id=1205198633 instance=ExtResource("7_d6qkc")]
+layout_mode = 2
+
 [node name="CreditsSection" type="FoldableContainer" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer" unique_id=809496993]
 layout_mode = 2
+folded = true
 title = "Credits:"
 title_alignment = 1
 
 [node name="MarginContainer" type="MarginContainer" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer/CreditsSection" unique_id=1970330076]
+visible = false
 layout_mode = 2
 theme_override_constants/margin_bottom = 4
 

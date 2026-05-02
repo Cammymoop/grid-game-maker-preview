@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://bnomndi6o3mmb"]
 
 [ext_resource type="Script" uid="uid://bo7hpfhcp3x5c" path="res://Scenes/credits_ui.gd" id="1_oyibb"]
-[ext_resource type="Script" uid="uid://c7i1r81fa2kcl" path="res://Scenes/auto_width_scroll_container.gd" id="2_gxy8c"]
+[ext_resource type="Script" path="res://Scenes/auto_width_scroll_container.gd" id="2_gxy8c"]
 [ext_resource type="Theme" uid="uid://bqr82gmch2tuh" path="res://assets/ui/credits_theme.tres" id="3_72q5r"]
 
 [sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_i0j1v"]
@@ -42,10 +42,10 @@ mouse_filter = 2
 alignment = 1
 
 [node name="AutoWidthScrollContainer" type="ScrollContainer" parent="HBoxContainer" unique_id=1860862900]
-custom_minimum_size = Vector2(129, 0)
+custom_minimum_size = Vector2(172, 0)
 layout_mode = 2
 mouse_filter = 2
-scroll_vertical = 3800
+scroll_vertical = 100
 horizontal_scroll_mode = 0
 vertical_scroll_mode = 3
 script = ExtResource("2_gxy8c")

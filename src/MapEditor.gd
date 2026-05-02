@@ -142,6 +142,7 @@ func on_edit_mode_disabled(do_save_state: bool) -> void:
 	after_edit_mode_switched()
 
 func on_edit_mode_enabled() -> void:
+	set_enable_camera_limits(true)
 	if GameManager.queued_level_load:
 		GameManager.cancel_queued_level_load()
 	has_edited_something = false
@@ -387,11 +388,18 @@ func inspect_at_cursor() -> void:
 		if found_last_picked == -1:
 			found_last_picked = 0
 		entity_instance_editor.open_instance_editor(entities_here[found_last_picked])
-		var instance_editor_width: float = entity_instance_editor.size.x / entity_instance_editor.get_viewport().size.x
-		var offset: = (1 - instance_editor_width) * get_display_world_size().x * 0.5
+		var ui_vp_size: Vector2 = Vector2(entity_instance_editor.get_viewport().size)
+		var instance_editor_width: float = entity_instance_editor.size.x / ui_vp_size.x
+		var disp_width: = get_display_world_size().x
+		var offset: = (1 - instance_editor_width) * disp_width - (disp_width / 2.0)
+		prints("ui_vp_size: ", ui_vp_size, "inst editor width: ", instance_editor_width, "offset: ", offset)
+		set_enable_camera_limits(false)
 		scroll_editor_camera_to_pos(MapManager.tile_to_world_position_centered(cursor_tile_pos) + Vector2.RIGHT * offset)
 	elif entity_instance_editor and entity_instance_editor.visible:
 		entity_instance_editor.close_instance_editor()
+
+func set_enable_camera_limits(is_enabled: bool) -> void:
+	editor_cam.set_enable_limits(is_enabled)
 
 
 func update_input_priority() -> bool:
@@ -676,6 +684,7 @@ func get_display_world_size() -> Vector2:
 	return Vector2(vp.get_resolution())
 
 func entity_instance_editor_closed() -> void:
+	set_enable_camera_limits(true)
 	if entity_instance_editor.edited_entity:
 		_refresh_entity_is_edited(entity_instance_editor.edited_entity)
 	request_grab_gui_focus.emit()
