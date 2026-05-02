@@ -773,7 +773,7 @@ func cmd_a_turn(slots: Dictionary, chosen_slot: int, complex_dir: Dictionary) ->
 func desc_next_level_exists() -> String:
 	return "none|If the next level exists"
 func cmd_next_level_exists(_slots: Dictionary) -> bool:
-	return MapManager.has_next_level()
+	return true
 
 func desc_load_next_level() -> String:
 	return "none|Load the next level, with a [delay:ComplexScalarInput:default=1,step=0.1] second delay"
@@ -781,6 +781,7 @@ func cmd_load_next_level(slots: Dictionary, _slot: int, delay: Dictionary = {"ty
 	var delay_val: float = resolve_complex_scalar(delay, slots)
 	GameManager.complete_for_advance()
 	#GameManager.try_load_next_level(delay_val)
+	prints("advancing level")
 	GameManager.advance_level(delay_val)
 
 func desc_take_a_turn() -> String:

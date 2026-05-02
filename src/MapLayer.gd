@@ -23,7 +23,7 @@ func set_cell_facing(at_coord: Vector2i, facing: int):
 	var transform_val: = Utility.tile_transform_from_facing(facing)
 	var old_source: = get_cell_source_id(at_coord)
 	var old_atlas_coords: = get_cell_atlas_coords(at_coord)
-	# NOTE: Currently dont use regular alt IDs, this would be needed if they were ever non-zero
+	# NOTE: Currently doesn't use regular alt IDs, this would be needed if they were ever non-zero
 	#var old_alt_id: = get_cell_alternative_tile(at_coord) & ~Utility.TILE_TANSFORM_MASK
 	# ... and pass `old_alt_id | transform_val` instead of just `transform_val`
 	set_cell(at_coord, old_source, old_atlas_coords, transform_val)

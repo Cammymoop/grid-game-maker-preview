@@ -19,11 +19,31 @@
   ],
   "game_settings": {
     "pixel_scale": 2.0,
-    "window_width": 18.0,
+    "window_width": 22.0,
     "window_height": 14.0,
     "auto_aspect": true,
     "camera_settings": {
       "follow_entity": "player"
+    },
+    "game_view_size": [
+      22.0,
+      16.0
+    ],
+    "bg_style": {
+      "bg_gradient_above": "above",
+      "dusty_particles_color": "#4981e069",
+      "bg_gradient_color": "#343ae0bb",
+      "background_color": "#9ac9f8",
+      "dusty_particles_amount": 0.5,
+      "pointy_particles_on": true,
+      "pointy_particles_color": "#cafbea11",
+      "pointy_particles_dark_mode": false,
+      "pointy_particles_speed": 0.5,
+      "pointy_particles_amount": 2.6,
+      "lines_on": true,
+      "lines_warp_scroll_speed": 0.02,
+      "lines_scroll_speed": 0.04,
+      "lines_color": "#ffffff12"
     }
   },
   "entity_definitions": {
@@ -274,7 +294,7 @@
             "basic_default.if_property_value::[\"i:1\",\"s:player\",true]"
           ],
           "when true": [
-            "basic_default.load_next_level::[\"i:-1\"]"
+            "basic_default.load_next_level::[\"i:-1\",{\"args\":[\"s:type\",\"s:plain\",\"s:value\",\"f:0.40000000000001\"],\"type\":\"Dictionary\"}]"
           ],
           "when false": [],
           "when always": []
@@ -299,5 +319,21 @@
     }
   },
   "window_width": 22.0,
-  "window_height": 16.0
+  "window_height": 16.0,
+  "level_lists": [
+    {
+      "name": "Levels",
+      "level_names": [
+        "Goal",
+        "Blocked",
+        "Door",
+        "Two",
+        "Swapper",
+        "Pull",
+        "Rules For Me",
+        "Toggle",
+        "At Least One Way"
+      ]
+    }
+  ]
 }

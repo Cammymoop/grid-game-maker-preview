@@ -264,6 +264,9 @@ func load_game_definition_from_file(game_name) -> void:
 func load_game_definition_data(definition_data: Dictionary) -> void:
 	game_definition = definition_data.duplicate_deep()
 	_unmodified_game_definition = definition_data.duplicate_deep()
+	is_in_level_edit_mode = false
+	current_level_list = ""
+	loaded_level_name = ""
 	
 	_set_game_name(definition_data['game_name'], false)
 	loaded_from_game_name = cur_game_name
@@ -545,8 +548,9 @@ func queue_delayed_goto_level(with_delay: float, level_code: String) -> void:
 	queued_level_load = true
 	queued_level_load_timer = Timer.new()
 	queued_level_load_timer.one_shot = true
-	queued_level_load_timer.timeout.connect(goto_level_code.bind(level_code))
+	queued_level_load_timer.timeout.connect(goto_level_code.bind(level_code, true))
 	queued_level_load_timer.timeout.connect(queued_level_load_timer.queue_free)
+	queued_level_load_timer.timeout.connect(prints.bind("qued lvl load timer done"))
 	add_child(queued_level_load_timer)
 	queued_level_load_timer.start(with_delay)
 
@@ -571,13 +575,13 @@ func cancel_queued_level_load() -> void:
 		queued_level_load_timer.queue_free()
 		queued_level_load_timer = null
 
-func try_load_level(level_name: String):
-	if not FilesManager.level_exists(cur_game_name, level_name) or queued_level_load:
+func try_load_level(level_name: String, as_queued_load: bool = false):
+	if not FilesManager.level_exists(cur_game_name, level_name) or (not as_queued_load and queued_level_load):
 		return
 	var the_level_data: = FilesManager.get_level_data(cur_game_name, level_name)
 	if not the_level_data["name"] == level_name:
 		the_level_data["name"] = level_name
-	load_level_data(the_level_data)
+	load_level_data(the_level_data, as_queued_load)
 
 func new_empty_level():
 	loaded_level_name = "LEVEL"
@@ -1238,10 +1242,11 @@ func _level_list_from_code(level_code: String) -> String:
 func _level_name_from_code(level_code: String) -> String:
 	return level_code.split("??")[1]
 
-func goto_level_code(level_code: String) -> void:
-	goto_level_in_level_list(_level_list_from_code(level_code), _level_name_from_code(level_code))
+func goto_level_code(level_code: String, as_queued_load: bool = false) -> void:
+	prints("goto_level_code: ", level_code)
+	goto_level_in_level_list(_level_list_from_code(level_code), _level_name_from_code(level_code), as_queued_load)
 
-func goto_level_in_level_list(level_list_name: String, level_name: String) -> void:
+func goto_level_in_level_list(level_list_name: String, level_name: String, as_queued_load: bool = false) -> void:
 	if not cur_scene == "Play":
 		return
 	if is_in_level_edit_mode:
@@ -1264,7 +1269,8 @@ func goto_level_in_level_list(level_list_name: String, level_name: String) -> vo
 	else:
 		current_level_list = ""
 	
-	try_load_level(level_name)
+	try_load_level(level_name, as_queued_load)
+
 
 func complete_level(level_list_name: String, level_name: String) -> void:
 	if is_in_level_edit_mode:
