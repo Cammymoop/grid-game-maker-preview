@@ -42,11 +42,12 @@ func _ready() -> void:
     
     dusty_particles_density = dusty_particles.density
 
-    default_pointy_particles_color = pointy_particles.modulate
     pointy_particles_base_speed = pointy_particles.speed_scale
     pointy_particles_density = pointy_particles.density
     var pointy_mat: ParticleProcessMaterial = pointy_particles.process_material
     pointy_particles_rainbow_hue_var = pointy_mat.hue_variation_max
+    default_pointy_particles_color = pointy_mat.color
+    default_pointy_particles_color.a = pointy_particles.modulate.a
     
     var pointy_canvas_mat: CanvasItemMaterial = pointy_particles.material
     pointy_particles_dark_mode = pointy_canvas_mat.blend_mode == CanvasItemMaterial.BLEND_MODE_SUB
@@ -85,12 +86,16 @@ func refresh_bg_style() -> void:
     pointy_particles.density = pointy_particles_density * level_bg_info.get("pointy_particles_amount", 1.0)
     pointy_particles.real_update()
     pointy_particles.speed_scale = pointy_particles_base_speed * level_bg_info.get("pointy_particles_speed", 1.0)
-    pointy_particles.modulate = Utility.get_dict_color(level_bg_info, "pointy_particles_color", default_pointy_particles_color)
     pointy_particles.visible = level_bg_info.get("pointy_particles_on", false)
     if level_bg_info.get("pointy_particles_dark_mode", pointy_particles_dark_mode):
         pointy_particles.material.blend_mode = CanvasItemMaterial.BLEND_MODE_SUB
     else:
         pointy_particles.material.blend_mode = CanvasItemMaterial.BLEND_MODE_ADD
+
+    var pointy_color: Color = Utility.get_dict_color(level_bg_info, "pointy_particles_color", default_pointy_particles_color)
+    pointy_particles.modulate = Color(1, 1, 1, pointy_color.a)
+    pointy_color.a = 1.0
+    pointy_mat.color = pointy_color
     
     bg_gradient.visible = level_bg_info.get("bg_gradient_on", true)
     bg_gradient.modulate = Utility.get_dict_color(level_bg_info, "bg_gradient_color", default_bg_gradient_color)

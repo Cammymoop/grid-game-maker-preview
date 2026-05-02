@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" uid="uid://c0aaabcqit332" path="res://Scenes/bg_effect_5.gd" id="1_2aks0"]
 [ext_resource type="Texture2D" uid="uid://bq5cmu4i8tgxn" path="res://assets/img/particle_textures/puffer.png" id="2_6ng66"]
-[ext_resource type="Shader" uid="uid://bi68mhe1xawmw" path="res://Scenes/bg_lines.gdshader" id="2_dyaob"]
+[ext_resource type="Shader" path="res://Scenes/bg_lines.gdshader" id="2_dyaob"]
 [ext_resource type="Material" uid="uid://bxpdteawtwgay" path="res://src/Effects/background/lines_as_water.tres" id="2_n4cem"]
 [ext_resource type="Script" uid="uid://15x5jg4jwyc5" path="res://src/Effects/VoidParticles.gd" id="3_dyaob"]
 [ext_resource type="Texture2D" uid="uid://by1uvj4gg53du" path="res://assets/img/square_shadow_white.png" id="4_6ng66"]
@@ -103,10 +103,9 @@ gravity = Vector3(0, 9, 0)
 scale_min = 0.5
 scale_max = 1.1
 scale_curve = SubResource("CurveTexture_dyaob")
-color = Color(0.8262977, 0.41741502, 0, 1)
 alpha_curve = SubResource("CurveTexture_nkw3m")
-hue_variation_min = -2.2351742e-08
-hue_variation_max = -2.2351742e-08
+hue_variation_min = -0.41000003
+hue_variation_max = 0.40999997
 
 [sub_resource type="Gradient" id="Gradient_6ng66"]
 colors = PackedColorArray(1, 1, 1, 1, 1, 1, 1, 0)
@@ -139,6 +138,8 @@ layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 mouse_filter = 2
 stretch = true
 

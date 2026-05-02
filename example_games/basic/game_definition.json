@@ -31,7 +31,7 @@
     ],
     "bg_style": {
       "bg_gradient_above": "above",
-      "dusty_particles_color": "#4981e069",
+      "dusty_particles_color": "#94ba8241",
       "bg_gradient_color": "#343ae0bb",
       "background_color": "#9ac9f8",
       "dusty_particles_amount": 0.5,
@@ -43,8 +43,9 @@
       "lines_on": true,
       "lines_warp_scroll_speed": 0.02,
       "lines_scroll_speed": 0.04,
-      "lines_color": "#ffffff12"
-    }
+      "lines_color": "#d6f0fd31"
+    },
+    "default_move_interp": "stepped"
   },
   "entity_definitions": {
     "1": {

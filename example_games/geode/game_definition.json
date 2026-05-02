@@ -64,7 +64,6 @@
       "name": "player",
       "texture": 1,
       "tex_index": 5,
-      "intended_move_speed": 6.0,
       "controller": "InputController",
       "properties": {
         "player": true,
@@ -100,7 +99,8 @@
           }
         ],
         "cutter": true,
-        "blocks": true
+        "blocks": true,
+        "move-speed": 6
       },
       "groups": [
         "Player"
@@ -151,8 +151,7 @@
         ],
         "geode": true,
         "no-rotate": true
-      },
-      "intended_move_speed": 0.0
+      }
     },
     "3": {
       "name": "split-geode",
@@ -177,8 +176,7 @@
         },
         "geode": true,
         "museum-active": false
-      },
-      "intended_move_speed": 0.0
+      }
     },
     "4": {
       "name": "geode-piece",
@@ -239,9 +237,9 @@
           ],
           "when always": []
         },
-        "geode": true
-      },
-      "intended_move_speed": 6.0
+        "geode": true,
+        "move-speed": 6
+      }
     },
     "5": {
       "name": "pickaxe",
@@ -258,8 +256,7 @@
           "when false": [],
           "when always": []
         }
-      },
-      "intended_move_speed": 0.0
+      }
     },
     "7": {
       "name": "player-pickaxe",
@@ -269,9 +266,9 @@
         "breaker": true,
         "cutter": true,
         "blocks": true,
-        "player": true
+        "player": true,
+        "move-speed": 6
       },
-      "intended_move_speed": 6.0,
       "controller": "InputController",
       "controller_options": {
         "stop_repeat_after_bonk": true,
@@ -327,9 +324,9 @@
           ],
           "when false": [],
           "when always": []
-        }
-      },
-      "intended_move_speed": 10.0
+        },
+        "move-speed": 10
+      }
     }
   },
   "game_settings": {
@@ -345,7 +342,27 @@
       12.0
     ],
     "window_width": 16.0,
-    "window_height": 12.0
+    "window_height": 12.0,
+    "bg_style": {
+      "background_color": "#191b1e",
+      "bg_gradient_color": "#272725bb",
+      "dusty_particles_color": "#57575214",
+      "dusty_particles_amount": 2.2,
+      "dusty_particles_speed": 0.0,
+      "bg_gradient_above": "between",
+      "pointy_particles_on": true,
+      "pointy_particles_speed": 0.5,
+      "pointy_particles_dark_mode": false,
+      "pointy_particles_color": "#360e6f5a",
+      "pointy_particles_rainbow_on": false,
+      "pointy_particles_amount": 0.1,
+      "lines_solid_on": true,
+      "lines_above": "below",
+      "lines_solid_color": "#5454540d",
+      "lines_scroll_speed": 0.0,
+      "lines_warp_scroll_speed": 0.02,
+      "lines_scroll_angle": 308.0
+    }
   },
   "game_metadata": {
     "credits": {
@@ -360,5 +377,38 @@
         }
       ]
     }
-  }
+  },
+  "level_lists": [
+    {
+      "name": "Levels",
+      "level_names": [
+        "editor autosave",
+        "Level 1",
+        "Level 2",
+        "Level 3",
+        "Level 4",
+        "Level 5",
+        "Level 6",
+        "Level 7",
+        "Level 8",
+        "Level 9",
+        "Level 10",
+        "Level 11",
+        "Level 12",
+        "Level 13",
+        "Level 14",
+        "Level 15",
+        "Level 16",
+        "Level 17",
+        "Level 18",
+        "Level 19",
+        "Level 20",
+        "Level 21",
+        "Level 22",
+        "Level 23",
+        "Secret Challenge",
+        "grats"
+      ]
+    }
+  ]
 }

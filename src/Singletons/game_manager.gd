@@ -1289,7 +1289,7 @@ func complete_for_advance() -> void:
 
 
 func advance_level(with_delay: float = 0, complete_current_level: bool = true) -> void:
-	if cur_scene != "Play":
+	if cur_scene != "Play" or is_in_level_edit_mode:
 		return
 	if complete_current_level:
 		complete_level(current_level_list, loaded_level_name)
