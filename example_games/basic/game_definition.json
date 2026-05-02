@@ -316,6 +316,31 @@
           "when always": []
         }
       }
+    },
+    "9": {
+      "name": "checkpoint",
+      "texture": 0,
+      "tex_index": 34,
+      "properties": {
+        "finish_move_onto_tile": {
+          "v": "3",
+          "conditions": [],
+          "when true": [
+            "basic_default.a_save_checkpoint::[\"i:-1\"]",
+            "basic_default.a_set_tiles::[\"i:4\",\"s:checkp-saved\"]"
+          ],
+          "when false": [],
+          "when always": []
+        }
+      }
+    },
+    "10": {
+      "name": "checkp-saved",
+      "texture": 0,
+      "tex_index": 33,
+      "properties": {
+
+      }
     }
   },
   "window_width": 22.0,

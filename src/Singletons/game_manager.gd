@@ -1190,7 +1190,7 @@ func get_auto_load_list_after_list(level_list_name: String, current_level_as_com
 	if not level_list_info:
 		return ""
 
-	if not level_list_info.get("auto_next_list", ""):
+	if level_list_info.get("auto_next_list", ""):
 		return level_list_info["auto_next_list"]
 	elif level_list_info.get("list_complete_to_lvlselect", false):
 		return ""
