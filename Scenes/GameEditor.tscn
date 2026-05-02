@@ -4,8 +4,8 @@
 [ext_resource type="PackedScene" uid="uid://dp8klau6une1m" path="res://Scenes/GameEditor/TileEntityEditorWindow.tscn" id="2"]
 [ext_resource type="Script" uid="uid://bx6f17nxjwie5" path="res://src/GameEditor/TilesEntitiesEditor.gd" id="3"]
 [ext_resource type="Theme" uid="uid://d02pi6tltv1cc" path="res://assets/ui/game_editor_tab_theme.tres" id="3_qrjoe"]
-[ext_resource type="Script" uid="uid://x80wuvd66lkn" path="res://Scenes/GameEditor/game_def_display_settings.gd" id="4_32qri"]
-[ext_resource type="Script" uid="uid://trn0oh5htse0" path="res://Scenes/sfx_tester.gd" id="4_p28x1"]
+[ext_resource type="Script" path="res://Scenes/GameEditor/game_def_display_settings.gd" id="4_32qri"]
+[ext_resource type="Script" path="res://Scenes/sfx_tester.gd" id="4_p28x1"]
 [ext_resource type="Script" uid="uid://cakuc61ui0t57" path="res://src/GameEditor/ImagesEditor.gd" id="5"]
 [ext_resource type="PackedScene" uid="uid://bgbv61t8v8ji5" path="res://Scenes/GameEditor/ConditionalEditor/vector2f_input.tscn" id="5_73cj6"]
 [ext_resource type="PackedScene" uid="uid://bleyoj5f36kfy" path="res://Scenes/GameEditor/ConditionalEditor/scalar_value_input.tscn" id="5_ixkgg"]
@@ -18,12 +18,12 @@
 [ext_resource type="Script" uid="uid://b067pb4uemc40" path="res://src/GameEditor/UIRoot.gd" id="10"]
 [ext_resource type="Script" uid="uid://bihb1rg68jci5" path="res://src/GameEditor/SelectableTextureList.gd" id="11"]
 [ext_resource type="Script" uid="uid://cia8grkwwxcha" path="res://src/GameEditor/PopupLayer.gd" id="12"]
-[ext_resource type="StyleBox" path="res://src/UI/list_background.tres" id="13"]
+[ext_resource type="StyleBox" uid="uid://bf4pw2lygxoq5" path="res://src/UI/list_background.tres" id="13"]
 [ext_resource type="FontFile" uid="uid://cpry5rd5ecdc5" path="res://assets/font/small_font.tres" id="14"]
 [ext_resource type="Script" uid="uid://c1vkx254mpaft" path="res://src/GameEditor/FollowBySelector.gd" id="15"]
-[ext_resource type="Script" path="res://Scenes/GameEditor/background_style_editor_tab.gd" id="15_4q0gk"]
+[ext_resource type="Script" uid="uid://blesifogfyjfp" path="res://Scenes/GameEditor/background_style_editor_tab.gd" id="15_4q0gk"]
 [ext_resource type="PackedScene" uid="uid://b4fp8ldktkvcd" path="res://Scenes/bg_effect_6.tscn" id="16_iwmpq"]
-[ext_resource type="PackedScene" path="res://Scenes/GameEditor/bg_style_editor.tscn" id="18_umwh7"]
+[ext_resource type="PackedScene" uid="uid://b1a6s2o32t35i" path="res://Scenes/GameEditor/bg_style_editor.tscn" id="18_umwh7"]
 
 [sub_resource type="StyleBoxEmpty" id="4"]
 
@@ -93,11 +93,10 @@ beside_tabs_buttons = NodePath("HBoxContainer")
 [node name="TabContainer" type="TabContainer" parent="MarginContainer/UIRoot" unique_id=540253846]
 layout_mode = 2
 theme = ExtResource("3_qrjoe")
-current_tab = 3
+current_tab = 0
 tab_0/title = "Game"
 
 [node name="GameDefinition" type="VBoxContainer" parent="MarginContainer/UIRoot/TabContainer" unique_id=1146228055 node_paths=PackedStringArray("show_level_title_option_picker", "name_input", "edit_game_dir_button", "move_interp_option_picker", "action_signal_sent_to_option_picker", "turn_animation_option_picker", "default_move_speed_input")]
-visible = false
 layout_mode = 2
 script = ExtResource("6")
 show_level_title_option_picker = NodePath("ScrollContainer/VBoxContainer/GameSettingsSection/MarginContainer/HFlowContainer/HFlowContainer/HBoxContainer11/OptionButton")
@@ -739,6 +738,7 @@ theme_override_constants/margin_bottom = 3
 layout_mode = 2
 
 [node name="Images" type="VBoxContainer" parent="MarginContainer/UIRoot/TabContainer" unique_id=500504760 node_paths=PackedStringArray("texture_item_list", "edit_texture_button", "open_images_folder_button")]
+visible = false
 layout_mode = 2
 script = ExtResource("5")
 texture_item_list = NodePath("PanelContainer/ScrollContainer/ListContainer")

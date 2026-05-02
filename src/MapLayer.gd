@@ -78,6 +78,9 @@ func deserialize(data: Dictionary) -> void:
 		var row = tile_data[y]
 		for x in row.size():
 			var coords: = Vector2i(x + sx, y + sy)
+			var tile_source_id: int = int(row[x][0]) if has_alt_ids else int(row[x])
+			if not tile_set.has_source(tile_source_id):
+				continue
 			if has_alt_ids:
 				set_cell_s(coords, int(row[x][0]), Utility.facing_from_tile_alt_id(int(row[x][1])))
 			else:

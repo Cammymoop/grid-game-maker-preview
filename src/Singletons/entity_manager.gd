@@ -736,6 +736,9 @@ func deserialize(data: Dictionary) -> void:
     bond_groups = data["bond_groups"].duplicate_deep()
 
     for entity_data in data["entity_list"]:
+        var entity_id: int = int(entity_data.get("entity_index", -1))
+        if entity_id == -1 or not entity_id in entity_defs:
+            continue
         restore_entity(entity_data)
     refresh_entity_list()
     instance_counter = 0
