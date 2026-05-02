@@ -33,7 +33,7 @@ const no_icon: Texture2D = preload("res://assets/img/property_list/no_icon.png")
 @export var enable_edit_base_props: bool = true
 
 @export var enable_conditional_editor: bool = true
-@export var override_props_can_be_conditional: bool = false
+@export var override_props_can_be_conditional: bool = true
 
 @export_group("UI Refs")
 @export var sub_item_container: Control
@@ -286,20 +286,33 @@ func on_name_edit_text_changed(new_name: String) -> void:
     if is_base_definition_property and not enable_edit_base_props:
         return
     var old_name = property_name
-    property_name = new_name
+    property_name = new_name.replace(" ", "-").replace(":", ";")
     property_name_changed.emit(old_name, property_name)
     if name_edit.is_editing():
         _name_edited = true
     else:
-        property_name_change_finalized.emit(property_name)
+        refresh_ui()
+        property_name_change_finalized.emit(_name_edited_from, property_name)
         _name_edited = false
+        _name_edited_from = property_name
 
 func on_name_edit_editing_toggled(is_editing: bool) -> void:
     if is_editing:
+        prints("editing name from", property_name)
         _name_edited_from = property_name
-    elif _name_edited:
-        property_name_change_finalized.emit(property_name)
-        _name_edited = false
+    else:
+        if not property_name:
+            if _name_edited_from:
+                property_name = _name_edited_from
+                name_edit.text = property_name
+            else:
+                queue_free()
+        elif _name_edited:
+            name_edit.text = property_name
+            refresh_ui()
+            property_name_change_finalized.emit(_name_edited_from, property_name)
+            _name_edited = false
+
 
 
 func on_prop_value_edited(new_value: Variant) -> void:
@@ -403,7 +416,6 @@ func start_value_editting() -> void:
     refresh_internal_focus_neighbors()
 
 func stop_value_editting() -> void:
-    print_stack()
     if not _value_editting:
         return
     _value_editting = false
@@ -435,6 +447,8 @@ func sub_item_gui_input(event: InputEvent, sub_item: Control) -> void:
                 start_value_editting()
                 accept_event()
                 return
+    if sub_item == name_edit:
+        return
     any_gui_input(event)
 
 func _gui_input(event: InputEvent) -> void:

@@ -109,7 +109,6 @@ func add_local_texture(file_name: String) -> void:
     }
     add_texture(spec)
 func add_builtin_texture(tex_name: String) -> void:
-    print_stack()
     if is_builtin_loaded(tex_name):
         return
     var spec = {

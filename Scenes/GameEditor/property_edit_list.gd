@@ -6,7 +6,7 @@ signal properties_changed()
 
 signal entity_instance_props_edited(entity: BaseEntity)
 
-signal request_conditional_editor(property_name: String, current_value: Variant)
+signal request_conditional_editor(property_name: String, current_value: Variant, editable: bool)
 signal request_new_property()
 signal request_duplicate_property(property_name: String)
 
@@ -76,7 +76,8 @@ var conflicting_property_name: String = ""
 var _next_index: int = 0
 
 func _init() -> void:
-    reset_sorting_info()
+    sorting_info.merge(_default_sorting_info)
+    pass#reset_sorting_info()
 
 func clear() -> void:
     _clear_list_items()
@@ -220,6 +221,7 @@ func load_entity_instance_properties(the_entity: BaseEntity) -> void:
     enable_local_props = true
     enable_edit_base_props = edit_base_props_on_instance
     if sorting_info == _default_sorting_info:
+        sorting_info["sort_event_special"] = -1 
         sorting_info["sort_conditional_local"] = 2
     if properties_info.size() > 0:
         clear()
@@ -335,7 +337,8 @@ func _setup_list_item_signals(list_item: ListItem) -> void:
     list_item.request_activate.connect(set_active_list_item)
 
 func on_conditional_editor_requested(prop_name: String, list_item: ListItem) -> void:
-    request_conditional_editor.emit(prop_name, list_item.property_value)
+    var is_base_prop: bool = not list_item.is_overridden and not list_item.is_removed
+    request_conditional_editor.emit(prop_name, list_item.property_value, enable_edit_base_props or not is_base_prop)
 
 func convert_prop_is_conditional(prop_name: String, set_is_conditional: bool) -> void:
     var p_index: int = index_map.get(prop_name, -1)
@@ -423,6 +426,10 @@ func all_props_changed() -> void:
         apply_properties_to_entity(true)
 
 func on_property_name_changed(old_name: String, new_name: String) -> void:
+    on_prop_name_width_changed()
+    return
+
+func _rename_prop_from_item(old_name: String, new_name: String) -> void:
     if not old_name:
         push_error("Old name is empty")
         return
@@ -455,10 +462,9 @@ func on_property_name_changed(old_name: String, new_name: String) -> void:
     on_prop_name_width_changed()
     properties_changed.emit()
 
-func on_property_name_change_finalized(_new_prop_name: String) -> void:
+func on_property_name_change_finalized(old_prop_name: String, new_prop_name: String) -> void:
+    _rename_prop_from_item(old_prop_name, new_prop_name)
     all_props_changed()
-    resort_list_items()
-    properties_changed.emit()
 
 func resolve_name_conflict_as_overwrite() -> void:
     var conflicting_index: int = index_map.get(CONFLICTED_NAME, -1)
@@ -771,6 +777,11 @@ func _add_new_property(property_name: String, as_conditional: bool, include_valu
     if not enable_local_props and not enable_edit_base_props:
         push_error("Cannot add properties because local props are disabled and base property editing is disabled")
         return -1
+    
+    if as_conditional and editing_entity:
+        as_conditional = false
+        if include_value:
+            value = true
 
     var new_index: int = index_map.get(property_name, -1)
     if new_index != -1:
@@ -866,10 +877,12 @@ func show_context_menu(for_list_item: ListItem) -> void:
         var is_base_def_prop: bool = for_list_item.is_base_definition_property
         if editing_entity and enable_local_props:
             if is_base_def_prop:
-                context_menu.add_item("Override As Removed", CTX_REMOVE_LOCAL_PROP)
-                context_menu.add_item("Reset Overriden Property", CTX_RESET_LOCAL_PROP)
+                if not for_list_item.is_removed:
+                    context_menu.add_item("Override As Removed", CTX_REMOVE_LOCAL_PROP)
+                if for_list_item.is_overridden or for_list_item.is_removed:
+                    context_menu.add_item("Reset Overriden Property", CTX_RESET_LOCAL_PROP)
             else:
-                context_menu.add_item("Remove Property Override", CTX_RESET_LOCAL_PROP)
+                context_menu.add_item("Remove Property", CTX_DELETE_PROPERTY)
         if not editing_entity or (edit_base_props_on_instance and is_base_def_prop):
             var base_text: = " Default" if editing_entity else ""
             context_menu.add_item("Delete%s Property" % base_text, CTX_DELETE_PROPERTY)
@@ -971,3 +984,16 @@ func focus_in_edit_mode(property_name: String) -> void:
     if not list_item.is_active():
         set_active_list_item(list_item)
     list_item.start_value_editting()
+
+func set_prop_conditional_value(property_name: String, new_value: Variant) -> void:
+    var p_index: int = index_map.get(property_name, -1)
+    if p_index == -1:
+        push_error("Property not found in list: %s" % property_name)
+        return
+    var info: Dictionary[String, Variant] = properties_info[p_index]
+    info["value"] = new_value
+    if info["list_item"]:
+        info["list_item"].set_prop_value(new_value)
+    prop_changed(property_name)
+    resort_list_items()
+    properties_changed.emit()

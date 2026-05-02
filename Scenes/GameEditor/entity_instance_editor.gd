@@ -4,10 +4,15 @@ signal entity_props_edited(entity: BaseEntity)
 signal closing()
 signal cancel_popups()
 
+const ConditionalEditor = preload("res://src/GameEditor/ConditionalEditor/ConditionalEditor.gd")
+
 const PropertyEditList = preload("res://Scenes/GameEditor/property_edit_list.gd")
+const PropertyEditListItem = preload("res://Scenes/GameEditor/property_edit_list_item.gd")
 
 const NewPropertyPanel = preload("res://Scenes/GameEditor/new_property_panel.gd")
 const new_property_panel_scn: = preload("res://Scenes/GameEditor/new_property_panel.tscn")
+
+var conditional_editor_scn: = preload("res://Scenes/GameEditor/ConditionalEditor/ConditionalEditor.tscn")
 
 @export var auto_pick_entity: bool = true
 
@@ -27,6 +32,7 @@ var edit_entity_pulse_period: float = 1.15
 var close_on_focus_lost: = true
 
 func _ready() -> void:
+    property_edit_list.request_conditional_editor.connect(on_conditional_editor_requested)
     get_viewport().gui_focus_changed.connect(on_gui_focus_changed)
     if entity_active_toggle:
         entity_active_toggle.toggled.connect(on_entity_active_toggled)
@@ -159,3 +165,27 @@ func on_gui_focus_changed(to_focus_owner: Control) -> void:
     if close_on_focus_lost:
         if to_focus_owner != self and not is_ancestor_of(to_focus_owner):
             close_instance_editor()
+
+func on_conditional_editor_requested(property_name: String, current_value: Variant, editable: bool) -> void:
+    show_conditional_editor(property_name, current_value, editable)
+
+func show_conditional_editor(property_name: String, current_value: Variant, editable: bool) -> void:
+    if typeof(current_value) not in [TYPE_DICTIONARY, TYPE_ARRAY]:
+        push_error("requesting to open conditional editor but value is not a dict or array: %s" % [current_value])
+        return
+    var new_conditional_editor: = conditional_editor_scn.instantiate() as ConditionalEditor
+    new_conditional_editor.editable = editable
+    new_conditional_editor.event_name = property_name
+    new_conditional_editor.has_me_entity_slot = true
+    new_conditional_editor.has_them_entity_slot = property_name not in ConditionalsV3.NO_OTHER_EVENTS
+    if not current_value:
+        current_value = ConditionalsV3.EMPTY_CONDITIONAL
+    add_child(new_conditional_editor)
+    new_conditional_editor.load_conditional_data(current_value)
+    new_conditional_editor.save_conditional.connect(on_save_conditional_prop.bind(property_name))
+    new_conditional_editor.transient = true
+
+    new_conditional_editor.popup_centered()
+
+func on_save_conditional_prop(new_conditional_value: Variant, prop_name: String) -> void:
+    property_edit_list.set_prop_conditional_value(prop_name, new_conditional_value)

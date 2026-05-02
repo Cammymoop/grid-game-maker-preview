@@ -79,7 +79,7 @@ func update_preview_variant_settings() -> void:
 	if has_preview_variant:
 		update_preview_image_button()
 
-func on_conditional_editor_requested(prop_name: String, current_value: Variant) -> void:
+func on_conditional_editor_requested(prop_name: String, current_value: Variant, _editable: bool) -> void:
 	if typeof(current_value) not in [TYPE_DICTIONARY, TYPE_ARRAY]:
 		push_error("requesting to open conditional editor but value is not a dict or array: %s" % [current_value])
 		return

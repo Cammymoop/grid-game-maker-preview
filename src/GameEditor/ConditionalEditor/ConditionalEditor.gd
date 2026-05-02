@@ -16,6 +16,8 @@ var when_lists: Dictionary = {}
 @export var event_name_label: Label
 @export var event_name: String = ""
 
+@export var editable: bool = true
+
 @onready var add_command_dialog = find_child("AddCommandDialog")
 
 @onready var action_tabs: ActionsTabs = find_child("ActionsTabs")

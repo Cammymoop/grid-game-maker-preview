@@ -47,8 +47,8 @@ func accept_name() -> void:
         if not allow_replacing_existing:
             GlobalToaster.show_toast_message("That property already exists and cannot be overridden")
         return
-    var is_alt_mode: bool = Input.is_key_pressed(KEY_SHIFT)
-    _accept_name(is_alt_mode)
+    #var is_alt_mode: bool = Input.is_key_pressed(KEY_SHIFT)
+    _accept_name(false)
 
 func allow_accepting() -> void:
     add_button.disabled = false
