@@ -89,7 +89,7 @@ func get_gui_focus() -> void:
     if focus_owner and (focus_owner == self or is_ancestor_of(focus_owner)):
         return
     var to_focus: Control = _first_element_to_focus()
-    if to_focus.get_focus_mode_with_override() != Control.FOCUS_NONE:
+    if to_focus and to_focus.get_focus_mode_with_override() != Control.FOCUS_NONE:
         to_focus.grab_focus()
     else:
         prints("focus node %s is unable to grab focus" % to_focus.get_path())
@@ -98,7 +98,7 @@ func _first_element_to_focus() -> Control:
     var all_list_items: = property_edit_list.get_all_list_items()
     if all_list_items.size() > 0:
         return all_list_items[0]
-    return add_property_button
+    return add_property_button.button
 
 func unedit_entity() -> void:
     if edited_entity:

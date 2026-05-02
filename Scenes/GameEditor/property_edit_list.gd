@@ -425,7 +425,7 @@ func all_props_changed() -> void:
     if is_instance_update():
         apply_properties_to_entity(true)
 
-func on_property_name_changed(old_name: String, new_name: String) -> void:
+func on_property_name_changed(_old_name: String, _new_name: String) -> void:
     on_prop_name_width_changed()
     return
 
