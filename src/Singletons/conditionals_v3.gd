@@ -72,7 +72,10 @@ const all_events: Array[String] = [
 ]
 
 const NO_OTHER_EVENTS: = [
-	"i_finish_move_onto_tile", "post_move", "idle_update", "dying",
+	"i_finish_move_onto_tile", "i_move_off_of_tile", "i_move_onto_tile", "half_moved_off_of_tile", "half_moved_onto_tile",
+    "post_move", "idle_update",
+    "joined_bond_group", "left_bond_group",
+    "dying", "do_action_1", "do_action_2", "do_action_3",
 ]
 
 const EMPTY_CONDITIONAL: = [{"v": "3", "conditions": []}]
@@ -463,4 +466,46 @@ const EVENT_HINT_TEXT: Dictionary[String, String] = {
     
     "joined_bond_group": "Unconditional Event.\nResolved when this entity becomes bonded to a bond group of entities",
     "left_bond_group": "Unconditional Event.\nResolved when this entity leaves all bond groups",
+}
+
+const EVENT_CATEGORIES: Dictionary[String, String] = {
+    "blocks": "move events",
+    "was_blocked": "move events",
+
+    "move_off_of": "move events",
+    "i_move_off_of": "move events",
+    "i_move_off_of_tile": "move events",
+    
+    "move_onto": "move events",
+    "i_move_onto": "move events",
+    "i_move_onto_tile": "move events",
+    
+    "post_move_off_of": "move events",
+    "post_move_onto": "move events",
+    "post_move": "move events",
+    
+    "half_moved_off_of": "move events",
+    "half_moved_off_of_tile": "move events",
+    "half_moved_onto": "move events",
+    "half_moved_onto_tile": "move events",
+    
+    "finish_move_onto": "move events",
+    "i_finish_move_onto": "move events",
+    "finish_move_onto_tile": "move events",
+    "i_finish_move_onto_tile": "move events",
+    
+    "do_action_1": "input events",
+    "do_action_2": "input events",
+    "do_action_3": "input events",
+    
+    "idle_update": "other",
+    "idle_on": "other",
+    "dying": "other",
+    
+    "started_tailing": "other",
+    "stopped_tailing": "other",
+    
+    "joined_bond_group": "other",
+    "left_bond_group": "other",
+    "when_signal_[signal]": "other",
 }

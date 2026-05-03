@@ -778,11 +778,6 @@ func _add_new_property(property_name: String, as_conditional: bool, include_valu
         push_error("Cannot add properties because local props are disabled and base property editing is disabled")
         return -1
     
-    if as_conditional and editing_entity:
-        as_conditional = false
-        if include_value:
-            value = true
-
     var new_index: int = index_map.get(property_name, -1)
     if new_index != -1:
         # replacing an existing property

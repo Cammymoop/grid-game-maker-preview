@@ -3,13 +3,35 @@
 [ext_resource type="Script" uid="uid://b11qxkebwcvfm" path="res://src/GameEditor/NewPropertyDialog.gd" id="1"]
 [ext_resource type="Script" uid="uid://di2eyvsiqwsee" path="res://src/GameEditor/ConditionalEditor/PropertyInput.gd" id="2_m2epb"]
 
-[node name="NewPropetyDialog" type="ConfirmationDialog" unique_id=1688005687]
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_m2epb"]
+content_margin_left = 6.0
+content_margin_right = 6.0
+bg_color = Color(0.19434929, 0.19434926, 0.19434926, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_uy14u"]
+content_margin_left = 6.0
+content_margin_right = 6.0
+bg_color = Color(0.09239706, 0.09239707, 0.092397, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_p2ow8"]
+content_margin_left = 6.0
+content_margin_right = 6.0
+bg_color = Color(0.09239706, 0.09239707, 0.092397, 1)
+
+[sub_resource type="Theme" id="Theme_uy14u"]
+MenuButton/styles/hover = SubResource("StyleBoxFlat_m2epb")
+MenuButton/styles/normal = SubResource("StyleBoxFlat_uy14u")
+MenuButton/styles/pressed = SubResource("StyleBoxFlat_p2ow8")
+
+[node name="NewPropetyDialog" type="ConfirmationDialog" unique_id=1688005687 node_paths=PackedStringArray("events_menu_btn", "special_props_menu_btn")]
 oversampling_override = 1.0
 title = "Add Property/Event"
 position = Vector2i(0, 25)
 size = Vector2i(360, 240)
 visible = true
 script = ExtResource("1")
+events_menu_btn = NodePath("VBoxContainer/HBoxContainer3/EventNames")
+special_props_menu_btn = NodePath("VBoxContainer/HBoxContainer3/SpecialPropNames")
 
 [node name="VBoxContainer" type="VBoxContainer" parent="." unique_id=896131391]
 anchors_preset = 15
@@ -19,6 +41,30 @@ offset_left = 8.0
 offset_top = 8.0
 offset_right = -8.0
 offset_bottom = -45.0
+theme_override_constants/separation = 8
+
+[node name="HBoxContainer3" type="HBoxContainer" parent="VBoxContainer" unique_id=963967885]
+layout_mode = 2
+size_flags_horizontal = 3
+theme = SubResource("Theme_uy14u")
+theme_override_constants/separation = 0
+alignment = 1
+
+[node name="EventNames" type="MenuButton" parent="VBoxContainer/HBoxContainer3" unique_id=1663248020]
+layout_mode = 2
+mouse_default_cursor_shape = 2
+theme_override_colors/font_color = Color(0.9026885, 0.5629965, 0.41542307, 1)
+text = "Events"
+flat = false
+switch_on_hover = true
+
+[node name="SpecialPropNames" type="MenuButton" parent="VBoxContainer/HBoxContainer3" unique_id=99398741]
+layout_mode = 2
+mouse_default_cursor_shape = 2
+theme_override_colors/font_color = Color(0.14019066, 0.7218098, 0.8524978, 1)
+text = "Special Properties"
+flat = false
+switch_on_hover = true
 
 [node name="HBoxContainer2" type="HBoxContainer" parent="VBoxContainer" unique_id=1477151240]
 layout_mode = 2

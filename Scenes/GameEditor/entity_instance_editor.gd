@@ -142,13 +142,13 @@ func show_add_property_panel(duplicate_prop_name: String = "") -> void:
     cancel_popups.connect(new_property_panel.close_panel)
     popup_holder.add_child(new_property_panel)
 
-func on_new_property_name_chosen(property_name: String, alt_mode: bool) -> void:
+func on_new_property_name_chosen(property_name: String, as_conditional: bool) -> void:
     if property_edit_list:
-        property_edit_list.add_new_or_duplicate_property(property_name, alt_mode)
+        property_edit_list.add_new_or_duplicate_property(property_name, as_conditional)
 
-func on_duplicate_property_name_chosen(property_name: String, alt_mode: bool, duplicate_of: String) -> void:
+func on_duplicate_property_name_chosen(property_name: String, as_conditional: bool, duplicate_of: String) -> void:
     if property_edit_list:
-        property_edit_list.add_new_or_duplicate_property(property_name, alt_mode, duplicate_of)
+        property_edit_list.add_new_or_duplicate_property(property_name, as_conditional, duplicate_of)
 
 func on_visibility_changed() -> void:
     if not visible:

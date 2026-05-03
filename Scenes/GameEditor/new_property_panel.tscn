@@ -15,7 +15,27 @@ corner_radius_bottom_right = 3
 corner_radius_bottom_left = 3
 corner_detail = 7
 
-[node name="NewPropetyDialog" type="PanelContainer" unique_id=1730346067 node_paths=PackedStringArray("property_name_input", "add_button", "replace_button", "replace_label")]
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_uy14u"]
+content_margin_left = 6.0
+content_margin_right = 6.0
+bg_color = Color(0.19434929, 0.19434926, 0.19434926, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_p2ow8"]
+content_margin_left = 6.0
+content_margin_right = 6.0
+bg_color = Color(0.09239706, 0.09239707, 0.092397, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_m2epb"]
+content_margin_left = 6.0
+content_margin_right = 6.0
+bg_color = Color(0.09239706, 0.09239707, 0.092397, 1)
+
+[sub_resource type="Theme" id="Theme_jrj38"]
+MenuButton/styles/hover = SubResource("StyleBoxFlat_uy14u")
+MenuButton/styles/normal = SubResource("StyleBoxFlat_p2ow8")
+MenuButton/styles/pressed = SubResource("StyleBoxFlat_m2epb")
+
+[node name="NewPropetyDialog" type="PanelContainer" unique_id=1730346067 node_paths=PackedStringArray("property_name_input", "add_button", "replace_button", "replace_label", "events_menu_btn", "special_props_menu_btn")]
 custom_minimum_size = Vector2(360, 0)
 offset_right = 360.0
 offset_bottom = 77.0
@@ -24,6 +44,8 @@ property_name_input = NodePath("VBoxContainer/HBoxContainer/PropertyNameInput")
 add_button = NodePath("VBoxContainer/HBoxContainer/AddPropButton")
 replace_button = NodePath("VBoxContainer/HBoxContainer2/ReplaceWithNewPropButton")
 replace_label = NodePath("VBoxContainer/HBoxContainer2/Label")
+events_menu_btn = NodePath("VBoxContainer/HBoxContainer3/EventNames")
+special_props_menu_btn = NodePath("VBoxContainer/HBoxContainer3/SpecialPropNames")
 
 [node name="VBoxContainer" type="VBoxContainer" parent="." unique_id=896131391]
 layout_mode = 2
@@ -75,6 +97,29 @@ layout_mode = 2
 size_flags_horizontal = 4
 theme_override_font_sizes/font_size = 12
 text = "Replace"
+
+[node name="HBoxContainer3" type="HBoxContainer" parent="VBoxContainer" unique_id=1053610777]
+layout_mode = 2
+size_flags_horizontal = 3
+theme = SubResource("Theme_jrj38")
+theme_override_constants/separation = 0
+alignment = 1
+
+[node name="EventNames" type="MenuButton" parent="VBoxContainer/HBoxContainer3" unique_id=1499340234]
+layout_mode = 2
+mouse_default_cursor_shape = 2
+theme_override_colors/font_color = Color(0.9026885, 0.5629965, 0.41542307, 1)
+text = "Events"
+flat = false
+switch_on_hover = true
+
+[node name="SpecialPropNames" type="MenuButton" parent="VBoxContainer/HBoxContainer3" unique_id=1319359713]
+layout_mode = 2
+mouse_default_cursor_shape = 2
+theme_override_colors/font_color = Color(0.14019066, 0.7218098, 0.8524978, 1)
+text = "Special Properties"
+flat = false
+switch_on_hover = true
 
 [node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer" unique_id=1944317131]
 layout_mode = 2
