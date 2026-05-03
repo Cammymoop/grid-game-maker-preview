@@ -30,8 +30,11 @@ func reimport_all_example_games() -> Array[String]:
             failed_games.append(example_game_name)
     return failed_games
 
-func import_game_zip(zip_file: Variant, as_new_game: bool, new_game_name: String = "") -> String:
+func import_game_zip(zip_file: Variant, as_new_game: bool, new_game_name: String = "", enable_bundled_images: bool = false) -> String:
     var importing_game_name: = ""
+    if not enable_bundled_images:
+        if ImportZipExtractor.zip_or_buffer_has_bundled_images(zip_file):
+            return ""
     if zip_file is String:
         importing_game_name = ImportZipExtractor.get_game_name_from_zip(zip_file)
     else:

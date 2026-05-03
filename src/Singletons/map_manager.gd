@@ -1155,4 +1155,50 @@ func idle_actions() -> void:
         resolve_tile_individual_events(positions_of_tile, "idle_update", null, t_id, false)
 
 func removing_texture_id(_texture_id: int) -> void:
-    pass
+    var fallback_tex: int = TextureManager.get_fallback_texture_id()
+    for tile_id in tile_defs.keys():
+        _remap_texture_id_in_tile(tile_id, _texture_id, fallback_tex, 0)
+
+func remapping_texture_id(from_texture_id: int, into_texture_id: int) -> void:
+    for tile_id in tile_defs.keys():
+        _remap_texture_id_in_tile(tile_id, from_texture_id, into_texture_id)
+
+func _remap_texture_id_in_tile(tile_id: int, from_texture_id: int, into_texture_id: int, overwrite_index_with: int = -1) -> void:
+    _remap_texture_id_in_dict(tile_defs[tile_id], from_texture_id, into_texture_id, overwrite_index_with)
+    if "preview_variant" in tile_defs[tile_id]:
+        _remap_texture_id_in_dict(tile_defs[tile_id]["preview_variant"], from_texture_id, into_texture_id, overwrite_index_with)
+    if "terrain_sprite_modifier" in tile_defs[tile_id]:
+        for mod_layer in tile_defs[tile_id]["terrain_sprite_modifier"].get("layers", []):
+            _remap_texture_id_in_dict(mod_layer, from_texture_id, into_texture_id, overwrite_index_with)
+
+func _remap_texture_id_in_dict(dict: Dictionary, from_texture_id: int, into_texture_id: int, overwrite_index_with: int = -1) -> void:
+    if "texture" in dict and int(dict["texture"]) == from_texture_id:
+        dict["texture"] = into_texture_id
+        if overwrite_index_with >= 0 and "tex_index" in dict:
+                dict["tex_index"] = overwrite_index_with
+    if "mask_texture" in dict and int(dict["mask_texture"]) == from_texture_id:
+        dict["mask_texture"] = into_texture_id
+        if overwrite_index_with >= 0 and "mask_tex_index" in dict:
+            dict["mask_tex_index"] = overwrite_index_with
+
+func _is_dict_using_texture_id(dict: Dictionary, texture_id: int) -> bool:
+    if int(dict.get("texture", -1)) == texture_id or int(dict.get("mask_texture", -1)) == texture_id:
+        return true
+    return false
+
+func _is_tile_using_texture_id(tile_id: int, texture_id: int) -> bool:
+    if _is_dict_using_texture_id(tile_defs[tile_id], texture_id):
+        return true
+    if "preview_variant" in tile_defs[tile_id]:
+        return _is_dict_using_texture_id(tile_defs[tile_id]["preview_variant"], texture_id)
+    if "terrain_sprite_modifier" in tile_defs[tile_id]:
+        for mod_layer in tile_defs[tile_id]["terrain_sprite_modifier"].get("layers", []):
+            if _is_dict_using_texture_id(mod_layer, texture_id):
+                return true
+    return false
+
+func is_texture_id_in_use(texture_id: int) -> bool:
+    for tile_id in tile_defs.keys():
+        if _is_tile_using_texture_id(tile_id, texture_id):
+            return true
+    return false

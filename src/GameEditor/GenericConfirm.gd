@@ -2,6 +2,8 @@ extends ConfirmationDialog
 
 signal hidden
 
+var free_on_close: bool = false
+
 func confirm_with_callbacks(with_title: String, message: String, ok_callback: Callable = Callable(), close_callback: Callable = Callable()):
 	title = with_title
 	dialog_text = message
@@ -17,4 +19,6 @@ func confirm_with_callbacks(with_title: String, message: String, ok_callback: Ca
 func _on_vis_changed():
 	if not visible:
 		hidden.emit()
+		if free_on_close:
+			queue_free()
 		

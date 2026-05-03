@@ -335,6 +335,28 @@ func get_game_info_from_zip(zip_file_path: String) -> Dictionary:
 		return {}
 	return parsed_data
 
+func zip_or_buffer_has_bundled_images(zip_file: Variant) -> bool:
+	if zip_file is String:
+		return zip_has_bundled_images(zip_file)
+	elif zip_file is PackedByteArray:
+		var temp_file_path: = FilesManager.save_temporary_data_as_file(zip_file, ".zip")
+		if not temp_file_path:
+			return false
+		var result: = zip_has_bundled_images(temp_file_path)
+		FilesManager.delete_temporary_file(temp_file_path)
+		return result
+	return false
+
+func zip_has_bundled_images(zip_file_path: String) -> bool:
+	var game_config: Dictionary = get_game_info_from_zip(zip_file_path).get("data", {})
+	var texture_spec: Array = game_config.get("textures", [])
+	for texture_info in texture_spec:
+		if not typeof(texture_info) == TYPE_DICTIONARY:
+			continue
+		if texture_info.get("type", "") == "local_file" and not texture_info.get("is_shared", true):
+			return true
+	return false
+
 func _read_game_definition_from_zip(zip_file_path: String) -> Dictionary:
 	var normalized_zip_path := _normalize_input_file_path(zip_file_path)
 	if normalized_zip_path.is_empty():

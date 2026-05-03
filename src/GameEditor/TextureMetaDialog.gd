@@ -16,6 +16,8 @@ signal meta_confirmed(texture_definition)
 @export var image_size_label: Control
 @export var image_size_node_2: Control
 
+var edit_shared_meta_warning: bool = false
+
 func _ready():
 	if not is_new_mode:
 		title = "Setup Grid for " + texture_name
@@ -23,6 +25,8 @@ func _ready():
 	else:
 		title = "New Image"
 		ok_button_text = "Create Image"
+	
+	find_child("SharedMetaWarning").visible = edit_shared_meta_warning
 
 	image_size_label.visible = is_new_mode
 	image_size_node_2.visible = is_new_mode

@@ -95,6 +95,13 @@ const SPECIAL_PROPS_HINT_TEXT: Dictionary[String, String] = {
 		'This speed can be overridden for a single movement using the "Override Move Speed" Conditional command or automatically by the "Get Pushed" command.',
 }
 
+enum OneTimeMessages {
+	IMPORTED_IMAGE_DISCLAIMER,
+}
+const ONE_TIME_MESSAGES_KEYS: Dictionary[OneTimeMessages, String] = {
+	OneTimeMessages.IMPORTED_IMAGE_DISCLAIMER: "imported_image_disclaimer",
+}
+
 @export_file("*.json") var builtin_default_game_file: String = ""
 var builtin_default_game_definition: Dictionary = {}
 
@@ -957,26 +964,48 @@ func is_name_overwriting(new_game_name: String) -> bool:
 func is_current_game_saved() -> bool:
 	return loaded_from_game_name != ""
 
-func import_and_load_game_zip(zip_file_path: String) -> bool:
-	var imported_name: String = ImporterExporter.import_game_zip(zip_file_path, true)
-	if not imported_name:
-		return false
-	load_game_definition_from_file(imported_name)
-	return true
+func import_and_load_game_zip(zip_file_path: String) -> void:
+	var w_images_disabled: bool = is_one_time_message_dismissed(OneTimeMessages.IMPORTED_IMAGE_DISCLAIMER)
+	_import_and_load_game_zip(zip_file_path, w_images_disabled, after_import_game_zip_message)
 
-func got_web_import_zip(_file_name: String, _file_type: String, b64_data: String) -> void:
-	var zip_byte_array: = Marshalls.base64_to_raw(b64_data)
-	if import_and_load_game_zip_buffer(zip_byte_array):
+func _import_and_load_game_zip(zip_file_path: String, w_images_confirmed: bool, then_callable: Callable) -> void:
+	if not w_images_confirmed:
+		if ImportZipExtractor.zip_has_bundled_images(zip_file_path):
+			check_and_show_imported_image_disclaimer(_import_and_load_game_zip.bind(zip_file_path, true, then_callable))
+	var imported_name: String = ImporterExporter.import_game_zip(zip_file_path, true)
+	var success: bool = true
+	if not imported_name:
+		success = false
+	else:
+		load_game_definition_from_file(imported_name)
+
+	if then_callable.is_valid():
+		then_callable.call(success)
+
+func after_import_game_zip_message(success: bool) -> void:
+	if success:
 		GlobalToaster.show_toast_message("Imported %s" % [get_game_name()])
 	else:
 		GlobalToaster.show_toast_message("Failed to import game")
 
-func import_and_load_game_zip_buffer(zip_buffer: PackedByteArray) -> bool:
+func got_web_import_zip(_file_name: String, _file_type: String, b64_data: String) -> void:
+	var zip_byte_array: = Marshalls.base64_to_raw(b64_data)
+	var w_images_disabled: bool = is_one_time_message_dismissed(OneTimeMessages.IMPORTED_IMAGE_DISCLAIMER)
+	import_and_load_game_zip_buffer(zip_byte_array, w_images_disabled, after_import_game_zip_message)
+
+func import_and_load_game_zip_buffer(zip_buffer: PackedByteArray, w_images_confirmed: bool = false, then_callable: Callable = Callable()) -> void:
+	if not w_images_confirmed:
+		var zip_has_bundled_images: bool = ImportZipExtractor.zip_or_buffer_has_bundled_images(zip_buffer)
+		if zip_has_bundled_images:
+			check_and_show_imported_image_disclaimer(import_and_load_game_zip_buffer.bind(zip_buffer, true, then_callable))
 	var imported_name: String = ImporterExporter.import_game_zip(zip_buffer, true)
 	if not imported_name:
-		return false
+		if then_callable.is_valid():
+			then_callable.call(false)
+		return
 	load_game_definition_from_file(imported_name)
-	return true
+	if then_callable.is_valid():
+		then_callable.call(true)
 
 func change_camera_follow_to_entity_name(entity_name: String) -> void:
 	set_cam_setting("follow_entity", entity_name)
@@ -1458,3 +1487,25 @@ func copy_game_bg_to_level() -> void:
 		return
 	var game_bg_info: Dictionary = get_game_setting("bg_style", {}).duplicate_deep()
 	set_level_bg_info(game_bg_info)
+
+
+func is_one_time_message_dismissed(message_type: OneTimeMessages) -> bool:
+	return player_profile.get_profile_setting_v(["one_time_messages", ONE_TIME_MESSAGES_KEYS[message_type]], false)
+
+func set_one_time_message_dismissed(message_type: OneTimeMessages, as_dismissed: bool = true) -> void:
+	player_profile.set_profile_setting_v(["one_time_messages", ONE_TIME_MESSAGES_KEYS[message_type]], as_dismissed)
+
+func check_and_show_imported_image_disclaimer(finish_import_callback: Callable) -> void:
+	if is_one_time_message_dismissed(OneTimeMessages.IMPORTED_IMAGE_DISCLAIMER):
+		return
+	var disclaimer_dialog: = preload("res://Scenes/bundled_image_disclaimer.tscn").instantiate() as ConfirmationDialog
+	disclaimer_dialog.confirmed.connect(confirmed_import_with_images.bind(finish_import_callback, disclaimer_dialog))
+	add_child(disclaimer_dialog)
+	disclaimer_dialog.popup_centered()
+
+func confirmed_import_with_images(finish_import_callback: Callable, disclaimer_dialog: ConfirmationDialog) -> void:
+	if disclaimer_dialog:
+		var disable_disclaimer_checkbox: = disclaimer_dialog.find_child("DisableDisclaimer") as CheckBox
+		if disable_disclaimer_checkbox and disable_disclaimer_checkbox.button_pressed:
+			set_one_time_message_dismissed(OneTimeMessages.IMPORTED_IMAGE_DISCLAIMER)
+	finish_import_callback.call()

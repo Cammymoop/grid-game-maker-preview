@@ -138,8 +138,9 @@ func on_game_dir_name_changed(new_game_name: String) -> void:
 func load_game_file(dialog) -> void:
 	var game_name = dialog.get_selected_game()
 	if game_name:
-		GameManager.load_game_definition_from_file(game_name)
-	dialog.close_dialog()
+		GameManager.load_game_definition_from_file.call_deferred(game_name)
+	else:
+		dialog.close_dialog()
 
 func _on_LoadButton_pressed():
 	var dialog = load_dialog.instantiate()
@@ -254,7 +255,25 @@ func _on_edit_game_dir_button_pressed() -> void:
 	name_input.grab_focus.call_deferred()
 
 
-func _on_export_zip_pressed() -> void:
+func _on_export_zip_pressed(no_bundle_pls: bool = false) -> void:
+	if not no_bundle_pls and Input.is_action_pressed(&"editor_alt_mode_hold"):
+		no_bundle_pls = true
+
+	if not no_bundle_pls and TextureManager.has_enabled_shared_images():
+		var bundle_shared_images_dialog: = generic_confirm.instantiate() as ConfirmationDialog
+		bundle_shared_images_dialog.free_on_close = true
+		add_child(bundle_shared_images_dialog)
+		bundle_shared_images_dialog.add_button("Export Without Bundling", true, "no_bundle_pls")
+		bundle_shared_images_dialog.custom_action.connect(on_bundle_dialog_custom_action)
+
+		var message_text: = "The current game is using some shared (non-bundled) images. The exported copy will not include those images."
+		message_text += "\nIt can still be exported, but will require those images to be in the shared images folder when imported in order to work properly."
+		message_text += "\n\nYou can bundle a copy of each shared image now so they are all included in the export, or export without bundling shared images."
+		bundle_shared_images_dialog.ok_button_text = "Bundle Images and Export"
+		bundle_shared_images_dialog.confirm_with_callbacks("Bundle Images Before Export?", message_text, do_bundle_first)
+		return
+	GameManager.save_current_game_definition()
+
 	if OS.has_feature("web"):
 		export_web_mode()
 		return
@@ -265,7 +284,18 @@ func _on_export_zip_pressed() -> void:
 	file_dialog.dir_selected.connect(_export_destination_picked.bind(file_dialog))
 	file_dialog.close_requested.connect(file_dialog.queue_free)
 	file_dialog.canceled.connect(file_dialog.queue_free)
+	add_child(file_dialog)
 	file_dialog.popup_file_dialog()
+
+func do_bundle_first() -> void:
+	if not TextureManager.bundle_all_used_shared_images():
+		GlobalToaster.show_toast_message("Oops! Failed to bundle shared images")
+	else:
+		_on_export_zip_pressed()
+
+func on_bundle_dialog_custom_action(action: String) -> void:
+	if action == "no_bundle_pls":
+		_on_export_zip_pressed(true)
 
 func export_web_mode() -> void:
 	var zip_path: String = ImporterExporter.export_game_zip(GameManager.get_game_name(), "")

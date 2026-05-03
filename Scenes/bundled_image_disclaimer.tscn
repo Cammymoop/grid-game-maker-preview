@@ -1,0 +1,42 @@
+[gd_scene format=3 uid="uid://3rmoon155mv6"]
+
+[ext_resource type="Script" uid="uid://c2upk4p6hy3o7" path="res://Scenes/close_on_hide_window.gd" id="1_g6do4"]
+
+[node name="AcceptDialog" type="ConfirmationDialog" unique_id=2016308173]
+oversampling_override = 1.0
+title = "Import Contains Images"
+size = Vector2i(396, 207)
+visible = true
+ok_button_text = "Import"
+script = ExtResource("1_g6do4")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="." unique_id=207997933]
+offset_left = 8.0
+offset_top = 8.0
+offset_right = 388.0
+offset_bottom = 162.0
+
+[node name="Label" type="Label" parent="VBoxContainer" unique_id=1398304212]
+custom_minimum_size = Vector2(380, 0)
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_colors/font_color = Color(0.8031394, 0.65600336, 0.09073787, 1)
+theme_override_font_sizes/font_size = 18
+text = "This game import contains bundled images."
+horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="Label2" type="Label" parent="VBoxContainer" unique_id=1273910294]
+custom_minimum_size = Vector2(320, 0)
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_font_sizes/font_size = 14
+text = "Grid Game Maker Preview does not scan, filter, or moderate imported content in any way. Please be aware, and use this feature at your own discretion."
+horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="DisableDisclaimer" type="CheckBox" parent="VBoxContainer" unique_id=1162591205]
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_font_sizes/font_size = 14
+text = "Do not show this prompt for future imports."

@@ -9,6 +9,9 @@ var TEMPORARY_FILE_PREFIX: = "_tmp_"
 
 var PLAYER_SETTINGS_FILENAME: = "player_settings.json"
 
+var SHARED_IMAGES_METADATA_FILENAME: = "local_image_meta.json"
+var BUNDLED_IMAGE_METADATA_FILENAME: = "image_metadata.json"
+
 var base_data_directory: = "user://"
 var games_subdir: = "games"
 var shared_assets_subdir: = "shared_assets"
@@ -86,6 +89,9 @@ func get_game_levels_dir(game_name: String) -> String:
 
 func get_game_assets_dir(game_name: String) -> String:
 	return get_game_gamedata_dir(game_name).path_join("assets")
+
+func get_game_images_dir(game_name: String) -> String:
+	return get_game_assets_dir(game_name).path_join("images")
 
 
 func get_shared_images_dir() -> String:
@@ -279,57 +285,71 @@ func _get_all_game_definitions() -> Array[Dictionary]:
 			push_error("Error parsing game definition at file: " + definition_path)
 	return game_definitions
 
-# NOTE leaving local images metadata file in place for now, should be moved probably, more likely refactored
 func update_local_image_metadata(local_image_name: String, data: Dictionary, for_game_name: String = "") -> void:
+	var local_images_meta = _get_local_images_metadata(for_game_name)
+	local_images_meta[local_image_name] = Utility.dict_vectors_to_lists(data)
+	_save_local_images_metadata(local_images_meta, for_game_name)
+
+func _save_local_images_metadata(new_data: Dictionary, for_game_name: String = "") -> void:
+	var meta_file_path: String = _data_path(SHARED_IMAGES_METADATA_FILENAME)
 	if for_game_name:
-		push_error("Images specific to games not supported yet")
-		return
-	var existing_data = _get_local_images_metadata()
-	existing_data[local_image_name] = Utility.dict_vectors_to_lists(data)
-	var f: = FileAccess.open(_data_path("local_image_meta.json"), FileAccess.WRITE)
+		if not game_exists(for_game_name):
+			return
+		meta_file_path = get_game_images_dir(for_game_name).path_join(BUNDLED_IMAGE_METADATA_FILENAME)
+	var f: = FileAccess.open(meta_file_path, FileAccess.WRITE)
 	if f:
-		f.store_string(JSON.stringify(existing_data))
+		f.store_string(JSON.stringify(new_data))
 
 func get_local_image_metadata(local_image_name: String, for_game_name: String = "") -> Dictionary:
-	if for_game_name:
-		push_error("Images specific to games not supported yet")
-		return {}
-	var local_meta = _get_local_images_metadata()
+	var local_meta = _get_local_images_metadata(for_game_name)
 	if local_meta and local_image_name in local_meta:
 		return local_meta[local_image_name]
 	return {}
 
 func has_local_image_metadata(local_image_name: String, for_game_name: String = "") -> bool:
-	if for_game_name:
-		push_error("Images specific to games not supported yet")
-		return false
-	var local_meta = _get_local_images_metadata()
+	var local_meta = _get_local_images_metadata(for_game_name)
 	if not local_meta or not local_image_name in local_meta:
 		return false
 	return true
 
-func _get_local_images_metadata() -> Dictionary:
-	if not FileAccess.file_exists(_data_path("local_image_meta.json")):
-		print_debug("No local image meta")
-		return {}
-	return _get_dict_from_json_file(_data_path("local_image_meta.json"))
+func _get_local_images_metadata(for_game_name: String = "") -> Dictionary:
+	var meta_file_path: String = _data_path(SHARED_IMAGES_METADATA_FILENAME)
+	if not for_game_name:
+		if not FileAccess.file_exists(_data_path(SHARED_IMAGES_METADATA_FILENAME)):
+			return {}
+	else:
+		if not game_exists(for_game_name):
+			return {}
+		meta_file_path = get_game_images_dir(for_game_name).path_join(BUNDLED_IMAGE_METADATA_FILENAME)
+		if not smarter_file_exists(meta_file_path):
+			return {}
+	return _get_dict_from_json_file(meta_file_path)
 
-func get_all_image_names() -> Array:
+
+func get_all_shared_image_names() -> Array:
 	var images_directory: = get_shared_images_dir()
 	return iterate_directory_flat_filelist(images_directory, "png")
 
-func _sanitize_image_filename(image_filename: String) -> String:
-	var extension: = "." + image_filename.get_extension()
-	var just_filename: = image_filename.trim_suffix(extension)
-	return Utility.sanitize_for_filename(just_filename, true, true) + extension
+func get_all_bundled_image_names(game_name: String) -> Array:
+	if not game_exists(game_name):
+		push_error("Game %s does not exist" % [game_name])
+		return []
+	var images_directory: = get_game_images_dir(game_name)
+	return iterate_directory_flat_filelist(images_directory, "png")
 
-func save_shared_image(image_to_save: Image, as_name: String) -> void:
-	var img_filename: = _sanitize_image_filename(as_name)
-	var img_path: = get_shared_images_dir().path_join(img_filename)
+func _sanitize_image_filename(image_filename: String) -> String:
+	return Utility.sanitize_for_filename(image_filename, true, true)
+
+func save_local_image(image_to_save: Image, image_filename: String, to_game_name: String = "") -> bool:
+	image_filename = _sanitize_image_filename(image_filename)
+	var img_path: = get_shared_images_dir().path_join(image_filename)
+	if to_game_name:
+		img_path = get_game_images_dir(to_game_name).path_join(image_filename)
 	var save_success: = image_to_save.save_png(img_path)
 	if save_success != OK:
-		push_error("Error saving shared image %s to %s: %s" % [as_name, img_path, error_string(save_success)])
-		return
+		push_error("Error saving shared image %s to %s: %s" % [image_filename, img_path, error_string(save_success)])
+		return false
+	return true
 
 func save_image_to_path(image_to_save: Image, abs_path: String) -> void:
 	var base_dir: = abs_path.get_base_dir()
@@ -339,7 +359,93 @@ func save_image_to_path(image_to_save: Image, abs_path: String) -> void:
 		push_error("Error saving image to %s: %s" % [base_dir.path_join(filename), error_string(save_success)])
 		return
 
-func load_shared_image_as_texture(image_name: String) -> Texture:
+func copy_shared_image_into_game(shared_image_name: String, copy_name: String, game_name: String) -> bool:
+	return _copy_from_to_bundled(shared_image_name, copy_name, game_name, true)
+
+func copy_bundled_image_into_shared(bundled_image_name: String, copy_name: String, game_name: String) -> bool:
+	return _copy_from_to_bundled(bundled_image_name, copy_name, game_name, false)
+
+func _copy_from_to_bundled(orig_image_name: String, copy_name: String, game_name: String, to_bundled: bool) -> bool:
+	orig_image_name = _sanitize_image_filename(orig_image_name)
+	if not copy_name:
+		copy_name = orig_image_name
+	else:
+		copy_name = _sanitize_image_filename(copy_name)
+	if not game_exists(game_name):
+		push_error("Game %s does not exist" % [game_name])
+		return false
+	if not local_image_file_exists(orig_image_name, "" if to_bundled else game_name) or local_image_file_exists(copy_name, game_name if to_bundled else ""):
+		push_error("image %s does not exist or target image with name %s already exists" % [orig_image_name, copy_name])
+		return false
+	var orig_base_dir: = get_shared_images_dir() if to_bundled else get_game_images_dir(game_name)
+	var copy_base_dir: = get_game_images_dir(game_name) if to_bundled else get_shared_images_dir()
+	var error: = DirAccess.copy_absolute(orig_base_dir.path_join(orig_image_name), copy_base_dir.path_join(copy_name))
+	if error != OK:
+		push_error("Error copying image from/to %s: %s -> %s : %s" % [game_name, orig_image_name, copy_name, error_string(error)])
+		return false
+	return true
+
+func get_image_data_as_bytes(image_data: Image) -> PackedByteArray:
+	return image_data.save_png_to_buffer()
+
+func get_local_image_path(image_name: String, for_game_name: String = "") -> String:
+	if for_game_name:
+		if not game_exists(for_game_name):
+			push_error("Game %s does not exist" % [for_game_name])
+			return ""
+		return get_game_images_dir(for_game_name).path_join(image_name)
+	return get_shared_images_dir().path_join(image_name)
+
+func copy_local_image_to_local(from_name: String, from_game: String, to_name: String, to_game: String) -> bool:
+	from_game = _sanitize_image_filename(from_game)
+	to_game = _sanitize_image_filename(to_game)
+	if not from_name or not to_name:
+		return false
+	if from_name == to_name and from_game == to_game:
+		return true
+	var from_path: = get_local_image_path(from_name, from_game)
+	var to_path: = get_local_image_path(to_name, to_game)
+	if not smarter_dir_exists(from_path.get_base_dir()) or not smarter_dir_exists(to_path.get_base_dir()):
+		push_error("Source or target directory does not exist: %s, %s" % [from_path.get_base_dir(), to_path.get_base_dir()])
+		return false
+	if not smarter_file_exists(from_path):
+		push_error("Source image %s does not exist" % [from_path])
+		return false
+	if smarter_file_exists(to_path):
+		push_error("Target image %s already exists" % [to_path])
+		return false
+	var error: = DirAccess.copy_absolute(from_path, to_path)
+	if error != OK:
+		push_error("Error copying image from %s to %s: %s" % [from_path, to_path, error_string(error)])
+	return true
+
+func load_local_image_as_texture(image_name: String, for_game_name: String = "") -> Texture:
+	image_name = _sanitize_image_filename(image_name)
+	if not for_game_name:
+		return _load_shared_image_as_texture(image_name)
+	else:
+		if not game_exists(for_game_name):
+			push_error("Game %s does not exist" % [for_game_name])
+			return null
+		var bundled_image_path: = get_game_images_dir(for_game_name).path_join(image_name)
+		return load_file_as_texture(bundled_image_path)
+
+func local_image_file_exists(image_filename: String, for_game_name: String = "") -> bool:
+	var file_path: String = get_shared_images_dir().path_join(image_filename)
+	if for_game_name:
+		file_path = get_game_images_dir(for_game_name).path_join(image_filename)
+	return smarter_file_exists(file_path)
+
+func delete_local_image(image_filename: String, for_game_name: String = "") -> void:
+	image_filename = _sanitize_image_filename(image_filename)
+	if not local_image_file_exists(image_filename, for_game_name):
+		return
+	var file_path: String = get_shared_images_dir().path_join(image_filename)
+	if for_game_name:
+		file_path = get_game_images_dir(for_game_name).path_join(image_filename)
+	DirAccess.remove_absolute(file_path)
+
+func _load_shared_image_as_texture(image_name: String) -> Texture:
 	return load_file_as_texture(get_shared_images_dir().path_join(image_name))
 
 func load_file_as_texture(file_path: String) -> Texture:
@@ -609,9 +715,12 @@ func delete_game(game_name: String) -> bool:
 		return false
 	return true
 
-func save_temporary_data_as_file(data: PackedByteArray, with_extension: String = "") -> String:
+func _get_temp_file_path(with_extension: String = "") -> String:
 	var random_name: = String.num_int64(randi_range(1, 200000), 16)
-	var temp_file_path: = _data_path(TEMPORARY_FILE_PREFIX + random_name + with_extension)
+	return _data_path(TEMPORARY_FILE_PREFIX + random_name + with_extension)
+
+func save_temporary_data_as_file(data: PackedByteArray, with_extension: String = "") -> String:
+	var temp_file_path: = _get_temp_file_path(with_extension)
 	var wr_file: = FileAccess.open(temp_file_path, FileAccess.WRITE)
 	if not wr_file:
 		push_error("Error creating temp file to write data to %s" % [temp_file_path])

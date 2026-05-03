@@ -595,7 +595,7 @@ func _on_SaveAsFileButton_pressed():
 func _on_SaveAsDialog_file_selected(path: String):
 	var base_path: = path.get_base_dir()
 	if base_path == FilesManager.get_shared_images_dir():
-		FilesManager.save_shared_image(edited_image, path.get_file())
+		FilesManager.save_local_image(edited_image, path.get_file(), "")
 	else:
 		GlobalToaster.show_toast_message("Please save to shared images directory")
 		return
@@ -612,7 +612,7 @@ func _on_BrushColorPicker_color_changed(color):
 func _on_SaveFileButton_pressed():
 	if save_as_name == "":
 		return
-	FilesManager.save_shared_image(edited_image, save_as_name)
+	FilesManager.save_local_image(edited_image, save_as_name, "")
 	FilesManager.update_local_image_metadata(save_as_name, image_meta)
 	GlobalToaster.show_toast_message("Saved Image")
 	

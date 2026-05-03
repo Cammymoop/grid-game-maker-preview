@@ -1527,8 +1527,54 @@ func disolve_entity_bond_group(entity: BaseEntity) -> void:
             var bonded_entity: BaseEntity = get_instance(inst_id)
             unbond_entity(bonded_entity, true)
 
-func removing_texture_id(_texture_id: int) -> void:
-    pass
+func removing_texture_id(texture_id_to_remove: int) -> void:
+    var fallback_tex: int = TextureManager.get_fallback_texture_id()
+    for entity_id in entity_defs.keys():
+        _remap_texture_id_in_entity(entity_id, texture_id_to_remove, fallback_tex, 0)
+
+func remapping_texture_id(from_texture_id: int, into_texture_id: int) -> void:
+    for entity_id in entity_defs.keys():
+        _remap_texture_id_in_entity(entity_id, from_texture_id, into_texture_id)
+
+func _remap_texture_id_in_entity(entity_id: int, from_texture_id: int, into_texture_id: int, overwrite_index_with: int = -1) -> void:
+    _remap_texture_id_in_dict(entity_defs[entity_id], from_texture_id, into_texture_id, overwrite_index_with)
+    if "preview_variant" in entity_defs[entity_id]:
+        _remap_texture_id_in_dict(entity_defs[entity_id]["preview_variant"], from_texture_id, into_texture_id, overwrite_index_with)
+    if "sprite_config" in entity_defs[entity_id]:
+        for layer_dict in entity_defs[entity_id]["sprite_config"].get("layers", []):
+            _remap_texture_id_in_dict(layer_dict, from_texture_id, into_texture_id, overwrite_index_with)
+
+func _remap_texture_id_in_dict(dict: Dictionary, from_texture_id: int, into_texture_id: int, overwrite_index_with: int = -1) -> void:
+    if "texture" in dict and int(dict["texture"]) == from_texture_id:
+        dict["texture"] = into_texture_id
+        if overwrite_index_with >= 0 and "tex_index" in dict:
+                dict["tex_index"] = overwrite_index_with
+    if "mask_texture" in dict and int(dict["mask_texture"]) == from_texture_id:
+        dict["mask_texture"] = into_texture_id
+        if overwrite_index_with >= 0 and "mask_tex_index" in dict:
+            dict["mask_tex_index"] = overwrite_index_with
+
+func _is_dict_using_texture_id(dict: Dictionary, texture_id: int) -> bool:
+    if int(dict.get("texture", -1)) == texture_id or int(dict.get("mask_texture", -1)) == texture_id:
+        return true
+    return false
+
+func _is_entity_using_texture_id(entity_id: int, texture_id: int) -> bool:
+    if _is_dict_using_texture_id(entity_defs[entity_id], texture_id):
+        return true
+    if "preview_variant" in entity_defs[entity_id]:
+        return _is_dict_using_texture_id(entity_defs[entity_id]["preview_variant"], texture_id)
+    if "sprite_config" in entity_defs[entity_id]:
+        for layer_dict in entity_defs[entity_id]["sprite_config"].get("layers", []):
+            if _is_dict_using_texture_id(layer_dict, texture_id):
+                return true
+    return false
+
+func is_texture_id_in_use(texture_id: int) -> bool:
+    for entity_id in entity_defs.keys():
+        if _is_entity_using_texture_id(entity_id, texture_id):
+            return true
+    return false
 
 func rerender_entity_sprite_preview(entity_id: int) -> void:
     var entity_def: Dictionary = entity_defs[entity_id]
