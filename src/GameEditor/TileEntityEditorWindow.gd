@@ -130,14 +130,16 @@ func set_controller(list_index) -> void:
 	controller_button.text = controller_name
 
 func load_entity_info(entity_index: int):
-	sprite_snapshot_tex = null
-	if EntityManager.entity_sprite_snapshots.has(entity_index):
-		sprite_snapshot_tex = EntityManager.get_entity_sprite_snapshot(entity_index)
-		# get the scale of the pixels in the snapshot, not the UI scale
-		sprite_snapshot_scale = 1 / EntityManager.get_entity_sprite_snapshot_scale(entity_index, false, false)
 	set_tile_entity_mode("entity")
 	the_index = entity_index
 	the_definition = EntityManager.get_entity_definition(entity_index)
+
+	sprite_snapshot_tex = null
+	var is_simple: bool = the_definition.get("sprite_config", {}).is_empty()
+	if not is_simple and EntityManager.entity_sprite_snapshots.has(entity_index):
+		sprite_snapshot_tex = EntityManager.get_entity_sprite_snapshot(entity_index)
+		# get the scale of the pixels in the snapshot, not the UI scale
+		sprite_snapshot_scale = 1 / EntityManager.get_entity_sprite_snapshot_scale(entity_index, false, false)
 	
 	find_child("NameInput").text = EntityManager.get_entity_name(the_index)
 	
