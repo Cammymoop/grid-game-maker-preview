@@ -5,7 +5,7 @@
 [ext_resource type="PackedScene" path="res://Scenes/GameEditor/TilePicker.tscn" id="3"]
 [ext_resource type="PackedScene" path="res://Scenes/GameEditor/HSeparator.tscn" id="4"]
 [ext_resource type="Texture2D" uid="uid://lrqeyxjmk22w" path="res://assets/img/tile_composer_bg.png" id="4_63ggb"]
-[ext_resource type="PackedScene" path="res://Scenes/UI/ButtonContainer.tscn" id="5"]
+[ext_resource type="PackedScene" uid="uid://cfehp8ycqn0du" path="res://Scenes/UI/ButtonContainer.tscn" id="5"]
 [ext_resource type="Script" uid="uid://ebmthipspiak" path="res://Scenes/GameEditor/UndoRedoer.gd" id="7"]
 [ext_resource type="Script" uid="uid://0abn2dhvmqsq" path="res://src/GameEditor/BrushSlideH.gd" id="8"]
 [ext_resource type="Script" uid="uid://ducwobvfknb7v" path="res://src/GameEditor/BrushSlideV.gd" id="9"]
@@ -20,6 +20,7 @@
 [ext_resource type="Texture2D" uid="uid://bd17ecvj57if6" path="res://assets/img/transparency_help.png" id="18"]
 [ext_resource type="FontFile" uid="uid://cpry5rd5ecdc5" path="res://assets/font/small_font.tres" id="19"]
 [ext_resource type="Script" uid="uid://ctv3pyo6boi3h" path="res://src/GameEditor/PickedCrosshair.gd" id="20"]
+[ext_resource type="PackedScene" uid="uid://dyjhlku4kgqkm" path="res://src/Singletons/global_toaster.tscn" id="20_63ggb"]
 
 [sub_resource type="AtlasTexture" id="3"]
 atlas = ExtResource("2")
@@ -93,7 +94,7 @@ default_font = ExtResource("19")
 
 [sub_resource type="ButtonGroup" id="ButtonGroup_63ggb"]
 
-[node name="TileCompositor" type="Window" unique_id=1495846052]
+[node name="TileCompositor" type="Window" unique_id=1495846052 node_paths=PackedStringArray("local_toaster")]
 oversampling_override = 1.0
 title = "Tile Compositor"
 position = Vector2i(2, 26)
@@ -102,6 +103,7 @@ wrap_controls = true
 script = ExtResource("1")
 loaded_texture = ExtResource("2")
 make_tex_with_size = Vector2(16, 16)
+local_toaster = NodePath("PanelContainer/LocalToaster")
 picked_brush_tex = SubResource("3")
 
 [node name="PanelContainer" type="PanelContainer" parent="." unique_id=337641331]
@@ -120,7 +122,7 @@ theme_override_constants/margin_bottom = 10
 [node name="VBoxContainer" type="VBoxContainer" parent="PanelContainer/MarginContainer" unique_id=746206108]
 layout_mode = 2
 
-[node name="Label" type="Label" parent="PanelContainer/MarginContainer/VBoxContainer" unique_id=1913660894]
+[node name="TitleLabel" type="Label" parent="PanelContainer/MarginContainer/VBoxContainer" unique_id=1913660894]
 layout_mode = 2
 text = "Image:"
 horizontal_alignment = 1
@@ -811,6 +813,8 @@ text = "Cancel"
 [node name="Control3" type="Control" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer3" unique_id=2084738060]
 layout_mode = 2
 size_flags_horizontal = 3
+
+[node name="LocalToaster" parent="PanelContainer" unique_id=1620797928 instance=ExtResource("20_63ggb")]
 
 [node name="UndoRedoer" type="Node" parent="." unique_id=1814489883]
 script = ExtResource("7")

@@ -26,7 +26,7 @@ func _ready():
 		title = "New Image"
 		ok_button_text = "Create Image"
 	
-	find_child("SharedMetaWarning").visible = edit_shared_meta_warning
+	find_child("SharedImageWarning").visible = edit_shared_meta_warning
 
 	image_size_label.visible = is_new_mode
 	image_size_node_2.visible = is_new_mode
@@ -36,6 +36,7 @@ func _ready():
 
 func load_meta(metadata: Dictionary) -> void:
 	if metadata.has("tile_size"):
+		prints("setting grid size input to", metadata["tile_size"])
 		grid_size_input.set_value(metadata["tile_size"])
 	if metadata.has("border"):
 		border_width_input.set_value(metadata["border"])

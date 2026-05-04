@@ -3,14 +3,51 @@
 [ext_resource type="Texture2D" uid="uid://b6lj5qghhre2t" path="res://assets/img/tiles.png" id="1"]
 [ext_resource type="Script" uid="uid://brdx6c4wcqmh6" path="res://src/GameEditor/SelectableTexture.gd" id="2"]
 [ext_resource type="StyleBox" path="res://src/UI/selectable_list_item_low.tres" id="3"]
+[ext_resource type="FontFile" uid="uid://ctnllh13x3iqi" path="res://assets/font/NotoSans-Bold.ttf" id="3_4tm3y"]
 [ext_resource type="Texture2D" uid="uid://b45r57rptl5tq" path="res://assets/img/button_icons/builtin.png" id="4"]
+[ext_resource type="Texture2D" uid="uid://dtjnaa2c5rfjm" path="res://assets/img/button_icons/bundled.png" id="5_b83f6"]
 
-[node name="SelectableTexItem" type="PanelContainer" unique_id=1682877327]
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_qhhpk"]
+content_margin_left = 2.0
+bg_color = Color(0.23594871, 0.23594871, 0.23594868, 0.28235295)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.86898494, 0.86898494, 0.8689847, 1)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_4tm3y"]
+content_margin_left = 2.0
+bg_color = Color(1, 1, 1, 1)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+
+[sub_resource type="Theme" id="Theme_qhhpk"]
+CheckButton/colors/button_checked_color = Color(0.17572346, 0.5492798, 3.85046e-07, 1)
+CheckButton/colors/button_unchecked_color = Color(2.6765938, 2.6765938, 2.6765938, 1)
+CheckButton/colors/font_pressed_color = Color(0, 0, 0, 1)
+CheckButton/font_sizes/font_size = 14
+CheckButton/styles/normal = SubResource("StyleBoxFlat_qhhpk")
+CheckButton/styles/pressed = SubResource("StyleBoxFlat_4tm3y")
+
+[node name="SelectableTexItem" type="PanelContainer" unique_id=1682877327 node_paths=PackedStringArray("display_tex_rect", "check_button", "name_label", "builtin_icon", "bundled_icon")]
 offset_left = 196.0
 offset_right = 770.0
 offset_bottom = 142.0
 theme_override_styles/panel = ExtResource("3")
 script = ExtResource("2")
+bold_font = ExtResource("3_4tm3y")
+display_tex_rect = NodePath("HB/TextureRect")
+check_button = NodePath("HB/MarginContainer2/CheckButton")
+name_label = NodePath("HB/MarginContainer/Label")
+builtin_icon = NodePath("HB/MarginContainer/VBoxContainer/Builtin")
+bundled_icon = NodePath("HB/MarginContainer/VBoxContainer/Bundled")
 
 [node name="HB" type="HBoxContainer" parent="." unique_id=166247145]
 layout_mode = 2
@@ -26,24 +63,51 @@ texture = ExtResource("1")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="Builtin" type="TextureRect" parent="HB" unique_id=1120489335]
-visible = false
+[node name="MarginContainer2" type="MarginContainer" parent="HB" unique_id=2059498998]
 layout_mode = 2
-size_flags_horizontal = 4
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_bottom = 8
+
+[node name="CheckButton" type="CheckButton" parent="HB/MarginContainer2" unique_id=1506435098]
+custom_minimum_size = Vector2(0, 50)
+layout_mode = 2
+size_flags_vertical = 4
+mouse_default_cursor_shape = 2
+theme = SubResource("Theme_qhhpk")
+text = "Used:"
+
+[node name="MarginContainer" type="MarginContainer" parent="HB" unique_id=642747095]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_bottom = 8
+
+[node name="VBoxContainer" type="VBoxContainer" parent="HB/MarginContainer" unique_id=545491649]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Builtin" type="TextureRect" parent="HB/MarginContainer/VBoxContainer" unique_id=1120489335]
+layout_mode = 2
+size_flags_horizontal = 0
 size_flags_vertical = 4
 tooltip_text = "Built-in"
 mouse_default_cursor_shape = 16
 texture = ExtResource("4")
 
-[node name="Label" type="Label" parent="HB" unique_id=1340523356]
+[node name="Bundled" type="TextureRect" parent="HB/MarginContainer/VBoxContainer" unique_id=2018522828]
+visible = false
+layout_mode = 2
+size_flags_horizontal = 0
+size_flags_vertical = 4
+tooltip_text = "Bunlded with this game"
+mouse_default_cursor_shape = 16
+texture = ExtResource("5_b83f6")
+
+[node name="Label" type="Label" parent="HB/MarginContainer" unique_id=1340523356]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "tiles.png"
 
-[node name="CheckButton" type="CheckButton" parent="HB" unique_id=1506435098]
-layout_mode = 2
-text = "Used:"
-
 [connection signal="gui_input" from="." to="." method="_on_SelectableTexItem_gui_input"]
 [connection signal="resized" from="HB/TextureRect" to="." method="_on_texture_rect_resized"]
-[connection signal="toggled" from="HB/CheckButton" to="." method="_on_CheckButton_toggled"]
+[connection signal="toggled" from="HB/MarginContainer2/CheckButton" to="." method="_on_CheckButton_toggled"]

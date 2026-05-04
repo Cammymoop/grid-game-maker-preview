@@ -18,12 +18,14 @@ var smallest_step: float = 0.00001
 var arg_name: String = ""
 
 var _ignore_value_changed: bool = false
+var _set_value: = false
 
 func _ready():
     if label_is_w_h:
         x_label.text = "W"
         y_label.text = "H"
-    set_value(starting_value)
+    if not _set_value:
+        set_value(starting_value)
     x_input.value_changed.connect(on_input_changed.unbind(1))
     y_input.value_changed.connect(on_input_changed.unbind(1))
     
@@ -58,7 +60,8 @@ func set_input_args(new_args: Array) -> void:
         set_args_starting_value(new_starting_val)
 
     if is_inside_tree():
-        set_value(starting_value)
+        if not _set_value:
+            set_value(starting_value)
 
 func set_args_starting_value(new_starting_val: Vector2) -> void:
     starting_value = new_starting_val
@@ -75,6 +78,7 @@ func get_value() -> Vector2:
     return Vector2(x_input.value, y_input.value)
 
 func set_value(new_val: Vector2) -> void:
+    _set_value = true
     change_precision_of_input(x_input, smallest_step)
     change_precision_of_input(y_input, smallest_step)
     x_input.set_value_no_signal(new_val.x)

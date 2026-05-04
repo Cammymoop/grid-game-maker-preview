@@ -34,6 +34,7 @@ var bg_color:Color
 const ROTATION_ADJUST = 1/20.0
 
 func _ready() -> void:
+	TextureManager.textures_loaded.connect(on_textures_loaded)
 	set_fall_direction(fall_direction)
 	set_process_input(changeable_direction)
 	tile_indexes = MapManager.get_all_tile_indexes()
@@ -48,6 +49,12 @@ func _ready() -> void:
 	
 	# Start with stuff already on the screen
 	start_fill()
+
+func reload_definitions() -> void:
+	tile_indexes = MapManager.get_all_tile_indexes()
+	tile_defs = MapManager.tile_defs.duplicate_deep()
+	entity_indexes = EntityManager.get_all_entity_indexes()
+	entity_defs = EntityManager.entity_defs.duplicate_deep()
 
 func start_fill() -> void:
 	var vp_height = get_viewport_rect().size.y
@@ -189,3 +196,6 @@ func set_fall_direction(new_direction: String) -> void:
 
 func _on_NewObjTimer_timeout() -> void:
 	spawn_random_obj()
+
+func on_textures_loaded() -> void:
+	reload_definitions()

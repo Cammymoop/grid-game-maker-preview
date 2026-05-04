@@ -397,8 +397,8 @@ func get_local_image_path(image_name: String, for_game_name: String = "") -> Str
 	return get_shared_images_dir().path_join(image_name)
 
 func copy_local_image_to_local(from_name: String, from_game: String, to_name: String, to_game: String) -> bool:
-	from_game = _sanitize_image_filename(from_game)
-	to_game = _sanitize_image_filename(to_game)
+	from_name = _sanitize_image_filename(from_name)
+	to_name = _sanitize_image_filename(to_name)
 	if not from_name or not to_name:
 		return false
 	if from_name == to_name and from_game == to_game:

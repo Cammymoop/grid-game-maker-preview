@@ -1,6 +1,7 @@
 extends VBoxContainer
 
 signal selected_item_changed(item: SelectableTexture)
+signal request_refresh_list()
 
 const SelectableTexture = preload("res://src/GameEditor/SelectableTexture.gd")
 const ImagesTab = preload("res://src/GameEditor/ImagesEditor.gd")
@@ -31,6 +32,7 @@ func init(editor: ImagesTab) -> void:
 
 func clear_all() -> void:
 	for c in get_children():
+		remove_child(c)
 		c.queue_free()
 	enabled_textures = []
 	all_textures = []
@@ -46,6 +48,7 @@ func add_texture(texture_name: String, texture: Texture, builtin: bool, enabled:
 	list_item.selected.connect(on_item_selected)
 	list_item.enable_toggled.connect(on_texture_item_enabled_toggled)
 	list_item.double_clicked.connect(on_item_double_clicked)
+	list_item.request_context_menu.connect(on_item_request_context_menu)
 	
 	add_child(list_item)
 
@@ -71,8 +74,15 @@ func _get_loaded_texture_id_from_item(item: SelectableTexture) -> int:
 func on_item_double_clicked(item: SelectableTexture) -> void:
 	images_editor.edit_texture_from_selectable_texture(item)
 
+func texture_item_count() -> int:
+	var count: int = 0
+	for child in get_children():
+		if child is SelectableTexture:
+			count += 1
+	return count
+
 func select_first_item() -> void:
-	if get_child_count() > 0:
+	if texture_item_count() > 0:
 		var first_item: = get_child(0) as SelectableTexture
 		if first_item:
 			deselect_other_items(first_item)
@@ -80,13 +90,13 @@ func select_first_item() -> void:
 
 func get_selected() -> SelectableTexture:
 	for c in get_children():
-		if c.is_selected:
+		if c is SelectableTexture and c.is_selected:
 			return c
 	return null
 
 func deselect_other_items(item: SelectableTexture) -> void:
 	for c in get_children():
-		if item == c:
+		if item == c or not c is SelectableTexture:
 			continue
 		c.deselect()
 
@@ -100,17 +110,20 @@ func sort_items() -> void:
 	for child_item in get_children():
 		if child_item is SelectableTexture:
 			items.append(child_item)
-			remove_child(child_item)
+		remove_child(child_item)
 	items.sort_custom(texture_item_order)
+	var previous_enabled: bool = true
 	for sorted_item in items:
+		if not sorted_item.is_enabled() and previous_enabled:
+			previous_enabled = false
+			if items.find(sorted_item) > 0:
+				var h_sep: = HSeparator.new()
+				add_child(h_sep)
 		add_child(sorted_item)
 
 func texture_item_order(item_a: SelectableTexture, item_b: SelectableTexture) -> bool:
 	var name_a: = item_a.get_texture_name()
 	var name_b: = item_b.get_texture_name()
-	if not name_b in all_textures or not name_a in all_textures:
-		prints("texture not found in all_textures", name_a, name_b)
-		return true
 	
 	var score_a: int = 100 * int(item_a.is_enabled())
 	var score_b: int = 100 * int(item_b.is_enabled())
@@ -122,6 +135,8 @@ func texture_item_order(item_a: SelectableTexture, item_b: SelectableTexture) ->
 		return score_a > score_b
 	return name_a.nocasecmp_to(name_b) < 0
 
+func on_item_request_context_menu(item: SelectableTexture) -> void:
+	show_context_menu(item)
 
 func show_context_menu(for_item: SelectableTexture) -> void:
 	if not for_item:
@@ -168,10 +183,12 @@ func on_context_menu_id_pressed(id: int, img_item: SelectableTexture) -> void:
 		if img_item.get_is_builtin():
 			return
 		FilesManager.delete_local_image(img_item.get_texture_name(), for_game_name)
+		request_refresh_list.emit()
 	elif id == CTX_EDIT_METADATA:
 		images_editor.edit_texture_metadata_for_item(img_item)
 	elif id == CTX_REMOVE_USAGE:
 		remove_used_item(img_item)
+		request_refresh_list.emit()
 	elif id == CTX_REMAP_TO_ANOTHER:
 		images_editor.prompt_for_remap_used_item(img_item)
 	elif id in [CTX_MAKE_BUNDLED, CTX_DUPLICATE_AS_BUNDLED, CTX_DUPLICATE_AS_SHARED]:
@@ -183,9 +200,11 @@ func handle_ctx_copy(id: int, img_item: SelectableTexture) -> void:
 			TextureManager.make_builtin_image_bundled(img_item.get_texture_name())
 		else:
 			TextureManager.make_shared_image_bundled(img_item.get_texture_name())
+		request_refresh_list.emit()
 	elif id in [CTX_DUPLICATE_AS_BUNDLED, CTX_DUPLICATE_AS_SHARED]:
 		var is_bundled_copy: = id == CTX_DUPLICATE_AS_BUNDLED
-		TextureManager.make_duplicate_of_image(is_bundled_copy, img_item.get_texture_name(), img_item.get_is_builtin(), img_item.get_is_shared())
+		TextureManager.make_duplicate_of_image(not is_bundled_copy, img_item.get_texture_name(), img_item.get_is_builtin(), img_item.get_is_shared())
+		request_refresh_list.emit()
 
 
 

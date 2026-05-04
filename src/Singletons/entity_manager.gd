@@ -197,6 +197,7 @@ func all_entities_settled() -> bool:
     return settled
 
 func _ready():
+    TextureManager.textures_remapped.connect(on_textures_remapped)
     #preload_controller_templates()
     process_physics_priority = 10
     if not GameManager.is_node_ready():
@@ -1599,7 +1600,7 @@ func build_sprite_previews() -> void:
     entity_sprite_snapshots.clear()
     var entities_to_gen_for: Array[int] = []
     for entity_id in entity_defs.keys():
-        if entity_defs[entity_id].get("preview_variant", {}).is_empty():
+        if entity_defs[entity_id].get("sprite_config", {}):
             entities_to_gen_for.append(entity_id)
     if not entities_to_gen_for:
         initial_sprite_previews_created = true
@@ -1609,7 +1610,7 @@ func build_sprite_previews() -> void:
     var sprite_previewer: = _get_snapshot_renderer()
     for entity_id in entities_to_gen_for:
         var entity_def: Dictionary = entity_defs[entity_id]
-        if not entity_def.get("preview_variant", {}).is_empty():
+        if not entity_def.get("sprite_config", {}):
             continue
         await _update_sprite_preview_for_entity(entity_id, entity_def, sprite_previewer)
 
@@ -1771,3 +1772,6 @@ func get_entity_tailing_chain(reference_entity: BaseEntity, with_behind: bool, w
                     filtered_chain.append(e)
 
     return filtered_chain
+
+func on_textures_remapped() -> void:
+    build_sprite_previews()

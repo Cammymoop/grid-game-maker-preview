@@ -1,0 +1,95 @@
+[gd_scene format=3 uid="uid://cmav0jdsm7bho"]
+
+[ext_resource type="Script" uid="uid://2svh3kdibwhh" path="res://Scenes/GameEditor/pick_remap_image.gd" id="1_p4jfj"]
+
+[node name="PickRemapImage" type="ConfirmationDialog" unique_id=668637704 node_paths=PackedStringArray("builtin_list", "shared_list", "bundled_list")]
+oversampling_override = 1.0
+title = "Remap to"
+position = Vector2i(0, 25)
+size = Vector2i(503, 400)
+visible = true
+ok_button_text = "Remap"
+script = ExtResource("1_p4jfj")
+builtin_list = NodePath("MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer/BuiltinList")
+shared_list = NodePath("MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer2/SharedList")
+bundled_list = NodePath("MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer3/BundledList")
+
+[node name="MarginContainer" type="MarginContainer" parent="." unique_id=324907220]
+offset_left = 8.0
+offset_top = 8.0
+offset_right = 495.0
+offset_bottom = 355.0
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 10
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer" unique_id=2126677588]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="Label" type="Label" parent="MarginContainer/VBoxContainer" unique_id=304080115]
+layout_mode = 2
+text = "Remap usage from "
+horizontal_alignment = 1
+
+[node name="Label2" type="Label" parent="MarginContainer/VBoxContainer" unique_id=1139657989]
+layout_mode = 2
+text = "To"
+horizontal_alignment = 1
+
+[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer" unique_id=461761338]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 20
+alignment = 1
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/VBoxContainer/HBoxContainer" unique_id=1880270379]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer" unique_id=969230741]
+layout_mode = 2
+text = "Builtin:"
+
+[node name="BuiltinList" type="ItemList" parent="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer" unique_id=1948084664]
+layout_mode = 2
+auto_width = true
+auto_height = true
+item_count = 2
+item_0/text = "abc"
+item_1/text = "123"
+
+[node name="VBoxContainer2" type="VBoxContainer" parent="MarginContainer/VBoxContainer/HBoxContainer" unique_id=1283231003]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer2" unique_id=1019166206]
+layout_mode = 2
+text = "Shared:"
+
+[node name="SharedList" type="ItemList" parent="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer2" unique_id=937902939]
+layout_mode = 2
+size_flags_vertical = 3
+auto_width = true
+scroll_hint_mode = 1
+item_count = 2
+item_0/text = "abc"
+item_1/text = "123"
+
+[node name="VBoxContainer3" type="VBoxContainer" parent="MarginContainer/VBoxContainer/HBoxContainer" unique_id=1000731083]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer3" unique_id=725742476]
+layout_mode = 2
+text = "Bundled:"
+
+[node name="BundledList" type="ItemList" parent="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer3" unique_id=513134837]
+layout_mode = 2
+size_flags_vertical = 3
+auto_width = true
+auto_height = true
+scroll_hint_mode = 1
+item_count = 2
+item_0/text = "abc"
+item_1/text = "123"
+
+[connection signal="confirmed" from="." to="." method="_on_TextureMetaDialog_confirmed"]

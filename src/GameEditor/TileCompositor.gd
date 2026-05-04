@@ -2,12 +2,21 @@ extends Window
 
 signal hidden
 
+const Toaster = preload("res://src/Singletons/global_toaster.gd")
+
 var texture_dialog = preload("res://Scenes/GameEditor/BetterTextureDialog.tscn")
 
 @onready var local_tile_picker = find_child("TilePickerLocal")
 @export var loaded_texture: Texture2D
 @export var make_tex_with_size: Vector2
+
+@export var title_label: Label
+
+@export var local_toaster: Toaster
+
 var save_as_name: = ""
+
+var edited_is_bundled: bool = false
 
 var edited_image: Image
 var edited_texture: Texture2D
@@ -80,6 +89,10 @@ func set_filename(file_name: String) -> void:
 		find_child("SaveFileButton").disabled = false
 	else:
 		find_child("SaveFileButton").disabled = true
+	if save_as_name:
+		title_label.text = file_name + ":"
+	else:
+		title_label.text = "Image:"
 		
 
 func _ready():
@@ -585,23 +598,44 @@ func _on_DiscardButton_pressed():
 
 
 func _on_SaveAsFileButton_pressed():
+	if OS.has_feature("web"):
+		return
 	if not save_as_name:
-		save_as_name = Utility.random_animal() + ".png"
-	$SaveAsDialog.current_path = FilesManager.get_shared_images_dir().path_join(save_as_name)
+		set_filename(Utility.random_animal() + ".png")
+	var default_dest_dir: = FilesManager.get_shared_images_dir()
+	if edited_is_bundled:
+		default_dest_dir = FilesManager.get_game_images_dir(GameManager.get_game_name())
+	FileDialog.set_favorite_list(PackedStringArray([
+		FilesManager.get_shared_images_dir(),
+		FilesManager.get_game_images_dir(GameManager.get_game_name()),
+	]))
+	$SaveAsDialog.current_path = default_dest_dir.path_join(save_as_name)
 	$SaveAsDialog.popup_centered()
 	$SaveAsDialog.deselect_all()
 
 
 func _on_SaveAsDialog_file_selected(path: String):
 	var base_path: = path.get_base_dir()
+	var saved_to_shared: = false
+	var saved_to_bundled: = false
 	if base_path == FilesManager.get_shared_images_dir():
+		saved_to_shared = true
 		FilesManager.save_local_image(edited_image, path.get_file(), "")
+	elif base_path == FilesManager.get_game_images_dir(GameManager.get_game_name()):
+		saved_to_bundled = true
+		FilesManager.save_local_image(edited_image, path.get_file(), GameManager.get_game_name())
 	else:
-		GlobalToaster.show_toast_message("Please save to shared images directory")
+		local_toaster.show_toast_message("Please save to shared or bundled images directory")
 		return
-	GlobalToaster.show_toast_message("Saved Image")
+	local_toaster.show_toast_message("Saved Image")
 	set_filename(path.get_file())
-	FilesManager.update_local_image_metadata(save_as_name, image_meta)
+	if saved_to_shared:
+		FilesManager.update_local_image_metadata(save_as_name, image_meta, "")
+		edited_is_bundled = false
+	elif saved_to_bundled:
+		var to_game_name: = GameManager.get_game_name()
+		FilesManager.update_local_image_metadata(save_as_name, image_meta, to_game_name)
+		edited_is_bundled = true
 
 
 func _on_BrushColorPicker_color_changed(color):
@@ -612,9 +646,10 @@ func _on_BrushColorPicker_color_changed(color):
 func _on_SaveFileButton_pressed():
 	if save_as_name == "":
 		return
-	FilesManager.save_local_image(edited_image, save_as_name, "")
-	FilesManager.update_local_image_metadata(save_as_name, image_meta)
-	GlobalToaster.show_toast_message("Saved Image")
+	var to_game_name: = GameManager.get_game_name() if edited_is_bundled else ""
+	FilesManager.save_local_image(edited_image, save_as_name, to_game_name)
+	FilesManager.update_local_image_metadata(save_as_name, image_meta, to_game_name)
+	local_toaster.show_toast_message("Saved Image")
 	
 
 func get_corner_from_button(corner_button: ButtonContainer) -> Rect2i:

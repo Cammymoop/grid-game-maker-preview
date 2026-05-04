@@ -25,6 +25,7 @@
 [ext_resource type="Script" path="res://Scenes/GameEditor/background_style_editor_tab.gd" id="15_4q0gk"]
 [ext_resource type="PackedScene" uid="uid://b4fp8ldktkvcd" path="res://Scenes/bg_effect_6.tscn" id="16_iwmpq"]
 [ext_resource type="PackedScene" uid="uid://b1a6s2o32t35i" path="res://Scenes/GameEditor/bg_style_editor.tscn" id="18_umwh7"]
+[ext_resource type="PackedScene" uid="uid://cj8u25mhjg6n8" path="res://Scenes/GameEditor/SelectableTexItem.tscn" id="22_48hio"]
 
 [sub_resource type="StyleBoxEmpty" id="4"]
 
@@ -67,6 +68,14 @@ corner_radius_bottom_right = 3
 corner_radius_bottom_left = 3
 corner_detail = 5
 
+[sub_resource type="StyleBoxLine" id="StyleBoxLine_retx3"]
+color = Color(0.4559766, 0.4110456, 0.5372054, 1)
+thickness = 12
+
+[sub_resource type="Theme" id="Theme_xh6ve"]
+HSeparator/constants/separation = 24
+HSeparator/styles/separator = SubResource("StyleBoxLine_retx3")
+
 [node name="GameEditor" type="Control" unique_id=1534913968]
 layout_mode = 3
 anchors_preset = 15
@@ -94,10 +103,11 @@ beside_tabs_buttons = NodePath("HBoxContainer")
 [node name="TabContainer" type="TabContainer" parent="MarginContainer/UIRoot" unique_id=540253846]
 layout_mode = 2
 theme = ExtResource("3_qrjoe")
-current_tab = 0
+current_tab = 3
 tab_0/title = "Game"
 
 [node name="GameDefinition" type="VBoxContainer" parent="MarginContainer/UIRoot/TabContainer" unique_id=1146228055 node_paths=PackedStringArray("show_level_title_option_picker", "name_input", "edit_game_dir_button", "move_interp_option_picker", "action_signal_sent_to_option_picker", "turn_animation_option_picker", "default_move_speed_input")]
+visible = false
 layout_mode = 2
 script = ExtResource("6")
 show_level_title_option_picker = NodePath("ScrollContainer/VBoxContainer/GameSettingsSection/MarginContainer/HFlowContainer/HFlowContainer/HBoxContainer11/OptionButton")
@@ -771,13 +781,15 @@ theme_override_constants/margin_bottom = 3
 [node name="BGStyleEditor" parent="MarginContainer/UIRoot/TabContainer/Background/HBoxContainer/PanelContainer/HBoxContainer/MarginContainer/PanelContainer/ScrollContainer/MarginContainer" unique_id=1622581633 instance=ExtResource("18_umwh7")]
 layout_mode = 2
 
-[node name="Images" type="VBoxContainer" parent="MarginContainer/UIRoot/TabContainer" unique_id=500504760 node_paths=PackedStringArray("texture_item_list", "edit_texture_button", "open_images_folder_button")]
-visible = false
+[node name="Images" type="VBoxContainer" parent="MarginContainer/UIRoot/TabContainer" unique_id=500504760 node_paths=PackedStringArray("texture_item_list", "edit_texture_button", "convert_to_bundled_button", "import_image_button", "duplicate_image_button", "open_images_folder_button")]
 layout_mode = 2
 script = ExtResource("5")
 texture_item_list = NodePath("PanelContainer/ScrollContainer/ListContainer")
 edit_texture_button = NodePath("HBoxContainer/HBoxContainer/EditTexButton")
-open_images_folder_button = NodePath("HBoxContainer/OpenImagesFolder")
+convert_to_bundled_button = NodePath("HBoxContainer/VBoxContainer/ConvertToBundledBtn")
+import_image_button = NodePath("HBoxContainer/VBoxContainer/ImportImageBtn")
+duplicate_image_button = NodePath("HBoxContainer/HBoxContainer/DuplicateImgButton")
+open_images_folder_button = NodePath("HBoxContainer/VBoxContainer/OpenImagesFolder")
 metadata/_tab_index = 3
 
 [node name="HBoxContainer2" type="HBoxContainer" parent="MarginContainer/UIRoot/TabContainer/Images" unique_id=313043667]
@@ -801,8 +813,18 @@ layout_mode = 2
 [node name="ListContainer" type="VBoxContainer" parent="MarginContainer/UIRoot/TabContainer/Images/PanelContainer/ScrollContainer" unique_id=24006158]
 layout_mode = 2
 size_flags_horizontal = 3
+theme = SubResource("Theme_xh6ve")
 theme_override_constants/separation = 5
 script = ExtResource("11")
+
+[node name="SelectableTexItem" parent="MarginContainer/UIRoot/TabContainer/Images/PanelContainer/ScrollContainer/ListContainer" unique_id=1682877327 instance=ExtResource("22_48hio")]
+layout_mode = 2
+
+[node name="HSeparator" type="HSeparator" parent="MarginContainer/UIRoot/TabContainer/Images/PanelContainer/ScrollContainer/ListContainer" unique_id=463818185]
+layout_mode = 2
+
+[node name="SelectableTexItem2" parent="MarginContainer/UIRoot/TabContainer/Images/PanelContainer/ScrollContainer/ListContainer" unique_id=1268164513 instance=ExtResource("22_48hio")]
+layout_mode = 2
 
 [node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/UIRoot/TabContainer/Images" unique_id=136632391]
 layout_mode = 2
@@ -824,11 +846,34 @@ layout_mode = 2
 disabled = true
 text = "Edit Image"
 
-[node name="OpenImagesFolder" type="Button" parent="MarginContainer/UIRoot/TabContainer/Images/HBoxContainer" unique_id=1941266168]
+[node name="DuplicateImgButton" type="Button" parent="MarginContainer/UIRoot/TabContainer/Images/HBoxContainer/HBoxContainer" unique_id=617858224]
+custom_minimum_size = Vector2(100, 50)
+layout_mode = 2
+disabled = true
+text = "Duplicate
+Image"
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/UIRoot/TabContainer/Images/HBoxContainer" unique_id=1035069219]
+layout_mode = 2
+
+[node name="OpenImagesFolder" type="Button" parent="MarginContainer/UIRoot/TabContainer/Images/HBoxContainer/VBoxContainer" unique_id=1941266168]
 layout_mode = 2
 size_flags_vertical = 4
 theme_override_fonts/font = ExtResource("14")
-text = "Open Images Folder"
+text = "Open Shared Images Folder"
+
+[node name="ImportImageBtn" type="Button" parent="MarginContainer/UIRoot/TabContainer/Images/HBoxContainer/VBoxContainer" unique_id=2110706824]
+visible = false
+layout_mode = 2
+size_flags_vertical = 4
+theme_override_fonts/font = ExtResource("14")
+text = "Import image"
+
+[node name="ConvertToBundledBtn" type="Button" parent="MarginContainer/UIRoot/TabContainer/Images/HBoxContainer/VBoxContainer" unique_id=1027773264]
+layout_mode = 2
+size_flags_vertical = 4
+theme_override_fonts/font = ExtResource("14")
+text = "Bundle used shared images"
 
 [node name="TileEntityEditorWindow" parent="MarginContainer/UIRoot" unique_id=1695968813 instance=ExtResource("2")]
 visible = false
@@ -909,7 +954,9 @@ max_brightness = 0.3
 [connection signal="pressed" from="MarginContainer/UIRoot/TabContainer/Tiles & Entities/VSplitContainer/VBoxContainer/EntitiesHBoxContainer/NewEntityButton" to="MarginContainer/UIRoot/TabContainer/Tiles & Entities" method="_on_NewEntityButton_pressed"]
 [connection signal="pressed" from="MarginContainer/UIRoot/TabContainer/Tiles & Entities/VSplitContainer/VBoxContainer2/TilesHBoxContainer/NewTileButton" to="MarginContainer/UIRoot/TabContainer/Tiles & Entities" method="_on_NewTileButton_pressed"]
 [connection signal="pressed" from="MarginContainer/UIRoot/TabContainer/Images/HBoxContainer/HBoxContainer/NewTexButton" to="MarginContainer/UIRoot/TabContainer/Images" method="_on_NewTexButton_pressed"]
-[connection signal="pressed" from="MarginContainer/UIRoot/TabContainer/Images/HBoxContainer/OpenImagesFolder" to="MarginContainer/UIRoot" method="_on_OpenImagesFolder_pressed"]
+[connection signal="pressed" from="MarginContainer/UIRoot/TabContainer/Images/HBoxContainer/VBoxContainer/OpenImagesFolder" to="MarginContainer/UIRoot" method="_on_OpenImagesFolder_pressed"]
+[connection signal="pressed" from="MarginContainer/UIRoot/TabContainer/Images/HBoxContainer/VBoxContainer/ImportImageBtn" to="MarginContainer/UIRoot" method="_on_OpenImagesFolder_pressed"]
+[connection signal="pressed" from="MarginContainer/UIRoot/TabContainer/Images/HBoxContainer/VBoxContainer/ConvertToBundledBtn" to="MarginContainer/UIRoot" method="_on_OpenImagesFolder_pressed"]
 [connection signal="pressed" from="MarginContainer/UIRoot/HBoxContainer/TestPlayButton" to="MarginContainer/UIRoot" method="_on_test_play_button_pressed"]
 [connection signal="pressed" from="MarginContainer/UIRoot/HBoxContainer/BackButton" to="MarginContainer/UIRoot" method="_on_BackButton_pressed"]
 

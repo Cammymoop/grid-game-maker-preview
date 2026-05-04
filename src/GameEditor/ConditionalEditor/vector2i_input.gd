@@ -9,8 +9,11 @@ signal value_changed(value: Vector2i)
 
 var arg_name: String = ""
 
+var _set_value: = false
+
 func _ready():
-    set_value(starting_value)
+    if not _set_value:
+        set_value(starting_value)
     x_input.value_changed.connect(on_input_changed.unbind(1))
     y_input.value_changed.connect(on_input_changed.unbind(1))
 
@@ -43,6 +46,7 @@ func get_value() -> Vector2i:
     return Vector2i(x_input.value, y_input.value)
 
 func set_value(new_val: Vector2i) -> void:
+    _set_value = true
     x_input.set_value_no_signal(new_val.x)
     y_input.set_value_no_signal(new_val.y)
 

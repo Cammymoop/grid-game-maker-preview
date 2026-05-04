@@ -8,6 +8,8 @@ const SelectableTextureList = preload("res://src/GameEditor/SelectableTextureLis
 var tile_compositor_scn = preload("res://Scenes/GameEditor/TileCompositor.tscn")
 var metadata_dialog = preload("res://Scenes/GameEditor/TextureMetaDialog.tscn")
 
+var pick_remap_image_scn = preload("res://Scenes/GameEditor/pick_remap_image.tscn")
+
 @onready var ui_root = find_parent("UIRoot")
 
 @export var texture_item_list: SelectableTextureList
@@ -15,6 +17,8 @@ var metadata_dialog = preload("res://Scenes/GameEditor/TextureMetaDialog.tscn")
 
 @export var convert_to_bundled_button: Button
 @export var import_image_button: Button
+
+@export var duplicate_image_button: Button
 
 @export var open_images_folder_button: Button
 
@@ -29,8 +33,10 @@ func _ready():
 		import_image_button.pressed.connect(import_image_from_web)
 	texture_item_list.init(self)
 	texture_item_list.selected_item_changed.connect(on_selected_item_changed)
+	texture_item_list.request_refresh_list.connect(refresh_list)
 	
 	edit_texture_button.pressed.connect(on_edit_texture_button_pressed)
+	duplicate_image_button.pressed.connect(on_duplicate_image_button_pressed)
 	refresh_list()
 
 func refresh_list():
@@ -70,13 +76,25 @@ func on_selected_item_changed(_item: SelectableTexture) -> void:
 
 func enable_edit_button() -> void:
 	edit_texture_button.disabled = false
+	duplicate_image_button.disabled = false
 
 func disable_edit_button() -> void:
 	edit_texture_button.disabled = true
+	duplicate_image_button.disabled = true
 
 func on_edit_texture_button_pressed() -> void:
 	var selected_item = texture_item_list.get_selected()
 	edit_texture_from_selectable_texture(selected_item)
+
+func on_duplicate_image_button_pressed() -> void:
+	var selected_item = texture_item_list.get_selected()
+	if selected_item:
+		var img_name: = selected_item.get_texture_name()
+		var is_builtin: = selected_item.get_is_builtin()
+		var from_shared: = selected_item.get_is_shared() and not is_builtin
+		var to_shared: = from_shared or is_builtin
+		TextureManager.make_duplicate_of_image(to_shared, img_name, is_builtin, from_shared)
+		refresh_list()
 
 func _on_NewTexButton_pressed() -> void:
 	var dialog: = metadata_dialog.instantiate() as TextureMetaDialog
@@ -126,6 +144,7 @@ func edit_texture_metadata_for_item(item: SelectableTexture) -> void:
 	var edit_meta_dialog: = metadata_dialog.instantiate() as TextureMetaDialog
 	edit_meta_dialog.is_new_mode = false
 	edit_meta_dialog.edit_shared_meta_warning = item.get_is_shared()
+	prints("loading meta", current_meta)
 	edit_meta_dialog.load_meta(current_meta)
 	add_child(edit_meta_dialog)
 	edit_meta_dialog.popup_centered()
@@ -145,10 +164,8 @@ func edit_tex_continue(meta: Dictionary, selected_item: SelectableTexture) -> vo
 	tile_compositor.set_texture(selected_item.get_texture())
 	tile_compositor.set_metadata(meta)
 	if not selected_item.get_is_builtin():
-		if not selected_item.get_is_shared():
-			push_error("Texture inside game not implemented yet")
-		else:
-			tile_compositor.set_filename(selected_item.texture_name)
+		tile_compositor.set_filename(selected_item.texture_name)
+		tile_compositor.edited_is_bundled = not selected_item.get_is_shared()
 	ui_root.add_popup_layer_node(tile_compositor)
 	tile_compositor.popup_centered()
 	
@@ -169,31 +186,38 @@ func set_texture_item_enabled(item: SelectableTexture, new_is_enabled: bool) -> 
 		enable_texture_item(item)
 	else:
 		disable_texture_item(item)
-	images_updated()
 
 func disable_texture_item(item: SelectableTexture) -> void:
 	TextureManager.remove_loaded_texture_by_name(item.get_texture_name(), item.get_is_builtin(), item.get_is_shared())
+	images_updated()
 
 func enable_texture_item(item: SelectableTexture) -> void:
 	if item.get_is_builtin():
 		TextureManager.add_builtin_texture(item.get_texture_name())
-	elif item.get_is_shared():
-		if not FilesManager.has_local_image_metadata(item.get_texture_name()):
+		images_updated()
+	else:
+		var for_game_name: = "" if item.get_is_shared() else GameManager.get_game_name()
+		if not FilesManager.has_local_image_metadata(item.get_texture_name(), for_game_name):
 			item.set_enabled(false)
 			var meta_dialog: = metadata_dialog.instantiate() as TextureMetaDialog
+			meta_dialog.is_new_mode = false
+			var default_meta: = TextureManager.create_metadata_for_texture(item.get_texture())
+			meta_dialog.load_meta(default_meta)
 			add_child(meta_dialog)
 			meta_dialog.popup_centered()
-			meta_dialog.meta_confirmed.connect(TextureManager.add_local_texture.bind(item.get_texture_name()))
-			meta_dialog.meta_confirmed.connect(item.set_enabled.bind(true))
+			meta_dialog.meta_confirmed.connect(enable_after_meta_edit.bind(item))
 		else:
-			TextureManager.add_local_texture(item.get_texture_name())
-	else:
-		item.set_enabled(false)
-		push_error("Texture inside game not implemented yet")
+			TextureManager.add_local_texture(item.get_texture_name(), item.get_is_shared())
+			refresh_list()
 
+func enable_after_meta_edit(new_meta: Dictionary, for_item) -> void:
+	TextureManager.set_texture_meta_by_name(for_item.get_texture_name(), false, for_item.get_is_shared(), new_meta)
+	TextureManager.add_local_texture(for_item.get_texture_name(), for_item.get_is_shared())
+	refresh_list()
 
 func make_all_used_shared_images_bundled() -> void:
 	TextureManager.bundle_all_used_shared_images()
+	refresh_list()
 
 func import_image_from_web() -> void:
 	if not OS.has_feature("web"):
@@ -232,3 +256,29 @@ func got_web_import_image(file_name: String, _file_type: String, b64_data: Strin
 		return
 	GlobalToaster.show_toast_message("Imported %s" % [file_name])
 	refresh_list()
+
+func prompt_for_remap_used_item(item: SelectableTexture) -> void:
+	var pick_remap_dialog: = pick_remap_image_scn.instantiate() as ConfirmationDialog
+	pick_remap_dialog.confirmed.connect(on_remap_image_confirmed.bind(item, pick_remap_dialog))
+	pick_remap_dialog.canceled.connect(pick_remap_dialog.close_dialog)
+	add_child(pick_remap_dialog)
+	pick_remap_dialog.popup_centered()
+
+
+func on_remap_image_confirmed(remap_from_item: SelectableTexture, pick_remap_dialog: ConfirmationDialog) -> void:
+	if not remap_from_item or not pick_remap_dialog:
+		push_warning("No remap from item or pick remap dialog")
+		return
+	var remap_from_texture_id: int = TextureManager.get_loaded_texture_id(remap_from_item.get_texture_name(), remap_from_item.get_is_builtin(), remap_from_item.get_is_shared())
+	if remap_from_texture_id == -1:
+		push_warning("Failed to get loaded texture id for remap from item")
+		return
+	var remap_to_name: String = pick_remap_dialog.picked_name
+	var remap_to_builtin: bool = pick_remap_dialog.picked_is_builtin
+	var remap_to_shared: bool = pick_remap_dialog.picked_is_shared
+	pick_remap_dialog.queue_free()
+	if TextureManager.remap_texture_id_to_image(remap_from_texture_id, remap_to_name, remap_to_builtin, remap_to_shared):
+		GlobalToaster.show_toast_message("Remapped %s to %s" % [remap_from_item.get_texture_name(), remap_to_name])
+		refresh_list()
+	else:
+		GlobalToaster.show_toast_message("Something went wrong remapping :(")

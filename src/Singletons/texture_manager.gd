@@ -1,6 +1,7 @@
 extends Node
 
 signal textures_loaded
+signal textures_remapped
 
 var placeholder = preload("res://assets/img/placeholder.png")
 var placeholder_metadata = {
@@ -97,12 +98,12 @@ func is_local_file_loaded(file_name: String, is_shared: bool = true) -> bool:
             return true
     return false
 
-func add_local_texture(file_name: String) -> void:
-    if is_local_file_loaded(file_name):
+func add_local_texture(file_name: String, is_shared: bool = true) -> void:
+    if is_local_file_loaded(file_name, is_shared):
         return
     var spec = {
         type = "local_file",
-        is_shared = true,
+        is_shared = is_shared,
         image_name = file_name,
         texture_id = get_new_texture_id(),
         filter = false,
@@ -163,7 +164,7 @@ func load_texture(tex: Dictionary):
         if texture:
             # Should have already prompted the user to make the texture metadata first but in case we get here make a basic default texture metadata
             if not unloaded_texture_has_metadata(texture_name, false, is_shared):
-                var new_meta: = create_metadata_for_texture(texture)
+                var new_meta: = create_metadata_for_texture(texture, true)
                 push_warning("No metadata for texture: " + texture_name + ", creating default metadata")
                 FilesManager.update_local_image_metadata(texture_name, new_meta, for_game_name)
             metadata = fix_vecs_texture_meta(FilesManager.get_local_image_metadata(texture_name, for_game_name))
@@ -286,15 +287,20 @@ func get_last_sub_index(texture_id: int) -> int:
     var rows: int = texture_rows[texture_id]
     return (rows * tpr) - 1
 
-func create_metadata_for_texture(texture: Texture2D) -> Dictionary:
+func create_metadata_for_texture(texture: Texture2D, as_savable_format: bool = false) -> Dictionary:
     var new_meta: = placeholder_metadata.duplicate_deep()
 
-    new_meta["size"] = Utility.vector_to_list(texture.get_size())
-    var tile_size: = Vector2(MapManager.tile_width, MapManager.tile_width)
-    new_meta["tile_size"] = Utility.vector_to_list(tile_size)
+    new_meta["size"] = texture.get_size()
+    if as_savable_format:
+        new_meta["size"] = Utility.vector_to_list(new_meta["size"])
+    new_meta["tile_size"] = Vector2(MapManager.tile_width, MapManager.tile_width)
+    if as_savable_format:
+        new_meta["tile_size"] = Utility.vector_to_list(new_meta["tile_size"])
 
-    var size_tiles: = (texture.get_size() / tile_size).floor()
-    new_meta["size_in_tiles"] = Utility.vector_to_list(size_tiles)
+    var size_tiles: Vector2 = (texture.get_size() / new_meta["tile_size"]).floor()
+    new_meta["size_in_tiles"] = size_tiles
+    if as_savable_format:
+        new_meta["size_in_tiles"] = Utility.vector_to_list(new_meta["size_in_tiles"])
 
     return new_meta
 
@@ -491,14 +497,15 @@ func make_shared_image_bundled(shared_texture_name: String) -> bool:
     if not FilesManager.copy_shared_image_into_game(sanitized_name, bundled_name, game_name):
         return false
     
+    var tex_meta: = get_unloaded_texture_meta(shared_texture_name, false, true)
+    set_texture_meta_by_name(bundled_name, false, false, tex_meta)
+    
     for tex_spec_item in texture_spec:
         if tex_spec_item['type'] != 'local_file' or tex_spec_item.get('is_shared', true):
             continue
         elif tex_spec_item['image_name'] == sanitized_name:
             tex_spec_item['image_name'] = bundled_name
             tex_spec_item['is_shared'] = false
-            var tex_meta: = get_texture_metadata(tex_spec_item['texture_id'])
-            FilesManager.update_local_image_metadata(bundled_name, _convert_texture_meta_for_saving(tex_meta), game_name)
             break
     refresh_textures()
     return true
@@ -506,7 +513,7 @@ func make_shared_image_bundled(shared_texture_name: String) -> bool:
 func save_local_copy_of_local_image(from_name: String, from_shared: bool, to_name: String, to_shared: bool) -> bool:
     if (not from_shared or not to_shared) and not GameManager.get_game_name():
         return false
-    to_name = _unique_image_name(Utility.sanitize_for_filename(to_name, true, true), to_shared)
+    to_name = _unique_image_name(Utility.sanitize_for_filename(to_name, true, true), not to_shared)
     
     var gname: String = GameManager.get_game_name()
     var success: = FilesManager.copy_local_image_to_local(from_name, "" if from_shared else gname, to_name, "" if to_shared else gname)
@@ -572,17 +579,20 @@ func remap_texture_id_to_image(texture_id: int, to_image_name: String, to_builti
             return true
     
     var to_type_str: = "builtin" if to_builtin else "local_file"
+    var name_check_key: = "name" if to_builtin else "image_name"
     var current_tex_spec_item: = {}
     for tex_spec_item in texture_spec:
         if tex_spec_item['texture_id'] == texture_id:
             current_tex_spec_item = tex_spec_item
         # if the target is already in use, merge the two ids
-        if tex_spec_item['type'] == to_type_str and tex_spec_item['image_name'] == to_image_name:
-            if not to_builtin and tex_spec_item.get('is_shared', true) == to_shared:
+        if tex_spec_item['type'] == to_type_str and tex_spec_item[name_check_key] == to_image_name:
+            if to_builtin or tex_spec_item.get('is_shared', true) == to_shared:
+                prints("merge remapping into id:", tex_spec_item['texture_id'])
                 return merge_remap_texture_id_into_texture_id(texture_id, tex_spec_item['texture_id'])
     
     if not current_tex_spec_item:
         # should already have been handled, but unable to find the spec item for this texture id
+        push_warning("Unable to find the spec item for this texture id")
         return false
     # otherwise, convert the entry to the new target
     current_tex_spec_item['type'] = to_type_str
@@ -596,6 +606,7 @@ func remap_texture_id_to_image(texture_id: int, to_image_name: String, to_builti
         current_tex_spec_item['is_shared'] = to_shared
     
     refresh_textures()
+    textures_remapped.emit()
     return true
 
 
@@ -617,6 +628,7 @@ func _remap_of_texture_id_into_texture_id(from_texture_id: int, into_texture_id:
     _unload_texture(from_texture_id)
     texture_spec.remove_at(info["spec_index"])
     refresh_textures()
+    textures_remapped.emit()
     return true
 
 func remove_loaded_texture_by_id(texture_id: int) -> void:
@@ -633,6 +645,7 @@ func remove_loaded_texture_by_id(texture_id: int) -> void:
     _unload_texture(texture_id)
     texture_spec.erase(spec_stuff)
     refresh_textures()
+    textures_remapped.emit()
 
 func is_texture_id_in_use(texture_id: int) -> bool:
     if not texture_id in textures:
