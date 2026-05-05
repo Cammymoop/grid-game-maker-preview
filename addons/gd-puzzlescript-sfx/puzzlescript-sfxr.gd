@@ -65,12 +65,15 @@ static func get_random_sfx_stream(generator_type: GeneratorType) -> AudioStreamW
 static func get_sfx_stream(puzzlescript_seed: int) -> AudioStreamWAV:
 	return get_seeded_sfx(puzzlescript_seed).audio_stream
 
+static func get_generator_index_from_seed(puzzlescript_seed: int) -> int:
+	return posmod(puzzlescript_seed % 100, len(GeneratorType))
+
 static func get_seeded_sfx(puzzlescript_seed: int) -> PSSfx:
 	if sfx_cache.has(puzzlescript_seed):
 		return sfx_cache[puzzlescript_seed]
 
 	var rng_seed: String = str(int(puzzlescript_seed / 100.0))
-	var generator_type: int = posmod(puzzlescript_seed % 100, len(GeneratorType))
+	var generator_type: int = get_generator_index_from_seed(puzzlescript_seed)
 	
 	var sfx_generator: = PuzzleScriptSFXR.new()
 	sfx_generator.make_seeded_rng(rng_seed)

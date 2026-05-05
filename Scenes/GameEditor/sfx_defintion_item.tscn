@@ -4,11 +4,17 @@
 [ext_resource type="PackedScene" uid="uid://cemds60k8ytal" path="res://Scenes/UI/icon_button.tscn" id="2_5b4fg"]
 [ext_resource type="Texture2D" uid="uid://dqjupuymonk4t" path="res://assets/img/button_icons/dice.png" id="3_fo1ao"]
 
-[node name="PSSfxDefintionItem" type="HBoxContainer" unique_id=864187500 node_paths=PackedStringArray("sfx_name_input", "sfx_style_picker", "sfx_input", "play_button", "randomize_button")]
+[node name="PSSfxDefintionItem" type="HBoxContainer" unique_id=864187500 node_paths=PackedStringArray("sfx_name_input", "sfx_type_picker", "sample_only_container", "sample_picker", "volume_slider", "pitch_slider", "ps_only_container", "sfx_style_picker", "sfx_input", "play_button", "randomize_button")]
 script = ExtResource("1_p75jx")
 sfx_name_input = NodePath("VBoxContainer/HBoxContainer/LineEdit")
-sfx_style_picker = NodePath("VBoxContainer/HBoxContainer2/HBoxContainer/PSSfxStylePicker")
-sfx_input = NodePath("VBoxContainer/HBoxContainer2/HBoxContainer2/PSSfxSeedNum")
+sfx_type_picker = NodePath("VBoxContainer/HBoxContainer/OptionButton")
+sample_only_container = NodePath("VBoxContainer/HBoxContainer2/SampleOnlyOptions")
+sample_picker = NodePath("VBoxContainer/HBoxContainer2/SampleOnlyOptions/HBoxContainer/BuiltinSamplePicker")
+volume_slider = NodePath("VBoxContainer/HBoxContainer2/VolumeOption/VolumeSlider")
+pitch_slider = NodePath("VBoxContainer/HBoxContainer2/PitchOption/PitchSlider")
+ps_only_container = NodePath("VBoxContainer/HBoxContainer2/PSOnlyOptions")
+sfx_style_picker = NodePath("VBoxContainer/HBoxContainer2/PSOnlyOptions/HBoxContainer/PSSfxStylePicker")
+sfx_input = NodePath("VBoxContainer/HBoxContainer2/PSOnlyOptions/HBoxContainer2/PSSfxSeedNum")
 play_button = NodePath("PlayButton")
 randomize_button = NodePath("RandomizeButton")
 
@@ -37,47 +43,99 @@ text = "Type:"
 layout_mode = 2
 size_flags_vertical = 4
 theme_override_font_sizes/font_size = 14
-disabled = true
+alignment = 1
 selected = 0
-item_count = 1
+item_count = 2
 popup/item_0/text = "PuzzleScript Sfx Number"
 popup/item_0/id = 0
+popup/item_1/text = "Built-in"
+popup/item_1/id = 1
 
 [node name="HBoxContainer2" type="HBoxContainer" parent="VBoxContainer" unique_id=565467424]
 layout_mode = 2
 theme_override_constants/separation = 8
 alignment = 1
 
-[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer/HBoxContainer2" unique_id=392395371]
+[node name="PSOnlyOptions" type="HBoxContainer" parent="VBoxContainer/HBoxContainer2" unique_id=903970141]
+visible = false
 layout_mode = 2
 
-[node name="Label3" type="Label" parent="VBoxContainer/HBoxContainer2/HBoxContainer" unique_id=1471981692]
+[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer/HBoxContainer2/PSOnlyOptions" unique_id=392395371]
+layout_mode = 2
+
+[node name="Label3" type="Label" parent="VBoxContainer/HBoxContainer2/PSOnlyOptions/HBoxContainer" unique_id=1471981692]
 layout_mode = 2
 theme_override_font_sizes/font_size = 14
 text = "Style:"
 
-[node name="PSSfxStylePicker" type="OptionButton" parent="VBoxContainer/HBoxContainer2/HBoxContainer" unique_id=1933049943]
+[node name="PSSfxStylePicker" type="OptionButton" parent="VBoxContainer/HBoxContainer2/PSOnlyOptions/HBoxContainer" unique_id=1933049943]
 layout_mode = 2
 
-[node name="Label4" type="Label" parent="VBoxContainer/HBoxContainer2" unique_id=142254925]
+[node name="Label4" type="Label" parent="VBoxContainer/HBoxContainer2/PSOnlyOptions" unique_id=142254925]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.68307734, 0.6830774, 0.68307734, 1)
 theme_override_font_sizes/font_size = 14
 text = "-or-"
 
-[node name="HBoxContainer2" type="HBoxContainer" parent="VBoxContainer/HBoxContainer2" unique_id=101606544]
+[node name="HBoxContainer2" type="HBoxContainer" parent="VBoxContainer/HBoxContainer2/PSOnlyOptions" unique_id=101606544]
 layout_mode = 2
 
-[node name="Label2" type="Label" parent="VBoxContainer/HBoxContainer2/HBoxContainer2" unique_id=1917887115]
+[node name="Label2" type="Label" parent="VBoxContainer/HBoxContainer2/PSOnlyOptions/HBoxContainer2" unique_id=1917887115]
 layout_mode = 2
 theme_override_font_sizes/font_size = 14
 text = "Paste Here:"
 
-[node name="PSSfxSeedNum" type="LineEdit" parent="VBoxContainer/HBoxContainer2/HBoxContainer2" unique_id=2044530853]
+[node name="PSSfxSeedNum" type="LineEdit" parent="VBoxContainer/HBoxContainer2/PSOnlyOptions/HBoxContainer2" unique_id=2044530853]
 custom_minimum_size = Vector2(80, 0)
 layout_mode = 2
 theme_override_font_sizes/font_size = 14
 select_all_on_focus = true
+
+[node name="SampleOnlyOptions" type="HBoxContainer" parent="VBoxContainer/HBoxContainer2" unique_id=820323794]
+layout_mode = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer/HBoxContainer2/SampleOnlyOptions" unique_id=593051203]
+layout_mode = 2
+
+[node name="Label3" type="Label" parent="VBoxContainer/HBoxContainer2/SampleOnlyOptions/HBoxContainer" unique_id=358005056]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "Sound:"
+
+[node name="BuiltinSamplePicker" type="OptionButton" parent="VBoxContainer/HBoxContainer2/SampleOnlyOptions/HBoxContainer" unique_id=1474851562]
+layout_mode = 2
+
+[node name="VolumeOption" type="HBoxContainer" parent="VBoxContainer/HBoxContainer2" unique_id=1139191272]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="VBoxContainer/HBoxContainer2/VolumeOption" unique_id=1505892932]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "Volume:"
+
+[node name="VolumeSlider" type="HSlider" parent="VBoxContainer/HBoxContainer2/VolumeOption" unique_id=444672396]
+custom_minimum_size = Vector2(100, 0)
+layout_mode = 2
+size_flags_vertical = 4
+max_value = 2.0
+step = 0.01
+value = 1.0
+
+[node name="PitchOption" type="HBoxContainer" parent="VBoxContainer/HBoxContainer2" unique_id=499489179]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="VBoxContainer/HBoxContainer2/PitchOption" unique_id=1047541330]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "Pitch:"
+
+[node name="PitchSlider" type="HSlider" parent="VBoxContainer/HBoxContainer2/PitchOption" unique_id=1269058905]
+custom_minimum_size = Vector2(100, 0)
+layout_mode = 2
+size_flags_vertical = 4
+max_value = 1.0
+step = 0.01
+value = 0.5
 
 [node name="RandomizeButton" parent="." unique_id=451892711 instance=ExtResource("2_5b4fg")]
 layout_mode = 2

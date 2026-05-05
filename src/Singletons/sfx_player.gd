@@ -20,6 +20,30 @@ var default_looping_cutoff_time: float = 2.0
 var default_restart_secs: float = 0.05
 
 const BUILTIN_SAMPLE_STREAMS: Dictionary[String, AudioStreamWAV] = {
+	"abscond": preload("res://assets/sound/wav_sfx/abscond_fast.wav"),
+	"attention": preload("res://assets/sound/wav_sfx/attention.wav"),
+	"boom": preload("res://assets/sound/wav_sfx/boom.wav"),
+	"burn": preload("res://assets/sound/wav_sfx/burn.wav"),
+	"cymbol": preload("res://assets/sound/wav_sfx/cymbol.wav"),
+	"drip": preload("res://assets/sound/wav_sfx/drip.wav"),
+	"drum": preload("res://assets/sound/wav_sfx/drum.wav"),
+	"er": preload("res://assets/sound/wav_sfx/er.wav"),
+	"fall": preload("res://assets/sound/wav_sfx/fall.wav"),
+	"fanfare": preload("res://assets/sound/wav_sfx/fanfare.wav"),
+	"knock": preload("res://assets/sound/wav_sfx/knock.wav"),
+	"mystery": preload("res://assets/sound/wav_sfx/mystery.wav"),
+	"oof": preload("res://assets/sound/wav_sfx/oof.wav"),
+	"ouch": preload("res://assets/sound/wav_sfx/ouch.wav"),
+	"pipes": preload("res://assets/sound/wav_sfx/pipes.wav"),
+    "pop": preload("res://assets/sound/wav_sfx/pop.wav"),
+	"scoot": preload("res://assets/sound/wav_sfx/scoot.wav"),
+	"slide": preload("res://assets/sound/wav_sfx/slide.wav"),
+	"spinout": preload("res://assets/sound/wav_sfx/spinout.wav"),
+	"splash": preload("res://assets/sound/wav_sfx/splash.wav"),
+	"squeak": preload("res://assets/sound/wav_sfx/squeak.wav"),
+	"switch": preload("res://assets/sound/wav_sfx/switch.wav"),
+	"tada": preload("res://assets/sound/wav_sfx/tada.wav"),
+	"undo": preload("res://assets/sound/wav_sfx/undo.wav"),
 }
 
 var modified_streams: Dictionary[String, AudioStreamWAV] = {}
@@ -37,6 +61,12 @@ func get_sample_name_list() -> Array[String]:
     var sample_name_list: Array[String] = []
     sample_name_list.assign(BUILTIN_SAMPLE_STREAMS.keys())
     return sample_name_list
+
+func get_sample_stream(sample_name: String) -> AudioStreamWAV:
+    if not BUILTIN_SAMPLE_STREAMS.has(sample_name):
+        push_error("unknown sample name: %s" % sample_name)
+        return null
+    return BUILTIN_SAMPLE_STREAMS[sample_name]
 
 func _ready() -> void:
     priorities.resize(num_stream_players)

@@ -63,7 +63,7 @@ func on_item_request_remove(item: PSSfxDefintionItem) -> void:
 func force_clean_cache() -> void:
     var all_used_seeds: Array[int] = []
     for sfx_definition in GameManager.get_sfx_definitions():
-        if sfx_definition.get('type') == 'ps_sfx':
+        if sfx_definition.get('type') == PSSfxDefintionItem.SFX_TYPE_PS_SFX:
             var named_seed: int = int(sfx_definition.get('ps_seed', 0))
             if named_seed != 0 and not all_used_seeds.has(named_seed):
                 all_used_seeds.append(named_seed)
@@ -79,8 +79,14 @@ func _get_pssfx_audio_stream(ps_seed: int) -> AudioStreamWAV:
 
 func on_item_play_preview(item: PSSfxDefintionItem) -> void:
     var item_definition: Dictionary = item.get_sfx_definition()
-    if item_definition['type'] == 'ps_sfx':
+    if item_definition['type'] == PSSfxDefintionItem.SFX_TYPE_PS_SFX:
         sfx_preview_player.stream = _get_pssfx_audio_stream(int(item_definition['ps_seed']))
-    else:
-        sfx_preview_player.stream = null
+        if sfx_preview_player.bus != "LowPassSfx":
+            sfx_preview_player.bus = "LowPassSfx"
+    elif item_definition['type'] == PSSfxDefintionItem.SFX_TYPE_SAMPLE:
+        sfx_preview_player.stream = SfxPlayer.get_sample_stream(item_definition['sample_name'])
+        if sfx_preview_player.bus != "SfxBus":
+            sfx_preview_player.bus = "SfxBus"
+    sfx_preview_player.volume_linear = item_definition.get("volume", 1.0)
+    sfx_preview_player.pitch_scale = item_definition.get("pitch", 1.0)
     sfx_preview_player.play()
