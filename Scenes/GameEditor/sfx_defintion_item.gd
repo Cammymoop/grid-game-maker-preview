@@ -68,9 +68,7 @@ func build_style_picker() -> void:
 
 func build_sample_picker() -> void:
     sample_picker.clear()
-    prints("building sample picker")
     for sample_name in SfxPlayer.get_sample_name_list():
-        prints("sample_name: %s" % sample_name)
         sample_picker.add_item(sample_name)
 
 func on_sfx_type_picker_item_selected(_index: int) -> void:
@@ -119,8 +117,15 @@ func set_sfx_definition(sfx_definition: Dictionary) -> void:
         sfx_input.text = str(ps_seed)
         var generator_index: int = PuzzleScriptSFXR.get_generator_index_from_seed(ps_seed)
         Utility.opbtn_select_id(sfx_style_picker, generator_index)
+        prints(Utility.opbtn_get_selected_text(sfx_style_picker))
     else:
-        sample_picker.selected = sfx_definition.get("sample_name", "")
+        var sample_name: String = sfx_definition.get("sample_name", "")
+        prints("sample_name: %s" % sample_name)
+        var sample_name_list: Array[String] = SfxPlayer.get_sample_name_list()
+        if not sample_name or not sample_name_list.has(sample_name):
+            sample_name = sample_name_list[0]
+        prints("sample_name: %s" % sample_name, "index: %s" % sample_name_list.find(sample_name))
+        sample_picker.selected = sample_name_list.find(sample_name)
     
     _set_pitch_factor(sfx_definition.get("pitch", 1.0))
     

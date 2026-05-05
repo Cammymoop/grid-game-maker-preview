@@ -81,6 +81,7 @@ func _ready() -> void:
         stream_players.append(stream_player)
         add_child(stream_player)
         var cutoff_timer: = Timer.new()
+        cutoff_timers.append(cutoff_timer)
         cutoff_timer.one_shot = true
         cutoff_timer.timeout.connect(on_cutoff_timer_timeout.bind(i))
         add_child(cutoff_timer)
@@ -291,7 +292,7 @@ func _play_sfx_options_on_player(player_idx: int, options: SfxPlayOptions) -> vo
 
 func play_sfx_options(options: SfxPlayOptions) -> void:
     var player_idx: int = _find_player_for_options(options)
-    if player_idx != -1:
+    if player_idx == -1:
         return
     _play_sfx_options_on_player(player_idx, options)
 

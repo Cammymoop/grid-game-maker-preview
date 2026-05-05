@@ -21,8 +21,8 @@ func load_sfx_definitions() -> void:
         if not sfx_definition:
             continue
         var new_item: PSSfxDefintionItem = _get_item()
-        new_item.set_sfx_definition(sfx_definition)
         item_container.add_child(new_item)
+        new_item.set_sfx_definition(sfx_definition)
 
 func clear_children() -> void:
     for child in item_container.get_children():
@@ -67,7 +67,7 @@ func force_clean_cache() -> void:
             var named_seed: int = int(sfx_definition.get('ps_seed', 0))
             if named_seed != 0 and not all_used_seeds.has(named_seed):
                 all_used_seeds.append(named_seed)
-    SfxPlayer.clean_cache(Utility.arr_set_union(_last_50_seeds, all_used_seeds))
+    PuzzleScriptSFXR.clean_cache(Utility.arr_set_union(_last_50_seeds, all_used_seeds))
 
 func _get_pssfx_audio_stream(ps_seed: int) -> AudioStreamWAV:
     if not _last_50_seeds.has(ps_seed):

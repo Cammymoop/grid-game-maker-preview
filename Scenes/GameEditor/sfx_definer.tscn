@@ -15,9 +15,9 @@ add_item_button = NodePath("HBoxContainer/AddItemButton")
 [node name="ItemContainer" type="VBoxContainer" parent="." unique_id=2135560960]
 layout_mode = 2
 size_flags_horizontal = 4
+theme_override_constants/separation = 8
 
 [node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="." unique_id=2031841490]
-bus = &"PSSfxBus"
 
 [node name="HBoxContainer" type="HBoxContainer" parent="." unique_id=575919807]
 layout_mode = 2

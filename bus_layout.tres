@@ -30,4 +30,4 @@ bus/2/effect/0/enabled = true
 bus/2/effect/1/effect = SubResource("AudioEffectLowPassFilter_k3f1v")
 bus/2/effect/1/enabled = true
 bus/2/effect/2/effect = SubResource("AudioEffectLowPassFilter_lg07x")
-bus/2/effect/2/enabled = true
+bus/2/effect/2/enabled = false

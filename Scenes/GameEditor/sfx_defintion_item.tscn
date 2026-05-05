@@ -5,6 +5,7 @@
 [ext_resource type="Texture2D" uid="uid://dqjupuymonk4t" path="res://assets/img/button_icons/dice.png" id="3_fo1ao"]
 
 [node name="PSSfxDefintionItem" type="HBoxContainer" unique_id=864187500 node_paths=PackedStringArray("sfx_name_input", "sfx_type_picker", "sample_only_container", "sample_picker", "volume_slider", "pitch_slider", "ps_only_container", "sfx_style_picker", "sfx_input", "play_button", "randomize_button")]
+size_flags_horizontal = 3
 script = ExtResource("1_p75jx")
 sfx_name_input = NodePath("VBoxContainer/HBoxContainer/LineEdit")
 sfx_type_picker = NodePath("VBoxContainer/HBoxContainer/OptionButton")
@@ -136,6 +137,10 @@ size_flags_vertical = 4
 max_value = 1.0
 step = 0.01
 value = 0.5
+
+[node name="Spacer" type="Control" parent="." unique_id=340862300]
+layout_mode = 2
+size_flags_horizontal = 3
 
 [node name="RandomizeButton" parent="." unique_id=451892711 instance=ExtResource("2_5b4fg")]
 layout_mode = 2

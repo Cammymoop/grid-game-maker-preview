@@ -1484,6 +1484,11 @@ func cmd_play_named_sfx(slots: Dictionary, _slot: int, sfx_name: Dictionary, do_
 		return
 	var sfx_name_str: String = get_complex_string_value(sfx_name, slots)
 	var sfx_options: = SfxPlayer.playback_options(sfx_name_str, "restart" if do_restart else "one")
+	var op_props: Array[String] = ['sfx_name', 'relative_volume', 'relative_pitch', 'self_polyphony']
+	var op_vals: Array = []
+	for prop in op_props:
+		op_vals.append(sfx_options.get(prop))
+	prints("playing sfx options: %s (%s)" % [sfx_name_str, ", ".join(op_vals)])
 	SfxPlayer.play_sfx_options(sfx_options)
 
 func desc_keep_named_sfx_playing() -> String:
