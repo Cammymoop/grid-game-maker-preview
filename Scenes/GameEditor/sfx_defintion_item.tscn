@@ -1,11 +1,11 @@
 [gd_scene format=3 uid="uid://bs0rl7wpacr81"]
 
-[ext_resource type="Script" uid="uid://bhsypmaydaolx" path="res://Scenes/GameEditor/ps_sfx_defintion_item.gd" id="1_c267v"]
-[ext_resource type="PackedScene" uid="uid://cemds60k8ytal" path="res://Scenes/UI/icon_button.tscn" id="2_4pn1v"]
-[ext_resource type="Texture2D" uid="uid://dqjupuymonk4t" path="res://assets/img/button_icons/dice.png" id="3_4pn1v"]
+[ext_resource type="Script" uid="uid://bhsypmaydaolx" path="res://Scenes/GameEditor/sfx_defintion_item.gd" id="1_p75jx"]
+[ext_resource type="PackedScene" uid="uid://cemds60k8ytal" path="res://Scenes/UI/icon_button.tscn" id="2_5b4fg"]
+[ext_resource type="Texture2D" uid="uid://dqjupuymonk4t" path="res://assets/img/button_icons/dice.png" id="3_fo1ao"]
 
 [node name="PSSfxDefintionItem" type="HBoxContainer" unique_id=864187500 node_paths=PackedStringArray("sfx_name_input", "sfx_style_picker", "sfx_input", "play_button", "randomize_button")]
-script = ExtResource("1_c267v")
+script = ExtResource("1_p75jx")
 sfx_name_input = NodePath("VBoxContainer/HBoxContainer/LineEdit")
 sfx_style_picker = NodePath("VBoxContainer/HBoxContainer2/HBoxContainer/PSSfxStylePicker")
 sfx_input = NodePath("VBoxContainer/HBoxContainer2/HBoxContainer2/PSSfxSeedNum")
@@ -79,10 +79,10 @@ layout_mode = 2
 theme_override_font_sizes/font_size = 14
 select_all_on_focus = true
 
-[node name="RandomizeButton" parent="." unique_id=451892711 instance=ExtResource("2_4pn1v")]
+[node name="RandomizeButton" parent="." unique_id=451892711 instance=ExtResource("2_5b4fg")]
 layout_mode = 2
 tooltip_text = "new random sfx in the same style"
-icon = ExtResource("3_4pn1v")
+icon = ExtResource("3_fo1ao")
 
 [node name="PlayButton" type="Button" parent="." unique_id=1796671263]
 layout_mode = 2
@@ -90,7 +90,7 @@ size_flags_vertical = 4
 theme_type_variation = &"BigTextButton"
 text = "Play"
 
-[node name="RemoveButton" parent="." unique_id=2142089124 instance=ExtResource("2_4pn1v")]
+[node name="RemoveButton" parent="." unique_id=2142089124 instance=ExtResource("2_5b4fg")]
 layout_mode = 2
 tooltip_text = "remove sfx"
 

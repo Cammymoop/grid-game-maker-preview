@@ -1483,7 +1483,8 @@ func cmd_play_named_sfx(slots: Dictionary, _slot: int, sfx_name: Dictionary, do_
 	if not sfx_name:
 		return
 	var sfx_name_str: String = get_complex_string_value(sfx_name, slots)
-	SfxPlayer.play_named_sfx(sfx_name_str, do_restart, true)
+	var sfx_options: = SfxPlayer.playback_options(sfx_name_str, "restart" if do_restart else "one")
+	SfxPlayer.play_sfx_options(sfx_options)
 
 func desc_keep_named_sfx_playing() -> String:
 	return "none|Keep the [sfx_name:SFXNameInput] sound effect playing (start if it isn't playing)"
@@ -1491,4 +1492,5 @@ func cmd_keep_named_sfx_playing(slots: Dictionary, _slot: int, sfx_name: Diction
 	if not sfx_name:
 		return
 	var sfx_name_str: String = get_complex_string_value(sfx_name, slots)
-	SfxPlayer.keep_named_sfx_playing(sfx_name_str, true)
+	var sfx_options: = SfxPlayer.playback_options(sfx_name_str, "keep_playing")
+	SfxPlayer.play_sfx_options(sfx_options)

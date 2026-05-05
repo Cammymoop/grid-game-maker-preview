@@ -1,7 +1,7 @@
 extends VBoxContainer
 
-const PSSfxDefintionItem = preload("res://Scenes/GameEditor/ps_sfx_defintion_item.gd")
-var sfx_definition_item_scn: = preload("res://Scenes/GameEditor/ps_sfx_defintion_item.tscn")
+const PSSfxDefintionItem = preload("res://Scenes/GameEditor/sfx_defintion_item.gd")
+var sfx_definition_item_scn: = preload("res://Scenes/GameEditor/sfx_defintion_item.tscn")
 
 @export var sfx_preview_player: AudioStreamPlayer
 

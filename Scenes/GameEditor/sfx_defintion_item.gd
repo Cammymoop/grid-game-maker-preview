@@ -6,6 +6,16 @@ signal play_preview(sfx_item: Node)
 signal changed()
 signal request_remove(sfx_item: Node)
 
+const SFX_TYPE_PS_SFX: String = "ps_sfx"
+const SFX_TYPE_SAMPLE: String = "sample"
+
+const SFX_TYPE_STRINGS: Dictionary[String, String] = {
+    SFX_TYPE_PS_SFX: "PuzzleScript Sfx Number",
+    SFX_TYPE_SAMPLE: "Sample",
+}
+
+@export var sfx_type_picker: OptionButton
+
 @export var sfx_name_input: LineEdit
 @export var sfx_style_picker: OptionButton
 @export var sfx_input: LineEdit

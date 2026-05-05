@@ -1018,3 +1018,6 @@ func event_is_menu_back_just_pressed(event: InputEvent) -> bool:
 	if fixed_just_pressed_by_event("controller_menu_back", event):
 		return true
 	return false
+
+func get_wav_stream_total_samples(wav_stream: AudioStreamWAV) -> int:
+	return roundi(wav_stream.get_length() * wav_stream.sample_rate)
