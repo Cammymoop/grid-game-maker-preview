@@ -45,6 +45,7 @@ func refresh_move_buttons() -> void:
     if not move_up_down_buttons.visible or not is_inside_tree():
         return
     var idx: = get_index()
+    prints("refresh_move_buttons", idx, get_parent().get_child_count())
     move_up_button.disabled = idx == 0
     move_down_button.disabled = idx == get_parent().get_child_count() - 1
 

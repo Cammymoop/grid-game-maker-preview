@@ -52,6 +52,8 @@ func set_levels(level_name_list: Array) -> void:
         var level_code: = GameManager._level_code(level_list_name, level_name)
         var level_title: = FilesManager.get_level_title(GameManager.cur_game_name, level_name)
         _add_level_item(level_name, level_title, level_code in all_played_levels, level_code in all_completed_levels)
+    for list_item: LevelListItem in level_item_container.get_children():
+        list_item.refresh_move_buttons()
 
 func _add_level_item(with_level_name: String, with_level_title: String, as_played: bool, as_completed: bool) -> void:
     var unlocked_levels: Array = GameManager.get_unlocked_levels_in_level_list(level_list_name)
