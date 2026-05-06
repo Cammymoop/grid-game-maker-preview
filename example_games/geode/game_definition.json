@@ -50,6 +50,8 @@
             "basic_default.c_has_property::[\"i:1\",false,\"s:player\"]"
           ],
           "when true": [
+            "basic_default.play_named_sfx::[\"i:-1\",{\"args\":[\"s:type\",\"s:plain\",\"s:value\",\"s:Burn\"],\"type\":\"Dictionary\"},false]",
+            "basic_default.play_named_sfx::[\"i:-1\",{\"args\":[\"s:type\",\"s:plain\",\"s:value\",\"s:Ow\"],\"type\":\"Dictionary\"},false]",
             "basic_default.move_facing::[\"i:1\",{\"args\":[\"s:type\",\"s:plain\",\"s:direction\",\"i:30\"],\"type\":\"Dictionary\"},{\"args\":[\"s:type\",\"s:plain\",\"s:direction\",\"i:28\"],\"type\":\"Dictionary\"}]",
             "basic_default.override_move_speed::[\"i:1\",{\"args\":[\"s:type\",\"s:plain\",\"s:value\",\"f:12.0\"],\"type\":\"Dictionary\"}]"
           ],
@@ -75,6 +77,7 @@
               "basic_default.c_is_named::[\"i:1\",false,\"s:pickaxe\"]"
             ],
             "when true": [
+              "basic_default.play_named_sfx::[\"i:-1\",{\"args\":[\"s:type\",\"s:plain\",\"s:value\",\"s:Pickup\"],\"type\":\"Dictionary\"},false]",
               "basic_default.a_die::[\"i:0\"]",
               "basic_default.a_die::[\"i:1\"]",
               "basic_default.a_create_entity::[\"i:4\",\"s:player-pickaxe\",\"i:12\",false]"
@@ -91,6 +94,7 @@
               "basic_default.exists::[\"i:5\"]"
             ],
             "when true": [
+              "basic_default.play_named_sfx::[\"i:-1\",{\"args\":[\"s:type\",\"s:plain\",\"s:value\",\"s:Earthquake\"],\"type\":\"Dictionary\"},false]",
               "basic_default.a_set_tiles::[\"i:5\",\"s:lava\"]",
               "basic_default.do_screen_shake::[\"i:-1\",{\"args\":[\"s:type\",\"s:plain\",\"s:value\",\"f:2.0\"],\"type\":\"Dictionary\"},{\"args\":[\"s:type\",\"s:plain\",\"s:value\",\"f:0.7\"],\"type\":\"Dictionary\"}]"
             ],
@@ -136,6 +140,7 @@
               "basic_default.a_turn::[\"i:0\",{\"args\":[\"s:type\",\"s:plain\",\"s:direction\",\"i:20\"],\"type\":\"Dictionary\"}]",
               "basic_default.a_create_entity::[\"i:4\",\"s:split-geode\",\"i:12\",false]",
               "basic_default.a_die::[\"i:0\"]",
+              "basic_default.play_named_sfx::[\"i:-1\",{\"args\":[\"s:type\",\"s:plain\",\"s:value\",\"s:Split\"],\"type\":\"Dictionary\"},false]",
               "basic_default.false::[\"i:-1\"]"
             ],
             "when false": [],
@@ -208,6 +213,7 @@
             ],
             "when true": [],
             "when false": [
+              "basic_default.play_named_sfx::[\"i:-1\",{\"args\":[\"s:type\",\"s:plain\",\"s:value\",\"s:Break\"],\"type\":\"Dictionary\"},true]",
               "basic_default.a_die::[\"i:0\"]",
               "basic_default.select_created_entity::[\"i:2\",{\"args\":[\"s:type\",\"s:plain\",\"s:value\",\"s:pick-effect\"],\"type\":\"Dictionary\"},\"i:1\",{\"args\":[\"s:type\",\"s:plain\",\"s:direction\",\"i:31\"],\"type\":\"Dictionary\"},false]",
               "basic_default.a_move::[\"i:2\",{\"args\":[\"s:type\",\"s:plain\",\"s:direction\",\"i:28\"],\"type\":\"Dictionary\"}]",
@@ -221,7 +227,9 @@
             "conditions": [
               "basic_default.c_get_pushed::[\"i:0\",{\"args\":[\"s:type\",\"s:plain\",\"s:direction\",\"i:20\"],\"type\":\"Dictionary\"},true]"
             ],
-            "when true": [],
+            "when true": [
+              "basic_default.play_named_sfx::[\"i:-1\",{\"args\":[\"s:type\",\"s:plain\",\"s:value\",\"s:Push\"],\"type\":\"Dictionary\"},true]"
+            ],
             "when false": [],
             "when always": []
           }
@@ -409,6 +417,64 @@
         "Secret Challenge",
         "grats"
       ]
+    }
+  ],
+  "sfx_definitions": [
+    {
+      "type": "sample",
+      "name": "Break",
+      "volume": 1.21,
+      "pitch": 3.0,
+      "sample_name": "boom"
+    },
+    {
+      "type": "ps_sfx",
+      "name": "Split",
+      "volume": 1.55,
+      "pitch": 1.0,
+      "ps_seed": 548004.0
+    },
+    {
+      "type": "sample",
+      "name": "Push",
+      "volume": 1.19,
+      "pitch": 1.65758488226679,
+      "sample_name": "burn"
+    },
+    {
+      "type": "sample",
+      "name": "Ow",
+      "volume": 1.5,
+      "pitch": 1.73205080756888,
+      "sample_name": "er"
+    },
+    {
+      "type": "ps_sfx",
+      "name": "Burn",
+      "volume": 0.95,
+      "pitch": 1.93318204493176,
+      "ps_seed": 599502.0
+    },
+    {
+      "type": "ps_sfx",
+      "name": "Pickup",
+      "volume": 1.31,
+      "pitch": 1.0,
+      "ps_seed": 903205.0
+    },
+    {
+      "type": "ps_sfx",
+      "name": "Earthquake",
+      "volume": 1.45,
+      "pitch": 0.540520409799777,
+      "ps_seed": 387802.0
+    },
+    {
+      "type": "sample",
+      "name": "NextLvl",
+      "volume": 1.52,
+      "pitch": 0.616689633342076,
+      "sample_name": "switch"
     }
   ]
 }

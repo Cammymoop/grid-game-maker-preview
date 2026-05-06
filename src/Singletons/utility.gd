@@ -883,6 +883,11 @@ func opbtn_set_text_for_id(opbtn: OptionButton, id: int, new_text: String) -> vo
 	if index >= 0:
 		opbtn.set_item_text(index, new_text)
 
+func opbtn_set_enabled_for_id(opbtn: OptionButton, id: int, is_enabled: bool) -> void:
+	var index: int = opbtn_get_index_from_id(opbtn, id)
+	if index >= 0:
+		opbtn.set_item_disabled(index, not is_enabled)
+
 func opbtn_select_id(opbtn: OptionButton, id: int) -> void:
 	opbtn.selected = opbtn_get_index_from_id(opbtn, id)
 
@@ -895,6 +900,17 @@ func opbtn_enumerate_non_separator_idx(opbtn: OptionButton) -> Array[int]:
 		if not opbtn.is_item_separator(i):
 			indices.append(i)
 	return indices
+
+func popupmenu_get_index_from_id(popupmenu: PopupMenu, id: int) -> int:
+	for i in popupmenu.get_item_count():
+		if popupmenu.get_item_id(i) == id:
+			return i
+	return -1
+
+func popupmenu_set_enabled_for_id(popupmenu: PopupMenu, id: int, is_enabled: bool) -> void:
+	var index: int = popupmenu_get_index_from_id(popupmenu, id)
+	if index >= 0:
+		popupmenu.set_item_disabled(index, not is_enabled)
 
 func normalize_angle(angle_radians: float) -> float:
 	return fposmod(angle_radians, TAU)

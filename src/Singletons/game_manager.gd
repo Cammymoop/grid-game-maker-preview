@@ -759,6 +759,16 @@ func close_pause_menu() -> void:
 	var pause_menus: = get_tree().get_nodes_in_group("PauseMenu")
 	for p in pause_menus:
 		p.close_pause_menu()
+
+func open_pause_menu() -> void:
+	if get_pause("pause_menu"):
+		return
+	var pause_menus: = get_tree().get_nodes_in_group("PauseMenu")
+	for p in pause_menus:
+		if p.active:
+			continue
+		p.toggle()
+		break
 	
 func start_on_ready() -> bool:
 	if TextureManager.im_ready and MapManager.im_ready and EntityManager.im_ready:
@@ -797,6 +807,7 @@ func _unhandled_input(event: InputEvent) -> void:
 	if Utility.event_is_menu_back_just_pressed(event):
 		if cur_scene == "Play":
 			toggle_pause_menu()
+			get_viewport().set_input_as_handled()
 
 func get_all_used_prop_names() -> Array[String]:
 	var prop_names: Array[String] = []
@@ -1201,6 +1212,12 @@ func is_level_in_any_list(level_name: String) -> bool:
 	return false
 
 
+func remove_level_from_list(level_name: String, level_list_name: String) -> void:
+	var level_list_info: = _get_level_list(level_list_name)
+	if level_list_info:
+		level_list_info["level_names"].erase(level_name)
+
+
 func get_next_level_in_list(level_list_name: String, after_level: String = "") -> String:
 	var level_list_info: = _get_level_list(level_list_name)
 	if not level_list_info or level_list_info.get("level_names", []).size() < 1:
@@ -1241,6 +1258,26 @@ func get_all_unlocked_level_lists(_current_level_as_complete: bool = false) -> A
 		if is_level_list_unlocked(level_list_info["name"]):
 			lists.append(level_list_info)
 	return lists
+
+func level_list_has_next(level_list_name: String) -> bool:
+	var total_lists: int = game_definition.get("level_lists", []).size()
+	var level_list_index: = _get_level_list_index(level_list_name)
+	return level_list_index < total_lists - 1
+
+func level_list_has_previous(level_list_name: String) -> bool:
+	var level_list_index: = _get_level_list_index(level_list_name)
+	return level_list_index > 0
+
+func move_level_to_relative_list(level_name: String, level_list_name: String, delta: int) -> void:
+	var list_index: = _get_level_list_index(level_list_name)
+	if list_index < 0:
+		return
+	var total_lists: int = game_definition.get("level_lists", []).size()
+	var to_index: = clampi(list_index + delta, 0, total_lists - 1)
+	if to_index == list_index:
+		return
+	remove_level_from_list(level_name, level_list_name)
+	add_level_to_level_list(level_name, game_definition.get("level_lists", [])[to_index]["name"])
 
 
 func get_next_level_to_auto_load(after_level: String = "", current_level_as_complete: bool = false) -> Array:

@@ -1,17 +1,87 @@
 [gd_scene format=3 uid="uid://c0hd2vbg4uxwk"]
 
 [ext_resource type="Script" uid="uid://b5v4a4qbv33a0" path="res://Scenes/level_list_item.gd" id="1_4meir"]
+[ext_resource type="StyleBox" uid="uid://bjfdm7g0ured8" path="res://assets/ui/button_styles/thin_button_disabled.tres" id="1_ck4xm"]
+[ext_resource type="StyleBox" uid="uid://dwpyvi0mnhxyx" path="res://assets/ui/button_styles/thin_button_hover.tres" id="2_gc3cy"]
+[ext_resource type="Texture2D" uid="uid://buk2nx53o8vuj" path="res://assets/img/button_icons/dot_small.png" id="2_pi131"]
+[ext_resource type="Texture2D" uid="uid://bicmwyncxdix0" path="res://assets/img/button_icons/check_small.png" id="3_35jtt"]
+[ext_resource type="StyleBox" uid="uid://cu78oa72kple8" path="res://assets/ui/button_styles/thin_button_normal.tres" id="3_bvcnr"]
+[ext_resource type="StyleBox" uid="uid://cf4b0mxp54ien" path="res://assets/ui/button_styles/thin_button_pressed.tres" id="4_6novh"]
+[ext_resource type="FontFile" uid="uid://ctnllh13x3iqi" path="res://assets/font/NotoSans-Bold.ttf" id="6_bvcnr"]
+[ext_resource type="PackedScene" uid="uid://cemds60k8ytal" path="res://Scenes/UI/icon_button.tscn" id="6_ybcw1"]
+[ext_resource type="Texture2D" uid="uid://tpslcq3ccosh" path="res://assets/img/button_icons/up_small.png" id="7_oxl58"]
+[ext_resource type="Texture2D" uid="uid://c1h0arduxil1j" path="res://assets/img/button_icons/down_small.png" id="8_ekmnw"]
+[ext_resource type="Texture2D" uid="uid://c0q4s8sa4ojhs" path="res://assets/img/button_icons/locked.png" id="11_gc3cy"]
 
-[node name="LevelItem" type="HBoxContainer" unique_id=1266912356 node_paths=PackedStringArray("title_label", "start_level_button")]
+[sub_resource type="Theme" id="Theme_v4jex"]
+Button/font_sizes/font_size = 20
+Button/styles/disabled = ExtResource("1_ck4xm")
+Button/styles/hover = ExtResource("2_gc3cy")
+Button/styles/normal = ExtResource("3_bvcnr")
+Button/styles/pressed = ExtResource("4_6novh")
+Label/font_sizes/font_size = 18
+
+[node name="LevelItem" type="HBoxContainer" unique_id=1266912356 node_paths=PackedStringArray("title_label", "start_level_button", "edit_level_button", "move_up_down_buttons", "move_up_button", "move_down_button", "dot_icon", "check_icon", "locked_icon")]
+theme = SubResource("Theme_v4jex")
 script = ExtResource("1_4meir")
+locked_color = Color(0.6789437, 0.6789437, 0.6789437, 1)
+completed_color = Color(0.7486713, 1, 0.5791102, 1)
+completed_font = ExtResource("6_bvcnr")
 title_label = NodePath("Label")
-start_level_button = NodePath("Button")
+start_level_button = NodePath("PlayButton")
+edit_level_button = NodePath("EditButton")
+move_up_down_buttons = NodePath("MoveUpDownButtons")
+move_up_button = NodePath("MoveUpDownButtons/MoveUpButton")
+move_down_button = NodePath("MoveUpDownButtons/MoveDownButton")
+dot_icon = NodePath("DotIcon")
+check_icon = NodePath("CheckIcon")
+locked_icon = NodePath("LockedIcon")
+
+[node name="MoveUpDownButtons" type="HBoxContainer" parent="." unique_id=1106326614]
+layout_mode = 2
+
+[node name="MoveUpButton" parent="MoveUpDownButtons" unique_id=451892711 instance=ExtResource("6_ybcw1")]
+layout_mode = 2
+icon = ExtResource("7_oxl58")
+
+[node name="MoveDownButton" parent="MoveUpDownButtons" unique_id=1123825490 instance=ExtResource("6_ybcw1")]
+layout_mode = 2
+icon = ExtResource("8_ekmnw")
 
 [node name="Label" type="Label" parent="." unique_id=856735861]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "-- Level Title --"
 
-[node name="Button" type="Button" parent="." unique_id=356515220]
+[node name="DotIcon" type="TextureRect" parent="." unique_id=395379952]
+self_modulate = Color(0.8821792, 0.71398956, 0.9663511, 1)
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+tooltip_text = "played"
+texture = ExtResource("2_pi131")
+
+[node name="CheckIcon" type="TextureRect" parent="." unique_id=92029116]
+self_modulate = Color(0.4057349, 0.80183524, 0.31315115, 1)
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+tooltip_text = "cleared"
+texture = ExtResource("3_35jtt")
+
+[node name="LockedIcon" type="TextureRect" parent="." unique_id=1817502997]
+self_modulate = Color(0.3515629, 0.3515629, 0.35156286, 1)
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+tooltip_text = "locked"
+texture = ExtResource("11_gc3cy")
+
+[node name="PlayButton" type="Button" parent="." unique_id=356515220]
 layout_mode = 2
 text = "Play"
+
+[node name="EditButton" type="Button" parent="." unique_id=1105101336]
+visible = false
+layout_mode = 2
+text = "Edit"
