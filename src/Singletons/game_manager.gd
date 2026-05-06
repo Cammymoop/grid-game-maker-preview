@@ -1484,13 +1484,22 @@ func get_game_bg_info() -> Dictionary:
 	var game_bg_info: Dictionary = get_game_setting("bg_style", {})
 	return game_bg_info.merged(default_bg_style)
 
-func get_level_bg_info() -> Dictionary:
+# get current background style, inheriting missing keys if necessary
+func get_current_bg_info() -> Dictionary:
 	if cur_scene != "Play":
 		return get_game_bg_info()
 
+	var game_bg_info: Dictionary = get_game_bg_info().duplicate_deep()
+	var level_list_bg_info: Dictionary = {}
+	if current_level_list:
+		var list_info: = _get_level_list(current_level_list)
+		if list_info.get("bg_style", {}):
+			level_list_bg_info = list_info["bg_style"].duplicate_deep()
+	level_list_bg_info.merge(game_bg_info)
 	if MapManager.has_metadata_value("bg_style"):
-		return MapManager.get_metadata_value("bg_style")
-	return get_game_bg_info()
+		return MapManager.get_metadata_value("bg_style").merged(level_list_bg_info)
+	else:
+		return level_list_bg_info
 
 func set_level_bg_info(bg_info: Dictionary) -> void:
 	MapManager.set_metadata_value("bg_style", bg_info)
@@ -1507,23 +1516,82 @@ func set_game_bg_info_value(key: String, value: Variant) -> void:
 func set_level_bg_info_value(key: String, value: Variant) -> void:
 	if not MapManager.has_metadata_value("bg_style"):
 		copy_game_bg_to_level()
-	var level_bg_info: Dictionary = MapManager.get_metadata_value("bg_style")
+	var level_bg_info: Variant = MapManager.get_metadata_value("bg_style")
+	if not level_bg_info:
+		level_bg_info = {}
 	level_bg_info[key] = value
 	MapManager.set_metadata_value("bg_style", level_bg_info)
 	bg_style_changed.emit()
+
+func set_level_list_bg_info_value(level_list_name: String, key: String, value: Variant) -> void:
+	var level_list_info: = _get_level_list(level_list_name)
+	if not level_list_info:
+		return
+	if not "bg_style" in level_list_info:
+		copy_game_bg_to_level_list(level_list_name)
+	level_list_info["bg_style"][key] = value
+	bg_style_changed.emit()
+
+func remove_current_level_custom_bg_info() -> void:
+	if cur_scene != "Play":
+		return
+	if MapManager.has_metadata_value("bg_style"):
+		MapManager.remove_metadata_value("bg_style")
+		bg_style_changed.emit()
+
+func remove_level_list_custom_bg_info(level_list_name: String) -> void:
+	var level_list_info: = _get_level_list(level_list_name)
+	if not level_list_info:
+		return
+	if "bg_style" in level_list_info:
+		level_list_info.erase("bg_style")
+		bg_style_changed.emit()
+
+func remove_current_bg_override() -> void:
+	if cur_scene != "Play":
+		return
+	var level_select_root: = Utility.get_level_select_root()
+	if level_select_root and level_select_root.visible:
+		var level_select_ui = level_select_root.level_select_ui
+		if level_select_ui.editing_level_list:
+			remove_level_list_custom_bg_info(level_select_ui.editing_level_list)
+		else:
+			remove_current_level_custom_bg_info()
 
 func set_auto_bg_info_value(key: String, value: Variant) -> void:
 	if cur_scene != "Play":
 		set_game_bg_info_value(key, value)
 		bg_style_changed.emit()
 	else:
-		set_level_bg_info_value(key, value)
+		var level_select_root: = Utility.get_level_select_root()
+		if level_select_root and level_select_root.visible:
+			var level_select_ui = level_select_root.level_select_ui
+			if level_select_ui.editing_level_list:
+				set_level_list_bg_info_value(level_select_ui.editing_level_list, key, value)
+			else:
+				set_level_bg_info_value(key, value)
+
+func copy_game_bg_to_current() -> void:
+	if cur_scene != "Play":
+		return
+	var level_select_root: = Utility.get_level_select_root()
+	if level_select_root and level_select_root.visible:
+		var level_select_ui = level_select_root.level_select_ui
+		if level_select_ui.editing_level_list:
+			copy_game_bg_to_level_list(level_select_ui.editing_level_list)
+	else:
+		copy_game_bg_to_level()
+
+func copy_game_bg_to_level_list(level_list_name: String) -> void:
+	var level_list_info: = _get_level_list(level_list_name)
+	if not level_list_info:
+		return
+	level_list_info["bg_style"] = get_game_bg_info().duplicate_deep()
 
 func copy_game_bg_to_level() -> void:
 	if not loaded_level_name:
 		return
-	var game_bg_info: Dictionary = get_game_setting("bg_style", {}).duplicate_deep()
-	set_level_bg_info(game_bg_info)
+	set_level_bg_info(get_game_bg_info())
 
 
 func is_one_time_message_dismissed(message_type: OneTimeMessages) -> bool:

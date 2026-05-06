@@ -3,11 +3,13 @@ extends VBoxContainer
 signal close_level_select()
 
 const SingleLevelList = preload("res://Scenes/single_level_list.gd")
+const LevelSelectUIRoot = preload("res://Scenes/level_select_root.gd")
 
 var single_level_list_scene: = preload("res://Scenes/single_level_list.tscn")
 
 @export var level_list_container: Control
 
+var level_select_root: LevelSelectUIRoot
 
 var any_edited: bool = false
 
@@ -73,3 +75,11 @@ func _process(_delta: float) -> void:
     for focus_move_action in ["ui_up", "ui_down", "ui_left", "ui_right"]:
         if Input.is_action_just_pressed(focus_move_action):
             try_grab_focus()
+
+func enable_background_editor() -> void:
+    if level_select_root:
+        level_select_root.show_background_editor()
+
+func disable_background_editor() -> void:
+    if level_select_root:
+        level_select_root.hide_background_editor()

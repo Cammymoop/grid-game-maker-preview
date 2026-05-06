@@ -14,10 +14,11 @@ content_margin_bottom = 0.0
 color = Color(0.33333334, 0.31764707, 0.44313726, 1)
 thickness = 2
 
-[node name="BGStyleEditor" type="VBoxContainer" unique_id=1622581633 node_paths=PackedStringArray("reset_button", "bg_color_picker", "bg_gradient_enable", "bg_gradient_suboptions", "bg_gradient_color_picker", "bg_gradient_sort_option", "dusty_particles_enable", "dusty_particles_suboptions", "dusty_particles_color_picker", "dusty_particles_speed_input", "dusty_particles_amount_input", "pointy_particles_enable", "pointy_particles_suboptions", "pointy_particles_color_picker", "pointy_particles_rainbow_enable", "pointy_particles_dark_mode_enable", "pointy_particles_speed_input", "pointy_particles_amount_input", "lines_enable", "solids_enable", "lines_suboptions", "lines_sort_option", "lines_color_picker", "solids_color_picker", "ln_scroll_speed_input", "ln_scroll_angle_input", "ln_warp_strength_input", "ln_warp_scroll_speed_input", "ln_warp_scroll_angle_input")]
+[node name="BGStyleEditor" type="VBoxContainer" unique_id=1622581633 node_paths=PackedStringArray("reset_button", "remove_override_button", "bg_color_picker", "bg_gradient_enable", "bg_gradient_suboptions", "bg_gradient_color_picker", "bg_gradient_sort_option", "dusty_particles_enable", "dusty_particles_suboptions", "dusty_particles_color_picker", "dusty_particles_speed_input", "dusty_particles_amount_input", "pointy_particles_enable", "pointy_particles_suboptions", "pointy_particles_color_picker", "pointy_particles_rainbow_enable", "pointy_particles_dark_mode_enable", "pointy_particles_speed_input", "pointy_particles_amount_input", "lines_enable", "solids_enable", "lines_suboptions", "lines_sort_option", "lines_color_picker", "solids_color_picker", "ln_scroll_speed_input", "ln_scroll_angle_input", "ln_warp_strength_input", "ln_warp_scroll_speed_input", "ln_warp_scroll_angle_input")]
 theme = SubResource("Theme_48hio")
 script = ExtResource("1_pxgli")
-reset_button = NodePath("ResetButton")
+reset_button = NodePath("HBoxContainer2/ResetButton")
+remove_override_button = NodePath("HBoxContainer2/RemoveCustomButton")
 bg_color_picker = NodePath("HBoxContainer/ColorPickerButton")
 bg_gradient_enable = NodePath("VBoxContainer/HBoxContainer2/CheckButton")
 bg_gradient_suboptions = NodePath("VBoxContainer/GradientSuboptions")
@@ -47,10 +48,20 @@ ln_warp_strength_input = NodePath("VBoxContainer3/NoiseSuboptions/HBoxContainer1
 ln_warp_scroll_speed_input = NodePath("VBoxContainer3/NoiseSuboptions/HBoxContainer12/ScalarValueInput")
 ln_warp_scroll_angle_input = NodePath("VBoxContainer3/NoiseSuboptions/HBoxContainer11/ScalarValueInput")
 
-[node name="ResetButton" type="Button" parent="." unique_id=506319681]
+[node name="HBoxContainer2" type="HBoxContainer" parent="." unique_id=181641709]
+layout_mode = 2
+alignment = 1
+
+[node name="ResetButton" type="Button" parent="HBoxContainer2" unique_id=506319681]
 layout_mode = 2
 size_flags_horizontal = 4
 text = "Reset"
+
+[node name="RemoveCustomButton" type="Button" parent="HBoxContainer2" unique_id=1150989389]
+visible = false
+layout_mode = 2
+size_flags_horizontal = 4
+text = "Use Game Default"
 
 [node name="HBoxContainer" type="HBoxContainer" parent="." unique_id=638438035]
 layout_mode = 2

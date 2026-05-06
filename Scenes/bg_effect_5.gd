@@ -67,7 +67,7 @@ func on_bg_style_changed() -> void:
     refresh_bg_style()
 
 func refresh_bg_style() -> void:
-    var level_bg_info: Dictionary = GameManager.get_level_bg_info()
+    var level_bg_info: Dictionary = GameManager.get_current_bg_info()
     var background_color: Color = Utility.get_dict_color(level_bg_info, "background_color", default_bg_color)
     var dusty_particles_color: Color = Utility.get_dict_color(level_bg_info, "dusty_particles_color", default_particles_color)
     
@@ -112,7 +112,7 @@ func refresh_bg_style() -> void:
 
 
 func refresh_lines_style() -> void:
-    var level_bg_info: Dictionary = GameManager.get_level_bg_info()
+    var level_bg_info: Dictionary = GameManager.get_current_bg_info()
     lines.visible = level_bg_info.get("lines_on", false)
     lines_solid.visible = level_bg_info.get("lines_solid_on", false)
     if not lines.visible and not lines_solid.visible:

@@ -2,6 +2,7 @@
 
 [ext_resource type="PackedScene" uid="uid://byt0p1dxwdwb3" path="res://Scenes/MapEditor.tscn" id="1"]
 [ext_resource type="Script" uid="uid://0coueog1ftu6" path="res://Scenes/input_catcher.gd" id="1_r5y0w"]
+[ext_resource type="Script" uid="uid://d2ug0fux2u8js" path="res://Scenes/play_scene.gd" id="1_t3can"]
 [ext_resource type="PackedScene" uid="uid://c56bx5og1o0x1" path="res://Scenes/PauseMenu.tscn" id="2"]
 [ext_resource type="Script" uid="uid://0xx8dh5smcvl" path="res://src/PlayUI/overlay_ui.gd" id="3_vx41i"]
 [ext_resource type="PackedScene" uid="uid://4c11q33d8c57" path="res://Scenes/GameEditor/entity_instance_editor.tscn" id="4_ek1d2"]
@@ -124,13 +125,15 @@ _data = {
 [sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_4cgsu"]
 blend_mode = 3
 
-[node name="Play" type="Control" unique_id=357405740]
+[node name="Play" type="Control" unique_id=357405740 node_paths=PackedStringArray("background_scene")]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+script = ExtResource("1_t3can")
+background_scene = NodePath("BGLayer/BGEffects")
 
 [node name="SubViewportContainer" type="SubViewportContainer" parent="." unique_id=268370649]
 layout_mode = 0
@@ -268,7 +271,6 @@ visible = false
 
 [node name="LevelSelectRoot" type="Control" parent="OverlayLayer" unique_id=718450970 node_paths=PackedStringArray("level_select_ui") groups=["LevelSelectRoot"]]
 process_mode = 3
-visible = false
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -277,7 +279,7 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 script = ExtResource("7_hagi3")
-level_select_ui = NodePath("CenterContainer/PanelContainer/VBoxContainer/LOL")
+level_select_ui = NodePath("HBoxContainer/CenterContainer/PanelContainer/VBoxContainer/LOL")
 
 [node name="MultiplyDarkenColor" type="ColorRect" parent="OverlayLayer/LevelSelectRoot" unique_id=1877095181]
 material = SubResource("CanvasItemMaterial_4cgsu")
@@ -290,7 +292,7 @@ grow_vertical = 2
 mouse_filter = 2
 color = Color(0.62152386, 0.6215239, 0.6215237, 1)
 
-[node name="CenterContainer" type="CenterContainer" parent="OverlayLayer/LevelSelectRoot" unique_id=1135640931]
+[node name="HBoxContainer" type="HBoxContainer" parent="OverlayLayer/LevelSelectRoot" unique_id=1477228057]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -298,30 +300,37 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="PanelContainer" type="PanelContainer" parent="OverlayLayer/LevelSelectRoot/CenterContainer" unique_id=276448297]
+[node name="CenterContainer" type="CenterContainer" parent="OverlayLayer/LevelSelectRoot/HBoxContainer" unique_id=429055740]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="PanelContainer" type="PanelContainer" parent="OverlayLayer/LevelSelectRoot/HBoxContainer/CenterContainer" unique_id=276448297]
 layout_mode = 2
 
-[node name="VBoxContainer" type="VBoxContainer" parent="OverlayLayer/LevelSelectRoot/CenterContainer/PanelContainer" unique_id=67623878]
+[node name="VBoxContainer" type="VBoxContainer" parent="OverlayLayer/LevelSelectRoot/HBoxContainer/CenterContainer/PanelContainer" unique_id=67623878]
 layout_mode = 2
 
-[node name="Label" type="Label" parent="OverlayLayer/LevelSelectRoot/CenterContainer/PanelContainer/VBoxContainer" unique_id=2095787770]
+[node name="Label" type="Label" parent="OverlayLayer/LevelSelectRoot/HBoxContainer/CenterContainer/PanelContainer/VBoxContainer" unique_id=2095787770]
 layout_mode = 2
 theme_override_font_sizes/font_size = 22
 text = "Select Level:"
 horizontal_alignment = 1
 
-[node name="Spacer" type="Control" parent="OverlayLayer/LevelSelectRoot/CenterContainer/PanelContainer/VBoxContainer" unique_id=763642225]
+[node name="Spacer" type="Control" parent="OverlayLayer/LevelSelectRoot/HBoxContainer/CenterContainer/PanelContainer/VBoxContainer" unique_id=763642225]
 custom_minimum_size = Vector2(0, 12)
 layout_mode = 2
 
-[node name="LOL" type="VBoxContainer" parent="OverlayLayer/LevelSelectRoot/CenterContainer/PanelContainer/VBoxContainer" unique_id=2125232342 node_paths=PackedStringArray("level_list_container")]
+[node name="LOL" type="VBoxContainer" parent="OverlayLayer/LevelSelectRoot/HBoxContainer/CenterContainer/PanelContainer/VBoxContainer" unique_id=2125232342 node_paths=PackedStringArray("level_list_container")]
 custom_minimum_size = Vector2(200, 0)
 layout_mode = 2
 theme_override_constants/separation = 12
 script = ExtResource("7_p1k4u")
 level_list_container = NodePath("LevelList")
 
-[node name="LevelList" parent="OverlayLayer/LevelSelectRoot/CenterContainer/PanelContainer/VBoxContainer/LOL" unique_id=407189420 instance=ExtResource("8_hagi3")]
+[node name="LevelList" parent="OverlayLayer/LevelSelectRoot/HBoxContainer/CenterContainer/PanelContainer/VBoxContainer/LOL" unique_id=407189420 instance=ExtResource("8_hagi3")]
+layout_mode = 2
+
+[node name="CenterContainer2" type="CenterContainer" parent="OverlayLayer/LevelSelectRoot/HBoxContainer" unique_id=1094782827]
 layout_mode = 2
 
 [node name="MapEditorUILayer" type="CanvasLayer" parent="." unique_id=1275328928]

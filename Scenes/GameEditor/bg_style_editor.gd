@@ -3,6 +3,7 @@ extends VBoxContainer
 const ScalarValueInput = preload("res://src/GameEditor/ConditionalEditor/scalar_value_input.gd")
 
 @export var reset_button: Button
+@export var remove_override_button: Button
 
 @export var bg_color_picker: ColorPickerButton
 
@@ -38,7 +39,9 @@ const ScalarValueInput = preload("res://src/GameEditor/ConditionalEditor/scalar_
 @export var ln_warp_scroll_angle_input: ScalarValueInput
 
 func _ready() -> void:
-    reset_button.pressed.connect(reset_bg_style.unbind(1))
+    reset_button.pressed.connect(reset_bg_style)
+    remove_override_button.pressed.connect(remove_override_bg_style)
+    remove_override_button.visible = GameManager.cur_scene == "Play"
     bg_gradient_enable.toggled.connect(refresh_suboptions.unbind(1))
     dusty_particles_enable.toggled.connect(refresh_suboptions.unbind(1))
     pointy_particles_enable.toggled.connect(refresh_suboptions.unbind(1))
@@ -51,13 +54,18 @@ func _ready() -> void:
 func reset_bg_style() -> void:
     if GameManager.cur_scene != "Play":
         GameManager.set_game_setting("bg_style", {})
-        GameManager.bg_style_changed.emit()
     else:
-        GameManager.copy_game_bg_to_level()
+        GameManager.copy_game_bg_to_current()
+    GameManager.bg_style_changed.emit()
     load_bg_style()
 
+func remove_override_bg_style() -> void:
+    if GameManager.cur_scene != "Play":
+        return
+    GameManager.remove_current_bg_override()
+
 func load_bg_style() -> void:
-    var bg_style: Dictionary = GameManager.get_level_bg_info()
+    var bg_style: Dictionary = GameManager.get_current_bg_info()
     
     bg_color_picker.color = Utility.get_dict_color(bg_style, "background_color", Color.BLACK)
     
