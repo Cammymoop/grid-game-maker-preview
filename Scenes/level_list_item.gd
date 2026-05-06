@@ -28,6 +28,8 @@ signal request_edit_level(level_name: String)
 
 var level_name: String = ""
 
+var _not_in_a_list: bool = false
+
 var is_unlocked: bool = true
 var is_completed: bool = false
 var is_played: bool = false
@@ -42,6 +44,10 @@ func _ready() -> void:
     move_up_button.pressed.connect(on_relative_move_pressed.bind(-1))
     move_down_button.pressed.connect(on_relative_move_pressed.bind(1))
     refresh_move_buttons()
+
+func not_in_a_list() -> void:
+    _not_in_a_list = true
+    move_up_down_buttons.visible = false
 
 func on_relative_move_pressed(relative_index: int) -> void:
     request_move_relative.emit(self, relative_index)

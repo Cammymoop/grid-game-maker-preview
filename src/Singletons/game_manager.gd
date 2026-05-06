@@ -1165,10 +1165,35 @@ func get_unlocked_levels_in_level_list(level_list_name: String) -> Array:
 		return []
 	var level_list_info: = _get_level_list(level_list_name)
 	var existing_levels: = get_levels_in_level_list(level_list_name)
-	if level_list_info.get("progressive_locked_levels", 0) > 0:
-		return existing_levels.slice(0, level_list_info.get("progressive_locked_levels", 0))
-	else:
+	var prog_unlock_num: int = level_list_info.get("progressive_locked_levels", 0)
+	if prog_unlock_num <= 0:
 		return existing_levels
+
+	var all_completed_levels: Array = get_game_save_data("completed_levels", [])
+	var unlocked_levels: Array = []
+	var max_completed_idx: int = -1
+	for idx in existing_levels.size():
+		if not _level_code(level_list_name, existing_levels[idx]) in all_completed_levels:
+			continue
+		max_completed_idx = maxi(max_completed_idx, idx)
+	for idx in existing_levels.size():
+		if max_completed_idx + prog_unlock_num >= idx:
+			unlocked_levels.append(existing_levels[idx])
+	return unlocked_levels
+
+func get_list_of_unlisted_levels() -> Array:
+	var all_level_lists: Array = get_list_of_level_lists()
+	var all_listed_levels: Array = []
+	for level_list_name in all_level_lists:
+		all_listed_levels.append_array(get_levels_in_level_list(level_list_name))
+	
+	var all_levels: Array = FilesManager.get_level_list(get_game_name())
+	var unlisted_levels: Array = []
+	for level_name in all_levels:
+		if not level_name in all_listed_levels:
+			unlisted_levels.append(level_name)
+	return unlisted_levels
+
 
 func get_first_existing_level_from_list(level_list_name: String) -> String:
 	var level_list_info: = _get_level_list(level_list_name)
@@ -1278,6 +1303,12 @@ func move_level_to_relative_list(level_name: String, level_list_name: String, de
 		return
 	remove_level_from_list(level_name, level_list_name)
 	add_level_to_level_list(level_name, game_definition.get("level_lists", [])[to_index]["name"])
+
+func add_level_to_list_index(level_name: String, to_index: int) -> void:
+	var all_level_lists: Array = get_list_of_level_lists()
+	if to_index < 0 or to_index >= all_level_lists.size():
+		return
+	add_level_to_level_list(level_name, _get_level_list(all_level_lists[to_index])["name"])
 
 
 func get_next_level_to_auto_load(after_level: String = "", current_level_as_complete: bool = false) -> Array:

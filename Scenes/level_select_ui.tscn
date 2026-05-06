@@ -1,0 +1,85 @@
+[gd_scene format=3 uid="uid://cfhftqjjfjyv"]
+
+[ext_resource type="Script" uid="uid://ce76sw1015ksr" path="res://Scenes/level_select_ui.gd" id="1_o0n7n"]
+[ext_resource type="Script" uid="uid://cfrnaqldrr8lr" path="res://Scenes/level_list_settings.gd" id="2_gs7i2"]
+[ext_resource type="PackedScene" uid="uid://bleyoj5f36kfy" path="res://Scenes/GameEditor/ConditionalEditor/scalar_value_input.tscn" id="3_wwtce"]
+
+[node name="LevelSelectUI" type="VBoxContainer" unique_id=1015399753 node_paths=PackedStringArray("level_list_container", "add_new_list_button")]
+custom_minimum_size = Vector2(200, 0)
+offset_right = 327.0
+offset_bottom = 163.0
+theme_override_constants/separation = 12
+script = ExtResource("1_o0n7n")
+level_list_container = NodePath("Lists/ListOfListsOfLevels")
+add_new_list_button = NodePath("Lists/AddListButton")
+
+[node name="Lists" type="VBoxContainer" parent="." unique_id=1147447715]
+visible = false
+layout_mode = 2
+
+[node name="ListOfListsOfLevels" type="VBoxContainer" parent="Lists" unique_id=1969060177]
+layout_mode = 2
+
+[node name="AddListButton" type="Button" parent="Lists" unique_id=1412812352]
+layout_mode = 2
+size_flags_horizontal = 4
+text = "Add Another List"
+
+[node name="LevelListSettings" type="VBoxContainer" parent="." unique_id=1214736889 node_paths=PackedStringArray("name_input", "do_progressive_unlock_toggle", "progressive_unlock_num_container", "progressive_unlock_num_input")]
+custom_minimum_size = Vector2(240, 0)
+layout_mode = 2
+script = ExtResource("2_gs7i2")
+name_input = NodePath("HBoxContainer/NameInput")
+do_progressive_unlock_toggle = NodePath("HBoxContainer2/CheckButton")
+progressive_unlock_num_container = NodePath("ProgressUnlockAmount")
+progressive_unlock_num_input = NodePath("ProgressUnlockAmount/ScalarValueInput")
+
+[node name="MarginContainer" type="MarginContainer" parent="LevelListSettings" unique_id=1609892732]
+layout_mode = 2
+theme_override_constants/margin_top = 2
+theme_override_constants/margin_bottom = 8
+
+[node name="Label" type="Label" parent="LevelListSettings/MarginContainer" unique_id=310132166]
+layout_mode = 2
+text = "List Settings"
+horizontal_alignment = 1
+
+[node name="BackButton" type="Button" parent="LevelListSettings/MarginContainer" unique_id=1955958437]
+layout_mode = 2
+size_flags_horizontal = 8
+text = "Back"
+
+[node name="HBoxContainer" type="HBoxContainer" parent="LevelListSettings" unique_id=1415682891]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="LevelListSettings/HBoxContainer" unique_id=69057831]
+layout_mode = 2
+text = "List Name:"
+
+[node name="NameInput" type="LineEdit" parent="LevelListSettings/HBoxContainer" unique_id=1091174358]
+layout_mode = 2
+size_flags_horizontal = 3
+expand_to_text_length = true
+
+[node name="HBoxContainer2" type="HBoxContainer" parent="LevelListSettings" unique_id=1069257500]
+layout_mode = 2
+alignment = 2
+
+[node name="CheckButton" type="CheckButton" parent="LevelListSettings/HBoxContainer2" unique_id=1217870361]
+layout_mode = 2
+text = "Progressively Unlock Levels"
+
+[node name="ProgressUnlockAmount" type="HBoxContainer" parent="LevelListSettings" unique_id=1857340366]
+layout_mode = 2
+alignment = 2
+
+[node name="Label" type="Label" parent="LevelListSettings/ProgressUnlockAmount" unique_id=744760892]
+layout_mode = 2
+text = "Levels Ahead Unlocked:"
+
+[node name="ScalarValueInput" parent="LevelListSettings/ProgressUnlockAmount" unique_id=1458729988 instance=ExtResource("3_wwtce")]
+layout_mode = 2
+is_int_type = true
+default_value = 1.0
+min_value = 1.0
+custom_step = true

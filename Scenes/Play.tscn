@@ -10,7 +10,7 @@
 [ext_resource type="Script" uid="uid://evq6x474ma1n" path="res://Scenes/text_box_anim_root.gd" id="5_q86eb"]
 [ext_resource type="PackedScene" uid="uid://bnomndi6o3mmb" path="res://Scenes/credits_ui.tscn" id="6_4cgsu"]
 [ext_resource type="Script" uid="uid://bpb7t48ncq7im" path="res://Scenes/level_select_root.gd" id="7_hagi3"]
-[ext_resource type="Script" uid="uid://ce76sw1015ksr" path="res://Scenes/level_select_ui.gd" id="7_p1k4u"]
+[ext_resource type="PackedScene" uid="uid://cfhftqjjfjyv" path="res://Scenes/level_select_ui.tscn" id="9_t3can"]
 [ext_resource type="PackedScene" uid="uid://b1a6s2o32t35i" path="res://Scenes/GameEditor/bg_style_editor.tscn" id="11_ui3gn"]
 [ext_resource type="PackedScene" uid="uid://b4fp8ldktkvcd" path="res://Scenes/bg_effect_6.tscn" id="12_hagi3"]
 
@@ -296,7 +296,7 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 script = ExtResource("7_hagi3")
-level_select_ui = NodePath("HBoxContainer/CenterContainer/PanelContainer/VBoxContainer/LOL")
+level_select_ui = NodePath("")
 darkener = NodePath("MultiplyDarkenColor")
 background_editor = NodePath("HBoxContainer/BackgroundEditor")
 
@@ -339,21 +339,8 @@ horizontal_alignment = 1
 custom_minimum_size = Vector2(0, 12)
 layout_mode = 2
 
-[node name="LOL" type="VBoxContainer" parent="OverlayLayer/LevelSelectRoot/HBoxContainer/CenterContainer/PanelContainer/VBoxContainer" unique_id=2125232342 node_paths=PackedStringArray("level_list_container", "add_new_list_button")]
-custom_minimum_size = Vector2(200, 0)
+[node name="LOL" parent="OverlayLayer/LevelSelectRoot/HBoxContainer/CenterContainer/PanelContainer/VBoxContainer" unique_id=1015399753 instance=ExtResource("9_t3can")]
 layout_mode = 2
-theme_override_constants/separation = 12
-script = ExtResource("7_p1k4u")
-level_list_container = NodePath("VBoxContainer")
-add_new_list_button = NodePath("AddListButton")
-
-[node name="VBoxContainer" type="VBoxContainer" parent="OverlayLayer/LevelSelectRoot/HBoxContainer/CenterContainer/PanelContainer/VBoxContainer/LOL" unique_id=461761998]
-layout_mode = 2
-
-[node name="AddListButton" type="Button" parent="OverlayLayer/LevelSelectRoot/HBoxContainer/CenterContainer/PanelContainer/VBoxContainer/LOL" unique_id=1861319869]
-layout_mode = 2
-size_flags_horizontal = 4
-text = "Add Another List"
 
 [node name="BackgroundEditor" type="HBoxContainer" parent="OverlayLayer/LevelSelectRoot/HBoxContainer" unique_id=1413652382]
 visible = false
