@@ -4,13 +4,14 @@ const LevelListItem = preload("res://Scenes/level_list_item.gd")
 
 signal play_level(level_list_name: String, level_name: String)
 signal edited()
+signal request_edit_list_settings(list_name: String)
 
 var level_item_scene: = preload("res://Scenes/level_list_item.tscn")
 
 @export var level_item_container: Container
+@export var edit_list_settings_button: Button
 
 var level_list_name: String = ""
-
 
 const CTX_MOVE_UP = 3
 const CTX_MOVE_DOWN = 4
@@ -21,6 +22,13 @@ const CTX_MOVE_TO_LIST_ABOVE = 12
 const CTX_MOVE_TO_LIST_BELOW = 13 
 const CTX_REMOVE_FROM_LIST = 14 
 
+
+func _ready() -> void:
+    edit_list_settings_button.pressed.connect(on_edit_list_settings_button_pressed)
+    edit_list_settings_button.visible = _is_in_edit_mode()
+
+func on_edit_list_settings_button_pressed() -> void:
+    request_edit_list_settings.emit(level_list_name)
 
 func _is_in_edit_mode() -> bool:
     return GameManager.is_in_level_edit_mode

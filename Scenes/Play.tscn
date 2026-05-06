@@ -11,7 +11,7 @@
 [ext_resource type="PackedScene" uid="uid://bnomndi6o3mmb" path="res://Scenes/credits_ui.tscn" id="6_4cgsu"]
 [ext_resource type="Script" uid="uid://bpb7t48ncq7im" path="res://Scenes/level_select_root.gd" id="7_hagi3"]
 [ext_resource type="Script" uid="uid://ce76sw1015ksr" path="res://Scenes/level_select_ui.gd" id="7_p1k4u"]
-[ext_resource type="PackedScene" uid="uid://c00jkbf64u78u" path="res://Scenes/single_level_list.tscn" id="8_hagi3"]
+[ext_resource type="PackedScene" uid="uid://b1a6s2o32t35i" path="res://Scenes/GameEditor/bg_style_editor.tscn" id="11_ui3gn"]
 [ext_resource type="PackedScene" uid="uid://b4fp8ldktkvcd" path="res://Scenes/bg_effect_6.tscn" id="12_hagi3"]
 
 [sub_resource type="Animation" id="Animation_nsvgp"]
@@ -124,6 +124,23 @@ _data = {
 
 [sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_4cgsu"]
 blend_mode = 3
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_n87tl"]
+content_margin_left = 8.0
+content_margin_top = 8.0
+content_margin_right = 3.0
+content_margin_bottom = 8.0
+bg_color = Color(0.13118428, 0.19086626, 0.2888734, 0.5921569)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.334955, 0.31812483, 0.44406027, 1)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+corner_detail = 5
 
 [node name="Play" type="Control" unique_id=357405740 node_paths=PackedStringArray("background_scene")]
 layout_mode = 3
@@ -269,7 +286,7 @@ libraries/ = SubResource("AnimationLibrary_hagi3")
 [node name="CreditsUI" parent="OverlayLayer" unique_id=1760736673 groups=["Credits"] instance=ExtResource("6_4cgsu")]
 visible = false
 
-[node name="LevelSelectRoot" type="Control" parent="OverlayLayer" unique_id=718450970 node_paths=PackedStringArray("level_select_ui") groups=["LevelSelectRoot"]]
+[node name="LevelSelectRoot" type="Control" parent="OverlayLayer" unique_id=718450970 node_paths=PackedStringArray("level_select_ui", "darkener", "background_editor") groups=["LevelSelectRoot"]]
 process_mode = 3
 layout_mode = 3
 anchors_preset = 15
@@ -280,6 +297,8 @@ grow_vertical = 2
 mouse_filter = 2
 script = ExtResource("7_hagi3")
 level_select_ui = NodePath("HBoxContainer/CenterContainer/PanelContainer/VBoxContainer/LOL")
+darkener = NodePath("MultiplyDarkenColor")
+background_editor = NodePath("HBoxContainer/BackgroundEditor")
 
 [node name="MultiplyDarkenColor" type="ColorRect" parent="OverlayLayer/LevelSelectRoot" unique_id=1877095181]
 material = SubResource("CanvasItemMaterial_4cgsu")
@@ -320,17 +339,48 @@ horizontal_alignment = 1
 custom_minimum_size = Vector2(0, 12)
 layout_mode = 2
 
-[node name="LOL" type="VBoxContainer" parent="OverlayLayer/LevelSelectRoot/HBoxContainer/CenterContainer/PanelContainer/VBoxContainer" unique_id=2125232342 node_paths=PackedStringArray("level_list_container")]
+[node name="LOL" type="VBoxContainer" parent="OverlayLayer/LevelSelectRoot/HBoxContainer/CenterContainer/PanelContainer/VBoxContainer" unique_id=2125232342 node_paths=PackedStringArray("level_list_container", "add_new_list_button")]
 custom_minimum_size = Vector2(200, 0)
 layout_mode = 2
 theme_override_constants/separation = 12
 script = ExtResource("7_p1k4u")
-level_list_container = NodePath("LevelList")
+level_list_container = NodePath("VBoxContainer")
+add_new_list_button = NodePath("AddListButton")
 
-[node name="LevelList" parent="OverlayLayer/LevelSelectRoot/HBoxContainer/CenterContainer/PanelContainer/VBoxContainer/LOL" unique_id=407189420 instance=ExtResource("8_hagi3")]
+[node name="VBoxContainer" type="VBoxContainer" parent="OverlayLayer/LevelSelectRoot/HBoxContainer/CenterContainer/PanelContainer/VBoxContainer/LOL" unique_id=461761998]
 layout_mode = 2
 
-[node name="CenterContainer2" type="CenterContainer" parent="OverlayLayer/LevelSelectRoot/HBoxContainer" unique_id=1094782827]
+[node name="AddListButton" type="Button" parent="OverlayLayer/LevelSelectRoot/HBoxContainer/CenterContainer/PanelContainer/VBoxContainer/LOL" unique_id=1861319869]
+layout_mode = 2
+size_flags_horizontal = 4
+text = "Add Another List"
+
+[node name="BackgroundEditor" type="HBoxContainer" parent="OverlayLayer/LevelSelectRoot/HBoxContainer" unique_id=1413652382]
+visible = false
+layout_mode = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="OverlayLayer/LevelSelectRoot/HBoxContainer/BackgroundEditor" unique_id=39011910]
+layout_mode = 2
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 12
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 12
+
+[node name="PanelContainer" type="PanelContainer" parent="OverlayLayer/LevelSelectRoot/HBoxContainer/BackgroundEditor/MarginContainer" unique_id=1711158392]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_n87tl")
+
+[node name="ScrollContainer" type="ScrollContainer" parent="OverlayLayer/LevelSelectRoot/HBoxContainer/BackgroundEditor/MarginContainer/PanelContainer" unique_id=1305098633]
+layout_mode = 2
+horizontal_scroll_mode = 0
+vertical_scroll_mode = 4
+
+[node name="MarginContainer" type="MarginContainer" parent="OverlayLayer/LevelSelectRoot/HBoxContainer/BackgroundEditor/MarginContainer/PanelContainer/ScrollContainer" unique_id=2063032859]
+layout_mode = 2
+theme_override_constants/margin_top = 3
+theme_override_constants/margin_bottom = 3
+
+[node name="BGStyleEditor" parent="OverlayLayer/LevelSelectRoot/HBoxContainer/BackgroundEditor/MarginContainer/PanelContainer/ScrollContainer/MarginContainer" unique_id=1622581633 instance=ExtResource("11_ui3gn")]
 layout_mode = 2
 
 [node name="MapEditorUILayer" type="CanvasLayer" parent="." unique_id=1275328928]

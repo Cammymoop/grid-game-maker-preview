@@ -23,6 +23,9 @@ signal request_edit_level(level_name: String)
 @export var check_icon: TextureRect
 @export var locked_icon: TextureRect
 
+@export var current_level_indicator: Control
+@export var current_level_icon: TextureRect
+
 var level_name: String = ""
 
 var is_unlocked: bool = true
@@ -30,6 +33,9 @@ var is_completed: bool = false
 var is_played: bool = false
 
 func _ready() -> void:
+    current_level_icon.hide()
+    current_level_indicator.visible = true
+    update_current_level_indicator()
     refresh_icons_and_text()
     start_level_button.pressed.connect(on_start_level_button_pressed)
     edit_level_button.pressed.connect(on_edit_level_button_pressed)
@@ -50,14 +56,24 @@ func refresh_move_buttons() -> void:
     move_down_button.disabled = idx == get_parent().get_child_count() - 1
 
 func set_edit_mode(is_edit: bool) -> void:
+    #current_level_indicator.visible = not is_edit
     start_level_button.visible = not is_edit
     edit_level_button.visible = is_edit
     move_up_down_buttons.visible = is_edit
     refresh_move_buttons()
+    update_current_level_indicator()
 
 func set_level_name_and_title(new_name: String, new_title: String) -> void:
     level_name = new_name
     title_label.text = new_title
+
+func update_current_level_indicator() -> void:
+    if not current_level_indicator.visible:
+        return
+    if GameManager.cur_scene == "Play" and GameManager.loaded_level_name:
+        prints("current level:", GameManager.loaded_level_name, "my level:", level_name)
+        if GameManager.loaded_level_name == level_name:
+            current_level_icon.show()
 
 func set_is_completed_is_played(new_is_completed: bool, new_is_played: bool) -> void:
     is_completed = new_is_completed

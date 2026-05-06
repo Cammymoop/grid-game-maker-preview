@@ -8,12 +8,17 @@ const LevelSelectUIRoot = preload("res://Scenes/level_select_root.gd")
 var single_level_list_scene: = preload("res://Scenes/single_level_list.tscn")
 
 @export var level_list_container: Control
+@export var add_new_list_button: Button
 
 var level_select_root: LevelSelectUIRoot
 
 var any_edited: bool = false
 
 func _ready() -> void:
+    refresh_level_list()
+
+func refresh() -> void:
+    add_new_list_button.visible = GameManager.is_in_level_edit_mode
     refresh_level_list()
 
 func refresh_level_list() -> void:

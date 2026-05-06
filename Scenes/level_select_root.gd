@@ -20,7 +20,7 @@ func on_level_select_ui_close_level_select() -> void:
 
 func open_level_select() -> void:
     GameManager.set_pause("level_select", true)
-    level_select_ui.refresh_level_list()
+    level_select_ui.refresh()
     show()
 
 func close_level_select() -> void:

@@ -11,6 +11,7 @@
 [ext_resource type="PackedScene" uid="uid://cemds60k8ytal" path="res://Scenes/UI/icon_button.tscn" id="6_ybcw1"]
 [ext_resource type="Texture2D" uid="uid://tpslcq3ccosh" path="res://assets/img/button_icons/up_small.png" id="7_oxl58"]
 [ext_resource type="Texture2D" uid="uid://c1h0arduxil1j" path="res://assets/img/button_icons/down_small.png" id="8_ekmnw"]
+[ext_resource type="Texture2D" uid="uid://csh27qa486e5f" path="res://assets/img/button_icons/is_current.png" id="10_6novh"]
 [ext_resource type="Texture2D" uid="uid://c0q4s8sa4ojhs" path="res://assets/img/button_icons/locked.png" id="11_gc3cy"]
 
 [sub_resource type="Theme" id="Theme_v4jex"]
@@ -21,7 +22,7 @@ Button/styles/normal = ExtResource("3_bvcnr")
 Button/styles/pressed = ExtResource("4_6novh")
 Label/font_sizes/font_size = 18
 
-[node name="LevelItem" type="HBoxContainer" unique_id=1266912356 node_paths=PackedStringArray("title_label", "start_level_button", "edit_level_button", "move_up_down_buttons", "move_up_button", "move_down_button", "dot_icon", "check_icon", "locked_icon")]
+[node name="LevelItem" type="HBoxContainer" unique_id=1266912356 node_paths=PackedStringArray("title_label", "start_level_button", "edit_level_button", "move_up_down_buttons", "move_up_button", "move_down_button", "dot_icon", "check_icon", "locked_icon", "current_level_indicator", "current_level_icon")]
 offset_right = 294.0
 offset_bottom = 28.0
 theme = SubResource("Theme_v4jex")
@@ -38,6 +39,8 @@ move_down_button = NodePath("MoveUpDownButtons/MoveDownButton")
 dot_icon = NodePath("DotIcon")
 check_icon = NodePath("CheckIcon")
 locked_icon = NodePath("LockedIcon")
+current_level_indicator = NodePath("CurrentLevelIndicator")
+current_level_icon = NodePath("CurrentLevelIndicator/CurrentLevelIcon")
 
 [node name="MoveUpDownButtons" type="HBoxContainer" parent="." unique_id=1106326614]
 layout_mode = 2
@@ -49,6 +52,23 @@ icon = ExtResource("7_oxl58")
 [node name="MoveDownButton" parent="MoveUpDownButtons" unique_id=1123825490 instance=ExtResource("6_ybcw1")]
 layout_mode = 2
 icon = ExtResource("8_ekmnw")
+
+[node name="CurrentLevelIndicator" type="Control" parent="." unique_id=545294022]
+visible = false
+custom_minimum_size = Vector2(15, 23)
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+
+[node name="CurrentLevelIcon" type="TextureRect" parent="CurrentLevelIndicator" unique_id=1378962608]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("10_6novh")
+stretch_mode = 2
 
 [node name="Label" type="Label" parent="." unique_id=856735861]
 layout_mode = 2
