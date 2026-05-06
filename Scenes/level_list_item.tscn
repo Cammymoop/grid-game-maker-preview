@@ -14,7 +14,7 @@
 [ext_resource type="Texture2D" uid="uid://c0q4s8sa4ojhs" path="res://assets/img/button_icons/locked.png" id="11_gc3cy"]
 
 [sub_resource type="Theme" id="Theme_v4jex"]
-Button/font_sizes/font_size = 20
+Button/font_sizes/font_size = 18
 Button/styles/disabled = ExtResource("1_ck4xm")
 Button/styles/hover = ExtResource("2_gc3cy")
 Button/styles/normal = ExtResource("3_bvcnr")
@@ -22,6 +22,8 @@ Button/styles/pressed = ExtResource("4_6novh")
 Label/font_sizes/font_size = 18
 
 [node name="LevelItem" type="HBoxContainer" unique_id=1266912356 node_paths=PackedStringArray("title_label", "start_level_button", "edit_level_button", "move_up_down_buttons", "move_up_button", "move_down_button", "dot_icon", "check_icon", "locked_icon")]
+offset_right = 294.0
+offset_bottom = 28.0
 theme = SubResource("Theme_v4jex")
 script = ExtResource("1_4meir")
 locked_color = Color(0.6789437, 0.6789437, 0.6789437, 1)

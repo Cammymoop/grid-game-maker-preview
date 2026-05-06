@@ -22,4 +22,4 @@ theme_override_constants/margin_left = 12
 
 [node name="LevelItems" type="VBoxContainer" parent="MarginContainer" unique_id=1319925921]
 layout_mode = 2
-theme_override_constants/separation = 6
+theme_override_constants/separation = 4
