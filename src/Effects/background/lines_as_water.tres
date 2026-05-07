@@ -1,6 +1,6 @@
 [gd_resource type="ShaderMaterial" format=3 uid="uid://bxpdteawtwgay"]
 
-[ext_resource type="Shader" path="res://Scenes/bg_lines_add.gdshader" id="1_8wuno"]
+[ext_resource type="Shader" uid="uid://b2l3vkyrw0olv" path="res://Scenes/bg_lines_add.gdshader" id="1_8wuno"]
 
 [sub_resource type="Gradient" id="Gradient_exhar"]
 

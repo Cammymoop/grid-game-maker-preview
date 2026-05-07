@@ -4,23 +4,53 @@
 [ext_resource type="Script" uid="uid://cfrnaqldrr8lr" path="res://Scenes/level_list_settings.gd" id="2_gs7i2"]
 [ext_resource type="PackedScene" uid="uid://bleyoj5f36kfy" path="res://Scenes/GameEditor/ConditionalEditor/scalar_value_input.tscn" id="3_wwtce"]
 
-[node name="LevelSelectUI" type="VBoxContainer" unique_id=1015399753 node_paths=PackedStringArray("level_list_container", "add_new_list_button", "level_list_settings")]
+[node name="LevelSelectUI" type="VBoxContainer" unique_id=1015399753 node_paths=PackedStringArray("level_list_container", "edit_lists_button_container", "add_new_list_button", "rearrange_lists_button", "level_list_settings", "rearrange_lists_back_container", "rearrange_lists_back_button", "list_scroll_container")]
 custom_minimum_size = Vector2(200, 0)
 offset_right = 327.0
 offset_bottom = 163.0
 theme_override_constants/separation = 12
 script = ExtResource("1_o0n7n")
-level_list_container = NodePath("Lists/ListOfListsOfLevels")
-add_new_list_button = NodePath("Lists/AddListButton")
+level_list_container = NodePath("Lists/ScrollContainer/ListOfListsOfLevels")
+edit_lists_button_container = NodePath("Lists/HBoxContainer")
+add_new_list_button = NodePath("Lists/HBoxContainer/AddListButton")
+rearrange_lists_button = NodePath("Lists/HBoxContainer/RearrangeListsButton")
 level_list_settings = NodePath("LevelListSettings")
+rearrange_lists_back_container = NodePath("Lists/RerrangeBackContainer")
+rearrange_lists_back_button = NodePath("Lists/RerrangeBackContainer/RearrangeBackButton")
+list_scroll_container = NodePath("Lists/ScrollContainer")
 
 [node name="Lists" type="VBoxContainer" parent="." unique_id=1147447715]
 layout_mode = 2
+theme_override_constants/separation = 12
 
-[node name="ListOfListsOfLevels" type="VBoxContainer" parent="Lists" unique_id=1969060177]
+[node name="RerrangeBackContainer" type="HBoxContainer" parent="Lists" unique_id=1031636159]
+visible = false
 layout_mode = 2
+alignment = 2
 
-[node name="AddListButton" type="Button" parent="Lists" unique_id=1412812352]
+[node name="RearrangeBackButton" type="Button" parent="Lists/RerrangeBackContainer" unique_id=17766171]
+layout_mode = 2
+text = "Back"
+
+[node name="ScrollContainer" type="ScrollContainer" parent="Lists" unique_id=1575701036]
+layout_mode = 2
+horizontal_scroll_mode = 0
+vertical_scroll_mode = 4
+
+[node name="ListOfListsOfLevels" type="VBoxContainer" parent="Lists/ScrollContainer" unique_id=1969060177]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="HBoxContainer" type="HBoxContainer" parent="Lists" unique_id=1069650957]
+layout_mode = 2
+alignment = 1
+
+[node name="RearrangeListsButton" type="Button" parent="Lists/HBoxContainer" unique_id=1062710444]
+layout_mode = 2
+size_flags_horizontal = 4
+text = "Rearrange Lists"
+
+[node name="AddListButton" type="Button" parent="Lists/HBoxContainer" unique_id=1412812352]
 layout_mode = 2
 size_flags_horizontal = 4
 text = "Add Another List"

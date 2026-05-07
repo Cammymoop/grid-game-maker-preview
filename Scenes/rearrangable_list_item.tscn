@@ -1,0 +1,45 @@
+[gd_scene format=3 uid="uid://bfxc0x33aqpnc"]
+
+[ext_resource type="StyleBox" uid="uid://bjfdm7g0ured8" path="res://assets/ui/button_styles/thin_button_disabled.tres" id="1_bq8id"]
+[ext_resource type="StyleBox" uid="uid://dwpyvi0mnhxyx" path="res://assets/ui/button_styles/thin_button_hover.tres" id="2_eed1d"]
+[ext_resource type="StyleBox" uid="uid://cu78oa72kple8" path="res://assets/ui/button_styles/thin_button_normal.tres" id="3_jkutp"]
+[ext_resource type="StyleBox" uid="uid://cf4b0mxp54ien" path="res://assets/ui/button_styles/thin_button_pressed.tres" id="4_wduyr"]
+[ext_resource type="Script" uid="uid://4aa4dwxfcvpr" path="res://Scenes/rearrangable_list_item.gd" id="5_eed1d"]
+[ext_resource type="PackedScene" uid="uid://cemds60k8ytal" path="res://Scenes/UI/icon_button.tscn" id="5_whnwl"]
+[ext_resource type="Texture2D" uid="uid://tpslcq3ccosh" path="res://assets/img/button_icons/up_small.png" id="6_shjdh"]
+[ext_resource type="Texture2D" uid="uid://c1h0arduxil1j" path="res://assets/img/button_icons/down_small.png" id="7_a5u3g"]
+
+[sub_resource type="Theme" id="Theme_bob85"]
+Button/font_sizes/font_size = 18
+Button/styles/disabled = ExtResource("1_bq8id")
+Button/styles/hover = ExtResource("2_eed1d")
+Button/styles/normal = ExtResource("3_jkutp")
+Button/styles/pressed = ExtResource("4_wduyr")
+Label/font_sizes/font_size = 18
+
+[node name="RearrangableListItem" type="HBoxContainer" unique_id=216382718 node_paths=PackedStringArray("up_button", "down_button", "remove_button", "name_label")]
+theme = SubResource("Theme_bob85")
+script = ExtResource("5_eed1d")
+up_button = NodePath("MoveUpDownButtons/MoveUpButton")
+down_button = NodePath("MoveUpDownButtons/MoveDownButton")
+remove_button = NodePath("RemoveButton")
+name_label = NodePath("Label")
+
+[node name="MoveUpDownButtons" type="HBoxContainer" parent="." unique_id=480010604]
+layout_mode = 2
+
+[node name="MoveUpButton" parent="MoveUpDownButtons" unique_id=451892711 instance=ExtResource("5_whnwl")]
+layout_mode = 2
+icon = ExtResource("6_shjdh")
+
+[node name="MoveDownButton" parent="MoveUpDownButtons" unique_id=535280930 instance=ExtResource("5_whnwl")]
+layout_mode = 2
+icon = ExtResource("7_a5u3g")
+
+[node name="Label" type="Label" parent="." unique_id=145598199]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "LIST NAME"
+
+[node name="RemoveButton" parent="." unique_id=763179905 instance=ExtResource("5_whnwl")]
+layout_mode = 2

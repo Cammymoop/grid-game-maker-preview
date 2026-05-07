@@ -30,6 +30,8 @@ const CTX_REMOVE_FROM_LIST = 14
 func _ready() -> void:
     edit_list_settings_button.pressed.connect(on_edit_list_settings_button_pressed)
     edit_list_settings_button.visible = _is_in_edit_mode()
+    if is_list_of_unlisted_levels:
+        edit_list_settings_button.visible = false
 
 func on_edit_list_settings_button_pressed() -> void:
     request_edit_list_settings.emit(level_list_name)
@@ -122,7 +124,10 @@ func on_level_item_play_level(level_name: String) -> void:
 func on_level_item_request_edit_level(level_name: String) -> void:
     if not level_name or not _is_in_edit_mode():
         return
-
+    if is_list_of_unlisted_levels:
+        GameManager.edit_level_named(level_name)
+    else:
+        GameManager.edit_level_in_list(level_list_name, level_name)
 
 func clear_level_items() -> void:
     for child in level_item_container.get_children():

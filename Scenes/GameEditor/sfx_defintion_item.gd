@@ -120,11 +120,9 @@ func set_sfx_definition(sfx_definition: Dictionary) -> void:
         prints(Utility.opbtn_get_selected_text(sfx_style_picker))
     else:
         var sample_name: String = sfx_definition.get("sample_name", "")
-        prints("sample_name: %s" % sample_name)
         var sample_name_list: Array[String] = SfxPlayer.get_sample_name_list()
         if not sample_name or not sample_name_list.has(sample_name):
             sample_name = sample_name_list[0]
-        prints("sample_name: %s" % sample_name, "index: %s" % sample_name_list.find(sample_name))
         sample_picker.selected = sample_name_list.find(sample_name)
     
     _set_pitch_factor(sfx_definition.get("pitch", 1.0))

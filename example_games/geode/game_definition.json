@@ -388,9 +388,8 @@
   },
   "level_lists": [
     {
-      "name": "Levels",
+      "name": "Part 1",
       "level_names": [
-        "editor autosave",
         "Level 1",
         "Level 2",
         "Level 3",
@@ -404,7 +403,12 @@
         "Level 11",
         "Level 12",
         "Level 13",
-        "Level 14",
+        "Level 14"
+      ]
+    },
+    {
+      "name": "Part 2",
+      "level_names": [
         "Level 15",
         "Level 16",
         "Level 17",
@@ -414,9 +418,66 @@
         "Level 21",
         "Level 22",
         "Level 23",
-        "Secret Challenge",
         "grats"
-      ]
+      ],
+      "bg_style": {
+        "background_color": "#191b1e",
+        "bg_gradient_color": "#272725bb",
+        "dusty_particles_color": "#57575214",
+        "dusty_particles_amount": 2.2,
+        "dusty_particles_speed": 0.0,
+        "bg_gradient_above": "between",
+        "pointy_particles_on": true,
+        "pointy_particles_speed": 0.5,
+        "pointy_particles_dark_mode": false,
+        "pointy_particles_color": "#360e6f9d",
+        "pointy_particles_rainbow_on": false,
+        "pointy_particles_amount": 0.1,
+        "lines_solid_on": true,
+        "lines_above": "below",
+        "lines_solid_color": "#e03a1363",
+        "lines_scroll_speed": 0.0,
+        "lines_warp_scroll_speed": 0.02,
+        "lines_scroll_angle": 308.0,
+        "bg_gradient_on": true,
+        "dusty_particles_on": true,
+        "lines_on": false,
+        "lines_color": "#ffffff40",
+        "lines_warp_strength": 1.30000001937156,
+        "lines_warp_scroll_angle": 197.999995574304
+      }
+    },
+    {
+      "name": "Bonus",
+      "level_names": [
+        "Secret Challenge"
+      ],
+      "bg_style": {
+        "background_color": "#191b1e",
+        "bg_gradient_color": "#272725bb",
+        "dusty_particles_color": "#57575214",
+        "dusty_particles_amount": 2.2,
+        "dusty_particles_speed": 0.0,
+        "bg_gradient_above": "between",
+        "pointy_particles_on": true,
+        "pointy_particles_speed": 0.5,
+        "pointy_particles_dark_mode": false,
+        "pointy_particles_color": "#9a9e0b5a",
+        "pointy_particles_rainbow_on": false,
+        "pointy_particles_amount": 0.1,
+        "lines_solid_on": true,
+        "lines_above": "below",
+        "lines_solid_color": "#5454540d",
+        "lines_scroll_speed": 0.0,
+        "lines_warp_scroll_speed": 0.02,
+        "lines_scroll_angle": 308.0,
+        "bg_gradient_on": true,
+        "dusty_particles_on": true,
+        "lines_on": false,
+        "lines_color": "#ffffff40",
+        "lines_warp_strength": 1.30000001937156,
+        "lines_warp_scroll_angle": 197.999995574304
+      }
     }
   ],
   "sfx_definitions": [

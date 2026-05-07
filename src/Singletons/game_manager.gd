@@ -530,6 +530,7 @@ func load_level_data(level_data: Dictionary, process_queued_load: bool = false):
 	editor_save = level_data["state"]
 	load_edited()
 	close_pause_menu()
+	bg_style_changed.emit()
 
 func try_load_next_level(with_delay: float = 0.5):
 	if not MapManager.has_next_level() or queued_level_load:
@@ -589,6 +590,27 @@ func try_load_level(level_name: String, as_queued_load: bool = false):
 	if not the_level_data["name"] == level_name:
 		the_level_data["name"] = level_name
 	load_level_data(the_level_data, as_queued_load)
+
+func edit_level_named(level_name: String) -> bool:
+	if not FilesManager.level_exists(cur_game_name, level_name):
+		push_error("Level %s does not exist" % [level_name])
+		return false
+	var the_level_data: = FilesManager.get_level_data(cur_game_name, level_name)
+	if not the_level_data["name"] == level_name:
+		the_level_data["name"] = level_name
+	load_level_data(the_level_data)
+	return true
+
+func edit_level_in_list(level_list_name: String, level_name: String) -> void:
+	var level_lists: = get_list_of_level_lists()
+	if not level_list_name in level_lists:
+		push_error("Level list %s does not exist" % [level_list_name])
+		return
+
+	var was_level_list: = current_level_list
+	current_level_list = level_list_name
+	if not edit_level_named(level_name):
+		current_level_list = was_level_list
 
 func new_empty_level():
 	loaded_level_name = "LEVEL"
@@ -1128,6 +1150,22 @@ func _get_level_list_index(level_list_name: String) -> int:
 			return i
 	return -1
 
+func remove_level_list(level_list_name: String) -> void:
+	if not game_definition.get("level_lists", []):
+		return
+	var level_list_index: = _get_level_list_index(level_list_name)
+	if level_list_index < 0:
+		return
+	game_definition["level_lists"].remove_at(level_list_index)
+
+func add_level_list(level_list_name: String) -> void:
+	if not game_definition.get("level_lists", []):
+		game_definition["level_lists"] = []
+	game_definition["level_lists"].append({
+		"name": level_list_name,
+		"level_names": [],
+	})
+
 func has_any_unlocked_levels() -> bool:
 	var total_unlocked_levels: int = 0
 	for level_list_name in get_list_of_level_lists():
@@ -1522,7 +1560,14 @@ func get_current_bg_info() -> Dictionary:
 
 	var game_bg_info: Dictionary = get_game_bg_info().duplicate_deep()
 	var level_list_bg_info: Dictionary = {}
-	if current_level_list:
+	var level_select_root: = Utility.get_level_select_root()
+	if is_in_level_edit_mode and level_select_root and level_select_root.visible:
+		var level_select_ui = level_select_root.level_select_ui
+		if level_select_ui.editing_level_list:
+			var list_info: = _get_level_list(level_select_ui.editing_level_list)
+			if list_info.get("bg_style", {}):
+				level_list_bg_info = list_info["bg_style"].duplicate_deep()
+	if not level_list_bg_info and current_level_list:
 		var list_info: = _get_level_list(current_level_list)
 		if list_info.get("bg_style", {}):
 			level_list_bg_info = list_info["bg_style"].duplicate_deep()

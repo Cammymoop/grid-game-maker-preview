@@ -1,0 +1,81 @@
+[gd_scene format=3 uid="uid://c08hfkcpibqpg"]
+
+[ext_resource type="Script" uid="uid://cb3aaeawpbmba" path="res://Scenes/GameEditor/new_list_panel.gd" id="1_ni3k7"]
+[ext_resource type="Texture2D" uid="uid://cbrbu8bh02ug" path="res://assets/ui/vector_x.tres" id="2_egnpj"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_6hdl4"]
+content_margin_left = 8.0
+content_margin_right = 8.0
+bg_color = Color(0.08816031, 0.120827846, 0.16656157, 1)
+border_color = Color(0.334955, 0.31812483, 0.44406027, 1)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+corner_detail = 7
+
+[node name="NewListDialog" type="PanelContainer" unique_id=1730346067 node_paths=PackedStringArray("close_button", "add_button", "name_input")]
+custom_minimum_size = Vector2(360, 0)
+offset_right = 360.0
+offset_bottom = 77.0
+script = ExtResource("1_ni3k7")
+close_button = NodePath("VBoxContainer/PanelContainer/HBoxContainer2/CloseButton")
+add_button = NodePath("VBoxContainer/HBoxContainer/AddButton")
+name_input = NodePath("VBoxContainer/HBoxContainer/ListNameInput")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="." unique_id=896131391]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="PanelContainer" type="PanelContainer" parent="VBoxContainer" unique_id=1040929598]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_6hdl4")
+
+[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer/PanelContainer" unique_id=939127179]
+layout_mode = 2
+alignment = 1
+
+[node name="TitleLabel" type="Label" parent="VBoxContainer/PanelContainer/HBoxContainer" unique_id=1590596653]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "New Level List"
+
+[node name="HBoxContainer2" type="HBoxContainer" parent="VBoxContainer/PanelContainer" unique_id=1308210799]
+layout_mode = 2
+alignment = 2
+
+[node name="CloseButton" type="Button" parent="VBoxContainer/PanelContainer/HBoxContainer2" unique_id=773498197]
+layout_mode = 2
+size_flags_vertical = 8
+mouse_default_cursor_shape = 2
+icon = ExtResource("2_egnpj")
+flat = true
+
+[node name="HBoxContainer2" type="HBoxContainer" parent="VBoxContainer" unique_id=1477151240]
+layout_mode = 2
+size_flags_horizontal = 3
+alignment = 1
+
+[node name="Spacer" type="Control" parent="VBoxContainer/HBoxContainer2" unique_id=1804791574]
+custom_minimum_size = Vector2(0, 21)
+layout_mode = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer" unique_id=1944317131]
+layout_mode = 2
+theme_override_constants/separation = 20
+alignment = 1
+
+[node name="ListNameInput" type="LineEdit" parent="VBoxContainer/HBoxContainer" unique_id=635870834]
+custom_minimum_size = Vector2(180, 0)
+layout_mode = 2
+size_flags_vertical = 4
+theme_override_font_sizes/font_size = 14
+placeholder_text = "List Name"
+max_length = 100
+expand_to_text_length = true
+
+[node name="AddButton" type="Button" parent="VBoxContainer/HBoxContainer" unique_id=1229390824]
+layout_mode = 2
+size_flags_horizontal = 4
+theme_type_variation = &"BigTextButton"
+text = "Add"

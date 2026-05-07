@@ -2,7 +2,7 @@
 
 [ext_resource type="PackedScene" uid="uid://byt0p1dxwdwb3" path="res://Scenes/MapEditor.tscn" id="1"]
 [ext_resource type="Script" uid="uid://0coueog1ftu6" path="res://Scenes/input_catcher.gd" id="1_r5y0w"]
-[ext_resource type="Script" path="res://Scenes/play_scene.gd" id="1_t3can"]
+[ext_resource type="Script" uid="uid://d2ug0fux2u8js" path="res://Scenes/play_scene.gd" id="1_t3can"]
 [ext_resource type="PackedScene" uid="uid://c56bx5og1o0x1" path="res://Scenes/PauseMenu.tscn" id="2"]
 [ext_resource type="Script" uid="uid://0xx8dh5smcvl" path="res://src/PlayUI/overlay_ui.gd" id="3_vx41i"]
 [ext_resource type="PackedScene" uid="uid://4c11q33d8c57" path="res://Scenes/GameEditor/entity_instance_editor.tscn" id="4_ek1d2"]
@@ -11,6 +11,7 @@
 [ext_resource type="PackedScene" uid="uid://bnomndi6o3mmb" path="res://Scenes/credits_ui.tscn" id="6_4cgsu"]
 [ext_resource type="Script" uid="uid://bpb7t48ncq7im" path="res://Scenes/level_select_root.gd" id="7_hagi3"]
 [ext_resource type="PackedScene" uid="uid://cfhftqjjfjyv" path="res://Scenes/level_select_ui.tscn" id="9_t3can"]
+[ext_resource type="PackedScene" uid="uid://c08hfkcpibqpg" path="res://Scenes/GameEditor/new_list_panel.tscn" id="10_ui3gn"]
 [ext_resource type="PackedScene" uid="uid://b1a6s2o32t35i" path="res://Scenes/GameEditor/bg_style_editor.tscn" id="11_ui3gn"]
 [ext_resource type="PackedScene" uid="uid://b4fp8ldktkvcd" path="res://Scenes/bg_effect_6.tscn" id="12_hagi3"]
 
@@ -286,7 +287,7 @@ libraries/ = SubResource("AnimationLibrary_hagi3")
 [node name="CreditsUI" parent="OverlayLayer" unique_id=1760736673 groups=["Credits"] instance=ExtResource("6_4cgsu")]
 visible = false
 
-[node name="LevelSelectRoot" type="Control" parent="OverlayLayer" unique_id=718450970 node_paths=PackedStringArray("level_select_ui", "darkener", "background_editor") groups=["LevelSelectRoot"]]
+[node name="LevelSelectRoot" type="Control" parent="OverlayLayer" unique_id=718450970 node_paths=PackedStringArray("level_select_ui", "darkener", "background_editor_container", "bg_style_editor", "add_new_list_panel") groups=["LevelSelectRoot"]]
 process_mode = 3
 layout_mode = 3
 anchors_preset = 15
@@ -298,7 +299,9 @@ mouse_filter = 2
 script = ExtResource("7_hagi3")
 level_select_ui = NodePath("HBoxContainer/CenterContainer/PanelContainer/VBoxContainer/LOL")
 darkener = NodePath("MultiplyDarkenColor")
-background_editor = NodePath("HBoxContainer/BackgroundEditor")
+background_editor_container = NodePath("HBoxContainer/BackgroundEditor")
+bg_style_editor = NodePath("HBoxContainer/BackgroundEditor/MarginContainer/PanelContainer/ScrollContainer/MarginContainer/BGStyleEditor")
+add_new_list_panel = NodePath("HBoxContainer/CenterContainer/NewListDialog")
 
 [node name="MultiplyDarkenColor" type="ColorRect" parent="OverlayLayer/LevelSelectRoot" unique_id=1877095181]
 material = SubResource("CanvasItemMaterial_4cgsu")
@@ -340,6 +343,9 @@ custom_minimum_size = Vector2(0, 12)
 layout_mode = 2
 
 [node name="LOL" parent="OverlayLayer/LevelSelectRoot/HBoxContainer/CenterContainer/PanelContainer/VBoxContainer" unique_id=1015399753 instance=ExtResource("9_t3can")]
+layout_mode = 2
+
+[node name="NewListDialog" parent="OverlayLayer/LevelSelectRoot/HBoxContainer/CenterContainer" unique_id=1730346067 instance=ExtResource("10_ui3gn")]
 layout_mode = 2
 
 [node name="BackgroundEditor" type="HBoxContainer" parent="OverlayLayer/LevelSelectRoot/HBoxContainer" unique_id=1413652382]
