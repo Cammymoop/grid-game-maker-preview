@@ -289,6 +289,7 @@ visible = false
 
 [node name="LevelSelectRoot" type="Control" parent="OverlayLayer" unique_id=718450970 node_paths=PackedStringArray("level_select_ui", "darkener", "background_editor_container", "bg_style_editor", "add_new_list_panel") groups=["LevelSelectRoot"]]
 process_mode = 3
+visible = false
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0

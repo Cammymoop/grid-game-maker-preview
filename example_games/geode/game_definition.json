@@ -423,7 +423,7 @@
       "bg_style": {
         "background_color": "#191b1e",
         "bg_gradient_color": "#272725bb",
-        "dusty_particles_color": "#57575214",
+        "dusty_particles_color": "#60554437",
         "dusty_particles_amount": 2.2,
         "dusty_particles_speed": 0.0,
         "bg_gradient_above": "between",
@@ -435,14 +435,14 @@
         "pointy_particles_amount": 0.1,
         "lines_solid_on": true,
         "lines_above": "below",
-        "lines_solid_color": "#e03a1363",
+        "lines_solid_color": "#bb28054c",
         "lines_scroll_speed": 0.0,
         "lines_warp_scroll_speed": 0.02,
         "lines_scroll_angle": 308.0,
         "bg_gradient_on": true,
         "dusty_particles_on": true,
-        "lines_on": false,
-        "lines_color": "#ffffff40",
+        "lines_on": true,
+        "lines_color": "#fada7927",
         "lines_warp_strength": 1.30000001937156,
         "lines_warp_scroll_angle": 197.999995574304
       }

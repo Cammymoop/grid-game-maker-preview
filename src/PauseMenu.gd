@@ -11,7 +11,9 @@ var active = false
 @export var next_level_list: OptionButton
 @export var level_title_edit: LineEdit
 
+@export var non_editor_stuff: Control
 @export var editor_stuff: Control
+@export var level_select_button: Button
 
 @export var play_mode_button: Button
 @export var level_edit_mode_button: Button
@@ -95,6 +97,8 @@ func on_show() -> void:
 	var load_button: BaseButton = find_child("LoadLevelButton")
 	load_button.disabled = not has_saved_levels
 	
+	level_select_button.visible = not GameManager.is_in_level_edit_mode
+	
 	play_mode_button.visible = GameManager.is_in_level_edit_mode
 	level_edit_mode_button.visible = not GameManager.is_in_level_edit_mode
 	
@@ -106,8 +110,9 @@ func on_show() -> void:
 		live_edit_mode_toggle.tooltip_text = ""
 	live_edit_mode_toggle.set_pressed_no_signal(GameManager.is_live_edit())
 	
-	live_edit_mode_toggle.visible = GameManager.is_in_level_edit_mode
+	#live_edit_mode_toggle.visible = GameManager.is_in_level_edit_mode
 	editor_stuff.visible = GameManager.is_in_level_edit_mode
+	non_editor_stuff.visible = not GameManager.is_in_level_edit_mode
 	
 	refresh_level_settings()
 
