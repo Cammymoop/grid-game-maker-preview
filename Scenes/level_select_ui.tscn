@@ -4,7 +4,7 @@
 [ext_resource type="Script" uid="uid://cfrnaqldrr8lr" path="res://Scenes/level_list_settings.gd" id="2_gs7i2"]
 [ext_resource type="PackedScene" uid="uid://bleyoj5f36kfy" path="res://Scenes/GameEditor/ConditionalEditor/scalar_value_input.tscn" id="3_wwtce"]
 
-[node name="LevelSelectUI" type="VBoxContainer" unique_id=1015399753 node_paths=PackedStringArray("level_list_container", "add_new_list_button")]
+[node name="LevelSelectUI" type="VBoxContainer" unique_id=1015399753 node_paths=PackedStringArray("level_list_container", "add_new_list_button", "level_list_settings")]
 custom_minimum_size = Vector2(200, 0)
 offset_right = 327.0
 offset_bottom = 163.0
@@ -12,9 +12,9 @@ theme_override_constants/separation = 12
 script = ExtResource("1_o0n7n")
 level_list_container = NodePath("Lists/ListOfListsOfLevels")
 add_new_list_button = NodePath("Lists/AddListButton")
+level_list_settings = NodePath("LevelListSettings")
 
 [node name="Lists" type="VBoxContainer" parent="." unique_id=1147447715]
-visible = false
 layout_mode = 2
 
 [node name="ListOfListsOfLevels" type="VBoxContainer" parent="Lists" unique_id=1969060177]
@@ -25,14 +25,16 @@ layout_mode = 2
 size_flags_horizontal = 4
 text = "Add Another List"
 
-[node name="LevelListSettings" type="VBoxContainer" parent="." unique_id=1214736889 node_paths=PackedStringArray("name_input", "do_progressive_unlock_toggle", "progressive_unlock_num_container", "progressive_unlock_num_input")]
+[node name="LevelListSettings" type="VBoxContainer" parent="." unique_id=1214736889 node_paths=PackedStringArray("back_button", "name_input", "do_progressive_unlock_toggle", "progressive_unlock_num_container", "progressive_unlock_num_input", "show_locked_levels_toggle")]
 custom_minimum_size = Vector2(240, 0)
 layout_mode = 2
 script = ExtResource("2_gs7i2")
+back_button = NodePath("MarginContainer/BackButton")
 name_input = NodePath("HBoxContainer/NameInput")
-do_progressive_unlock_toggle = NodePath("HBoxContainer2/CheckButton")
+do_progressive_unlock_toggle = NodePath("HBoxContainer2/ProgUnlockEnable")
 progressive_unlock_num_container = NodePath("ProgressUnlockAmount")
 progressive_unlock_num_input = NodePath("ProgressUnlockAmount/ScalarValueInput")
+show_locked_levels_toggle = NodePath("HBoxContainer3/ShowLockedEnable")
 
 [node name="MarginContainer" type="MarginContainer" parent="LevelListSettings" unique_id=1609892732]
 layout_mode = 2
@@ -65,7 +67,7 @@ expand_to_text_length = true
 layout_mode = 2
 alignment = 2
 
-[node name="CheckButton" type="CheckButton" parent="LevelListSettings/HBoxContainer2" unique_id=1217870361]
+[node name="ProgUnlockEnable" type="CheckButton" parent="LevelListSettings/HBoxContainer2" unique_id=1217870361]
 layout_mode = 2
 text = "Progressively Unlock Levels"
 
@@ -83,3 +85,12 @@ is_int_type = true
 default_value = 1.0
 min_value = 1.0
 custom_step = true
+
+[node name="HBoxContainer3" type="HBoxContainer" parent="LevelListSettings" unique_id=1788294374]
+layout_mode = 2
+alignment = 2
+
+[node name="ShowLockedEnable" type="CheckButton" parent="LevelListSettings/HBoxContainer3" unique_id=59697373]
+layout_mode = 2
+button_pressed = true
+text = "Show Locked Levels"

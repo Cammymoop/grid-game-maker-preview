@@ -2,11 +2,12 @@
 
 [ext_resource type="Script" uid="uid://waclbk3mcfsb" path="res://Scenes/single_level_list.gd" id="1_kb61r"]
 
-[node name="LevelList" type="VBoxContainer" unique_id=407189420 node_paths=PackedStringArray("level_item_container", "edit_list_settings_button")]
+[node name="LevelList" type="VBoxContainer" unique_id=407189420 node_paths=PackedStringArray("list_name_label", "level_item_container", "edit_list_settings_button")]
 offset_right = 193.0
 offset_bottom = 51.0
 theme_override_constants/separation = 10
 script = ExtResource("1_kb61r")
+list_name_label = NodePath("HBoxContainer/Label")
 level_item_container = NodePath("MarginContainer/LevelItems")
 edit_list_settings_button = NodePath("HBoxContainer/ListOptionsButton")
 

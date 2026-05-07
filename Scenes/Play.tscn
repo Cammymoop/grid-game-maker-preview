@@ -2,7 +2,7 @@
 
 [ext_resource type="PackedScene" uid="uid://byt0p1dxwdwb3" path="res://Scenes/MapEditor.tscn" id="1"]
 [ext_resource type="Script" uid="uid://0coueog1ftu6" path="res://Scenes/input_catcher.gd" id="1_r5y0w"]
-[ext_resource type="Script" uid="uid://d2ug0fux2u8js" path="res://Scenes/play_scene.gd" id="1_t3can"]
+[ext_resource type="Script" path="res://Scenes/play_scene.gd" id="1_t3can"]
 [ext_resource type="PackedScene" uid="uid://c56bx5og1o0x1" path="res://Scenes/PauseMenu.tscn" id="2"]
 [ext_resource type="Script" uid="uid://0xx8dh5smcvl" path="res://src/PlayUI/overlay_ui.gd" id="3_vx41i"]
 [ext_resource type="PackedScene" uid="uid://4c11q33d8c57" path="res://Scenes/GameEditor/entity_instance_editor.tscn" id="4_ek1d2"]
@@ -296,7 +296,7 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 script = ExtResource("7_hagi3")
-level_select_ui = NodePath("")
+level_select_ui = NodePath("HBoxContainer/CenterContainer/PanelContainer/VBoxContainer/LOL")
 darkener = NodePath("MultiplyDarkenColor")
 background_editor = NodePath("HBoxContainer/BackgroundEditor")
 

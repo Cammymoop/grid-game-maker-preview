@@ -30,20 +30,33 @@ func refresh() -> void:
 func refresh_level_list() -> void:
     clear_level_lists()
     if GameManager.is_in_level_edit_mode:
-        for level_list_info in GameManager.get_list_of_level_lists():
-            _add_level_list(level_list_info)
+        for level_list_name in GameManager.get_list_of_level_lists():
+            _add_level_list(GameManager._get_level_list(level_list_name))
+        var unlisted_levels: Array = GameManager.get_list_of_unlisted_levels()
+        if unlisted_levels.size() > 0:
+            add_unlisted_levels()
     else:
         for unlocked_level_list in GameManager.get_all_unlocked_level_lists():
             _add_level_list(unlocked_level_list)
 
 func _add_level_list(level_list_info: Dictionary) -> void:
     var single_level_list: SingleLevelList = single_level_list_scene.instantiate()
-    single_level_list.play_level.connect(on_level_list_play_level)
-    single_level_list.edited.connect(on_level_list_edited)
-    single_level_list.list_membership_changed.connect(on_level_list_membership_changed)
-    single_level_list.request_edit_list_settings.connect(on_req_edit_list_settings)
+    _setup_level_list(single_level_list)
     level_list_container.add_child(single_level_list)
     single_level_list.load_level_list_info(level_list_info)
+
+func _setup_level_list(lev_list: SingleLevelList) -> void:
+    lev_list.play_level.connect(on_level_list_play_level)
+    lev_list.edited.connect(on_level_list_edited)
+    lev_list.list_membership_changed.connect(on_level_list_membership_changed)
+    lev_list.request_edit_list_settings.connect(on_req_edit_list_settings)
+
+func add_unlisted_levels() -> void:
+    var unlisted_level_list: SingleLevelList = single_level_list_scene.instantiate()
+    unlisted_level_list.is_list_of_unlisted_levels = true
+    _setup_level_list(unlisted_level_list)
+    level_list_container.add_child(unlisted_level_list)
+    unlisted_level_list.load_unlisted_levels()
 
 func on_level_list_membership_changed() -> void:
     any_edited = true

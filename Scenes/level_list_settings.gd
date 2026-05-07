@@ -11,6 +11,8 @@ const ScalarValueInput = preload("res://src/GameEditor/ConditionalEditor/scalar_
 @export var progressive_unlock_num_container: Control
 @export var progressive_unlock_num_input: ScalarValueInput
 
+@export var show_locked_levels_toggle: CheckButton
+
 var editing_list_name: String = ""
 
 

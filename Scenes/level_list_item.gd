@@ -77,7 +77,6 @@ func update_current_level_indicator() -> void:
     if not current_level_indicator.visible:
         return
     if GameManager.cur_scene == "Play" and GameManager.loaded_level_name:
-        prints("current level:", GameManager.loaded_level_name, "my level:", level_name)
         if GameManager.loaded_level_name == level_name:
             current_level_icon.show()
 

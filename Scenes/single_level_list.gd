@@ -38,12 +38,15 @@ func _is_in_edit_mode() -> bool:
     return GameManager.is_in_level_edit_mode
 
 func reload_list_info() -> void:
-    var level_list_info: Dictionary = GameManager.get_level_list_info(level_list_name)
+    var level_list_info: Dictionary = GameManager._get_level_list(level_list_name)
     if not level_list_info:
         push_error("Level list info is gone ;-;")
         queue_free()
         return
-    load_level_list_info(level_list_info)
+    if is_list_of_unlisted_levels:
+        load_unlisted_levels()
+    else:
+        load_level_list_info(level_list_info)
 
 func load_level_list_info(level_list_info: Dictionary) -> void:
     set_level_list_name(level_list_info.get("name", ""))
@@ -145,21 +148,21 @@ func on_level_item_request_context_menu(level_item: LevelListItem) -> void:
         Utility.popupmenu_set_enabled_for_id(context_menu, CTX_MOVE_DOWN, false)
         Utility.popupmenu_set_enabled_for_id(context_menu, CTX_MOVE_TO_BOTTOM, false)
     
-    
     var has_next_list: bool = GameManager.level_list_has_next(level_list_name)
     var has_previous_list: bool = GameManager.level_list_has_previous(level_list_name)
     var total_lists: int = GameManager.get_list_of_level_lists().size()
 
-    if has_next_list or has_previous_list:
-        context_menu.add_separator()
-        if is_list_of_unlisted_levels and total_lists >= 1:
+    context_menu.add_separator()
+    if is_list_of_unlisted_levels:
+        if total_lists >= 1:
             context_menu.add_item("Move to first list", CTX_MOVE_TO_LIST_ABOVE)
             context_menu.add_item("Move to last list", CTX_MOVE_TO_LIST_BELOW)
-        else:
-            if has_next_list:
-                context_menu.add_item("Move to next list", CTX_MOVE_TO_LIST_BELOW)
-            if has_previous_list:
-                context_menu.add_item("Move to previous list", CTX_MOVE_TO_LIST_ABOVE)
+    else:
+        if has_next_list:
+            context_menu.add_item("Move to next list", CTX_MOVE_TO_LIST_BELOW)
+        if has_previous_list:
+            context_menu.add_item("Move to previous list", CTX_MOVE_TO_LIST_ABOVE)
+        context_menu.add_item("Remove from this list", CTX_REMOVE_FROM_LIST)
 
     context_menu.id_pressed.connect(on_context_menu_id_pressed.bind(level_item))
     add_child(context_menu)
