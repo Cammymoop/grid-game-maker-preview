@@ -55,6 +55,7 @@ func refresh() -> void:
 
 func refresh_level_list() -> void:
     is_rearranging_lists = false
+    rearrange_lists_button.show()
     clear_level_lists()
     if GameManager.is_in_level_edit_mode:
         for level_list_name in GameManager.get_list_of_level_lists():
@@ -83,8 +84,9 @@ func refresh_rearrangable_lists() -> void:
     if editing_level_list:
         return
     is_rearranging_lists = true
-    rearrange_lists_back_container.visible = true
+    rearrange_lists_button.hide()
     clear_level_lists()
+    rearrange_lists_back_container.visible = true
     for list_name in GameManager.get_list_of_level_lists():
         var rearr_list: = rearrangable_level_list_scn.instantiate() as RearrangableListItem
         rearr_list.request_move_relative.connect(on_rearrangable_list_move_relative)
