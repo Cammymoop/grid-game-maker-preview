@@ -316,6 +316,7 @@ func serialize() -> Dictionary:
     return serialized_stuff
 
 func deserialize(data: Dictionary) -> void:
+    prints("map deserializing")
     clear()
     
     for layer_data in data["layers"]:
@@ -323,6 +324,7 @@ func deserialize(data: Dictionary) -> void:
         new_layer.deserialize(layer_data)
     
     map_metadata = data.get("metadata", {}).duplicate(true)
+    prints("new map metadata keys: ", map_metadata.keys())
     
     recreate_persistant_effects()
     _rebuild_position_prop_cache()
@@ -493,8 +495,8 @@ func erase_metadata_value(key: String, update_edited_metadata: bool = true) -> v
 
 func has_metadata_value(key: String) -> bool:
     return map_metadata.has(key)
-func get_metadata_value(key: String) -> Variant:
-    return map_metadata.get(key, null)
+func get_metadata_value(key: String, default_value: Variant = null) -> Variant:
+    return map_metadata.get(key, default_value)
 
 func get_all_tile_indexes() -> Array:
     var keys = tile_defs.keys()

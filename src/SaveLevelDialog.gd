@@ -1,5 +1,6 @@
 extends Window
 
+signal saved_level(level_name: String)
 signal hidden
 
 func _ready():
@@ -38,6 +39,7 @@ func _on_SaveFileButton_pressed():
 		GameManager.save_edited()
 	var level_name: String = find_child("LevelNameInput").text.strip_edges()
 	GameManager.save_edited_level_as(level_name)
+	saved_level.emit(level_name)
 	close_dialog()
 
 func _on_cancel_button_pressed() -> void:

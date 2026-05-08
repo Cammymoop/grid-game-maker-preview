@@ -48,6 +48,10 @@ func _ready() -> void:
     lines_enable.toggled.connect(refresh_suboptions.unbind(1))
     solids_enable.toggled.connect(refresh_suboptions.unbind(1))
     
+    GameManager.bg_style_changed.connect(bg_style_changed)
+    if not GameManager.current_has_bg_info():
+        remove_override_button.disabled = true
+    
     setup_value_change_signals()
     load_bg_style()
 
@@ -63,6 +67,8 @@ func remove_override_bg_style() -> void:
     if GameManager.cur_scene != "Play":
         return
     GameManager.remove_current_bg_override()
+    remove_override_button.disabled = true
+    load_bg_style()
 
 func load_bg_style() -> void:
     var bg_style: Dictionary = GameManager.get_current_bg_info()
@@ -167,3 +173,9 @@ func setup_value_change_signals() -> void:
     for key in toggle_inputs:
         var toggle_input: CheckButton = toggle_inputs[key]
         toggle_input.toggled.connect(update_toggle_option.bind(key))
+
+func bg_style_changed() -> void:
+    if GameManager.cur_scene != "Play":
+        return
+    if GameManager.current_has_bg_info():
+        remove_override_button.disabled = false

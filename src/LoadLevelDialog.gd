@@ -57,8 +57,7 @@ func _on_LoadFileButton_pressed():
 		close_dialog()
 		return
 
-	var parsed_level = FilesManager.get_level_data(GameManager.cur_game_name, selected_level)
-	GameManager.load_level_data(parsed_level)
+	GameManager.edit_level_named(selected_level)
 	close_dialog()
 
 func _on_cancel_button_pressed() -> void:

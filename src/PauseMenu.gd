@@ -1,5 +1,7 @@
 extends Control
 
+const BGStyleEditor = preload("res://Scenes/GameEditor/bg_style_editor.gd")
+
 signal gameplay_paused
 signal pause_menu_closed
 
@@ -18,10 +20,17 @@ var active = false
 @export var play_mode_button: Button
 @export var level_edit_mode_button: Button
 
+@export var background_editor_container: Control
+@export var background_editor: BGStyleEditor
+@export var darkener: ColorRect
+
 @onready var main_panel: PanelContainer = find_child("MainPausePanel")
 @onready var level_settings_panel: PanelContainer = find_child("LevelSettingsPausePanel")
 
+@export var level_list_picker: OptionButton
+
 func _ready():
+	background_editor_container.hide()
 	play_mode_button.pressed.connect(switch_to_non_level_edit_mode)
 	level_edit_mode_button.pressed.connect(switch_to_level_edit_mode)
 
@@ -33,6 +42,8 @@ func _ready():
 	GameManager.level_state_loaded.connect(refresh_level_settings)
 	if level_title_edit:
 		level_title_edit.text_changed.connect(on_level_title_edited)
+	
+	level_list_picker.item_selected.connect(level_list_picked)
 
 func _unhandled_input(event: InputEvent) -> void:
 	if Utility.fixed_just_pressed_by_event("pause_game", event):
@@ -74,7 +85,10 @@ func switch_panel(to_panel: String) -> void:
 	main_panel.visible = is_main_panel
 	level_settings_panel.visible = not is_main_panel
 	if level_settings_panel.visible:
+		show_background_editor()
 		refresh_level_settings()
+	else:
+		hide_background_editor()
 
 func toggle():
 	active = not active
@@ -114,6 +128,12 @@ func on_show() -> void:
 	editor_stuff.visible = GameManager.is_in_level_edit_mode
 	non_editor_stuff.visible = not GameManager.is_in_level_edit_mode
 	
+	if GameManager.is_in_level_edit_mode:
+		var current_level_list: String = GameManager.current_level_list
+		if not current_level_list:
+			current_level_list = GameManager.get_list_containing_level(GameManager.loaded_level_name)
+		refresh_level_list_picker(current_level_list)
+	
 	refresh_level_settings()
 
 func close_pause_menu() -> void:
@@ -126,8 +146,17 @@ func _on_QuitToMenu_pressed():
 func _on_SaveLevelButton_pressed():
 	var popup: Window = save_dialog.instantiate()
 	add_child(popup)
+	popup.saved_level.connect(level_was_saved.bind(GameManager.loaded_level_name))
 	popup.popup_centered()
 	popup.hidden.connect(refresh_level_settings)
+
+func level_was_saved(level_name: String, old_level_name: String) -> void:
+	# in case it was a new level or it was saved as a new name, set it up to be in the selected list
+	if not old_level_name or old_level_name != level_name:
+		var current_selected_list: String = Utility.opbtn_selected_text(level_list_picker)
+		if current_selected_list == "[No List]":
+			current_selected_list = ""
+		set_current_level_list_to(current_selected_list)
 
 func _on_new_level_button_pressed() -> void:
 	GameManager.new_empty_level()
@@ -164,9 +193,32 @@ func _on_edit_level_settings_button_pressed() -> void:
 	switch_panel("level_settings")
 
 func refresh_level_settings() -> void:
-	refresh_next_level_list()
+	#refresh_next_level_list()
 	level_title_edit.text = MapManager.map_metadata.get("title", "")
-	level_title_edit.placeholder_text = GameManager.loaded_level_name
+	
+	var list_of_current_level: String = ""
+	if GameManager.loaded_level_name:
+		level_title_edit.placeholder_text = GameManager.loaded_level_name
+		if GameManager.current_level_list:
+			list_of_current_level = GameManager.current_level_list
+		else:
+			list_of_current_level = GameManager.get_list_containing_level(GameManager.loaded_level_name)
+	else:
+		level_title_edit.placeholder_text = ""
+	
+	refresh_level_list_picker(list_of_current_level)
+
+func refresh_level_list_picker(list_of_current_level: String) -> void:
+	level_list_picker.clear()
+	level_list_picker.add_item("[No List]")
+	for list_name in GameManager.get_list_of_level_lists():
+		level_list_picker.add_item(list_name)
+
+	if not list_of_current_level:
+		level_list_picker.selected = 0
+	else:
+		Utility.opbtn_select_text(level_list_picker, list_of_current_level)
+
 
 func refresh_next_level_list() -> void:
 	if not next_level_list:
@@ -225,3 +277,34 @@ func switch_to_non_level_edit_mode() -> void:
 	var map_editor = Utility.get_map_editor()
 	if map_editor:
 		map_editor.switch_to_non_level_edit_mode()
+
+func show_background_editor() -> void:
+	if not GameManager.is_in_level_edit_mode:
+		return
+	background_editor_container.show()
+	darkener.hide()
+	background_editor.load_bg_style()
+
+func hide_background_editor() -> void:
+	darkener.show()
+	background_editor_container.hide()
+
+func level_list_picked(index: int) -> void:
+	if not GameManager.loaded_level_name:
+		# the current level isn't saved, still allow choosing the list which it will be added to once saved
+		return
+	var list_name = level_list_picker.get_item_text(index)
+	if list_name == "[No List]":
+		list_name = ""
+	
+	set_current_level_list_to(list_name)
+
+func set_current_level_list_to(list_name: String) -> void:
+	if not list_name:
+		GameManager._remove_level_from_all_lists(GameManager.loaded_level_name)
+		GameManager.current_level_list = ""
+	else:
+		GameManager.move_level_to_level_list(GameManager.loaded_level_name, list_name)
+		GameManager.current_level_list = list_name
+	GameManager.save_current_game_definition()
+	GlobalToaster.show_toast_message("Saved Level List")

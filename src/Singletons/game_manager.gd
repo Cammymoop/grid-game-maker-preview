@@ -406,6 +406,7 @@ func load_serialized_play_state(serialized_state: Dictionary, as_level_load: boo
 	if as_level_load:
 		level_state_loaded.emit()
 	set_pause("gm_loading_state", false)
+	bg_style_changed.emit()
 
 func deserialize(serialized_state: Dictionary) -> void:
 	stateful_camera_settings = serialized_state.get("stateful_camera_settings", {}).duplicate_deep()
@@ -530,7 +531,6 @@ func load_level_data(level_data: Dictionary, process_queued_load: bool = false):
 	editor_save = level_data["state"]
 	load_edited()
 	close_pause_menu()
-	bg_style_changed.emit()
 
 func try_load_next_level(with_delay: float = 0.5):
 	if not MapManager.has_next_level() or queued_level_load:
@@ -558,7 +558,6 @@ func queue_delayed_goto_level(with_delay: float, level_code: String) -> void:
 	queued_level_load_timer.one_shot = true
 	queued_level_load_timer.timeout.connect(goto_level_code.bind(level_code, true))
 	queued_level_load_timer.timeout.connect(queued_level_load_timer.queue_free)
-	queued_level_load_timer.timeout.connect(prints.bind("qued lvl load timer done"))
 	add_child(queued_level_load_timer)
 	queued_level_load_timer.start(with_delay)
 
@@ -598,6 +597,7 @@ func edit_level_named(level_name: String) -> bool:
 	var the_level_data: = FilesManager.get_level_data(cur_game_name, level_name)
 	if not the_level_data["name"] == level_name:
 		the_level_data["name"] = level_name
+	current_level_list = get_list_containing_level(level_name)
 	load_level_data(the_level_data)
 	return true
 
@@ -613,7 +613,7 @@ func edit_level_in_list(level_list_name: String, level_name: String) -> void:
 		current_level_list = was_level_list
 
 func new_empty_level():
-	loaded_level_name = "LEVEL"
+	loaded_level_name = ""
 	current_level_is_museum = false
 	EntityManager.clear()
 	MapManager.clear()
@@ -1274,6 +1274,12 @@ func is_level_in_any_list(level_name: String) -> bool:
 			return true
 	return false
 
+func get_list_containing_level(level_name: String) -> String:
+	for level_list_info in game_definition.get("level_lists", []):
+		if level_name in level_list_info.get("level_names", []):
+			return level_list_info["name"]
+	return ""
+
 
 func remove_level_from_list(level_name: String, level_list_name: String) -> void:
 	var level_list_info: = _get_level_list(level_list_name)
@@ -1304,14 +1310,17 @@ func get_auto_load_list_after_list(level_list_name: String, current_level_as_com
 	elif level_list_info.get("list_complete_to_lvlselect", false):
 		return ""
 	var unlocked_lists: Array = get_all_unlocked_level_lists(current_level_as_complete)
-	if unlocked_lists.size() <= 1:
+	var unlocked_lists_names: Array = []
+	for unlocked_list in unlocked_lists:
+		unlocked_lists_names.append(unlocked_list["name"])
+	if unlocked_lists_names.size() <= 1:
 		return ""
-	var index_of: = unlocked_lists.find(level_list_name)
+	var index_of: = unlocked_lists_names.find(level_list_name)
 	if index_of == -1:
-		return unlocked_lists[0]
-	elif index_of == unlocked_lists.size() - 1:
+		return unlocked_lists_names[0]
+	elif index_of == unlocked_lists_names.size() - 1:
 		return ""
-	return unlocked_lists[index_of + 1]
+	return unlocked_lists_names[index_of + 1]
 
 func get_all_unlocked_level_lists(_current_level_as_complete: bool = false) -> Array:
 	var lists: Array = []
@@ -1378,7 +1387,6 @@ func _level_name_from_code(level_code: String) -> String:
 	return level_code.split("??")[1]
 
 func goto_level_code(level_code: String, as_queued_load: bool = false) -> void:
-	prints("goto_level_code: ", level_code)
 	goto_level_in_level_list(_level_list_from_code(level_code), _level_name_from_code(level_code), as_queued_load)
 
 func goto_level_in_level_list(level_list_name: String, level_name: String, as_queued_load: bool = false) -> void:
@@ -1591,7 +1599,7 @@ func set_game_bg_info_value(key: String, value: Variant) -> void:
 
 func set_level_bg_info_value(key: String, value: Variant) -> void:
 	if not MapManager.has_metadata_value("bg_style"):
-		copy_game_bg_to_level()
+		copy_current_bg_to_level()
 	var level_bg_info: Variant = MapManager.get_metadata_value("bg_style")
 	if not level_bg_info:
 		level_bg_info = {}
@@ -1631,8 +1639,21 @@ func remove_current_bg_override() -> void:
 		var level_select_ui = level_select_root.level_select_ui
 		if level_select_ui.editing_level_list:
 			remove_level_list_custom_bg_info(level_select_ui.editing_level_list)
-		else:
-			remove_current_level_custom_bg_info()
+	else:
+		remove_current_level_custom_bg_info()
+
+func current_has_bg_info() -> bool:
+	if cur_scene != "Play":
+		return false
+	var level_select_root: = Utility.get_level_select_root()
+	if level_select_root and level_select_root.visible:
+		var level_select_ui = level_select_root.level_select_ui
+		if level_select_ui.editing_level_list:
+			var list_info: = _get_level_list(level_select_ui.editing_level_list)
+			return list_info.get("bg_style", {}).size() > 0
+	elif MapManager.has_metadata_value("bg_style"):
+		return MapManager.get_metadata_value("bg_style").size() > 0
+	return false
 
 func set_auto_bg_info_value(key: String, value: Variant) -> void:
 	if cur_scene != "Play":
@@ -1644,8 +1665,8 @@ func set_auto_bg_info_value(key: String, value: Variant) -> void:
 			var level_select_ui = level_select_root.level_select_ui
 			if level_select_ui.editing_level_list:
 				set_level_list_bg_info_value(level_select_ui.editing_level_list, key, value)
-			else:
-				set_level_bg_info_value(key, value)
+		else:
+			set_level_bg_info_value(key, value)
 
 func copy_game_bg_to_current() -> void:
 	if cur_scene != "Play":
@@ -1667,7 +1688,12 @@ func copy_game_bg_to_level_list(level_list_name: String) -> void:
 func copy_game_bg_to_level() -> void:
 	if not loaded_level_name:
 		return
-	set_level_bg_info(get_game_bg_info())
+	set_level_bg_info(get_game_bg_info().duplicate_deep())
+
+func copy_current_bg_to_level() -> void:
+	if not loaded_level_name:
+		return
+	set_level_bg_info(get_current_bg_info().duplicate_deep())
 
 
 func is_one_time_message_dismissed(message_type: OneTimeMessages) -> bool:
