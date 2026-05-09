@@ -23,7 +23,7 @@ var rearrangable_level_list_scn: = preload("res://Scenes/rearrangable_list_item.
 
 @export var list_scroll_container: ScrollContainer
 
-var max_height_ratio: float = 0.85
+var max_height_ratio: float = 0.82
 var min_max_height: float = 100
 
 var editing_level_list: String = ""

@@ -9,7 +9,13 @@ const NewListPanel = preload("res://Scenes/GameEditor/new_list_panel.gd")
 @export var bg_style_editor: Control
 @export var add_new_list_panel: NewListPanel
 
+@export var no_web_container: Control
+@export var open_levels_folder_button: Button
+
 func _ready() -> void:
+    no_web_container.visible = not OS.has_feature("web")
+    open_levels_folder_button.pressed.connect(on_open_levels_folder_button_pressed)
+
     add_new_list_panel.hide()
     add_new_list_panel.add_list_requested.connect(adding_new_list)
     GameManager.level_state_loaded.connect(on_level_state_loaded)
@@ -62,3 +68,10 @@ func adding_new_list(list_name: String) -> void:
         level_select_ui.refresh_rearrangable_lists()
     else:
         level_select_ui.refresh_level_list()
+
+func on_open_levels_folder_button_pressed() -> void:
+    if not FilesManager.game_exists(GameManager.get_game_name()):
+        GlobalToaster.show_toast_message("Game not saved")
+        return
+    var levels_folder: = FilesManager.get_game_levels_dir(GameManager.get_game_name())
+    OS.shell_open(ProjectSettings.globalize_path(levels_folder))

@@ -1716,3 +1716,13 @@ func confirmed_import_with_images(finish_import_callback: Callable, disclaimer_d
 		if disable_disclaimer_checkbox and disable_disclaimer_checkbox.button_pressed:
 			set_one_time_message_dismissed(OneTimeMessages.IMPORTED_IMAGE_DISCLAIMER)
 	finish_import_callback.call()
+
+
+func web_export_level_json(level_name: String) -> void:
+	if not OS.has_feature("web") or not get_game_name():
+		return
+	if not FilesManager.level_exists(get_game_name(), level_name):
+		return
+	var level_bytes: PackedByteArray = FilesManager.get_level_file_bytes(get_game_name(), level_name)
+	var level_filename: = FilesManager.sanitize_level_filename(level_name) + ".json"
+	JavaScriptBridge.download_buffer(level_bytes, level_filename, "application/json")

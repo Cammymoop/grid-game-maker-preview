@@ -28,7 +28,7 @@ corner_radius_bottom_right = 3
 corner_radius_bottom_left = 3
 corner_detail = 5
 
-[node name="PauseMenu" type="Control" unique_id=1906408289 node_paths=PackedStringArray("next_level_list", "level_title_edit", "non_editor_stuff", "editor_stuff", "level_select_button", "play_mode_button", "level_edit_mode_button", "background_editor_container", "background_editor", "darkener", "level_list_picker") groups=["PauseMenu"]]
+[node name="PauseMenu" type="Control" unique_id=1906408289 node_paths=PackedStringArray("next_level_list", "level_title_edit", "non_editor_stuff", "editor_stuff", "level_select_button", "play_mode_button", "level_edit_mode_button", "web_export_level_button", "background_editor_container", "background_editor", "darkener", "level_list_picker") groups=["PauseMenu"]]
 process_mode = 3
 layout_mode = 3
 anchors_preset = 15
@@ -45,6 +45,7 @@ editor_stuff = NodePath("HBoxContainer/CenterContainer/MainPausePanel/MarginCont
 level_select_button = NodePath("HBoxContainer/CenterContainer/MainPausePanel/MarginContainer/VBoxContainer/HBoxContainer6/LvlSelect")
 play_mode_button = NodePath("HBoxContainer/CenterContainer/MainPausePanel/MarginContainer/VBoxContainer/EditorStuff/PlayModeButton")
 level_edit_mode_button = NodePath("HBoxContainer/CenterContainer/MainPausePanel/MarginContainer/VBoxContainer/NonEditorStuff/EditModeButton")
+web_export_level_button = NodePath("HBoxContainer/CenterContainer/MainPausePanel/MarginContainer/VBoxContainer/EditorStuff/WebExportLevel/WebExportLevel")
 background_editor_container = NodePath("HBoxContainer/BackgroundEditorContainer")
 background_editor = NodePath("HBoxContainer/BackgroundEditorContainer/PanelContainer/ScrollContainer/MarginContainer/BGStyleEditor")
 darkener = NodePath("MultiplyDarkenColor")
@@ -82,7 +83,6 @@ layout_mode = 2
 size_flags_horizontal = 3
 
 [node name="MainPausePanel" type="PanelContainer" parent="HBoxContainer/CenterContainer" unique_id=819996639]
-visible = false
 layout_mode = 2
 
 [node name="MarginContainer" type="MarginContainer" parent="HBoxContainer/CenterContainer/MainPausePanel" unique_id=542551305]
@@ -235,6 +235,16 @@ text = "New Level"
 layout_mode = 2
 text = "Load Level"
 
+[node name="WebExportLevel" type="HBoxContainer" parent="HBoxContainer/CenterContainer/MainPausePanel/MarginContainer/VBoxContainer/EditorStuff" unique_id=589029230]
+layout_mode = 2
+theme_override_constants/separation = 14
+alignment = 1
+
+[node name="WebExportLevel" type="Button" parent="HBoxContainer/CenterContainer/MainPausePanel/MarginContainer/VBoxContainer/EditorStuff/WebExportLevel" unique_id=1499408617]
+custom_minimum_size = Vector2(0, 30)
+layout_mode = 2
+text = "Export Level .json"
+
 [node name="Spacer3" type="Control" parent="HBoxContainer/CenterContainer/MainPausePanel/MarginContainer/VBoxContainer/EditorStuff" unique_id=443423797]
 custom_minimum_size = Vector2(0, 10)
 layout_mode = 2
@@ -252,6 +262,7 @@ text = "Go To Museum"
 layout_mode = 2
 
 [node name="LevelSettingsPausePanel" type="PanelContainer" parent="HBoxContainer/CenterContainer" unique_id=686677102]
+visible = false
 layout_mode = 2
 theme_override_styles/panel = ExtResource("1_5w4ur")
 
@@ -362,6 +373,7 @@ layout_mode = 2
 [connection signal="pressed" from="HBoxContainer/CenterContainer/MainPausePanel/MarginContainer/VBoxContainer/EditorStuff/LevelFileActionButtons/SaveLevelButton" to="." method="_on_SaveLevelButton_pressed"]
 [connection signal="pressed" from="HBoxContainer/CenterContainer/MainPausePanel/MarginContainer/VBoxContainer/EditorStuff/LevelFileActionButtons/NewLevelButton" to="." method="_on_new_level_button_pressed"]
 [connection signal="pressed" from="HBoxContainer/CenterContainer/MainPausePanel/MarginContainer/VBoxContainer/EditorStuff/LevelFileActionButtons/LoadLevelButton" to="." method="_on_LoadLevelButton_pressed"]
+[connection signal="pressed" from="HBoxContainer/CenterContainer/MainPausePanel/MarginContainer/VBoxContainer/EditorStuff/WebExportLevel/WebExportLevel" to="." method="_on_SaveLevelButton_pressed"]
 [connection signal="pressed" from="HBoxContainer/CenterContainer/MainPausePanel/MarginContainer/VBoxContainer/EditorStuff/HBoxContainer3/MuseumButton" to="." method="_on_museum_button_pressed"]
 [connection signal="pressed" from="HBoxContainer/CenterContainer/LevelSettingsPausePanel/MarginContainer/VBoxContainer/BackButton" to="." method="_on_back_button_pressed"]
 [connection signal="pressed" from="HBoxContainer/CenterContainer/LevelSettingsPausePanel/MarginContainer/VBoxContainer/QuitToMenu2" to="." method="_on_QuitToMenu_pressed"]

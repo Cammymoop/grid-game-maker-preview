@@ -209,6 +209,19 @@ func _get_dict_from_json_file(file_path: String) -> Dictionary:
 		return {}
 	return result
 
+func get_level_file_bytes(game_name: String, level_name: String) -> PackedByteArray:
+	if not level_name or not game_exists(game_name):
+		push_error("Invalid game or level name: %s, %s" % [game_name, level_name])
+		return PackedByteArray()
+	var level_filename: = _level_filename(level_name)
+	var level_file_path: = get_game_levels_dir(game_name).path_join(level_filename)
+	var bytes: PackedByteArray = FileAccess.get_file_as_bytes(level_file_path)
+	if FileAccess.get_open_error() != OK:
+		push_error("Error opening level file: " + level_file_path)
+		return PackedByteArray()
+	return bytes
+
+
 func get_game_definition(game_name: String) -> Dictionary:
 	if not game_exists(game_name):
 		push_error("Game %s does not exist" % [game_name])

@@ -20,6 +20,8 @@ var active = false
 @export var play_mode_button: Button
 @export var level_edit_mode_button: Button
 
+@export var web_export_level_button: Button
+
 @export var background_editor_container: Control
 @export var background_editor: BGStyleEditor
 @export var darkener: ColorRect
@@ -30,6 +32,9 @@ var active = false
 @export var level_list_picker: OptionButton
 
 func _ready():
+	web_export_level_button.visible = OS.has_feature("web")
+	web_export_level_button.pressed.connect(on_web_export_level_button_pressed)
+
 	background_editor_container.hide()
 	play_mode_button.pressed.connect(switch_to_non_level_edit_mode)
 	level_edit_mode_button.pressed.connect(switch_to_level_edit_mode)
@@ -308,3 +313,11 @@ func set_current_level_list_to(list_name: String) -> void:
 		GameManager.current_level_list = list_name
 	GameManager.save_current_game_definition()
 	GlobalToaster.show_toast_message("Saved Level List")
+
+func on_web_export_level_button_pressed() -> void:
+	if not GameManager.is_in_level_edit_mode:
+		return
+	if not FilesManager.level_exists(GameManager.get_game_name(), GameManager.loaded_level_name):
+		GlobalToaster.show_toast_message("Saved level not found")
+		return
+	GameManager.web_export_level_json(GameManager.loaded_level_name)
