@@ -19,9 +19,13 @@ var preview_info: Dictionary = {}
 var layer_order_id: int = 0
 
 var _all_modifiers: Dictionary = {}
+var _animation_timers: Dictionary[String, float] = {}
 
 var modifier_masks: Dictionary = {}
 var modifier_effects: Dictionary = {}
+var animated_effects: Dictionary = {}
+
+var animated_modifiers: Array[String] = []
 
 var prop_update_response: Dictionary[String, Array] = {}
 
@@ -34,6 +38,8 @@ var interpolate_facing_enabled: bool = true
 var interp_facing_timer: float = 0.0
 @export var interp_duration: float = 0.24
 @export_exp_easing() var interp_ease_param: float = 0.2
+
+var layer_root: Node2D = null
 
 var rotation_prop: float = 0:
     get:
@@ -53,6 +59,12 @@ func _enter_tree() -> void:
     else:
         parent_entity = null
 
+func ensure_layer_root() -> void:
+    if not layer_root:
+        layer_root = Node2D.new()
+        layer_root.name = "LayerRoot"
+        add_child(layer_root, true)
+
 func _notify_local_prop_updated() -> void:
     _local_prop_updated = true
 
@@ -71,6 +83,26 @@ func sprite_process(delta_time: float) -> void:
             var to_angle: float = Utility.facing_rotation(parent_entity.facing)
             var interp_angle: float = lerp_angle(_facing_rotation, to_angle, eased_progress)
             set_sprite_rotation(interp_angle)
+    process_animated_modifiers(delta_time)
+
+func process_animated_modifiers(delta_time: float) -> void:
+    var expired_modifiers: Array[String]
+    for mod_name in animated_modifiers:
+        if not mod_name in _animation_timers:
+            continue
+        _animation_timers[mod_name] += delta_time
+        var expire_time: float = _all_modifiers[mod_name].get("expire_time", 0)
+        if expire_time > 0 and _animation_timers[mod_name] >= expire_time:
+            expired_modifiers.append(mod_name)
+    for mod_name in expired_modifiers:
+        remove_modifier(mod_name)
+    apply_animated_effects_to_sprite(delta_time)
+    
+func apply_animated_effects_to_sprite(delta_time: float = 0) -> void:
+    if delta_time > 0 and not animated_effects:
+        return
+    for animated_effect_name in SpriteEffects.LOW_LEVEL_ANIM_EFFECTS:
+        _apply_animated_effect_to_sprite(animated_effect_name, delta_time)
 
 
 func on_entity_preview_mode_changed(enable_preview: bool) -> void:
@@ -166,6 +198,7 @@ func _track_layer_angles() -> void:
             layer["_was_fixed"] = false
 
 func refresh_layers() -> void:
+    ensure_layer_root()
     resort_layers()
     clear_children()
     prop_update_response.clear()
@@ -210,20 +243,32 @@ func apply_modifier_info(modifier_info: Dictionary) -> void:
     if modifier_info.has("effects"):
         for effect_name in modifier_info["effects"]:
             _add_modifier_effect_stuff(effect_name, modifier_name, modifier_info["effects"][effect_name])
+    if modifier_info.get("animated_effects", {}):
+        if not animated_modifiers.has(modifier_name):
+            animated_modifiers.append(modifier_name)
+        for effect_name in modifier_info["animated_effects"]:
+            _add_animated_modifier_effect(effect_name, modifier_name, modifier_info["animated_effects"][effect_name])
+        _animation_timers[modifier_name] = 0.0
+        apply_animated_effects_to_sprite()
     _all_modifiers[modifier_name] = modifier_info.duplicate_deep()
     refresh_layers()
 
 func has_applied_modifier(modifier_name: String) -> bool:
-    return modifier_name in modifier_masks
+    return modifier_name in _all_modifiers
 
 func remove_modifier(modifier_name: String) -> void:
     if not has_applied_modifier(modifier_name):
         return
     modifier_masks.erase(modifier_name)
     _remove_modifier_effect_stuff(modifier_name)
+    _remove_animated_modifier_effects(modifier_name)
     _remove_modifier_layers(modifier_name)
     _apply_most_recent_modifier_mask()
+    _animation_timers.erase(modifier_name)
     _all_modifiers.erase(modifier_name)
+    if animated_modifiers.has(modifier_name):
+        animated_modifiers.erase(modifier_name)
+        apply_animated_effects_to_sprite()
     refresh_layers()
 
 func clear_modifiers() -> void:
@@ -232,19 +277,30 @@ func clear_modifiers() -> void:
     _remove_all_modifier_layers()
     _remove_main_layers_mask()
     _all_modifiers.clear()
+    animated_effects.clear()
+    animated_modifiers.clear()
+    _animation_timers.clear()
+    apply_animated_effects_to_sprite()
     refresh_layers()
 
 func get_serialized_info() -> Dictionary:
-    if _all_modifiers.is_empty():
-        return {}
-    return {
-        "modifiers": _all_modifiers.duplicate_deep(),
+    var serialized_info: Dictionary = {
+        "current_rotation": current_rotation,
     }
+    if not _all_modifiers.is_empty():
+        serialized_info["modifiers"] = _all_modifiers.duplicate_deep()
+        serialized_info["animation_timers"] = _animation_timers.duplicate()
+    return serialized_info
 
 func deserialize_sprite_info(info: Dictionary) -> void:
     clear_modifiers()
+    if info.has("current_rotation"):
+        current_rotation = info["current_rotation"]
+    var animation_timers: Dictionary = info.get("animation_timers", {})
     for modifier_name in info["modifiers"]:
         apply_modifier_info(info["modifiers"][modifier_name])
+        if animation_timers.has(modifier_name):
+            _animation_timers[modifier_name] = animation_timers[modifier_name]
 
 func _remove_all_modifier_layers() -> void:
     var new_layers: Array[Dictionary] = []
@@ -367,7 +423,7 @@ func create_and_add_nodes_for_layer(layer_info: Dictionary, layer_index: int) ->
     
     main_layer_node.z_index = int(layer_info.get("z_offset", 0))
 
-    add_child(main_layer_node, true)
+    layer_root.add_child(main_layer_node, true)
     var layer_scale: Vector2 = Utility.get_vector2_from_arr(layer_info.get("scale", [1,1]))
     layer_scale *= _get_modifiers_scale()
     main_layer_node.scale = layer_scale
@@ -448,8 +504,20 @@ func _remove_modifier_effect_stuff(modifier_name: String) -> void:
             if modifier_effects[effect_name].size() == 0:
                 modifier_effects.erase(effect_name)
 
+func _add_animated_modifier_effect(effect_name: String, modifier_name: String, effect_stuff: Variant) -> void:
+    if not animated_effects.has(effect_name):
+        animated_effects[effect_name] = {}
+    animated_effects[effect_name][modifier_name] = effect_stuff
+
+func _remove_animated_modifier_effects(for_modifier_name: String) -> void:
+    for effect_name in animated_effects:
+        if animated_effects[effect_name].has(for_modifier_name):
+            animated_effects[effect_name].erase(for_modifier_name)
+            if animated_effects[effect_name].size() == 0:
+                animated_effects.erase(effect_name)
+
 func clear_children() -> void:
-    for child in get_children():
+    for child in layer_root.get_children():
         child.queue_free()
 
 func set_sprite_facing(facing: int, immediate: bool = false) -> void:
@@ -462,7 +530,9 @@ func set_sprite_facing(facing: int, immediate: bool = false) -> void:
 
 func set_sprite_rotation(new_rotation: float) -> void:
     current_rotation = new_rotation
-    for layer_node in get_children():
+    if not layer_root:
+        return
+    for layer_node in layer_root.get_children():
         if not layer_node.get_meta("spins", false):
             _set_sprite_layer_rotation(layer_node, current_rotation)
 
@@ -603,15 +673,26 @@ func _apply_modifier_effects_to(layer_node: Node2D) -> void:
     _apply_mod_modulate_to(layer_node)
 
 func _apply_mod_replace_color_to(layer_node: Node2D) -> void:
+    var active_replace_color: Dictionary = _get_static_replace_color()
+    if layer_node.material and layer_node.material is ShaderMaterial:
+        layer_node.material.set_shader_parameter("replace_color", active_replace_color["color"])
+        layer_node.material.set_shader_parameter("replace_amt", active_replace_color["amount"])
+
+func _get_static_replace_color() -> Dictionary:
     var replace_color_modifiers: Array = modifier_effects.get("replace_color", {}).keys()
     if replace_color_modifiers.size() < 1:
-        return
+        return { "color": Color.WHITE, "amount": 0.0 }
     var active_replace_color: Dictionary = modifier_effects.get("replace_color", {})[replace_color_modifiers[-1]]
-    var replace_color: Color = Utility.get_dict_color(active_replace_color, "color", Color.WHITE)
-    var replace_amt: float = active_replace_color.get("amount", 0.0)
-    if layer_node.material and layer_node.material is ShaderMaterial:
-        layer_node.material.set_shader_parameter("replace_color", replace_color)
-        layer_node.material.set_shader_parameter("replace_amt", replace_amt)
+    return {
+        "color": Utility.get_dict_color(active_replace_color, "color", Color.WHITE),
+        "amount": active_replace_color.get("amount", 0.0),
+    }
+
+func _set_all_layers_replace_color(color: Color, amount: float) -> void:
+    for layer_node in layer_root.get_children():
+        if layer_node.material and layer_node.material is ShaderMaterial:
+            layer_node.material.set_shader_parameter("replace_color", color)
+            layer_node.material.set_shader_parameter("replace_amt", amount)
 
 func _apply_mod_modulate_to(layer_node: Node2D) -> void:
     var modulate_modifiers: Array = modifier_effects.get("modulate", {}).keys()
@@ -638,3 +719,73 @@ func _get_new_unmasked_sprite() -> Sprite2D:
     var new_sprite: Sprite2D = Sprite2D.new()
     new_sprite.material = replace_color_mat.duplicate()
     return new_sprite
+
+
+func _apply_animated_effect_to_sprite(effect_name: String, delta_time: float) -> void:
+    var method_name: String = "_anim___%s" % effect_name
+    if has_method(method_name):
+        call(method_name, animated_effects.get(effect_name, {}), delta_time)
+
+func _get_anim_t(effect_data: Dictionary, mod_name: String) -> float:
+    var base_duration: float = effect_data.get("base_duration", 1.0)
+    var t: float = (_animation_timers[mod_name] + effect_data.get("time_offset", 0.0)) / base_duration
+    if effect_data.has("ease_param"):
+        t = ease(t, effect_data["ease_param"])
+    return t
+
+func _anim___scale(effect_stack: Dictionary, _delta_time: float) -> void:
+    var total_scale: = Vector2.ONE
+    for mod_name in effect_stack:
+        var effect_data: Dictionary = effect_stack[mod_name]
+        var t: float = _get_anim_t(effect_data, mod_name)
+        var scale_from: = Utility.get_vector2_from_arr(effect_data.get("scale_from", [1,1]))
+        var scale_to: = Utility.get_vector2_from_arr(effect_data.get("scale_to", [1,1]))
+        total_scale *= scale_from.lerp(scale_to, t)
+    layer_root.scale = total_scale
+
+func _anim___offset(effect_stack: Dictionary, _delta_time: float) -> void:
+    var accumulated_offset: = Vector2.ZERO
+    for mod_name in effect_stack:
+        var effect_data: Dictionary = effect_stack[mod_name]
+        var t: float = _get_anim_t(effect_data, mod_name)
+        var offset_from: = Utility.get_vector2_from_arr(effect_data.get("offset_from", [0,0]))
+        var offset_to: = Utility.get_vector2_from_arr(effect_data.get("offset_to", [0,0]))
+        accumulated_offset += offset_from.lerp(offset_to, t)
+    layer_root.offset = accumulated_offset
+
+func _anim___replace_color(effect_stack: Dictionary, _delta_time: float) -> void:
+    var use_color: Color = Color.WHITE
+    var use_amt: float = 0
+    if effect_stack.size() >= 1:
+        var active_color_mod: String = effect_stack.keys()[-1]
+        var active_replace: Dictionary = effect_stack[active_color_mod]
+        var t: float = _get_anim_t(active_replace, active_color_mod)
+        var color_to: Color = Utility.get_dict_color(active_replace, "color_to", Color.WHITE)
+        if active_replace.has("color_from"):
+            var color_from: Color = Utility.get_dict_color(active_replace, "color_from", Color.WHITE)
+            use_color = color_from.lerp(color_to, t)
+        else:
+            use_color = color_to
+        #use_color = Utility.lerp_ok_hsl_color(from_color, to_color, t)
+        var amt_from: float = active_replace.get("amount_from", 0.0)
+        var amt_to: float = active_replace.get("amount_to", 0.0)
+        use_amt = lerpf(amt_from, amt_to, t)
+    var anim_color_overlay: Color = use_color
+    anim_color_overlay.a = 1
+    var static_replace_color_info: Dictionary = _get_static_replace_color()
+    var static_color: Color = static_replace_color_info["color"]
+    static_color.a = 1
+    var static_contribution: float = (1 - use_amt) * static_replace_color_info["amount"]
+    var final_color: = anim_color_overlay.lerp(static_color, static_contribution)
+    var final_amt: float = use_amt + static_contribution
+    _set_all_layers_replace_color(final_color, final_amt)
+    
+func _anim___fade(effect_stack: Dictionary, _delta_time: float) -> void:
+    var accum_inverse_fade: float = 1.0
+    for mod_name in effect_stack:
+        var effect_data: Dictionary = effect_stack[mod_name]
+        var t: float = _get_anim_t(effect_data, mod_name)
+        var fade_from: float = effect_data.get("fade_from", 0.0)
+        var fade_to: float = effect_data.get("fade_to", 0.0)
+        accum_inverse_fade *= 1 - lerpf(fade_from, fade_to, t)
+    layer_root.modulate.a = clampf(accum_inverse_fade, 0.0, 1.0)

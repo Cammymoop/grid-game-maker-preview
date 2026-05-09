@@ -61,3 +61,7 @@ const ParticleEffects: Array[String] = [
     "Electric",
     "Bubbles",
 ]
+
+const LOW_LEVEL_ANIM_EFFECTS: Array[String] = [
+    "scale", "offset", "replace_color", "fade",
+]
