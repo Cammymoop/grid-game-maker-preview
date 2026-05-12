@@ -28,7 +28,7 @@ corner_radius_bottom_right = 3
 corner_radius_bottom_left = 3
 corner_detail = 5
 
-[node name="PauseMenu" type="Control" unique_id=1906408289 node_paths=PackedStringArray("next_level_list", "level_title_edit", "non_editor_stuff", "editor_stuff", "level_select_button", "play_mode_button", "level_edit_mode_button", "web_export_level_button", "background_editor_container", "background_editor", "darkener", "level_list_picker") groups=["PauseMenu"]]
+[node name="PauseMenu" type="Control" unique_id=1906408289 node_paths=PackedStringArray("next_level_list", "level_title_edit", "non_editor_stuff", "editor_stuff", "level_select_button", "play_mode_button", "level_edit_mode_button", "web_export_level_button", "background_editor_container", "background_editor", "darkener", "level_size_label", "level_list_picker") groups=["PauseMenu"]]
 process_mode = 3
 layout_mode = 3
 anchors_preset = 15
@@ -49,6 +49,7 @@ web_export_level_button = NodePath("HBoxContainer/CenterContainer/MainPausePanel
 background_editor_container = NodePath("HBoxContainer/BackgroundEditorContainer")
 background_editor = NodePath("HBoxContainer/BackgroundEditorContainer/PanelContainer/ScrollContainer/MarginContainer/BGStyleEditor")
 darkener = NodePath("MultiplyDarkenColor")
+level_size_label = NodePath("HBoxContainer/CenterContainer/MainPausePanel/MarginContainer/VBoxContainer/EditorStuff/LevelSize")
 level_list_picker = NodePath("HBoxContainer/CenterContainer/LevelSettingsPausePanel/MarginContainer/VBoxContainer/GridContainer/LevelListPicker")
 
 [node name="MixDarkenColor" type="ColorRect" parent="." unique_id=1335268905]
@@ -175,6 +176,13 @@ text = "Level Editor"
 [node name="HSeparator2" type="HSeparator" parent="HBoxContainer/CenterContainer/MainPausePanel/MarginContainer/VBoxContainer/EditorStuff/TextSeparator" unique_id=1137352540]
 layout_mode = 2
 size_flags_horizontal = 3
+
+[node name="LevelSize" type="Label" parent="HBoxContainer/CenterContainer/MainPausePanel/MarginContainer/VBoxContainer/EditorStuff" unique_id=195402698]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.54896253, 0.54896265, 0.54896235, 1)
+theme_override_font_sizes/font_size = 12
+text = "Level Size:"
+horizontal_alignment = 1
 
 [node name="PlayModeButton" type="Button" parent="HBoxContainer/CenterContainer/MainPausePanel/MarginContainer/VBoxContainer/EditorStuff" unique_id=32451149]
 layout_mode = 2

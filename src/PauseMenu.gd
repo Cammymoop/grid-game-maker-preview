@@ -26,6 +26,8 @@ var active = false
 @export var background_editor: BGStyleEditor
 @export var darkener: ColorRect
 
+@export var level_size_label: Label
+
 @onready var main_panel: PanelContainer = find_child("MainPausePanel")
 @onready var level_settings_panel: PanelContainer = find_child("LevelSettingsPausePanel")
 
@@ -138,6 +140,18 @@ func on_show() -> void:
 		if not current_level_list:
 			current_level_list = GameManager.get_list_containing_level(GameManager.loaded_level_name)
 		refresh_level_list_picker(current_level_list)
+		
+		var cur_level_base64: = GameManager.clipboardify_level_data(GameManager.get_edited_as_level_data())
+		var char_size_text: = Utility.int_with_commas(cur_level_base64.length())
+
+		if cur_level_base64.length() > GameManager.MAX_LEVEL_TEXT_SIZE:
+			level_size_label.text = "Level Size (text): %s (TOO BIG FOR CLIPBOARD)" % [char_size_text]
+		else:
+			var level_size_percentage: = (cur_level_base64.length() / float(GameManager.MAX_LEVEL_TEXT_SIZE)) * 100.0
+			level_size_percentage = clampf(level_size_percentage, 0.1, 99.9)
+			if cur_level_base64.length() == GameManager.MAX_LEVEL_TEXT_SIZE:
+				level_size_percentage = 100.0
+			level_size_label.text = "Level Size (text): %.1f%% (%s)" % [level_size_percentage, char_size_text]
 	
 	refresh_level_settings()
 

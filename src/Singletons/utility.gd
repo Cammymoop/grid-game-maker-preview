@@ -1037,3 +1037,11 @@ func event_is_menu_back_just_pressed(event: InputEvent) -> bool:
 
 func get_wav_stream_total_samples(wav_stream: AudioStreamWAV) -> int:
 	return roundi(wav_stream.get_length() * wav_stream.sample_rate)
+
+func int_with_commas(value: int) -> String:
+	var chars: = str(value)
+	var result: String = ""
+	while chars.length() > 3:
+		result = "," + chars.right(3) + result
+		chars = chars.substr(0, chars.length() - 3)
+	return chars + result

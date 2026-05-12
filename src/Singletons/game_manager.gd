@@ -12,6 +12,8 @@ const CreditsUI = preload("res://Scenes/credits_ui.gd")
 const FULL_TICK_RATE: int = 60
 @onready var TICK_RATE: int = ProjectSettings.get_setting_with_override("physics/common/physics_ticks_per_second")
 
+const MAX_LEVEL_TEXT_SIZE: int = 1000000
+
 var started = false
 var cur_scene = null
 
@@ -870,12 +872,35 @@ func is_event_name(prop_name: String) -> bool:
 		return true
 	return false
 
+func get_edited_as_level_data() -> Dictionary:
+	if not editor_save:
+		push_error("No editor save data")
+		return {}
+	var level_name: = loaded_level_name if loaded_level_name else Utility.random_animal()
+	return get_play_state_as_level_data(editor_save, level_name)
+
+func get_play_state_as_level_data(serialized_play_state: Dictionary, level_name: String = "") -> Dictionary:
+	if not serialized_play_state:
+		return {}
+	if not level_name:
+		level_name = loaded_level_name
+	if not level_name:
+		push_error("No level name provided")
+		return {}
+	level_name = FilesManager.sanitize_level_filename(level_name)
+
+	var level_data: = {
+		"name": level_name,
+		"state": serialized_play_state.duplicate_deep(),
+	}
+	return level_data
+
 func save_edited_level_as(as_level_filename: String) -> void:
 	if not editor_save:
 		return
-	var level_data: = {}
-	level_data["name"] = FilesManager.sanitize_level_filename(as_level_filename)
-	level_data["state"] = editor_save
+	var level_data: = get_play_state_as_level_data(editor_save, as_level_filename)
+	if not level_data:
+		return
 	
 	var saved_successfully: = FilesManager.save_level(GameManager.cur_game_name, level_data)
 	if saved_successfully:
@@ -1165,6 +1190,15 @@ func add_level_list(level_list_name: String) -> void:
 		"name": level_list_name,
 		"level_names": [],
 	})
+
+func add_level_list_with_info(level_list_name: String, level_list_info: Dictionary) -> void:
+	if not level_list_name:
+		return
+	if not game_definition.get("level_lists", []):
+		game_definition["level_lists"] = []
+	if not level_list_info.get("name", "") == level_list_name:
+		level_list_info["name"] = level_list_name
+	game_definition["level_lists"].append(level_list_info.duplicate_deep())
 
 func has_any_unlocked_levels() -> bool:
 	var total_unlocked_levels: int = 0
@@ -1726,3 +1760,231 @@ func web_export_level_json(level_name: String) -> void:
 	var level_bytes: PackedByteArray = FilesManager.get_level_file_bytes(get_game_name(), level_name)
 	var level_filename: = FilesManager.sanitize_level_filename(level_name) + ".json"
 	JavaScriptBridge.download_buffer(level_bytes, level_filename, "application/json")
+
+
+func make_level_list_bundle_data(level_list_info: Dictionary) -> Dictionary:
+	if not level_list_info.get("name", ""):
+		push_error("Invalid level list info: %s" % level_list_info)
+		return {}
+	if not level_list_info.get("level_names", []):
+		return {}
+	var bundle_data: Dictionary = {
+		"what_is_this": "GGM bundled level list",
+		"for_game": get_game_name(),
+		"list_name": level_list_info["name"],
+		"level_filenames": [],
+		"level_titles": {},
+		"level_data": {},
+	}
+	var included_levels: Array = []
+	for level_name in level_list_info.get("level_names", []):
+		if level_name in included_levels or not FilesManager.level_exists(get_game_name(), level_name):
+			continue
+		included_levels.append(level_name)
+	
+	for level_name in level_list_info.get("level_names", []):
+		if level_name in included_levels:
+			bundle_data["level_filenames"].append(FilesManager.sanitize_level_filename(level_name))
+	
+	for level_name in included_levels:
+		var level_data: = FilesManager.get_level_data(get_game_name(), level_name)
+		bundle_data["level_data"][level_name] = level_data
+		bundle_data["level_titles"][level_name] = FilesManager.get_level_title(get_game_name(), level_name)
+	
+	return bundle_data
+
+
+func export_level_list(list_name: String) -> void:
+	var level_list_info: = _get_level_list(list_name)
+	if not level_list_info:
+		push_error("Level list %s not found" % list_name)
+		return
+	if level_list_info.get("level_names", []).size() < 1:
+		push_warning("Level list %s has no levels" % list_name)
+		return
+
+	if OS.has_feature("web"):
+		web_export_level_list(list_name)
+		return
+	
+	var list_filename: = Utility.sanitize_for_filename(list_name, true, true) + ".json"
+	
+	var file_dialog: FileDialog = FileDialog.new()
+	file_dialog.title = "Export Level List %s.json" % [list_name]
+	file_dialog.file_mode = FileDialog.FILE_MODE_SAVE_FILE
+	file_dialog.access = FileDialog.ACCESS_FILESYSTEM
+	file_dialog.filters = ["*.json"]
+	file_dialog.file_selected.connect(_export_level_list_destination_picked.bind(list_name, file_dialog))
+	file_dialog.close_requested.connect(file_dialog.queue_free)
+	file_dialog.canceled.connect(file_dialog.queue_free)
+	
+	file_dialog.current_dir = OS.get_system_dir(OS.SYSTEM_DIR_DESKTOP)
+	file_dialog.current_file = list_filename
+	add_child(file_dialog)
+	file_dialog.popup_file_dialog()
+
+func _export_level_list_destination_picked(save_path: String, list_name: String, file_dialog: FileDialog) -> void:
+	file_dialog.queue_free()
+	var level_list_info: = _get_level_list(list_name)
+	var bundle_data: Dictionary = make_level_list_bundle_data(level_list_info)
+	if not bundle_data:
+		push_error("Failed to make level list bundled data")
+		return
+	var stringified: = JSON.stringify(bundle_data, "", false)
+	if not stringified:
+		push_error("Failed to serialize level list bundled data")
+		return
+	
+	var f: = FileAccess.open(save_path, FileAccess.WRITE)
+	if not f:
+		push_error("Failed to open file for writing: %s" % save_path)
+		return
+	if not f.store_string(stringified):
+		push_error("Failed to write level list bundled data to file: %s" % save_path)
+		return
+	GlobalToaster.show_toast_message("Exported Level list to %s" % [save_path.get_file()])
+
+func web_export_level_list(list_name: String) -> void:
+	if not OS.has_feature("web") or not get_game_name():
+		return
+	var level_list_info: = _get_level_list(list_name)
+	var bundle_data: Dictionary = make_level_list_bundle_data(level_list_info)
+	if not bundle_data:
+		push_error("Failed to make level list bundled data")
+		return
+	var serialized: = JSON.stringify(bundle_data, "", false).to_utf8_buffer()
+	if not serialized:
+		push_error("Failed to serialize level list bundled data")
+		return
+	var list_filename: = Utility.sanitize_for_filename(list_name, true, true) + ".json"
+	JavaScriptBridge.download_buffer(serialized, list_filename, "application/json")
+
+func get_unique_import_level_name(current_levels_list: Array, level_filename: String, level_title: String) -> String:
+	if not level_filename in current_levels_list:
+		return level_filename
+	var title_name: = level_title.to_ascii_buffer().get_string_from_ascii()
+	title_name = Utility.sanitize_for_filename(title_name, true, true)
+	if title_name and not title_name in current_levels_list:
+		return title_name
+
+	var tries: int = 1
+	var stamped_title_name: = title_name + (" %s" % Time.get_date_string_from_system())
+	if not stamped_title_name in current_levels_list:
+		return stamped_title_name
+	var current_try: = stamped_title_name
+	while current_try in current_levels_list:
+		current_try = stamped_title_name + (" (%s)" % tries)
+		tries += 1
+		if tries > 10000:
+			push_error("Failed to find a unique name for the imported level")
+			return ""
+	return current_try
+
+func import_level_list_data(list_data: Dictionary, game_name_confirmed: bool = false) -> void:
+	var for_game_name: String = list_data.get("for_game", "")
+	if not game_name_confirmed and for_game_name != get_game_name():
+		var confirm_dialog: = ConfirmationDialog.new()
+		confirm_dialog.title = "Import Level List"
+		confirm_dialog.dialog_text = "This level list is for a game named '%s'. The current game is '%s'.\n" \
+									+ "Do you still want to import the levels?" % [for_game_name, get_game_name()]
+		
+		confirm_dialog.confirmed.connect(import_level_list_data.bind(list_data, true))
+		confirm_dialog.canceled.connect(confirm_dialog.queue_free)
+		
+		add_child(confirm_dialog)
+		confirm_dialog.popup_centered()
+		return
+	
+	var imported_list_name: String = list_data.get("list_name", "")
+	if not imported_list_name:
+		imported_list_name = Utility.random_animal()
+	
+	var cur_lists: = get_list_of_level_lists()
+	if imported_list_name in cur_lists:
+		var stamped_name: = imported_list_name + (" %s" % Time.get_date_string_from_system())
+		if not stamped_name in cur_lists:
+			var tries: int = 1
+			var current_try: = stamped_name
+			while current_try in cur_lists:
+				current_try = stamped_name + (" (%s)" % tries)
+				
+				tries += 1
+				if tries > 10000:
+					push_error("Failed to find a unique name for the imported level list")
+					return
+			imported_list_name = current_try
+		else:
+			imported_list_name = stamped_name
+	
+	var level_list_info: Dictionary = {
+		"name": imported_list_name,
+	}
+	if list_data.has("bg_style"):
+		level_list_info["bg_style"] = list_data["bg_style"].duplicate_deep()
+	
+	var level_datas: Dictionary = list_data.get("level_data", {})
+	var level_titles: Dictionary = list_data.get("level_titles", {})
+	var existing_levels: = FilesManager.get_level_list(get_game_name())
+	
+	var remapped_names: Dictionary[String, String] = {}
+	for level_filename in level_datas.keys():
+		var data: Dictionary = level_datas[level_filename]
+		if not data:
+			continue
+		var new_name: = get_unique_import_level_name(existing_levels, level_filename, level_titles.get(level_filename, ""))
+		if not new_name:
+			push_warning("failed to make a unique name for level %s, skipping" % [level_filename])
+			continue
+		remapped_names[level_filename] = new_name
+		existing_levels.append(new_name)
+	
+	for old_level_name in remapped_names.keys():
+		var data: Dictionary = level_datas[old_level_name]
+		if not FilesManager.save_level_to_name(get_game_name(), data, remapped_names[old_level_name]):
+			push_error("Failed to save level %s" % [old_level_name])
+			remapped_names.erase(old_level_name)
+	
+	level_list_info["level_names"] = []
+	for old_level_name in list_data.get("level_names", []):
+		if old_level_name in remapped_names:
+			level_list_info["level_names"].append(remapped_names[old_level_name])
+	
+	add_level_list_with_info(imported_list_name, level_list_info)
+	save_current_game_definition()
+	
+	GlobalToaster.show_toast_message("Imported level list %s" % [imported_list_name])
+
+
+
+func clipboardify_level_data(level_data: Dictionary) -> String:
+	var stringified: = JSON.stringify(level_data, "", false)
+	var uncompressed_data: = stringified.to_utf8_buffer()
+	var compressed_b64: = Marshalls.raw_to_base64(uncompressed_data.compress(FileAccess.COMPRESSION_ZSTD))
+	if not compressed_b64:
+		push_error("Failed to compress level data")
+		return ""
+	return ("%d:" % uncompressed_data.size()) + compressed_b64
+
+func declipboardify_level_data(clipboard_data: String) -> Dictionary:
+	if not clipboard_data.substr(0, 20).contains(":"):
+		push_error("Invalid clipboard data: %s..." % clipboard_data.substr(0, 20))
+		return {}
+	var uncompressed_size: = clipboard_data.split(":", true, 1)[0]
+	if not uncompressed_size or not uncompressed_size.is_valid_int():
+		push_error("Invalid uncompressed size: %s" % uncompressed_size)
+	var compressed_data: = Marshalls.base64_to_raw(clipboard_data.split(":", true, 1)[1])
+	if not compressed_data:
+		push_error("Failed to un-base64-ify level data from clipboard")
+		return {}
+	var decompressed_data: = compressed_data.decompress(int(uncompressed_size), FileAccess.COMPRESSION_ZSTD)
+	if not decompressed_data:
+		push_error("Failed to decompress level data from clipboard")
+		return {}
+	var parsed_data: Variant = JSON.parse_string(decompressed_data.get_string_from_utf8())
+	if not parsed_data:
+		push_error("Failed to parse JSON from decompressed level data from clipboard")
+		return {}
+	if not parsed_data is Dictionary:
+		push_error("Parsed level data from clipboard is not a dictionary: %s" % parsed_data)
+		return {}
+	return parsed_data
