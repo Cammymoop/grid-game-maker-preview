@@ -297,7 +297,7 @@ func deserialize_sprite_info(info: Dictionary) -> void:
     if info.has("current_rotation"):
         current_rotation = info["current_rotation"]
     var animation_timers: Dictionary = info.get("animation_timers", {})
-    for modifier_name in info["modifiers"]:
+    for modifier_name in info.get("modifiers", {}):
         apply_modifier_info(info["modifiers"][modifier_name])
         if animation_timers.has(modifier_name):
             _animation_timers[modifier_name] = animation_timers[modifier_name]
@@ -517,6 +517,8 @@ func _remove_animated_modifier_effects(for_modifier_name: String) -> void:
                 animated_effects.erase(effect_name)
 
 func clear_children() -> void:
+    if not layer_root:
+        return
     for child in layer_root.get_children():
         child.queue_free()
 
@@ -751,7 +753,7 @@ func _anim___offset(effect_stack: Dictionary, _delta_time: float) -> void:
         var offset_from: = Utility.get_vector2_from_arr(effect_data.get("offset_from", [0,0]))
         var offset_to: = Utility.get_vector2_from_arr(effect_data.get("offset_to", [0,0]))
         accumulated_offset += offset_from.lerp(offset_to, t)
-    layer_root.offset = accumulated_offset
+    layer_root.position = accumulated_offset
 
 func _anim___replace_color(effect_stack: Dictionary, _delta_time: float) -> void:
     var use_color: Color = Color.WHITE

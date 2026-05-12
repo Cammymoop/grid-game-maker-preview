@@ -18,11 +18,16 @@ const edited_entity_indicator_icon: Texture2D = preload("res://assets/img/button
 @export var ui_root_control: Control
 @export var entity_instance_editor: EntityInstanceEditor
 
+@export var cursor_star: Node2D
+
 var edit_mode: = false
 
 var cur_ent_i: int = 0
 var current_entity_index: int = -1
 var current_entity_facing: int = 0
+
+var has_copied_properties: = false
+var entity_properties_copied: = {}
 
 var cur_tile_i: int = 0
 var current_tile_index: int = -1 
@@ -150,7 +155,7 @@ func on_edit_mode_enabled() -> void:
 	if vp.has_method("rescale"):
 		vp.rescale()
 	if not GameManager.is_live_edit():
-		GameManager.load_edited()
+		GameManager.load_edited(false)
 		await get_tree().process_frame
 		await get_tree().process_frame
 	refresh_game_definition()
@@ -221,6 +226,17 @@ func set_as_placing_mode(tile_entity: String) -> void:
 		set_current_facing(0)
 	set_cursor_mode(tile_entity)
 
+func pick_entity(entity: BaseEntity) -> void:
+	pick_index("entity", entity.entity_index, entity.facing)
+	has_copied_properties = entity.has_any_local_properties()
+	if is_alt_mode_active():
+		has_copied_properties = false
+	if has_copied_properties:
+		entity_properties_copied = entity.get_local_properties_dict()
+	else:
+		entity_properties_copied = {}
+	check_show_star()
+
 func pick_index(tile_entity: String, index: int, facing: int = -1) -> void:
 	set_as_placing_mode(tile_entity)
 	set_current_index_to(index)
@@ -231,6 +247,10 @@ func _set_entity_index_to(index: int) -> void:
 	if index == current_entity_index:
 		return
 	current_entity_index = index
+	if has_copied_properties:
+		has_copied_properties = false
+		entity_properties_copied = {}
+		check_show_star()
 	if cursor_mode == "entity" and index > -1:
 		preview_entity(index)
 		show_item_name()
@@ -302,6 +322,7 @@ func set_cursor_mode(new_mode: String):
 		_last_tile_entity_mode = new_mode
 		preview.visible = true
 		show_item_name()
+		check_show_star()
 	else:
 		preview.visible = false
 
@@ -320,6 +341,12 @@ func set_cursor_mode(new_mode: String):
 			preview_tile(current_tile_index)
 	if cursor_mode == "delete":
 		cursor.texture = delete_cursor_tex
+
+func check_show_star() -> void:
+	if not cursor_mode == "entity":
+		cursor_star.hide()
+		return
+	cursor_star.visible = has_copied_properties
 
 func is_in_placing_mode() -> bool:
 	return cursor_mode in ["tile", "entity"]
@@ -350,7 +377,10 @@ func _primary_action_at_cursor(holding: bool = false) -> void:
 				if EntityManager.get_entity_prop_with_default(e, "edit-place-multiple", false):
 					continue
 				EntityManager.remove_entity(e)
-		EntityManager.create_entity(current_entity_index, cursor_tile_pos, current_entity_facing)
+		var new_entity: BaseEntity = EntityManager.create_entity(current_entity_index, cursor_tile_pos, current_entity_facing)
+		if has_copied_properties:
+			new_entity.set_local_properties_dict(entity_properties_copied)
+			_refresh_edited_entity_indicators()
 	elif cursor_mode == "delete":
 		var force_everything: = holding and not delete_held_on_entity
 		var force_only_entities: = holding and delete_held_on_entity
@@ -560,7 +590,7 @@ func forwarded_gui_input(event: InputEvent) -> void:
 			if not picked_entity:
 				picked_entity = entities_here[0]
 
-			pick_index("entity", picked_entity.entity_index, picked_entity.facing)
+			pick_entity(picked_entity)
 			_last_picked_entity = picked_entity
 		else:
 			var tile_here = MapManager.get_tile_index_at(cursor_tile_pos)
@@ -585,9 +615,16 @@ func forwarded_shortcut_input(event: InputEvent) -> void:
 	if Utility.fixed_just_pressed_by_event("editor_start", event, true):
 		switch_edit_mode(not edit_mode)
 	elif Utility.fixed_just_pressed_by_event("editor_save_level", event, true) and edit_mode:
-		if GameManager.loaded_level_name:
+		if edit_mode:
 			GameManager.save_edited()
+		if GameManager.loaded_level_name:
 			GameManager.save_edited_level_as(GameManager.loaded_level_name)
+		else:
+			var pause_menu: = Utility.get_pause_menu()
+			if pause_menu:
+				pause_menu.pause_and_open()
+				pause_menu.on_save_as_button_pressed()
+		GlobalToaster.show_toast_message("Saved")
 	elif Utility.fixed_just_pressed_by_event("editor_new_map", event, true):
 		GameManager.new_empty_level()
 

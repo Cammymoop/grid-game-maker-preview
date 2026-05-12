@@ -23,6 +23,8 @@ var conditional_editor_scn: = preload("res://Scenes/GameEditor/ConditionalEditor
 
 @export var add_property_button: ButtonContainer
 
+@export var reset_local_props_button: Button
+
 var non_expanded_v_size_flags: int = Control.SIZE_SHRINK_CENTER
 var prop_list_default_min_size: Vector2 = Vector2.ZERO
 var edited_entity: BaseEntity = null
@@ -64,6 +66,12 @@ func _shortcut_input(event: InputEvent) -> void:
     if visible and Utility.event_is_menu_back_just_pressed(event):
         close_instance_editor()
         get_viewport().set_input_as_handled()
+
+func on_reset_local_props_button_pressed() -> void:
+    if not visible or not edited_entity:
+        return
+    edited_entity.reset_all_local_properties()
+    property_edit_list.load_entity_instance_properties(edited_entity)
 
 func on_entity_instance_props_edited(entity: BaseEntity) -> void:
     entity_props_edited.emit(entity)

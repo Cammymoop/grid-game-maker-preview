@@ -40,7 +40,7 @@ corner_radius_bottom_right = 3
 corner_radius_bottom_left = 3
 corner_detail = 7
 
-[node name="EntityInstanceEditor" type="PanelContainer" unique_id=1898877842 node_paths=PackedStringArray("property_edit_list", "popup_holder", "entity_active_toggle", "add_property_button")]
+[node name="EntityInstanceEditor" type="PanelContainer" unique_id=1898877842 node_paths=PackedStringArray("property_edit_list", "popup_holder", "entity_active_toggle", "add_property_button", "reset_local_props_button")]
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -54,6 +54,7 @@ property_edit_list = NodePath("VBoxContainer/VBoxContainer/HBoxContainer4/Proper
 popup_holder = NodePath("VBoxContainer2/CenterContainer/Control/PopupHolder")
 entity_active_toggle = NodePath("VBoxContainer/VBoxContainer/HBoxContainer/HBoxContainer/EntityActiveToggle")
 add_property_button = NodePath("VBoxContainer/VBoxContainer/HBoxContainer4/VBoxContainer/AddPropertyButton")
+reset_local_props_button = NodePath("VBoxContainer/VBoxContainer/HBoxContainer/HBoxContainer2/ResetLocalButton")
 
 [node name="VBoxContainer" type="VBoxContainer" parent="." unique_id=520120316]
 layout_mode = 2
@@ -99,6 +100,12 @@ horizontal_alignment = 1
 layout_mode = 2
 size_flags_horizontal = 3
 alignment = 1
+
+[node name="ResetLocalButton" type="Button" parent="VBoxContainer/VBoxContainer/HBoxContainer/HBoxContainer2" unique_id=1989754929]
+layout_mode = 2
+size_flags_vertical = 4
+theme_override_font_sizes/font_size = 14
+text = "Reset all overriden"
 
 [node name="HBoxContainer4" type="HBoxContainer" parent="VBoxContainer/VBoxContainer" unique_id=215106456]
 layout_mode = 2

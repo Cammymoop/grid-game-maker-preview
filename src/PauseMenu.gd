@@ -33,9 +33,19 @@ var active = false
 
 @export var level_list_picker: OptionButton
 
+@export var copy_to_clipboard_button: Button
+@export var paste_from_clipboard_button: Button
+
+@export var save_as_button: Button
+
 func _ready():
+	copy_to_clipboard_button.pressed.connect(on_copy_to_clipboard_button_pressed)
+	paste_from_clipboard_button.pressed.connect(on_paste_from_clipboard_button_pressed)
+
 	web_export_level_button.visible = OS.has_feature("web")
 	web_export_level_button.pressed.connect(on_web_export_level_button_pressed)
+	
+	save_as_button.pressed.connect(on_save_as_button_pressed)
 
 	background_editor_container.hide()
 	play_mode_button.pressed.connect(switch_to_non_level_edit_mode)
@@ -118,7 +128,7 @@ func on_show() -> void:
 	var load_button: BaseButton = find_child("LoadLevelButton")
 	load_button.disabled = not has_saved_levels
 	
-	level_select_button.visible = not GameManager.is_in_level_edit_mode
+	#level_select_button.visible = not GameManager.is_in_level_edit_mode
 	
 	play_mode_button.visible = GameManager.is_in_level_edit_mode
 	level_edit_mode_button.visible = not GameManager.is_in_level_edit_mode
@@ -142,16 +152,24 @@ func on_show() -> void:
 		refresh_level_list_picker(current_level_list)
 		
 		var cur_level_base64: = GameManager.clipboardify_level_data(GameManager.get_edited_as_level_data())
+		copy_to_clipboard_button.disabled = cur_level_base64.length() > GameManager.MAX_LEVEL_TEXT_SIZE
 		var char_size_text: = Utility.int_with_commas(cur_level_base64.length())
 
+		level_size_label.text = "Level Size (text):\n"
 		if cur_level_base64.length() > GameManager.MAX_LEVEL_TEXT_SIZE:
-			level_size_label.text = "Level Size (text): %s (TOO BIG FOR CLIPBOARD)" % [char_size_text]
+			level_size_label.text += "%s (TOO BIG)" % [char_size_text]
 		else:
 			var level_size_percentage: = (cur_level_base64.length() / float(GameManager.MAX_LEVEL_TEXT_SIZE)) * 100.0
 			level_size_percentage = clampf(level_size_percentage, 0.1, 99.9)
 			if cur_level_base64.length() == GameManager.MAX_LEVEL_TEXT_SIZE:
 				level_size_percentage = 100.0
-			level_size_label.text = "Level Size (text): %.1f%% (%s)" % [level_size_percentage, char_size_text]
+			level_size_label.text += "%.1f%% (%s)" % [level_size_percentage, char_size_text]
+		
+		var has_clipboard_level: = false
+		if DisplayServer.clipboard_has() and DisplayServer.clipboard_get().substr(0, 20).contains(":"):
+			prints("clipboard might be a level: %s..." % DisplayServer.clipboard_get().substr(0, 20))
+			has_clipboard_level = true
+		paste_from_clipboard_button.disabled = not has_clipboard_level
 	
 	refresh_level_settings()
 
@@ -159,10 +177,27 @@ func close_pause_menu() -> void:
 	if active:
 		toggle()
 
+func pause_and_open() -> void:
+	if not active:
+		toggle()
+
 func _on_QuitToMenu_pressed():
 	GameManager.change_scene("Menu")
 
 func _on_SaveLevelButton_pressed():
+	if not GameManager.is_in_level_edit_mode:
+		return
+
+	if not GameManager.loaded_level_name or not GameManager.loaded_level_is_saved:
+		on_save_as_button_pressed()
+	else:
+		var map_editor: = Utility.get_map_editor()
+		if map_editor and map_editor.edit_mode:
+			GameManager.save_edited()
+		GameManager.save_edited_level_as(GameManager.loaded_level_name)
+		GlobalToaster.show_toast_message("Saved")
+
+func on_save_as_button_pressed() -> void:
 	var popup: Window = save_dialog.instantiate()
 	add_child(popup)
 	popup.saved_level.connect(level_was_saved.bind(GameManager.loaded_level_name))
@@ -170,6 +205,7 @@ func _on_SaveLevelButton_pressed():
 	popup.hidden.connect(refresh_level_settings)
 
 func level_was_saved(level_name: String, old_level_name: String) -> void:
+	GlobalToaster.show_toast_message("Saved")
 	# in case it was a new level or it was saved as a new name, set it up to be in the selected list
 	if not old_level_name or old_level_name != level_name:
 		var current_selected_list: String = Utility.opbtn_selected_text(level_list_picker)
@@ -335,3 +371,17 @@ func on_web_export_level_button_pressed() -> void:
 		GlobalToaster.show_toast_message("Saved level not found")
 		return
 	GameManager.web_export_level_json(GameManager.loaded_level_name)
+
+func on_copy_to_clipboard_button_pressed() -> void:
+	var cur_level_base64: = GameManager.clipboardify_level_data(GameManager.get_edited_as_level_data())
+	DisplayServer.clipboard_set(cur_level_base64)
+	GlobalToaster.show_toast_message("Copied Level to Clipboard (as text)")
+
+func on_paste_from_clipboard_button_pressed() -> void:
+	if not DisplayServer.clipboard_has():
+		return
+	var clipboard_data: = DisplayServer.clipboard_get()
+	if not clipboard_data.substr(0, 20).contains(":"):
+		return
+	if not GameManager.load_level_from_clipboard_string(clipboard_data):
+		GlobalToaster.show_toast_message("Failed to load level from clipboard text")

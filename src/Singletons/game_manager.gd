@@ -33,6 +33,7 @@ var loaded_level: = {}
 var quicksave_state: = {}
 
 var loaded_level_name: = ""
+var loaded_level_is_saved: = false
 var loaded_is_autosave: = false
 
 var is_in_level_edit_mode: = true
@@ -276,6 +277,7 @@ func load_game_definition_data(definition_data: Dictionary) -> void:
 	is_in_level_edit_mode = false
 	current_level_list = ""
 	loaded_level_name = ""
+	loaded_level_is_saved = false
 	
 	_set_game_name(definition_data['game_name'], false)
 	loaded_from_game_name = cur_game_name
@@ -284,9 +286,9 @@ func load_game_definition_data(definition_data: Dictionary) -> void:
 		put_all_existing_levels_into_single_level_list()
 	
 	editor_save = {}
-	quicksave_state = {}
-	checkpoint_save = {}
 	loaded_level = {}
+	clear_checkpoint()
+	clear_quicksave()
 	
 	# compatibility
 	if "window_width" in definition_data and "window_height" in definition_data:
@@ -466,7 +468,7 @@ func save_checkpoint() -> void:
 	checkpoint_save = get_serialized_play_state()
 func load_checkpoint() -> void:
 	if not checkpoint_save:
-		if loaded_level_name and editor_save:
+		if editor_save:
 			load_serialized_play_state(editor_save, false)
 		return
 	load_serialized_play_state(checkpoint_save, false)
@@ -476,16 +478,48 @@ func clear_checkpoint() -> void:
 func save_edited() -> void:
 	editor_save = get_serialized_play_state()
 	clear_checkpoint()
-func load_edited() -> void:
-	load_serialized_play_state(editor_save)
+func load_edited(as_level_load: bool = true) -> void:
+	load_serialized_play_state(editor_save, as_level_load)
 	clear_checkpoint()
 
 func save_quicksave() -> void:
-	quicksave_state = get_serialized_play_state()
+	quicksave_state = {
+		"level_state": get_serialized_play_state(),
+		"level_name": loaded_level_name,
+		"level_list": current_level_list,
+		"checkpoint_state": {},
+	}
+	if checkpoint_save:
+		quicksave_state["checkpoint_state"] = checkpoint_save.duplicate_deep()
 func load_quicksave() -> void:
 	if not quicksave_state:
 		return
-	load_serialized_play_state(quicksave_state, false)
+	var quicksave_level_name: String = quicksave_state.get("level_name", "")
+	var quicksave_level_list: String = quicksave_state.get("level_list", "")
+	var changing_levels: = false
+	if not quicksave_level_name or quicksave_level_name != loaded_level_name:
+		changing_levels = true
+	elif current_level_list and quicksave_level_list and current_level_list != quicksave_level_list:
+		changing_levels = true
+
+	loaded_level_name = quicksave_level_name
+	current_level_list = quicksave_level_list
+	load_serialized_play_state(quicksave_state["level_state"], changing_levels)
+	if changing_levels:
+		if FilesManager.level_exists(cur_game_name, quicksave_level_name):
+			loaded_level_is_saved = true
+			var level_data: = FilesManager.get_level_data(cur_game_name, quicksave_level_name)
+			if level_data:
+				editor_save = level_data["state"]
+			else:
+				editor_save = {}
+		else:
+			editor_save = {}
+	
+	if quicksave_state.get("checkpoint_state", {}):
+		checkpoint_save = quicksave_state["checkpoint_state"].duplicate_deep()
+	else:
+		checkpoint_save = {}
 func clear_quicksave() -> void:
 	quicksave_state = {}
 
@@ -518,6 +552,7 @@ func load_editor_autosave() -> void:
 		return
 	var autosave_data: Dictionary = FilesManager.get_level_data(cur_game_name, "editor_autosave")
 	load_level_data(autosave_data)
+	loaded_level_is_saved = false
 	loaded_is_autosave = true
 
 func load_level_data(level_data: Dictionary, process_queued_load: bool = false):
@@ -532,6 +567,7 @@ func load_level_data(level_data: Dictionary, process_queued_load: bool = false):
 	loaded_level_name = level_data["name"]
 	editor_save = level_data["state"]
 	load_edited()
+	clear_checkpoint()
 	close_pause_menu()
 
 func try_load_next_level(with_delay: float = 0.5):
@@ -616,6 +652,7 @@ func edit_level_in_list(level_list_name: String, level_name: String) -> void:
 
 func new_empty_level():
 	loaded_level_name = ""
+	loaded_level_is_saved = false
 	current_level_is_museum = false
 	EntityManager.clear()
 	MapManager.clear()
@@ -626,6 +663,7 @@ func new_empty_level():
 
 func new_museum_level():
 	loaded_level_name = "Museum"
+	loaded_level_is_saved = false
 	current_level_is_museum = true
 	EntityManager.clear()
 	MapManager.clear()
@@ -874,9 +912,11 @@ func is_event_name(prop_name: String) -> bool:
 
 func get_edited_as_level_data() -> Dictionary:
 	if not editor_save:
-		push_error("No editor save data")
+		push_error("No level to get level data of")
 		return {}
-	var level_name: = loaded_level_name if loaded_level_name else Utility.random_animal()
+	var level_name: = loaded_level_name if loaded_level_name else level_data_get_title(editor_save, "");
+	if not level_name:
+		level_name = Utility.random_animal()
 	return get_play_state_as_level_data(editor_save, level_name)
 
 func get_play_state_as_level_data(serialized_play_state: Dictionary, level_name: String = "") -> Dictionary:
@@ -910,6 +950,7 @@ func save_edited_level_as(as_level_filename: String) -> void:
 		return
 	
 	loaded_level_name = level_data["name"]
+	loaded_level_is_saved = true
 	loaded_is_autosave = false
 	save_checkpoint()
 
@@ -1620,6 +1661,8 @@ func get_current_bg_info() -> Dictionary:
 		return level_list_bg_info
 
 func set_level_bg_info(bg_info: Dictionary) -> void:
+	if not editor_save:
+		return
 	MapManager.set_metadata_value("bg_style", bg_info)
 	bg_style_changed.emit()
 
@@ -1720,13 +1763,9 @@ func copy_game_bg_to_level_list(level_list_name: String) -> void:
 	level_list_info["bg_style"] = get_game_bg_info().duplicate_deep()
 
 func copy_game_bg_to_level() -> void:
-	if not loaded_level_name:
-		return
 	set_level_bg_info(get_game_bg_info().duplicate_deep())
 
 func copy_current_bg_to_level() -> void:
-	if not loaded_level_name:
-		return
 	set_level_bg_info(get_current_bg_info().duplicate_deep())
 
 
@@ -1956,6 +1995,32 @@ func import_level_list_data(list_data: Dictionary, game_name_confirmed: bool = f
 
 
 
+func level_data_get_title(level_data: Dictionary, level_name: String) -> String:
+	return level_data.get("state", {}).get("map", {}).get("metadata", {}).get("title", level_name)
+
+func level_data_set_title(level_data: Dictionary, title: String) -> void:
+	if not level_data.get("state", {}).get("map", {}):
+		push_error("Level data is empty or invalid")
+		return
+	if not level_data["state"]["map"].has("metadata"):
+		level_data["state"]["map"]["metadata"] = {}
+	level_data["state"]["map"]["metadata"]["title"] = title
+
+func ensure_level_data_title(level_data: Dictionary, level_name: String) -> void:
+	if not level_data_get_title(level_data, ""):
+		level_data_set_title(level_data, level_name)
+
+func ensure_level_has_name(level_data: Dictionary, fallback_name: String) -> void:
+	if level_data.get("name", ""):
+		return
+	if level_data_get_title(level_data, ""):
+		level_data["name"] = FilesManager.sanitize_level_filename(level_data_get_title(level_data, ""))
+	elif fallback_name:
+		level_data["name"] = FilesManager.sanitize_level_filename(fallback_name)
+	else:
+		level_data["name"] = Utility.random_animal()
+
+
 func clipboardify_level_data(level_data: Dictionary) -> String:
 	var stringified: = JSON.stringify(level_data, "", false)
 	var uncompressed_data: = stringified.to_utf8_buffer()
@@ -1972,6 +2037,9 @@ func declipboardify_level_data(clipboard_data: String) -> Dictionary:
 	var uncompressed_size: = clipboard_data.split(":", true, 1)[0]
 	if not uncompressed_size or not uncompressed_size.is_valid_int():
 		push_error("Invalid uncompressed size: %s" % uncompressed_size)
+	if int(uncompressed_size) > MAX_LEVEL_TEXT_SIZE * 1.5:
+		push_error("Level data is too big to paste from clipboard: %s" % uncompressed_size)
+		return {}
 	var compressed_data: = Marshalls.base64_to_raw(clipboard_data.split(":", true, 1)[1])
 	if not compressed_data:
 		push_error("Failed to un-base64-ify level data from clipboard")
@@ -1988,3 +2056,16 @@ func declipboardify_level_data(clipboard_data: String) -> Dictionary:
 		push_error("Parsed level data from clipboard is not a dictionary: %s" % parsed_data)
 		return {}
 	return parsed_data
+
+func load_level_from_clipboard_string(clipboard_data: String) -> bool:
+	if cur_scene != "Play" or queued_level_load:
+		return false
+	var parsed: = declipboardify_level_data(clipboard_data)
+	if not parsed:
+		GlobalToaster.show_toast_message("Unable to paste level")
+		return false
+	current_level_list = ""
+	ensure_level_has_name(parsed, "Pasted Level")
+	load_level_data(parsed)
+	loaded_level_is_saved = false
+	return true

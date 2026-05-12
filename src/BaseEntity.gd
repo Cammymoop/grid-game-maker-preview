@@ -407,8 +407,30 @@ func _reset_local_property(property_name: String) -> void:
 	removed_properties.erase(property_name)
 	refresh_cached_prop(property_name)
 
+func reset_all_local_properties() -> void:
+	for property_name in local_properties:
+		_reset_local_property(property_name)
+	for deleted_name in removed_properties:
+		_reset_local_property(deleted_name)
+	_local_prop_changed()
+
 func _local_prop_changed() -> void:
 	local_prop_changed.emit(self)
+
+func has_any_local_properties() -> bool:
+	return local_properties.size() > 0 or removed_properties.size() > 0
+
+func get_local_properties_dict() -> Dictionary:
+	return {
+		"local_set": local_properties.duplicate_deep(),
+		"local_removed": removed_properties.duplicate_deep(),
+	}
+
+func set_local_properties_dict(properties_dict: Dictionary) -> void:
+	local_properties.assign(properties_dict["local_set"].duplicate_deep())
+	removed_properties.assign(properties_dict["local_removed"].duplicate_deep())
+	update_cached_special_props()
+	_local_prop_changed()
 
 func get_intended_move(attempt_num: int = 0) -> int:
 	if not controller:

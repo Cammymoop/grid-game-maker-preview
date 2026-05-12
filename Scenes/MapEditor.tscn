@@ -6,6 +6,7 @@
 [ext_resource type="Script" uid="uid://038xoi2u4itl" path="res://src/EditorCam.gd" id="4"]
 [ext_resource type="Script" uid="uid://b7r4llrey36xo" path="res://src/TileEntityPreview.gd" id="5"]
 [ext_resource type="Texture2D" uid="uid://c7lnnrchiodgs" path="res://assets/img/square_shadow_2_clipped.png" id="5_eo7xe"]
+[ext_resource type="Texture2D" uid="uid://cv2dtf7gj1lyt" path="res://assets/img/button_icons/star.png" id="6_id73f"]
 [ext_resource type="Script" uid="uid://do6dnbr5vck5i" path="res://src/BatchOneShotEmitters.gd" id="7"]
 [ext_resource type="Texture2D" uid="uid://dxq70fd10q5pp" path="res://assets/img/particle_textures/soft_cloud.png" id="8"]
 
@@ -125,10 +126,11 @@ scale_curve = SubResource("19")
 color = Color(1, 1, 1, 0.65882355)
 color_ramp = SubResource("17")
 
-[node name="MapEditor" type="Node2D" unique_id=188513453]
+[node name="MapEditor" type="Node2D" unique_id=188513453 node_paths=PackedStringArray("cursor_star")]
 process_mode = 1
 z_index = 10
 script = ExtResource("1")
+cursor_star = NodePath("Cursor/Star")
 
 [node name="Cursor" type="Sprite2D" parent="." unique_id=1992386502]
 texture = ExtResource("2")
@@ -202,6 +204,10 @@ self_modulate = Color(1, 1, 1, 0.14117648)
 show_behind_parent = true
 position = Vector2(16, 16)
 texture = ExtResource("5_eo7xe")
+
+[node name="Star" type="Sprite2D" parent="Cursor" unique_id=1878490946]
+visible = false
+texture = ExtResource("6_id73f")
 
 [node name="EditorCam" type="Camera2D" parent="." unique_id=268862736]
 limit_smoothed = true
