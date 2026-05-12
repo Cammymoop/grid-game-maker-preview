@@ -168,6 +168,7 @@ func apply_edited_instance_property_update(for_property_name: String) -> void:
     if p_index == -1:
         # property was removed from the list entirely, reset the local prop if it was set
         editing_entity.reset_local_property(for_property_name)
+        entity_instance_props_edited.emit(editing_entity)
         return
 
     var info: Dictionary[String, Variant] = properties_info[p_index]

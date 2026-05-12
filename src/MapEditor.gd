@@ -86,6 +86,7 @@ func _ready() -> void:
 	
 	entity_instance_editor.closing.connect(entity_instance_editor_closed)
 	entity_instance_editor.entity_props_edited.connect(on_entity_props_edited)
+	entity_instance_editor.entity_local_props_reset.connect(on_entity_local_props_reset)
 	
 	GameManager.level_state_loaded.connect(on_level_state_loaded)
 
@@ -728,6 +729,10 @@ func entity_instance_editor_closed() -> void:
 
 func on_entity_props_edited(entity: BaseEntity) -> void:
 	_refresh_entity_is_edited(entity)
+	_refresh_edited_entity_indicators()
+
+func on_entity_local_props_reset(_entity: BaseEntity) -> void:
+	_refresh_edited_entity_indicators()
 
 func get_all_entities_at_tile_pos(tile_pos: Vector2i) -> Array:
 	return EntityManager.get_entities_at(tile_pos, null, [], true, true)

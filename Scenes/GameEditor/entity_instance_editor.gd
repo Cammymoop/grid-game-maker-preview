@@ -1,6 +1,7 @@
 extends Control
 
 signal entity_props_edited(entity: BaseEntity)
+signal entity_local_props_reset(entity: BaseEntity)
 signal closing()
 signal cancel_popups()
 
@@ -34,6 +35,8 @@ var edit_entity_pulse_period: float = 1.15
 var close_on_focus_lost: = true
 
 func _ready() -> void:
+    reset_local_props_button.pressed.connect(on_reset_local_props_button_pressed)
+
     property_edit_list.request_conditional_editor.connect(on_conditional_editor_requested)
     get_viewport().gui_focus_changed.connect(on_gui_focus_changed)
     if entity_active_toggle:
@@ -72,6 +75,7 @@ func on_reset_local_props_button_pressed() -> void:
         return
     edited_entity.reset_all_local_properties()
     property_edit_list.load_entity_instance_properties(edited_entity)
+    entity_local_props_reset.emit(edited_entity)
 
 func on_entity_instance_props_edited(entity: BaseEntity) -> void:
     entity_props_edited.emit(entity)
