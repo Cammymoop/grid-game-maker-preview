@@ -1801,6 +1801,69 @@ func web_export_level_json(level_name: String) -> void:
 	JavaScriptBridge.download_buffer(level_bytes, level_filename, "application/json")
 
 
+func start_import_levels() -> void:
+	if OS.has_feature("web"):
+		start_web_import_levels()
+	else:
+		var file_dialog: FileDialog = FileDialog.new()
+		file_dialog.title = "Import Level/Level List json (%s)" % [get_game_title()]
+		file_dialog.file_mode = FileDialog.FILE_MODE_OPEN_FILE
+		file_dialog.filters = ["*.json"]
+		file_dialog.access = FileDialog.ACCESS_FILESYSTEM
+		file_dialog.file_selected.connect(import_levels_local_picked)
+		file_dialog.close_requested.connect(file_dialog.queue_free)
+		file_dialog.canceled.connect(file_dialog.queue_free)
+		
+		file_dialog.current_dir = OS.get_system_dir(OS.SYSTEM_DIR_DESKTOP)
+		add_child(file_dialog)
+		file_dialog.popup_file_dialog()
+
+func import_levels_local_picked(file_path: String) -> void:
+	var json_string: = FileAccess.get_file_as_string(file_path)
+	var data: Variant = JSON.parse_string(json_string)
+	if not data or not typeof(data) == TYPE_DICTIONARY:
+		push_error("Failed to parse JSON from imported levels")
+		GlobalToaster.show_toast_message("Not valid levels")
+		return
+	import_some_json_data(data)
+
+
+func start_web_import_levels() -> void:
+	if not OS.has_feature("web") or not get_game_name():
+		return
+	file_access_web = FileAccessWeb.new()
+	file_access_web.loaded.connect(GameManager.got_web_import_levels)
+	file_access_web.open(".json")
+
+func got_web_import_levels(_file_name: String, _file_type: String, b64_data: String) -> void:
+	if file_access_web:
+		file_access_web.queue_free()
+		file_access_web = null
+	var json_text: = Marshalls.base64_to_utf8(b64_data)
+	var data: Variant = JSON.parse_string(json_text)
+	if not data or not typeof(data) == TYPE_DICTIONARY:
+		push_error("Failed to parse JSON from imported levels")
+		GlobalToaster.show_toast_message("Not valid levels")
+		return
+	import_some_json_data(data)
+
+
+func import_some_json_data(some_data: Dictionary) -> void:
+	if is_data_level_list(some_data):
+		import_level_list_data(some_data)
+		return
+	else:
+		var imported_as_name: = add_imported_level_data(some_data)
+		if not imported_as_name:
+			GlobalToaster.show_toast_message("Failed to import level :<")
+		else:
+			GlobalToaster.show_toast_message("Imported level %s" % [imported_as_name])
+
+func is_data_level_list(some_data: Dictionary) -> bool:
+	if some_data.has("list_name") and some_data.has("level_filenames"):
+		return true
+	return false
+
 func make_level_list_bundle_data(level_list_info: Dictionary) -> Dictionary:
 	if not level_list_info.get("name", ""):
 		push_error("Invalid level list info: %s" % level_list_info)
@@ -1924,8 +1987,8 @@ func import_level_list_data(list_data: Dictionary, game_name_confirmed: bool = f
 	if not game_name_confirmed and for_game_name != get_game_name():
 		var confirm_dialog: = ConfirmationDialog.new()
 		confirm_dialog.title = "Import Level List"
-		confirm_dialog.dialog_text = "This level list is for a game named '%s'. The current game is '%s'.\n" \
-									+ "Do you still want to import the levels?" % [for_game_name, get_game_name()]
+		confirm_dialog.dialog_text = ("This level list is for a game named '%s'. The current game is '%s'.\n" \
+									+ "Do you still want to import the levels?") % [for_game_name, get_game_name()]
 		
 		confirm_dialog.confirmed.connect(import_level_list_data.bind(list_data, true))
 		confirm_dialog.canceled.connect(confirm_dialog.queue_free)
@@ -2069,3 +2132,24 @@ func load_level_from_clipboard_string(clipboard_data: String) -> bool:
 	load_level_data(parsed)
 	loaded_level_is_saved = false
 	return true
+
+func add_imported_level_data(level_data: Dictionary) -> String:
+	var existing_lists: = get_list_of_level_lists()
+	if not "Imported Levels" in existing_lists:
+		add_level_list("Imported Levels")
+	
+	var existing_levels: = FilesManager.get_level_list(get_game_name())
+	var level_name: String = level_data.get("name", "")
+	var unique_level_name: = get_unique_import_level_name(existing_levels, level_name, level_data_get_title(level_data, ""))
+	if not unique_level_name:
+		push_error("Failed to find a unique name for the imported level")
+		return ""
+	
+	if not FilesManager.save_level_to_name(get_game_name(), level_data, unique_level_name):
+		push_error("Failed to save level %s" % [unique_level_name])
+		return ""
+	
+	add_level_to_level_list(unique_level_name, "Imported Levels")
+	save_current_game_definition()
+	
+	return unique_level_name

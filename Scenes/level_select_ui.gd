@@ -15,6 +15,7 @@ var rearrangable_level_list_scn: = preload("res://Scenes/rearrangable_list_item.
 @export var edit_lists_button_container: Control
 @export var add_new_list_button: Button
 @export var rearrange_lists_button: Button
+@export var import_levels_button: Button
 
 @export var level_list_settings: LevelListSettings
 
@@ -40,6 +41,7 @@ const CTX_MOVE_TO_BOTTOM = 6
 const CTX_REMOVE_LIST = 14
 
 func _ready() -> void:
+    import_levels_button.pressed.connect(on_import_levels_button_pressed)
     level_list_settings.request_close.connect(back_to_select_from_list_settings)
     
     add_new_list_button.pressed.connect(on_add_new_list_button_pressed)
@@ -291,3 +293,6 @@ func set_level_list_container_min_height() -> void:
         list_scroll_container.custom_minimum_size.y = max_height - other_height
     else:
         list_scroll_container.custom_minimum_size.y = list_height
+
+func on_import_levels_button_pressed() -> void:
+    GameManager.start_import_levels()

@@ -13,6 +13,7 @@
 [ext_resource type="Texture2D" uid="uid://c1h0arduxil1j" path="res://assets/img/button_icons/down_small.png" id="8_ekmnw"]
 [ext_resource type="Texture2D" uid="uid://csh27qa486e5f" path="res://assets/img/button_icons/is_current.png" id="10_6novh"]
 [ext_resource type="Texture2D" uid="uid://c0q4s8sa4ojhs" path="res://assets/img/button_icons/locked.png" id="11_gc3cy"]
+[ext_resource type="Texture2D" uid="uid://eqfb62b4t34o" path="res://assets/img/button_icons/play_small.png" id="14_ybcw1"]
 
 [sub_resource type="Theme" id="Theme_v4jex"]
 Button/font_sizes/font_size = 18
@@ -22,45 +23,55 @@ Button/styles/normal = ExtResource("3_bvcnr")
 Button/styles/pressed = ExtResource("4_6novh")
 Label/font_sizes/font_size = 18
 
-[node name="LevelItem" type="HBoxContainer" unique_id=1266912356 node_paths=PackedStringArray("title_label", "start_level_button", "edit_level_button", "move_up_down_buttons", "move_up_button", "move_down_button", "dot_icon", "check_icon", "locked_icon", "current_level_indicator", "current_level_icon")]
-offset_right = 294.0
+[node name="LevelItem" type="MarginContainer" unique_id=508503408 node_paths=PackedStringArray("title_label", "start_level_button", "edit_level_button", "move_up_down_buttons", "move_up_button", "move_down_button", "dot_icon", "check_icon", "locked_icon", "current_level_indicator", "current_level_icon", "highlight_rect")]
+offset_right = 290.0
 offset_bottom = 28.0
 theme = SubResource("Theme_v4jex")
 script = ExtResource("1_4meir")
-locked_color = Color(0.6789437, 0.6789437, 0.6789437, 1)
+locked_color = Color(0.42759606, 0.50056404, 0.56175846, 1)
 completed_color = Color(0.7486713, 1, 0.5791102, 1)
+current_level_font = ExtResource("6_bvcnr")
 completed_font = ExtResource("6_bvcnr")
-title_label = NodePath("Label")
-start_level_button = NodePath("PlayButton")
-edit_level_button = NodePath("EditButton")
-move_up_down_buttons = NodePath("MoveUpDownButtons")
-move_up_button = NodePath("MoveUpDownButtons/MoveUpButton")
-move_down_button = NodePath("MoveUpDownButtons/MoveDownButton")
-dot_icon = NodePath("DotIcon")
-check_icon = NodePath("CheckIcon")
-locked_icon = NodePath("LockedIcon")
-current_level_indicator = NodePath("CurrentLevelIndicator")
-current_level_icon = NodePath("CurrentLevelIndicator/CurrentLevelIcon")
+unplayed_color = Color(0.78039217, 0.69803923, 0.69803923, 1)
+title_label = NodePath("ItemContents/Label")
+start_level_button = NodePath("ItemContents/Play2Button")
+edit_level_button = NodePath("ItemContents/EditButton")
+move_up_down_buttons = NodePath("ItemContents/MoveUpDownButtons")
+move_up_button = NodePath("ItemContents/MoveUpDownButtons/MoveUpButton")
+move_down_button = NodePath("ItemContents/MoveUpDownButtons/MoveDownButton")
+dot_icon = NodePath("ItemContents/DotIcon")
+check_icon = NodePath("ItemContents/CheckIcon")
+locked_icon = NodePath("ItemContents/LockedIcon")
+current_level_indicator = NodePath("ItemContents/CurrentLevelIndicator")
+current_level_icon = NodePath("ItemContents/CurrentLevelIndicator/CurrentLevelIcon")
+highlight_rect = NodePath("HighlightRect")
 
-[node name="MoveUpDownButtons" type="HBoxContainer" parent="." unique_id=1106326614]
+[node name="HighlightRect" type="ColorRect" parent="." unique_id=1351419670]
+layout_mode = 2
+color = Color(0.81104237, 0.81104237, 0.81104237, 0.20784314)
+
+[node name="ItemContents" type="HBoxContainer" parent="." unique_id=1266912356]
 layout_mode = 2
 
-[node name="MoveUpButton" parent="MoveUpDownButtons" unique_id=451892711 instance=ExtResource("6_ybcw1")]
+[node name="MoveUpDownButtons" type="HBoxContainer" parent="ItemContents" unique_id=1106326614]
+layout_mode = 2
+
+[node name="MoveUpButton" parent="ItemContents/MoveUpDownButtons" unique_id=451892711 instance=ExtResource("6_ybcw1")]
 layout_mode = 2
 icon = ExtResource("7_oxl58")
 
-[node name="MoveDownButton" parent="MoveUpDownButtons" unique_id=1123825490 instance=ExtResource("6_ybcw1")]
+[node name="MoveDownButton" parent="ItemContents/MoveUpDownButtons" unique_id=1123825490 instance=ExtResource("6_ybcw1")]
 layout_mode = 2
 icon = ExtResource("8_ekmnw")
 
-[node name="CurrentLevelIndicator" type="Control" parent="." unique_id=545294022]
+[node name="CurrentLevelIndicator" type="Control" parent="ItemContents" unique_id=545294022]
 visible = false
 custom_minimum_size = Vector2(15, 23)
 layout_mode = 2
 size_flags_horizontal = 4
 size_flags_vertical = 4
 
-[node name="CurrentLevelIcon" type="TextureRect" parent="CurrentLevelIndicator" unique_id=1378962608]
+[node name="CurrentLevelIcon" type="TextureRect" parent="ItemContents/CurrentLevelIndicator" unique_id=1378962608]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -70,20 +81,20 @@ grow_vertical = 2
 texture = ExtResource("10_6novh")
 stretch_mode = 2
 
-[node name="Label" type="Label" parent="." unique_id=856735861]
+[node name="Label" type="Label" parent="ItemContents" unique_id=856735861]
 layout_mode = 2
 size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.7821496, 0.6980694, 0.6961202, 1)
 text = "-- Level Title --"
 
-[node name="DotIcon" type="TextureRect" parent="." unique_id=395379952]
-self_modulate = Color(0.8821792, 0.71398956, 0.9663511, 1)
+[node name="DotIcon" type="TextureRect" parent="ItemContents" unique_id=395379952]
 layout_mode = 2
 size_flags_horizontal = 4
 size_flags_vertical = 4
 tooltip_text = "played"
 texture = ExtResource("2_pi131")
 
-[node name="CheckIcon" type="TextureRect" parent="." unique_id=92029116]
+[node name="CheckIcon" type="TextureRect" parent="ItemContents" unique_id=92029116]
 self_modulate = Color(0.4057349, 0.80183524, 0.31315115, 1)
 layout_mode = 2
 size_flags_horizontal = 4
@@ -91,7 +102,7 @@ size_flags_vertical = 4
 tooltip_text = "cleared"
 texture = ExtResource("3_35jtt")
 
-[node name="LockedIcon" type="TextureRect" parent="." unique_id=1817502997]
+[node name="LockedIcon" type="TextureRect" parent="ItemContents" unique_id=1817502997]
 self_modulate = Color(0.3515629, 0.3515629, 0.35156286, 1)
 layout_mode = 2
 size_flags_horizontal = 4
@@ -99,11 +110,14 @@ size_flags_vertical = 4
 tooltip_text = "locked"
 texture = ExtResource("11_gc3cy")
 
-[node name="PlayButton" type="Button" parent="." unique_id=356515220]
+[node name="Play2Button" parent="ItemContents" unique_id=459620624 instance=ExtResource("6_ybcw1")]
+custom_minimum_size = Vector2(23, 23)
 layout_mode = 2
-text = "Play"
+tooltip_text = "Play"
+mouse_default_cursor_shape = 2
+icon = ExtResource("14_ybcw1")
 
-[node name="EditButton" type="Button" parent="." unique_id=1105101336]
+[node name="EditButton" type="Button" parent="ItemContents" unique_id=1105101336]
 visible = false
 layout_mode = 2
 text = "Edit"

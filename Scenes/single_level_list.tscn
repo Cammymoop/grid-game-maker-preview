@@ -1,8 +1,10 @@
 [gd_scene format=3 uid="uid://c00jkbf64u78u"]
 
 [ext_resource type="Script" uid="uid://waclbk3mcfsb" path="res://Scenes/single_level_list.gd" id="1_kb61r"]
+[ext_resource type="PackedScene" uid="uid://cemds60k8ytal" path="res://Scenes/UI/icon_button.tscn" id="2_0k5vv"]
+[ext_resource type="Texture2D" uid="uid://b4q7u3xbkyj45" path="res://assets/img/button_icons/gear_small.png" id="3_8vw25"]
 
-[node name="LevelList" type="VBoxContainer" unique_id=407189420 node_paths=PackedStringArray("list_name_label", "level_item_container", "edit_list_settings_button")]
+[node name="LevelList" type="VBoxContainer" unique_id=407189420 node_paths=PackedStringArray("list_name_label", "level_item_container", "edit_list_settings_button", "edit_settings_icon_button", "export_list_button")]
 offset_right = 193.0
 offset_bottom = 51.0
 theme_override_constants/separation = 10
@@ -10,6 +12,8 @@ script = ExtResource("1_kb61r")
 list_name_label = NodePath("HBoxContainer/Label")
 level_item_container = NodePath("MarginContainer/LevelItems")
 edit_list_settings_button = NodePath("HBoxContainer/ListOptionsButton")
+edit_settings_icon_button = NodePath("HBoxContainer/SettingsIconButton")
+export_list_button = NodePath("HBoxContainer/ExportListButton")
 
 [node name="HBoxContainer" type="HBoxContainer" parent="." unique_id=240377601]
 layout_mode = 2
@@ -20,9 +24,20 @@ size_flags_horizontal = 3
 theme_override_font_sizes/font_size = 14
 text = "Level List A:"
 
+[node name="SettingsIconButton" parent="HBoxContainer" unique_id=451892711 instance=ExtResource("2_0k5vv")]
+layout_mode = 2
+icon = ExtResource("3_8vw25")
+
 [node name="ListOptionsButton" type="Button" parent="HBoxContainer" unique_id=637013142]
+visible = false
 layout_mode = 2
 text = "List Settings"
+
+[node name="ExportListButton" type="Button" parent="HBoxContainer" unique_id=510631481]
+layout_mode = 2
+size_flags_vertical = 4
+theme_override_font_sizes/font_size = 14
+text = "export list"
 
 [node name="MarginContainer" type="MarginContainer" parent="." unique_id=1210683614]
 layout_mode = 2

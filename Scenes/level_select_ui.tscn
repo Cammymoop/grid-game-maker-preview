@@ -4,16 +4,17 @@
 [ext_resource type="Script" uid="uid://cfrnaqldrr8lr" path="res://Scenes/level_list_settings.gd" id="2_gs7i2"]
 [ext_resource type="PackedScene" uid="uid://bleyoj5f36kfy" path="res://Scenes/GameEditor/ConditionalEditor/scalar_value_input.tscn" id="3_wwtce"]
 
-[node name="LevelSelectUI" type="VBoxContainer" unique_id=1015399753 node_paths=PackedStringArray("level_list_container", "edit_lists_button_container", "add_new_list_button", "rearrange_lists_button", "level_list_settings", "rearrange_lists_back_container", "rearrange_lists_back_button", "list_scroll_container")]
+[node name="LevelSelectUI" type="VBoxContainer" unique_id=1015399753 node_paths=PackedStringArray("level_list_container", "edit_lists_button_container", "add_new_list_button", "rearrange_lists_button", "import_levels_button", "level_list_settings", "rearrange_lists_back_container", "rearrange_lists_back_button", "list_scroll_container")]
 custom_minimum_size = Vector2(200, 0)
 offset_right = 327.0
 offset_bottom = 163.0
 theme_override_constants/separation = 12
 script = ExtResource("1_o0n7n")
-level_list_container = NodePath("Lists/ScrollContainer/ListOfListsOfLevels")
-edit_lists_button_container = NodePath("Lists/HBoxContainer")
-add_new_list_button = NodePath("Lists/HBoxContainer/AddListButton")
-rearrange_lists_button = NodePath("Lists/HBoxContainer/RearrangeListsButton")
+level_list_container = NodePath("Lists/ScrollContainer/MarginContainer/ListOfListsOfLevels")
+edit_lists_button_container = NodePath("Lists/VBoxContainer")
+add_new_list_button = NodePath("Lists/VBoxContainer/HBoxContainer/AddListButton")
+rearrange_lists_button = NodePath("Lists/VBoxContainer/HBoxContainer/RearrangeListsButton")
+import_levels_button = NodePath("Lists/VBoxContainer/HBoxContainer2/ImportLevelsButton")
 level_list_settings = NodePath("LevelListSettings")
 rearrange_lists_back_container = NodePath("Lists/RerrangeBackContainer")
 rearrange_lists_back_button = NodePath("Lists/RerrangeBackContainer/RearrangeBackButton")
@@ -37,23 +38,41 @@ layout_mode = 2
 horizontal_scroll_mode = 0
 vertical_scroll_mode = 4
 
-[node name="ListOfListsOfLevels" type="VBoxContainer" parent="Lists/ScrollContainer" unique_id=1969060177]
+[node name="MarginContainer" type="MarginContainer" parent="Lists/ScrollContainer" unique_id=179063278]
+layout_mode = 2
+theme_override_constants/margin_left = 4
+theme_override_constants/margin_right = 4
+theme_override_constants/margin_bottom = 4
+
+[node name="ListOfListsOfLevels" type="VBoxContainer" parent="Lists/ScrollContainer/MarginContainer" unique_id=1969060177]
 layout_mode = 2
 theme_override_constants/separation = 16
 
-[node name="HBoxContainer" type="HBoxContainer" parent="Lists" unique_id=1069650957]
+[node name="VBoxContainer" type="VBoxContainer" parent="Lists" unique_id=1884090066]
+layout_mode = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="Lists/VBoxContainer" unique_id=1069650957]
 layout_mode = 2
 alignment = 1
 
-[node name="RearrangeListsButton" type="Button" parent="Lists/HBoxContainer" unique_id=1062710444]
+[node name="RearrangeListsButton" type="Button" parent="Lists/VBoxContainer/HBoxContainer" unique_id=1062710444]
 layout_mode = 2
 size_flags_horizontal = 4
 text = "Rearrange Lists"
 
-[node name="AddListButton" type="Button" parent="Lists/HBoxContainer" unique_id=1412812352]
+[node name="AddListButton" type="Button" parent="Lists/VBoxContainer/HBoxContainer" unique_id=1412812352]
 layout_mode = 2
 size_flags_horizontal = 4
 text = "Add Another List"
+
+[node name="HBoxContainer2" type="HBoxContainer" parent="Lists/VBoxContainer" unique_id=1772683526]
+layout_mode = 2
+alignment = 1
+
+[node name="ImportLevelsButton" type="Button" parent="Lists/VBoxContainer/HBoxContainer2" unique_id=1065626505]
+layout_mode = 2
+size_flags_horizontal = 4
+text = "Import Levels"
 
 [node name="LevelListSettings" type="VBoxContainer" parent="." unique_id=1214736889 node_paths=PackedStringArray("back_button", "name_input", "do_progressive_unlock_toggle", "progressive_unlock_num_container", "progressive_unlock_num_input", "show_locked_levels_toggle")]
 visible = false

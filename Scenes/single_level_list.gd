@@ -12,6 +12,8 @@ var level_item_scene: = preload("res://Scenes/level_list_item.tscn")
 @export var list_name_label: Label
 @export var level_item_container: Container
 @export var edit_list_settings_button: Button
+@export var edit_settings_icon_button: ButtonContainer
+@export var export_list_button: Button
 
 @export var is_list_of_unlisted_levels: bool = false
 
@@ -28,10 +30,17 @@ const CTX_REMOVE_FROM_LIST = 14
 
 
 func _ready() -> void:
+    export_list_button.pressed.connect(on_export_list_button_pressed)
+
     edit_list_settings_button.pressed.connect(on_edit_list_settings_button_pressed)
-    edit_list_settings_button.visible = _is_in_edit_mode()
+    edit_settings_icon_button.pressed.connect(on_edit_list_settings_button_pressed)
+    #edit_list_settings_button.visible = _is_in_edit_mode()
+    edit_settings_icon_button.visible = _is_in_edit_mode()
+    export_list_button.visible = _is_in_edit_mode()
     if is_list_of_unlisted_levels:
-        edit_list_settings_button.visible = false
+        #edit_list_settings_button.visible = false
+        edit_settings_icon_button.visible = false
+        export_list_button.visible = false
 
 func on_edit_list_settings_button_pressed() -> void:
     request_edit_list_settings.emit(level_list_name)
@@ -51,10 +60,12 @@ func reload_list_info() -> void:
         load_level_list_info(level_list_info)
 
 func load_level_list_info(level_list_info: Dictionary) -> void:
+    export_list_button.visible = _is_in_edit_mode()
     set_level_list_name(level_list_info.get("name", ""))
     setup_levels(level_list_info)
 
 func load_unlisted_levels() -> void:
+    export_list_button.visible = false
     level_list_name = "NONE"
     is_list_of_unlisted_levels = true
     list_name_label.text = "NO LIST"
@@ -225,3 +236,8 @@ func get_first_focusable_control() -> Control:
         elif list_item.edit_level_button.visible and not list_item.edit_level_button.disabled:
             return list_item.edit_level_button
     return null
+
+func on_export_list_button_pressed() -> void:
+    if not level_list_name:
+        return
+    GameManager.export_level_list(level_list_name)

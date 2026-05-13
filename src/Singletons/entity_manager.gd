@@ -1290,7 +1290,8 @@ func get_all_entities_depending_on(entity: BaseEntity, include_self: bool = true
         collected_instances.append(entity.instance_id)
     var entities: Array[BaseEntity] = []
     for instance_id in collected_instances:
-        entities.append(entity_instance_map[instance_id])
+        if instance_id in entity_instance_map:
+            entities.append(entity_instance_map[instance_id])
     return entities
 
 func _collect_entity_subordinates(of_instance_id: int, collected: Array[int]) -> void:

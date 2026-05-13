@@ -38,3 +38,7 @@ func _on_import_new_game_button_pressed() -> void:
 		file_dialog.canceled.connect(file_dialog.queue_free)
 		add_child(file_dialog)
 		file_dialog.popup_file_dialog()
+
+
+func _on_import_levels_button_pressed() -> void:
+	GameManager.start_import_levels()

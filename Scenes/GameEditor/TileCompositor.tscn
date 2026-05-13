@@ -94,7 +94,7 @@ default_font = ExtResource("19")
 
 [sub_resource type="ButtonGroup" id="ButtonGroup_63ggb"]
 
-[node name="TileCompositor" type="Window" unique_id=1495846052 node_paths=PackedStringArray("local_toaster")]
+[node name="TileCompositor" type="Window" unique_id=1495846052 node_paths=PackedStringArray("title_label", "local_toaster")]
 oversampling_override = 1.0
 title = "Tile Compositor"
 position = Vector2i(2, 26)
@@ -103,6 +103,7 @@ wrap_controls = true
 script = ExtResource("1")
 loaded_texture = ExtResource("2")
 make_tex_with_size = Vector2(16, 16)
+title_label = NodePath("PanelContainer/MarginContainer/VBoxContainer/TitleLabel")
 local_toaster = NodePath("PanelContainer/LocalToaster")
 picked_brush_tex = SubResource("3")
 

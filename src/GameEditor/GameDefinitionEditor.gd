@@ -313,3 +313,6 @@ func _export_destination_picked(path: String, file_dialog: FileDialog) -> void:
 
 func on_default_move_speed_changed(value: float) -> void:
 	GameManager.set_game_setting("entity_move_speed", value)
+
+func _on_import_levels_btn_pressed() -> void:
+	GameManager.start_import_levels()

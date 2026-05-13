@@ -208,7 +208,7 @@ func level_was_saved(level_name: String, old_level_name: String) -> void:
 	GlobalToaster.show_toast_message("Saved")
 	# in case it was a new level or it was saved as a new name, set it up to be in the selected list
 	if not old_level_name or old_level_name != level_name:
-		var current_selected_list: String = Utility.opbtn_selected_text(level_list_picker)
+		var current_selected_list: String = Utility.opbtn_get_selected_text(level_list_picker)
 		if current_selected_list == "[No List]":
 			current_selected_list = ""
 		set_current_level_list_to(current_selected_list)

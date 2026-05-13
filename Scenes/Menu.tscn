@@ -163,8 +163,9 @@ layout_mode = 2
 theme_type_variation = &"BigTextButton"
 text = "Edit Game"
 
-[node name="HBoxContainer2" type="HBoxContainer" parent="MarginContainer/MainMenu/MarginContainer/VBoxContainer" unique_id=1806049705]
+[node name="HBoxContainer2" type="VBoxContainer" parent="MarginContainer/MainMenu/MarginContainer/VBoxContainer" unique_id=1795824773]
 layout_mode = 2
+size_flags_horizontal = 4
 size_flags_vertical = 4
 theme_override_constants/separation = 12
 alignment = 1
@@ -172,6 +173,10 @@ alignment = 1
 [node name="ImportNewGameButton" type="Button" parent="MarginContainer/MainMenu/MarginContainer/VBoxContainer/HBoxContainer2" unique_id=1756290664]
 layout_mode = 2
 text = "Import Game .zip"
+
+[node name="ImportLevelsButton" type="Button" parent="MarginContainer/MainMenu/MarginContainer/VBoxContainer/HBoxContainer2" unique_id=1753228737]
+layout_mode = 2
+text = "Import Levels"
 
 [node name="QuitButton" type="Button" parent="MarginContainer/MainMenu/MarginContainer/VBoxContainer" unique_id=1411082331]
 layout_mode = 2
@@ -184,3 +189,4 @@ text = "Quit"
 [connection signal="pressed" from="MarginContainer/MainMenu/MarginContainer/VBoxContainer/HBoxContainer/PlayButton" to="MarginContainer/MainMenu" method="_on_PlayButton_pressed"]
 [connection signal="pressed" from="MarginContainer/MainMenu/MarginContainer/VBoxContainer/HBoxContainer/EditButton" to="MarginContainer/MainMenu" method="_on_EditButton_pressed"]
 [connection signal="pressed" from="MarginContainer/MainMenu/MarginContainer/VBoxContainer/HBoxContainer2/ImportNewGameButton" to="MarginContainer/MainMenu" method="_on_import_new_game_button_pressed"]
+[connection signal="pressed" from="MarginContainer/MainMenu/MarginContainer/VBoxContainer/HBoxContainer2/ImportLevelsButton" to="MarginContainer/MainMenu" method="_on_import_levels_button_pressed"]

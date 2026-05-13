@@ -1,4 +1,4 @@
-extends HBoxContainer
+extends Control
 
 const LevelListItem = preload("res://Scenes/level_list_item.gd")
 
@@ -9,10 +9,13 @@ signal request_edit_level(level_name: String)
 
 @export var locked_color: Color
 @export var completed_color: Color
+@export var current_level_font: Font
+@export var current_level_font_size: int = 22
 @export var completed_font: Font
+@export var unplayed_color: Color
 
 @export var title_label: Label
-@export var start_level_button: Button
+@export var start_level_button: ButtonContainer
 @export var edit_level_button: Button
 
 @export var move_up_down_buttons: Control
@@ -26,6 +29,8 @@ signal request_edit_level(level_name: String)
 @export var current_level_indicator: Control
 @export var current_level_icon: TextureRect
 
+@export var highlight_rect: ColorRect
+
 var level_name: String = ""
 
 var _not_in_a_list: bool = false
@@ -34,7 +39,10 @@ var is_unlocked: bool = true
 var is_completed: bool = false
 var is_played: bool = false
 
+var _is_current_level: bool = false
+
 func _ready() -> void:
+    highlight_rect.hide()
     current_level_icon.hide()
     current_level_indicator.visible = true
     update_current_level_indicator()
@@ -74,10 +82,14 @@ func set_level_name_and_title(new_name: String, new_title: String) -> void:
 
 func update_current_level_indicator() -> void:
     if not current_level_indicator.visible:
+        highlight_rect.hide()
         return
     if GameManager.cur_scene == "Play" and GameManager.loaded_level_name:
         if GameManager.loaded_level_name == level_name:
+            _is_current_level = true
             current_level_icon.show()
+            highlight_rect.show()
+            refresh_icons_and_text()
 
 func set_is_completed_is_played(new_is_completed: bool, new_is_played: bool) -> void:
     is_completed = new_is_completed
@@ -87,6 +99,7 @@ func set_is_completed_is_played(new_is_completed: bool, new_is_played: bool) -> 
 func refresh_icons_and_text() -> void:
     title_label.remove_theme_color_override("font_color")
     title_label.remove_theme_font_override("font")
+    title_label.remove_theme_font_size_override("font_size")
     dot_icon.visible = is_unlocked and is_played and not is_completed
     check_icon.visible = is_unlocked and is_completed
     locked_icon.visible = not is_unlocked
@@ -96,6 +109,14 @@ func refresh_icons_and_text() -> void:
         title_label.add_theme_font_override("font", completed_font)
     elif not is_unlocked:
         title_label.add_theme_color_override("font_color", locked_color)
+    elif is_played:
+        title_label.add_theme_color_override("font_color", dot_icon.self_modulate)
+    elif start_level_button.visible:
+        title_label.add_theme_color_override("font_color", unplayed_color)
+
+    if _is_current_level:
+        title_label.add_theme_font_override("font", current_level_font)
+        title_label.add_theme_font_size_override("font_size", current_level_font_size)
 
 func set_is_unlocked(new_is_unlocked: bool) -> void:
     is_unlocked = new_is_unlocked
