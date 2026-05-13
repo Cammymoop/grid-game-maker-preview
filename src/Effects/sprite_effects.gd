@@ -39,7 +39,6 @@ const AnimatedEffects: Array[String] = [
     
     "Dissolve In",
     "Dissolve Out",
-    
 
     "Pixel Explode",
     "Shatter Explode",
