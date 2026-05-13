@@ -43,6 +43,7 @@ const AnimatedEffects: Array[String] = [
     "Pixel Explode",
     "Shatter Explode",
     
+
     "Spinning",
     "Shaking",
     
