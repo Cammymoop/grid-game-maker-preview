@@ -28,7 +28,7 @@ corner_radius_bottom_right = 3
 corner_radius_bottom_left = 3
 corner_detail = 5
 
-[node name="PauseMenu" type="Control" unique_id=1906408289 node_paths=PackedStringArray("next_level_list", "level_title_edit", "non_editor_stuff", "editor_stuff", "level_select_button", "play_mode_button", "level_edit_mode_button", "web_export_level_button", "background_editor_container", "background_editor", "darkener", "level_size_label", "level_list_picker", "copy_to_clipboard_button", "paste_from_clipboard_button", "save_as_button") groups=["PauseMenu"]]
+[node name="PauseMenu" type="Control" unique_id=1906408289 node_paths=PackedStringArray("next_level_list", "level_title_edit", "non_editor_stuff", "editor_stuff", "level_select_button", "level_editor_controls_help_toggle", "play_mode_button", "level_edit_mode_button", "web_export_level_button", "background_editor_container", "background_editor", "darkener", "level_size_label", "level_list_picker", "copy_to_clipboard_button", "paste_from_clipboard_button", "save_as_button") groups=["PauseMenu"]]
 process_mode = 3
 layout_mode = 3
 anchors_preset = 15
@@ -43,6 +43,7 @@ level_title_edit = NodePath("HBoxContainer/CenterContainer/LevelSettingsPausePan
 non_editor_stuff = NodePath("HBoxContainer/CenterContainer/MainPausePanel/MarginContainer/VBoxContainer/NonEditorStuff")
 editor_stuff = NodePath("HBoxContainer/CenterContainer/MainPausePanel/MarginContainer/VBoxContainer/EditorStuff")
 level_select_button = NodePath("HBoxContainer/CenterContainer/MainPausePanel/MarginContainer/VBoxContainer/HBoxContainer6/LvlSelect")
+level_editor_controls_help_toggle = NodePath("HBoxContainer/CenterContainer/MainPausePanel/MarginContainer/VBoxContainer/EditorStuff/HBoxContainer6/VBoxContainer2/HBoxContainer3/EditorControlsTextToggle")
 play_mode_button = NodePath("HBoxContainer/CenterContainer/MainPausePanel/MarginContainer/VBoxContainer/EditorStuff/PlayModeButton")
 level_edit_mode_button = NodePath("HBoxContainer/CenterContainer/MainPausePanel/MarginContainer/VBoxContainer/NonEditorStuff/EditModeButton")
 web_export_level_button = NodePath("HBoxContainer/CenterContainer/MainPausePanel/MarginContainer/VBoxContainer/EditorStuff/HBoxContainer6/VBoxContainer2/WebExportLevel/WebExportLevel")
@@ -257,8 +258,19 @@ layout_mode = 2
 
 [node name="VBoxContainer2" type="VBoxContainer" parent="HBoxContainer/CenterContainer/MainPausePanel/MarginContainer/VBoxContainer/EditorStuff/HBoxContainer6" unique_id=769558386]
 layout_mode = 2
-theme_override_constants/separation = 12
+theme_override_constants/separation = 10
 alignment = 1
+
+[node name="HBoxContainer3" type="HBoxContainer" parent="HBoxContainer/CenterContainer/MainPausePanel/MarginContainer/VBoxContainer/EditorStuff/HBoxContainer6/VBoxContainer2" unique_id=579309894]
+layout_mode = 2
+size_flags_horizontal = 4
+
+[node name="EditorControlsTextToggle" type="CheckButton" parent="HBoxContainer/CenterContainer/MainPausePanel/MarginContainer/VBoxContainer/EditorStuff/HBoxContainer6/VBoxContainer2/HBoxContainer3" unique_id=1478715001]
+layout_mode = 2
+tooltip_text = "Edit the current state of the level instead of the starting state."
+mouse_default_cursor_shape = 2
+theme_override_font_sizes/font_size = 12
+text = "Show Editor Controls"
 
 [node name="HBoxContainer2" type="HBoxContainer" parent="HBoxContainer/CenterContainer/MainPausePanel/MarginContainer/VBoxContainer/EditorStuff/HBoxContainer6/VBoxContainer2" unique_id=318746137]
 layout_mode = 2
@@ -268,6 +280,7 @@ size_flags_horizontal = 4
 layout_mode = 2
 tooltip_text = "Edit the current state of the level instead of the starting state."
 mouse_default_cursor_shape = 2
+theme_override_font_sizes/font_size = 14
 text = "Live Edit Mode"
 
 [node name="HBoxContainer4" type="HBoxContainer" parent="HBoxContainer/CenterContainer/MainPausePanel/MarginContainer/VBoxContainer/EditorStuff/HBoxContainer6/VBoxContainer2" unique_id=25173669]

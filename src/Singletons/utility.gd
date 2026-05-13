@@ -285,6 +285,13 @@ func get_map_editor() -> Node:
 	else:
 		return null
 
+func get_map_editor_overlay() -> Node:
+	var f = get_tree().get_nodes_in_group("MapEditorOverlay")
+	if f:
+		return f[0]
+	print_debug("Error could not find map editor overlay")
+	return null
+
 func get_pause_menu() -> Node:
 	var f = get_tree().get_nodes_in_group("PauseMenu")
 	if f:

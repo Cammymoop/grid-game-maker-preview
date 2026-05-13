@@ -17,6 +17,8 @@ var active = false
 @export var editor_stuff: Control
 @export var level_select_button: Button
 
+@export var level_editor_controls_help_toggle: CheckButton
+
 @export var play_mode_button: Button
 @export var level_edit_mode_button: Button
 
@@ -39,6 +41,8 @@ var active = false
 @export var save_as_button: Button
 
 func _ready():
+	level_editor_controls_help_toggle.toggled.connect(on_level_editor_controls_help_toggle_pressed)
+
 	copy_to_clipboard_button.pressed.connect(on_copy_to_clipboard_button_pressed)
 	paste_from_clipboard_button.pressed.connect(on_paste_from_clipboard_button_pressed)
 
@@ -170,6 +174,10 @@ func on_show() -> void:
 			prints("clipboard might be a level: %s..." % DisplayServer.clipboard_get().substr(0, 20))
 			has_clipboard_level = true
 		paste_from_clipboard_button.disabled = not has_clipboard_level
+		
+		var map_editor_overlay: Node = Utility.get_map_editor_overlay()
+		if map_editor_overlay:
+			level_editor_controls_help_toggle.set_pressed_no_signal(map_editor_overlay.is_showing_controls_help())
 	
 	refresh_level_settings()
 
@@ -385,3 +393,8 @@ func on_paste_from_clipboard_button_pressed() -> void:
 		return
 	if not GameManager.load_level_from_clipboard_string(clipboard_data):
 		GlobalToaster.show_toast_message("Failed to load level from clipboard text")
+
+func on_level_editor_controls_help_toggle_pressed(toggled_on: bool) -> void:
+	var map_editor_overlay: = Utility.get_map_editor_overlay()
+	if map_editor_overlay:
+		map_editor_overlay.set_show_controls_help(toggled_on)

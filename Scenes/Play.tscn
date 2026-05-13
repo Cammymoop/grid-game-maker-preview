@@ -14,6 +14,8 @@
 [ext_resource type="PackedScene" uid="uid://c08hfkcpibqpg" path="res://Scenes/GameEditor/new_list_panel.tscn" id="10_ui3gn"]
 [ext_resource type="PackedScene" uid="uid://b1a6s2o32t35i" path="res://Scenes/GameEditor/bg_style_editor.tscn" id="11_ui3gn"]
 [ext_resource type="PackedScene" uid="uid://b4fp8ldktkvcd" path="res://Scenes/bg_effect_6.tscn" id="12_hagi3"]
+[ext_resource type="Script" uid="uid://b4kmfrl8rik3w" path="res://Scenes/map_editor_overlay.gd" id="12_n87tl"]
+[ext_resource type="FontFile" uid="uid://ctnllh13x3iqi" path="res://assets/font/NotoSans-Bold.ttf" id="14_n5m2s"]
 
 [sub_resource type="Animation" id="Animation_nsvgp"]
 length = 0.001
@@ -142,6 +144,21 @@ corner_radius_top_right = 3
 corner_radius_bottom_right = 3
 corner_radius_bottom_left = 3
 corner_detail = 5
+
+[sub_resource type="Theme" id="Theme_vpmux"]
+Label/colors/font_color = Color(0, 0, 0, 1)
+Label/font_sizes/font_size = 12
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_n5m2s"]
+content_margin_left = 2.0
+content_margin_top = 2.0
+content_margin_right = 2.0
+content_margin_bottom = 2.0
+bg_color = Color(0.9325083, 0.9325084, 0.93250835, 0.5254902)
+corner_radius_top_left = 2
+corner_radius_top_right = 2
+corner_radius_bottom_right = 2
+corner_radius_bottom_left = 2
 
 [node name="Play" type="Control" unique_id=357405740 node_paths=PackedStringArray("background_scene")]
 layout_mode = 3
@@ -289,6 +306,7 @@ visible = false
 
 [node name="LevelSelectRoot" type="Control" parent="OverlayLayer" unique_id=718450970 node_paths=PackedStringArray("level_select_ui", "darkener", "background_editor_container", "bg_style_editor", "add_new_list_panel", "no_web_container", "open_levels_folder_button") groups=["LevelSelectRoot"]]
 process_mode = 3
+visible = false
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -394,7 +412,7 @@ layout_mode = 2
 [node name="MapEditorUILayer" type="CanvasLayer" parent="." unique_id=1275328928]
 layer = 10
 
-[node name="MapEditorRootControl" type="Control" parent="MapEditorUILayer" unique_id=1493144217]
+[node name="MapEditorRootControl" type="Control" parent="MapEditorUILayer" unique_id=1493144217 node_paths=PackedStringArray("controls_help") groups=["MapEditorOverlay"]]
 process_mode = 3
 layout_mode = 3
 anchors_preset = 15
@@ -404,6 +422,8 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 mouse_behavior_recursive = 1
+script = ExtResource("12_n87tl")
+controls_help = NodePath("MarginContainer/EditorControlsHelp")
 
 [node name="HBoxContainer" type="HBoxContainer" parent="MapEditorUILayer/MapEditorRootControl" unique_id=827881825]
 layout_mode = 1
@@ -434,6 +454,200 @@ visible = false
 layout_mode = 2
 mouse_behavior_recursive = 2
 
+[node name="MarginContainer" type="MarginContainer" parent="MapEditorUILayer/MapEditorRootControl" unique_id=1119073896]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 6
+theme_override_constants/margin_top = 6
+theme_override_constants/margin_right = 6
+theme_override_constants/margin_bottom = 6
+
+[node name="EditorControlsHelp" type="PanelContainer" parent="MapEditorUILayer/MapEditorRootControl/MarginContainer" unique_id=864744568]
+layout_mode = 2
+size_flags_horizontal = 0
+size_flags_vertical = 0
+theme = SubResource("Theme_vpmux")
+theme_override_styles/panel = SubResource("StyleBoxFlat_n5m2s")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MapEditorUILayer/MapEditorRootControl/MarginContainer/EditorControlsHelp" unique_id=725377958]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="MapEditorUILayer/MapEditorRootControl/MarginContainer/EditorControlsHelp/VBoxContainer" unique_id=1242220843]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("14_n5m2s")
+theme_override_font_sizes/font_size = 14
+text = "Editor Controls:"
+horizontal_alignment = 1
+
+[node name="Control" type="Control" parent="MapEditorUILayer/MapEditorRootControl/MarginContainer/EditorControlsHelp/VBoxContainer" unique_id=1075049214]
+layout_mode = 2
+
+[node name="KeyboardControls" type="GridContainer" parent="MapEditorUILayer/MapEditorRootControl/MarginContainer/EditorControlsHelp/VBoxContainer" unique_id=522070559]
+layout_mode = 2
+columns = 2
+
+[node name="Label6" type="Label" parent="MapEditorUILayer/MapEditorRootControl/MarginContainer/EditorControlsHelp/VBoxContainer/KeyboardControls" unique_id=118938883]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("14_n5m2s")
+text = "Edit/Test"
+horizontal_alignment = 2
+
+[node name="Label7" type="Label" parent="MapEditorUILayer/MapEditorRootControl/MarginContainer/EditorControlsHelp/VBoxContainer/KeyboardControls" unique_id=2019378220]
+layout_mode = 2
+text = "E"
+
+[node name="Label2" type="Label" parent="MapEditorUILayer/MapEditorRootControl/MarginContainer/EditorControlsHelp/VBoxContainer/KeyboardControls" unique_id=263829075]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("14_n5m2s")
+text = "Place"
+horizontal_alignment = 2
+
+[node name="Label3" type="Label" parent="MapEditorUILayer/MapEditorRootControl/MarginContainer/EditorControlsHelp/VBoxContainer/KeyboardControls" unique_id=431281195]
+layout_mode = 2
+text = "Left Click / Space"
+
+[node name="Label4" type="Label" parent="MapEditorUILayer/MapEditorRootControl/MarginContainer/EditorControlsHelp/VBoxContainer/KeyboardControls" unique_id=1107533201]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("14_n5m2s")
+text = "Pick/Copy"
+horizontal_alignment = 2
+
+[node name="Label5" type="Label" parent="MapEditorUILayer/MapEditorRootControl/MarginContainer/EditorControlsHelp/VBoxContainer/KeyboardControls" unique_id=1088007844]
+layout_mode = 2
+text = "Right Click / Tab"
+
+[node name="Label14" type="Label" parent="MapEditorUILayer/MapEditorRootControl/MarginContainer/EditorControlsHelp/VBoxContainer/KeyboardControls" unique_id=2025665644]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("14_n5m2s")
+text = "Move Cursor"
+horizontal_alignment = 2
+
+[node name="Label15" type="Label" parent="MapEditorUILayer/MapEditorRootControl/MarginContainer/EditorControlsHelp/VBoxContainer/KeyboardControls" unique_id=1672321192]
+layout_mode = 2
+text = "Mouse / Arrows"
+
+[node name="Label20" type="Label" parent="MapEditorUILayer/MapEditorRootControl/MarginContainer/EditorControlsHelp/VBoxContainer/KeyboardControls" unique_id=480331214]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("14_n5m2s")
+text = "Move Camera"
+horizontal_alignment = 2
+
+[node name="Label21" type="Label" parent="MapEditorUILayer/MapEditorRootControl/MarginContainer/EditorControlsHelp/VBoxContainer/KeyboardControls" unique_id=1348826319]
+layout_mode = 2
+text = "WASD"
+
+[node name="Label8" type="Label" parent="MapEditorUILayer/MapEditorRootControl/MarginContainer/EditorControlsHelp/VBoxContainer/KeyboardControls" unique_id=546897101]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("14_n5m2s")
+text = "Edit Entity"
+horizontal_alignment = 2
+
+[node name="Label9" type="Label" parent="MapEditorUILayer/MapEditorRootControl/MarginContainer/EditorControlsHelp/VBoxContainer/KeyboardControls" unique_id=1977683212]
+layout_mode = 2
+text = "Middle Click / F"
+
+[node name="Label10" type="Label" parent="MapEditorUILayer/MapEditorRootControl/MarginContainer/EditorControlsHelp/VBoxContainer/KeyboardControls" unique_id=236158740]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("14_n5m2s")
+text = "Delete Mode"
+horizontal_alignment = 2
+
+[node name="Label11" type="Label" parent="MapEditorUILayer/MapEditorRootControl/MarginContainer/EditorControlsHelp/VBoxContainer/KeyboardControls" unique_id=1169566592]
+layout_mode = 2
+text = "Backspace / Q"
+
+[node name="Label12" type="Label" parent="MapEditorUILayer/MapEditorRootControl/MarginContainer/EditorControlsHelp/VBoxContainer/KeyboardControls" unique_id=1945343089]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("14_n5m2s")
+text = "Delete At Cursor"
+horizontal_alignment = 2
+
+[node name="Label13" type="Label" parent="MapEditorUILayer/MapEditorRootControl/MarginContainer/EditorControlsHelp/VBoxContainer/KeyboardControls" unique_id=165782785]
+layout_mode = 2
+text = "Delete"
+
+[node name="Label18" type="Label" parent="MapEditorUILayer/MapEditorRootControl/MarginContainer/EditorControlsHelp/VBoxContainer/KeyboardControls" unique_id=2136249609]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("14_n5m2s")
+text = "Next/Prev Entity"
+horizontal_alignment = 2
+
+[node name="Label19" type="Label" parent="MapEditorUILayer/MapEditorRootControl/MarginContainer/EditorControlsHelp/VBoxContainer/KeyboardControls" unique_id=1564012289]
+layout_mode = 2
+text = "(Shift+) X"
+
+[node name="Label26" type="Label" parent="MapEditorUILayer/MapEditorRootControl/MarginContainer/EditorControlsHelp/VBoxContainer/KeyboardControls" unique_id=478826525]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("14_n5m2s")
+text = "Next/Prev Tile"
+horizontal_alignment = 2
+
+[node name="Label27" type="Label" parent="MapEditorUILayer/MapEditorRootControl/MarginContainer/EditorControlsHelp/VBoxContainer/KeyboardControls" unique_id=836020681]
+layout_mode = 2
+text = "(Shift+) C"
+
+[node name="Label16" type="Label" parent="MapEditorUILayer/MapEditorRootControl/MarginContainer/EditorControlsHelp/VBoxContainer/KeyboardControls" unique_id=631498055]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("14_n5m2s")
+text = "Next/Prev Tile or Entity"
+horizontal_alignment = 2
+
+[node name="Label17" type="Label" parent="MapEditorUILayer/MapEditorRootControl/MarginContainer/EditorControlsHelp/VBoxContainer/KeyboardControls" unique_id=1267959391]
+layout_mode = 2
+text = "Scroll"
+
+[node name="Label22" type="Label" parent="MapEditorUILayer/MapEditorRootControl/MarginContainer/EditorControlsHelp/VBoxContainer/KeyboardControls" unique_id=592058407]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("14_n5m2s")
+text = "Rotate Tile/Entity"
+horizontal_alignment = 2
+
+[node name="Label23" type="Label" parent="MapEditorUILayer/MapEditorRootControl/MarginContainer/EditorControlsHelp/VBoxContainer/KeyboardControls" unique_id=1830451243]
+layout_mode = 2
+text = "Shift+Scroll / (Shift+) V"
+
+[node name="Label24" type="Label" parent="MapEditorUILayer/MapEditorRootControl/MarginContainer/EditorControlsHelp/VBoxContainer/KeyboardControls" unique_id=1264511083]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("14_n5m2s")
+horizontal_alignment = 2
+
+[node name="Label25" type="Label" parent="MapEditorUILayer/MapEditorRootControl/MarginContainer/EditorControlsHelp/VBoxContainer/KeyboardControls" unique_id=894102850]
+layout_mode = 2
+
+[node name="Label28" type="Label" parent="MapEditorUILayer/MapEditorRootControl/MarginContainer/EditorControlsHelp/VBoxContainer/KeyboardControls" unique_id=1239948958]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("14_n5m2s")
+text = "Save"
+horizontal_alignment = 2
+
+[node name="Label29" type="Label" parent="MapEditorUILayer/MapEditorRootControl/MarginContainer/EditorControlsHelp/VBoxContainer/KeyboardControls" unique_id=1246102528]
+layout_mode = 2
+text = "Ctr+S"
+
+[node name="Label30" type="Label" parent="MapEditorUILayer/MapEditorRootControl/MarginContainer/EditorControlsHelp/VBoxContainer/KeyboardControls" unique_id=1608946425]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("14_n5m2s")
+text = "Save As"
+horizontal_alignment = 2
+
+[node name="Label31" type="Label" parent="MapEditorUILayer/MapEditorRootControl/MarginContainer/EditorControlsHelp/VBoxContainer/KeyboardControls" unique_id=805488408]
+layout_mode = 2
+text = "Ctr+Shift+S"
+
+[node name="Label32" type="Label" parent="MapEditorUILayer/MapEditorRootControl/MarginContainer/EditorControlsHelp/VBoxContainer/KeyboardControls" unique_id=870600022]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("14_n5m2s")
+text = "New Empty Level"
+horizontal_alignment = 2
+
+[node name="Label33" type="Label" parent="MapEditorUILayer/MapEditorRootControl/MarginContainer/EditorControlsHelp/VBoxContainer/KeyboardControls" unique_id=1376177061]
+layout_mode = 2
+text = "Ctr+N"
+
 [node name="PauseMenuLayer" type="CanvasLayer" parent="." unique_id=166184817]
 layer = 14
 
@@ -444,3 +658,4 @@ visible = false
 layer = -4
 
 [node name="BGEffects" parent="BGLayer" unique_id=1203754819 instance=ExtResource("12_hagi3")]
+metadata/_edit_lock_ = true
