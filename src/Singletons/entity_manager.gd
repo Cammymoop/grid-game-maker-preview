@@ -1419,22 +1419,32 @@ func get_all_active_entities() -> Array[BaseEntity]:
 var special_effects: Dictionary = {
     "Shrink": {
         "name": "effect-shrink",
-        "effects": {
-            "scale": [0.65, 0.65],
-        },
+        "effects": { "scale": [0.65, 0.65], },
     },
     "Grow": {
         "name": "effect-grow",
-        "effects": {
-            "scale": [1.25, 1.25],
-        },
+        "effects": { "scale": [1.25, 1.25], },
     },
+    "Color": {
+        "name": "effect-color",
+        "effects": { "replace_color": { "color": "#FFFFFF", "amount": 1.0 } },
+    },
+    "Multiplied Color": {
+        "name": "effect-multiplied-color",
+        "effects": { "modulate": { "color": "#FFFFFFFF" } },
+    }
 }
 
-func apply_special_effect(entity: BaseEntity, effect_name: String) -> void:
+func apply_special_effect(entity: BaseEntity, effect_name: String, color_param: Color = Color.WHITE) -> void:
     if not entity or not effect_name in special_effects:
         return
-    entity.add_sprite_modifier(special_effects[effect_name])
+    var effect_info: Dictionary = special_effects[effect_name].duplicate_deep()
+    if effect_name == "Color":
+        effect_info["effects"]["replace_color"]["color"] = Utility.color_string_no_alpha(color_param)
+        effect_info["effects"]["replace_color"]["amount"] = color_param.a
+    elif effect_name == "Multiplied Color":
+        effect_info["effects"]["modulate"]["color"] = Utility.color_string(color_param, true)
+    entity.add_sprite_modifier(effect_info)
 
 func remove_special_effect(entity: BaseEntity, effect_name: String) -> void:
     if not entity or not effect_name in special_effects:

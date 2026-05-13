@@ -41,7 +41,6 @@
       "name": "player",
       "texture": 1,
       "tex_index": 0,
-      "intended_move_speed": 6.0,
       "controller": "InputController",
       "properties": {
         "treads": true,
@@ -100,7 +99,8 @@
           ],
           "when false": [],
           "when always": []
-        }
+        },
+        "move-speed": 6
       },
       "groups": [
         "Player"
@@ -184,17 +184,16 @@
         "fire-resistant": true,
         "eats": true,
         "no-rotate": true
-      },
-      "intended_move_speed": 0.0
+      }
     },
     "2": {
       "name": "bouncer",
       "texture": 1,
       "tex_index": 6,
-      "intended_move_speed": 6.0,
       "properties": {
         "creature": true,
-        "solid": true
+        "solid": true,
+        "move-speed": 6
       },
       "controller": "BounceController"
     },
@@ -216,8 +215,7 @@
         "z-index": -1,
         "solid": true,
         "no-rotate": true
-      },
-      "intended_move_speed": 0.0
+      }
     },
     "8": {
       "name": "toggle_button",
@@ -253,9 +251,9 @@
           "when false": [],
           "when always": []
         },
-        "solid": true
+        "solid": true,
+        "move-speed": 6
       },
-      "intended_move_speed": 6.0,
       "controller": "creature_controller",
       "controller_options": {
         "direction_priority": [
@@ -282,8 +280,7 @@
         "green-keys": true,
         "no-museum": true,
         "teleported": true
-      },
-      "intended_move_speed": 0.0
+      }
     },
     "11": {
       "name": "fireball",
@@ -301,9 +298,9 @@
           "when always": []
         },
         "solid": true,
-        "fire-resistant": true
+        "fire-resistant": true,
+        "move-speed": 6
       },
-      "intended_move_speed": 6.0,
       "controller": "creature_controller",
       "controller_options": {
         "direction_priority": [
@@ -333,9 +330,9 @@
         },
         "solid": true,
         "move-animation": "stepped",
-        "eats": true
+        "eats": true,
+        "move-speed": 5
       },
-      "intended_move_speed": 5.0,
       "controller": "creature_controller",
       "controller_options": {
         "direction_priority": [
@@ -364,9 +361,9 @@
         },
         "solid": true,
         "move-animation": "stepped",
-        "eats": true
+        "eats": true,
+        "move-speed": 5
       },
-      "intended_move_speed": 5.0,
       "controller": "creature_controller",
       "controller_options": {
         "direction_priority": [
@@ -408,8 +405,7 @@
           "when always": []
         },
         "no-rotate": true
-      },
-      "intended_move_speed": 0.0
+      }
     },
     "15": {
       "name": "chaser",
@@ -429,10 +425,10 @@
         },
         "solid": true,
         "move-animation": "stepped",
-        "eats": true
+        "eats": true,
+        "move-speed": 3
       },
       "controller": "direct_chase_controller",
-      "intended_move_speed": 3.0,
       "controller_options": {
         "always_update_target": true,
         "only_target_active": true,
@@ -560,8 +556,7 @@
           "when always": []
         },
         "no-rotate": true
-      },
-      "intended_move_speed": 0.0
+      }
     },
     "21": {
       "name": "skates",
@@ -621,8 +616,7 @@
         "move_off_of": false,
         "z-index": 6,
         "cage": true
-      },
-      "intended_move_speed": 0.0
+      }
     },
     "24": {
       "name": "trap-button",
@@ -697,9 +691,9 @@
           "when always": []
         },
         "fire-averse": true,
-        "eats": true
+        "eats": true,
+        "move-speed": 2
       },
-      "intended_move_speed": 2.0,
       "controller": "random_creature_controller",
       "controller_options": {
         "prefer_forward": false
@@ -722,9 +716,9 @@
         "creature": true,
         "solid": true,
         "fire-averse": true,
-        "turn-animation": "none"
+        "turn-animation": "none",
+        "move-speed": 4
       },
-      "intended_move_speed": 4.0,
       "controller": "random_creature_controller",
       "controller_options": {
         "prefer_forward": true
@@ -770,8 +764,7 @@
           "when false": [],
           "when always": []
         }
-      },
-      "intended_move_speed": 0.0
+      }
     },
     "29": {
       "name": "tank",
@@ -799,10 +792,10 @@
           "when false": [],
           "when always": []
         },
-        "fire-averse": true
+        "fire-averse": true,
+        "move-speed": 3
       },
       "controller": "creature_controller",
-      "intended_move_speed": 3.0,
       "controller_options": {
         "direction_priority": [
           "forward",
@@ -1049,8 +1042,7 @@
       "preview_variant": {
         "texture": 0.0,
         "tex_index": 37.0
-      },
-      "intended_move_speed": 0.0
+      }
     },
     "37": {
       "name": "cloner",
@@ -1126,7 +1118,7 @@
               "basic_default.select_created_entity::[\"i:2\",{\"args\":[\"s:type\",\"s:slot_value\",\"s:slot_id\",\"i:12\"],\"type\":\"Dictionary\"},\"i:0\",{\"args\":[\"s:type\",\"s:plain\",\"s:direction\",\"i:12\"],\"type\":\"Dictionary\"},false]",
               "basic_default.set_entity_as_active::[\"i:2\",false]",
               "basic_default.make_entity_dependent::[\"i:2\",\"i:0\"]",
-              "basic_default.apply_effect_to_entity::[\"i:2\",\"s:Shrink\"]",
+              "basic_default.apply_effect_to_entity::[\"i:2\",{\"args\":[\"s:effect\",\"s:Shrink\"],\"type\":\"Dictionary\"}]",
               "basic_default.a_set_property::[\"i:0\",\"s:clone-entity\",{\"args\":[\"s:type\",\"s:slot_value\",\"s:slot_id\",\"i:12\"],\"type\":\"Dictionary\"}]",
               "basic_default.a_set_property::[\"i:0\",\"s:preview-loaded\",\"s:true\"]"
             ],
@@ -1173,8 +1165,7 @@
           "when always": []
         },
         "no-rotate": true
-      },
-      "intended_move_speed": 0.0
+      }
     },
     "40": {
       "name": "respawner",
@@ -1192,7 +1183,7 @@
             "when true": [
               "basic_default.select_text_property::[\"i:12\",\"i:0\",\"s:clone-entity\"]",
               "basic_default.select_created_entity::[\"i:2\",{\"args\":[\"s:type\",\"s:slot_value\",\"s:slot_id\",\"i:12\"],\"type\":\"Dictionary\"},\"i:0\",{\"args\":[\"s:type\",\"s:plain\",\"s:direction\",\"i:12\"],\"type\":\"Dictionary\"},false]",
-              "basic_default.apply_effect_to_entity::[\"i:2\",\"s:Shrink\"]",
+              "basic_default.apply_effect_to_entity::[\"i:2\",{\"args\":[\"s:effect\",\"s:Shrink\"],\"type\":\"Dictionary\"}]",
               "basic_default.set_entity_as_active::[\"i:2\",false]",
               "basic_default.a_set_property::[\"i:2\",\"s:z-index\",\"s:2\"]",
               "basic_default.a_set_property::[\"i:0\",\"s:created-preview\",\"s:true\"]",
@@ -2090,5 +2081,23 @@
         }
       ]
     }
-  }
+  },
+  "level_lists": [
+    {
+      "name": "Levels",
+      "level_names": [
+        "bolts and nuts",
+        "cherries",
+        "cloner test",
+        "creature_test",
+        "force-floors",
+        "ice test",
+        "teletest",
+        "test_level",
+        "trap_test",
+        "watery test",
+        "watery_test"
+      ]
+    }
+  ]
 }

@@ -67,7 +67,7 @@ var templates: = {
 	
 	InputTypes.ComplexPropValueInput: preload("res://Scenes/GameEditor/ConditionalEditor/complex_prop_value_input.tscn"),
 	
-	InputTypes.SpecialEffectInput: preload("res://Scenes/GameEditor/ConditionalEditor/special_effect_input.tscn"),
+	InputTypes.SpecialEffectInput: preload("res://Scenes/GameEditor/static_effect_input.tscn"),
 	InputTypes.ExcludeDirectionInput: preload("res://Scenes/GameEditor/ConditionalEditor/exclude_dir_input.tscn"),
 }
 

@@ -1038,13 +1038,23 @@ func cmd_set_entity_as_active(slots: Dictionary, chosen_slot: int, is_active: bo
 		slots[chosen_slot].set_active(is_active)
 
 func desc_apply_effect_to_entity() -> String:
-	return "entity|Apply the effect [effect_name:SpecialEffectInput] to the entity"
-func cmd_apply_effect_to_entity(slots: Dictionary, chosen_slot: int, effect_name: String) -> void:
+	return "entity|Apply the effect [effect_info:SpecialEffectInput] to the entity"
+func cmd_apply_effect_to_entity(slots: Dictionary, chosen_slot: int, effect_info: Dictionary) -> void:
 	if not Commands.slot_is_entity(chosen_slot) or not slots[chosen_slot]:
 		push_error("Invalid slot or empty slot to apply effect to entity: %s" % chosen_slot)
 		return
 	if slots[chosen_slot]:
-		EntityManager.apply_special_effect(slots[chosen_slot], effect_name)
+		var effect_color: Color = Utility.get_dict_color(effect_info, "color", Color.WHITE)
+		EntityManager.apply_special_effect(slots[chosen_slot], effect_info["effect"], effect_color)
+
+func desc_remove_effects_from_entity() -> String:
+	return "entity|Remove all sprite effects from the entity"
+func cmd_remove_effects_from_entity(slots: Dictionary, chosen_slot: int) -> void:
+	if not Commands.slot_is_entity(chosen_slot) or not slots[chosen_slot]:
+		push_error("Invalid slot or empty slot to remove effects from entity: %s" % chosen_slot)
+		return
+	if slots[chosen_slot]:
+		EntityManager.clear_entity_special_effects(slots[chosen_slot])
 
 func desc_do_screen_shake() -> String:
 	return "none|Shake the screen! Intensity [intensity:ComplexScalarInput:default=2.0,step=0.1]" \

@@ -29,6 +29,8 @@ var texture_rows: Dictionary [int, int] = {}
 var tile_sizes: = {}
 var texture_meta: = {}
 
+var greyscale_textures: Dictionary[int, Texture] = {}
+
 var next_texture_id: int = 0
 
 var texture_spec: Array
