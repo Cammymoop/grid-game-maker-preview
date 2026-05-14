@@ -1,0 +1,38 @@
+[gd_scene format=3 uid="uid://begr2i37toh2w"]
+
+[ext_resource type="Script" uid="uid://uay87omxrsio" path="res://Scenes/GameEditor/static_sprite_effect_input.gd" id="1_lt1nu"]
+[ext_resource type="Script" uid="uid://b2e3vs73ts471" path="res://Scenes/GameEditor/ConditionalEditor/generic_option_button_input.gd" id="2_711ot"]
+
+[node name="AnimatedEffectInput" type="HBoxContainer" unique_id=790260579 node_paths=PackedStringArray("effect_picker_input", "color_picker")]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_right = -565.0
+offset_bottom = -741.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 10
+script = ExtResource("1_lt1nu")
+effect_picker_input = NodePath("AnimatedEffectPicker")
+color_picker = NodePath("ColorPickerButton")
+
+[node name="AnimatedEffectPicker" type="OptionButton" parent="." unique_id=583237251]
+layout_mode = 2
+size_flags_vertical = 4
+alignment = 1
+selected = 0
+fit_to_longest_item = false
+item_count = 4
+popup/item_0/text = "Shrink"
+popup/item_0/id = 0
+popup/item_1/text = "Grow"
+popup/item_1/id = 1
+popup/item_2/text = "Color"
+popup/item_2/id = 2
+popup/item_3/text = "Multiplied Color"
+popup/item_3/id = 3
+script = ExtResource("2_711ot")
+
+[node name="ColorPickerButton" type="ColorPickerButton" parent="." unique_id=627619670]
+custom_minimum_size = Vector2(40, 0)
+layout_mode = 2

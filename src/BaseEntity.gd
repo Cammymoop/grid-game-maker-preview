@@ -8,6 +8,8 @@ signal local_prop_changed
 
 const PosInterpStyle = Utility.PosInterpStyle
 
+const DEF_DYING_EFFECT_DURATION: float = 0.5
+
 var move_interp_style: = PosInterpStyle.CONTINUOUS_LINEAR
 var is_move_interp_override: = false
 var override_move_interp_style: = PosInterpStyle.NONE
@@ -64,6 +66,7 @@ var idle_update_cache: Property = null
 var idle_update_sleep: int = 1
 
 var active: = false
+var dying: = false
 
 # Properties set on an entity instance overriding their default for the entity type or removing them entirely
 var local_properties: = {}
@@ -85,6 +88,11 @@ func _make_sprite() -> void:
 		return
 	sprite = MaskLayerSprite.new()
 	add_child(sprite, true)
+	sprite.dying_animation_finished.connect(on_dying_animation_finished)
+
+func on_dying_animation_finished() -> void:
+	dying = false
+	EntityManager.remove_entity(self)
 
 func pre_init() -> void:
 	if _pre_init_called:
@@ -718,12 +726,33 @@ func can_i_teleport_to(to_tile_pos: Vector2i, with_facing: int = -1, with_move_f
 	set_move_facing(old_move_facing)
 	return result
 
-func die() -> void:
-	var dying = EntityManager.get_entity_property(self, "dying")
-	if dying and dying.is_conditional():
-		dying.resolve(self, null, tile_position)
+func die(with_effect_info: Dictionary = {}) -> void:
+	var dying_conditional = EntityManager.get_entity_property(self, "dying")
+	if dying_conditional and dying_conditional.is_conditional():
+		dying_conditional.resolve(self, null, tile_position)
 	EntityManager.post_die_actions(self)
-	EntityManager.remove_entity(self)
+	with_effect_info = SpriteEffects.DYING_EFFECTS["Spin Out"]
+	if not with_effect_info:
+		EntityManager.remove_entity(self)
+	else:
+		dying = true
+		do_dying_effect(with_effect_info)
+
+func do_dying_effect(effect_info: Dictionary) -> void:
+	var effect_name: String = effect_info.get("name", "")
+	if not effect_info or not effect_name:
+		push_warning("invalid dying effect info: " + str(effect_info))
+		EntityManager.remove_entity(self)
+		return
+	effect_info = effect_info.duplicate_deep()
+	set_active(false)
+	var duration: float = effect_info.get("duration", DEF_DYING_EFFECT_DURATION)
+	for ll_effect_name in effect_info.get("animated_effects", {}):
+		var ll_effect: Dictionary = effect_info["animated_effects"][ll_effect_name]
+		var ll_effect_dur_factor: float = ll_effect.get("duration_factor", 1.0)
+		ll_effect["base_duration"] = duration * ll_effect_dur_factor
+	effect_info["expire_time"] = duration
+	add_sprite_modifier(effect_info, true)
 
 func set_tailing(entity_to_tail) -> void:
 	tailing = entity_to_tail
@@ -797,10 +826,10 @@ func _handle_signal(signaling_entity: BaseEntity, args: Array, signal_name: Stri
 	if handler and handler.is_conditional():
 		handler.resolve(self, signaling_entity, tile_position, args)
 
-func add_sprite_modifier(mod_info: Dictionary) -> void:
+func add_sprite_modifier(mod_info: Dictionary, is_dying_effect: bool = false) -> void:
 	if not mod_info or not mod_info.get("name", ""):
 		return
-	sprite.apply_modifier_info(mod_info)
+	sprite.apply_modifier_info(mod_info, is_dying_effect)
 
 func remove_sprite_modifier(mod_info: Dictionary) -> void:
 	if not mod_info or not mod_info.get("name", ""):

@@ -1,6 +1,8 @@
 class_name MaskLayerSprite
 extends Node2D
 
+signal dying_animation_finished
+
 const DigitDisplay = preload("res://Scenes/digit_display.gd")
 
 var digit_display_scn: PackedScene = preload("res://Scenes/digit_display.tscn")
@@ -13,6 +15,8 @@ var current_rotation: float = 0
 var _facing_rotation: float = 0.0
 var _current_facing: int = 0
 var elapsed_time: float = 0.0
+
+var _animated_spinning: bool = false
 
 var preview_info: Dictionary = {}
 
@@ -32,6 +36,7 @@ var prop_update_response: Dictionary[String, Array] = {}
 var is_preview_mode: bool = false
 
 var _local_prop_updated: = false
+var _dying_with_animated_mod: String = ""
 var parent_entity: BaseEntity = null
 
 var interpolate_facing_enabled: bool = true
@@ -91,11 +96,14 @@ func process_animated_modifiers(delta_time: float) -> void:
         if not mod_name in _animation_timers:
             continue
         _animation_timers[mod_name] += delta_time
+        prints("mod %s, timer %s" % [mod_name, _animation_timers[mod_name]])
         var expire_time: float = _all_modifiers[mod_name].get("expire_time", 0)
         if expire_time > 0 and _animation_timers[mod_name] >= expire_time:
             expired_modifiers.append(mod_name)
     for mod_name in expired_modifiers:
         remove_modifier(mod_name)
+        if _dying_with_animated_mod == mod_name:
+            dying_animation_finished.emit()
     apply_animated_effects_to_sprite(delta_time)
     
 func apply_animated_effects_to_sprite(delta_time: float = 0) -> void:
@@ -227,7 +235,7 @@ func _layer_sort_compare(layer_a: Dictionary, layer_b: Dictionary) -> bool:
 func resort_layers() -> void:
     layers.sort_custom(_layer_sort_compare)
 
-func apply_modifier_info(modifier_info: Dictionary) -> void:
+func apply_modifier_info(modifier_info: Dictionary, is_dying_effect: bool = false) -> void:
     modifier_info = modifier_info.duplicate_deep()
     if not modifier_info.has("name"):
         return
@@ -250,6 +258,8 @@ func apply_modifier_info(modifier_info: Dictionary) -> void:
             _add_animated_modifier_effect(effect_name, modifier_name, modifier_info["animated_effects"][effect_name])
         _animation_timers[modifier_name] = 0.0
         apply_animated_effects_to_sprite()
+    if is_dying_effect and modifier_info.get("expire_time", 0) > 0:
+        _dying_with_animated_mod = modifier_name
     _all_modifiers[modifier_name] = modifier_info.duplicate_deep()
     refresh_layers()
 
@@ -267,6 +277,7 @@ func remove_modifier(modifier_name: String) -> void:
     _animation_timers.erase(modifier_name)
     _all_modifiers.erase(modifier_name)
     if animated_modifiers.has(modifier_name):
+        prints("removing animated modifier: %s" % modifier_name)
         animated_modifiers.erase(modifier_name)
         apply_animated_effects_to_sprite()
     refresh_layers()
@@ -498,11 +509,11 @@ func _add_modifier_effect_stuff(effect_name: String, modifier_name: String, effe
     modifier_effects[effect_name][modifier_name] = effect_stuff
 
 func _remove_modifier_effect_stuff(modifier_name: String) -> void:
-    for effect_name in modifier_effects:
-        if modifier_effects[effect_name].has(modifier_name):
-            modifier_effects[effect_name].erase(modifier_name)
-            if modifier_effects[effect_name].size() == 0:
-                modifier_effects.erase(effect_name)
+    for effect_name in animated_effects:
+        if animated_effects[effect_name].has(modifier_name):
+            animated_effects[effect_name].erase(modifier_name)
+            if animated_effects[effect_name].size() == 0:
+                animated_effects.erase(effect_name)
 
 func _add_animated_modifier_effect(effect_name: String, modifier_name: String, effect_stuff: Variant) -> void:
     if not animated_effects.has(effect_name):
@@ -530,13 +541,16 @@ func set_sprite_facing(facing: int, immediate: bool = false) -> void:
     else:
         set_sprite_rotation(Utility.facing_rotation(facing))
 
-func set_sprite_rotation(new_rotation: float) -> void:
-    current_rotation = new_rotation
+func set_sprite_rotation(new_rotation: float, force: bool = false) -> void:
+    if _animated_spinning and not force:
+        return
+    if not _animated_spinning:
+        current_rotation = new_rotation
     if not layer_root:
         return
     for layer_node in layer_root.get_children():
         if not layer_node.get_meta("spins", false):
-            _set_sprite_layer_rotation(layer_node, current_rotation)
+            _set_sprite_layer_rotation(layer_node, new_rotation)
 
 func _set_sprite_layer_rotation(layer_node: Node2D, new_rotation: float) -> void:
     var layer_rotates: bool = layer_node.get_meta("rotates_with_sprite", true)
@@ -551,6 +565,8 @@ func _set_sprite_layer_rotation(layer_node: Node2D, new_rotation: float) -> void
         layer_node.get_child(0).rotation = (-2 * main_layer_rotation) + new_rotation
 
 func update_spinning_layers() -> void:
+    if _animated_spinning:
+        return
     for layer_node in get_children():
         if layer_node.get_meta("spins", false):
             _update_spinning_layer(layer_node)
@@ -733,6 +749,7 @@ func _get_anim_t(effect_data: Dictionary, mod_name: String) -> float:
     var t: float = (_animation_timers[mod_name] + effect_data.get("time_offset", 0.0)) / base_duration
     if effect_data.has("ease_param"):
         t = ease(t, effect_data["ease_param"])
+    prints("effect %s, base duration %s, t %s ::: %s" % [mod_name, base_duration, t, effect_data])
     return t
 
 func _anim___scale(effect_stack: Dictionary, _delta_time: float) -> void:
@@ -791,3 +808,21 @@ func _anim___fade(effect_stack: Dictionary, _delta_time: float) -> void:
         var fade_to: float = effect_data.get("fade_to", 0.0)
         accum_inverse_fade *= 1 - lerpf(fade_from, fade_to, t)
     layer_root.modulate.a = clampf(accum_inverse_fade, 0.0, 1.0)
+
+func _anim___spin(effect_stack: Dictionary, _delta_time: float) -> void:
+    var active_spin: = {}
+    var active_spin_mod: String = ""
+    if effect_stack.size() >= 1:
+        active_spin_mod = effect_stack.keys()[-1]
+        active_spin = effect_stack[active_spin_mod]
+    
+    if active_spin:
+        _animated_spinning = true
+        var t: float = _get_anim_t(active_spin, active_spin_mod)
+        var total_rotation: float = active_spin.get("total_rotation", 1.0)
+        var angle: float = total_rotation * t * TAU
+        set_sprite_rotation(current_rotation + angle, true)
+    else:
+        if _animated_spinning:
+            _animated_spinning = false
+            set_sprite_rotation(current_rotation)

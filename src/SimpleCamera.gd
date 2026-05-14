@@ -83,10 +83,10 @@ func _process(delta):
 	var pos_target: = position
 	if target_entity and is_instance_valid(target_entity):
 		var find_new_target: = false
-		if was_target_active != target_entity.active:
+		if was_target_active != is_target_active():
 			if was_target_active:
 				find_new_target = true
-			was_target_active = target_entity.active
+			was_target_active = is_target_active()
 
 		if find_new_target:
 			find_entity_to_follow()
@@ -121,7 +121,13 @@ func get_targeted_position() -> Vector2:
 	return get_entity_interp_pos(potential_target)
 
 func is_target_active() -> bool:
-	return target_entity and is_instance_valid(target_entity) and target_entity.active
+	if target_entity and is_instance_valid(target_entity):
+		if target_entity.dying:
+			return true
+		else:
+			return target_entity.active
+	else:
+		return false
 
 func on_entity_list_updated() -> void:
 	if not target_entity or not is_instance_valid(target_entity):
@@ -153,7 +159,7 @@ func follow_entity(entity: BaseEntity) -> void:
 		return
 	target_entity = entity
 	ent_center_offset = target_entity.get_center_offset()
-	was_target_active = target_entity.active
+	was_target_active = is_target_active()
 	camera_target_changed.emit(target_entity)
 
 func follow_next(dir: int = 1) -> void:

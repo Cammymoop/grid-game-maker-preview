@@ -63,5 +63,15 @@ const ParticleEffects: Array[String] = [
 ]
 
 const LOW_LEVEL_ANIM_EFFECTS: Array[String] = [
-    "scale", "offset", "replace_color", "fade",
+    "scale", "offset", "replace_color", "fade", "spin",
 ]
+
+const DYING_EFFECTS: Dictionary[String, Dictionary] = {
+    "Spin Out": {
+        "name": "dying-spin-out",
+        "animated_effects": {
+            "spin": { "total_rotation": -0.75, "ease_param": 2.6 },
+            "scale": { "scale_from": [1,1], "scale_to": [0,0], "ease_param": 2.6 },
+        },
+    },
+}
