@@ -324,7 +324,6 @@ func deserialize(data: Dictionary) -> void:
         new_layer.deserialize(layer_data)
     
     map_metadata = data.get("metadata", {}).duplicate(true)
-    prints("new map metadata keys: ", map_metadata.keys())
     
     recreate_persistant_effects()
     _rebuild_position_prop_cache()

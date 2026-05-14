@@ -2,10 +2,6 @@ extends Control
 
 @export var controls_help: Control
 
-func _ready() -> void:
-    controls_help.hide()
-
-
 func toggle_controls_help() -> void:
     controls_help.visible = not controls_help.visible
 

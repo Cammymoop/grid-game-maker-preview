@@ -40,17 +40,26 @@ horizontal_alignment = 1
 layout_mode = 2
 
 [node name="KeyboardControls" type="GridContainer" parent="VBoxContainer" unique_id=605651217]
-visible = false
 layout_mode = 2
 columns = 2
 
 [node name="Label6" type="Label" parent="VBoxContainer/KeyboardControls" unique_id=1129934542]
 layout_mode = 2
 theme_override_fonts/font = ExtResource("1_rr3k7")
-text = "Edit/Test"
+text = "Show Controls"
 horizontal_alignment = 2
 
 [node name="Label7" type="Label" parent="VBoxContainer/KeyboardControls" unique_id=2047109372]
+layout_mode = 2
+text = "? / F1"
+
+[node name="Label34" type="Label" parent="VBoxContainer/KeyboardControls" unique_id=672885974]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("1_rr3k7")
+text = "Edit/Test"
+horizontal_alignment = 2
+
+[node name="Label35" type="Label" parent="VBoxContainer/KeyboardControls" unique_id=1441799230]
 layout_mode = 2
 text = "E"
 
@@ -203,6 +212,7 @@ layout_mode = 2
 text = "Ctr+N"
 
 [node name="ControllerControls" type="GridContainer" parent="VBoxContainer" unique_id=355923955]
+visible = false
 layout_mode = 2
 columns = 2
 
