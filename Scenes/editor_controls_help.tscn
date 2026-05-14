@@ -1,0 +1,387 @@
+[gd_scene format=3 uid="uid://cdx3gttyeybd1"]
+
+[ext_resource type="FontFile" uid="uid://ctnllh13x3iqi" path="res://assets/font/NotoSans-Bold.ttf" id="1_rr3k7"]
+[ext_resource type="Theme" uid="uid://c1enbl4niyp1f" path="res://assets/ui/controls_help_light_mode.tres" id="1_tbtak"]
+[ext_resource type="Script" uid="uid://c5rkf205k3nuv" path="res://Scenes/editor_controls_help.gd" id="2_8wsuq"]
+[ext_resource type="Texture2D" uid="uid://cbrbu8bh02ug" path="res://assets/ui/vector_x.tres" id="3_1158l"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_n5m2s"]
+content_margin_left = 2.0
+content_margin_top = 2.0
+content_margin_right = 2.0
+content_margin_bottom = 2.0
+bg_color = Color(0.9325083, 0.9325084, 0.93250835, 0.5254902)
+corner_radius_top_left = 2
+corner_radius_top_right = 2
+corner_radius_bottom_right = 2
+corner_radius_bottom_left = 2
+
+[node name="EditorControlsHelp" type="PanelContainer" unique_id=1779930358 node_paths=PackedStringArray("close_texture_button", "keyboard_controls", "controller_controls")]
+size_flags_horizontal = 0
+size_flags_vertical = 0
+theme = ExtResource("1_tbtak")
+theme_override_styles/panel = SubResource("StyleBoxFlat_n5m2s")
+script = ExtResource("2_8wsuq")
+close_texture_button = NodePath("TextureRect")
+keyboard_controls = NodePath("VBoxContainer/KeyboardControls")
+controller_controls = NodePath("VBoxContainer/ControllerControls")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="." unique_id=749708766]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="VBoxContainer" unique_id=1391207185]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("1_rr3k7")
+theme_override_font_sizes/font_size = 14
+text = "Editor Controls:"
+horizontal_alignment = 1
+
+[node name="Control" type="Control" parent="VBoxContainer" unique_id=1637900961]
+layout_mode = 2
+
+[node name="KeyboardControls" type="GridContainer" parent="VBoxContainer" unique_id=605651217]
+visible = false
+layout_mode = 2
+columns = 2
+
+[node name="Label6" type="Label" parent="VBoxContainer/KeyboardControls" unique_id=1129934542]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("1_rr3k7")
+text = "Edit/Test"
+horizontal_alignment = 2
+
+[node name="Label7" type="Label" parent="VBoxContainer/KeyboardControls" unique_id=2047109372]
+layout_mode = 2
+text = "E"
+
+[node name="Label2" type="Label" parent="VBoxContainer/KeyboardControls" unique_id=527963990]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("1_rr3k7")
+text = "Place"
+horizontal_alignment = 2
+
+[node name="Label3" type="Label" parent="VBoxContainer/KeyboardControls" unique_id=211259968]
+layout_mode = 2
+text = "Left Click / Space"
+
+[node name="Label4" type="Label" parent="VBoxContainer/KeyboardControls" unique_id=1279008787]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("1_rr3k7")
+text = "Pick/Copy"
+horizontal_alignment = 2
+
+[node name="Label5" type="Label" parent="VBoxContainer/KeyboardControls" unique_id=970140882]
+layout_mode = 2
+text = "Right Click / Tab"
+
+[node name="Label14" type="Label" parent="VBoxContainer/KeyboardControls" unique_id=504618873]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("1_rr3k7")
+text = "Move Cursor"
+horizontal_alignment = 2
+
+[node name="Label15" type="Label" parent="VBoxContainer/KeyboardControls" unique_id=2108731895]
+layout_mode = 2
+text = "Mouse / Arrows"
+
+[node name="Label20" type="Label" parent="VBoxContainer/KeyboardControls" unique_id=934323138]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("1_rr3k7")
+text = "Move Camera"
+horizontal_alignment = 2
+
+[node name="Label21" type="Label" parent="VBoxContainer/KeyboardControls" unique_id=402003961]
+layout_mode = 2
+text = "WASD"
+
+[node name="Label8" type="Label" parent="VBoxContainer/KeyboardControls" unique_id=1386556186]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("1_rr3k7")
+text = "Edit Entity"
+horizontal_alignment = 2
+
+[node name="Label9" type="Label" parent="VBoxContainer/KeyboardControls" unique_id=1277859079]
+layout_mode = 2
+text = "Middle Click / F"
+
+[node name="Label10" type="Label" parent="VBoxContainer/KeyboardControls" unique_id=1521754985]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("1_rr3k7")
+text = "Delete Mode"
+horizontal_alignment = 2
+
+[node name="Label11" type="Label" parent="VBoxContainer/KeyboardControls" unique_id=1250066520]
+layout_mode = 2
+text = "Backspace / Q"
+
+[node name="Label12" type="Label" parent="VBoxContainer/KeyboardControls" unique_id=893127642]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("1_rr3k7")
+text = "Delete At Cursor"
+horizontal_alignment = 2
+
+[node name="Label13" type="Label" parent="VBoxContainer/KeyboardControls" unique_id=375854052]
+layout_mode = 2
+text = "Delete"
+
+[node name="Label18" type="Label" parent="VBoxContainer/KeyboardControls" unique_id=835875520]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("1_rr3k7")
+text = "Next/Prev Entity"
+horizontal_alignment = 2
+
+[node name="Label19" type="Label" parent="VBoxContainer/KeyboardControls" unique_id=1606051061]
+layout_mode = 2
+text = "(Shift+) X"
+
+[node name="Label26" type="Label" parent="VBoxContainer/KeyboardControls" unique_id=1929725320]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("1_rr3k7")
+text = "Next/Prev Tile"
+horizontal_alignment = 2
+
+[node name="Label27" type="Label" parent="VBoxContainer/KeyboardControls" unique_id=548969570]
+layout_mode = 2
+text = "(Shift+) C"
+
+[node name="Label16" type="Label" parent="VBoxContainer/KeyboardControls" unique_id=15602188]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("1_rr3k7")
+text = "Next/Prev Tile or Entity"
+horizontal_alignment = 2
+
+[node name="Label17" type="Label" parent="VBoxContainer/KeyboardControls" unique_id=1930227911]
+layout_mode = 2
+text = "Scroll"
+
+[node name="Label22" type="Label" parent="VBoxContainer/KeyboardControls" unique_id=1716763579]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("1_rr3k7")
+text = "Rotate Tile/Entity"
+horizontal_alignment = 2
+
+[node name="Label23" type="Label" parent="VBoxContainer/KeyboardControls" unique_id=1590692281]
+layout_mode = 2
+text = "Shift+Scroll / (Shift+) V"
+
+[node name="Label24" type="Label" parent="VBoxContainer/KeyboardControls" unique_id=470271133]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("1_rr3k7")
+horizontal_alignment = 2
+
+[node name="Label25" type="Label" parent="VBoxContainer/KeyboardControls" unique_id=1395996464]
+layout_mode = 2
+
+[node name="Label28" type="Label" parent="VBoxContainer/KeyboardControls" unique_id=1761330829]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("1_rr3k7")
+text = "Save"
+horizontal_alignment = 2
+
+[node name="Label29" type="Label" parent="VBoxContainer/KeyboardControls" unique_id=2108473473]
+layout_mode = 2
+text = "Ctr+S"
+
+[node name="Label30" type="Label" parent="VBoxContainer/KeyboardControls" unique_id=1375376188]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("1_rr3k7")
+text = "Save As"
+horizontal_alignment = 2
+
+[node name="Label31" type="Label" parent="VBoxContainer/KeyboardControls" unique_id=1156799995]
+layout_mode = 2
+text = "Ctr+Shift+S"
+
+[node name="Label32" type="Label" parent="VBoxContainer/KeyboardControls" unique_id=2141915385]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("1_rr3k7")
+text = "New Empty Level"
+horizontal_alignment = 2
+
+[node name="Label33" type="Label" parent="VBoxContainer/KeyboardControls" unique_id=1259359633]
+layout_mode = 2
+text = "Ctr+N"
+
+[node name="ControllerControls" type="GridContainer" parent="VBoxContainer" unique_id=355923955]
+layout_mode = 2
+columns = 2
+
+[node name="Label6" type="Label" parent="VBoxContainer/ControllerControls" unique_id=940435525]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("1_rr3k7")
+text = "Edit/Test"
+horizontal_alignment = 2
+
+[node name="Label7" type="Label" parent="VBoxContainer/ControllerControls" unique_id=349364780]
+layout_mode = 2
+text = "Back"
+
+[node name="Label2" type="Label" parent="VBoxContainer/ControllerControls" unique_id=1996091519]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("1_rr3k7")
+text = "Place"
+horizontal_alignment = 2
+
+[node name="Label3" type="Label" parent="VBoxContainer/ControllerControls" unique_id=1965821659]
+layout_mode = 2
+text = "A"
+
+[node name="Label4" type="Label" parent="VBoxContainer/ControllerControls" unique_id=1394384511]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("1_rr3k7")
+text = "Pick/Copy"
+horizontal_alignment = 2
+
+[node name="Label5" type="Label" parent="VBoxContainer/ControllerControls" unique_id=37858618]
+layout_mode = 2
+text = "Y"
+
+[node name="Label14" type="Label" parent="VBoxContainer/ControllerControls" unique_id=1193821485]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("1_rr3k7")
+text = "Move Cursor"
+horizontal_alignment = 2
+
+[node name="Label15" type="Label" parent="VBoxContainer/ControllerControls" unique_id=632003733]
+layout_mode = 2
+text = "D-Pad / Left Stick"
+
+[node name="Label20" type="Label" parent="VBoxContainer/ControllerControls" unique_id=1518009061]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("1_rr3k7")
+text = "Move Camera"
+horizontal_alignment = 2
+
+[node name="Label21" type="Label" parent="VBoxContainer/ControllerControls" unique_id=1765196735]
+layout_mode = 2
+text = "Right Stick"
+
+[node name="Label8" type="Label" parent="VBoxContainer/ControllerControls" unique_id=1485157084]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("1_rr3k7")
+text = "Edit Entity"
+horizontal_alignment = 2
+
+[node name="Label9" type="Label" parent="VBoxContainer/ControllerControls" unique_id=1722928799]
+layout_mode = 2
+text = "X"
+
+[node name="Label10" type="Label" parent="VBoxContainer/ControllerControls" unique_id=1788319398]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("1_rr3k7")
+text = "Delete Mode"
+horizontal_alignment = 2
+
+[node name="Label11" type="Label" parent="VBoxContainer/ControllerControls" unique_id=447209953]
+layout_mode = 2
+text = "Backspace / Q"
+
+[node name="Label12" type="Label" parent="VBoxContainer/ControllerControls" unique_id=1206201685]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("1_rr3k7")
+text = "Delete At Cursor"
+horizontal_alignment = 2
+
+[node name="Label13" type="Label" parent="VBoxContainer/ControllerControls" unique_id=1621966092]
+layout_mode = 2
+text = "Delete"
+
+[node name="Label18" type="Label" parent="VBoxContainer/ControllerControls" unique_id=461480635]
+visible = false
+layout_mode = 2
+theme_override_fonts/font = ExtResource("1_rr3k7")
+text = "Next/Prev Entity"
+horizontal_alignment = 2
+
+[node name="Label19" type="Label" parent="VBoxContainer/ControllerControls" unique_id=2001971206]
+visible = false
+layout_mode = 2
+text = "LB / RB"
+
+[node name="Label26" type="Label" parent="VBoxContainer/ControllerControls" unique_id=1151547410]
+visible = false
+layout_mode = 2
+theme_override_fonts/font = ExtResource("1_rr3k7")
+text = "Next/Prev Tile"
+horizontal_alignment = 2
+
+[node name="Label27" type="Label" parent="VBoxContainer/ControllerControls" unique_id=1414216232]
+visible = false
+layout_mode = 2
+text = "(Shift+) C"
+
+[node name="Label16" type="Label" parent="VBoxContainer/ControllerControls" unique_id=863571486]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("1_rr3k7")
+text = "Next/Prev Tile or Entity"
+horizontal_alignment = 2
+
+[node name="Label17" type="Label" parent="VBoxContainer/ControllerControls" unique_id=1691772632]
+layout_mode = 2
+text = "LB / RB"
+
+[node name="Label22" type="Label" parent="VBoxContainer/ControllerControls" unique_id=1242602261]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("1_rr3k7")
+text = "Rotate Tile/Entity"
+horizontal_alignment = 2
+
+[node name="Label23" type="Label" parent="VBoxContainer/ControllerControls" unique_id=439055794]
+layout_mode = 2
+text = "RT"
+
+[node name="Label24" type="Label" parent="VBoxContainer/ControllerControls" unique_id=1771075380]
+visible = false
+layout_mode = 2
+theme_override_fonts/font = ExtResource("1_rr3k7")
+horizontal_alignment = 2
+
+[node name="Label25" type="Label" parent="VBoxContainer/ControllerControls" unique_id=254317095]
+visible = false
+layout_mode = 2
+
+[node name="Label28" type="Label" parent="VBoxContainer/ControllerControls" unique_id=1411333627]
+visible = false
+layout_mode = 2
+theme_override_fonts/font = ExtResource("1_rr3k7")
+text = "Save"
+horizontal_alignment = 2
+
+[node name="Label29" type="Label" parent="VBoxContainer/ControllerControls" unique_id=1695555051]
+visible = false
+layout_mode = 2
+text = "Ctr+S"
+
+[node name="Label30" type="Label" parent="VBoxContainer/ControllerControls" unique_id=1466770077]
+visible = false
+layout_mode = 2
+theme_override_fonts/font = ExtResource("1_rr3k7")
+text = "Save As"
+horizontal_alignment = 2
+
+[node name="Label31" type="Label" parent="VBoxContainer/ControllerControls" unique_id=481142092]
+visible = false
+layout_mode = 2
+text = "Ctr+Shift+S"
+
+[node name="Label32" type="Label" parent="VBoxContainer/ControllerControls" unique_id=317132706]
+visible = false
+layout_mode = 2
+theme_override_fonts/font = ExtResource("1_rr3k7")
+text = "New Empty Level"
+horizontal_alignment = 2
+
+[node name="Label33" type="Label" parent="VBoxContainer/ControllerControls" unique_id=993525987]
+visible = false
+layout_mode = 2
+text = "Ctr+N"
+
+[node name="TextureRect" type="TextureRect" parent="." unique_id=2085722576]
+layout_mode = 2
+size_flags_horizontal = 8
+size_flags_vertical = 0
+mouse_filter = 0
+mouse_behavior_recursive = 2
+mouse_default_cursor_shape = 2
+texture = ExtResource("3_1158l")
+stretch_mode = 2

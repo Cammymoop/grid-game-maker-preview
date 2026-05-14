@@ -415,8 +415,9 @@ func load_serialized_play_state(serialized_state: Dictionary, as_level_load: boo
 func deserialize(serialized_state: Dictionary) -> void:
 	stateful_camera_settings = serialized_state.get("stateful_camera_settings", {}).duplicate_deep()
 	if "camera_position" in serialized_state:
-		var game_camera_to: Vector2 = Utility.get_vector2_from_arr(serialized_state.get("camera_position", [0, 0]))
-		position_gameplay_camera(game_camera_to)
+		if not is_in_level_edit_mode:
+			var game_camera_to: Vector2 = Utility.get_vector2_from_arr(serialized_state.get("camera_position", [0, 0]))
+			position_gameplay_camera(game_camera_to)
 
 func create_game_camera() -> void:
 	var cam = cameras["SimpleCamera"].instantiate()
@@ -761,7 +762,8 @@ func post_scene_change() -> void:
 	if cur_scene == "Play":
 		update_game_viewport()
 		create_game_camera()
-		activate_gameplay_camera()
+		if not is_in_level_edit_mode:
+			activate_gameplay_camera()
 		EffectsHelper._fetch_effects_holder()
 		if is_in_level_edit_mode:
 			if loaded_level:

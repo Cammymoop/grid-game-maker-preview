@@ -107,6 +107,19 @@ func _process(delta):
 	else:
 		offset = Vector2.ZERO
 
+func get_targeted_position() -> Vector2:
+	var potential_target: BaseEntity = null
+	if target_entity and is_instance_valid(target_entity) and is_current():
+		potential_target = target_entity
+	elif target_entity and is_instance_valid(target_entity) and explicitly_following:
+		potential_target = target_entity
+	else:
+		potential_target = _find_entity_to_follow()
+	
+	if not potential_target:
+		return position
+	return get_entity_interp_pos(potential_target)
+
 func is_target_active() -> bool:
 	return target_entity and is_instance_valid(target_entity) and target_entity.active
 
@@ -178,15 +191,18 @@ func find_entity_to_follow() -> void:
 	if not active:
 		return
 	explicitly_following = false
+	var next_to_follow: = _find_entity_to_follow()
+	target_entity = next_to_follow
+
+func _find_entity_to_follow() -> BaseEntity:
 	var follow_targets: = get_follow_targets()
 	# Prefer active entities
 	for entity in follow_targets:
 		if entity.active:
-			follow_entity(entity)
-			break
-	if not target_entity:
-		for entity in follow_targets:
-			follow_entity(entity)
+			return entity
+	for entity in follow_targets:
+		return entity
+	return null
 
 func get_next_prev_follow_target(dir: int = 1) -> BaseEntity:
 	if not active or dir == 0:
@@ -214,15 +230,18 @@ func on_level_state_loaded() -> void:
 		teleport(get_target_iterpolated_pos())
 
 func get_target_iterpolated_pos() -> Vector2:
-	var use_entity_interp_pos: = not override_target_interp_style or not target_entity.moving
-	if target_entity.is_teleporting():
+	return get_entity_interp_pos(target_entity)
+
+func get_entity_interp_pos(entity: BaseEntity) -> Vector2:
+	var use_entity_interp_pos: = not override_target_interp_style or not entity.moving
+	if entity.is_teleporting():
 		use_entity_interp_pos = not teleport_override_interp
 	if use_entity_interp_pos:
-		return target_entity.global_position + ent_center_offset
+		return entity.global_position + ent_center_offset
 	
-	var target_from_pos: = MapManager.tile_to_world_position(target_entity.get_stationary_position())
-	var target_to_pos: = MapManager.tile_to_world_position(target_entity.next_tile_pos)
-	return target_from_pos.lerp(target_to_pos, target_entity.get_move_progress()) + ent_center_offset
+	var target_from_pos: = MapManager.tile_to_world_position(entity.get_stationary_position())
+	var target_to_pos: = MapManager.tile_to_world_position(entity.next_tile_pos)
+	return target_from_pos.lerp(target_to_pos, entity.get_move_progress()) + ent_center_offset
 	
 func do_screen_shake(intensity: float, duration: float) -> void:
 	if not is_shaking:

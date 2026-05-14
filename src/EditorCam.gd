@@ -1,6 +1,6 @@
 extends Camera2D
 
-@export var edge_limit_tile_count: int = 4
+@export var edge_limit_tile_count: int = 9
 var extend_limits = 0
 @onready var vp = get_viewport()
 

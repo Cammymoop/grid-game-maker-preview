@@ -12,14 +12,15 @@ const edited_entity_indicator_icon: Texture2D = preload("res://assets/img/button
 
 @export var camera_move_speed: = 700
 
-@export var extend_camera_limits_by_tiles: int = 4
+@export var extend_camera_limits_by_tiles: int = 9
 
 @export var ui_layer: CanvasLayer
-@export var ui_root_control: Control
+@export var map_editor_overlay: Control
 @export var entity_instance_editor: EntityInstanceEditor
 
 @export var cursor_star: Node2D
 
+var start_in_edit_mode: = true
 var edit_mode: = false
 
 var cur_ent_i: int = 0
@@ -89,6 +90,9 @@ func _ready() -> void:
 	entity_instance_editor.entity_local_props_reset.connect(on_entity_local_props_reset)
 	
 	GameManager.level_state_loaded.connect(on_level_state_loaded)
+	
+	if GameManager.is_in_level_edit_mode and start_in_edit_mode:
+		switch_edit_mode(true)
 
 	await get_tree().process_frame
 	var pause_menu: Control = Utility.get_pause_menu()
@@ -102,6 +106,10 @@ func _physics_process(delta: float) -> void:
 
 func on_level_state_loaded() -> void:
 	if edit_mode:
+		prints("level state loaded, finding camera start pos")
+		var game_camera_starting_pos: Vector2 = GameManager.game_camera.get_targeted_position()
+		editor_cam.set_position_immediate(game_camera_starting_pos)
+
 		_refresh_edited_entity_indicators()
 
 func is_holding_cursor_move() -> bool:
@@ -459,6 +467,9 @@ func _process(delta: float) -> void:
 	update_input_priority()
 	if not edit_mode or is_other_paused():
 		return
+	
+	if Input.is_action_just_pressed("editor_toggle_help"):
+		map_editor_overlay.toggle_controls_help()
 	
 	# camera scroll that doesn't interact with GUI can scroll regardless of input priority
 	var dedicated_scroll_input: = Utility.input_vector_by_prefix("editor_camera_dedicated")
