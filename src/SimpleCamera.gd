@@ -1,6 +1,7 @@
 extends Camera2D
 
 signal camera_target_changed(entity: BaseEntity)
+signal no_more_targets()
 
 var active: = false
 var target_entity: BaseEntity = null
@@ -36,7 +37,7 @@ func _ready():
 	if ext:
 		extend_level_bounds = int(ext)
 	
-	GameManager.level_state_loaded.connect(on_level_state_loaded)
+	GameManager.any_state_loaded.connect(on_state_loaded)
 
 func update_bounds() -> void:
 	if not respect_level_bounds:
@@ -59,6 +60,8 @@ func update_bounds() -> void:
 
 func activate():
 	active = true
+	prints("activating gameplay camera")
+	print_stack()
 	make_current()
 	if explicitly_following and target_entity and is_instance_valid(target_entity):
 		follow_entity(target_entity)
@@ -68,6 +71,7 @@ func activate():
 func deactivate():
 	active = false
 	if not explicitly_following:
+		prints("deactivating gameplay camera")
 		target_entity = null
 
 func _process(delta):
@@ -199,6 +203,11 @@ func find_entity_to_follow() -> void:
 	explicitly_following = false
 	var next_to_follow: = _find_entity_to_follow()
 	target_entity = next_to_follow
+	if not target_entity:
+		prints("no more camera targets")
+		no_more_targets.emit()
+	else:
+		camera_target_changed.emit(target_entity)
 
 func _find_entity_to_follow() -> BaseEntity:
 	var follow_targets: = get_follow_targets()
@@ -231,9 +240,16 @@ func get_next_prev_follow_target(dir: int = 1) -> BaseEntity:
 func teleport(pos: Vector2) -> void:
 	position = pos
 
-func on_level_state_loaded() -> void:
+func on_state_loaded() -> void:
+	if not active:
+		prints("state loaded, but camera is not active")
+		return
 	if target_entity and is_instance_valid(target_entity):
+		prints("state loaded, target entity")
 		teleport(get_target_iterpolated_pos())
+	else:
+		prints("state loaded, no target entity")
+		find_entity_to_follow()
 
 func get_target_iterpolated_pos() -> Vector2:
 	return get_entity_interp_pos(target_entity)

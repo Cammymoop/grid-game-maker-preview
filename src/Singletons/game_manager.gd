@@ -1,6 +1,7 @@
 extends Node
 
 signal level_state_loaded
+signal any_state_loaded
 signal game_camera_target_changed(entity: BaseEntity)
 signal game_settings_changed
 signal game_dir_name_changed(new_game_dir_name: String)
@@ -45,6 +46,7 @@ var current_level_is_museum: = false
 
 var queued_level_load: bool = false
 var queued_level_load_timer: Timer = null
+var _queued_reload_for_lack_of_cam_target: bool = false
 
 var file_access_web: RefCounted = null
 
@@ -72,9 +74,10 @@ const SPECIAL_PROPS: Array[String] = [
 	"actions-disabled",
 	"no-rotate",
 	"teleport-duration", "move-speed",
+	"dying-effect",
 ]
 
-const SPECIAL_PROPS_HINT_TEXT: Dictionary[String, String] = {
+static var SPECIAL_PROPS_HINT_TEXT: Dictionary[String, String] = {
 	"z-index": "Relative sorting offset, Entities or tiles with a higher sorting offset will be shown over others, can be negative.\nBy default entities are 5 higher than tiles.",
 	"move-turns": "If false, the entity will not automatically turn it's facing direction to match it's moving direction when it moves.",
 	"inherit-properties": "[Experimental] If true, the entity will inherit properties it does not have from another entity type with this name.",
@@ -96,6 +99,8 @@ const SPECIAL_PROPS_HINT_TEXT: Dictionary[String, String] = {
 		'This can be overridden for a single teleport using by using the "Override Move Speed" Conditional command (duration is = 1/move speed).',
 	"move-speed": "The default speed (grid spaces per second) that this entity moves at.\nIf not set, the default from the game settings is used.\n" +
 		'This speed can be overridden for a single movement using the "Override Move Speed" Conditional command or automatically by the "Get Pushed" command.',
+	"dying-effect": "The default effect on this entity's sprite when it is destroyed. If set, overrides the game's default dying effect.\n" +
+		"Effects: " + ", ".join(SpriteEffects.DYING_EFFECTS.keys()),
 }
 
 enum OneTimeMessages {
@@ -407,8 +412,12 @@ func load_serialized_play_state(serialized_state: Dictionary, as_level_load: boo
 	MapManager.deserialize(serialized_state['map'])
 	EntityManager.deserialize(serialized_state['entities'])
 	
+	if game_camera and (not is_in_level_edit_mode or game_camera.active):
+		activate_gameplay_camera()
+	
 	if as_level_load:
 		level_state_loaded.emit()
+	any_state_loaded.emit()
 	set_pause("gm_loading_state", false)
 	bg_style_changed.emit()
 
@@ -423,7 +432,25 @@ func create_game_camera() -> void:
 	var cam = cameras["SimpleCamera"].instantiate()
 	Utility.get_world().add_child(cam)
 	game_camera = cam
-	game_camera.camera_target_changed.connect(game_camera_target_changed.emit)
+	game_camera.camera_target_changed.connect(on_game_camera_target_changed)
+	game_camera.no_more_targets.connect(on_no_more_camera_targets)
+
+func on_no_more_camera_targets() -> void:
+	if is_in_level_edit_mode or not editor_save:
+		return
+	if get_game_setting("auto_reload_checkpoint_for_no_cam_focus", false):
+		prints("queueing checkpoint reload for no cam focus")
+		queue_delayed_other_load(0.5, _reload_for_lack_of_cam_target)
+
+func on_game_camera_target_changed(entity: BaseEntity) -> void:
+	if entity and _queued_reload_for_lack_of_cam_target:
+		cancel_queued_level_load()
+	game_camera_target_changed.emit(entity)
+
+func _reload_for_lack_of_cam_target() -> void:
+	queued_level_load = false
+	_queued_reload_for_lack_of_cam_target = false
+	load_checkpoint()
 
 func position_gameplay_camera(pos: Vector2) -> void:
 	if game_camera:
@@ -435,6 +462,8 @@ func get_gameplay_camera_position() -> Vector2:
 	return Vector2.ZERO
 
 func activate_gameplay_camera() -> void:
+	if _queued_reload_for_lack_of_cam_target:
+		cancel_queued_level_load()
 	if game_camera:
 		game_camera.activate()
 
@@ -468,9 +497,13 @@ func _unpause() -> void:
 func save_checkpoint() -> void:
 	checkpoint_save = get_serialized_play_state()
 func load_checkpoint() -> void:
+	prints("loading checkpoint")
 	if not checkpoint_save:
 		if editor_save:
 			load_serialized_play_state(editor_save, false)
+		else:
+			push_error("cannot load level or checkpoint")
+			prints("cannot load level or checkpoint")
 		return
 	load_serialized_play_state(checkpoint_save, false)
 func clear_checkpoint() -> void:
@@ -609,6 +642,7 @@ func queue_delayed_other_load(with_delay: float, callback: Callable) -> void:
 	queued_level_load = true
 	queued_level_load_timer = Timer.new()
 	queued_level_load_timer.one_shot = true
+	queued_level_load_timer.timeout.connect(prints.bind("queued other load timeout"))
 	queued_level_load_timer.timeout.connect(callback)
 	queued_level_load_timer.timeout.connect(queued_level_load_timer.queue_free)
 	add_child(queued_level_load_timer)
@@ -762,8 +796,6 @@ func post_scene_change() -> void:
 	if cur_scene == "Play":
 		update_game_viewport()
 		create_game_camera()
-		if not is_in_level_edit_mode:
-			activate_gameplay_camera()
 		EffectsHelper._fetch_effects_holder()
 		if is_in_level_edit_mode:
 			if loaded_level:
@@ -782,8 +814,11 @@ func post_scene_change() -> void:
 			else:
 				new_empty_level()
 		else:
+			prints("playing current save level")
 			play_current_save_level()
 			#play_first_level()
+		if not is_in_level_edit_mode:
+			activate_gameplay_camera()
 	scene_changed.emit(cur_scene)
 
 func update_game_viewport() -> void:
@@ -859,12 +894,16 @@ func _process(_delta):
 			GlobalToaster.show_toast_message("Quicksaved")
 		elif Input.is_action_just_pressed(&"press_quickload"):
 			if quicksave_state:
+				if queued_level_load:
+					cancel_queued_level_load()
 				load_quicksave()
 				GlobalToaster.show_toast_message("Loaded quicksave")
 			else:
 				GlobalToaster.show_toast_message("No Quicksave")
 		elif Input.is_action_just_pressed(&"reload_checkpoint"):
 			if not get_tree().paused:
+				if _queued_reload_for_lack_of_cam_target:
+					cancel_queued_level_load()
 				load_checkpoint()
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -1135,6 +1174,7 @@ func reset_camera_follow() -> void:
 	camera_refollow()
 
 func camera_refollow() -> void:
+	prints("refollowing camera")
 	game_camera.find_entity_to_follow()
 
 func get_base_camera_setting(setting_name: String, default_value: Variant = null) -> Variant:
@@ -1468,6 +1508,7 @@ func goto_level_code(level_code: String, as_queued_load: bool = false) -> void:
 
 func goto_level_in_level_list(level_list_name: String, level_name: String, as_queued_load: bool = false) -> void:
 	if not cur_scene == "Play":
+		prints("goto level not in play scene")
 		return
 	if is_in_level_edit_mode:
 		return
@@ -1487,8 +1528,10 @@ func goto_level_in_level_list(level_list_name: String, level_name: String, as_qu
 		else:
 			current_level_list = level_list_name
 	else:
+		prints("level list info is empty")
 		current_level_list = ""
 	
+	prints("loading level: " + level_name + " in list: " + level_list_name, " queued load: " + str(queued_level_load), " as queued load: " + str(as_queued_load))
 	try_load_level(level_name, as_queued_load)
 
 
@@ -1587,15 +1630,19 @@ func play_first_level() -> void:
 		return
 	var first_level_and_list: Array = get_starting_level_and_list()
 	if not first_level_and_list:
+		prints("no first level and list, creating empty level")
 		new_empty_level()
 		return
+	prints("playing first level: " + first_level_and_list[1] + " in list: " + first_level_and_list[0])
 	goto_level_in_level_list(first_level_and_list[0], first_level_and_list[1])
 
 func play_current_save_level() -> void:
 	if is_in_level_edit_mode:
 		return
 	var cur_save_level: String = get_game_save_data("last_played_level", "")
+	prints("playing current save level: " + cur_save_level)
 	if not cur_save_level:
+		prints("current save level is empty, playing first level")
 		play_first_level()
 		return
 	goto_level_in_level_list(_level_list_from_code(cur_save_level), _level_name_from_code(cur_save_level))

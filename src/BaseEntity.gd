@@ -726,13 +726,30 @@ func can_i_teleport_to(to_tile_pos: Vector2i, with_facing: int = -1, with_move_f
 	set_move_facing(old_move_facing)
 	return result
 
+func die_with_effect(effect_info: Dictionary) -> void:
+	var effect_name: String = effect_info.get("name", "")
+	if effect_name == "" or not effect_name in SpriteEffects.DYING_EFFECTS:
+		push_warning("Unknown dying effect: %s" % effect_name)
+		die()
+	else:
+		var duration: float = -1
+		if effect_info.has("duration"):
+			duration = effect_info["duration"]
+		# todo: extra modifications to effect like direction or color
+		die(SpriteEffects.DYING_EFFECTS[effect_name], duration)
+
 func die(with_effect_info: Dictionary = {}, with_duration: float = -1) -> void:
 	var dying_conditional = EntityManager.get_entity_property(self, "dying")
 	if dying_conditional and dying_conditional.is_conditional():
 		dying_conditional.resolve(self, null, tile_position)
 	EntityManager.post_die_actions(self)
-	with_effect_info = SpriteEffects.DYING_EFFECTS["Fly Up"]
 	if not with_effect_info:
+		prints("no specified dying effect for %s checking for default" % entity_name)
+		with_effect_info = EntityManager.get_default_dying_effect_for_entity_id(entity_index)
+	else:
+		prints("specified dying effect for %s: %s" % [entity_name, with_effect_info])
+
+	if not with_effect_info or with_effect_info.get("none", false):
 		EntityManager.remove_entity(self)
 	else:
 		dying = true

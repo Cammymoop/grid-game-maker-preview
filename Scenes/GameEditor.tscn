@@ -19,10 +19,10 @@
 [ext_resource type="Script" uid="uid://b067pb4uemc40" path="res://src/GameEditor/UIRoot.gd" id="10"]
 [ext_resource type="Script" uid="uid://bihb1rg68jci5" path="res://src/GameEditor/SelectableTextureList.gd" id="11"]
 [ext_resource type="Script" uid="uid://cia8grkwwxcha" path="res://src/GameEditor/PopupLayer.gd" id="12"]
-[ext_resource type="StyleBox" path="res://src/UI/list_background.tres" id="13"]
+[ext_resource type="StyleBox" uid="uid://bf4pw2lygxoq5" path="res://src/UI/list_background.tres" id="13"]
 [ext_resource type="FontFile" uid="uid://cpry5rd5ecdc5" path="res://assets/font/small_font.tres" id="14"]
 [ext_resource type="Script" uid="uid://c1vkx254mpaft" path="res://src/GameEditor/FollowBySelector.gd" id="15"]
-[ext_resource type="Script" path="res://Scenes/GameEditor/background_style_editor_tab.gd" id="15_4q0gk"]
+[ext_resource type="Script" uid="uid://blesifogfyjfp" path="res://Scenes/GameEditor/background_style_editor_tab.gd" id="15_4q0gk"]
 [ext_resource type="PackedScene" uid="uid://b4fp8ldktkvcd" path="res://Scenes/bg_effect_6.tscn" id="16_iwmpq"]
 [ext_resource type="PackedScene" uid="uid://b1a6s2o32t35i" path="res://Scenes/GameEditor/bg_style_editor.tscn" id="18_umwh7"]
 [ext_resource type="PackedScene" uid="uid://cj8u25mhjg6n8" path="res://Scenes/GameEditor/SelectableTexItem.tscn" id="22_48hio"]
@@ -106,7 +106,7 @@ theme = ExtResource("3_qrjoe")
 current_tab = 0
 tab_0/title = "Game"
 
-[node name="GameDefinition" type="VBoxContainer" parent="MarginContainer/UIRoot/TabContainer" unique_id=1146228055 node_paths=PackedStringArray("show_level_title_option_picker", "name_input", "edit_game_dir_button", "move_interp_option_picker", "action_signal_sent_to_option_picker", "turn_animation_option_picker", "default_move_speed_input")]
+[node name="GameDefinition" type="VBoxContainer" parent="MarginContainer/UIRoot/TabContainer" unique_id=1146228055 node_paths=PackedStringArray("show_level_title_option_picker", "name_input", "edit_game_dir_button", "move_interp_option_picker", "action_signal_sent_to_option_picker", "turn_animation_option_picker", "def_dying_eff_picker", "default_move_speed_input", "auto_reload_checkpoint_for_no_cam_focus_toggle")]
 layout_mode = 2
 script = ExtResource("6")
 show_level_title_option_picker = NodePath("ScrollContainer/VBoxContainer/GameSettingsSection/MarginContainer/HFlowContainer/HFlowContainer/HBoxContainer11/OptionButton")
@@ -115,7 +115,9 @@ edit_game_dir_button = NodePath("HBoxContainer/VBoxContainer/HBoxContainer/EditG
 move_interp_option_picker = NodePath("ScrollContainer/VBoxContainer/GameSettingsSection/MarginContainer/HFlowContainer/VBoxContainer/HBoxContainer/HBoxContainer10/MoveInterpSelect")
 action_signal_sent_to_option_picker = NodePath("ScrollContainer/VBoxContainer/GameSettingsSection/MarginContainer/HFlowContainer/HFlowContainer/HBoxContainer12/ActionSentToSelect")
 turn_animation_option_picker = NodePath("ScrollContainer/VBoxContainer/GameSettingsSection/MarginContainer/HFlowContainer/VBoxContainer/HBoxContainer/HBoxContainer13/TurnAnimSelect")
+def_dying_eff_picker = NodePath("ScrollContainer/VBoxContainer/GameSettingsSection/MarginContainer/HFlowContainer/VBoxContainer/HBoxContainer11/DyingEffectPicker")
 default_move_speed_input = NodePath("ScrollContainer/VBoxContainer/GameSettingsSection/MarginContainer/HFlowContainer/HFlowContainer/HBoxContainer10/DefMoveSpeedInput")
+auto_reload_checkpoint_for_no_cam_focus_toggle = NodePath("ScrollContainer/VBoxContainer/DefaultCameraSection/MarginContainer/HFlowContainer/HBoxContainer8/AutoCheckpointCamFocusToggle")
 metadata/_tab_index = 0
 metadata/_tab_name = "Game"
 
@@ -309,6 +311,35 @@ popup/item_4/id = 4
 
 [node name="HSeparator2" type="HSeparator" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer/GameSettingsSection/MarginContainer/HFlowContainer/VBoxContainer" unique_id=950934069]
 layout_mode = 2
+
+[node name="Label2" type="Label" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer/GameSettingsSection/MarginContainer/HFlowContainer/VBoxContainer" unique_id=604212140]
+layout_mode = 2
+text = "Default Effect For"
+horizontal_alignment = 1
+
+[node name="HBoxContainer11" type="HBoxContainer" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer/GameSettingsSection/MarginContainer/HFlowContainer/VBoxContainer" unique_id=719060459]
+layout_mode = 2
+alignment = 2
+
+[node name="Label2" type="Label" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer/GameSettingsSection/MarginContainer/HFlowContainer/VBoxContainer/HBoxContainer11" unique_id=818267902]
+layout_mode = 2
+text = "Destroyed Etntites:"
+
+[node name="DyingEffectPicker" type="OptionButton" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer/GameSettingsSection/MarginContainer/HFlowContainer/VBoxContainer/HBoxContainer11" unique_id=1160322751]
+layout_mode = 2
+alignment = 1
+selected = 1
+item_count = 5
+popup/item_0/text = "none"
+popup/item_0/id = 0
+popup/item_1/text = "smooth"
+popup/item_1/id = 1
+popup/item_2/text = "stepped"
+popup/item_2/id = 2
+popup/item_3/text = "jerky"
+popup/item_3/id = 3
+popup/item_4/text = "jerky-stepped"
+popup/item_4/id = 4
 
 [node name="HFlowContainer" type="HFlowContainer" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer/GameSettingsSection/MarginContainer/HFlowContainer" unique_id=2017167320]
 layout_mode = 2
@@ -513,7 +544,6 @@ theme_override_constants/margin_bottom = 4
 [node name="HFlowContainer" type="HFlowContainer" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer/DefaultCameraSection/MarginContainer" unique_id=2020647641]
 layout_mode = 2
 alignment = 1
-reverse_fill = true
 
 [node name="HBoxContainer6" type="HBoxContainer" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer/DefaultCameraSection/MarginContainer/HFlowContainer" unique_id=1658482809]
 layout_mode = 2
@@ -550,6 +580,15 @@ text = "Extend Camera Limits:"
 layout_mode = 2
 max_value = 300.0
 suffix = "px"
+
+[node name="HBoxContainer8" type="HBoxContainer" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer/DefaultCameraSection/MarginContainer/HFlowContainer" unique_id=557712138]
+layout_mode = 2
+alignment = 2
+
+[node name="AutoCheckpointCamFocusToggle" type="CheckButton" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer/DefaultCameraSection/MarginContainer/HFlowContainer/HBoxContainer8" unique_id=486077773]
+layout_mode = 2
+text = "Reload Checkpoint when
+camera has nothing to focus"
 
 [node name="SfxSection" type="FoldableContainer" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/VBoxContainer" unique_id=1949552966]
 layout_mode = 2

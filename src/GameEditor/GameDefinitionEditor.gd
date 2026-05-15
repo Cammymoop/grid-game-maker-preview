@@ -21,7 +21,11 @@ var invalid_field_color = Color(0.7, 0.4, 0.4)
 @export var action_signal_sent_to_option_picker: OptionButton
 @export var turn_animation_option_picker: OptionButton
 
+@export var def_dying_eff_picker: OptionButton
+
 @export var default_move_speed_input: ScalarValueInput
+
+@export var auto_reload_checkpoint_for_no_cam_focus_toggle: CheckButton
 
 var _save_as_dialog_open: bool = false
 
@@ -91,6 +95,22 @@ func _ready():
 		if action_signal_sent_to_option_picker.get_item_text(i) == cur_action_signal_sent_to:
 			action_signal_sent_to_option_picker.select(i)
 			break
+	
+	def_dying_eff_picker.item_selected.connect(on_default_dying_eff_option_picked)
+	var cur_dying_eff: String = GameManager.get_game_setting("default_dying_effect", "")
+	def_dying_eff_picker.clear()
+	def_dying_eff_picker.add_item("None")
+	for effect_name in SpriteEffects.DYING_EFFECTS:
+		def_dying_eff_picker.add_item(effect_name)
+	
+	var auto_reload_no_cam_focus: bool = GameManager.get_game_setting("auto_reload_checkpoint_for_no_cam_focus", false)
+	auto_reload_checkpoint_for_no_cam_focus_toggle.set_pressed_no_signal(auto_reload_no_cam_focus)
+	auto_reload_checkpoint_for_no_cam_focus_toggle.toggled.connect(on_auto_reload_checkpoint_for_no_cam_focus_toggled)
+
+	if cur_dying_eff:
+		Utility.opbtn_select_text(def_dying_eff_picker, cur_dying_eff)
+	else:
+		def_dying_eff_picker.selected = 0
 
 func init_movement_modes() -> void:
 	var popup_menu: PopupMenu = find_child("MovementModeMenuButton").get_popup()
@@ -316,3 +336,12 @@ func on_default_move_speed_changed(value: float) -> void:
 
 func _on_import_levels_btn_pressed() -> void:
 	GameManager.start_import_levels()
+
+func on_default_dying_eff_option_picked(index: int) -> void:
+	var item_text: = def_dying_eff_picker.get_item_text(index)
+	GameManager.set_game_setting("default_dying_effect", item_text)
+	GameManager.game_settings_changed.emit()
+
+func on_auto_reload_checkpoint_for_no_cam_focus_toggled(button_pressed: bool) -> void:
+	GameManager.set_game_setting("auto_reload_checkpoint_for_no_cam_focus", button_pressed)
+	GameManager.game_settings_changed.emit()

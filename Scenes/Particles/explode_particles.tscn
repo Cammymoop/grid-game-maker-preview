@@ -1,5 +1,6 @@
 [gd_scene format=3 uid="uid://c6310xu1ijeyy"]
 
+[ext_resource type="Script" uid="uid://16koykq6fac3" path="res://Scenes/Particles/explode_particles.gd" id="1_dclpa"]
 [ext_resource type="Texture2D" uid="uid://dxq70fd10q5pp" path="res://assets/img/particle_textures/soft_cloud.png" id="1_o6vyl"]
 
 [sub_resource type="Curve" id="Curve_o6vyl"]
@@ -89,7 +90,10 @@ scale_curve = SubResource("CurveTexture_xt5cw")
 color_ramp = SubResource("GradientTexture1D_kyutj")
 alpha_curve = SubResource("CurveTexture_4btjn")
 
-[node name="ExplodeParticles" type="Node2D" unique_id=303765297]
+[node name="ExplodeParticles" type="Node2D" unique_id=303765297 node_paths=PackedStringArray("smoke_particles", "flash_particles")]
+script = ExtResource("1_dclpa")
+smoke_particles = NodePath("Smoke")
+flash_particles = NodePath("Flash")
 
 [node name="Smoke" type="GPUParticles2D" parent="." unique_id=1182042900]
 emitting = false

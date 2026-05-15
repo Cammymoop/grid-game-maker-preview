@@ -103,4 +103,17 @@ const DYING_EFFECTS: Dictionary[String, Dictionary] = {
                         "duration_factor": 0.5, "time_offset": 0.5 },
         },
     },
+    
+    "Real Explosion": {
+        "name": "dying-real-explosion",
+        "duration": 1.5,
+        # hide base layers
+        "effects": {"modulate": {"color": "#ffffff00" } },
+        "layers": [{
+            "mode": "particles",
+            "particles_type": "explode",
+            "z_offset": 2,
+            "receives_effects": false,
+        }],
+    },
 }

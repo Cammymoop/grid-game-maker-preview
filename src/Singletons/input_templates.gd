@@ -31,6 +31,8 @@ enum InputTypes {
 
 	ComplexPropValueInput,
 	
+	DyingEffectInput,
+	
 	# Janky stuff
 	SpecialEffectInput,
 	ExcludeDirectionInput,
@@ -69,6 +71,9 @@ var templates: = {
 	
 	InputTypes.SpecialEffectInput: preload("res://Scenes/GameEditor/static_effect_input.tscn"),
 	InputTypes.ExcludeDirectionInput: preload("res://Scenes/GameEditor/ConditionalEditor/exclude_dir_input.tscn"),
+	
+
+	InputTypes.DyingEffectInput: preload("res://Scenes/GameEditor/dying_effect_input.tscn"),
 }
 
 func get_template(input_type: InputTypes) -> Control:

@@ -56,6 +56,8 @@ var default_teleport_duration: float = 1/6.0
 var default_idle_delay: float = 1/10.0
 var idle_delay_frames: int = -1
 
+var default_dying_effect: Dictionary = {}
+
 var actions_only_for_camera_target: bool = false
 
 var default_move_interp_style: Utility.PosInterpStyle = Utility.PosInterpStyle.CONTINUOUS_LINEAR
@@ -268,6 +270,17 @@ func refresh_definition():
     create_defined_custom_signals()
     
     actions_only_for_camera_target = GameManager.get_game_setting("action_signal_sent_to", "all_entities") != "camera_target"
+    update_default_dying_effect()
+    
+func update_default_dying_effect():
+    var default_dying_effect_name: String = GameManager.get_game_setting("default_dying_effect", "")
+    if not default_dying_effect_name or default_dying_effect_name.to_lower() == "none":
+        default_dying_effect = {}
+    elif default_dying_effect_name in SpriteEffects.DYING_EFFECTS:
+        default_dying_effect = SpriteEffects.DYING_EFFECTS[default_dying_effect_name].duplicate_deep()
+    else:
+        push_warning("Unknown default dying effect (game setting): %s" % default_dying_effect_name)
+        default_dying_effect = {}
 
 func convert_legacy_format_stuff():
     for entity_id in entity_defs:
@@ -281,6 +294,7 @@ func convert_legacy_format_stuff():
 
 func on_game_settings_changed():
     update_movement_mode()
+    update_default_dying_effect()
 
 func update_movement_mode():
     movement_mode = GameManager.get_game_setting("movement_mode", GameManager.MovementMode.MOVEMENT_CONTINUOUS)
@@ -1786,3 +1800,17 @@ func get_entity_tailing_chain(reference_entity: BaseEntity, with_behind: bool, w
 
 func on_textures_remapped() -> void:
     build_sprite_previews()
+
+func get_default_dying_effect_for_entity_id(entity_id: int) -> Dictionary:
+    if not entity_id in entity_defs:
+        push_error("Entity id not found: %s" % entity_id)
+        return {}
+    var dying_effect_prop_val: Variant = entity_defs[entity_id]["properties"].get("dying-effect", "")
+    if typeof(dying_effect_prop_val) in [TYPE_DICTIONARY, TYPE_ARRAY]:
+        prints("entity dying-effect is the wrong type: %s" % type_string(typeof(dying_effect_prop_val)))
+        return default_dying_effect
+    if not dying_effect_prop_val or not typeof(dying_effect_prop_val) == TYPE_STRING or not dying_effect_prop_val in SpriteEffects.DYING_EFFECTS:
+        prints("entity dying-effect is not valid: %s" % dying_effect_prop_val)
+        return default_dying_effect
+    prints("using entity dying-effect: %s" % dying_effect_prop_val)
+    return SpriteEffects.DYING_EFFECTS[dying_effect_prop_val]

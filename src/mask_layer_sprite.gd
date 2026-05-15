@@ -5,6 +5,15 @@ signal dying_animation_finished
 
 const DigitDisplay = preload("res://Scenes/digit_display.gd")
 
+static var particle_types: Dictionary[String, PackedScene] = {
+    "burning_smoke": preload("res://Scenes/Particles/burning_smoke.tscn"),
+    "flames": preload("res://Scenes/Particles/flames.tscn"),
+    "sparkles": preload("res://Scenes/Particles/sparkles.tscn"),
+
+    "explode": preload("res://Scenes/Particles/explode_particles.tscn"),
+    "dust_poof": preload("res://Scenes/Particles/dust_poof_particles.tscn"),
+}
+
 var digit_display_scn: PackedScene = preload("res://Scenes/digit_display.tscn")
 var clipping_spr_scn: PackedScene = preload("res://src/Utility/sub_vp_friendly_clipping_sprite.tscn")
 
@@ -99,10 +108,12 @@ func process_animated_modifiers(delta_time: float) -> void:
         #prints("mod %s, timer %s" % [mod_name, _animation_timers[mod_name]])
         var expire_time: float = _all_modifiers[mod_name].get("expire_time", 0)
         if expire_time > 0 and _animation_timers[mod_name] >= expire_time:
+            prints("expiring modifier %s" % mod_name)
             expired_modifiers.append(mod_name)
     for mod_name in expired_modifiers:
         remove_modifier(mod_name)
         if _dying_with_animated_mod == mod_name:
+            prints("dying modifier expired")
             dying_animation_finished.emit()
     apply_animated_effects_to_sprite(delta_time)
     
@@ -256,13 +267,14 @@ func apply_modifier_info(modifier_info: Dictionary, is_dying_effect: bool = fals
             animated_modifiers.append(modifier_name)
         for effect_name in modifier_info["animated_effects"]:
             _add_animated_modifier_effect(effect_name, modifier_name, modifier_info["animated_effects"][effect_name])
-        _animation_timers[modifier_name] = 0.0
-        apply_animated_effects_to_sprite()
     if modifier_info.get("expire_time", 0) > 0:
-        if is_dying_effect:
-            _dying_with_animated_mod = modifier_name
         if not animated_modifiers.has(modifier_name):
             animated_modifiers.append(modifier_name)
+        if is_dying_effect:
+            _dying_with_animated_mod = modifier_name
+    if modifier_name in animated_modifiers:
+        _animation_timers[modifier_name] = 0.0
+        apply_animated_effects_to_sprite()
     _all_modifiers[modifier_name] = modifier_info.duplicate_deep()
     refresh_layers()
 
@@ -395,6 +407,12 @@ func create_and_add_nodes_for_layer(layer_info: Dictionary, layer_index: int) ->
                 set_digit_display_number.call_deferred(layer_info.get("preview_number", 0), digit_display)
         else:
             set_digit_display_number.call_deferred(layer_info.get("digits_number", 1), digit_display)
+    elif layer_info.get("mode") == "particles":
+        var particles_type: String = layer_info.get("particles_type", "")
+        if not particles_type in particle_types:
+            push_warning("Invalid particles type: %s" % particles_type)
+            return
+        main_layer_node = particle_types[particles_type].instantiate()
     
     var offset_degrees: float = layer_info.get("offset_degrees", 0)
     main_layer_node.set_meta("offset_degrees", offset_degrees)
@@ -718,11 +736,11 @@ func _set_all_layers_replace_color(color: Color, amount: float) -> void:
             layer_node.material.set_shader_parameter("replace_amt", amount)
 
 func _apply_mod_modulate_to(layer_node: Node2D) -> void:
-    var modulate_modifiers: Array = modifier_effects.get("modulate", {}).keys()
-    if modulate_modifiers.size() < 1:
+    var modulate_effects: Dictionary = modifier_effects.get("modulate", {})
+    if modulate_effects.size() < 1:
         return
     var base_mod_color: Color = layer_node.get_meta("base_mod_color", Color.WHITE)
-    var active_modulate: Dictionary = modifier_effects.get("modulate", {})[modulate_modifiers[-1]]
+    var active_modulate: Dictionary = modulate_effects[modulate_effects.keys()[-1]]
     layer_node.modulate = Utility.get_dict_color(active_modulate, "color", Color.WHITE) * base_mod_color
 
 func _get_modifiers_scale() -> Vector2:
