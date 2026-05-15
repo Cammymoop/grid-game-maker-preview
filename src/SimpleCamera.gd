@@ -60,7 +60,6 @@ func update_bounds() -> void:
 
 func activate():
 	active = true
-	prints("activating gameplay camera")
 	print_stack()
 	make_current()
 	if explicitly_following and target_entity and is_instance_valid(target_entity):
@@ -71,7 +70,6 @@ func activate():
 func deactivate():
 	active = false
 	if not explicitly_following:
-		prints("deactivating gameplay camera")
 		target_entity = null
 
 func _process(delta):
@@ -204,7 +202,6 @@ func find_entity_to_follow() -> void:
 	var next_to_follow: = _find_entity_to_follow()
 	target_entity = next_to_follow
 	if not target_entity:
-		prints("no more camera targets")
 		no_more_targets.emit()
 	else:
 		camera_target_changed.emit(target_entity)
@@ -242,13 +239,10 @@ func teleport(pos: Vector2) -> void:
 
 func on_state_loaded() -> void:
 	if not active:
-		prints("state loaded, but camera is not active")
 		return
 	if target_entity and is_instance_valid(target_entity):
-		prints("state loaded, target entity")
 		teleport(get_target_iterpolated_pos())
 	else:
-		prints("state loaded, no target entity")
 		find_entity_to_follow()
 
 func get_target_iterpolated_pos() -> Vector2:

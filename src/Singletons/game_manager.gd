@@ -439,7 +439,6 @@ func on_no_more_camera_targets() -> void:
 	if is_in_level_edit_mode or not editor_save:
 		return
 	if get_game_setting("auto_reload_checkpoint_for_no_cam_focus", false):
-		prints("queueing checkpoint reload for no cam focus")
 		queue_delayed_other_load(0.5, _reload_for_lack_of_cam_target)
 
 func on_game_camera_target_changed(entity: BaseEntity) -> void:
@@ -497,13 +496,11 @@ func _unpause() -> void:
 func save_checkpoint() -> void:
 	checkpoint_save = get_serialized_play_state()
 func load_checkpoint() -> void:
-	prints("loading checkpoint")
 	if not checkpoint_save:
 		if editor_save:
 			load_serialized_play_state(editor_save, false)
 		else:
 			push_error("cannot load level or checkpoint")
-			prints("cannot load level or checkpoint")
 		return
 	load_serialized_play_state(checkpoint_save, false)
 func clear_checkpoint() -> void:
@@ -642,7 +639,6 @@ func queue_delayed_other_load(with_delay: float, callback: Callable) -> void:
 	queued_level_load = true
 	queued_level_load_timer = Timer.new()
 	queued_level_load_timer.one_shot = true
-	queued_level_load_timer.timeout.connect(prints.bind("queued other load timeout"))
 	queued_level_load_timer.timeout.connect(callback)
 	queued_level_load_timer.timeout.connect(queued_level_load_timer.queue_free)
 	add_child(queued_level_load_timer)
@@ -814,7 +810,6 @@ func post_scene_change() -> void:
 			else:
 				new_empty_level()
 		else:
-			prints("playing current save level")
 			play_current_save_level()
 			#play_first_level()
 		if not is_in_level_edit_mode:
@@ -1174,7 +1169,6 @@ func reset_camera_follow() -> void:
 	camera_refollow()
 
 func camera_refollow() -> void:
-	prints("refollowing camera")
 	game_camera.find_entity_to_follow()
 
 func get_base_camera_setting(setting_name: String, default_value: Variant = null) -> Variant:
@@ -1508,7 +1502,7 @@ func goto_level_code(level_code: String, as_queued_load: bool = false) -> void:
 
 func goto_level_in_level_list(level_list_name: String, level_name: String, as_queued_load: bool = false) -> void:
 	if not cur_scene == "Play":
-		prints("goto level not in play scene")
+		push_error("goto level not in play scene")
 		return
 	if is_in_level_edit_mode:
 		return
@@ -1528,10 +1522,8 @@ func goto_level_in_level_list(level_list_name: String, level_name: String, as_qu
 		else:
 			current_level_list = level_list_name
 	else:
-		prints("level list info is empty")
 		current_level_list = ""
 	
-	prints("loading level: " + level_name + " in list: " + level_list_name, " queued load: " + str(queued_level_load), " as queued load: " + str(as_queued_load))
 	try_load_level(level_name, as_queued_load)
 
 
@@ -1630,19 +1622,16 @@ func play_first_level() -> void:
 		return
 	var first_level_and_list: Array = get_starting_level_and_list()
 	if not first_level_and_list:
-		prints("no first level and list, creating empty level")
+		push_warning("no first level and list, creating empty level")
 		new_empty_level()
 		return
-	prints("playing first level: " + first_level_and_list[1] + " in list: " + first_level_and_list[0])
 	goto_level_in_level_list(first_level_and_list[0], first_level_and_list[1])
 
 func play_current_save_level() -> void:
 	if is_in_level_edit_mode:
 		return
 	var cur_save_level: String = get_game_save_data("last_played_level", "")
-	prints("playing current save level: " + cur_save_level)
 	if not cur_save_level:
-		prints("current save level is empty, playing first level")
 		play_first_level()
 		return
 	goto_level_in_level_list(_level_list_from_code(cur_save_level), _level_name_from_code(cur_save_level))
