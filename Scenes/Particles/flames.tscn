@@ -1,8 +1,8 @@
-[gd_scene format=3 uid="uid://2dkudl66yoq3"]
+[gd_scene format=3 uid="uid://be2lcsnedw0qb"]
 
-[ext_resource type="Script" uid="uid://f5bdstyasl6x" path="res://Scenes/Particles/burning_particles.gd" id="1_1qt3a"]
-[ext_resource type="Texture2D" uid="uid://bq5cmu4i8tgxn" path="res://assets/img/particle_textures/puffer.png" id="3_uljns"]
-[ext_resource type="Texture2D" uid="uid://cdghqjnvh5h5d" path="res://assets/img/particle_textures/mess_solid.png" id="4_xjelu"]
+[ext_resource type="Script" uid="uid://f5bdstyasl6x" path="res://Scenes/Particles/burning_particles.gd" id="1_jwhq7"]
+[ext_resource type="Texture2D" uid="uid://bq5cmu4i8tgxn" path="res://assets/img/particle_textures/puffer.png" id="2_md0ju"]
+[ext_resource type="Texture2D" uid="uid://cdghqjnvh5h5d" path="res://assets/img/particle_textures/mess_solid.png" id="3_xgm7e"]
 
 [sub_resource type="Curve" id="Curve_jwi5v"]
 _data = [Vector2(0, 0.28947365), 0.0, 0.0, 0, 0, Vector2(0.2593458, 1), 0.0, 0.0, 0, 0, Vector2(0.3948598, 1), 0.0, 0.0, 0, 0, Vector2(1, 0), 0.0, 0.0, 0, 0]
@@ -65,8 +65,9 @@ hue_variation_min = -0.010000022
 hue_variation_max = 0.009999977
 
 [node name="Burning" type="Node2D" unique_id=1045806711 node_paths=PackedStringArray("smoke_particles", "flames_particles")]
-script = ExtResource("1_1qt3a")
+script = ExtResource("1_jwhq7")
 show_flames = true
+show_smoke = false
 smoke_particles = NodePath("Smoke")
 flames_particles = NodePath("Flames")
 
@@ -74,16 +75,15 @@ flames_particles = NodePath("Flames")
 show_behind_parent = true
 emitting = false
 amount = 60
-texture = ExtResource("3_uljns")
+texture = ExtResource("2_md0ju")
 lifetime = 0.7
 speed_scale = 2.2
 process_material = SubResource("ParticleProcessMaterial_3xiqv")
 
 [node name="Flames" type="GPUParticles2D" parent="." unique_id=1149991277]
 self_modulate = Color(1, 1, 1, 0.5294118)
-z_index = 2
 material = SubResource("CanvasItemMaterial_ul442")
 emitting = false
 amount = 50
-texture = ExtResource("4_xjelu")
+texture = ExtResource("3_xgm7e")
 process_material = SubResource("ParticleProcessMaterial_njjym")

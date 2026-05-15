@@ -91,20 +91,6 @@ alpha_curve = SubResource("CurveTexture_4btjn")
 
 [node name="ExplodeParticles" type="Node2D" unique_id=303765297]
 
-[node name="ColorRect2" type="ColorRect" parent="." unique_id=449810410]
-offset_left = -48.0
-offset_top = -47.0
-offset_right = 48.0
-offset_bottom = 49.0
-color = Color(0.88686633, 0.50395304, 0.5011923, 1)
-
-[node name="ColorRect" type="ColorRect" parent="." unique_id=635308001]
-offset_left = -16.0
-offset_top = -15.0
-offset_right = 16.0
-offset_bottom = 17.0
-color = Color(0.9305399, 0.6358329, 0.62629753, 1)
-
 [node name="Smoke" type="GPUParticles2D" parent="." unique_id=1182042900]
 emitting = false
 amount = 20
@@ -113,6 +99,7 @@ lifetime = 1.39
 one_shot = true
 speed_scale = 1.4
 explosiveness = 0.8
+visibility_rect = Rect2(-32, -32, 64, 64)
 process_material = SubResource("20")
 
 [node name="Flash" type="GPUParticles2D" parent="." unique_id=394171610]
@@ -121,4 +108,5 @@ texture = SubResource("GradientTexture2D_pfho2")
 lifetime = 0.28
 one_shot = true
 explosiveness = 0.86
+visibility_rect = Rect2(-32, -32, 64, 64)
 process_material = SubResource("ParticleProcessMaterial_n0gle")

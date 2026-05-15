@@ -56,8 +56,8 @@ radial_accel_max = 0.99999774
 radial_accel_curve = SubResource("CurveTexture_0wrl5")
 damping_min = 3.0000002
 damping_max = 3.0000002
-scale_min = 0.7
-scale_max = 1.5
+scale_min = 0.55
+scale_max = 1.25
 scale_curve = SubResource("19")
 color_ramp = SubResource("GradientTexture1D_07pp6")
 color_initial_ramp = SubResource("GradientTexture1D_it4mw")
@@ -72,6 +72,7 @@ lifetime = 0.8
 one_shot = true
 preprocess = 0.2
 explosiveness = 0.86
+visibility_rect = Rect2(-32, -32, 64, 64)
 process_material = SubResource("20")
 
 [node name="ColorRect2" type="ColorRect" parent="." unique_id=1493733611]
