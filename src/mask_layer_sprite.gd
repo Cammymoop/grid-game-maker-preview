@@ -96,7 +96,7 @@ func process_animated_modifiers(delta_time: float) -> void:
         if not mod_name in _animation_timers:
             continue
         _animation_timers[mod_name] += delta_time
-        prints("mod %s, timer %s" % [mod_name, _animation_timers[mod_name]])
+        #prints("mod %s, timer %s" % [mod_name, _animation_timers[mod_name]])
         var expire_time: float = _all_modifiers[mod_name].get("expire_time", 0)
         if expire_time > 0 and _animation_timers[mod_name] >= expire_time:
             expired_modifiers.append(mod_name)
@@ -258,8 +258,11 @@ func apply_modifier_info(modifier_info: Dictionary, is_dying_effect: bool = fals
             _add_animated_modifier_effect(effect_name, modifier_name, modifier_info["animated_effects"][effect_name])
         _animation_timers[modifier_name] = 0.0
         apply_animated_effects_to_sprite()
-    if is_dying_effect and modifier_info.get("expire_time", 0) > 0:
-        _dying_with_animated_mod = modifier_name
+    if modifier_info.get("expire_time", 0) > 0:
+        if is_dying_effect:
+            _dying_with_animated_mod = modifier_name
+        if not animated_modifiers.has(modifier_name):
+            animated_modifiers.append(modifier_name)
     _all_modifiers[modifier_name] = modifier_info.duplicate_deep()
     refresh_layers()
 
@@ -277,7 +280,6 @@ func remove_modifier(modifier_name: String) -> void:
     _animation_timers.erase(modifier_name)
     _all_modifiers.erase(modifier_name)
     if animated_modifiers.has(modifier_name):
-        prints("removing animated modifier: %s" % modifier_name)
         animated_modifiers.erase(modifier_name)
         apply_animated_effects_to_sprite()
     refresh_layers()
@@ -521,11 +523,14 @@ func _add_animated_modifier_effect(effect_name: String, modifier_name: String, e
     animated_effects[effect_name][modifier_name] = effect_stuff
 
 func _remove_animated_modifier_effects(for_modifier_name: String) -> void:
-    for effect_name in animated_effects:
+    for effect_name in animated_effects.keys():
         if animated_effects[effect_name].has(for_modifier_name):
+            prints("removing animated effect %s for modifier %s" % [effect_name, for_modifier_name])
             animated_effects[effect_name].erase(for_modifier_name)
             if animated_effects[effect_name].size() == 0:
                 animated_effects.erase(effect_name)
+        else:
+            prints("effect %s not included in modifier %s" % [effect_name, for_modifier_name])
 
 func clear_children() -> void:
     if not layer_root:
@@ -745,12 +750,28 @@ func _apply_animated_effect_to_sprite(effect_name: String, delta_time: float) ->
         call(method_name, animated_effects.get(effect_name, {}), delta_time)
 
 func _get_anim_t(effect_data: Dictionary, mod_name: String) -> float:
+    if effect_data.get("two_stage", false):
+        return _get_two_stage_anim_t(effect_data, mod_name)
     var base_duration: float = effect_data.get("base_duration", 1.0)
-    var t: float = (_animation_timers[mod_name] + effect_data.get("time_offset", 0.0)) / base_duration
+    var t: float = (_animation_timers[mod_name] - effect_data.get("time_offset", 0.0)) / base_duration
     if effect_data.has("ease_param"):
         t = ease(t, effect_data["ease_param"])
-    prints("effect %s, base duration %s, t %s ::: %s" % [mod_name, base_duration, t, effect_data])
     return t
+
+func _get_two_stage_anim_t(effect_data: Dictionary, mod_name: String) -> float:
+    var base_duration: float = effect_data.get("base_duration", 1.0)
+    var mid_point: float = effect_data.get("mid_point", 0.5)
+    var base_t: float = (_animation_timers[mod_name] - effect_data.get("time_offset", 0.0)) / base_duration
+    if base_t < mid_point:
+        var stage_1_t: float = base_t / mid_point
+        if effect_data.has("ease_param"):
+            stage_1_t = ease(stage_1_t, effect_data["ease_param"])
+        return stage_1_t
+    else:
+        var stage_2_t: float =  1 - ((base_t - mid_point) / (1 - mid_point))
+        if effect_data.has("ease_param_2"):
+            stage_2_t = ease(stage_2_t, effect_data["ease_param_2"])
+        return stage_2_t
 
 func _anim___scale(effect_stack: Dictionary, _delta_time: float) -> void:
     var total_scale: = Vector2.ONE

@@ -14,8 +14,11 @@
 [ext_resource type="PackedScene" uid="uid://c08hfkcpibqpg" path="res://Scenes/GameEditor/new_list_panel.tscn" id="10_ui3gn"]
 [ext_resource type="PackedScene" uid="uid://b1a6s2o32t35i" path="res://Scenes/GameEditor/bg_style_editor.tscn" id="11_ui3gn"]
 [ext_resource type="PackedScene" uid="uid://b4fp8ldktkvcd" path="res://Scenes/bg_effect_6.tscn" id="12_hagi3"]
-[ext_resource type="Script" path="res://Scenes/map_editor_overlay.gd" id="12_n87tl"]
+[ext_resource type="Script" uid="uid://b4kmfrl8rik3w" path="res://Scenes/map_editor_overlay.gd" id="12_n87tl"]
 [ext_resource type="PackedScene" uid="uid://cdx3gttyeybd1" path="res://Scenes/editor_controls_help.tscn" id="14_n5m2s"]
+
+[sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_n5m2s"]
+blend_mode = 4
 
 [sub_resource type="Animation" id="Animation_nsvgp"]
 length = 0.001
@@ -167,6 +170,7 @@ offset_right = 40.0
 offset_bottom = 40.0
 
 [node name="Display" type="TextureRect" parent="." unique_id=1709416986 node_paths=PackedStringArray("forward_to")]
+material = SubResource("CanvasItemMaterial_n5m2s")
 layout_mode = 0
 anchor_right = 1.0
 anchor_bottom = 1.0

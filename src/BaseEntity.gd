@@ -726,19 +726,19 @@ func can_i_teleport_to(to_tile_pos: Vector2i, with_facing: int = -1, with_move_f
 	set_move_facing(old_move_facing)
 	return result
 
-func die(with_effect_info: Dictionary = {}) -> void:
+func die(with_effect_info: Dictionary = {}, with_duration: float = -1) -> void:
 	var dying_conditional = EntityManager.get_entity_property(self, "dying")
 	if dying_conditional and dying_conditional.is_conditional():
 		dying_conditional.resolve(self, null, tile_position)
 	EntityManager.post_die_actions(self)
-	with_effect_info = SpriteEffects.DYING_EFFECTS["Spin Out"]
+	with_effect_info = SpriteEffects.DYING_EFFECTS["Fly Up"]
 	if not with_effect_info:
 		EntityManager.remove_entity(self)
 	else:
 		dying = true
-		do_dying_effect(with_effect_info)
+		do_dying_effect(with_effect_info, with_duration)
 
-func do_dying_effect(effect_info: Dictionary) -> void:
+func do_dying_effect(effect_info: Dictionary, with_duration: float = -1) -> void:
 	var effect_name: String = effect_info.get("name", "")
 	if not effect_info or not effect_name:
 		push_warning("invalid dying effect info: " + str(effect_info))
@@ -746,12 +746,15 @@ func do_dying_effect(effect_info: Dictionary) -> void:
 		return
 	effect_info = effect_info.duplicate_deep()
 	set_active(false)
-	var duration: float = effect_info.get("duration", DEF_DYING_EFFECT_DURATION)
+	if with_duration < 0:
+		with_duration = effect_info.get("duration", DEF_DYING_EFFECT_DURATION)
 	for ll_effect_name in effect_info.get("animated_effects", {}):
 		var ll_effect: Dictionary = effect_info["animated_effects"][ll_effect_name]
 		var ll_effect_dur_factor: float = ll_effect.get("duration_factor", 1.0)
-		ll_effect["base_duration"] = duration * ll_effect_dur_factor
-	effect_info["expire_time"] = duration
+		ll_effect["base_duration"] = with_duration * ll_effect_dur_factor
+		if ll_effect.has("time_offset"):
+			ll_effect["time_offset"] *= with_duration
+	effect_info["expire_time"] = with_duration
 	add_sprite_modifier(effect_info, true)
 
 func set_tailing(entity_to_tail) -> void:

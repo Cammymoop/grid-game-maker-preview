@@ -1,0 +1,124 @@
+[gd_scene format=3 uid="uid://c6310xu1ijeyy"]
+
+[ext_resource type="Texture2D" uid="uid://dxq70fd10q5pp" path="res://assets/img/particle_textures/soft_cloud.png" id="1_o6vyl"]
+
+[sub_resource type="Curve" id="Curve_o6vyl"]
+_data = [Vector2(0, 1), 0.0, 0.0, 0, 0, Vector2(0.4929906, 1), 0.0, 0.0, 0, 0, Vector2(1, 0), 0.0, 0.0, 0, 0]
+point_count = 3
+
+[sub_resource type="CurveTexture" id="CurveTexture_dclpa"]
+curve = SubResource("Curve_o6vyl")
+
+[sub_resource type="Gradient" id="Gradient_o6vyl"]
+offsets = PackedFloat32Array(0.013736264, 0.15659341, 0.3653846, 0.8708791)
+colors = PackedColorArray(0.9759771, 0.8814899, 0.791216, 1, 0.54896253, 0.5489626, 0.5489625, 1, 0.2592942, 0.25929356, 0.25929335, 1, 0.30131587, 0.30131587, 0.30131584, 0.90588236)
+
+[sub_resource type="GradientTexture1D" id="GradientTexture1D_dclpa"]
+gradient = SubResource("Gradient_o6vyl")
+
+[sub_resource type="Curve" id="18"]
+_data = [Vector2(0, 0.5421052), 0.0, 0.0, 0, 0, Vector2(0.16588786, 1), 0.0, 0.0, 0, 0, Vector2(0.60514015, 1), 0.0, 0.0, 0, 0, Vector2(1, 0.75263155), 0.0, 0.0, 0, 0]
+point_count = 4
+
+[sub_resource type="CurveTexture" id="19"]
+curve = SubResource("18")
+
+[sub_resource type="ParticleProcessMaterial" id="20"]
+particle_flag_damping_as_friction = true
+emission_shape = 1
+emission_sphere_radius = 8.0
+angle_min = 1.0728835e-05
+angle_max = 90.000015
+spread = 180.0
+initial_velocity_min = 150.0
+initial_velocity_max = 190.0
+gravity = Vector3(0, 0, 0)
+damping_min = 2.9
+damping_max = 3.4
+scale_min = 0.7
+scale_max = 1.5
+scale_curve = SubResource("19")
+color = Color(1, 1, 1, 0.8980392)
+color_ramp = SubResource("GradientTexture1D_dclpa")
+alpha_curve = SubResource("CurveTexture_dclpa")
+
+[sub_resource type="Gradient" id="Gradient_k7xsi"]
+offsets = PackedFloat32Array(0, 0.95353985, 1)
+colors = PackedColorArray(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_pfho2"]
+gradient = SubResource("Gradient_k7xsi")
+fill = 1
+fill_from = Vector2(0.5, 0.5)
+fill_to = Vector2(1, 0.5)
+metadata/_snap_enabled = true
+
+[sub_resource type="Curve" id="Curve_j8ni2"]
+_data = [Vector2(0, 1), 0.0, 0.0, 0, 0, Vector2(0.32476634, 1), 0.0, 0.0, 0, 0, Vector2(1, 0.2473684), 0.0, 0.0, 0, 0]
+point_count = 3
+
+[sub_resource type="CurveTexture" id="CurveTexture_4btjn"]
+curve = SubResource("Curve_j8ni2")
+
+[sub_resource type="Gradient" id="Gradient_tkulx"]
+offsets = PackedFloat32Array(0.03021978, 0.32692307, 0.77747256, 1)
+colors = PackedColorArray(1, 1, 1, 1, 0.9999997, 0.97496015, 0.6056027, 1, 0.9381421, 0.44120446, 0.46558923, 1, 0.41752076, 0.23067161, 0.23482364, 1)
+
+[sub_resource type="GradientTexture1D" id="GradientTexture1D_kyutj"]
+gradient = SubResource("Gradient_tkulx")
+
+[sub_resource type="Curve" id="Curve_hep8t"]
+_data = [Vector2(0, 1), 0.0, 0.0, 0, 0, Vector2(0.3808411, 1), 0.0, 0.0, 0, 0, Vector2(1, 0.44736838), 0.0, 0.0, 0, 0]
+point_count = 3
+
+[sub_resource type="CurveTexture" id="CurveTexture_xt5cw"]
+curve = SubResource("Curve_hep8t")
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_n0gle"]
+particle_flag_disable_z = true
+emission_shape = 6
+emission_ring_axis = Vector3(0, 0, 1)
+emission_ring_height = 1.0
+emission_ring_radius = 7.0
+emission_ring_inner_radius = 6.5
+emission_ring_cone_angle = 90.0
+gravity = Vector3(0, 0, 0)
+scale_min = 0.24
+scale_max = 0.39999998
+scale_curve = SubResource("CurveTexture_xt5cw")
+color_ramp = SubResource("GradientTexture1D_kyutj")
+alpha_curve = SubResource("CurveTexture_4btjn")
+
+[node name="ExplodeParticles" type="Node2D" unique_id=303765297]
+
+[node name="ColorRect2" type="ColorRect" parent="." unique_id=449810410]
+offset_left = -48.0
+offset_top = -47.0
+offset_right = 48.0
+offset_bottom = 49.0
+color = Color(0.88686633, 0.50395304, 0.5011923, 1)
+
+[node name="ColorRect" type="ColorRect" parent="." unique_id=635308001]
+offset_left = -16.0
+offset_top = -15.0
+offset_right = 16.0
+offset_bottom = 17.0
+color = Color(0.9305399, 0.6358329, 0.62629753, 1)
+
+[node name="Smoke" type="GPUParticles2D" parent="." unique_id=1182042900]
+emitting = false
+amount = 20
+texture = ExtResource("1_o6vyl")
+lifetime = 1.39
+one_shot = true
+speed_scale = 1.4
+explosiveness = 0.8
+process_material = SubResource("20")
+
+[node name="Flash" type="GPUParticles2D" parent="." unique_id=394171610]
+emitting = false
+texture = SubResource("GradientTexture2D_pfho2")
+lifetime = 0.28
+one_shot = true
+explosiveness = 0.86
+process_material = SubResource("ParticleProcessMaterial_n0gle")

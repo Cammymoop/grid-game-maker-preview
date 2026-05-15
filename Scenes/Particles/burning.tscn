@@ -1,0 +1,106 @@
+[gd_scene format=3 uid="uid://2dkudl66yoq3"]
+
+[ext_resource type="Script" uid="uid://f5bdstyasl6x" path="res://Scenes/Particles/burning_particles.gd" id="1_1qt3a"]
+[ext_resource type="Texture2D" uid="uid://d0uyc2rshryrj" path="res://assets/img/entityTiles.png" id="2_umexe"]
+[ext_resource type="Texture2D" uid="uid://bq5cmu4i8tgxn" path="res://assets/img/particle_textures/puffer.png" id="3_uljns"]
+[ext_resource type="Texture2D" uid="uid://cdghqjnvh5h5d" path="res://assets/img/particle_textures/mess_solid.png" id="4_xjelu"]
+
+[sub_resource type="Curve" id="Curve_jwi5v"]
+_data = [Vector2(0, 0.28947365), 0.0, 0.0, 0, 0, Vector2(0.2593458, 1), 0.0, 0.0, 0, 0, Vector2(0.3948598, 1), 0.0, 0.0, 0, 0, Vector2(1, 0), 0.0, 0.0, 0, 0]
+point_count = 4
+
+[sub_resource type="CurveTexture" id="CurveTexture_c2y11"]
+curve = SubResource("Curve_jwi5v")
+
+[sub_resource type="Gradient" id="Gradient_we8kr"]
+offsets = PackedFloat32Array(0, 0.728022, 1)
+colors = PackedColorArray(0.22670737, 0.22670755, 0.2267074, 1, 0.19793701, 0.19793734, 0.1979371, 1, 0.525101, 0.5251014, 0.5251012, 1)
+
+[sub_resource type="GradientTexture1D" id="GradientTexture1D_2n4xf"]
+gradient = SubResource("Gradient_we8kr")
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_3xiqv"]
+particle_flag_disable_z = true
+emission_shape_offset = Vector3(0, 3, 0)
+emission_shape = 1
+emission_sphere_radius = 12.0
+angle_min = -179.99998
+angle_max = 180.00002
+gravity = Vector3(0, -35, 0)
+scale_min = 0.29999998
+scale_max = 0.87
+color_initial_ramp = SubResource("GradientTexture1D_2n4xf")
+alpha_curve = SubResource("CurveTexture_c2y11")
+
+[sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_ul442"]
+blend_mode = 1
+
+[sub_resource type="Gradient" id="Gradient_m8ay6"]
+colors = PackedColorArray(0.9803168, 0.70620054, 0.3665359, 1, 0.9750082, 0.5184421, 0.4962821, 1)
+
+[sub_resource type="GradientTexture1D" id="GradientTexture1D_ve81k"]
+gradient = SubResource("Gradient_m8ay6")
+
+[sub_resource type="Curve" id="Curve_wmr7b"]
+_data = [Vector2(0, 0.6263157), 0.0, 0.0, 0, 0, Vector2(0.2313084, 1), 0.0, 0.0, 0, 0, Vector2(0.7266355, 1), 0.0, 0.0, 0, 0, Vector2(1, 0.56315786), 0.0, 0.0, 0, 0]
+point_count = 4
+
+[sub_resource type="CurveTexture" id="CurveTexture_23veu"]
+curve = SubResource("Curve_wmr7b")
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_njjym"]
+particle_flag_disable_z = true
+emission_shape = 1
+emission_sphere_radius = 14.0
+angle_min = -46.69999
+angle_max = 46.700012
+gravity = Vector3(0, -50, 0)
+radial_accel_min = -30.000002
+radial_accel_max = -30.000002
+scale_min = 0.5
+scale_max = 0.7
+scale_curve = SubResource("CurveTexture_23veu")
+color = Color(1, 1, 1, 0.17254902)
+color_ramp = SubResource("GradientTexture1D_ve81k")
+hue_variation_min = -0.010000022
+hue_variation_max = 0.009999977
+
+[node name="Burning" type="Node2D" unique_id=1045806711]
+script = ExtResource("1_1qt3a")
+
+[node name="ColorRect2" type="ColorRect" parent="." unique_id=596745047]
+offset_left = -48.0
+offset_top = -47.0
+offset_right = 48.0
+offset_bottom = 49.0
+color = Color(0.88686633, 0.50395304, 0.5011923, 1)
+
+[node name="ColorRect" type="ColorRect" parent="." unique_id=959955813]
+offset_left = -16.0
+offset_top = -15.0
+offset_right = 16.0
+offset_bottom = 17.0
+color = Color(0.9305399, 0.6358329, 0.62629753, 1)
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=1105820878]
+texture_filter = 1
+texture = ExtResource("2_umexe")
+region_enabled = true
+region_rect = Rect2(0, 0, 32, 32)
+
+[node name="Smoke" type="GPUParticles2D" parent="Sprite2D" unique_id=926810221]
+show_behind_parent = true
+emitting = false
+amount = 60
+texture = ExtResource("3_uljns")
+lifetime = 0.7
+speed_scale = 2.2
+process_material = SubResource("ParticleProcessMaterial_3xiqv")
+
+[node name="Flames" type="GPUParticles2D" parent="Sprite2D" unique_id=1149991277]
+visible = false
+self_modulate = Color(1, 1, 1, 0.5294118)
+material = SubResource("CanvasItemMaterial_ul442")
+amount = 50
+texture = ExtResource("4_xjelu")
+process_material = SubResource("ParticleProcessMaterial_njjym")
