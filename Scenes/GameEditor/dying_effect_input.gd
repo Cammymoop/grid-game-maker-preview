@@ -16,6 +16,9 @@ func set_arg_name(new_arg_name: String) -> void:
 func get_arg_name() -> String:
     return arg_name
 
+func set_value(new_value: Dictionary) -> void:
+    Utility.opbtn_select_text(effect_picker_input, new_value["name"])
+
 func get_value() -> Dictionary:
     var selected_effect: String = Utility.opbtn_get_selected_text(effect_picker_input)
     return {
