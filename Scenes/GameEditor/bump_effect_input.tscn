@@ -1,0 +1,26 @@
+[gd_scene format=3 uid="uid://cxhnyxu1yw3sp"]
+
+[ext_resource type="Script" uid="uid://ddhsn1v0xq64b" path="res://Scenes/GameEditor/bump_effect_input.gd" id="1_8mgq2"]
+
+[node name="BumpEffectInput" type="HBoxContainer" unique_id=790260579 node_paths=PackedStringArray("effect_picker_input")]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_right = -565.0
+offset_bottom = -741.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 10
+script = ExtResource("1_8mgq2")
+effect_picker_input = NodePath("BumpEffectPicker")
+
+[node name="BumpEffectPicker" type="OptionButton" parent="." unique_id=583237251]
+layout_mode = 2
+size_flags_vertical = 4
+alignment = 1
+fit_to_longest_item = false
+
+[node name="ColorPickerButton" type="ColorPickerButton" parent="." unique_id=627619670]
+visible = false
+custom_minimum_size = Vector2(40, 0)
+layout_mode = 2

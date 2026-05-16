@@ -66,6 +66,72 @@ const LOW_LEVEL_ANIM_EFFECTS: Array[String] = [
     "scale", "offset", "replace_color", "fade", "spin",
 ]
 
+const BUMP_EFFECTS: Dictionary[String, Dictionary] = {
+    "Hop": {
+        "name": "bump-hop",
+        "animated_effects": {
+            "offset": { 
+                "two_stage": true,
+                "mid_point": 0.5,
+                "offset_to": [0, -22],
+                "ease_param": 0.5,
+                "ease_param_2": 2.0,
+            }
+        }
+    },
+    "Expand": {
+        "name": "bump-expand",
+        "animated_effects": {
+            "scale": {
+                "two_stage": true,
+                "mid_point": 0.25,
+                "scale_to": [1.2,1.2],
+            }
+        }
+    },
+    "Shrink": {
+        "name": "bump-shrink",
+        "animated_effects": {
+            "scale": { 
+                "two_stage": true,
+                "mid_point": 0.25,
+                "scale_to": [0.8,0.8],
+            }
+        }
+    },
+    "Flash": {
+        "name": "bump-flash",
+        "animated_effects": {
+            "replace_color": {
+                "two_stage": true,
+                "mid_point": 0.25,
+                "color_from": "#ffffff",
+                "color_to": "#ffffff",
+                "amount_to": 1.0,
+            }
+        }
+    },
+    "Spin": {
+        "name": "bump-spin",
+        "animated_effects": {
+            "spin": {
+                "total_rotation": 1.0,
+                "ease_param": 0.33,
+            }
+        }
+    },
+}
+
+static func set_bump_effect_params(effect_name: String, effect_params: Dictionary, effect_info: Dictionary) -> void:
+    if not effect_name in BUMP_EFFECTS:
+        return
+    if effect_params.has("color"):
+        if effect_name == "Flash":
+            var replace_color_effect: Dictionary = effect_info.get("animated_effects", {}).get("replace_color", {})
+            if replace_color_effect:
+                replace_color_effect["color_from"] = effect_params["color"]
+                replace_color_effect["color_to"] = effect_params["color"]
+
 const DYING_EFFECTS: Dictionary[String, Dictionary] = {
     "Spin Out": {
         "name": "dying-spin-out",

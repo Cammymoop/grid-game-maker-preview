@@ -607,6 +607,9 @@ func actually_started_move() -> void:
 	var post_move = EntityManager.get_entity_property(self, "post_move")
 	if post_move and post_move.is_conditional():
 		post_move.resolve(self, null, get_moving_position())
+	
+	if entity_name == "player":
+		do_named_bump_effect({"name": "Spin"})
 
 func is_settled() -> bool:
 	return not moving
@@ -675,6 +678,9 @@ func get_steps_per_tile() -> int:
 	if is_spt_override:
 		return override_steps_per_tile
 	return _cached_definition_spt
+
+func get_move_duration() -> float:
+	return get_steps_per_tile() / float(GameManager.FULL_TICK_RATE)
 
 func get_native_steps_per_tile() -> int:
 	return _cached_definition_spt
@@ -773,6 +779,36 @@ func do_dying_effect(effect_info: Dictionary, with_duration: float = -1) -> void
 			ll_effect["time_offset"] *= with_duration
 	effect_info["expire_time"] = with_duration
 	add_sprite_modifier(effect_info, true)
+
+
+func do_named_bump_effect(effect_params: Dictionary, with_duration: float = -1) -> void:
+	var effect_name: String = effect_params.get("name", "")
+	if not effect_name or not effect_name in SpriteEffects.BUMP_EFFECTS:
+		push_warning("Unknown bump effect: %s" % effect_name)
+		return
+	var effect_info: Dictionary = SpriteEffects.BUMP_EFFECTS[effect_name].duplicate_deep()
+	SpriteEffects.set_bump_effect_params(effect_name, effect_params, effect_info)
+	do_bump_effect(effect_info, with_duration)
+
+func do_bump_effect(effect_info: Dictionary, with_duration: float = -1) -> void:
+	if not effect_info:
+		return
+	effect_info = effect_info.duplicate_deep()
+	if with_duration < 0:
+		if effect_info.has("duration"):
+			with_duration = effect_info["duration"]
+		else:
+			with_duration = get_move_duration()
+	var animated_effects: Dictionary = effect_info.get("animated_effects", {})
+	for ll_effect_name in animated_effects:
+		var ll_effect: Dictionary = animated_effects[ll_effect_name]
+		var ll_effect_dur_factor: float = ll_effect.get("duration_factor", 1.0)
+		ll_effect["base_duration"] = with_duration * ll_effect_dur_factor
+		if ll_effect.has("time_offset"):
+			ll_effect["time_offset"] *= with_duration
+	effect_info["expire_time"] = with_duration
+	add_sprite_modifier(effect_info)
+
 
 func set_tailing(entity_to_tail) -> void:
 	tailing = entity_to_tail

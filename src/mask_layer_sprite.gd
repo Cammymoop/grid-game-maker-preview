@@ -108,12 +108,10 @@ func process_animated_modifiers(delta_time: float) -> void:
         #prints("mod %s, timer %s" % [mod_name, _animation_timers[mod_name]])
         var expire_time: float = _all_modifiers[mod_name].get("expire_time", 0)
         if expire_time > 0 and _animation_timers[mod_name] >= expire_time:
-            prints("expiring modifier %s" % mod_name)
             expired_modifiers.append(mod_name)
     for mod_name in expired_modifiers:
         remove_modifier(mod_name)
         if _dying_with_animated_mod == mod_name:
-            prints("dying modifier expired")
             dying_animation_finished.emit()
     apply_animated_effects_to_sprite(delta_time)
     
@@ -808,6 +806,7 @@ func _anim___offset(effect_stack: Dictionary, _delta_time: float) -> void:
         var t: float = _get_anim_t(effect_data, mod_name)
         var offset_from: = Utility.get_vector2_from_arr(effect_data.get("offset_from", [0,0]))
         var offset_to: = Utility.get_vector2_from_arr(effect_data.get("offset_to", [0,0]))
+        prints("anim mod adding %s offset, (t = %s)" % [str(offset_from.lerp(offset_to, t)), t])
         accumulated_offset += offset_from.lerp(offset_to, t)
     layer_root.position = accumulated_offset
 

@@ -32,6 +32,7 @@ enum InputTypes {
 	ComplexPropValueInput,
 	
 	DyingEffectInput,
+	BumpEffectInput,
 	
 	# Janky stuff
 	SpecialEffectInput,
@@ -74,6 +75,7 @@ var templates: = {
 	
 
 	InputTypes.DyingEffectInput: preload("res://Scenes/GameEditor/dying_effect_input.tscn"),
+	InputTypes.BumpEffectInput: preload("res://Scenes/GameEditor/bump_effect_input.tscn"),
 }
 
 func get_template(input_type: InputTypes) -> Control:
