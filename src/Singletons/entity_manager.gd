@@ -1446,7 +1446,16 @@ var special_effects: Dictionary = {
     "Multiplied Color": {
         "name": "effect-multiplied-color",
         "effects": { "modulate": { "color": "#FFFFFFFF" } },
-    }
+    },
+    "Sparkling": {
+        "name": "bump-sparkle",
+        "layers": [{
+            "mode": "particles",
+            "particles_type": "sparkles",
+            "receives_effects": false,
+            "mod_color": "#FFFFFFFF",
+        }],
+    },
 }
 
 func apply_special_effect(entity: BaseEntity, effect_name: String, color_param: Color = Color.WHITE) -> void:
@@ -1458,6 +1467,8 @@ func apply_special_effect(entity: BaseEntity, effect_name: String, color_param: 
         effect_info["effects"]["replace_color"]["amount"] = color_param.a
     elif effect_name == "Multiplied Color":
         effect_info["effects"]["modulate"]["color"] = Utility.color_string(color_param, true)
+    elif effect_name == "Sparkling":
+        effect_info["layers"][0]["mod_color"] = Utility.color_string(color_param, true)
     entity.add_sprite_modifier(effect_info)
 
 func remove_special_effect(entity: BaseEntity, effect_name: String) -> void:

@@ -22,7 +22,7 @@ size_flags_vertical = 4
 alignment = 1
 selected = 0
 fit_to_longest_item = false
-item_count = 4
+item_count = 5
 popup/item_0/text = "Shrink"
 popup/item_0/id = 0
 popup/item_1/text = "Grow"
@@ -31,6 +31,8 @@ popup/item_2/text = "Color"
 popup/item_2/id = 2
 popup/item_3/text = "Multiplied Color"
 popup/item_3/id = 3
+popup/item_4/text = "Sparkling"
+popup/item_4/id = 4
 script = ExtResource("2_tx4cj")
 
 [node name="ColorPickerButton" type="ColorPickerButton" parent="." unique_id=627619670]

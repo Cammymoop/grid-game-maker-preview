@@ -5,17 +5,28 @@ const ScalarValueInput: = preload("res://src/GameEditor/ConditionalEditor/scalar
 var arg_name: String = ""
 @export var effect_picker_input: OptionButton
 @export var color_picker: ColorPickerButton
-#@export var duration_input: ScalarValueInput
+
+@export var amount_container: Control
+@export var amount_input: ScalarValueInput
 
 const EFFECTS_WITH_COLOR: Array[String] = [
     "Flash",
 ]
-
-func _init() -> void:
-    setup_bump_effect_picker()
+const EFFECTS_WITH_AMOUNT: Array[String] = [
+    "Grow", "Shrink", "Flash", "Hop", "Sparkle",
+]
+const DEFAULT_AMOUNTS: Dictionary[String, float] = {
+    "Grow": 0.2,
+    "Shrink": 0.2,
+    "Flash": 1.0,
+    "Hop": 22.0,
+}
 
 func _ready() -> void:
+    setup_bump_effect_picker()
     effect_picker_input.item_selected.connect(on_effect_picker_item_selected)
+
+    set_default_amount()
     refresh_ui()
 
 func set_arg_name(new_arg_name: String) -> void:
@@ -34,6 +45,8 @@ func get_value() -> Dictionary:
     }
     if selected_effect in EFFECTS_WITH_COLOR:
         effect_params["color"] = Utility.color_string(color_picker.color)
+    if selected_effect in EFFECTS_WITH_AMOUNT:
+        effect_params["amount"] = amount_input.get_value()
     return effect_params
 
 func setup_bump_effect_picker() -> void:
@@ -42,8 +55,17 @@ func setup_bump_effect_picker() -> void:
     effect_picker_input.selected = 0
 
 func on_effect_picker_item_selected(_index: int) -> void:
+    set_default_amount()
     refresh_ui()
+
+func set_default_amount() -> void:
+    var effect_name: String = Utility.opbtn_get_selected_text(effect_picker_input)
+    if effect_name in DEFAULT_AMOUNTS:
+        amount_input.set_value(DEFAULT_AMOUNTS[effect_name])
 
 func refresh_ui() -> void:
     var effect_name: String = Utility.opbtn_get_selected_text(effect_picker_input)
+
     color_picker.visible = effect_name in EFFECTS_WITH_COLOR
+    
+    amount_container.visible = effect_name in EFFECTS_WITH_AMOUNT

@@ -10,9 +10,14 @@ point_count = 4
 _data = [Vector2(0, 1), 0.0, 0.0, 0, 0, Vector2(0.66588783, 1), 0.0, 0.0, 0, 0, Vector2(0.98364484, 0), 0.0, 0.0, 0, 0]
 point_count = 3
 
+[sub_resource type="Curve" id="Curve_1onlp"]
+_data = [Vector2(0, 1), 0.0, 0.0, 0, 0, Vector2(1, 1), 0.0, 0.0, 0, 0]
+point_count = 2
+
 [sub_resource type="CurveXYZTexture" id="CurveXYZTexture_08ld4"]
 curve_x = SubResource("Curve_lsqog")
 curve_y = SubResource("Curve_ykumq")
+curve_z = SubResource("Curve_1onlp")
 
 [sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_l4yqj"]
 particle_flag_disable_z = true
@@ -29,6 +34,7 @@ scale_curve = SubResource("CurveXYZTexture_08ld4")
 [node name="Sparkles" type="Node2D" unique_id=1360383814]
 
 [node name="ColorRect" type="ColorRect" parent="." unique_id=346605300]
+visible = false
 offset_left = -16.0
 offset_top = -16.0
 offset_right = 16.0

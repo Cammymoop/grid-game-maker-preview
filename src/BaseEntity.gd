@@ -609,7 +609,7 @@ func actually_started_move() -> void:
 		post_move.resolve(self, null, get_moving_position())
 	
 	if entity_name == "player":
-		do_named_bump_effect({"name": "Spin"})
+		pass#do_named_bump_effect({"name": "Spin"})
 
 func is_settled() -> bool:
 	return not moving
@@ -807,6 +807,9 @@ func do_bump_effect(effect_info: Dictionary, with_duration: float = -1) -> void:
 		if ll_effect.has("time_offset"):
 			ll_effect["time_offset"] *= with_duration
 	effect_info["expire_time"] = with_duration
+	var modifier_name: String = effect_info.get("name", "")
+	if modifier_name and sprite.has_applied_modifier(modifier_name):
+		remove_sprite_modifier({"name": modifier_name})
 	add_sprite_modifier(effect_info)
 
 

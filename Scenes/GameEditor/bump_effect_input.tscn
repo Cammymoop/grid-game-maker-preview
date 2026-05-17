@@ -1,8 +1,9 @@
 [gd_scene format=3 uid="uid://cxhnyxu1yw3sp"]
 
 [ext_resource type="Script" uid="uid://ddhsn1v0xq64b" path="res://Scenes/GameEditor/bump_effect_input.gd" id="1_8mgq2"]
+[ext_resource type="PackedScene" uid="uid://bleyoj5f36kfy" path="res://Scenes/GameEditor/ConditionalEditor/scalar_value_input.tscn" id="2_bq0lu"]
 
-[node name="BumpEffectInput" type="HBoxContainer" unique_id=790260579 node_paths=PackedStringArray("effect_picker_input")]
+[node name="BumpEffectInput" type="HBoxContainer" unique_id=790260579 node_paths=PackedStringArray("effect_picker_input", "color_picker")]
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -13,6 +14,7 @@ grow_vertical = 2
 theme_override_constants/separation = 10
 script = ExtResource("1_8mgq2")
 effect_picker_input = NodePath("BumpEffectPicker")
+color_picker = NodePath("ColorPickerButton")
 
 [node name="BumpEffectPicker" type="OptionButton" parent="." unique_id=583237251]
 layout_mode = 2
@@ -24,3 +26,15 @@ fit_to_longest_item = false
 visible = false
 custom_minimum_size = Vector2(40, 0)
 layout_mode = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="." unique_id=645982276]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="HBoxContainer" unique_id=168911535]
+layout_mode = 2
+text = "Amount:"
+
+[node name="ScalarValueInput" parent="HBoxContainer" unique_id=1458729988 instance=ExtResource("2_bq0lu")]
+layout_mode = 2
+custom_step = true
+custom_step_value = 0.1

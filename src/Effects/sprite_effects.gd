@@ -1,6 +1,7 @@
 class_name SpriteEffects
 extends Node
 
+# ideas
 const StaticEffects: Array[String] = [
     "Smaller",
     "Bigger",
@@ -12,6 +13,7 @@ const StaticEffects: Array[String] = [
     "Angled",
 ]
 
+# ideas
 const AnimatedEffects: Array[String] = [
     "Grow In",
     "Grow Out",
@@ -53,6 +55,7 @@ const AnimatedEffects: Array[String] = [
     "Color Bounce",
 ]
 
+# ideas
 const ParticleEffects: Array[String] = [
     "Sparkle",
     "Burning Smoke",
@@ -111,14 +114,32 @@ const BUMP_EFFECTS: Dictionary[String, Dictionary] = {
             }
         }
     },
-    "Spin": {
-        "name": "bump-spin",
+    "Spin Clockwise": {
+        "name": "bump-spin-cw",
         "animated_effects": {
             "spin": {
                 "total_rotation": 1.0,
                 "ease_param": 0.33,
             }
         }
+    },
+    "Spin Counterclockwise": {
+        "name": "bump-spin-ccw",
+        "animated_effects": {
+            "spin": {
+                "total_rotation": -1.0,
+                "ease_param": 0.33,
+            }
+        }
+    },
+    "Sparkle": {
+        "name": "bump-sparkle",
+        "layers": [{
+            "mode": "particles",
+            "particles_type": "sparkles",
+            "receives_effects": false,
+        }],
+        "expire_wait_particles": true,
     },
 }
 
@@ -131,6 +152,38 @@ static func set_bump_effect_params(effect_name: String, effect_params: Dictionar
             if replace_color_effect:
                 replace_color_effect["color_from"] = effect_params["color"]
                 replace_color_effect["color_to"] = effect_params["color"]
+        if effect_name == "Sparkle":
+            for layer in effect_info.get("layers", []):
+                if layer.get("mode") == "particles" and layer.get("particles_type") == "sparkles":
+                    layer["mod_color"] = effect_params["color"]
+    if effect_params.has("amount"):
+        if effect_name == "Grow":
+            var scale_effect: Dictionary = effect_info.get("animated_effects", {}).get("scale", {})
+            var scale_to_amt: float = 1 + effect_params["amount"]
+            if scale_effect:
+                scale_effect["scale_to"] = [scale_to_amt, scale_to_amt]
+        elif effect_name == "Shrink":
+            var scale_effect: Dictionary = effect_info.get("animated_effects", {}).get("scale", {})
+            var scale_to_amt: float = maxf(0, 1 - effect_params["amount"])
+            if scale_effect:
+                scale_effect["scale_to"] = [scale_to_amt, scale_to_amt]
+        elif effect_name == "Flash":
+            var replace_color_effect: Dictionary = effect_info.get("animated_effects", {}).get("replace_color", {})
+            if replace_color_effect:
+                replace_color_effect["amount_to"] = effect_params["amount"]
+        elif effect_name == "Hop":
+            var offset_effect: Dictionary = effect_info.get("animated_effects", {}).get("offset", {})
+            if offset_effect and offset_effect.has("offset_to"):
+                offset_effect["offset_to"][1] = -effect_params["amount"]
+    
+    if effect_params.has("direction"):
+        var dir_int: int = int(effect_params["direction"])
+        var dir_vec: Vector2 = Utility.facing_vector(dir_int)
+        if effect_name == "Hop":
+            var offset_effect: Dictionary = effect_info.get("animated_effects", {}).get("offset", {})
+            if offset_effect and offset_effect.has("offset_to"):
+                var hop_amount: float = Utility.get_vector2_from_arr(offset_effect["offset_to"]).length()
+                offset_effect["offset_to"] = Utility.get_arr_from_vector2(dir_vec * hop_amount)
 
 const DYING_EFFECTS: Dictionary[String, Dictionary] = {
     "Spin Out": {

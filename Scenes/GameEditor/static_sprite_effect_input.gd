@@ -8,7 +8,7 @@ const GenericOptionInput: = preload("res://Scenes/GameEditor/ConditionalEditor/g
 var arg_name: String = ""
 
 var EFFECTS_WITH_COLOR: Array[String] = [
-    "Color", "Multiplied Color"
+    "Color", "Multiplied Color", "Sparkling",
 ]
 
 func _ready() -> void:
