@@ -1821,7 +1821,6 @@ func get_default_dying_effect_for_entity_id(entity_id: int) -> Dictionary:
         prints("entity dying-effect is the wrong type: %s" % type_string(typeof(dying_effect_prop_val)))
         return default_dying_effect
     if not dying_effect_prop_val or not typeof(dying_effect_prop_val) == TYPE_STRING or not dying_effect_prop_val in SpriteEffects.DYING_EFFECTS:
-        prints("entity dying-effect is not valid: %s" % dying_effect_prop_val)
         return default_dying_effect
     prints("using entity dying-effect: %s" % dying_effect_prop_val)
     return SpriteEffects.DYING_EFFECTS[dying_effect_prop_val]

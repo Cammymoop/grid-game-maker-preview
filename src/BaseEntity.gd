@@ -750,10 +750,7 @@ func die(with_effect_info: Dictionary = {}, with_duration: float = -1) -> void:
 		dying_conditional.resolve(self, null, tile_position)
 	EntityManager.post_die_actions(self)
 	if not with_effect_info:
-		prints("no specified dying effect for %s checking for default" % entity_name)
 		with_effect_info = EntityManager.get_default_dying_effect_for_entity_id(entity_index)
-	else:
-		prints("specified dying effect for %s: %s" % [entity_name, with_effect_info])
 
 	if not with_effect_info or with_effect_info.get("none", false):
 		EntityManager.remove_entity(self)

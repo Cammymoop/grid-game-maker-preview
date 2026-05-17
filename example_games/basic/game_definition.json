@@ -88,7 +88,8 @@
           "when true": [],
           "when false": [],
           "when always": []
-        }
+        },
+        "box": true
       }
     },
     "3": {
@@ -96,25 +97,93 @@
       "texture": 1,
       "tex_index": 8,
       "properties": {
-        "move_onto": {
+        "move_onto": [
+          {
+            "v": "3",
+            "conditions": [
+              "basic_default.c_is_named::[\"i:1\",false,\"s:pusher\"]"
+            ],
+            "when true": [
+              "basic_default.quit::[\"i:-1\"]"
+            ],
+            "when false": [],
+            "when always": []
+          },
+          {
+            "v": "3",
+            "conditions": [
+              "basic_default.c_get_pushed::[\"i:0\",{\"args\":[\"s:type\",\"s:plain\",\"s:direction\",\"i:22\"],\"type\":\"Dictionary\"},true]"
+            ],
+            "when true": [],
+            "when false": [],
+            "when always": []
+          }
+        ],
+        "pushes-button": true,
+        "blocks": {
           "v": "3",
           "conditions": [
-            "basic_default.c_get_pushed::[\"i:0\",{\"args\":[\"s:type\",\"s:plain\",\"s:direction\",\"i:22\"],\"type\":\"Dictionary\"},true]"
+            "basic_default.if_property_value::[\"i:1\",\"s:pushes\",false]",
+            "basic_default.c_is_named::[\"i:1\",true,\"s:pusher\"]"
           ],
           "when true": [],
           "when false": [],
           "when always": []
         },
-        "pushes-button": true,
-        "blocks": {
-          "v": "3",
-          "conditions": [
-            "basic_default.if_property_value::[\"i:1\",\"s:pushes\",false]"
-          ],
-          "when true": [],
-          "when false": [],
-          "when always": []
-        }
+        "box": true,
+        "sliding": false,
+        "i_finish_move_onto_tile": [
+          {
+            "v": "3",
+            "conditions": [
+              "basic_default.if_property_value::[\"i:0\",\"s:sliding\",false]"
+            ],
+            "when true": [
+              "basic_default.quit::[\"i:-1\"]"
+            ],
+            "when false": [],
+            "when always": []
+          },
+          {
+            "v": "3",
+            "conditions": [
+              "basic_default.c_get_pushed::[\"i:0\",{\"args\":[\"s:type\",\"s:plain\",\"s:direction\",\"i:12\"],\"type\":\"Dictionary\"},true]"
+            ],
+            "when true": [
+              "basic_default.override_move_animation::[\"i:0\",\"s:smooth\"]",
+              "basic_default.override_move_speed::[\"i:0\",{\"args\":[\"s:type\",\"s:plain\",\"s:value\",\"f:10.0\"],\"type\":\"Dictionary\"}]"
+            ],
+            "when false": [
+              "basic_default.a_set_property::[\"i:0\",\"s:sliding\",\"s:false\"]"
+            ],
+            "when always": []
+          }
+        ],
+        "finish_move_onto": [
+          {
+            "v": "3",
+            "conditions": [
+              "basic_default.c_is_named::[\"i:1\",false,\"s:pusher\"]"
+            ],
+            "when true": [
+              "basic_default.a_set_property::[\"i:0\",\"s:sliding\",\"s:true\"]",
+              "basic_default.a_move::[\"i:0\",{\"args\":[\"s:type\",\"s:plain\",\"s:direction\",\"i:28\"],\"type\":\"Dictionary\"}]",
+              "basic_default.override_move_animation::[\"i:0\",\"s:smooth\"]",
+              "basic_default.override_move_speed::[\"i:0\",{\"args\":[\"s:type\",\"s:plain\",\"s:value\",\"f:10.0\"],\"type\":\"Dictionary\"}]",
+              "basic_default.a_die::[\"i:1\"]"
+            ],
+            "when false": [],
+            "when always": []
+          },
+          {
+            "v": "3",
+            "conditions": [],
+            "when true": [],
+            "when false": [],
+            "when always": []
+          }
+        ],
+        "no-rotate": true
       }
     },
     "4": {
@@ -160,7 +229,8 @@
           "when false": [],
           "when always": []
         },
-        "pushes": true
+        "pushes": true,
+        "box": true
       },
       "sprite_config": {
         "layers": [
@@ -180,7 +250,7 @@
       "properties": {
         "z-index": -1,
         "holding-button": 0,
-        "finish_move_onto": {
+        "half_moved_onto": {
           "v": "3",
           "conditions": [
             "basic_default.if_property_value::[\"i:1\",\"s:pushes-button\",true]"
@@ -191,13 +261,67 @@
           "when false": [],
           "when always": []
         },
-        "post_move_off_of": {
+        "half_moved_off_of": {
           "v": "3",
           "conditions": [
             "basic_default.if_property_value::[\"i:1\",\"s:pushes-button\",true]"
           ],
           "when true": [
             "basic_default.a_property_subtract::[\"i:0\",\"s:holding-button\",{\"args\":[\"s:type\",\"s:plain\",\"s:value\",\"f:1.0\"],\"type\":\"Dictionary\"},true]"
+          ],
+          "when false": [],
+          "when always": []
+        }
+      }
+    },
+    "7": {
+      "name": "thin-wall",
+      "texture": 0,
+      "tex_index": 32,
+      "properties": {
+        "blocks": {
+          "v": "3",
+          "conditions": [
+            "basic_default.c_is_moving::[\"i:1\",false,\"i:14\"]"
+          ],
+          "when true": [],
+          "when false": [],
+          "when always": []
+        },
+        "move_off_of": {
+          "v": "3",
+          "conditions": [
+            "basic_default.c_is_moving::[\"i:1\",true,\"i:12\"]"
+          ],
+          "when true": [],
+          "when false": [],
+          "when always": []
+        }
+      }
+    },
+    "8": {
+      "name": "pusher",
+      "texture": 1,
+      "tex_index": 49,
+      "properties": {
+        "finish_move_onto": {
+          "v": "3",
+          "conditions": [
+            "basic_default.if_property_value::[\"i:1\",\"s:box\",true]"
+          ],
+          "when true": [
+            "basic_default.destroy_entity_with_effect::[\"i:0\",{\"args\":[\"s:name\",\"s:Shrink Out\"],\"type\":\"Dictionary\"}]"
+          ],
+          "when false": [],
+          "when always": []
+        },
+        "move_onto": {
+          "v": "3",
+          "conditions": [
+            "basic_default.if_property_value::[\"i:1\",\"s:pushes\",true]"
+          ],
+          "when true": [
+            "basic_default.a_move::[\"i:0\",{\"args\":[\"s:type\",\"s:plain\",\"s:direction\",\"i:20\"],\"type\":\"Dictionary\"}]"
           ],
           "when false": [],
           "when always": []
@@ -342,6 +466,39 @@
       "properties": {
 
       }
+    },
+    "11": {
+      "name": "water",
+      "texture": 0,
+      "tex_index": 16,
+      "properties": {
+        "finish_move_onto_tile": [
+          {
+            "v": "3",
+            "conditions": [
+              "basic_default.if_property_value::[\"i:1\",\"s:player\",true]"
+            ],
+            "when true": [
+              "basic_default.a_move::[\"i:1\",{\"args\":[\"s:type\",\"s:plain\",\"s:direction\",\"i:22\"],\"type\":\"Dictionary\"}]",
+              "basic_default.quit::[\"i:-1\"]"
+            ],
+            "when false": [],
+            "when always": []
+          },
+          {
+            "v": "3",
+            "conditions": [
+              "basic_default.if_property_value::[\"i:1\",\"s:box\",true]"
+            ],
+            "when true": [
+              "basic_default.destroy_entity_immediately::[\"i:1\"]",
+              "basic_default.a_set_tiles::[\"i:4\",\"s:floor\"]"
+            ],
+            "when false": [],
+            "when always": []
+          }
+        ]
+      }
     }
   },
   "window_width": 22.0,
@@ -358,7 +515,8 @@
         "Pull",
         "Rules For Me",
         "Toggle",
-        "At Least One Way"
+        "At Least One Way",
+        "Clockwise"
       ]
     }
   ]
