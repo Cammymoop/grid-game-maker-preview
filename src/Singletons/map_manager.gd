@@ -316,7 +316,6 @@ func serialize() -> Dictionary:
     return serialized_stuff
 
 func deserialize(data: Dictionary) -> void:
-    prints("map deserializing")
     clear()
     
     for layer_data in data["layers"]:

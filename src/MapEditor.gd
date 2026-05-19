@@ -106,7 +106,6 @@ func _physics_process(delta: float) -> void:
 
 func on_level_state_loaded() -> void:
 	if edit_mode:
-		prints("level state loaded, finding camera start pos")
 		var game_camera_starting_pos: Vector2 = GameManager.game_camera.get_targeted_position()
 		editor_cam.set_position_immediate(game_camera_starting_pos)
 
@@ -431,7 +430,6 @@ func inspect_at_cursor() -> void:
 		var instance_editor_width: float = entity_instance_editor.size.x / ui_vp_size.x
 		var disp_width: = get_display_world_size().x
 		var offset: = (1 - instance_editor_width) * disp_width - (disp_width / 2.0)
-		prints("ui_vp_size: ", ui_vp_size, "inst editor width: ", instance_editor_width, "offset: ", offset)
 		set_enable_camera_limits(false)
 		scroll_editor_camera_to_pos(MapManager.tile_to_world_position_centered(cursor_tile_pos) + Vector2.RIGHT * offset)
 	elif entity_instance_editor and entity_instance_editor.visible:
@@ -447,8 +445,6 @@ func update_input_priority() -> bool:
 	elif entity_instance_editor and entity_instance_editor.is_visible_in_tree():
 		drop_input_priority()
 	else:
-		if not _input_priority:
-			prints("gain input priority")
 		gain_input_priority()
 	return _input_priority
 

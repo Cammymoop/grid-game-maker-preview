@@ -60,7 +60,6 @@ func update_bounds() -> void:
 
 func activate():
 	active = true
-	print_stack()
 	make_current()
 	if explicitly_following and target_entity and is_instance_valid(target_entity):
 		follow_entity(target_entity)
