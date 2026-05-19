@@ -96,12 +96,18 @@ func load_bg_style() -> void:
     lines_color_picker.color = Utility.get_dict_color(bg_style, "lines_color", Color.WHITE)
     solids_color_picker.color = Utility.get_dict_color(bg_style, "lines_solid_color", Color.WHITE)
     ln_scroll_speed_input.set_value(bg_style.get("lines_scroll_speed", 0.05))
-    ln_scroll_angle_input.set_value(bg_style.get("lines_scroll_angle", 0.4))
+    ln_scroll_angle_input.set_value(_turn_to_deg(bg_style.get("lines_scroll_angle", 0.4)))
     ln_warp_strength_input.set_value(bg_style.get("lines_warp_strength", 1.0))
     ln_warp_scroll_speed_input.set_value(bg_style.get("lines_warp_scroll_speed", 0.05))
-    ln_warp_scroll_angle_input.set_value(bg_style.get("lines_warp_scroll_angle", 0.4))
+    ln_warp_scroll_angle_input.set_value(_turn_to_deg(bg_style.get("lines_warp_scroll_angle", 0.4)))
 
     refresh_suboptions()
+
+func _turn_to_deg(turns: float) -> float:
+    return roundf(rad_to_deg(turns * TAU))
+
+func _deg_to_turn(deg: float) -> float:
+    return deg_to_rad(deg) / TAU
 
 func refresh_suboptions() -> void:
     bg_gradient_suboptions.visible = bg_gradient_enable.button_pressed
@@ -114,6 +120,8 @@ func update_color_option(new_color: Color, color_key: String, no_alpha: bool = f
     GameManager.set_auto_bg_info_value(color_key, color_func.call(new_color))
 
 func update_scalar_option(new_value: float, scalar_key: String) -> void:
+    if scalar_key in ["lines_scroll_angle", "lines_warp_scroll_angle"]:
+        new_value = _deg_to_turn(new_value)
     GameManager.set_auto_bg_info_value(scalar_key, new_value)
 
 func update_opbtn_option(new_index: int, opbtn: OptionButton, value_key: String) -> void:

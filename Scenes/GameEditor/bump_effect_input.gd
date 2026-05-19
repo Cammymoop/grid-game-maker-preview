@@ -13,10 +13,10 @@ const EFFECTS_WITH_COLOR: Array[String] = [
     "Flash",
 ]
 const EFFECTS_WITH_AMOUNT: Array[String] = [
-    "Grow", "Shrink", "Flash", "Hop", "Sparkle",
+    "Expand", "Shrink", "Flash", "Hop", "Sparkle",
 ]
 const DEFAULT_AMOUNTS: Dictionary[String, float] = {
-    "Grow": 0.2,
+    "Expand": 0.2,
     "Shrink": 0.2,
     "Flash": 1.0,
     "Hop": 22.0,

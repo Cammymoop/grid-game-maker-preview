@@ -256,6 +256,8 @@ func _find_player_for_options(options: SfxPlayOptions) -> int:
     return -1
 
 func _play_sfx_options_on_player(player_idx: int, options: SfxPlayOptions) -> void:
+    if not options.sfx_name:
+        return
     _set_stream_player_to_named_sfx(player_idx, options.sfx_name)
     var is_playing: bool = stream_players[player_idx].playing
     var is_looping: bool = looping_players[player_idx]

@@ -144,6 +144,7 @@ const BUMP_EFFECTS: Dictionary[String, Dictionary] = {
 }
 
 static func set_bump_effect_params(effect_name: String, effect_params: Dictionary, effect_info: Dictionary) -> void:
+    prints("setting bump effect params: %s, %s, %s" % [effect_name, effect_params, effect_info])
     if not effect_name in BUMP_EFFECTS:
         return
     if effect_params.has("color"):
@@ -157,7 +158,7 @@ static func set_bump_effect_params(effect_name: String, effect_params: Dictionar
                 if layer.get("mode") == "particles" and layer.get("particles_type") == "sparkles":
                     layer["mod_color"] = effect_params["color"]
     if effect_params.has("amount"):
-        if effect_name == "Grow":
+        if effect_name == "Expand":
             var scale_effect: Dictionary = effect_info.get("animated_effects", {}).get("scale", {})
             var scale_to_amt: float = 1 + effect_params["amount"]
             if scale_effect:

@@ -5,6 +5,7 @@ var move_mode = "direction"
 # Options
 var stop_repeat_after_bonk: = true
 var lock_for_idle_delay_after_bonk: = true
+var idle_delay_multiplier: int = 1
 var allow_wait: = true
 
 var only_receive_when_camera_target: = true
@@ -12,6 +13,7 @@ var only_receive_when_camera_target: = true
 var is_repeat = false
 
 var is_delay_locked: = false
+var idle_delays_left: int = 0
 
 var up_held: = false
 var down_held: = false
@@ -30,6 +32,7 @@ var load_delay_left: int = 0
 var available_options = {
 	"stop_repeat_after_bonk": {"display_name": "Stop repeating movement after being blocked", "type": "bool"},
 	"lock_for_idle_delay_after_bonk": {"display_name": "Prevent movement briefly after being blocked", "type": "bool"},
+	"idle_delay_multiplier": {"display_name": "Multiply bonk delay", "type": "int", "min_value": 1, "max_value": 10},
 	"allow_wait": {"display_name": "Press a key to wait a turn", "type": "bool"},
 	"only_rcv_when_cam": {"display_name": "Only receive input when camera is following", "type": "bool"},
 }
@@ -47,6 +50,8 @@ func on_level_state_loaded() -> void:
 	load_delay_left = level_load_delay_frames
 
 func get_max_move_intentions() -> int:
+	if idle_delays_left > 0:
+		return 0
 	if is_delay_locked and parent_entity.idle_ticks_elapsed + 1 < EntityManager.idle_delay_frames:
 		return 0
 	return 1
@@ -56,6 +61,8 @@ func set_options(options: Dictionary) -> void:
 		stop_repeat_after_bonk = options["stop_repeat_after_bonk"]
 	if "lock_for_idle_delay_after_bonk" in options:
 		lock_for_idle_delay_after_bonk = options["lock_for_idle_delay_after_bonk"]
+	if "idle_delay_multiplier" in options:
+		idle_delay_multiplier = int(options["idle_delay_multiplier"])
 	if "allow_wait" in options:
 		allow_wait = options["allow_wait"]
 	if "only_rcv_when_cam" in options:
@@ -149,6 +156,7 @@ func got_blocked() -> void:
 		cancelled = true
 		if lock_for_idle_delay_after_bonk:
 			is_delay_locked = true
+			idle_delays_left = idle_delay_multiplier - 1
 
 func on_start_move(_facing_dir) -> void:
 	if load_delay_left > 0:
@@ -157,6 +165,9 @@ func on_start_move(_facing_dir) -> void:
 	is_delay_locked = false
 
 func on_idle() -> void:
+	if is_delay_locked and idle_delays_left > 0:
+		idle_delays_left -= 1
+		return
 	if is_delay_locked:
 		cancelled = false
 	is_delay_locked = false
