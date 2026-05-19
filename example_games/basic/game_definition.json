@@ -83,13 +83,28 @@
         "blocks": {
           "v": "3",
           "conditions": [
-            "basic_default.if_property_value::[\"i:1\",\"s:pushes\",false]"
+            "basic_default.if_property_value::[\"i:1\",\"s:pushes\",false]",
+            "basic_default.c_is_named::[\"i:1\",true,\"s:pusher\"]"
           ],
           "when true": [],
           "when false": [],
           "when always": []
         },
-        "box": true
+        "box": true,
+        "finish_move_onto": {
+          "v": "3",
+          "conditions": [
+            "basic_default.c_is_named::[\"i:1\",false,\"s:pusher\"]"
+          ],
+          "when true": [
+            "basic_default.a_move::[\"i:0\",{\"args\":[\"s:type\",\"s:plain\",\"s:direction\",\"i:28\"],\"type\":\"Dictionary\"}]",
+            "basic_default.override_move_animation::[\"i:0\",\"s:smooth\"]",
+            "basic_default.override_move_speed::[\"i:0\",{\"args\":[\"s:type\",\"s:plain\",\"s:value\",\"f:10.0\"],\"type\":\"Dictionary\"}]",
+            "basic_default.a_die::[\"i:1\"]"
+          ],
+          "when false": [],
+          "when always": []
+        }
       }
     },
     "3": {
@@ -154,7 +169,7 @@
               "basic_default.override_move_speed::[\"i:0\",{\"args\":[\"s:type\",\"s:plain\",\"s:value\",\"f:10.0\"],\"type\":\"Dictionary\"}]"
             ],
             "when false": [
-              "basic_default.a_set_property::[\"i:0\",\"s:sliding\",\"s:false\"]"
+              "basic_default.reset_property_to_default::[\"i:0\",\"s:sliding\"]"
             ],
             "when always": []
           }
@@ -177,8 +192,13 @@
           },
           {
             "v": "3",
-            "conditions": [],
-            "when true": [],
+            "conditions": [
+              "basic_default.if_entity_is_moving::[\"i:0\"]",
+              "not"
+            ],
+            "when true": [
+              "basic_default.reset_property_to_default::[\"i:0\",\"s:sliding\"]"
+            ],
             "when false": [],
             "when always": []
           }
@@ -223,14 +243,16 @@
         "blocks": {
           "v": "3",
           "conditions": [
-            "basic_default.if_property_value::[\"i:1\",\"s:pushes\",false]"
+            "basic_default.if_property_value::[\"i:1\",\"s:pushes\",false]",
+            "basic_default.c_is_named::[\"i:1\",true,\"s:pusher\"]"
           ],
           "when true": [],
           "when false": [],
           "when always": []
         },
         "pushes": true,
-        "box": true
+        "box": true,
+        "floats": true
       },
       "sprite_config": {
         "layers": [
@@ -488,16 +510,25 @@
           {
             "v": "3",
             "conditions": [
-              "basic_default.if_property_value::[\"i:1\",\"s:box\",true]"
+              "basic_default.if_property_value::[\"i:1\",\"s:box\",true]",
+              "basic_default.if_property_value::[\"i:1\",\"s:floats\",false]"
             ],
             "when true": [
               "basic_default.destroy_entity_immediately::[\"i:1\"]",
-              "basic_default.a_set_tiles::[\"i:4\",\"s:floor\"]"
+              "basic_default.a_set_tiles::[\"i:4\",\"s:filled-water\"]"
             ],
             "when false": [],
             "when always": []
           }
         ]
+      }
+    },
+    "12": {
+      "name": "filled-water",
+      "texture": 0,
+      "tex_index": 47,
+      "properties": {
+
       }
     }
   },
@@ -516,7 +547,9 @@
         "Rules For Me",
         "Toggle",
         "At Least One Way",
-        "Clockwise"
+        "Clockwise",
+        "Wet Boxes",
+        "Sinking Feeling"
       ]
     }
   ]
