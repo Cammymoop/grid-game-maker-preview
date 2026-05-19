@@ -3,7 +3,7 @@
 [ext_resource type="Script" uid="uid://ddhsn1v0xq64b" path="res://Scenes/GameEditor/bump_effect_input.gd" id="1_8mgq2"]
 [ext_resource type="PackedScene" uid="uid://bleyoj5f36kfy" path="res://Scenes/GameEditor/ConditionalEditor/scalar_value_input.tscn" id="2_bq0lu"]
 
-[node name="BumpEffectInput" type="HBoxContainer" unique_id=790260579 node_paths=PackedStringArray("effect_picker_input", "color_picker")]
+[node name="BumpEffectInput" type="HBoxContainer" unique_id=790260579 node_paths=PackedStringArray("effect_picker_input", "color_picker", "amount_container", "amount_input")]
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -15,6 +15,8 @@ theme_override_constants/separation = 10
 script = ExtResource("1_8mgq2")
 effect_picker_input = NodePath("BumpEffectPicker")
 color_picker = NodePath("ColorPickerButton")
+amount_container = NodePath("HBoxContainer")
+amount_input = NodePath("HBoxContainer/ScalarValueInput")
 
 [node name="BumpEffectPicker" type="OptionButton" parent="." unique_id=583237251]
 layout_mode = 2

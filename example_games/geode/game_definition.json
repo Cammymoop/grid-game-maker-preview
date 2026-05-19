@@ -80,7 +80,8 @@
               "basic_default.play_named_sfx::[\"i:-1\",{\"args\":[\"s:type\",\"s:plain\",\"s:value\",\"s:Pickup\"],\"type\":\"Dictionary\"},false]",
               "basic_default.a_die::[\"i:0\"]",
               "basic_default.a_die::[\"i:1\"]",
-              "basic_default.a_create_entity::[\"i:4\",\"s:player-pickaxe\",\"i:12\",false]"
+              "basic_default.select_created_entity::[\"i:2\",{\"args\":[\"s:type\",\"s:plain\",\"s:value\",\"s:player-pickaxe\"],\"type\":\"Dictionary\"},\"i:4\",{\"args\":[\"s:type\",\"s:plain\",\"s:direction\",\"i:12\"],\"type\":\"Dictionary\"},false]",
+              "basic_default.entity_play_bump_effect::[\"i:2\",{\"args\":[\"s:name\",\"s:Expand\"],\"type\":\"Dictionary\"}]"
             ],
             "when false": [
               "basic_default.quit::[\"i:-1\"]"
@@ -110,7 +111,7 @@
         "Player"
       ],
       "controller_options": {
-        "stop_repeat_after_bonk": false,
+        "stop_repeat_after_bonk": true,
         "lock_for_idle_delay_after_bonk": true,
         "allow_wait": false,
         "only_rcv_when_cam": true

@@ -1519,7 +1519,6 @@ func cmd_play_named_sfx(slots: Dictionary, _slot: int, sfx_name: Dictionary, do_
 	var op_vals: Array = []
 	for prop in op_props:
 		op_vals.append(sfx_options.get(prop))
-	prints("playing sfx options: %s (%s)" % [sfx_name_str, ", ".join(op_vals)])
 	SfxPlayer.play_sfx_options(sfx_options)
 
 func desc_keep_named_sfx_playing() -> String:
