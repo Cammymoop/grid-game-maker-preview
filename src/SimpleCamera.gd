@@ -42,6 +42,7 @@ func _ready():
 func update_bounds() -> void:
 	if not respect_level_bounds:
 		return
+	prints("updating camera level bounds")
 	var level_bounds = MapManager.get_level_bounds().grow(extend_level_bounds)
 	limit_left = level_bounds.position.x
 	limit_top = level_bounds.position.y
@@ -95,7 +96,8 @@ func _process(delta):
 			pos_target = get_target_iterpolated_pos()
 	
 	if smoothing_enabled:
-		position = position.lerp(pos_target, smoothing_amount * delta)
+		var smooth_amt: = clampf(smoothing_amount * delta, 0.05, 1)
+		position = position.lerp(pos_target, smooth_amt)
 	else:
 		position = pos_target
 	
@@ -105,7 +107,7 @@ func _process(delta):
 			shake_timer = 0
 			is_shaking = false
 		offset = Vector2(randf() * 2 - 1, randf() * 2 - 1) * shake_intensity
-	else:
+	elif offset != Vector2.ZERO:
 		offset = Vector2.ZERO
 
 func get_targeted_position() -> Vector2:
@@ -234,6 +236,7 @@ func get_next_prev_follow_target(dir: int = 1) -> BaseEntity:
 	return follow_targets[posmod(cur_index + dir, follow_targets.size())]
 
 func teleport(pos: Vector2) -> void:
+	prints("teleporting to: %s" % pos)
 	position = pos
 
 func on_state_loaded() -> void:

@@ -24,6 +24,8 @@ var controller_templates: = {
 var entity_defs: Dictionary = {}
 @onready var loaded_entity_defs: = entity_defs
 
+var entity_instance_cap: int = 100000
+
 var entity_index_map: = {}
 var entity_instance_map: = {}
 
@@ -580,6 +582,8 @@ func reset_entity_move_interp_style(entity: BaseEntity) -> void:
         entity.teleport_interp_style = BaseEntity.read_move_interp_style_string(str(teleport_interp_str), default_teleport_interp_style)
 
 func create_entity(entity_index: int, tile_position: Vector2i, facing: int = 0, activate: bool = true) -> Node2D:
+    if entity_list.size() >= entity_instance_cap:
+        return null
     var entity_info = entity_defs[entity_index]
     
     var entity: BaseEntity

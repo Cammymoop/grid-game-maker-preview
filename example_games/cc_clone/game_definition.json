@@ -804,7 +804,7 @@
           "when always": []
         },
         "fire-averse": true,
-        "move-speed": 3
+        "move-speed": 5
       },
       "controller": "creature_controller",
       "controller_options": {
@@ -1755,7 +1755,20 @@
       "texture": 0,
       "tex_index": 14,
       "properties": {
-
+        "idle_update": {
+          "v": "3",
+          "conditions": [
+            "basic_default.select_named_entity_at::[\"i:2\",\"i:4\",{\"args\":[\"s:type\",\"s:plain\",\"s:value\",\"s:trap-cage\"],\"type\":\"Dictionary\"}]",
+            "basic_default.exists::[\"i:2\"]",
+            "not"
+          ],
+          "when true": [
+            "basic_default.a_create_entity::[\"i:4\",\"s:trap-cage\",\"i:0\",false]"
+          ],
+          "when false": [],
+          "when always": []
+        },
+        "move_off_of": false
       }
     },
     "21": {
