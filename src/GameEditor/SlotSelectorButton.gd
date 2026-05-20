@@ -267,10 +267,11 @@ func get_current_slot() -> int:
 func get_value() -> int:
     return get_current_slot()
 
-func set_current_slot(slot_id: int) -> void:
+func set_current_slot(slot_id: int, do_emit: bool = true) -> void:
     current_slot_id = slot_id
     update_texture()
-    emit_signal("slot_changed", current_slot_id)
+    if do_emit:
+        emit_signal("slot_changed", current_slot_id)
 
 func _on_ButtonContainer_pressed():
     if not picker_open:

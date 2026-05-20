@@ -6,14 +6,19 @@ func _ready():
 	var games = FilesManager.get_games_list()
 	
 	var list = find_child("GamesList")
-	for g in games:
-		list.add_item(g)
+	for i in games.size():
+		var game_name = games[i]
+		var game_title = FilesManager.get_game_definition(game_name).get("game_settings", {}).get("title", game_name)
+		if game_title.to_lower() != game_name.to_lower():
+			game_title = "%s (%s)" % [game_title, game_name]
+		list.add_item(game_title)
+		list.set_item_metadata(i, game_name)
 
 func get_selected_game() -> String:
 	var list:ItemList = find_child("GamesList")
 	var selected = list.get_selected_items()
 	if len(selected) > 0:
-		return list.get_item_text(selected[0])
+		return list.get_item_metadata(selected[0])
 	return ""
 
 

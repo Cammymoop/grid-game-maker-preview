@@ -21,7 +21,7 @@ var current_slot_id: int = SlotSelectorButton.NUMBER_VALUE
 
 func _ready():
     slot_selector.set_valid_slot_categories(["int", "float"])
-    slot_selector.set_current_slot(default_slot_id)
+    slot_selector.set_current_slot(default_slot_id, false)
     slot_selector.slot_changed.connect(on_slot_changed)
     
     plain_value_input.value_changed.connect(on_plain_value_changed)
@@ -42,6 +42,7 @@ func get_arg_name() -> String:
 func set_input_args(new_args: Array) -> void:
     if not new_args:
         return
+    prints("setting input args: ", new_args)
     if "int" in new_args:
         is_int_only = true
         _update_int_only()
@@ -63,6 +64,7 @@ func get_value() -> Dictionary:
         return {"type": "plain", "value": 0}
 
 func set_value(new_val: Variant) -> void:
+    prints("setting complex num value: ", new_val)
     # load old conditionals that used generic string inputs
     if typeof(new_val) == TYPE_STRING and new_val.is_valid_float():
         new_val = {"type": "plain", "value": float(new_val)}
@@ -75,6 +77,7 @@ func set_value(new_val: Variant) -> void:
         push_error("Invalid complex scalar value type: %s" % [new_val["type"]])
         current_slot_id = SlotSelectorButton.NUMBER_VALUE
         plain_value_input.set_value(0)
+    refresh_ui()
 
 func on_slot_changed(new_slot_id: int) -> void:
     current_slot_id = new_slot_id
@@ -95,3 +98,5 @@ func refresh_ui() -> void:
         plain_value_input.visible = true
     else:
         plain_value_input.visible = false
+    
+    slot_selector.set_current_slot(current_slot_id, false)
