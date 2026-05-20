@@ -496,7 +496,8 @@
           "when false": [],
           "when always": []
         },
-        "z-index": -1
+        "z-index": -1,
+        "solid": true
       }
     },
     "18": {

@@ -364,8 +364,7 @@ func _on_UpdateButton_pressed():
 	else:
 		EntityManager.update_entity_definition(the_index, the_definition)
 		if sprite_snapshot_tex:
-			if not EntityManager.entity_sprite_snapshots.has(the_index) and EntityManager.entity_sprite_snapshots[the_index] != sprite_snapshot_tex:
-				prints("saving entity sprite snapshot for entity %d" % the_index)
+			if not EntityManager.entity_sprite_snapshots.has(the_index) or EntityManager.entity_sprite_snapshots[the_index] != sprite_snapshot_tex:
 				EntityManager.save_entity_sprite_snapshot(the_index, sprite_snapshot_tex)
 	close_window()
 
