@@ -40,8 +40,8 @@
   "entity_definitions": {
     "0": {
       "name": "player",
-      "texture": 1,
-      "tex_index": 0,
+      "texture": 1.0,
+      "tex_index": 0.0,
       "controller": "InputController",
       "properties": {
         "treads": true,
@@ -58,7 +58,7 @@
           "when false": [],
           "when always": []
         },
-        "chips": 0,
+        "chips": 0.0,
         "can-cross-gravel": true,
         "can-cross-goal": true,
         "solid": true,
@@ -101,7 +101,7 @@
           "when false": [],
           "when always": []
         },
-        "move-speed": 6,
+        "move-speed": 6.0,
         "dying-effect": "Spin Out"
       },
       "groups": [
@@ -147,8 +147,8 @@
     },
     "1": {
       "name": "green_box",
-      "texture": 1,
-      "tex_index": 1,
+      "texture": 1.0,
+      "tex_index": 1.0,
       "properties": {
         "blocks": {
           "v": "3",
@@ -181,7 +181,7 @@
         },
         "can-cross-gravel": true,
         "can-cross-goal": true,
-        "z-index": 1,
+        "z-index": 1.0,
         "solid": true,
         "fire-resistant": true,
         "eats": true,
@@ -190,19 +190,19 @@
     },
     "2": {
       "name": "bouncer",
-      "texture": 1,
-      "tex_index": 6,
+      "texture": 1.0,
+      "tex_index": 6.0,
       "properties": {
         "creature": true,
         "solid": true,
-        "move-speed": 6
+        "move-speed": 6.0
       },
       "controller": "BounceController"
     },
     "6": {
       "name": "bomb",
-      "texture": 1,
-      "tex_index": 10,
+      "texture": 1.0,
+      "tex_index": 10.0,
       "properties": {
         "finish_move_onto": {
           "v": "3",
@@ -214,17 +214,17 @@
           "when false": [],
           "when always": []
         },
-        "z-index": -1,
+        "z-index": -1.0,
         "solid": true,
         "no-rotate": true
       }
     },
     "8": {
       "name": "toggle_button",
-      "texture": 1,
-      "tex_index": 18,
+      "texture": 1.0,
+      "tex_index": 18.0,
       "properties": {
-        "z-index": -1,
+        "z-index": -1.0,
         "finish_move_onto": {
           "v": "3",
           "conditions": [],
@@ -238,8 +238,8 @@
     },
     "9": {
       "name": "glider",
-      "texture": 1,
-      "tex_index": 4,
+      "texture": 1.0,
+      "tex_index": 4.0,
       "properties": {
         "creature": true,
         "floats": true,
@@ -254,7 +254,7 @@
           "when always": []
         },
         "solid": true,
-        "move-speed": 6
+        "move-speed": 6.0
       },
       "controller": "creature_controller",
       "controller_options": {
@@ -268,8 +268,8 @@
     },
     "10": {
       "name": "props",
-      "texture": 2,
-      "tex_index": 11,
+      "texture": 2.0,
+      "tex_index": 11.0,
       "properties": {
         "ice-skater": true,
         "fire-resistant": true,
@@ -286,8 +286,8 @@
     },
     "11": {
       "name": "fireball",
-      "texture": 1,
-      "tex_index": 2,
+      "texture": 1.0,
+      "tex_index": 2.0,
       "properties": {
         "creature": true,
         "blocks": {
@@ -301,7 +301,7 @@
         },
         "solid": true,
         "fire-resistant": true,
-        "move-speed": 6
+        "move-speed": 6.0
       },
       "controller": "creature_controller",
       "controller_options": {
@@ -316,8 +316,8 @@
     },
     "12": {
       "name": "bug",
-      "texture": 1,
-      "tex_index": 3,
+      "texture": 1.0,
+      "tex_index": 3.0,
       "properties": {
         "creature": true,
         "fire-averse": true,
@@ -333,7 +333,7 @@
         "solid": true,
         "move-animation": "stepped",
         "eats": true,
-        "move-speed": 5
+        "move-speed": 5.0
       },
       "controller": "creature_controller",
       "controller_options": {
@@ -347,8 +347,8 @@
     },
     "13": {
       "name": "paramecium",
-      "texture": 1,
-      "tex_index": 5,
+      "texture": 1.0,
+      "tex_index": 5.0,
       "properties": {
         "creature": true,
         "fire-averse": true,
@@ -364,7 +364,7 @@
         "solid": true,
         "move-animation": "stepped",
         "eats": true,
-        "move-speed": 5
+        "move-speed": 5.0
       },
       "controller": "creature_controller",
       "controller_options": {
@@ -378,8 +378,8 @@
     },
     "14": {
       "name": "chip",
-      "texture": 1,
-      "tex_index": 9,
+      "texture": 1.0,
+      "tex_index": 9.0,
       "properties": {
         "finish_move_onto": {
           "v": "3",
@@ -396,7 +396,7 @@
           "when false": [],
           "when always": []
         },
-        "z-index": -1,
+        "z-index": -1.0,
         "blocks": {
           "v": "3",
           "conditions": [
@@ -411,11 +411,11 @@
     },
     "15": {
       "name": "chaser",
-      "texture": 1,
-      "tex_index": 7,
+      "texture": 1.0,
+      "tex_index": 7.0,
       "properties": {
         "creature": true,
-        "z-index": 1,
+        "z-index": 1.0,
         "blocks": {
           "v": "3",
           "conditions": [
@@ -428,7 +428,7 @@
         "solid": true,
         "move-animation": "stepped",
         "eats": true,
-        "move-speed": 3
+        "move-speed": 3.0
       },
       "controller": "direct_chase_controller",
       "controller_options": {
@@ -439,8 +439,8 @@
     },
     "16": {
       "name": "thin-wall",
-      "texture": 0,
-      "tex_index": 32,
+      "texture": 0.0,
+      "tex_index": 32.0,
       "properties": {
         "blocks": {
           "v": "3",
@@ -464,8 +464,8 @@
     },
     "17": {
       "name": "wall-trap",
-      "texture": 1,
-      "tex_index": 33,
+      "texture": 1.0,
+      "tex_index": 33.0,
       "properties": {
         "blocks": {
           "v": "3",
@@ -487,23 +487,23 @@
           "when false": [],
           "when always": []
         },
-        "z-index": -1
+        "z-index": -1.0
       }
     },
     "18": {
       "name": "sprung-wall",
-      "texture": 1,
-      "tex_index": 34,
+      "texture": 1.0,
+      "tex_index": 34.0,
       "properties": {
         "blocks": true,
-        "z-index": -1,
+        "z-index": -1.0,
         "solid": true
       }
     },
     "19": {
       "name": "snorkel",
-      "texture": 1,
-      "tex_index": 37,
+      "texture": 1.0,
+      "tex_index": 37.0,
       "properties": {
         "finish_move_onto": {
           "v": "3",
@@ -517,7 +517,7 @@
           "when false": [],
           "when always": []
         },
-        "z-index": -1,
+        "z-index": -1.0,
         "blocks": {
           "v": "3",
           "conditions": [
@@ -532,8 +532,8 @@
     },
     "20": {
       "name": "fire-proof-boots",
-      "texture": 1,
-      "tex_index": 36,
+      "texture": 1.0,
+      "tex_index": 36.0,
       "properties": {
         "finish_move_onto": {
           "v": "3",
@@ -547,7 +547,7 @@
           "when false": [],
           "when always": []
         },
-        "z-index": -1,
+        "z-index": -1.0,
         "blocks": {
           "v": "3",
           "conditions": [
@@ -562,8 +562,8 @@
     },
     "21": {
       "name": "skates",
-      "texture": 1,
-      "tex_index": 38,
+      "texture": 1.0,
+      "tex_index": 38.0,
       "properties": {
         "finish_move_onto": {
           "v": "3",
@@ -577,7 +577,7 @@
           "when false": [],
           "when always": []
         },
-        "z-index": -1,
+        "z-index": -1.0,
         "blocks": {
           "v": "3",
           "conditions": [
@@ -592,8 +592,8 @@
     },
     "22": {
       "name": "purple-key",
-      "texture": 1,
-      "tex_index": 28,
+      "texture": 1.0,
+      "tex_index": 28.0,
       "properties": {
         "finish_move_onto": {
           "v": "3",
@@ -607,25 +607,25 @@
           "when false": [],
           "when always": []
         },
-        "z-index": -1
+        "z-index": -1.0
       }
     },
     "23": {
       "name": "trap-cage",
-      "texture": 0,
-      "tex_index": 23,
+      "texture": 0.0,
+      "tex_index": 23.0,
       "properties": {
         "move_off_of": false,
-        "z-index": 6,
+        "z-index": 6.0,
         "cage": true
       }
     },
     "24": {
       "name": "trap-button",
-      "texture": 1,
-      "tex_index": 19,
+      "texture": 1.0,
+      "tex_index": 19.0,
       "properties": {
-        "z-index": -1,
+        "z-index": -1.0,
         "half_moved_onto": {
           "v": "3",
           "conditions": [
@@ -678,8 +678,8 @@
     },
     "25": {
       "name": "blob",
-      "texture": 1,
-      "tex_index": 35,
+      "texture": 1.0,
+      "tex_index": 35.0,
       "properties": {
         "creature": true,
         "solid": true,
@@ -694,7 +694,7 @@
         },
         "fire-averse": true,
         "eats": true,
-        "move-speed": 2
+        "move-speed": 2.0
       },
       "controller": "random_creature_controller",
       "controller_options": {
@@ -703,8 +703,8 @@
     },
     "26": {
       "name": "rando-bounce",
-      "texture": 1,
-      "tex_index": 17,
+      "texture": 1.0,
+      "tex_index": 17.0,
       "properties": {
         "blocks": {
           "v": "3",
@@ -719,7 +719,7 @@
         "solid": true,
         "fire-averse": true,
         "turn-animation": "none",
-        "move-speed": 4
+        "move-speed": 4.0
       },
       "controller": "random_creature_controller",
       "controller_options": {
@@ -728,8 +728,8 @@
     },
     "27": {
       "name": "trash",
-      "texture": 1,
-      "tex_index": 16,
+      "texture": 1.0,
+      "tex_index": 16.0,
       "properties": {
         "finish_move_onto": {
           "v": "3",
@@ -746,15 +746,15 @@
           "when false": [],
           "when always": []
         },
-        "z-index": -1
+        "z-index": -1.0
       }
     },
     "28": {
       "name": "tank-button",
-      "texture": 1,
-      "tex_index": 40,
+      "texture": 1.0,
+      "tex_index": 40.0,
       "properties": {
-        "z-index": -1,
+        "z-index": -1.0,
         "finish_move_onto": {
           "v": "3",
           "conditions": [
@@ -770,11 +770,11 @@
     },
     "29": {
       "name": "tank",
-      "texture": 1,
-      "tex_index": 41,
+      "texture": 1.0,
+      "tex_index": 41.0,
       "properties": {
         "creature": true,
-        "z-index": 2,
+        "z-index": 2.0,
         "blocks": {
           "v": "3",
           "conditions": [
@@ -795,7 +795,7 @@
           "when always": []
         },
         "fire-averse": true,
-        "move-speed": 3
+        "move-speed": 3.0
       },
       "controller": "creature_controller",
       "controller_options": {
@@ -810,8 +810,8 @@
     },
     "30": {
       "name": "suc-boots",
-      "texture": 1,
-      "tex_index": 39,
+      "texture": 1.0,
+      "tex_index": 39.0,
       "properties": {
         "finish_move_onto": {
           "v": "3",
@@ -825,7 +825,7 @@
           "when false": [],
           "when always": []
         },
-        "z-index": -1,
+        "z-index": -1.0,
         "blocks": {
           "v": "3",
           "conditions": [
@@ -839,8 +839,8 @@
     },
     "31": {
       "name": "orange-key",
-      "texture": 1,
-      "tex_index": 27,
+      "texture": 1.0,
+      "tex_index": 27.0,
       "properties": {
         "finish_move_onto": {
           "v": "3",
@@ -854,13 +854,13 @@
           "when false": [],
           "when always": []
         },
-        "z-index": -1
+        "z-index": -1.0
       }
     },
     "32": {
       "name": "blue-key",
-      "texture": 1,
-      "tex_index": 30,
+      "texture": 1.0,
+      "tex_index": 30.0,
       "properties": {
         "finish_move_onto": {
           "v": "3",
@@ -874,13 +874,13 @@
           "when false": [],
           "when always": []
         },
-        "z-index": -1
+        "z-index": -1.0
       }
     },
     "33": {
       "name": "green-key",
-      "texture": 1,
-      "tex_index": 29,
+      "texture": 1.0,
+      "tex_index": 29.0,
       "properties": {
         "finish_move_onto": {
           "v": "3",
@@ -894,15 +894,15 @@
           "when false": [],
           "when always": []
         },
-        "z-index": -1
+        "z-index": -1.0
       }
     },
     "34": {
       "name": "chip-gate",
-      "texture": 0,
-      "tex_index": 35,
+      "texture": 0.0,
+      "tex_index": 35.0,
       "properties": {
-        "chips-required": 9,
+        "chips-required": 9.0,
         "blocks": {
           "v": "3",
           "conditions": [
@@ -951,10 +951,10 @@
     },
     "35": {
       "name": "hint",
-      "texture": 1,
-      "tex_index": 44,
+      "texture": 1.0,
+      "tex_index": 44.0,
       "properties": {
-        "z-index": -1,
+        "z-index": -1.0,
         "hint-text": "lorem ipsum\ndolor set",
         "half_moved_onto": {
           "v": "3",
@@ -983,8 +983,8 @@
     },
     "36": {
       "name": "invisible-wall",
-      "texture": 0,
-      "tex_index": 37,
+      "texture": 0.0,
+      "tex_index": 37.0,
       "properties": {
         "move_onto": {
           "v": "3",
@@ -998,7 +998,7 @@
           "when always": []
         },
         "shown": false,
-        "countdown": 0,
+        "countdown": 0.0,
         "idle_update": [
           {
             "v": "3",
@@ -1048,8 +1048,8 @@
     },
     "37": {
       "name": "cloner",
-      "texture": 0,
-      "tex_index": 26,
+      "texture": 0.0,
+      "tex_index": 26.0,
       "properties": {
         "when_signal_clone": [
           {
@@ -1128,15 +1128,15 @@
             "when always": []
           }
         ],
-        "z-index": -2
+        "z-index": -2.0
       }
     },
     "38": {
       "name": "clone-button",
-      "texture": 1,
-      "tex_index": 12,
+      "texture": 1.0,
+      "tex_index": 12.0,
       "properties": {
-        "z-index": -1,
+        "z-index": -1.0,
         "finish_move_onto": {
           "v": "3",
           "conditions": [],
@@ -1150,10 +1150,10 @@
     },
     "39": {
       "name": "cherry",
-      "texture": 1,
-      "tex_index": 11,
+      "texture": 1.0,
+      "tex_index": 11.0,
       "properties": {
-        "z-index": -1,
+        "z-index": -1.0,
         "tasty-looking": true,
         "finish_move_onto": {
           "v": "3",
@@ -1171,8 +1171,8 @@
     },
     "40": {
       "name": "respawner",
-      "texture": 0,
-      "tex_index": 44,
+      "texture": 0.0,
+      "tex_index": 44.0,
       "properties": {
         "blocks": true,
         "clone-entity": "green_box",
@@ -1226,8 +1226,8 @@
     },
     "41": {
       "name": "teleporter",
-      "texture": 1,
-      "tex_index": 46,
+      "texture": 1.0,
+      "tex_index": 46.0,
       "properties": {
         "finish_move_onto": [
           {
@@ -1272,39 +1272,39 @@
             "when always": []
           }
         ],
-        "z-index": -3
+        "z-index": -3.0
       }
     }
   },
   "tile_definitions": {
     "0": {
       "name": "floor",
-      "texture": 0,
-      "tex_index": 18,
+      "texture": 0.0,
+      "tex_index": 18.0,
       "properties": {
         "f1": true
       }
     },
     "1": {
       "name": "wall",
-      "texture": 0,
-      "tex_index": 19,
+      "texture": 0.0,
+      "tex_index": 19.0,
       "properties": {
         "blocks": true
       }
     },
     "2": {
       "name": "floor2",
-      "texture": 0,
-      "tex_index": 22,
+      "texture": 0.0,
+      "tex_index": 22.0,
       "properties": {
         "f2": true
       }
     },
     "3": {
       "name": "water",
-      "texture": 0,
-      "tex_index": 15,
+      "texture": 0.0,
+      "tex_index": 15.0,
       "properties": {
         "finish_move_onto_tile": {
           "v": "3",
@@ -1341,8 +1341,8 @@
     },
     "4": {
       "name": "greenery",
-      "texture": 0,
-      "tex_index": 27,
+      "texture": 0.0,
+      "tex_index": 27.0,
       "properties": {
         "blocks": {
           "v": "3",
@@ -1367,40 +1367,40 @@
     },
     "5": {
       "name": "was_greenery",
-      "texture": 0,
-      "tex_index": 28,
+      "texture": 0.0,
+      "tex_index": 28.0,
       "properties": {
 
       }
     },
     "6": {
       "name": "trap-inactive",
-      "texture": 0,
-      "tex_index": 13,
+      "texture": 0.0,
+      "tex_index": 13.0,
       "properties": {
 
       }
     },
     "7": {
       "name": "toggle_wall",
-      "texture": 0,
-      "tex_index": 12,
+      "texture": 0.0,
+      "tex_index": 12.0,
       "properties": {
         "blocks": true
       }
     },
     "8": {
       "name": "toggle_floor",
-      "texture": 0,
-      "tex_index": 11,
+      "texture": 0.0,
+      "tex_index": 11.0,
       "properties": {
 
       }
     },
     "9": {
       "name": "fire",
-      "texture": 0,
-      "tex_index": 10,
+      "texture": 0.0,
+      "tex_index": 10.0,
       "properties": {
         "blocks": {
           "v": "3",
@@ -1426,8 +1426,8 @@
     },
     "10": {
       "name": "real_wall",
-      "texture": 0,
-      "tex_index": 20,
+      "texture": 0.0,
+      "tex_index": 20.0,
       "properties": {
         "blocks": [
           {
@@ -1455,8 +1455,8 @@
     },
     "11": {
       "name": "fake_wall",
-      "texture": 0,
-      "tex_index": 20,
+      "texture": 0.0,
+      "tex_index": 20.0,
       "properties": {
         "blocks": {
           "v": "3",
@@ -1471,14 +1471,14 @@
         }
       },
       "preview_variant": {
-        "texture": 0,
-        "tex_index": 21
+        "texture": 0.0,
+        "tex_index": 21.0
       }
     },
     "12": {
       "name": "ice",
-      "texture": 0,
-      "tex_index": 9,
+      "texture": 0.0,
+      "tex_index": 9.0,
       "properties": {
         "finish_move_onto_tile": [
           {
@@ -1525,8 +1525,8 @@
     },
     "13": {
       "name": "ice-corner",
-      "texture": 0,
-      "tex_index": 17,
+      "texture": 0.0,
+      "tex_index": 17.0,
       "properties": {
         "finish_move_onto_tile": [
           {
@@ -1613,8 +1613,8 @@
     },
     "14": {
       "name": "gravel",
-      "texture": 0,
-      "tex_index": 6,
+      "texture": 0.0,
+      "tex_index": 6.0,
       "properties": {
         "blocks": {
           "v": "3",
@@ -1629,8 +1629,8 @@
     },
     "15": {
       "name": "chip-gate",
-      "texture": 0,
-      "tex_index": 29,
+      "texture": 0.0,
+      "tex_index": 29.0,
       "properties": {
         "blocks": {
           "v": "3",
@@ -1651,16 +1651,16 @@
     },
     "16": {
       "name": "open-chip-gate",
-      "texture": 0,
-      "tex_index": 30,
+      "texture": 0.0,
+      "tex_index": 30.0,
       "properties": {
 
       }
     },
     "17": {
       "name": "goal",
-      "texture": 0,
-      "tex_index": 31,
+      "texture": 0.0,
+      "tex_index": 31.0,
       "properties": {
         "blocks": {
           "v": "3",
@@ -1686,8 +1686,8 @@
     },
     "18": {
       "name": "purple-door",
-      "texture": 0,
-      "tex_index": 3,
+      "texture": 0.0,
+      "tex_index": 3.0,
       "properties": {
         "blocks": {
           "v": "3",
@@ -1705,32 +1705,32 @@
     },
     "19": {
       "name": "open-door",
-      "texture": 0,
-      "tex_index": 1,
+      "texture": 0.0,
+      "tex_index": 1.0,
       "properties": {
 
       }
     },
     "20": {
       "name": "trap-active",
-      "texture": 0,
-      "tex_index": 14,
+      "texture": 0.0,
+      "tex_index": 14.0,
       "properties": {
 
       }
     },
     "21": {
       "name": "revealed-wall",
-      "texture": 0,
-      "tex_index": 38,
+      "texture": 0.0,
+      "tex_index": 38.0,
       "properties": {
         "blocks": true
       }
     },
     "22": {
       "name": "hidden-wall",
-      "texture": 0,
-      "tex_index": 18,
+      "texture": 0.0,
+      "tex_index": 18.0,
       "properties": {
         "blocks": {
           "v": "3",
@@ -1743,14 +1743,14 @@
         }
       },
       "preview_variant": {
-        "texture": 0,
-        "tex_index": 38
+        "texture": 0.0,
+        "tex_index": 38.0
       }
     },
     "23": {
       "name": "force-floor",
-      "texture": 0,
-      "tex_index": 8,
+      "texture": 0.0,
+      "tex_index": 8.0,
       "properties": {
         "idle_on": {
           "v": "3",
@@ -1867,8 +1867,8 @@
     },
     "24": {
       "name": "orange-door",
-      "texture": 0,
-      "tex_index": 2,
+      "texture": 0.0,
+      "tex_index": 2.0,
       "properties": {
         "blocks": {
           "v": "3",
@@ -1886,8 +1886,8 @@
     },
     "25": {
       "name": "blue-door",
-      "texture": 0,
-      "tex_index": 5,
+      "texture": 0.0,
+      "tex_index": 5.0,
       "properties": {
         "blocks": {
           "v": "3",
@@ -1905,8 +1905,8 @@
     },
     "26": {
       "name": "green-door",
-      "texture": 0,
-      "tex_index": 4,
+      "texture": 0.0,
+      "tex_index": 4.0,
       "properties": {
         "blocks": {
           "v": "3",
@@ -1923,8 +1923,8 @@
     },
     "27": {
       "name": "random-force-floor",
-      "texture": 0,
-      "tex_index": 7,
+      "texture": 0.0,
+      "tex_index": 7.0,
       "properties": {
         "idle_on": {
           "v": "3",
@@ -2042,8 +2042,8 @@
     },
     "28": {
       "name": "checkpoint",
-      "texture": 0,
-      "tex_index": 34,
+      "texture": 0.0,
+      "tex_index": 34.0,
       "properties": {
         "finish_move_onto_tile": {
           "v": "3",
@@ -2063,8 +2063,8 @@
     },
     "29": {
       "name": "checkp-saved",
-      "texture": 0,
-      "tex_index": 33,
+      "texture": 0.0,
+      "tex_index": 33.0,
       "properties": {
 
       }

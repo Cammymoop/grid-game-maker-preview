@@ -231,14 +231,15 @@ func color_brush() -> void:
 	
 	for x in range(img.get_width()):
 		for y in range(img.get_height()):
-			var alpha = img.get_pixel(x, y).a8
+			var pixel_color = img.get_pixel(x, y)
 			if mode_flat:
-				var pix_col = brush_color
-				pix_col.a8 = alpha
-				img.set_pixel(x, y, pix_col)
+				var flat_colored: = brush_color
+				flat_colored.a *= pixel_color.a
+				img.set_pixel(x, y, flat_colored)
 			elif mode_colorize:
-				var brightness = img.get_pixel(x, y).v * brush_color.v
-				img.set_pixel(x, y, Color.from_hsv(brush_color.h, brush_color.s, brightness, alpha))
+				var lightness = pixel_color.ok_hsl_l * brush_color.ok_hsl_l
+				var alpha = pixel_color.a * brush_color.a
+				img.set_pixel(x, y, Color.from_ok_hsl(brush_color.ok_hsl_h, brush_color.ok_hsl_s, lightness, alpha))
 		
 
 func update_tile_brush_preview() -> void:
@@ -270,9 +271,11 @@ func do_corner_paint(corner: Rect2i, dest_image: Image) -> void:
 		old_brush.copy_from(dest_image)
 		dest_image.blit_rect(picked_colored_brush_image, src_rect, corner.position)
 		dest_image.blend_rect(old_brush, whole_brush, Vector2.ZERO)
-	elif brush_creator_mode == "stencil":
-		stencil_blit(picked_colored_brush_image, dest_image, src_rect, corner.position)
+	elif brush_creator_mode == "stamp":
+		stamp_blit(picked_colored_brush_image, dest_image, src_rect, corner.position)
 	elif brush_creator_mode == "cut":
+		alpha_min(picked_colored_brush_image, dest_image, src_rect, corner.position)
+	elif brush_creator_mode == "hole cut":
 		alpha_subtract(picked_colored_brush_image, dest_image, src_rect, corner.position)
 
 func alpha_subtract(from_image: Image, to_image, src_rect: Rect2i, dest_offset: Vector2) -> void:
@@ -287,8 +290,20 @@ func alpha_subtract(from_image: Image, to_image, src_rect: Rect2i, dest_offset: 
 			cur_pixel.a8 = int(max(0, cur_pixel.a8 - alpha))
 			to_image.set_pixel(dest_offset.x + x, dest_offset.y + y, cur_pixel)
 
+func alpha_min(from_image: Image, to_image: Image, src_rect: Rect2i, dest_offset: Vector2) -> void:
+	var w = src_rect.size.x
+	var h = src_rect.size.y
+	var src_offset = src_rect.position
+	
+	for x in range(w):
+		for y in range(h):
+			var brush_alpha: = from_image.get_pixel(src_offset.x + x, src_offset.y + y).a8
+			var cur_pixel: Color = to_image.get_pixel(dest_offset.x + x, dest_offset.y + y)
+			cur_pixel.a8 = int(min(cur_pixel.a8, brush_alpha))
+			to_image.set_pixel(dest_offset.x + x, dest_offset.y + y, cur_pixel)
+
 # paints the specified region onto to_image, while leaving the alpha channel unmodified
-func stencil_blit(from_image: Image, to_image: Image, src_rect: Rect2i, dest_offset: Vector2) -> void:
+func stamp_blit(from_image: Image, to_image: Image, src_rect: Rect2i, dest_offset: Vector2) -> void:
 	var w = src_rect.size.x
 	var h = src_rect.size.y
 	var src_offset = src_rect.position
@@ -299,8 +314,10 @@ func stencil_blit(from_image: Image, to_image: Image, src_rect: Rect2i, dest_off
 			if color.a8 < 1:
 				# ignore completely transparent_img pixels from source
 				continue
-			color.a8 = to_image.get_pixel(dest_offset.x + x, dest_offset.y + y).a8
-			to_image.set_pixel(dest_offset.x + x, dest_offset.y + y, color)
+			var dest_color: = to_image.get_pixel(dest_offset.x + x, dest_offset.y + y)
+			var final_color: = dest_color.lerp(color, color.a)
+			final_color.a = dest_color.a
+			to_image.set_pixel(dest_offset.x + x, dest_offset.y + y, final_color)
 
 func _on_TLButton_pressed() -> void:
 	paint_corner_to_tile_brush(tl_corner)

@@ -133,10 +133,12 @@ func get_half_size() -> Vector2:
 
 func connect_to_signals() -> void:
 	var all_props = EntityManager.get_entity_property_list(self)
+	prints("connecting to prop signals, all props: ", all_props)
 
 	for prop_name in all_props:
 		if prop_name.begins_with("when_signal_"):
 			var signal_name = prop_name.trim_prefix("when_signal_")
+			prints("connecting to signal: ", signal_name)
 			EntityManager.connect_custom_signal(signal_name, entity_manager_signal.bind(signal_name))
 
 	
@@ -878,6 +880,7 @@ func add_deferred_action_signal(action_signal: String) -> void:
 	})
 
 func _handle_signal(signaling_entity: BaseEntity, args: Array, signal_name: String) -> void:
+	prints("handling signal: ", signal_name)
 	var handler = EntityManager.get_entity_property(self, "when_signal_" + signal_name)
 	if handler and handler.is_conditional():
 		handler.resolve(self, signaling_entity, tile_position, args)
