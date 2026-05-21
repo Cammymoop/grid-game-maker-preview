@@ -157,7 +157,7 @@ layout_mode = 2
 
 [node name="Label" type="Label" parent="PanelContainer/VBoxContainer/HBoxContainer2/PreviewVariantSettings" unique_id=640214406]
 layout_mode = 2
-size_flags_stretch_ratio = 0.5
+tooltip_text = "This version is shown in level editor mode"
 theme_override_font_sizes/font_size = 14
 text = "Preview
 Image:"

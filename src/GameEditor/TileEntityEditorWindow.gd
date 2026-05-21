@@ -203,7 +203,7 @@ func _update_terrain_sprite_modifier_ui() -> void:
     var terrain_spr_mod: Dictionary = the_definition.get("terrain_sprite_modifier", {})
     terrain_spr_mod_switch.set_pressed_no_signal(not terrain_spr_mod.is_empty())
     terrain_sprite_modifier_edit.set_text_contents(JSON.stringify(terrain_spr_mod, "  ", false))
-    terrain_sprite_modifier_edit.visible = terrain_spr_mod_switch.button_pressed
+    terrain_sprite_modifier_edit.visible = not terrain_spr_mod.is_empty()
 
 func update_image_button():
     if sprite_snapshot_tex:
@@ -358,6 +358,7 @@ func _on_TestTerrainSprMod_toggled(button_pressed):
         }
     else:
         the_definition.erase("terrain_sprite_modifier")
+    _update_terrain_sprite_modifier_ui()
 
 
 func _on_UpdateButton_pressed():
