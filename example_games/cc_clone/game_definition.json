@@ -13,7 +13,20 @@
       14.0
     ],
     "window_width": 19.0,
-    "auto_reload_checkpoint_for_no_cam_focus": true
+    "auto_reload_checkpoint_for_no_cam_focus": true,
+    "bg_style": {
+      "background_color": "#6dbbf0",
+      "bg_gradient_color": "#5a8df4ff",
+      "dusty_particles_on": true,
+      "pointy_particles_on": false,
+      "pointy_particles_amount": 0.1,
+      "pointy_particles_color": "#c739393a",
+      "dusty_particles_color": "#0081f80b",
+      "dusty_particles_amount": 2.8,
+      "dusty_particles_speed": 1.2,
+      "bg_gradient_on": true,
+      "bg_gradient_above": "below"
+    }
   },
   "textures": [
     {
@@ -1320,7 +1333,7 @@
     "3": {
       "name": "water",
       "texture": 0,
-      "tex_index": 15,
+      "tex_index": 16,
       "properties": {
         "finish_move_onto_tile": {
           "v": "3",
