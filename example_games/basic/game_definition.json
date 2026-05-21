@@ -55,7 +55,17 @@
       "properties": {
         "player": true,
         "pushes": true,
-        "pushes-button": true
+        "pushes-button": true,
+        "z-index": 1,
+        "blocks": {
+          "v": "3",
+          "conditions": [
+            "basic_default.if_property_value::[\"i:1\",\"s:sliding\",true]"
+          ],
+          "when true": [],
+          "when false": [],
+          "when always": []
+        }
       },
       "controller": "InputController",
       "controller_options": {
@@ -104,7 +114,10 @@
           ],
           "when false": [],
           "when always": []
-        }
+        },
+        "heavy": true,
+        "no-rotate": true,
+        "z-index": 2
       }
     },
     "3": {
@@ -151,7 +164,9 @@
           {
             "v": "3",
             "conditions": [
-              "basic_default.if_property_value::[\"i:0\",\"s:sliding\",false]"
+              "basic_default.if_property_value::[\"i:0\",\"s:sliding\",false]",
+              "basic_default.if_entity_is_moving::[\"i:0\"]",
+              "or"
             ],
             "when true": [
               "basic_default.quit::[\"i:-1\"]"
@@ -203,7 +218,10 @@
             "when always": []
           }
         ],
-        "no-rotate": true
+        "no-rotate": true,
+        "heavy": true,
+        "slides": true,
+        "z-index": 2
       }
     },
     "4": {
@@ -252,7 +270,9 @@
         },
         "pushes": true,
         "box": true,
-        "floats": true
+        "floats": true,
+        "no-rotate": true,
+        "z-index": 2
       },
       "sprite_config": {
         "layers": [
@@ -318,7 +338,8 @@
           "when true": [],
           "when false": [],
           "when always": []
-        }
+        },
+        "z-index": 5
       }
     },
     "8": {
@@ -326,28 +347,61 @@
       "texture": 1,
       "tex_index": 49,
       "properties": {
-        "finish_move_onto": {
-          "v": "3",
-          "conditions": [
-            "basic_default.if_property_value::[\"i:1\",\"s:box\",true]"
-          ],
-          "when true": [
-            "basic_default.destroy_entity_with_effect::[\"i:0\",{\"args\":[\"s:name\",\"s:Shrink Out\"],\"type\":\"Dictionary\"}]"
-          ],
-          "when false": [],
-          "when always": []
-        },
-        "move_onto": {
-          "v": "3",
-          "conditions": [
-            "basic_default.if_property_value::[\"i:1\",\"s:pushes\",true]"
-          ],
-          "when true": [
-            "basic_default.a_move::[\"i:0\",{\"args\":[\"s:type\",\"s:plain\",\"s:direction\",\"i:20\"],\"type\":\"Dictionary\"}]"
-          ],
-          "when false": [],
-          "when always": []
-        }
+        "finish_move_onto": [
+          {
+            "v": "3",
+            "conditions": [
+              "basic_default.if_property_value::[\"i:1\",\"s:box\",true]"
+            ],
+            "when true": [
+              "basic_default.a_turn::[\"i:1\",{\"args\":[\"s:type\",\"s:plain\",\"s:direction\",\"i:12\"],\"type\":\"Dictionary\"}]",
+              "basic_default.destroy_entity_with_effect::[\"i:0\",{\"args\":[\"s:name\",\"s:Shrink Out\"],\"type\":\"Dictionary\"}]"
+            ],
+            "when false": [
+              "basic_default.quit::[\"i:-1\"]"
+            ],
+            "when always": []
+          },
+          {
+            "v": "3",
+            "conditions": [
+              "basic_default.if_property_value::[\"i:1\",\"s:sliding\",false]"
+            ],
+            "when true": [
+              "basic_default.a_move::[\"i:1\",{\"args\":[\"s:type\",\"s:plain\",\"s:direction\",\"i:28\"],\"type\":\"Dictionary\"}]"
+            ],
+            "when false": [],
+            "when always": []
+          }
+        ],
+        "move_onto": [
+          {
+            "v": "3",
+            "conditions": [
+              "basic_default.if_property_value::[\"i:1\",\"s:pushes\",true]",
+              "basic_default.if_property_value::[\"i:1\",\"s:heavy\",true]",
+              "or"
+            ],
+            "when true": [],
+            "when false": [
+              "basic_default.quit::[\"i:-1\"]"
+            ],
+            "when always": []
+          },
+          {
+            "v": "3",
+            "conditions": [
+              "basic_default.if_property_value::[\"i:1\",\"s:pushes\",true]"
+            ],
+            "when true": [
+              "basic_default.a_move::[\"i:0\",{\"args\":[\"s:type\",\"s:plain\",\"s:direction\",\"i:20\"],\"type\":\"Dictionary\"}]"
+            ],
+            "when false": [
+              "basic_default.true::[\"i:-1\"]"
+            ],
+            "when always": []
+          }
+        ]
       }
     }
   },
