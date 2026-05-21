@@ -6,6 +6,7 @@
 [ext_resource type="Texture2D" uid="uid://cv8l7ymc05wg5" path="res://assets/img/button_icons/plus.png" id="3"]
 [ext_resource type="Script" uid="uid://bq446sgdivroo" path="res://ButtonContainer.gd" id="3_obo3l"]
 [ext_resource type="Texture2D" uid="uid://b0qrxa5lu7j65" path="res://assets/img/button_icons/minus.png" id="4"]
+[ext_resource type="PackedScene" uid="uid://dvimib4iq4sje" path="res://Scenes/GameEditor/adaptive_multi_line_edit.tscn" id="6_47s6f"]
 [ext_resource type="PackedScene" uid="uid://cxrfq7ld3ttmn" path="res://Scenes/GameEditor/property_edit_list.tscn" id="6_dlgud"]
 [ext_resource type="Texture2D" uid="uid://ctd2phj4knof4" path="res://assets/img/button_icons/x.png" id="6_h7da8"]
 
@@ -13,7 +14,7 @@
 atlas = ExtResource("1")
 region = Rect2(0, 64, 32, 32)
 
-[node name="TileEntityEditorWindow" type="Window" unique_id=1467937022 node_paths=PackedStringArray("property_edit_list")]
+[node name="TileEntityEditorWindow" type="Window" unique_id=1467937022 node_paths=PackedStringArray("property_edit_list", "terrain_sprite_modifier_edit")]
 oversampling_override = 1.0
 title = "Edit"
 position = Vector2i(0, 25)
@@ -22,6 +23,7 @@ wrap_controls = true
 popup_window = true
 script = ExtResource("2")
 property_edit_list = NodePath("PanelContainer/VBoxContainer/VBoxContainer/HBoxContainer4/PropertyEditList")
+terrain_sprite_modifier_edit = NodePath("PanelContainer/VBoxContainer/HBoxContainer5/TerrainSprModTextEdit")
 
 [node name="PanelContainer" type="PanelContainer" parent="." unique_id=1898877842]
 anchors_preset = 15
@@ -204,14 +206,21 @@ layout_mode = 2
 size_flags_horizontal = 3
 alignment = 1
 
-[node name="Label" type="Label" parent="PanelContainer/VBoxContainer/HBoxContainer5" unique_id=1078261995]
-layout_mode = 2
-size_flags_stretch_ratio = 0.5
-text = "Test Terrain Spr Modifier Enabled:"
-horizontal_alignment = 2
-
 [node name="TestTerrainSprMod" type="CheckButton" parent="PanelContainer/VBoxContainer/HBoxContainer5" unique_id=48218373]
 layout_mode = 2
+text = "Terrain Spr Modifier:"
+
+[node name="Label" type="Label" parent="PanelContainer/VBoxContainer/HBoxContainer5" unique_id=1912939437]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.94869167, 0.82275736, 0.45312566, 1)
+theme_override_font_sizes/font_size = 12
+text = "(Advanced)"
+
+[node name="TerrainSprModTextEdit" parent="PanelContainer/VBoxContainer/HBoxContainer5" unique_id=634600988 instance=ExtResource("6_47s6f")]
+custom_minimum_size = Vector2(190, 0)
+layout_mode = 2
+size_flags_horizontal = 1
+placeholder_text = "{modifier json}"
 
 [node name="HSeparator2" parent="PanelContainer/VBoxContainer" unique_id=547141302 instance=ExtResource("2_nnx4p")]
 layout_mode = 2

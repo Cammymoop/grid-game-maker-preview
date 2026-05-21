@@ -1081,7 +1081,13 @@
             "conditions": [
               "basic_default.select_adjacent_tile::[\"i:5\",\"i:0\",{\"args\":[\"s:type\",\"s:plain\",\"s:direction\",\"i:12\"],\"type\":\"Dictionary\"}]",
               "basic_default.select_named_entity_at::[\"i:2\",\"i:5\",{\"args\":[\"s:type\",\"s:slot_value\",\"s:slot_id\",\"i:12\"],\"type\":\"Dictionary\"}]",
-              "basic_default.exists::[\"i:2\"]"
+              "basic_default.exists::[\"i:2\"]",
+              "and",
+              "and",
+              "basic_default.select_entity_at::[\"i:2\",\"i:5\",\"s:solid\",false]",
+              "basic_default.exists::[\"i:2\"]",
+              "and",
+              "or"
             ],
             "when true": [
               "basic_default.quit::[\"i:-1\"]"
@@ -1339,7 +1345,7 @@
         }
       },
       "terrain_sprite_modifier": {
-        "name": "my_test_terrain_mod",
+        "name": "water_mask",
         "layers": [
           {
             "texture": 1.0,

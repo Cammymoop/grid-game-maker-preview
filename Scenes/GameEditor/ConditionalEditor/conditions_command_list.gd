@@ -559,7 +559,30 @@ func calculate_all_index_ranges() -> Dictionary:
     return index_ranges_recursive(combiner_tree, get_command_count() - 1)
 
 func calculate_combiner_subtree_index_ranges(combiner_subtree: Dictionary, last_available_index: int) -> Dictionary:
+    if last_available_index == -1:
+        if combiner_subtree.has("last_command_index"):
+            last_available_index = combiner_subtree["last_command_index"]
+        elif is_same(combiner_subtree, combiner_tree):
+            last_available_index = maxi(0, get_command_count() - 1)
+        else:
+            var all_ranges: = calculate_all_index_ranges()
+            var found_range: = find_combiner_range_in(combiner_subtree, all_ranges)
+            if not found_range:
+                push_error("Combiner subtree not found in calculated index ranges: %s" % [combiner_subtree])
+                return {}
+            return found_range
     return index_ranges_recursive(combiner_subtree, last_available_index)
+
+func find_combiner_range_in(combiner_subtree: Dictionary, at_range: Dictionary) -> Dictionary:
+    if is_same(at_range["root_node"], combiner_subtree):
+        return at_range
+    if not at_range or not at_range.get("children", []):
+        return {}
+    for child_range in at_range["children"]:
+        var found_range: = find_combiner_range_in(combiner_subtree, child_range)
+        if found_range:
+            return found_range
+    return {}
 
 func get_combiner_node_last_index(combiner_node: Dictionary) -> int:
     if combiner_node.has("last_command_index"):
@@ -690,10 +713,7 @@ func append_command(new_command: CommandListItem) -> void:
 func setup_command_item_as_own(command_item: CommandListItem) -> void:
     command_item.parent_list = self
     if not command_item.request_invert.is_connected(on_command_item_request_invert):
-        prints("binding request invert for", command_item)
         command_item.request_invert.connect(on_command_item_request_invert.bind(command_item))
-    else:
-        prints("request invert already bound for", command_item)
 
 # deep version: Tries to put the new command at the deepest tree level possible at that index (not expanding adjacent combiners)
 func combiner_insert_index(index_ranges_subtree: Dictionary, inserted_index: int) -> void:
@@ -825,7 +845,7 @@ func update_resizing_combiner(local_pos: Vector2) -> void:
     else:
         new_range[0] = mini(new_range[1], resizer_at_row_index)
     var resized_version: = get_combiner_copy_for_resizing()
-    resize_combiner_smart(resized_version, new_range, resizing_last_index)
+    resize_combiner_smart(resized_version, new_range)
     _dirty = true
 
 func get_combiner_copy_for_resizing() -> Dictionary:
@@ -838,9 +858,9 @@ func get_combiner_copy_for_resizing() -> Dictionary:
 
 # Resize combiners in-place, dropping, shortening, or enveloping children and siblings as necessary
 
-func resize_combiner_smart(resized_node: Dictionary, new_range: Array[int], current_last_index: int) -> void:
+func resize_combiner_smart(resized_node: Dictionary, new_range: Array[int]) -> void:
     var parent_combiner: Dictionary = get_parent_combiner(resized_node)
-    var parent_range: Dictionary = calculate_combiner_subtree_index_ranges(parent_combiner, current_last_index)
+    var parent_range: Dictionary = calculate_combiner_subtree_index_ranges(parent_combiner, -1)
     var this_range: Dictionary = parent_range["children"][parent_combiner["children"].find(resized_node)]
     var old_range: Array[int] = this_range["index_range"]
 
@@ -943,7 +963,6 @@ func on_combiner_context_id_pressed(context_id: int, local_row: int, local_colum
 func on_command_item_request_invert(command_node: CommandListItem) -> void:
     if not command_node:
         return
-    prints("on_command_item_request_invert", command_node)
     var command_index: int = command_list_items.find(command_node)
     if command_index == -1:
         return
