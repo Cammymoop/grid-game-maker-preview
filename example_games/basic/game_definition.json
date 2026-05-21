@@ -31,10 +31,10 @@
     ],
     "bg_style": {
       "bg_gradient_above": "above",
-      "dusty_particles_color": "#94ba8241",
+      "dusty_particles_color": "#9aeab651",
       "bg_gradient_color": "#343ae0bb",
       "background_color": "#9ac9f8",
-      "dusty_particles_amount": 0.5,
+      "dusty_particles_amount": 0.7,
       "pointy_particles_on": true,
       "pointy_particles_color": "#cafbea11",
       "pointy_particles_dark_mode": false,
@@ -222,6 +222,22 @@
         "heavy": true,
         "slides": true,
         "z-index": 2
+      },
+      "sprite_config": {
+        "layers": [
+          {
+            "mode": "normal",
+            "texture": 1.0,
+            "tex_index": 8.0
+          },
+          {
+            "mode": "normal",
+            "texture": 1.0,
+            "tex_index": 57.0,
+            "mod_color": "#d25cd49c",
+            "when_property": "sliding"
+          }
+        ]
       }
     },
     "4": {
