@@ -262,7 +262,8 @@
           "v": "3",
           "conditions": [
             "basic_default.if_property_value::[\"i:1\",\"s:pushes\",false]",
-            "basic_default.c_is_named::[\"i:1\",true,\"s:pusher\"]"
+            "basic_default.c_is_named::[\"i:1\",true,\"s:pusher\"]",
+            "basic_default.if_property_value::[\"i:1\",\"s:slides\",false]"
           ],
           "when true": [],
           "when false": [],
