@@ -1056,7 +1056,7 @@ func cmd_apply_effect_to_entity(slots: Dictionary, chosen_slot: int, effect_info
 		return
 	if slots[chosen_slot]:
 		var effect_color: Color = Utility.get_dict_color(effect_info, "color", Color.WHITE)
-		EntityManager.apply_special_effect(slots[chosen_slot], effect_info["effect"], effect_color)
+		EntityManager.apply_special_effect(slots[chosen_slot], effect_info["effect"], effect_color, effect_info.get("amount", 0.0))
 
 func desc_entity_play_bump_effect() -> String:
 	return "entity|The entity plays the short \"bump\" effect [effect_info:BumpEffectInput]"

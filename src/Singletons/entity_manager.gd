@@ -1437,7 +1437,7 @@ func get_all_active_entities() -> Array[BaseEntity]:
 var special_effects: Dictionary = {
     "Shrink": {
         "name": "effect-shrink",
-        "effects": { "scale": [0.65, 0.65], },
+        "effects": { "scale": [0.75, 0.75], },
     },
     "Grow": {
         "name": "effect-grow",
@@ -1462,10 +1462,17 @@ var special_effects: Dictionary = {
     },
 }
 
-func apply_special_effect(entity: BaseEntity, effect_name: String, color_param: Color = Color.WHITE) -> void:
+func special_effect_with_amount(effect_name: String, amount: float) -> Dictionary:
+    var effect_info: Dictionary = special_effects[effect_name].duplicate_deep()
+    if effect_name in ["Shrink", "Grow"]:
+        var scale_val: float = 1 + amount if effect_name == "Grow" else 1 - amount
+        effect_info["effects"]["scale"] = [scale_val, scale_val]
+    return effect_info
+
+func apply_special_effect(entity: BaseEntity, effect_name: String, color_param: Color = Color.WHITE, with_amount: float = 0.0) -> void:
     if not entity or not effect_name in special_effects:
         return
-    var effect_info: Dictionary = special_effects[effect_name].duplicate_deep()
+    var effect_info: Dictionary = special_effect_with_amount(effect_name, with_amount)
     if effect_name == "Color":
         effect_info["effects"]["replace_color"]["color"] = Utility.color_string_no_alpha(color_param)
         effect_info["effects"]["replace_color"]["amount"] = color_param.a

@@ -1136,7 +1136,7 @@
               "basic_default.select_created_entity::[\"i:2\",{\"args\":[\"s:type\",\"s:slot_value\",\"s:slot_id\",\"i:12\"],\"type\":\"Dictionary\"},\"i:0\",{\"args\":[\"s:type\",\"s:plain\",\"s:direction\",\"i:12\"],\"type\":\"Dictionary\"},false]",
               "basic_default.set_entity_as_active::[\"i:2\",false]",
               "basic_default.make_entity_dependent::[\"i:2\",\"i:0\"]",
-              "basic_default.apply_effect_to_entity::[\"i:2\",{\"args\":[\"s:effect\",\"s:Shrink\"],\"type\":\"Dictionary\"}]",
+              "basic_default.apply_effect_to_entity::[\"i:2\",{\"args\":[\"s:effect\",\"s:Shrink\",\"s:amount\",\"f:0.25\"],\"type\":\"Dictionary\"}]",
               "basic_default.a_set_property::[\"i:0\",\"s:clone-entity\",{\"args\":[\"s:type\",\"s:slot_value\",\"s:slot_id\",\"i:12\"],\"type\":\"Dictionary\"}]",
               "basic_default.a_set_property::[\"i:0\",\"s:preview-loaded\",\"s:true\"]"
             ],
@@ -1201,7 +1201,7 @@
             "when true": [
               "basic_default.select_text_property::[\"i:12\",\"i:0\",\"s:clone-entity\"]",
               "basic_default.select_created_entity::[\"i:2\",{\"args\":[\"s:type\",\"s:slot_value\",\"s:slot_id\",\"i:12\"],\"type\":\"Dictionary\"},\"i:0\",{\"args\":[\"s:type\",\"s:plain\",\"s:direction\",\"i:12\"],\"type\":\"Dictionary\"},false]",
-              "basic_default.apply_effect_to_entity::[\"i:2\",{\"args\":[\"s:effect\",\"s:Shrink\"],\"type\":\"Dictionary\"}]",
+              "basic_default.apply_effect_to_entity::[\"i:2\",{\"args\":[\"s:effect\",\"s:Shrink\",\"s:amount\",\"f:0.25\"],\"type\":\"Dictionary\"}]",
               "basic_default.set_entity_as_active::[\"i:2\",false]",
               "basic_default.a_set_property::[\"i:2\",\"s:z-index\",\"s:2\"]",
               "basic_default.a_set_property::[\"i:0\",\"s:created-preview\",\"s:true\"]",
