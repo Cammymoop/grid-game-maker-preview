@@ -87,3 +87,36 @@ func update_bounds() -> void:
 		level_bounds.size.y = game_render_size.y
 	set_limits_rect(level_bounds)
 	_cached_center_limits = Rect2()
+
+func reset_zoom() -> void:
+	GameManager.update_game_viewport()
+	update_bounds()
+
+func zoom_in() -> float:
+	return zoom_in_out(-1)
+
+func zoom_out() -> float:
+	return zoom_in_out(1)
+
+func zoom_in_out(dir: float) -> float:
+	var base_vp_size: Vector2 = GameManager.get_base_window_size()
+	var current_vp_size: Vector2 = vp.intended_resolution
+
+	var cur_multiplier: float = current_vp_size.x / base_vp_size.x
+	var new_multiplier: float = cur_multiplier + (dir * .25)
+	return _set_zoom_to(new_multiplier)
+
+func set_zoom_to(multiplier: float) -> float:
+	return _set_zoom_to(multiplier)
+
+func _set_zoom_to(multiplier: float) -> float:
+	var base_vp_size: Vector2 = GameManager.get_base_window_size()
+	
+	var long_side_lenght: float = max(base_vp_size.x, base_vp_size.y)
+	var max_vp_target_size: float = 4096
+	var max_factor: float = floorf((max_vp_target_size / long_side_lenght) * 4) * 0.25
+	multiplier = clamp(multiplier, .25, max_factor)
+	
+	vp.set_resolution(base_vp_size * multiplier)
+	update_bounds()
+	return multiplier

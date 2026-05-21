@@ -103,6 +103,26 @@ horizontal_alignment = 2
 layout_mode = 2
 text = "WASD"
 
+[node name="Label36" type="Label" parent="VBoxContainer/KeyboardControls" unique_id=402562466]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("1_rr3k7")
+text = "Zoom In/Out"
+horizontal_alignment = 2
+
+[node name="Label37" type="Label" parent="VBoxContainer/KeyboardControls" unique_id=691098788]
+layout_mode = 2
+text = "- / +"
+
+[node name="Label38" type="Label" parent="VBoxContainer/KeyboardControls" unique_id=507797455]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("1_rr3k7")
+text = "Reset Zoom"
+horizontal_alignment = 2
+
+[node name="Label39" type="Label" parent="VBoxContainer/KeyboardControls" unique_id=1785821929]
+layout_mode = 2
+text = "0"
+
 [node name="Label8" type="Label" parent="VBoxContainer/KeyboardControls" unique_id=1386556186]
 layout_mode = 2
 theme_override_fonts/font = ExtResource("1_rr3k7")

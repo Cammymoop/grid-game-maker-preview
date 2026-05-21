@@ -40,8 +40,12 @@ func set_resolution(new_resolution: Vector2) -> void:
 	#get_window().min_size = Vector2i(new_resolution / 2)
 	intended_resolution = new_resolution
 	resolution = fit_resolution_into_aspect(aspect_expand)
-	size = resolution * overscale_factor
-	size_2d_override = resolution
+	if maxf(resolution.x, resolution.y) > 1024:
+		size = resolution
+		size_2d_override = resolution
+	else:
+		size = resolution * overscale_factor
+		size_2d_override = resolution
 	
 	# Let the texture rect know it needs to scale the texture again
 	var tex_rect: = get_parent() as TextureRect

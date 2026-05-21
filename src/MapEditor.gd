@@ -37,6 +37,8 @@ var current_tile_facing: int = 0
 var all_tiles: = []
 var all_entities: = []
 
+var last_zoom_amt: float = 1
+
 var input_repeat_timers: Array[RepeatDelayTimer] = []
 
 @onready var editor_cam: EditorCam = get_node("EditorCam")
@@ -142,6 +144,7 @@ func after_edit_mode_switched() -> void:
 	MapManager.switch_tiles_preview_mode(edit_mode)
 
 func on_edit_mode_disabled(do_save_state: bool) -> void:
+	editor_cam.reset_zoom()
 	drop_input_priority()
 	if entity_instance_editor.visible:
 		entity_instance_editor.close_instance_editor()
@@ -155,6 +158,8 @@ func on_edit_mode_disabled(do_save_state: bool) -> void:
 	after_edit_mode_switched()
 
 func on_edit_mode_enabled() -> void:
+	if last_zoom_amt != 1:
+		last_zoom_amt = editor_cam.set_zoom_to(last_zoom_amt)
 	set_enable_camera_limits(true)
 	if GameManager.queued_level_load:
 		GameManager.cancel_queued_level_load()
@@ -466,6 +471,14 @@ func _process(delta: float) -> void:
 	
 	if Input.is_action_just_pressed("editor_toggle_help"):
 		map_editor_overlay.toggle_controls_help()
+	
+	if Input.is_action_just_pressed("editor_zoom_in"):
+		last_zoom_amt = editor_cam.zoom_in()
+	elif Input.is_action_just_pressed("editor_zoom_out"):
+		last_zoom_amt = editor_cam.zoom_out()
+	elif Input.is_action_just_pressed("editor_zoom_reset"):
+		editor_cam.reset_zoom()
+		last_zoom_amt = 1
 	
 	# camera scroll that doesn't interact with GUI can scroll regardless of input priority
 	var dedicated_scroll_input: = Utility.input_vector_by_prefix("editor_camera_dedicated")
