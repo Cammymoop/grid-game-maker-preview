@@ -50,6 +50,11 @@ func _spawn_entity_layer_effect(effect_node: Node2D, at_pos: Vector2, use_id: in
     var effect_id: = use_id
     if effect_id < 0:
         effect_id = get_next_effect_id()
+    else:
+        if effect_id_references.has(effect_id):
+            push_warning("Effect id already in use: %s" % [effect_id])
+            remove_effect_by_id(effect_id)
+        effect_id_counter = maxi(effect_id_counter, use_id + 1)
     effects_holder.add_child(effect_node)
     effect_node.position = at_pos
     effect_id_references[effect_id] = effect_node
@@ -80,12 +85,9 @@ func _cleanup_effect_ids() -> void:
 func remove_effect_by_id(effect_id: int) -> void:
     prints("removing effect by id: %s" % [effect_id])
     if not effect_id_references.has(effect_id):
-        prints("no effect found by id: %s" % [effect_id])
         return
     if is_instance_valid(effect_id_references[effect_id]):
-        prints("queueing free for effect by id: %s" % [effect_id])
         effect_id_references[effect_id].queue_free()
-    prints("clearing effect id: %s" % [effect_id])
     clear_effect_id(effect_id)
 
 func get_effect_node_by_id(effect_id: int) -> Node2D:

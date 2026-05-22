@@ -528,9 +528,6 @@ func _process(delta: float) -> void:
 	if not edit_mode or is_other_paused():
 		return
 	
-	if Input.is_action_just_pressed("editor_toggle_help"):
-		map_editor_overlay.toggle_controls_help()
-	
 	if Input.is_action_just_pressed("editor_zoom_in"):
 		last_zoom_amt = editor_cam.zoom_in()
 	elif Input.is_action_just_pressed("editor_zoom_out"):
@@ -602,6 +599,9 @@ func forwarded_gui_input(event: InputEvent) -> void:
 	if not edit_mode or GameManager.get_pause("pause_menu"):
 		return
 	
+	if Utility.fixed_just_pressed_by_event("editor_toggle_help", event, true):
+		map_editor_overlay.toggle_controls_help()
+	
 	#if event is InputEventMouseButton:
 		#prints(get_viewport().gui_get_focus_owner())
 	
@@ -659,7 +659,7 @@ func forwarded_gui_input(event: InputEvent) -> void:
 	if Utility.fixed_just_pressed_by_event("editor_non_pointer_primary", event, true):
 		_primary_action_at_cursor()
 		return
-	if Utility.fixed_just_pressed_by_event("editor_pointer_primary", event, true):
+	if Utility.fixed_just_pressed_by_event("editor_pointer_primary", event, false):
 		_primary_action_at_cursor()
 		return
 	

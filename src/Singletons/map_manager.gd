@@ -274,10 +274,10 @@ func edit_persistant_text_colors(effect_id: int, new_color: Color, change_outlin
     if not effect_info:
         push_error("Could not find effect with id: " + str(effect_id))
         return
-    effect_info["color"] = new_color
+    effect_info["color"] = Utility.color_string(new_color)
     if change_outline:
         effect_info["outline_enabled"] = outline_enabled
-        effect_info["outline_color"] = outline_color
+        effect_info["outline_color"] = Utility.color_string(outline_color)
     var effect_node: = EffectsHelper.get_effect_node_by_id(effect_id) as MiniTextMessage
     if not effect_node:
         push_error("Could not find effect node with id: " + str(effect_id))
@@ -336,11 +336,11 @@ func _create_persistant_text_effect(effect_info: Dictionary) -> int:
     if effect_info.has("size"):
         effect_node.set_font_size(effect_info["size"])
     if effect_info.has("color"):
-        effect_node.set_color(effect_info["color"])
+        effect_node.set_color(Utility.get_dict_color(effect_info, "color", Color.WHITE))
     if effect_info.has("outline_enabled"):
         effect_node.set_outline_enabled(effect_info["outline_enabled"])
     if effect_info.has("outline_color"):
-        effect_node.set_outline_color(effect_info["outline_color"])
+        effect_node.set_outline_color(Utility.get_dict_color(effect_info, "outline_color", Color.BLACK))
 
     return effect_info["effect_id"]
 
@@ -393,9 +393,13 @@ func deserialize(data: Dictionary) -> void:
     level_size_changed.emit()
 
 func recreate_persistant_effects() -> void:
-    for effect_pos_key in map_metadata.get("persistant_effects", {}).keys():
-        for i in map_metadata["persistant_effects"][effect_pos_key].size():
-            _create_persistant_effect_info(map_metadata["persistant_effects"][effect_pos_key][i])
+    if not map_metadata.has("persistant_effects"):
+        return
+    var old_effects: Dictionary = map_metadata["persistant_effects"].duplicate_deep()
+    map_metadata["persistant_effects"] = {}
+    for effect_pos_key in old_effects.keys():
+        for i in old_effects[effect_pos_key].size():
+            _create_persistant_effect_info(old_effects[effect_pos_key][i])
 
 func create_positioned_property(at_pos: Vector2i, for_tile_index: int) -> Dictionary:
     if not map_metadata.has("positioned_properties"):
