@@ -4,6 +4,7 @@ signal lost_input_priority
 signal request_grab_gui_focus
 
 const EntityInstanceEditor = preload("res://Scenes/GameEditor/entity_instance_editor.gd")
+const PlaceableTextPanel = preload("res://Scenes/GameEditor/placeable_text_panel.gd")
 const EditorCam = preload("res://src/EditorCam.gd")
 
 const edited_entity_indicator_icon: Texture2D = preload("res://assets/img/button_icons/star.png")
@@ -17,6 +18,7 @@ const edited_entity_indicator_icon: Texture2D = preload("res://assets/img/button
 @export var ui_layer: CanvasLayer
 @export var map_editor_overlay: Control
 @export var entity_instance_editor: EntityInstanceEditor
+@export var placeable_text_input_panel: PlaceableTextPanel
 
 @export var cursor_star: Node2D
 
@@ -37,6 +39,8 @@ var current_tile_facing: int = 0
 var all_tiles: = []
 var all_entities: = []
 
+var text_place_snap: Vector2i = Vector2i(4, 4)
+
 var last_zoom_amt: float = 1
 
 var input_repeat_timers: Array[RepeatDelayTimer] = []
@@ -45,6 +49,8 @@ var input_repeat_timers: Array[RepeatDelayTimer] = []
 
 @onready var cursor = get_node("Cursor")
 @onready var preview = get_node("Cursor/TileEntityPreview")
+
+@export var text_preview: Node2D
 
 @onready var edited_entity_indicators: Node2D = find_child("EditedEntityIndicators")
 
@@ -58,6 +64,7 @@ var default_cursor_tex: = preload("res://assets/img/cursor.png")
 var entity_cursor_tex: = preload("res://assets/img/cursor_entity.png")
 var tile_cursor_tex: = preload("res://assets/img/cursor_tile.png")
 var delete_cursor_tex: = preload("res://assets/img/cursor_delete.png")
+var text_cursor_tex: = preload("res://assets/img/cursor_tile.png")
 
 var cursor_mode: = "none"
 
@@ -77,7 +84,12 @@ var _cursor_moved_from_directional_input: = false
 
 var _edited_entitys_indicators: Dictionary[int, Sprite2D] = {}
 
+var _placing_text_string: = ""
+var _placeable_text_style_info: = {}
+var _placing_text_offset: Vector2 = Vector2.ZERO
+
 func _ready() -> void:
+	text_preview.hide()
 
 	editor_cam.edge_limit_tile_count = extend_camera_limits_by_tiles
 	editor_cam.update_bounds()
@@ -91,7 +103,10 @@ func _ready() -> void:
 	entity_instance_editor.entity_props_edited.connect(on_entity_props_edited)
 	entity_instance_editor.entity_local_props_reset.connect(on_entity_local_props_reset)
 	
-	GameManager.level_state_loaded.connect(on_level_state_loaded)
+	placeable_text_input_panel.hidden.connect(on_placeable_text_input_panel_hidden)
+	placeable_text_input_panel.text_picked.connect(on_placeable_text_input_panel_text_picked)
+	
+	GameManager.any_state_loaded.connect(on_any_state_loaded)
 	
 	if GameManager.is_in_level_edit_mode and start_in_edit_mode:
 		switch_edit_mode(true)
@@ -106,7 +121,7 @@ func _physics_process(delta: float) -> void:
 		if not EntityManager.can_process():
 			EntityManager.paused_visual_process(delta)
 
-func on_level_state_loaded() -> void:
+func on_any_state_loaded() -> void:
 	if edit_mode:
 		var game_camera_starting_pos: Vector2 = GameManager.game_camera.get_targeted_position()
 		editor_cam.set_position_immediate(game_camera_starting_pos)
@@ -126,6 +141,9 @@ func on_cursor_move_activated() -> void:
 	_cursor_moved_from_directional_input = true
 	var move_vec: = Utility.input_vector_by_prefix("editor_cursor")
 	move_cursor(cursor_tile_pos + Vector2i(move_vec.snapped(Vector2.ONE)))
+	if cursor_mode == "text":
+		if _placing_text_offset != Vector2.ZERO:
+			set_placing_text_offset(Vector2.ZERO)
 
 func switch_edit_mode(edit_enabled: bool, do_save_state: bool = true) -> void:
 	edit_mode = edit_enabled
@@ -148,6 +166,8 @@ func on_edit_mode_disabled(do_save_state: bool) -> void:
 	drop_input_priority()
 	if entity_instance_editor.visible:
 		entity_instance_editor.close_instance_editor()
+	if placeable_text_input_panel.visible:
+		placeable_text_input_panel.close_panel()
 	#set_cursor_mode("none")
 	if do_save_state:
 		GameManager.save_edited()
@@ -172,6 +192,9 @@ func on_edit_mode_enabled() -> void:
 		await get_tree().process_frame
 		await get_tree().process_frame
 	refresh_game_definition()
+
+	if cursor_mode == "text":
+		set_cursor_mode(_last_tile_entity_mode)
 
 	var cam_position = GameManager.get_gameplay_camera_position()
 	_cursor_moved_from_directional_input = true
@@ -319,6 +342,14 @@ func preview_tile(tile_index):
 	preview.region_enabled = true
 	preview.region_rect = MapManager.get_tile_texture_rect(tile_index, true)
 
+func switch_to_text_cursor() -> void:
+	if not _placing_text_string.strip_edges():
+		if cursor_mode == "text":
+			set_cursor_mode(_last_tile_entity_mode)
+		return
+	text_preview.set_message_text(_placing_text_string)
+	set_cursor_mode("text")
+
 func set_cursor_mode(new_mode: String):
 	if new_mode != "none":
 		cursor_mode_text.text = new_mode.capitalize()
@@ -338,6 +369,8 @@ func set_cursor_mode(new_mode: String):
 		check_show_star()
 	else:
 		preview.visible = false
+	
+	text_preview.visible = cursor_mode == "text"
 
 	# default cursor for "none" or unknown mode
 	cursor.texture = default_cursor_tex
@@ -354,6 +387,9 @@ func set_cursor_mode(new_mode: String):
 			preview_tile(current_tile_index)
 	if cursor_mode == "delete":
 		cursor.texture = delete_cursor_tex
+	
+	if cursor_mode == "text":
+		cursor.texture = text_cursor_tex
 
 func check_show_star() -> void:
 	if not cursor_mode == "entity":
@@ -394,6 +430,24 @@ func _primary_action_at_cursor(holding: bool = false) -> void:
 		if has_copied_properties:
 			new_entity.set_local_properties_dict(entity_properties_copied)
 			_refresh_edited_entity_indicators()
+	elif cursor_mode == "text":
+		var text_offset: = get_cur_placeable_text_offset()
+		var max_tile_z: int = MapManager.get_max_z_at(cursor_tile_pos)
+		var max_entity_z: int = 0
+		for e in get_all_entities_at_tile_pos(cursor_tile_pos):
+			max_entity_z = maxi(max_entity_z, e.z_index)
+		var put_at_z: int = maxi(max_tile_z + 5, max_entity_z) - EffectsHelper.base_effects_z_index
+		var message_effect_id: int = MapManager.create_persistant_text_effect(_placing_text_string, cursor_tile_pos, text_offset, put_at_z)
+		if _placeable_text_style_info:
+			MapManager.edit_persistant_text_layout_mode(message_effect_id, _placeable_text_style_info["h_align"])
+			MapManager.edit_persistant_text_size(message_effect_id, _placeable_text_style_info["size"])
+			MapManager.edit_persistant_text_colors(
+				message_effect_id,
+				_placeable_text_style_info["color"],
+				true,
+				_placeable_text_style_info["outline_enabled"],
+				_placeable_text_style_info["outline_color"]
+			)
 	elif cursor_mode == "delete":
 		var force_everything: = holding and not delete_held_on_entity
 		var force_only_entities: = holding and delete_held_on_entity
@@ -404,6 +458,9 @@ func _primary_action_at_cursor(holding: bool = false) -> void:
 				delete_held_on_entity = false
 		_standard_delete_at_cursor(force_everything, force_only_entities)
 
+func get_cur_placeable_text_offset() -> Vector2:
+	return _placing_text_offset
+
 func _standard_delete_at_cursor(force_everything: bool = false, force_only_entities: bool = false) -> void:
 	var entities_here = get_sorted_entities_at(cursor_tile_pos)
 	var deleted_something: = false
@@ -411,8 +468,8 @@ func _standard_delete_at_cursor(force_everything: bool = false, force_only_entit
 		# No entities, remove the tile
 		var here = MapManager.get_tile_index_at(cursor_tile_pos)
 		if here > -1:
-			MapManager.erase_tiles_and_effects_at(cursor_tile_pos)
 			deleted_something = true
+		MapManager.erase_tiles_and_effects_at(cursor_tile_pos)
 
 	if entities_here.size() > 0:
 		if not is_alt_mode_active():
@@ -449,6 +506,8 @@ func update_input_priority() -> bool:
 		drop_input_priority()
 	elif entity_instance_editor and entity_instance_editor.is_visible_in_tree():
 		drop_input_priority()
+	elif placeable_text_input_panel and placeable_text_input_panel.visible:
+		drop_input_priority()
 	else:
 		gain_input_priority()
 	return _input_priority
@@ -476,7 +535,7 @@ func _process(delta: float) -> void:
 		last_zoom_amt = editor_cam.zoom_in()
 	elif Input.is_action_just_pressed("editor_zoom_out"):
 		last_zoom_amt = editor_cam.zoom_out()
-	elif Input.is_action_just_pressed("editor_zoom_reset"):
+	elif Input.is_action_just_pressed("editor_reset_zoom"):
 		editor_cam.reset_zoom()
 		last_zoom_amt = 1
 	
@@ -507,6 +566,12 @@ func process_new_mouse_position() -> void:
 	_cursor_moved_from_directional_input = false
 	var tile_pos: = MapManager.world_to_tile_position(new_mouse_pos)
 	move_cursor(tile_pos)
+	if cursor_mode == "text":
+		var snapped_mouse_pos: = new_mouse_pos
+		if not is_alt_mode_active():
+			snapped_mouse_pos = snapped_mouse_pos.snapped(text_place_snap)
+		var tile_center_pos: = MapManager.tile_to_world_position_centered(tile_pos)
+		set_placing_text_offset(snapped_mouse_pos - tile_center_pos)
 
 func move_cursor(new_position: Vector2i) -> void:
 	if new_position == cursor_tile_pos:
@@ -579,6 +644,16 @@ func forwarded_gui_input(event: InputEvent) -> void:
 		if cursor_mode == "entity" or cursor_mode == "tile":
 			var direction = 1 if rotate_cw else -1
 			set_current_facing(posmod(get_current_facing() + direction, 4))
+		return
+	
+	if Utility.fixed_just_pressed_by_event("editor_do_text", event, false):
+		var alt_mode: = is_alt_mode_active()
+		if cursor_mode == "text" and not alt_mode:
+			set_cursor_mode(_last_tile_entity_mode)
+		else:
+			var with_text: = _placing_text_string if alt_mode else ""
+			get_window().set_input_as_handled()
+			show_add_placeable_text_panel(with_text)
 		return
 	
 	if Utility.fixed_just_pressed_by_event("editor_non_pointer_primary", event, true):
@@ -747,6 +822,9 @@ func entity_instance_editor_closed() -> void:
 		_refresh_entity_is_edited(entity_instance_editor.edited_entity)
 	request_grab_gui_focus.emit()
 
+func on_placeable_text_input_panel_hidden() -> void:
+	request_grab_gui_focus.emit()
+
 func on_entity_props_edited(entity: BaseEntity) -> void:
 	_refresh_entity_is_edited(entity)
 	_refresh_edited_entity_indicators()
@@ -761,3 +839,26 @@ func pause_menu_closed() -> void:
 	if entity_instance_editor and entity_instance_editor.visible:
 		entity_instance_editor.get_gui_focus()
 	request_grab_gui_focus.emit()
+
+func on_placeable_text_input_panel_text_picked(text: String) -> void:
+	_placing_text_string = text
+	_placeable_text_style_info = placeable_text_input_panel.get_style_info()
+	update_text_preview_style()
+	switch_to_text_cursor()
+
+func show_add_placeable_text_panel(with_text: String) -> void:
+	placeable_text_input_panel.set_input_text(with_text)
+	placeable_text_input_panel.open_panel(true)
+
+func update_text_preview_style() -> void:
+	text_preview.reset_style()
+	if _placeable_text_style_info:
+		text_preview.set_layout_mode(_placeable_text_style_info["h_align"])
+		text_preview.set_font_size(_placeable_text_style_info["size"])
+		text_preview.set_color(_placeable_text_style_info["color"])
+		text_preview.set_outline_enabled(_placeable_text_style_info["outline_enabled"])
+		text_preview.set_outline_color(_placeable_text_style_info["outline_color"])
+
+func set_placing_text_offset(new_offset: Vector2) -> void:
+	_placing_text_offset = new_offset
+	text_preview.position = _placing_text_offset

@@ -2,6 +2,8 @@ extends Node
 
 const MapLayer = preload("res://src/MapLayer.gd")
 
+const MiniTextMessage = preload("res://Scenes/GameEditor/Effects/mini_text_message.gd")
+
 signal level_size_changed
 signal map_cleared
 
@@ -248,14 +250,60 @@ func get_tile_atlas_coords(tile_index, preview: bool = false) -> Vector2i:
         tex_from = tex_from["preview_variant"]
     return TextureManager.get_index_atlas_coords(tex_from['texture'], tex_from['tex_index'])
 
-func create_persistant_text_effect(effect_text: String, at_tile_pos: Vector2i, pos_offset: Vector2 = Vector2.ZERO, z_offset: int = 0) -> void:
-    _create_persistant_effect_info({
+func create_persistant_text_effect(effect_text: String, at_tile_pos: Vector2i, pos_offset: Vector2 = Vector2.ZERO, z_offset: int = 0) -> int:
+    return _create_persistant_effect_info({
         "effect_type": "text",
         "tile_pos": Utility.get_arr_from_vector2i(at_tile_pos),
         "text": effect_text,
         "pos_offset": Utility.get_arr_from_vector2(pos_offset),
         "z_offset": z_offset,
     })
+
+func edit_persistant_text_size(effect_id: int, new_size: int) -> void:
+    var effect_info: = _find_persistant_effect_by_id(effect_id)
+    if not effect_info:
+        push_error("Could not find effect with id: " + str(effect_id))
+        return
+    effect_info["size"] = new_size
+    var effect_node: = EffectsHelper.get_effect_node_by_id(effect_id) as MiniTextMessage
+    if effect_node:
+        effect_node.set_font_size(new_size)
+
+func edit_persistant_text_colors(effect_id: int, new_color: Color, change_outline: bool = false, outline_enabled: bool = true, outline_color: Color = Color.BLACK) -> void:
+    var effect_info: = _find_persistant_effect_by_id(effect_id)
+    if not effect_info:
+        push_error("Could not find effect with id: " + str(effect_id))
+        return
+    effect_info["color"] = new_color
+    if change_outline:
+        effect_info["outline_enabled"] = outline_enabled
+        effect_info["outline_color"] = outline_color
+    var effect_node: = EffectsHelper.get_effect_node_by_id(effect_id) as MiniTextMessage
+    if not effect_node:
+        push_error("Could not find effect node with id: " + str(effect_id))
+        return
+
+    effect_node.set_color(new_color)
+    if change_outline:
+        effect_node.set_outline_color(outline_color)
+        effect_node.set_outline_enabled(outline_enabled)
+
+func edit_persistant_text_layout_mode(effect_id: int, new_horizontal_alignment: HorizontalAlignment) -> void:
+    var effect_info: = _find_persistant_effect_by_id(effect_id)
+    if not effect_info:
+        push_error("Could not find effect with id: " + str(effect_id))
+        return
+    effect_info["h_align"] = new_horizontal_alignment
+    var effect_node: = EffectsHelper.get_effect_node_by_id(effect_id) as MiniTextMessage
+    if effect_node:
+        effect_node.set_layout_mode(new_horizontal_alignment)
+
+func _find_persistant_effect_by_id(effect_id: int) -> Dictionary:
+    for k in map_metadata.get("persistant_effects", {}).keys():
+        for effect_info in map_metadata["persistant_effects"][k]:
+            if effect_info.get("effect_id", -1) == effect_id:
+                return effect_info
+    return {}
 
 func _create_persistant_effect_info(effect_info: Dictionary) -> int:
     var effect_type: String = effect_info.get("effect_type", "")
@@ -281,6 +329,19 @@ func _create_persistant_text_effect(effect_info: Dictionary) -> int:
     var effect_world_pos: Vector2 = tile_to_world_position_centered(tile_pos) + pos_offset
     var z: = int(effect_info.get("z_offset", 0))
     effect_info["effect_id"] = EffectsHelper.spawn_mini_text_at(effect_info["text"], effect_world_pos, 0, z, effect_id)
+
+    var effect_node: = EffectsHelper.get_effect_node_by_id(effect_info["effect_id"]) as MiniTextMessage
+    if effect_info.has("h_align"):
+        effect_node.set_layout_mode(effect_info["h_align"])
+    if effect_info.has("size"):
+        effect_node.set_font_size(effect_info["size"])
+    if effect_info.has("color"):
+        effect_node.set_color(effect_info["color"])
+    if effect_info.has("outline_enabled"):
+        effect_node.set_outline_enabled(effect_info["outline_enabled"])
+    if effect_info.has("outline_color"):
+        effect_node.set_outline_color(effect_info["outline_color"])
+
     return effect_info["effect_id"]
 
 func _register_persistant_effect_at(at_tile_pos: Vector2i, effect_info: Dictionary) -> void:
@@ -301,10 +362,12 @@ func _register_persistant_effect(effect_info: Dictionary) -> void:
 func _remove_effects_at(at_tile_pos: Vector2i) -> void:
     var key: = Utility.vec2i_key(at_tile_pos)
     if not map_metadata.get("persistant_effects", {}).has(key):
+        prints("no effects at: ", at_tile_pos)
         return
     for effect_info in map_metadata["persistant_effects"][key]:
         if effect_info.has("effect_id"):
             EffectsHelper.remove_effect_by_id(effect_info["effect_id"])
+    prints("removing effect metadata: %s" % [key])
     map_metadata["persistant_effects"].erase(key)
 
 func serialize() -> Dictionary:
@@ -594,6 +657,7 @@ func replace_tiles_at(tile_position, new_tile, facing: int = 0) -> void:
         level_size_changed.emit()
 
 func erase_tiles_and_effects_at(tile_position: Vector2i) -> void:
+    prints("erasing tiles and effects at: ", tile_position)
     clear_all_at(tile_position)
     _remove_effects_at(tile_position)
 
@@ -1202,3 +1266,14 @@ func is_texture_id_in_use(texture_id: int) -> bool:
         if _is_tile_using_texture_id(tile_id, texture_id):
             return true
     return false
+
+func get_max_z_at(at_tile_pos: Vector2i) -> int:
+    var max_z: int = 0
+    for l in layers:
+        var ti = l.get_cell_s(at_tile_pos)
+        if ti != -1:
+            var tile_def_props: Dictionary = tile_defs[ti]["properties"]
+            if not tile_def_props.has("z-index") or typeof(tile_def_props["z-index"]) in [TYPE_DICTIONARY, TYPE_ARRAY]:
+                continue
+            max_z = maxi(max_z, Utility.property_value_scalar(tile_def_props["z-index"], max_z))
+    return max_z

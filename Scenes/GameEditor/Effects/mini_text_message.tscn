@@ -1,6 +1,7 @@
 [gd_scene format=3 uid="uid://biqaeyf1jo17c"]
 
 [ext_resource type="Script" uid="uid://dcu8f0xs7ukpp" path="res://Scenes/GameEditor/Effects/mini_text_message.gd" id="1_vghrs"]
+[ext_resource type="FontFile" uid="uid://ctnllh13x3iqi" path="res://assets/font/NotoSans-Bold.ttf" id="2_c4ili"]
 
 [sub_resource type="Animation" id="Animation_vghrs"]
 length = 0.001
@@ -129,12 +130,12 @@ _data = {
 [node name="MiniTextMessage" type="Node2D" unique_id=1604703929 node_paths=PackedStringArray("label_node", "animator")]
 z_index = 20
 script = ExtResource("1_vghrs")
-label_node = NodePath("AnimRoot/CenterContainer/Label")
+label_node = NodePath("AnimRoot/Label")
 animator = NodePath("AnimRoot/AnimationPlayer")
 
 [node name="AnimRoot" type="Node2D" parent="." unique_id=1671356438]
 
-[node name="CenterContainer" type="CenterContainer" parent="AnimRoot" unique_id=1262844214]
+[node name="Label" type="Label" parent="AnimRoot" unique_id=1011223641]
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
@@ -142,12 +143,11 @@ anchor_right = 0.5
 anchor_bottom = 0.5
 grow_horizontal = 2
 grow_vertical = 2
-
-[node name="Label" type="Label" parent="AnimRoot/CenterContainer" unique_id=1011223641]
-layout_mode = 2
 theme_override_constants/outline_size = 4
+theme_override_fonts/font = ExtResource("2_c4ili")
 theme_override_font_sizes/font_size = 9
 text = "MESSAGE"
+horizontal_alignment = 1
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="AnimRoot" unique_id=198677716]
 libraries/ = SubResource("AnimationLibrary_6vvwn")

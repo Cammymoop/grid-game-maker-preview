@@ -137,8 +137,12 @@ func _show_multi_line(set_cursor_to: int = -1) -> void:
         multi_line_input.select_all()
     if set_cursor_to >= 0:
         var new_cursor_position: = Utility.get_line_and_column_of_char_index(multi_line_contents, set_cursor_to)
-        multi_line_input.set_caret_line(new_cursor_position.y)
-        multi_line_input.set_caret_column(new_cursor_position.x)
+        if new_cursor_position.x >= 0:
+            multi_line_input.set_caret_line(new_cursor_position.y)
+            multi_line_input.set_caret_column(new_cursor_position.x)
+        else:
+            multi_line_input.set_caret_column(0)
+            multi_line_input.set_caret_line(multi_line_input.get_line_count() - 1)
 
 func _gui_input(event: InputEvent) -> void:
     if Utility.fixed_just_pressed_by_event("ui_paste", event, true):

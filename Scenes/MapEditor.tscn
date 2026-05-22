@@ -6,6 +6,7 @@
 [ext_resource type="Script" uid="uid://038xoi2u4itl" path="res://src/EditorCam.gd" id="4"]
 [ext_resource type="Script" uid="uid://b7r4llrey36xo" path="res://src/TileEntityPreview.gd" id="5"]
 [ext_resource type="Texture2D" uid="uid://c7lnnrchiodgs" path="res://assets/img/square_shadow_2_clipped.png" id="5_eo7xe"]
+[ext_resource type="PackedScene" uid="uid://biqaeyf1jo17c" path="res://Scenes/GameEditor/Effects/mini_text_message.tscn" id="5_kdxsy"]
 [ext_resource type="Texture2D" uid="uid://cv2dtf7gj1lyt" path="res://assets/img/button_icons/star.png" id="6_id73f"]
 [ext_resource type="Script" uid="uid://do6dnbr5vck5i" path="res://src/BatchOneShotEmitters.gd" id="7"]
 [ext_resource type="PackedScene" uid="uid://n6lfbabe1t3" path="res://Scenes/Particles/dust_poof_particles.tscn" id="9_id73f"]
@@ -93,11 +94,12 @@ _data = {
 &"show_fade": SubResource("Animation_id73f")
 }
 
-[node name="MapEditor" type="Node2D" unique_id=188513453 node_paths=PackedStringArray("cursor_star")]
+[node name="MapEditor" type="Node2D" unique_id=188513453 node_paths=PackedStringArray("cursor_star", "text_preview")]
 process_mode = 1
 z_index = 10
 script = ExtResource("1")
 cursor_star = NodePath("Cursor/Star")
+text_preview = NodePath("Cursor/Center/MiniTextMessage")
 
 [node name="Cursor" type="Sprite2D" parent="." unique_id=1992386502]
 texture = ExtResource("2")
@@ -165,6 +167,12 @@ vertical_alignment = 1
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="Cursor/Center/CenterContainer2/ItemNameText" unique_id=1974689617]
 libraries/ = SubResource("AnimationLibrary_kdxsy")
+
+[node name="MiniTextMessage" parent="Cursor/Center" unique_id=1604703929 instance=ExtResource("5_kdxsy")]
+visible = false
+lifetime = 0.0
+use_show_anim = false
+use_hide_anim = false
 
 [node name="Shadow" type="Sprite2D" parent="Cursor" unique_id=2011759003]
 self_modulate = Color(1, 1, 1, 0.14117648)

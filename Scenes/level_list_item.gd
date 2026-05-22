@@ -32,6 +32,7 @@ signal request_edit_level(level_name: String)
 @export var highlight_rect: ColorRect
 
 var level_name: String = ""
+var level_title: String = ""
 
 var _not_in_a_list: bool = false
 
@@ -40,6 +41,7 @@ var is_completed: bool = false
 var is_played: bool = false
 
 var _is_current_level: bool = false
+var _is_edit_mode: bool = false
 
 func _ready() -> void:
     highlight_rect.hide()
@@ -69,16 +71,26 @@ func refresh_move_buttons() -> void:
     move_down_button.disabled = idx == get_parent().get_child_count() - 1
 
 func set_edit_mode(is_edit: bool) -> void:
+    _is_edit_mode = is_edit
     #current_level_indicator.visible = not is_edit
     start_level_button.visible = not is_edit
     edit_level_button.visible = is_edit
     move_up_down_buttons.visible = is_edit
     refresh_move_buttons()
     update_current_level_indicator()
+    if level_name:
+        if level_name.to_lower() != level_title.to_lower():
+            title_label.text = "%s (%s)" % [level_title, level_name]
+        else:
+            title_label.text = level_title
 
 func set_level_name_and_title(new_name: String, new_title: String) -> void:
     level_name = new_name
-    title_label.text = new_title
+    level_title = new_title
+    if _is_edit_mode and level_name.to_lower() != level_title.to_lower():
+        title_label.text = "%s (%s)" % [level_title, level_name]
+    else:
+        title_label.text = level_title
 
 func update_current_level_indicator() -> void:
     if not current_level_indicator.visible:

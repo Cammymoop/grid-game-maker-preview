@@ -78,9 +78,17 @@ func _cleanup_effect_ids() -> void:
         new_id_references[effect_id] = effect_node
 
 func remove_effect_by_id(effect_id: int) -> void:
+    prints("removing effect by id: %s" % [effect_id])
     if not effect_id_references.has(effect_id):
+        prints("no effect found by id: %s" % [effect_id])
         return
     if is_instance_valid(effect_id_references[effect_id]):
+        prints("queueing free for effect by id: %s" % [effect_id])
         effect_id_references[effect_id].queue_free()
+    prints("clearing effect id: %s" % [effect_id])
     clear_effect_id(effect_id)
-    
+
+func get_effect_node_by_id(effect_id: int) -> Node2D:
+    if not effect_id_references.has(effect_id) or not is_instance_valid(effect_id_references[effect_id]):
+        return null
+    return effect_id_references[effect_id]

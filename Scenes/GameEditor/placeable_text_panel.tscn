@@ -1,0 +1,183 @@
+[gd_scene format=3 uid="uid://22wn5812pyeo"]
+
+[ext_resource type="Script" uid="uid://eah3x6ddvpet" path="res://Scenes/GameEditor/placeable_text_panel.gd" id="1_o1md5"]
+[ext_resource type="Texture2D" uid="uid://cbrbu8bh02ug" path="res://assets/ui/vector_x.tres" id="2_wtxur"]
+[ext_resource type="PackedScene" uid="uid://bleyoj5f36kfy" path="res://Scenes/GameEditor/ConditionalEditor/scalar_value_input.tscn" id="3_ws2r7"]
+[ext_resource type="PackedScene" uid="uid://dvimib4iq4sje" path="res://Scenes/GameEditor/adaptive_multi_line_edit.tscn" id="3_wtxur"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_6hdl4"]
+content_margin_left = 8.0
+content_margin_right = 8.0
+bg_color = Color(0.08816031, 0.120827846, 0.16656157, 1)
+border_color = Color(0.334955, 0.31812483, 0.44406027, 1)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+corner_detail = 7
+
+[sub_resource type="Theme" id="Theme_es645"]
+CheckButton/font_sizes/font_size = 14
+Label/font_sizes/font_size = 14
+
+[sub_resource type="ButtonGroup" id="ButtonGroup_wtxur"]
+
+[node name="PlaceableTextPanel" type="PanelContainer" unique_id=1730346067 node_paths=PackedStringArray("enable_style_customization_toggle", "customization_options_container", "text_color_picker", "outline_enabled_toggle", "outline_color_picker", "font_size_input", "align_left_button", "align_center_button", "align_right_button", "text_input")]
+custom_minimum_size = Vector2(490, 0)
+offset_right = 360.0
+offset_bottom = 77.0
+script = ExtResource("1_o1md5")
+enable_style_customization_toggle = NodePath("VBoxContainer/HBoxContainer2/EnableCustimization")
+customization_options_container = NodePath("VBoxContainer/CustomizationOptions")
+text_color_picker = NodePath("VBoxContainer/CustomizationOptions/HBoxContainer2/HBoxContainer/ColorPick")
+outline_enabled_toggle = NodePath("VBoxContainer/CustomizationOptions/HBoxContainer2/EnableBorder")
+outline_color_picker = NodePath("VBoxContainer/CustomizationOptions/HBoxContainer2/HBoxContainer2/BorderColorPick")
+font_size_input = NodePath("VBoxContainer/CustomizationOptions/HBoxContainer/HBoxContainer/FontSizeInput")
+align_left_button = NodePath("VBoxContainer/CustomizationOptions/HBoxContainer/HBoxContainer2/Button")
+align_center_button = NodePath("VBoxContainer/CustomizationOptions/HBoxContainer/HBoxContainer2/Button2")
+align_right_button = NodePath("VBoxContainer/CustomizationOptions/HBoxContainer/HBoxContainer2/Button3")
+text_input = NodePath("VBoxContainer/HBoxContainer/AdaptiveMultiLineEdit")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="." unique_id=896131391]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="PanelContainer" type="PanelContainer" parent="VBoxContainer" unique_id=1040929598]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_6hdl4")
+
+[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer/PanelContainer" unique_id=939127179]
+layout_mode = 2
+alignment = 1
+
+[node name="TitleLabel" type="Label" parent="VBoxContainer/PanelContainer/HBoxContainer" unique_id=1590596653]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "Add Placeable Text"
+
+[node name="HBoxContainer2" type="HBoxContainer" parent="VBoxContainer/PanelContainer" unique_id=1308210799]
+layout_mode = 2
+alignment = 2
+
+[node name="CloseButton" type="Button" parent="VBoxContainer/PanelContainer/HBoxContainer2" unique_id=773498197]
+layout_mode = 2
+size_flags_vertical = 8
+mouse_default_cursor_shape = 2
+icon = ExtResource("2_wtxur")
+flat = true
+
+[node name="HBoxContainer2" type="HBoxContainer" parent="VBoxContainer" unique_id=1477151240]
+layout_mode = 2
+size_flags_horizontal = 3
+alignment = 1
+
+[node name="Spacer" type="Control" parent="VBoxContainer/HBoxContainer2" unique_id=1804791574]
+custom_minimum_size = Vector2(0, 21)
+layout_mode = 2
+
+[node name="EnableCustimization" type="CheckButton" parent="VBoxContainer/HBoxContainer2" unique_id=2052368459]
+layout_mode = 2
+text = "Customize"
+
+[node name="CustomizationOptions" type="VBoxContainer" parent="VBoxContainer" unique_id=374032856]
+layout_mode = 2
+theme = SubResource("Theme_es645")
+
+[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer/CustomizationOptions" unique_id=301008622]
+layout_mode = 2
+theme_override_constants/separation = 12
+alignment = 1
+
+[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer/CustomizationOptions/HBoxContainer" unique_id=1445208051]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="VBoxContainer/CustomizationOptions/HBoxContainer/HBoxContainer" unique_id=691698574]
+layout_mode = 2
+text = "Font Size:"
+
+[node name="FontSizeInput" parent="VBoxContainer/CustomizationOptions/HBoxContainer/HBoxContainer" unique_id=1458729988 instance=ExtResource("3_ws2r7")]
+layout_mode = 2
+is_int_type = true
+default_value = 9.0
+min_value = 2.0
+max_value = 200.0
+
+[node name="HBoxContainer2" type="HBoxContainer" parent="VBoxContainer/CustomizationOptions/HBoxContainer" unique_id=198985133]
+layout_mode = 2
+
+[node name="Label2" type="Label" parent="VBoxContainer/CustomizationOptions/HBoxContainer/HBoxContainer2" unique_id=926970079]
+layout_mode = 2
+text = "Alignment:"
+
+[node name="Button" type="Button" parent="VBoxContainer/CustomizationOptions/HBoxContainer/HBoxContainer2" unique_id=1242193834]
+layout_mode = 2
+toggle_mode = true
+button_group = SubResource("ButtonGroup_wtxur")
+text = "left"
+
+[node name="Button2" type="Button" parent="VBoxContainer/CustomizationOptions/HBoxContainer/HBoxContainer2" unique_id=2055290561]
+layout_mode = 2
+toggle_mode = true
+button_pressed = true
+button_group = SubResource("ButtonGroup_wtxur")
+text = "center"
+
+[node name="Button3" type="Button" parent="VBoxContainer/CustomizationOptions/HBoxContainer/HBoxContainer2" unique_id=755036277]
+layout_mode = 2
+toggle_mode = true
+button_group = SubResource("ButtonGroup_wtxur")
+text = "right"
+
+[node name="HBoxContainer2" type="HBoxContainer" parent="VBoxContainer/CustomizationOptions" unique_id=965786388]
+layout_mode = 2
+theme_override_constants/separation = 12
+alignment = 1
+
+[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer/CustomizationOptions/HBoxContainer2" unique_id=1637482292]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="VBoxContainer/CustomizationOptions/HBoxContainer2/HBoxContainer" unique_id=46142235]
+layout_mode = 2
+text = "Text Color:"
+
+[node name="ColorPick" type="ColorPickerButton" parent="VBoxContainer/CustomizationOptions/HBoxContainer2/HBoxContainer" unique_id=159279195]
+custom_minimum_size = Vector2(30, 0)
+layout_mode = 2
+color = Color(1, 1, 1, 1)
+edit_intensity = false
+
+[node name="EnableBorder" type="CheckButton" parent="VBoxContainer/CustomizationOptions/HBoxContainer2" unique_id=1736944412]
+layout_mode = 2
+button_pressed = true
+text = "Enable Border"
+
+[node name="HBoxContainer2" type="HBoxContainer" parent="VBoxContainer/CustomizationOptions/HBoxContainer2" unique_id=1594580466]
+layout_mode = 2
+
+[node name="Label2" type="Label" parent="VBoxContainer/CustomizationOptions/HBoxContainer2/HBoxContainer2" unique_id=2079324914]
+layout_mode = 2
+text = "Border Color:"
+
+[node name="BorderColorPick" type="ColorPickerButton" parent="VBoxContainer/CustomizationOptions/HBoxContainer2/HBoxContainer2" unique_id=281853103]
+custom_minimum_size = Vector2(30, 0)
+layout_mode = 2
+edit_intensity = false
+
+[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer" unique_id=1944317131]
+layout_mode = 2
+theme_override_constants/separation = 20
+alignment = 1
+
+[node name="AdaptiveMultiLineEdit" parent="VBoxContainer/HBoxContainer" unique_id=634600988 instance=ExtResource("3_wtxur")]
+layout_mode = 2
+size_flags_vertical = 4
+placeholder_text = "text goes here"
+
+[node name="AddPropButton" type="Button" parent="VBoxContainer/HBoxContainer" unique_id=1229390824]
+layout_mode = 2
+size_flags_horizontal = 4
+theme_type_variation = &"BigTextButton"
+text = "Add"
+
+[connection signal="pressed" from="VBoxContainer/PanelContainer/HBoxContainer2/CloseButton" to="." method="close_panel"]
+[connection signal="pressed" from="VBoxContainer/HBoxContainer/AddPropButton" to="." method="accept_text"]
