@@ -38,6 +38,9 @@ var entity_list: Array = []
 var bond_groups: Array = []
 var _pending_half_move_actions: Array[BaseEntity] = []
 
+var _entity_at_cache: Dictionary[Vector2i, Array] = {}
+var _entity_leaving_cache: Dictionary[Vector2i, Array] = {}
+
 var initial_sprite_previews_created: bool = false
 var im_ready: = false
 
@@ -86,6 +89,8 @@ func entity_list_process(delta_time: float) -> void:
             new_action_activations.append("do_action_" + action_num)
     
     # Phased processing so each entity completes a phase before any entity processes the next phase
+    
+    _build_entity_at_cache()
     
     # Phase 1 - Timed entity events, Starting movement and start of move actions
     process_phase = 1
@@ -156,6 +161,32 @@ func entity_list_process(delta_time: float) -> void:
             e.process_finish_move()
     
     process_phase = 0
+
+func _build_entity_at_cache() -> void:
+    _entity_at_cache.clear()
+    _entity_leaving_cache.clear()
+    for e in entity_list:
+        if e is LargeEntity:
+            var main_positions: Array[Vector2i] = e.get_positions_at(e.next_tile_pos if e.moving else e.tile_position)
+            for at_pos in main_positions:
+                if not at_pos in _entity_at_cache:
+                    _entity_at_cache[at_pos] = []
+                _entity_at_cache[at_pos].append(e)
+            if e.moving:
+                for leaving_pos in e.get_positions_at(e.tile_position):
+                    if not leaving_pos in _entity_leaving_cache:
+                        _entity_leaving_cache[leaving_pos] = []
+                    _entity_leaving_cache[leaving_pos].append(e)
+        else:
+            var main_pos: Vector2i = e.next_tile_pos if e.moving else e.tile_position
+            if not main_pos in _entity_at_cache:
+                _entity_at_cache[main_pos] = []
+            _entity_at_cache[main_pos].append(e)
+            if e.moving:
+                if not e.tile_position in _entity_leaving_cache:
+                    _entity_leaving_cache[e.tile_position] = []
+                _entity_leaving_cache[e.tile_position].append(e)
+            
 
 func run_entity_event(entity: BaseEntity, event_info: Dictionary) -> void:
     if event_info.get("property_event", ""):
@@ -869,13 +900,28 @@ func get_entities_half_at(tile_pos: Vector2i, exclude_entity: Object = null, exc
 
 func get_entities_at_multiple(tile_positions: Array, exclude_entity: Object = null, exclude_list: Array = [], include_moving_away: bool = false, include_inactive: bool = false) -> Array:
     var entities_here: Array = []
-    for e in entity_list:
-        if not include_inactive and not e.active:
-            continue
-        if e == exclude_entity or (exclude_list and e.instance_id in exclude_list):
-            continue
-        if e.is_at_multiple(tile_positions, include_moving_away):
-            entities_here.append(e)
+    if process_phase == 0:
+        for e in entity_list:
+            if not include_inactive and not e.active:
+                continue
+            if e == exclude_entity or (exclude_list and e.instance_id in exclude_list):
+                continue
+            if e.is_at_multiple(tile_positions, include_moving_away):
+                entities_here.append(e)
+    else:
+        for pos in tile_positions:
+            if not pos in _entity_at_cache:
+                continue
+            for e in _entity_at_cache[pos]:
+                if not e in entities_here and (include_inactive or e.active):
+                    entities_here.append(e)
+        if include_moving_away:
+            for pos in tile_positions:
+                if not pos in _entity_leaving_cache:
+                    continue
+                for e in _entity_leaving_cache[pos]:
+                    if not e in entities_here and (include_inactive or e.active):
+                        entities_here.append(e)
     return entities_here
 
 func find_entity_by_index(entity_index: int, first: bool = true) -> BaseEntity:
