@@ -599,7 +599,7 @@ func revert_move_start() -> void:
 	_this_move_steps = 0
 	_this_move_is_teleport = false
 	next_tile_pos = tile_position
-	blocked.emit(move_facing)
+	blocked.emit()
 
 # I started moving
 func actually_started_move() -> void:

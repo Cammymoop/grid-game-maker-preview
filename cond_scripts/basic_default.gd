@@ -570,6 +570,8 @@ func cmd_c_get_pushed(slots: Dictionary, chosen_slot: int, direction: Variant, k
 		selected.move_interp_style = blue_entity.move_interp_style
 	var facing = resolve_variant_direction_value(direction, slots)
 	var got_pushed: bool = selected.start_move(facing, not keep_visual)
+	if not got_pushed and EntityManager.is_entity_move_started_within_stack(selected):
+		return true
 	return got_pushed
 
 func desc_c_is_facing() -> Dictionary:

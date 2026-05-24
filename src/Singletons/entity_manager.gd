@@ -74,6 +74,9 @@ var is_entity_preview_mode: bool = false
 
 var timed_entity_events: Dictionary[int, Array] = {}
 
+var _move_resolution_stack: Array[Dictionary] = []
+var _move_stack_metadata: Dictionary = {}
+
 func paused_visual_process(delta_time: float) -> void:
     for e in entity_list:
         e.sprite_process(delta_time)
@@ -128,12 +131,16 @@ func entity_list_process(delta_time: float) -> void:
         e.sprite_process(delta_time)
     
     # Phase 2 - Update idle tick counter (for non-moving) and idle actions
+    # also find entities that started moving after their turn to run starting actions
     process_phase = 2
     for e in idle_entities:
         if e.active:
-            e.idle_ticks_elapsed += 1
+            if e.moving:
+                moving_entities.append(e)
+            else:
+                e.idle_ticks_elapsed += 1
     for e in idle_entities:
-        if e.active and e.idle_ticks_elapsed >= idle_delay_frames:
+        if e.active and not e.moving and e.idle_ticks_elapsed >= idle_delay_frames:
             MapManager.entity_idle_actions(e)
             e.entity_process_idle_actions()
             e.idle_ticks_elapsed = 0
@@ -145,6 +152,8 @@ func entity_list_process(delta_time: float) -> void:
     process_phase = 3
     var entities_that_finished_moving: Array[BaseEntity] = []
     _pending_half_move_actions.clear()
+    if moving_entities.size() > 0:
+        pass#breakpoint
     for e in moving_entities:
         if e.active:
             e.idle_ticks_elapsed = 0
@@ -1890,5 +1899,36 @@ func get_default_dying_effect_for_entity_id(entity_id: int) -> Dictionary:
         return default_dying_effect
     if not dying_effect_prop_val or not typeof(dying_effect_prop_val) == TYPE_STRING or not dying_effect_prop_val in SpriteEffects.DYING_EFFECTS:
         return default_dying_effect
-    prints("using entity dying-effect: %s" % dying_effect_prop_val)
     return SpriteEffects.DYING_EFFECTS[dying_effect_prop_val]
+
+func is_entity_move_started_within_stack(entity: BaseEntity) -> bool:
+    if not entity or not _move_resolution_stack:
+        return false
+    return entity.instance_id in _move_stack_metadata.get("started_move_instances", [])
+
+func _move_resolution_stack_pop() -> void:
+    if not _move_resolution_stack:
+        return
+    if _move_resolution_stack.size() == 1:
+        _move_resolution_stack.clear()
+        _move_stack_metadata.clear()
+    else:
+        _move_resolution_stack.pop_back()
+
+func _add_move_resolution_start(entity: BaseEntity) -> void:
+    if not entity:
+        return
+    var stack_entry: Dictionary = {
+        "entity": entity,
+        "instance_id": entity.instance_id,
+    }
+    _move_resolution_stack.append(stack_entry)
+
+func _add_instance_move_start_to_stack_meta(instance_id: int) -> void:
+    if not _move_resolution_stack:
+        return
+    if not _move_stack_metadata.has("started_move_instances"):
+        _move_stack_metadata["started_move_instances"] = Array([], TYPE_INT, "", null)
+    if instance_id in _move_stack_metadata["started_move_instances"]:
+        return
+    _move_stack_metadata["started_move_instances"].append(instance_id)
