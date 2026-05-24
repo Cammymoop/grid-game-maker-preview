@@ -122,7 +122,7 @@ func _physics_process(delta: float) -> void:
 			EntityManager.paused_visual_process(delta)
 
 func on_any_state_loaded() -> void:
-	if edit_mode:
+	if edit_mode and GameManager.game_camera:
 		var game_camera_starting_pos: Vector2 = GameManager.game_camera.get_targeted_position()
 		editor_cam.set_position_immediate(game_camera_starting_pos)
 

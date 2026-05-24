@@ -29,7 +29,7 @@ func _shortcut_input(event: InputEvent) -> void:
 
 func name_input_text_changed(new_game_name: String) -> void:
 	if not has_title:
-		game_title_label.text = FilesManager.sanitize_game_filename(new_game_name)
+		game_title_label.text = Utility.sanitize_for_filename(new_game_name, true, true)
 
 func _on_SaveFileButton_pressed():
 	save_requested()

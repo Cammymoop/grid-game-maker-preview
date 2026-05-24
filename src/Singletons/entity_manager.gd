@@ -783,7 +783,12 @@ func deserialize(data: Dictionary) -> void:
     animation_frame_counter = data.get("animation_frame_counter", 0)
     if "timed_entity_events" in data:
         timed_entity_events.assign(data["timed_entity_events"].duplicate_deep())
-    bond_groups = data["bond_groups"].duplicate_deep()
+    bond_groups = []
+    for deserialized_bg in data.get("bond_groups", []).duplicate_deep():
+        var new_bg: Array = []
+        for instance_id in deserialized_bg:
+            new_bg.append(int(instance_id))
+        bond_groups.append(new_bg)
 
     for entity_data in data["entity_list"]:
         var entity_id: int = int(entity_data.get("entity_index", -1))
@@ -794,6 +799,8 @@ func deserialize(data: Dictionary) -> void:
     instance_counter = 0
     for e in entity_list:
         instance_counter = maxi(instance_counter, e.instance_id + 1)
+    
+    prints("deserialized entities, entity instances:", entity_instance_map.keys(), "bond groups:", bond_groups)
     
     post_deserialize.emit()
 
@@ -852,7 +859,7 @@ func bond_group_start_move(bond_group: Array, steps_per_tile: int, move_facing: 
     
     var move_allowed = true
     for entity in instances:
-        # set change visual facing to false for group moves for now
+        # set change_visual_facing to false for group moves for now
         # good default but should be configurable somehow
         entity.set_steps_per_tile_override(steps_per_tile)
         if not entity.start_move(move_facing, false, true):
@@ -913,6 +920,8 @@ func get_entities_at_multiple(tile_positions: Array, exclude_entity: Object = nu
             if not pos in _entity_at_cache:
                 continue
             for e in _entity_at_cache[pos]:
+                if e == exclude_entity or (exclude_list and e.instance_id in exclude_list):
+                    continue
                 if not e in entities_here and (include_inactive or e.active):
                     entities_here.append(e)
         if include_moving_away:
@@ -920,6 +929,8 @@ func get_entities_at_multiple(tile_positions: Array, exclude_entity: Object = nu
                 if not pos in _entity_leaving_cache:
                     continue
                 for e in _entity_leaving_cache[pos]:
+                    if e == exclude_entity or (exclude_list and e.instance_id in exclude_list):
+                        continue
                     if not e in entities_here and (include_inactive or e.active):
                         entities_here.append(e)
     return entities_here
@@ -1077,7 +1088,7 @@ func attempt_move_leave(moving_entity: BaseEntity, leaving_ps: Array[Vector2i], 
         result = false
     
     if is_group_move:
-        skip_entity_inst_ids = moving_entity.bond_group.duplicate()
+        skip_entity_inst_ids.assign(moving_entity.bond_group.duplicate())
     var entities_here: = get_entities_at_multiple(leaving_ps, moving_entity, skip_entity_inst_ids)
     for e in entities_here:
         skip_entity_inst_ids.append(e.instance_id)

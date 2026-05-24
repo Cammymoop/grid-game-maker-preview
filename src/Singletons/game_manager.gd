@@ -1359,7 +1359,10 @@ func get_starting_level_name() -> String:
 
 func get_starting_level_and_list() -> Array:
 	var first_level_name: String = get_starting_level_name()
-	var first_level_list: String = get_list_of_level_lists()[0]
+	var l_lists: = get_list_of_level_lists()
+	if not l_lists:
+		return []
+	var first_level_list: String = l_lists[0]
 	if not first_level_name or not first_level_list:
 		return []
 	return [first_level_list, first_level_name]
