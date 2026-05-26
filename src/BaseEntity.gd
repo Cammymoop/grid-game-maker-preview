@@ -80,6 +80,9 @@ var instance_id: int = 0
 
 var _pre_init_called: = false
 
+var _currently_starting_move: bool = false
+var _current_starting_move_facing: int = -1
+
 func _ready() -> void:
 	pre_init()
 
@@ -508,20 +511,20 @@ func _movement_steps_finished() -> void:
 func process_finish_move() -> void:
 	MapManager.finish_move(self, [tile_position])
 
-func start_move(in_facing_dir: int, change_visual_facing: bool = true, group_move: bool = false) -> bool:
+func start_move(in_facing_dir: int, change_visual_facing: bool = true, group_move: bool = false, is_revertable: bool = false) -> bool:
 	if moving or get_steps_per_tile() <= 0:
 		return false
 	if change_visual_facing and visual_turn_on_move:
 		set_facing(in_facing_dir)
 	set_move_facing(in_facing_dir)
-	
+
 	if not group_move and bond_group:
-		return EntityManager.bond_group_start_move(bond_group, get_steps_per_tile(), in_facing_dir)
+		return EntityManager.bond_group_start_move(bond_group, get_steps_per_tile(), in_facing_dir, is_revertable)
 	
 	var to_pos: = tile_position + Utility.facing_vector_i(in_facing_dir)
-	return _start_move_common(to_pos, group_move, false)
+	return _start_move_common(to_pos, group_move, false, is_revertable)
 
-func start_teleport_to(to_tile_pos: Vector2i, override_move_facing: int = -1, override_facing: int = -1, group_move: bool = false, override_steps: int = -1) -> bool:
+func start_teleport_to(to_tile_pos: Vector2i, override_move_facing: int = -1, override_facing: int = -1, group_move: bool = false, override_steps: int = -1, is_revertable: bool = false) -> bool:
 	if moving:
 		return false
 
@@ -545,17 +548,24 @@ func start_teleport_to(to_tile_pos: Vector2i, override_move_facing: int = -1, ov
 	if not group_move and bond_group:
 		return EntityManager.bond_group_start_teleport(bond_group, get_teleport_steps(), move_facing)
 	
-	return _start_move_common(to_tile_pos, group_move, true)
+	return _start_move_common(to_tile_pos, group_move, true, is_revertable)
 
 func _is_diagonal_adj(to_tile_pos: Vector2i) -> bool:
 	if (get_moving_position() - to_tile_pos).abs() == Vector2i.ONE:
 		return true
 	return false
 
-func _start_move_common(to_tile_pos: Vector2i, is_group_move: bool, is_teleport: bool) -> bool:
-	if MapManager.attempt_move(self, [tile_position], [to_tile_pos], is_group_move):
+func _start_move_common(to_tile_pos: Vector2i, is_group_move: bool, is_teleport: bool, is_revertable: bool) -> bool:
+	var related_move_node: = EntityManager.track_move_starting(self, is_group_move, is_revertable)
+	_currently_starting_move = true
+	_current_starting_move_facing = move_facing
+	
+	var result: = MapManager.attempt_move(self, [tile_position], [to_tile_pos], is_group_move)
+
+	if result:
 		moving = true
 		next_tile_pos = to_tile_pos
+		invalidate_cached_at_position([tile_position])
 		_pending_half_move = true
 		steps_remaining = get_teleport_steps() if is_teleport else get_steps_per_tile()
 		_this_move_steps = steps_remaining
@@ -564,11 +574,14 @@ func _start_move_common(to_tile_pos: Vector2i, is_group_move: bool, is_teleport:
 			EntityManager.post_move_actions(self, tile_position, next_tile_pos)
 			actually_started_move()
 		_move_bump_check()
-		return true
 	else:
 		if not is_group_move:
 			on_move_was_blocked()
-		return false
+	
+	EntityManager.just_finished_move_start(related_move_node, result)
+	_currently_starting_move = false
+	_current_starting_move_facing = -1
+	return result
 
 func on_move_was_blocked() -> void:
 	EntityManager.resolve_entity_interaction_event("was_blocked", self, null, [tile_position])
@@ -599,6 +612,7 @@ func revert_move_start() -> void:
 	_this_move_steps = 0
 	_this_move_is_teleport = false
 	next_tile_pos = tile_position
+	invalidate_cached_at_position([next_tile_pos])
 	blocked.emit()
 
 # I started moving
@@ -610,6 +624,9 @@ func actually_started_move() -> void:
 	
 	if entity_name == "player":
 		pass#do_named_bump_effect({"name": "Spin"})
+
+func invalidate_cached_at_position(from_positions: Array[Vector2i]) -> void:
+	EntityManager.invalidate_cached_instance_at_pos(self, from_positions)
 
 func is_settled() -> bool:
 	return not moving
@@ -840,7 +857,7 @@ func tail_follow(_move_facing) -> void:
 			untail()
 	else:
 		var new_facing = Utility.facing_from_adjacent_positions(tile_position, target_tile)
-		if not start_move(new_facing):
+		if not start_move(new_facing, true, false, true):
 			untail()
 	if moving and not _this_move_is_teleport and not tailing._this_move_is_teleport:
 		set_move_interp_override(tailing.get_move_interp_style())

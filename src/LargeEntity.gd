@@ -82,7 +82,7 @@ func get_frontier(in_facing_dir: int) -> Dictionary[String, Array]:
 	return frontier
 
 # Override start_move because I'm too thicc
-func start_move(in_facing_dir: int, change_visual_facing: bool = true, group_move: bool = false) -> bool:
+func start_move(in_facing_dir: int, change_visual_facing: bool = true, group_move: bool = false, is_revertable: bool = false) -> bool:
 	if moving:
 		push_warning("Tried to start move when already moving")
 		return false
@@ -95,7 +95,7 @@ func start_move(in_facing_dir: int, change_visual_facing: bool = true, group_mov
 	
 	if not group_move and bond_group:
 		# TODO entity managers bond group move checking doesnt take large entities into account yet
-		return EntityManager.bond_group_start_move(bond_group, get_steps_per_tile(), in_facing_dir)
+		return EntityManager.bond_group_start_move(bond_group, get_steps_per_tile(), in_facing_dir, is_revertable)
 	
 	next_tile_pos = tile_position + Utility.facing_vector_i(in_facing_dir)
 	

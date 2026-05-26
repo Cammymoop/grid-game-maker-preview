@@ -30,8 +30,23 @@ func cmd_if_entity_is_moving(slots: Dictionary, chosen_slot: int) -> bool:
 		push_error("Invalid slot or empty slot to check if entity is moving: %s" % chosen_slot)
 		return false
 	if not slots[chosen_slot]:
+		prints("moving check: no entity")
 		return false
 	return slots[chosen_slot].moving
+
+func desc_if_entity_is_moving_or_starting_to_move() -> String:
+	return "entity|If the entity is currently moving or starting to move"
+func cmd_if_entity_is_moving_or_starting_to_move(slots: Dictionary, chosen_slot: int) -> bool:
+	if not Commands.slot_is_entity(chosen_slot):
+		push_error("Invalid slot or empty slot to check if entity is moving: %s" % chosen_slot)
+		return false
+	if not slots[chosen_slot]:
+		return false
+	if slots[chosen_slot].moving:
+		return true
+	if slots[chosen_slot]._currently_starting_move:
+		return true
+	return false
 
 
 func desc_select_tiles_named() -> String:
@@ -570,8 +585,30 @@ func cmd_c_get_pushed(slots: Dictionary, chosen_slot: int, direction: Variant, k
 		selected.move_interp_style = blue_entity.move_interp_style
 	var facing = resolve_variant_direction_value(direction, slots)
 	var got_pushed: bool = selected.start_move(facing, not keep_visual)
-	if not got_pushed and EntityManager.is_entity_move_started_within_stack(selected):
-		return true
+	return got_pushed
+
+func desc_get_pushed_revertable() -> String:
+	return "entity|If the entity successfully gets pushed this way [direction:DirectionInput:1]\n" \
+	     + "(Reverted if the move that triggered this command fails)\n" \
+	     + "[keep_visual:BoolChoice:true,without turning,turning] to face that direction"
+func cmd_get_pushed_revertable(slots: Dictionary, chosen_slot: int, direction: Variant, keep_visual: bool) -> bool:
+	if not Commands.slot_is_entity(chosen_slot):
+		return false
+	var selected: BaseEntity = slots[chosen_slot]
+	if selected.moving:
+		return false
+	var blue_entity: BaseEntity = slots[Slot.BLUE]
+	# Pick an appropriate move speed
+	if blue_entity and blue_entity.get_steps_per_tile() > 0:
+		selected.set_steps_per_tile_override(blue_entity.get_steps_per_tile())
+	elif selected.get_native_steps_per_tile() > 0:
+		selected.set_native_move_speed()
+	else:
+		selected.set_steps_per_tile_override(EntityManager.get_default_spt())
+	if blue_entity:
+		selected.move_interp_style = blue_entity.move_interp_style
+	var facing = resolve_variant_direction_value(direction, slots)
+	var got_pushed: bool = selected.start_move(facing, not keep_visual, false, true)
 	return got_pushed
 
 func desc_c_is_facing() -> Dictionary:
@@ -633,12 +670,13 @@ func cmd_a_move(slots: Dictionary, chosen_slot: int, complex_dir: Dictionary) ->
 		selected.start_move(resolve_complex_direction(complex_dir, slots))
 
 func desc_move_facing() -> String:
-	return "entity|The entity starts moving this way [compl_move:DirectionInput:1] while facing this way [compl_face:DirectionInput:1]"
-func cmd_move_facing(slots: Dictionary, chosen_slot: int, compl_move: Dictionary, compl_face: Dictionary) -> void:
+	return "entity|The entity starts moving this way [compl_move:DirectionInput:1] while facing this way [compl_face:DirectionInput:1]\n" \
+	     + "[revertable:BoolChoice:true,(revertable),(non-revertable)]"
+func cmd_move_facing(slots: Dictionary, chosen_slot: int, compl_move: Dictionary, compl_face: Dictionary, revertable: bool = false) -> void:
 	if Commands.slot_is_entity(chosen_slot) and slots[chosen_slot]:
 		var selected: BaseEntity = slots[chosen_slot]
 		selected.set_facing(resolve_complex_direction(compl_face, slots))
-		selected.start_move(resolve_complex_direction(compl_move, slots), false)
+		selected.start_move(resolve_complex_direction(compl_move, slots), false, false, revertable)
 
 func desc_a_swap_tiles() -> String:
 	return "pos|Swap the tiles here, switching [a_name:TileNameInput] and [b_name:TileNameInput]"

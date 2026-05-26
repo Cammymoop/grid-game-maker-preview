@@ -74,8 +74,12 @@ var is_entity_preview_mode: bool = false
 
 var timed_entity_events: Dictionary[int, Array] = {}
 
-var _move_resolution_stack: Array[Dictionary] = []
-var _move_stack_metadata: Dictionary = {}
+var _nested_related_moves: Dictionary = {}
+var _cur_related_move_node: Dictionary = {}
+var _finished_related_move_node: Dictionary = {}
+
+#var _move_resolution_stack: Array[Dictionary] = []
+#var _move_stack_metadata: Dictionary = {}
 
 func paused_visual_process(delta_time: float) -> void:
     for e in entity_list:
@@ -175,26 +179,38 @@ func _build_entity_at_cache() -> void:
     _entity_at_cache.clear()
     _entity_leaving_cache.clear()
     for e in entity_list:
-        if e is LargeEntity:
-            var main_positions: Array[Vector2i] = e.get_positions_at(e.next_tile_pos if e.moving else e.tile_position)
-            for at_pos in main_positions:
-                if not at_pos in _entity_at_cache:
-                    _entity_at_cache[at_pos] = []
-                _entity_at_cache[at_pos].append(e)
-            if e.moving:
-                for leaving_pos in e.get_positions_at(e.tile_position):
-                    if not leaving_pos in _entity_leaving_cache:
-                        _entity_leaving_cache[leaving_pos] = []
-                    _entity_leaving_cache[leaving_pos].append(e)
-        else:
-            var main_pos: Vector2i = e.next_tile_pos if e.moving else e.tile_position
-            if not main_pos in _entity_at_cache:
-                _entity_at_cache[main_pos] = []
-            _entity_at_cache[main_pos].append(e)
-            if e.moving:
-                if not e.tile_position in _entity_leaving_cache:
-                    _entity_leaving_cache[e.tile_position] = []
-                _entity_leaving_cache[e.tile_position].append(e)
+        _cache_entity_at_pos(e)
+
+func _cache_entity_at_pos(e: BaseEntity) -> void:
+    if e is LargeEntity:
+        var main_positions: Array[Vector2i] = e.get_positions_at(e.next_tile_pos if e.moving else e.tile_position)
+        for at_pos in main_positions:
+            if not at_pos in _entity_at_cache:
+                _entity_at_cache[at_pos] = []
+            _entity_at_cache[at_pos].append(e)
+        if e.moving:
+            for leaving_pos in e.get_positions_at(e.tile_position):
+                if not leaving_pos in _entity_leaving_cache:
+                    _entity_leaving_cache[leaving_pos] = []
+                _entity_leaving_cache[leaving_pos].append(e)
+    else:
+        var main_pos: Vector2i = e.next_tile_pos if e.moving else e.tile_position
+        if not main_pos in _entity_at_cache:
+            _entity_at_cache[main_pos] = []
+        _entity_at_cache[main_pos].append(e)
+        if e.moving:
+            if not e.tile_position in _entity_leaving_cache:
+                _entity_leaving_cache[e.tile_position] = []
+            _entity_leaving_cache[e.tile_position].append(e)
+
+func invalidate_cached_instance_at_pos(entity: BaseEntity, from_positions: Array[Vector2i]) -> void:
+    for pos in from_positions:
+        if pos in _entity_at_cache:
+            _entity_at_cache[pos].erase(entity)
+        if pos in _entity_leaving_cache:
+            _entity_leaving_cache[pos].erase(entity)
+    _cache_entity_at_pos(entity)
+
             
 
 func run_entity_event(entity: BaseEntity, event_info: Dictionary) -> void:
@@ -414,6 +430,7 @@ func clear():
     frame_counter = 0
 
 func clear_entity_list():
+    clear_related_move_cache()
     disconnect_all_custom_signals()
     for entity in entity_list:
         if not entity:
@@ -809,8 +826,6 @@ func deserialize(data: Dictionary) -> void:
     for e in entity_list:
         instance_counter = maxi(instance_counter, e.instance_id + 1)
     
-    prints("deserialized entities, entity instances:", entity_instance_map.keys(), "bond groups:", bond_groups)
-    
     post_deserialize.emit()
 
 func create_bond_group(entities: Array) -> void:
@@ -856,33 +871,64 @@ func find_bond_group_of_entity(entity: BaseEntity) -> Array:
             return bg
     return []
 
-func bond_group_start_move(bond_group: Array, steps_per_tile: int, move_facing: int) -> bool:
+func bond_group_start_move(bond_group: Array, steps_per_tile: int, move_facing: int, is_revertable: bool) -> bool:
     var instances = []
+
+    var leftover_ids: Array[int] = []
     for entity_instance_id in bond_group:
+        if not entity_instance_id in entity_instance_map:
+            leftover_ids.append(entity_instance_id)
+            continue
         instances.append(get_instance(entity_instance_id))
+    
+    for old_id in leftover_ids:
+        bond_group.erase(old_id)
+    
+    var related_move_parent: = {}
+    var is_top_level_move: = false
+    if not _nested_related_moves:
+        is_top_level_move = true
+        _nested_related_moves = _fake_related_move()
+        _cur_related_move_node = _nested_related_moves
+    related_move_parent = _cur_related_move_node
     
     for entity in instances:
         if entity.moving:
             # Short circuit so we dont break by reverting a move on a currently moving entity
             return false
     
+    # pre-set starting move for all instances before running any conditionals
+    for entity in instances:
+        entity._currently_starting_move = true
+        entity._current_starting_move_facing = move_facing
+
     var move_allowed = true
+    var first_related_move_node: = {}
     for entity in instances:
         # set change_visual_facing to false for group moves for now
         # good default but should be configurable somehow
         entity.set_steps_per_tile_override(steps_per_tile)
-        if not entity.start_move(move_facing, false, true):
+        if not entity.start_move(move_facing, false, true, is_revertable):
             move_allowed = false
+
+        if not first_related_move_node and move_allowed:
+            first_related_move_node = _finished_related_move_node
     
     # At least one of the entities in the bond group were blocked
     # Stop them all from moving
     if not move_allowed:
         for entity in instances:
             entity.revert_move_start()
+        failed_group_move_start(related_move_parent, bond_group.duplicate())
     else:
+        # use the first instead of last group move as the cannonical related move node
+        _finished_related_move_node = first_related_move_node
         for entity in instances:
             post_move_actions(entity, entity.tile_position, entity.next_tile_pos)
             entity.actually_started_move()
+    if is_top_level_move:
+        prints("group move as top level, clearing related move cache")
+        clear_related_move_cache()
     return move_allowed
 
 func get_entities_at(tile_position: Vector2i, exclude_entity: Object = null, exclude_list: Array = [], include_moving_away: bool = false, include_inactive: bool = false) -> Array:
@@ -1901,34 +1947,168 @@ func get_default_dying_effect_for_entity_id(entity_id: int) -> Dictionary:
         return default_dying_effect
     return SpriteEffects.DYING_EFFECTS[dying_effect_prop_val]
 
-func is_entity_move_started_within_stack(entity: BaseEntity) -> bool:
-    if not entity or not _move_resolution_stack:
-        return false
-    return entity.instance_id in _move_stack_metadata.get("started_move_instances", [])
-
-func _move_resolution_stack_pop() -> void:
-    if not _move_resolution_stack:
-        return
-    if _move_resolution_stack.size() == 1:
-        _move_resolution_stack.clear()
-        _move_stack_metadata.clear()
+func track_move_starting(moving_entity: BaseEntity, is_group_move: bool = false, is_revertable: bool = false) -> Dictionary:
+    if not moving_entity:
+        return {}
+    if not _nested_related_moves:
+        var new_move_node: = _new_related_move(moving_entity, is_revertable)
+        _nested_related_moves["group_move"] = is_group_move
+        if is_group_move:
+            _nested_related_moves = _fake_related_move()
+            _nested_related_moves["child_moves"].append(new_move_node)
+        else:
+            _nested_related_moves = new_move_node
+        _cur_related_move_node = new_move_node
     else:
-        _move_resolution_stack.pop_back()
+        var new_move_node: = _append_related_move(moving_entity, is_revertable)
+        new_move_node["group_move"] = is_group_move
+        _cur_related_move_node = new_move_node
+    return _cur_related_move_node
 
-func _add_move_resolution_start(entity: BaseEntity) -> void:
-    if not entity:
-        return
-    var stack_entry: Dictionary = {
-        "entity": entity,
-        "instance_id": entity.instance_id,
+func clear_related_move_cache() -> void:
+    _nested_related_moves = {}
+    _cur_related_move_node = {}
+    _finished_related_move_node = {}
+
+func _new_related_move(moving_entity: BaseEntity, is_revertable: bool = false) -> Dictionary:
+    return {
+        "moving_entity": moving_entity,
+        "fake": false,
+        "group_move": false,
+        "revertable": is_revertable,
+        "instance_id": moving_entity.instance_id,
+        "child_moves": [],
     }
-    _move_resolution_stack.append(stack_entry)
 
-func _add_instance_move_start_to_stack_meta(instance_id: int) -> void:
-    if not _move_resolution_stack:
+func _fake_related_move() -> Dictionary:
+    return {
+        "moving_entity": null,
+        "fake": true,
+        "group_move": false,
+        "revertable": false,
+        "instance_id": -1,
+        "child_moves": [],
+    }
+
+# only call if just started move succeeded
+func set_just_started_move_as_revertable(as_revertable: bool) -> void:
+    if not _nested_related_moves or not _finished_related_move_node:
+        push_error("Cant set move revertable status")
         return
-    if not _move_stack_metadata.has("started_move_instances"):
-        _move_stack_metadata["started_move_instances"] = Array([], TYPE_INT, "", null)
-    if instance_id in _move_stack_metadata["started_move_instances"]:
+    if _finished_related_move_node["group_move"]:
+        var group_instance_ids: Array = _finished_related_move_node["moving_entity"].bond_group.duplicate()
+        var sibling_nodes: Array = _get_sibling_move_nodes(_finished_related_move_node)
+        for sibling_node in sibling_nodes:
+            if sibling_node["fake"] or sibling_node["instance_id"] not in group_instance_ids:
+                continue
+            sibling_node["revertable"] = as_revertable
+    else:
+        _finished_related_move_node["revertable"] = as_revertable
+
+func _append_related_move(moving_entity: BaseEntity, is_revertable: bool = false) -> Dictionary:
+    if not _cur_related_move_node or not _cur_related_move_node.has("child_moves"):
+        push_error("None or invalid current related move node")
+        return {}
+    var new_move_node: Dictionary = _new_related_move(moving_entity, is_revertable)
+    _cur_related_move_node["child_moves"].append(new_move_node)
+    return new_move_node
+
+func just_finished_move_start(related_move_node: Dictionary, move_result: bool) -> void:
+    if not related_move_node or not _nested_related_moves:
+        push_error("None or invalid move node or node tree")
         return
-    _move_stack_metadata["started_move_instances"].append(instance_id)
+
+    if move_result:
+        _finished_related_move_node = related_move_node
+    elif not related_move_node["group_move"]:
+        _failed_move_start(related_move_node)
+    
+    # not ideal implementation, but should always need to set the parent of this move as the current move again
+    if _nested_related_moves and not is_same(_nested_related_moves, related_move_node):
+        var move_parent: = _get_parent_move_node(related_move_node)
+        if move_parent and not is_same(_cur_related_move_node, move_parent):
+            _cur_related_move_node = move_parent
+
+    if _nested_related_moves and is_same(_nested_related_moves, related_move_node):
+        _nested_related_moves = {}
+        _cur_related_move_node = {}
+
+func failed_group_move_start(parent_related_move: Dictionary, instance_ids: Array) -> void:
+    prints("group move failed", parent_related_move)
+    prints(JSON.stringify(_nested_related_moves, "\t", false))
+    if not parent_related_move or not instance_ids:
+        return
+    for child_move_node in parent_related_move["child_moves"]:
+        if child_move_node["instance_id"] in instance_ids:
+            # group move failing already reverts group member movements, trigger revert on grandchild related moves
+            for grandchild in child_move_node["child_moves"]:
+                _failed_move_start(grandchild)
+    _cur_related_move_node = parent_related_move
+
+func _failed_move_start(related_move_node: Dictionary) -> void:
+    _revert_related_move_node(related_move_node)
+    if not is_same(_nested_related_moves, related_move_node):
+        var parent_node: = _get_parent_move_node(related_move_node)
+        if parent_node:
+            parent_node["child_moves"].erase(related_move_node)
+
+func _get_parent_move_node(related_move_node: Dictionary, at_node: Dictionary = {}) -> Dictionary:
+    if not at_node:
+        if is_same(_nested_related_moves, related_move_node):
+            return {}
+        at_node = _nested_related_moves
+    for child_move_node in at_node["child_moves"]:
+        if is_same(child_move_node, related_move_node):
+            return at_node
+        var found_parent: = _get_parent_move_node(related_move_node, child_move_node)
+        if found_parent:
+            return found_parent
+    return {}
+
+func _get_sibling_move_nodes(related_move_node: Dictionary) -> Array:
+    if is_same(_nested_related_moves, related_move_node):
+        return []
+    var parent_node: = _get_parent_move_node(related_move_node)
+    if not parent_node:
+        return []
+    return parent_node["child_moves"].duplicate()
+
+func _revert_related_move_node(related_move_node: Dictionary) -> void:
+    if related_move_node["revertable"]:
+        for child_move_node in related_move_node["child_moves"]:
+            _revert_related_move_node(child_move_node)
+        if not related_move_node["fake"]:
+            related_move_node["moving_entity"].revert_move_start()
+
+# Not using this idea atm
+#func is_entity_move_started_within_stack(entity: BaseEntity) -> bool:
+#    if not entity or not _move_resolution_stack:
+#        return false
+#    return entity.instance_id in _move_stack_metadata.get("started_move_instances", [])
+#
+#func _move_resolution_stack_pop() -> void:
+#    if not _move_resolution_stack:
+#        return
+#    if _move_resolution_stack.size() == 1:
+#        _move_resolution_stack.clear()
+#        _move_stack_metadata.clear()
+#    else:
+#        _move_resolution_stack.pop_back()
+#
+#func _add_move_resolution_start(entity: BaseEntity) -> void:
+#    if not entity:
+#        return
+#    var stack_entry: Dictionary = {
+#        "entity": entity,
+#        "instance_id": entity.instance_id,
+#    }
+#    _move_resolution_stack.append(stack_entry)
+#
+#func _add_instance_move_start_to_stack_meta(instance_id: int) -> void:
+#    if not _move_resolution_stack:
+#        return
+#    if not _move_stack_metadata.has("started_move_instances"):
+#        _move_stack_metadata["started_move_instances"] = Array([], TYPE_INT, "", null)
+#    if instance_id in _move_stack_metadata["started_move_instances"]:
+#        return
+#    _move_stack_metadata["started_move_instances"].append(instance_id)

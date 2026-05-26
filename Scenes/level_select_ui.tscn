@@ -145,3 +145,7 @@ alignment = 2
 layout_mode = 2
 button_pressed = true
 text = "Show Locked Levels"
+
+[node name="ColorRect" type="ColorRect" parent="." unique_id=1343634556]
+layout_mode = 2
+color = Color(0.9972375, 0.46810806, 0.36083245, 1)
