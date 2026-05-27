@@ -735,17 +735,43 @@ func auto_tail_handler(entity: BaseEntity) -> void:
             break
 
 func auto_bond_handler(entity: BaseEntity) -> void:
-    if get_entity_prop_with_default(entity, "auto-bond", false):
+    if not entity or entity.bond_group:
+        return
+    var auto_bond_val: String = Utility.property_value_nonempty_string(get_entity_prop_with_default(entity, "auto-bond", false), "false")
+    if auto_bond_val != "false":
+        prints("instance", entity.instance_id, "auto bond val", auto_bond_val)
         var bonded: = false
+        var bond_to_entity_ids: Array = []
+        if auto_bond_val == "true":
+            bond_to_entity_ids = [entity.entity_index]
+        else:
+            bond_to_entity_ids = filter_entity_types_by_property(auto_bond_val)
+        prints("checking for entities with ids:", bond_to_entity_ids)
+        var bond_adjacent: = get_entity_prop_is_truthy(entity, "auto-bond-adjacent", false)
+        var adjacent_positions: Array[Vector2i] = []
+        if bond_adjacent:
+            var e_pos: = entity.get_moving_position()
+            adjacent_positions = [e_pos]
+            adjacent_positions.append_array(Utility.get_adjacent_positions(e_pos))
+            prints("checking for positions", adjacent_positions)
+
         for potential_group in bond_groups:
             # This doesn't keep track of which groups were created as auto-bond groups for specific entities, more work to do later
             if not potential_group:
                 continue
-            if get_instance(potential_group[0]).entity_index == entity.entity_index:
+            for instance_id in potential_group:
+                var group_entity: = get_instance(instance_id)
+                var entity_type_id: int = get_instance(instance_id).entity_index
+                if entity_type_id not in bond_to_entity_ids:
+                    continue
+                if bond_adjacent and not group_entity.is_at_multiple(adjacent_positions):
+                    continue
+                prints("found a bond group", potential_group)
                 bond_entity(entity, potential_group)
                 bonded = true
                 break
         if not bonded:
+            prints("making new bond group")
             create_bond_group([entity])
 
 func restore_entity(serialized_entity: Dictionary, refresh: bool = false) -> void:
@@ -927,7 +953,6 @@ func bond_group_start_move(bond_group: Array, steps_per_tile: int, move_facing: 
             post_move_actions(entity, entity.tile_position, entity.next_tile_pos)
             entity.actually_started_move()
     if is_top_level_move:
-        prints("group move as top level, clearing related move cache")
         clear_related_move_cache()
     return move_allowed
 
@@ -1015,6 +1040,26 @@ func filter_entities_by_property(prop_name: String, entities: Array, invert: boo
         if entity_has_property(entities[i], prop_name) != invert:
             filtered_entities.append(entities[i])
     return filtered_entities
+
+func filter_entity_types_by_property(prop_name: String, invert: bool = false) -> Array:
+    var filtered_ids: Array = []
+    for e_id in entity_defs.keys():
+        if entity_def_has_truthy_property_no_conditional(e_id, prop_name) != invert:
+            filtered_ids.append(e_id)
+    return filtered_ids
+
+func entity_def_has_truthy_property_no_conditional(e_id: int, prop_name: String) -> bool:
+    if not e_id in entity_defs:
+        return false
+    var entity_def_props: Dictionary = entity_defs[e_id]["properties"]
+    if not prop_name in entity_def_props:
+        return false
+    var prop_val: Variant = entity_def_props[prop_name]
+    if typeof(prop_val) in [TYPE_DICTIONARY, TYPE_ARRAY]:
+        return false
+    elif prop_val:
+        return true
+    return false
 
 func find_entity_with_truthy_property(prop_name: String, first: bool = true) -> BaseEntity:
     for i in Utility.array_iter(entity_list, not first):

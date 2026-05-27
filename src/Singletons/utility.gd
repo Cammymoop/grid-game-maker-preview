@@ -364,6 +364,9 @@ func facing_from_adjacent_positions(from_pos, to_pos) -> int:
 		return 2
 	else:
 		return -1
+
+func get_adjacent_positions(pos: Vector2i) -> Array[Vector2i]:
+	return [pos + Vector2i.LEFT, pos + Vector2i.RIGHT, pos + Vector2i.UP, pos + Vector2i.DOWN]
 	
 
 func dict_vectors_to_lists(dict: Dictionary) -> Dictionary:
