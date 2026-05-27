@@ -524,11 +524,11 @@ func start_move(in_facing_dir: int, change_visual_facing: bool = true, group_mov
 	var to_pos: = tile_position + Utility.facing_vector_i(in_facing_dir)
 	return _start_move_common(to_pos, group_move, false, is_revertable)
 
-func start_teleport_to(to_tile_pos: Vector2i, override_move_facing: int = -1, override_facing: int = -1, group_move: bool = false, override_steps: int = -1, is_revertable: bool = false) -> bool:
+func start_teleport_to(from_pos: Vector2i, to_pos: Vector2i, override_move_facing: int = -1, override_facing: int = -1, group_move: bool = false, override_steps: int = -1, is_revertable: bool = false) -> bool:
 	if moving:
 		return false
 
-	var implicit_facing: = _get_teleport_implicit_facing(to_tile_pos)
+	var implicit_facing: = _get_teleport_implicit_facing(from_pos, to_pos)
 	if override_move_facing == -2:
 		override_move_facing = move_facing
 	set_move_facing(implicit_facing if override_move_facing == -1 else override_move_facing)
@@ -538,7 +538,7 @@ func start_teleport_to(to_tile_pos: Vector2i, override_move_facing: int = -1, ov
 	var set_facing_to: = implicit_facing if override_facing == -1 else override_facing
 	if set_facing_to != facing:
 		var do_turn_interp: = sprite.interpolate_facing_enabled
-		if not Utility.is_interp_style_smooth(get_teleport_interp_style(_is_diagonal_adj(to_tile_pos))):
+		if not Utility.is_interp_style_smooth(get_teleport_interp_style(_is_diagonal_adj(from_pos, to_pos))):
 			do_turn_interp = false
 		set_facing(set_facing_to, not do_turn_interp)
 	
@@ -548,10 +548,10 @@ func start_teleport_to(to_tile_pos: Vector2i, override_move_facing: int = -1, ov
 	if not group_move and bond_group:
 		return EntityManager.bond_group_start_teleport(bond_group, get_teleport_steps(), move_facing)
 	
-	return _start_move_common(to_tile_pos, group_move, true, is_revertable)
+	return _start_move_common(to_pos, group_move, true, is_revertable)
 
-func _is_diagonal_adj(to_tile_pos: Vector2i) -> bool:
-	if (get_moving_position() - to_tile_pos).abs() == Vector2i.ONE:
+func _is_diagonal_adj(from_pos: Vector2i, to_pos: Vector2i) -> bool:
+	if (from_pos - to_pos).abs() == Vector2i.ONE:
 		return true
 	return false
 
@@ -625,8 +625,9 @@ func actually_started_move() -> void:
 	if entity_name == "player":
 		pass#do_named_bump_effect({"name": "Spin"})
 
-func invalidate_cached_at_position(from_positions: Array[Vector2i]) -> void:
-	EntityManager.invalidate_cached_instance_at_pos(self, from_positions)
+func invalidate_cached_at_position(from_positions: Array) -> void:
+	var from_positions_v2i: Array[Vector2i] = Array(from_positions, TYPE_VECTOR2I, "", null)
+	EntityManager.invalidate_cached_instance_at_pos(self, from_positions_v2i)
 
 func is_settled() -> bool:
 	return not moving
@@ -717,12 +718,13 @@ func get_moving_steps_per_tile() -> int:
 func update_move_speed() -> void:
 	current_move_speed = _spt_to_speed(get_steps_per_tile())
 
-func _get_teleport_implicit_facing(to_tile_pos: Vector2i) -> int:
-	return Utility.vector_to_facing_from_facing(to_tile_pos - get_moving_position(), facing)
+func _get_teleport_implicit_facing(from_pos: Vector2i, to_pos: Vector2i) -> int:
+	return Utility.vector_to_facing_from_facing(to_pos - from_pos, facing)
 
 func can_i_move(at_facing: int) -> bool:
-	var my_pos: = tile_position if not moving else next_tile_pos
-	var target_pos: = my_pos + Utility.facing_vector_i(at_facing)
+	if moving:
+		return false
+	var target_pos: = tile_position + Utility.facing_vector_i(at_facing)
 	
 	# temporarily face the movement direction, so that blocking conditionals can read it
 	var old_move_facing = move_facing
@@ -732,19 +734,19 @@ func can_i_move(at_facing: int) -> bool:
 	
 	return result
 
-func can_i_teleport_to(to_tile_pos: Vector2i, with_facing: int = -1, with_move_facing: int = -1) -> bool:
+func can_i_teleport_to(from_pos: Vector2i, to_pos: Vector2i, with_facing: int = -1, with_move_facing: int = -1) -> bool:
 	var old_facing = facing
 	var old_move_facing = move_facing
 	if with_facing != -1:
 		facing = with_facing
 	elif with_facing != -2:
-		facing = _get_teleport_implicit_facing(to_tile_pos)
+		facing = _get_teleport_implicit_facing(from_pos, to_pos)
 	if with_move_facing != -1:
 		set_move_facing(with_move_facing)
 	elif with_move_facing != -2:
-		set_move_facing(_get_teleport_implicit_facing(to_tile_pos))
+		set_move_facing(_get_teleport_implicit_facing(from_pos, to_pos))
 
-	var result: = MapManager.can_move_to(self, to_tile_pos)
+	var result: = MapManager.can_move_to(self, to_pos)
 	facing = old_facing
 	set_move_facing(old_move_facing)
 	return result
@@ -851,7 +853,7 @@ func tail_follow(_move_facing) -> void:
 	if (target_tile - tile_position).length() > 1:
 		if GameManager.get_game_setting("tails_teleport", true):
 			var facing_val: = -1 if visual_turn_on_move else -2
-			if not start_teleport_to(target_tile, -1, facing_val, true):
+			if not start_teleport_to(tile_position, target_tile, -1, facing_val, true):
 				untail()
 		else:
 			untail()
@@ -1013,3 +1015,6 @@ func get_teleport_interp_style(is_diagonal_adj: bool) -> PosInterpStyle:
 
 func is_teleporting() -> bool:
 	return moving and _this_move_is_teleport
+
+func is_large() -> bool:
+	return false

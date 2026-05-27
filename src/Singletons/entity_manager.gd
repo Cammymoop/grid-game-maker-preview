@@ -646,6 +646,8 @@ func create_entity(entity_index: int, tile_position: Vector2i, facing: int = 0, 
     var entity: BaseEntity
     if "entity_type" in entity_info:
         entity = large_entity_template.instantiate()
+    elif entity_info.get("can_be_large", false):
+        entity = large_entity_template.instantiate()
     else: 
         entity = entity_template.instantiate()
 
@@ -662,6 +664,8 @@ func create_entity(entity_index: int, tile_position: Vector2i, facing: int = 0, 
     entity.position = MapManager.tile_to_world_position(tile_position)
     entity.tile_position = tile_position
     entity.next_tile_pos = tile_position
+    if entity is LargeEntity:
+        setup_new_entity_size(entity)
     add_entity_to_world(entity)
     entity.initialize()
     setup_entity_sprite(entity)
@@ -685,6 +689,20 @@ func create_entity(entity_index: int, tile_position: Vector2i, facing: int = 0, 
     MapManager.check_terrain_spr_mod_for_created(entity)
     
     return entity
+
+func setup_new_entity_size(entity: BaseEntity) -> void:
+    if not entity is LargeEntity:
+        return
+    
+    var entity_def: Dictionary = entity_defs[entity.entity_index]
+
+    var default_size: Vector2 = Utility.get_vector2_from_arr(entity_def.get("default_size", [1, 1]))
+    entity.entity_size = default_size
+    entity.set_default_mask()
+    if entity_def.has("starting_mask_out"):
+        for masked_pos in entity_def["starting_mask_out"]:
+            var mask_pos_vec: Vector2i = Utility.get_vector2i_from_arr(masked_pos)
+            entity.shape_mask[mask_pos_vec] = false
 
 func post_activated_actions(entity: BaseEntity) -> void:
     if not entity.active:
@@ -776,12 +794,15 @@ func auto_bond_handler(entity: BaseEntity) -> void:
 
 func restore_entity(serialized_entity: Dictionary, refresh: bool = false) -> void:
     var entity: BaseEntity
-    if not "entity_class" in serialized_entity or serialized_entity["entity_class"] == "BaseEntity":
-        entity = entity_template.instantiate()
-    else:
+    var entity_id: int = int(serialized_entity['entity_index'])
+    if entity_defs[entity_id].get("can_be_large", false):
         entity = large_entity_template.instantiate()
+    elif serialized_entity.get("entity_class", "BaseEntity") != "BaseEntity":
+        entity = large_entity_template.instantiate()
+    else:
+        entity = entity_template.instantiate()
     
-    entity.entity_index = int(serialized_entity['entity_index'])
+    entity.entity_index = entity_id
     entity.pre_init()
     entity.deserialize(serialized_entity)
     add_entity_to_world(entity)
@@ -814,6 +835,9 @@ func setup_entity_sprite(entity: BaseEntity) -> void:
     if entity_has_property(entity, "turn-animation"):
         turn_anim = get_entity_prop_with_default(entity, "turn-animation", turn_anim)
     sprite.interpolate_facing_enabled = turn_anim != "none"
+    
+    if entity is LargeEntity:
+        entity.update_sprite_pos_scale()
 
 func serialize() -> Dictionary:
     var serialized_entity_system: Dictionary = {}
@@ -1342,6 +1366,19 @@ func can_move_to(moving_entity: BaseEntity, tile_position: Vector2i) -> bool:
         if blocks:
             if blocks.is_conditional():
                 if blocks.resolve(e, moving_entity, tile_position):
+                    return false
+            else:
+                if blocks.get_value():
+                    return false
+    return true
+
+func can_move_to_multiple(moving_entity: BaseEntity, tile_positions: Array[Vector2i]) -> bool:
+    var entities_here: = get_entities_at_multiple(tile_positions, moving_entity)
+    for e in entities_here:
+        var blocks: = get_entity_property(e, "blocks")
+        if blocks:
+            if blocks.is_conditional():
+                if blocks.resolve(e, moving_entity, [e.get_moving_position()]):
                     return false
             else:
                 if blocks.get_value():

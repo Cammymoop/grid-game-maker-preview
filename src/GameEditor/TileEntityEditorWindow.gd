@@ -11,6 +11,8 @@ const PropertyEditList: = preload("res://Scenes/GameEditor/property_edit_list.gd
 
 const AdaptiveMultiLineEdit: = preload("res://Scenes/GameEditor/adaptable_multi_line_edit.gd")
 
+const Vector2iInput: = preload("res://src/GameEditor/ConditionalEditor/vector2i_input.gd")
+
 var conditional_editor_scene: = preload("res://Scenes/GameEditor/ConditionalEditor/ConditionalEditor.tscn")
 var tex_popup_scene: = preload("res://Scenes/GameEditor/BetterTextureDialog.tscn")
 var fancy_sprite_editor_scene: = preload("res://Scenes/GameEditor/fancy_sprite_editor.tscn")
@@ -45,6 +47,11 @@ var sprite_snapshot_scale: float = 1.0
 
 @export var terrain_sprite_modifier_edit: AdaptiveMultiLineEdit
 
+@export var entity_size_option: Control
+@export var large_toggle: CheckButton
+@export var entity_size_input_container: Control
+@export var entity_size_input: Vector2iInput
+
 func _ready():
     visibility_changed.connect(_on_vis_changed)
     var controller_list = find_child("EditController").get_popup()
@@ -71,6 +78,9 @@ func _ready():
     
     property_edit_list.properties_changed.connect(on_properties_changed)
     property_edit_list.request_conditional_editor.connect(on_conditional_editor_requested)
+    
+    large_toggle.toggled.connect(on_large_toggle_toggled)
+    entity_size_input.value_changed.connect(on_entity_size_input_changed)
     
     close_requested.connect(close_window)
 
@@ -178,6 +188,7 @@ func load_tile_info(tile_index: int):
     load_common()
 
 func load_common():
+    _update_entity_size_ui()
     _update_terrain_sprite_modifier_ui()
     var terrain_spr_mod_switch: CheckButton = find_child("TestTerrainSprMod")
     if terrain_spr_mod_switch:
@@ -204,6 +215,15 @@ func _update_terrain_sprite_modifier_ui() -> void:
     terrain_spr_mod_switch.set_pressed_no_signal(not terrain_spr_mod.is_empty())
     terrain_sprite_modifier_edit.set_text_contents(JSON.stringify(terrain_spr_mod, "  ", false))
     terrain_sprite_modifier_edit.visible = not terrain_spr_mod.is_empty()
+
+func _update_entity_size_ui() -> void:
+    entity_size_option.visible = tile_entity_mode == "entity"
+    if tile_entity_mode == "entity":
+        var is_large: bool = the_definition.get("can_be_large", false)
+        entity_size_input_container.visible = is_large
+        large_toggle.set_pressed_no_signal(is_large)
+        var definition_size: Array = the_definition.get("default_size", [2, 2])
+        entity_size_input.set_value(Utility.get_vector2i_from_arr(definition_size))
 
 func update_image_button():
     if sprite_snapshot_tex:
@@ -624,3 +644,21 @@ func on_terrain_sprite_modifier_text_submitted(new_text: String) -> void:
     else:
         the_definition["terrain_sprite_modifier"] = jsonified
     _update_terrain_sprite_modifier_ui()
+
+func on_large_toggle_toggled(button_pressed: bool) -> void:
+    if not tile_entity_mode == "entity":
+        return
+    if not button_pressed:
+        the_definition.erase("can_be_large")
+        the_definition.erase("default_size")
+    else:
+        the_definition["can_be_large"] = true
+        the_definition["default_size"] = Utility.get_arr_from_vector2i(entity_size_input.get_value())
+    _update_entity_size_ui()
+
+func on_entity_size_input_changed(new_value: Vector2i) -> void:
+    if not tile_entity_mode == "entity":
+        return
+    if not the_definition.get("can_be_large", false):
+        return
+    the_definition["default_size"] = Utility.get_arr_from_vector2i(new_value)

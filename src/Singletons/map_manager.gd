@@ -900,6 +900,12 @@ func can_move_to(entity, tile_position) -> bool:
         return false
     
     return check_blocks_allow_move(entity, [tile_position])
+
+func can_move_to_multiple(entity: BaseEntity, tile_positions: Array[Vector2i]) -> bool:
+    if not EntityManager.can_move_to_multiple(entity, tile_positions):
+        return false
+    
+    return check_blocks_allow_move(entity, tile_positions)
     
 func check_blocks_allow_move(entity: BaseEntity, tile_positions: Array[Vector2i]) -> bool:
     var tile_ids_here: Array[int] = []

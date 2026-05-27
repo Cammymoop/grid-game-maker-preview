@@ -183,6 +183,11 @@ func _select_first_last_teleport_in_direction(slots: Dictionary, chosen_slot: in
 
 	var entity: BaseEntity = slots[entity_slot]
 	var in_positions: Array = slots[in_positions_slot]
+	
+	var entity_teleport_from_pos: Vector2i = entity.get_moving_position()
+	if origin_pos != entity_teleport_from_pos and entity.is_large():
+		if origin_pos in entity.get_positions_at(entity_teleport_from_pos):
+			entity_teleport_from_pos = origin_pos
 		
 	if not is_first:
 		# start from the map edge in the direction of the delta and search backwards
@@ -196,7 +201,7 @@ func _select_first_last_teleport_in_direction(slots: Dictionary, chosen_slot: in
 			# reverse look checked all positions from map edge
 			break
 		if not in_positions or in_positions.has(check_pos):
-			if entity.can_i_teleport_to(check_pos, -2, -2):
+			if entity.can_i_teleport_to(entity_teleport_from_pos, check_pos, -2, -2):
 				slots[chosen_slot] = [check_pos]
 				return
 		check_pos += delta
@@ -462,7 +467,7 @@ var rand_dir_options: Dictionary = {
 
 func desc_select_random_direction() -> String:
 	return "int|<= Select a random [dir_options:RandomDirectionOptionsInput] direction [exclude_dir:ExcludeDirectionInput]"
-func cmd_select_random_direction(slots: Dictionary, chosen_slot: int, dir_options: String, exclude_dir: Dictionary) -> void:
+func cmd_select_random_direction(slots: Dictionary, chosen_slot: int, dir_options: String = "any", exclude_dir: Dictionary = {}) -> void:
 	var choose_from: Array = rand_dir_options.get(dir_options, [0])
 	if exclude_dir.get("type", "") != "ignore":
 		var exclude_dir_val: int = resolve_complex_direction(exclude_dir, slots)
@@ -1350,20 +1355,23 @@ func cmd_if_entity_gets_teleported_in_direction(slots: Dictionary, chosen_slot: 
 		return false
 	var dist_val: = int(resolve_complex_scalar(dist, slots))
 	var from_pos: Vector2i = slots[chosen_slot].get_moving_position()
-	return slots[chosen_slot].start_teleport_to(from_pos + Utility.facing_vector_i(direction) * dist_val, -2, -2)
+	return slots[chosen_slot].start_teleport_to(from_pos, from_pos + Utility.facing_vector_i(direction) * dist_val, -2, -2)
 
 func desc_teleport_entity_to() -> String:
 	return "entity|Teleport the entity to [to_position_slot:SlotInput:pos,entity]"
 func cmd_teleport_entity_to(slots: Dictionary, chosen_slot: int, to_position_slot: int) -> void:
-	_teleport_entity_to(slots, chosen_slot, to_position_slot)
+	_teleport_entity_to(slots, chosen_slot, to_position_slot, false)
 
-func _teleport_entity_to(slots: Dictionary, chosen_slot: int, to_position_slot: int) -> bool:
+func _teleport_entity_to(slots: Dictionary, chosen_slot: int, to_position_slot: int, with_from_pos: bool, manual_from_pos: Vector2i = Vector2i.ZERO) -> bool:
 	if not Commands.slot_has_position(to_position_slot) or not Commands.slot_is_entity(chosen_slot):
 		push_error("Invalid slots to teleport entity to: %s and %s" % [chosen_slot, to_position_slot])
 		return false
 	if not slots[chosen_slot] or not _slot_has_single_tile_position(slots, to_position_slot):
 		return false
-	return slots[chosen_slot].start_teleport_to(_single_tile_position_from_slot(slots, to_position_slot), -2, -2)
+	var from_pos: Vector2i = manual_from_pos
+	if not with_from_pos:
+		from_pos = slots[chosen_slot].get_moving_position()
+	return slots[chosen_slot].start_teleport_to(from_pos, _single_tile_position_from_slot(slots, to_position_slot), -2, -2)
 
 func desc_if_entity_can_teleport_to() -> String:
 	return "entity|If the entity can teleport to [to_position_slot:SlotInput:pos,entity]"
@@ -1373,12 +1381,38 @@ func cmd_if_entity_can_teleport_to(slots: Dictionary, chosen_slot: int, to_posit
 		return false
 	if not slots[chosen_slot] or not _slot_has_single_tile_position(slots, to_position_slot):
 		return false
-	return slots[chosen_slot].can_i_teleport_to(_single_tile_position_from_slot(slots, to_position_slot), -2, -2)
+	var from_pos: Vector2i = slots[chosen_slot].get_moving_position()
+	return slots[chosen_slot].can_i_teleport_to(from_pos, _single_tile_position_from_slot(slots, to_position_slot), -2, -2)
+
+func desc_if_entity_can_teleport_to_from() -> String:
+	return "entity|If the entity can teleport to [to_position_slot:SlotInput:pos,entity] from [from_pos_slot:SlotInput:pos,entity]\n" \
+			+ "(This version is for LARGE entities, small entities have no need to specify the from position)"
+func cmd_if_entity_can_teleport_to_from(slots: Dictionary, chosen_slot: int, to_pos_slot: int, from_pos_slot: int) -> bool:
+	if not Commands.slot_has_position(to_pos_slot) or not Commands.slot_has_position(from_pos_slot) or not Commands.slot_is_entity(chosen_slot):
+		push_error("Invalid slots to check if entity can teleport to from: %s and %s and %s" % [chosen_slot, to_pos_slot, from_pos_slot])
+		return false
+	if not slots[chosen_slot] or not _slot_has_single_tile_position(slots, to_pos_slot) or not _slot_has_single_tile_position(slots, from_pos_slot):
+		return false
+	var from_pos: Vector2i = _single_tile_position_from_slot(slots, from_pos_slot)
+	var to_pos: Vector2i = _single_tile_position_from_slot(slots, to_pos_slot)
+	return slots[chosen_slot].can_i_teleport_to(from_pos, to_pos, -2, -2)
 
 func desc_if_entity_gets_teleported_to() -> String:
 	return "entity|If the entity successfully gets teleported to [to_position_slot:SlotInput:pos,entity]"
 func cmd_if_entity_gets_teleported_to(slots: Dictionary, chosen_slot: int, to_position_slot: int) -> bool:
-	return _teleport_entity_to(slots, chosen_slot, to_position_slot)
+	return _teleport_entity_to(slots, chosen_slot, to_position_slot, false)
+
+func desc_if_entity_gets_teleported_to_from() -> String:
+	return "entity|If the entity successfully gets teleported to [to_position_slot:SlotInput:pos,entity] from [from_pos_slot:SlotInput:pos,entity]\n" \
+			+ "(This version is for LARGE entities, small entities have no need to specify the from position)"
+func cmd_if_entity_gets_teleported_to_from(slots: Dictionary, chosen_slot: int, to_pos_slot: int, from_pos_slot: int) -> bool:
+	if not Commands.slot_has_position(from_pos_slot):
+		push_error("Invalid slot or empty slot to teleport entity to from: %s and %s" % [chosen_slot, from_pos_slot])
+		return false
+	if not _slot_has_single_tile_position(slots, from_pos_slot):
+		return false
+	var from_pos: Vector2i = _single_tile_position_from_slot(slots, from_pos_slot)
+	return _teleport_entity_to(slots, chosen_slot, to_pos_slot, true, from_pos)
 
 
 func desc_if_entity_is_bonded() -> String:
@@ -1617,3 +1651,13 @@ func cmd_keep_named_sfx_playing(slots: Dictionary, _slot: int, sfx_name: Diction
 	var sfx_name_str: String = get_complex_string_value(sfx_name, slots)
 	var sfx_options: = SfxPlayer.playback_options(sfx_name_str, "keep_playing")
 	SfxPlayer.play_sfx_options(sfx_options)
+
+func desc_if_entity_is_large() -> String:
+	return "entity|If the entity is currently LARGE (occupying more than on grid space)"
+func cmd_if_entity_is_large(slots: Dictionary, chosen_slot: int) -> bool:
+	if not Commands.slot_is_entity(chosen_slot):
+		push_error("Invalid slot or empty slot to check if entity is large: %s" % chosen_slot)
+		return false
+	if not slots[chosen_slot]:
+		return false
+	return slots[chosen_slot].is_large()

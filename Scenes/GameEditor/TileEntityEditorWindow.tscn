@@ -9,12 +9,13 @@
 [ext_resource type="PackedScene" uid="uid://dvimib4iq4sje" path="res://Scenes/GameEditor/adaptive_multi_line_edit.tscn" id="6_47s6f"]
 [ext_resource type="PackedScene" uid="uid://cxrfq7ld3ttmn" path="res://Scenes/GameEditor/property_edit_list.tscn" id="6_dlgud"]
 [ext_resource type="Texture2D" uid="uid://ctd2phj4knof4" path="res://assets/img/button_icons/x.png" id="6_h7da8"]
+[ext_resource type="PackedScene" uid="uid://yskjico8qrbl" path="res://Scenes/GameEditor/ConditionalEditor/vector2i_input.tscn" id="7_47s6f"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_nnx4p"]
 atlas = ExtResource("1")
 region = Rect2(0, 64, 32, 32)
 
-[node name="TileEntityEditorWindow" type="Window" unique_id=1467937022 node_paths=PackedStringArray("property_edit_list", "terrain_sprite_modifier_edit")]
+[node name="TileEntityEditorWindow" type="Window" unique_id=1467937022 node_paths=PackedStringArray("property_edit_list", "terrain_sprite_modifier_edit", "entity_size_option", "large_toggle", "entity_size_input_container", "entity_size_input")]
 oversampling_override = 1.0
 title = "Edit"
 position = Vector2i(0, 25)
@@ -24,6 +25,10 @@ popup_window = true
 script = ExtResource("2")
 property_edit_list = NodePath("PanelContainer/VBoxContainer/VBoxContainer/HBoxContainer4/PropertyEditList")
 terrain_sprite_modifier_edit = NodePath("PanelContainer/VBoxContainer/HBoxContainer5/TerrainSprModTextEdit")
+entity_size_option = NodePath("PanelContainer/VBoxContainer/DefaultSizeOption")
+large_toggle = NodePath("PanelContainer/VBoxContainer/DefaultSizeOption/LargeToggle")
+entity_size_input_container = NodePath("PanelContainer/VBoxContainer/DefaultSizeOption/SizeInputContainer")
+entity_size_input = NodePath("PanelContainer/VBoxContainer/DefaultSizeOption/SizeInputContainer/EntitySizeInput")
 
 [node name="PanelContainer" type="PanelContainer" parent="." unique_id=1898877842]
 anchors_preset = 15
@@ -206,21 +211,50 @@ layout_mode = 2
 size_flags_horizontal = 3
 alignment = 1
 
-[node name="TestTerrainSprMod" type="CheckButton" parent="PanelContainer/VBoxContainer/HBoxContainer5" unique_id=48218373]
-layout_mode = 2
-text = "Terrain Spr Modifier:"
-
 [node name="Label" type="Label" parent="PanelContainer/VBoxContainer/HBoxContainer5" unique_id=1912939437]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.94869167, 0.82275736, 0.45312566, 1)
 theme_override_font_sizes/font_size = 12
 text = "(Advanced)"
 
+[node name="TestTerrainSprMod" type="CheckButton" parent="PanelContainer/VBoxContainer/HBoxContainer5" unique_id=48218373]
+layout_mode = 2
+text = "Terrain Spr Modifier:"
+
 [node name="TerrainSprModTextEdit" parent="PanelContainer/VBoxContainer/HBoxContainer5" unique_id=634600988 instance=ExtResource("6_47s6f")]
 custom_minimum_size = Vector2(190, 0)
 layout_mode = 2
 size_flags_horizontal = 1
 placeholder_text = "{modifier json}"
+
+[node name="DefaultSizeOption" type="HBoxContainer" parent="PanelContainer/VBoxContainer" unique_id=377323617]
+layout_mode = 2
+size_flags_horizontal = 3
+alignment = 1
+
+[node name="Label2" type="Label" parent="PanelContainer/VBoxContainer/DefaultSizeOption" unique_id=2012579990]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.94869167, 0.82275736, 0.45312566, 1)
+theme_override_font_sizes/font_size = 12
+text = "(Advanced)"
+
+[node name="LargeToggle" type="CheckButton" parent="PanelContainer/VBoxContainer/DefaultSizeOption" unique_id=1297410692]
+layout_mode = 2
+text = "LARGE:"
+
+[node name="SizeInputContainer" type="HBoxContainer" parent="PanelContainer/VBoxContainer/DefaultSizeOption" unique_id=1868441043]
+visible = false
+layout_mode = 2
+
+[node name="Label" type="Label" parent="PanelContainer/VBoxContainer/DefaultSizeOption/SizeInputContainer" unique_id=2058783725]
+layout_mode = 2
+size_flags_stretch_ratio = 0.5
+text = "size:"
+horizontal_alignment = 2
+
+[node name="EntitySizeInput" parent="PanelContainer/VBoxContainer/DefaultSizeOption/SizeInputContainer" unique_id=2047234622 instance=ExtResource("7_47s6f")]
+layout_mode = 2
+starting_value = Vector2i(2, 2)
 
 [node name="HSeparator2" parent="PanelContainer/VBoxContainer" unique_id=547141302 instance=ExtResource("2_nnx4p")]
 layout_mode = 2
