@@ -1193,13 +1193,15 @@ func reset_stateful_camera_settings() -> void:
 func is_entity_current_camera_focus(entity: BaseEntity) -> bool:
 	if not cur_scene == "Play" or not game_camera or not game_camera.active:
 		return false
-	var current_camera_focus: BaseEntity = game_camera.target_entity
+	var current_camera_focus: BaseEntity = get_camera_focus_entity()
 	if not current_camera_focus:
 		return false
 	return current_camera_focus.instance_id == entity.instance_id
 
 func get_camera_focus_entity() -> BaseEntity:
 	if not game_camera or not game_camera.active:
+		return null
+	if not game_camera.target_entity or not is_instance_valid(game_camera.target_entity):
 		return null
 	return game_camera.target_entity
 
