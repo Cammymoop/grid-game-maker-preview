@@ -427,6 +427,7 @@ func create_and_add_nodes_for_layer(layer_info: Dictionary, layer_index: int) ->
         else:
             _add_prop_upate_callable(when_property_name, show_hide_layer.bind(main_layer_node))
 
+
     var base_mod_color: Color = Utility.get_dict_color(layer_info, "mod_color", Color.WHITE)
     main_layer_node.set_meta("base_mod_color", base_mod_color)
     main_layer_node.modulate = base_mod_color
@@ -449,6 +450,12 @@ func create_and_add_nodes_for_layer(layer_info: Dictionary, layer_index: int) ->
             main_layer_node = pivot_node
             main_layer_node.set_meta("offset_degrees", 0)
     main_layer_node.name = layer_info.get("mode", "MODE") + str(layer_index)
+    
+    if layer_info.get("when_camera_focus", "ignore") != "ignore":
+        main_layer_node.set_meta("show_when_cam_focus", layer_info["when_camera_focus"] != "hide")
+        refresh_cam_focus()
+        if GameManager.cur_scene == "Play":
+            check_register_cam_focus_updates()
     
     main_layer_node.z_index = int(layer_info.get("z_offset", 0))
 
@@ -479,6 +486,17 @@ func create_and_add_nodes_for_layer(layer_info: Dictionary, layer_index: int) ->
     
     if layer_info.get("is_main_layer", false) or layer_info.get("receives_effects", true):
         _apply_modifier_effects_to(main_layer_node)
+
+func check_register_cam_focus_updates() -> void:
+    if not GameManager.game_camera_target_changed.is_connected(refresh_cam_focus):
+        GameManager.game_camera_target_changed.connect(refresh_cam_focus.unbind(1))
+
+func refresh_cam_focus() -> void:
+    var is_in_focus: bool = GameManager.is_entity_current_camera_focus(parent_entity)
+    for layer_node in layer_root.get_children():
+        if not layer_node.has_meta("show_when_cam_focus"):
+            continue
+        layer_node.visible = is_in_focus == layer_node.get_meta("show_when_cam_focus")
 
 func _add_prop_upate_callable(prop_name: String, update_func: Callable) -> void:
     if not prop_update_response.has(prop_name):

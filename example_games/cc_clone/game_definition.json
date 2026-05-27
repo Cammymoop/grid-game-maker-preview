@@ -129,7 +129,14 @@
           {
             "mode": "normal",
             "texture": 1.0,
-            "tex_index": 0.0
+            "tex_index": 0.0,
+            "mod_color": "#a3a3a3ff"
+          },
+          {
+            "mode": "normal",
+            "texture": 1.0,
+            "tex_index": 0.0,
+            "when_camera_focus": "show"
           },
           {
             "mode": "normal",

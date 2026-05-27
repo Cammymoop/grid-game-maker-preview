@@ -312,7 +312,8 @@
             "when false": [],
             "when always": []
           }
-        ]
+        ],
+        "auto-bond-adjacent": true
       }
     }
   },

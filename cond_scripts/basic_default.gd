@@ -849,7 +849,9 @@ func cmd_select_created_entity(slots: Dictionary, chosen_slot: int, entity_name:
 
 	var pos: Vector2i = get_single_position_from_slot(pos_slot, slots)
 	var facing: int = resolve_complex_direction(compl_dir, slots)
-	slots[chosen_slot] = _create_entity_at(e_id, pos, facing, is_moving)
+	var created: = _create_entity_at(e_id, pos, facing, is_moving)
+	prints("the created entity instance id is", created.instance_id)
+	slots[chosen_slot] = created
 
 
 func desc_a_turn() -> String:

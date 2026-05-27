@@ -47,6 +47,11 @@ const DigitsSourceTexts: Dictionary[int, String] = {
     DIGITS_SOURCE_PROPERTY: "Property:",
 }
 
+const CAM_FOCUS_IGNORE: = "ignore"
+const CAM_FOCUS_SHOW: = "show"
+const CAM_FOCUS_HIDE: = "hide"
+const CamFocusOptions: Array[String] = [CAM_FOCUS_IGNORE, CAM_FOCUS_SHOW, CAM_FOCUS_HIDE]
+
 @export var empty_layer_button_icon: Texture2D
 
 @export var remove_button: ButtonContainer
@@ -72,6 +77,7 @@ const DigitsSourceTexts: Dictionary[int, String] = {
 
 @export var visibility_property_input: FuzzyAutocompleteInput
 @export var mod_color_input: ColorPickerButton
+@export var cam_focus_visibility_select: OptionButton
 
 @export var show_reorder_buttons: bool = true
 @export var enable_context_menu: bool = true
@@ -152,6 +158,12 @@ func _ready() -> void:
     
     visibility_property_input.text_changed.connect(on_visibility_prop_changed)
     mod_color_input.color_changed.connect(on_mod_color_changed)
+    
+    cam_focus_visibility_select.clear()
+    for cam_focus_option in CamFocusOptions:
+        cam_focus_visibility_select.add_item(cam_focus_option)
+    cam_focus_visibility_select.selected = 0
+    cam_focus_visibility_select.item_selected.connect(on_cam_focus_visibility_selected)
     
     subsection_nav_forward.pressed.connect(on_navigate_subsection.bind(1))
     subsection_nav_back.pressed.connect(on_navigate_subsection.bind(-1))
@@ -293,11 +305,19 @@ func refresh_spin_speed_input() -> void:
 
 func update_image_button_texture() -> void:
     var button_texture: Texture2D = null
-    if layer_info['mode'] == MODE_EMPTY and empty_layer_button_icon:
+    var is_empty: bool = layer_info['mode'] == MODE_EMPTY
+    if is_empty and empty_layer_button_icon:
         button_texture = empty_layer_button_icon
     elif layer_info['mode'] == MODE_NORMAL:
         button_texture = Utility.atlas_texture_from_texture_index(layer_info['texture'], layer_info['tex_index'])
-    layer_image_button.find_child("TextureRect").texture = button_texture
+
+    var layer_image_button_tex: TextureRect = layer_image_button.find_child("TextureRect")
+    if layer_image_button_tex:
+        layer_image_button_tex.texture = button_texture
+        if layer_info.has("mod_color") and not is_empty:
+            layer_image_button_tex.self_modulate = Utility.get_dict_color(layer_info, "mod_color", Color.WHITE)
+        else:
+            layer_image_button_tex.self_modulate = Color.WHITE
 
 
 func move_up_button_pressed() -> void:
@@ -482,4 +502,12 @@ func on_z_offset_changed(new_value: float) -> void:
         layer_info.erase('z_offset')
     else:
         layer_info['z_offset'] = new_value
+    changed.emit()
+
+func on_cam_focus_visibility_selected(index: int) -> void:
+    var new_cam_focus_visibility: = cam_focus_visibility_select.get_item_text(index)
+    if new_cam_focus_visibility == CAM_FOCUS_IGNORE:
+        layer_info.erase('when_camera_focus')
+    else:
+        layer_info['when_camera_focus'] = new_cam_focus_visibility
     changed.emit()

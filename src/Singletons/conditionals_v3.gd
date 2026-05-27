@@ -94,8 +94,6 @@ const BUILTIN_COMMANDS: Array[String] = ["and", "or", "xor", "not", "false", "tr
 
 var verbose = false
 
-var reset_slots: Dictionary = {}
-
 func _ready() -> void:
     for script_name in DEFAULT_SCRIPTS:
         add_command_script_auto(script_name, ScriptType.GDSCRIPT, null)
@@ -229,15 +227,17 @@ func resolve_conditional(conditional: Variant, slots: Dictionary, extra_debug: b
     return _resolve_conditional(regularized_conditional, slots, extra_debug)
 
 func _resolve_conditional(conditional: Array[Dictionary], slots: Dictionary, extra_debug: bool = false) -> Dictionary:
-    reset_slots = slots_copy(slots)
+    slots["reset_slots"] = slots_copy(slots)
     
     var this_step_result = {"result": true, "quit": false}
     for i in conditional.size():
         this_step_result = _resolve_conditional_step(i, conditional[i], this_step_result, slots, extra_debug)
         if this_step_result["quit"]:
             break
+    var reset_slots: Dictionary = slots["reset_slots"]
     if reset_slots[Slot.RED] and slots[Slot.PINK]:
         reset_slots[Slot.RED].friend_instance_id = slots[Slot.PINK].instance_id
+
     return this_step_result
     
 func _resolve_conditional_step(step_index: int, cond_step: Dictionary, overall_result: Dictionary, slots: Dictionary, extra_debug: bool = false) -> Dictionary:
@@ -388,10 +388,18 @@ func _call_conditional_command(cmd_script: Node, main_cmd_name: String, slots: D
 
 func select_reset(slots: Dictionary) -> void:
     slots.clear()
-    slots.merge(reset_slots)
+    var reset_slots: Dictionary = slots["reset_slots"]
+    for key in slots:
+        if key == "reset_slots":
+            continue
+        slots[key] = reset_slots[key]
+        if typeof(slots[key]) == TYPE_ARRAY:
+            slots[key] = slots[key].duplicate()
 
 func select_reset_slot(slots: Dictionary, slot_id: Slot) -> void:
-    slots[slot_id] = reset_slots[slot_id]
+    slots[slot_id] = slots["reset_slots"][slot_id]
+    if typeof(slots[slot_id]) == TYPE_ARRAY:
+        slots[slot_id] = slots[slot_id].duplicate()
 
 func empty_slots() -> Dictionary:
     return {

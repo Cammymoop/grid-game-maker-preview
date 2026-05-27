@@ -41,7 +41,7 @@ LineEdit/constants/minimum_character_width = 2
 atlas = ExtResource("3_jxcnp")
 region = Rect2(0, 64, 32, 32)
 
-[node name="FancySpriteLayerListItem" type="MarginContainer" unique_id=1110623540 node_paths=PackedStringArray("remove_button", "layer_image_button", "offset_type_selector", "offset_input", "mode_selector", "reorder_buttons", "rotates_option", "rotates_mode_select", "spin_speed_input", "offset_degrees_input", "z_offset_input", "digits_settings", "digits_max_digits_input", "digits_color_picker", "digits_pad_zeros_toggle", "digits_source_selector", "digits_number_input", "digits_property_input", "visibility_property_input", "mod_color_input", "subsection_container", "subsection_nav_forward", "subsection_nav_back")]
+[node name="FancySpriteLayerListItem" type="MarginContainer" unique_id=1110623540 node_paths=PackedStringArray("remove_button", "layer_image_button", "offset_type_selector", "offset_input", "mode_selector", "reorder_buttons", "rotates_option", "rotates_mode_select", "spin_speed_input", "offset_degrees_input", "z_offset_input", "digits_settings", "digits_max_digits_input", "digits_color_picker", "digits_pad_zeros_toggle", "digits_source_selector", "digits_number_input", "digits_property_input", "visibility_property_input", "mod_color_input", "cam_focus_visibility_select", "subsection_container", "subsection_nav_forward", "subsection_nav_back")]
 offset_right = 503.0
 offset_bottom = 75.0
 theme = ExtResource("1_pj4t0")
@@ -71,6 +71,7 @@ digits_number_input = NodePath("HBoxContainer/PanelContainer/HBoxContainer/HBoxC
 digits_property_input = NodePath("HBoxContainer/PanelContainer/HBoxContainer/HBoxContainer/DigitSettings/HBoxContainer3/DigitPropertyInput")
 visibility_property_input = NodePath("HBoxContainer/PanelContainer/HBoxContainer/SubsectionContainer/VisibilitySection/VisibilityProp/VisPropInput")
 mod_color_input = NodePath("HBoxContainer/PanelContainer/HBoxContainer/SubsectionContainer/VisibilitySection/VBoxContainer/HBoxContainer/ModColorPicker")
+cam_focus_visibility_select = NodePath("HBoxContainer/PanelContainer/HBoxContainer/SubsectionContainer/VisibilitySection/VBoxContainer/HBoxContainer2/CamFocusVisibilitySelect")
 subsection_container = NodePath("HBoxContainer/PanelContainer/HBoxContainer/SubsectionContainer")
 subsection_nav_forward = NodePath("HBoxContainer/PanelContainer/HBoxContainer/SectionNavButtons/NextSubsection")
 subsection_nav_back = NodePath("HBoxContainer/PanelContainer/HBoxContainer/SectionNavButtons/PrevSubsection")
@@ -263,6 +264,7 @@ alignment = 1
 
 [node name="HBoxContainer" type="HBoxContainer" parent="HBoxContainer/PanelContainer/HBoxContainer/SubsectionContainer/VisibilitySection/VBoxContainer" unique_id=499940092]
 layout_mode = 2
+size_flags_horizontal = 4
 
 [node name="Label" type="Label" parent="HBoxContainer/PanelContainer/HBoxContainer/SubsectionContainer/VisibilitySection/VBoxContainer/HBoxContainer" unique_id=300957757]
 layout_mode = 2
@@ -273,6 +275,19 @@ custom_minimum_size = Vector2(32, 28)
 layout_mode = 2
 color = Color(1, 1, 1, 1)
 edit_intensity = false
+
+[node name="HBoxContainer2" type="HBoxContainer" parent="HBoxContainer/PanelContainer/HBoxContainer/SubsectionContainer/VisibilitySection/VBoxContainer" unique_id=1589483168]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="HBoxContainer/PanelContainer/HBoxContainer/SubsectionContainer/VisibilitySection/VBoxContainer/HBoxContainer2" unique_id=1012186701]
+layout_mode = 2
+text = "If Camera Focus:"
+
+[node name="CamFocusVisibilitySelect" type="OptionButton" parent="HBoxContainer/PanelContainer/HBoxContainer/SubsectionContainer/VisibilitySection/VBoxContainer/HBoxContainer2" unique_id=554422872]
+layout_mode = 2
+item_count = 1
+popup/item_0/text = "ignore"
+popup/item_0/id = 0
 
 [node name="Section" type="VBoxContainer" parent="HBoxContainer/PanelContainer/HBoxContainer/SubsectionContainer" unique_id=1296096512]
 visible = false
