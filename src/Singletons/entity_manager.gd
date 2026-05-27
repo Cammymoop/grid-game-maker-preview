@@ -2034,8 +2034,6 @@ func just_finished_move_start(related_move_node: Dictionary, move_result: bool) 
         _cur_related_move_node = {}
 
 func failed_group_move_start(parent_related_move: Dictionary, instance_ids: Array) -> void:
-    prints("group move failed", parent_related_move)
-    prints(JSON.stringify(_nested_related_moves, "\t", false))
     if not parent_related_move or not instance_ids:
         return
     for child_move_node in parent_related_move["child_moves"]:
