@@ -332,6 +332,51 @@ func cmd_select_name_of_entity(slots: Dictionary, chosen_slot: int, target_slot:
 	else:
 		slots[chosen_slot] = ""
 
+func desc_select_first_entity_in_direction() -> String:
+	return "entity|<= Select the first entity in a direct line in this direction [compl_dir:DirectionInput:1]\n" \
+			+ "from [single_pos_slot:SlotInput:pos,entity] with a [truthy:BoolChoice:true,true or non-zero,false or zero] [prop_name:PropertyInput] property\n" \
+			+ "stopping [before:BoolChoice:true,before,after] hitting a tile with a [t_truthy:BoolChoice:true,true or non-zero,false or zero] [t_prop_name:PropertyInput] property"
+func cmd_select_first_entity_in_direction(slots: Dictionary, chosen_slot: int, single_pos_slot: int, compl_dir: Dictionary, truthy: bool, prop_name: String, before: bool, t_truthy: bool, t_prop_name: String) -> void:
+	if not Commands.slot_is_entity(chosen_slot) or not Commands.slot_has_position(single_pos_slot):
+		push_error("Invalid slots to select first entity in direction: %s, %s" % [chosen_slot, single_pos_slot])
+		return
+	var origin_pos: Vector2i = _single_tile_position_from_slot(slots, single_pos_slot)
+	var delta: = Utility.facing_vector_i(resolve_complex_direction(compl_dir, slots))
+	
+	var map_bounds: = MapManager.get_map_size().grow(5)
+	
+	var check_pos: = origin_pos
+	var break_next: = false
+	for i in 10000:
+		if break_next:
+			break
+		check_pos += delta
+		if MapManager.is_empty_blocking_at(check_pos) or not map_bounds.has_point(check_pos):
+			break
+		if MapManager.conditional_tile_event([check_pos], t_prop_name, null, false) == t_truthy:
+			if before:
+				break
+			else:
+				break_next = true
+		var found_entities: = EntityManager.get_entities_at_multiple([check_pos], null, [])
+		
+		# stationary entities first, then higher IDs (later in entity list) first
+		found_entities.reverse()
+		var ordered_entities: Array[BaseEntity] = []
+		for e in found_entities:
+			if not e.moving:
+				ordered_entities.append(e)
+		for e in found_entities:
+			if not e in ordered_entities:
+				ordered_entities.append(e)
+		for e in ordered_entities:
+			if EntityManager.get_entity_prop_is_truthy(e, prop_name, false) == truthy:
+				slots[chosen_slot] = e
+				return
+	
+	slots[chosen_slot] = null
+
+
 func desc_select_number() -> String:
 	return "number,string|<= Select the number [complex_num:ComplexScalarInput]"
 func cmd_select_number(slots: Dictionary, chosen_slot: int, complex_num: Dictionary) -> void:

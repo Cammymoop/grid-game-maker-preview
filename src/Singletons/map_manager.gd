@@ -875,6 +875,14 @@ func is_tile_index_at(tile_position, tile_index: int) -> bool:
             return true
     return false
 
+func is_empty_blocking_at(tile_position: Vector2i) -> bool:
+    if not is_empty_blocking:
+        return false
+    for l in layers:
+        if l.get_cell_s(tile_position) != -1:
+            return false
+    return true
+
 func get_tile_index_at(tile_position) -> int:
     var tile_index = -1
     for l in layers:
