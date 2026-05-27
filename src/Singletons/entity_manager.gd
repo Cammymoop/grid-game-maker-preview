@@ -1845,15 +1845,6 @@ func _update_sprite_preview_for_entity(entity_id: int, entity_def: Dictionary, s
     var img_tex: ImageTexture = ImageTexture.create_from_image(sub_vp.get_texture().get_image())
     save_entity_sprite_snapshot(entity_id, img_tex, 1)
 
-func get_tailing_entities_of(entity: BaseEntity, include_inactive: bool = false) -> Array[BaseEntity]:
-    var tailing_entities: Array[BaseEntity] = []
-    for check_entity in entity_list:
-        if not check_entity.active:
-            continue
-        if entity.tailing and entity.tailing.instance_id == check_entity.instance_id:
-            tailing_entities.append(check_entity)
-    return tailing_entities
-
 func _get_all_entities_that_are_tailing_something(include_inactive: bool = false) -> Array[BaseEntity]:
     var tailing_entities: Array[BaseEntity] = []
     for entity in entity_list:
@@ -1867,6 +1858,15 @@ func get_entities_tailing_behind(head_entity: BaseEntity, include_self: bool = f
     if not include_self:
         exclude_list.append(head_entity)
     return get_entity_tailing_chain(head_entity, true, false, exclude_list, false)
+
+func get_direct_tailing_entities(of_entity: BaseEntity) -> Array[BaseEntity]:
+    if not of_entity:
+        return []
+    var tailing_entities: Array[BaseEntity] = []
+    for tailing_entity in _get_all_entities_that_are_tailing_something():
+        if tailing_entity.tailing.instance_id == of_entity.instance_id:
+            tailing_entities.append(tailing_entity)
+    return tailing_entities
 
 func get_tailing_chain_head_entity(reference_entity: BaseEntity, allow_self: bool = true) -> BaseEntity:
     if not reference_entity or not reference_entity.active:

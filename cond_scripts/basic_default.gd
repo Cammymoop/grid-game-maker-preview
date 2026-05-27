@@ -1570,23 +1570,24 @@ func cmd_is_entity_tailing(slots: Dictionary, chosen_slot: int, tailing: bool) -
 		return false
 	if tailing:
 		return slots[chosen_slot].tailing != null
-	return EntityManager.get_tailing_entities_of(slots[chosen_slot]).size() > 0
+	else:
+		return EntityManager.get_direct_tailing_entities(slots[chosen_slot]).size() > 0
 
 func desc_select_tailing_entity() -> String:
-	return "entity|<= Select an entity [tailing_me:BoolChoice:true,being tailed by,that is tailing] [ref_entity_slot:SlotInput:entity]"
-func cmd_select_tailing_entity(slots: Dictionary, chosen_slot: int, tailing_me: bool, ref_entity_slot: int) -> void:
+	return "entity|<= Select an entity [tail_parent:BoolChoice:true,being tailed by,that is tailing] [ref_entity_slot:SlotInput:entity]"
+func cmd_select_tailing_entity(slots: Dictionary, chosen_slot: int, tail_parent: bool, ref_entity_slot: int) -> void:
 	if not Commands.slot_is_entity(chosen_slot):
 		push_error("Invalid slot or empty slot to select tailing entity: %s" % chosen_slot)
 		return
 	if not slots[ref_entity_slot]:
 		return
-	if not tailing_me:
-		if not slots[chosen_slot].tailing or not EntityManager.has_instance(slots[chosen_slot].tailing.instance_id):
+	if tail_parent:
+		if not slots[ref_entity_slot].tailing or not EntityManager.has_instance(slots[ref_entity_slot].tailing.instance_id):
 			slots[chosen_slot] = null
 			return
 		slots[chosen_slot] = EntityManager.get_instance(slots[chosen_slot].tailing.instance_id)
 	else:
-		var tailing_entities: Array[BaseEntity] = EntityManager.get_tailing_entities_of(slots[ref_entity_slot])
+		var tailing_entities: Array[BaseEntity] = EntityManager.get_direct_tailing_entities(slots[ref_entity_slot])
 		if tailing_entities.size() == 0:
 			slots[chosen_slot] = null
 			return
