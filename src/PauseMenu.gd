@@ -170,9 +170,10 @@ func on_show() -> void:
 			level_size_label.text += "%.1f%% (%s)" % [level_size_percentage, char_size_text]
 		
 		var has_clipboard_level: = false
-		if DisplayServer.clipboard_has() and DisplayServer.clipboard_get().substr(0, 20).contains(":"):
-			prints("clipboard might be a level: %s..." % DisplayServer.clipboard_get().substr(0, 20))
-			has_clipboard_level = true
+		if DisplayServer.clipboard_has(): 
+			var clipboard_data: = DisplayServer.clipboard_get()
+			if clipboard_data and clipboard_data.substr(0, 20).contains(":") and clipboard_data[0].is_valid_int():
+				has_clipboard_level = true
 		paste_from_clipboard_button.disabled = not has_clipboard_level
 		
 		var map_editor_overlay: Node = Utility.get_map_editor_overlay()

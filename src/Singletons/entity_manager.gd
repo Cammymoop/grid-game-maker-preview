@@ -1006,7 +1006,9 @@ func get_entities_half_at(tile_pos: Vector2i, exclude_entity: Object = null, exc
             continue
         if e == exclude_entity or (exclude_list and e.instance_id in exclude_list):
             continue
-        if e.get_half_moved_position() == tile_pos:
+        if e.is_large() and e.is_half_at(tile_pos):
+            entities_here.append(e)
+        elif e.get_half_moved_position() == tile_pos:
             entities_here.append(e)
     return entities_here
 
@@ -1251,14 +1253,19 @@ func process_half_moves() -> void:
         if not entity.active:
             continue
         entity._pending_half_move = false
-        var from_pos: = entity.get_stationary_position()
-        if not from_pos in half_moved_at_positions:
-            half_moved_at_positions[from_pos] = {"leaving": [], "entering": []}
-        half_moved_at_positions[from_pos]["leaving"].append(entity)
-        var to_pos: = entity.get_moving_position()
-        if not to_pos in half_moved_at_positions:
-            half_moved_at_positions[to_pos] = {"leaving": [], "entering": []}
-        half_moved_at_positions[to_pos]["entering"].append(entity)
+        var frontier: = {}
+        if entity.is_large():
+            frontier = entity.get_current_move_frontier()
+        var from_positions: Array = frontier.from if frontier else [entity.get_stationary_position()]
+        for from_pos in from_positions:
+            if not from_pos in half_moved_at_positions:
+                half_moved_at_positions[from_pos] = {"leaving": [], "entering": []}
+            half_moved_at_positions[from_pos]["leaving"].append(entity)
+        var to_positions: Array = frontier.to if frontier else [entity.get_moving_position()]
+        for to_pos in to_positions:
+            if not to_pos in half_moved_at_positions:
+                half_moved_at_positions[to_pos] = {"leaving": [], "entering": []}
+            half_moved_at_positions[to_pos]["entering"].append(entity)
 
     for hm_pos in half_moved_at_positions:
         half_moved_at_positions[hm_pos]["other_entities"] = get_entities_half_at(hm_pos, null, half_moved_at_positions[hm_pos]["entering"])

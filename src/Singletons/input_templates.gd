@@ -23,6 +23,7 @@ enum InputTypes {
 	BoolChoice,
 	InvertInput,
 	PositionInput,
+	Vector2iInput,
 	Vector2Input,
 	
 	SlotInput,
@@ -62,6 +63,7 @@ var templates: = {
 	InputTypes.InvertInput: preload("res://Scenes/GameEditor/ConditionalEditor/InvertInput.tscn"),
 
 	InputTypes.PositionInput: preload("res://Scenes/GameEditor/ConditionalEditor/vector2i_input.tscn"),
+	InputTypes.Vector2iInput: preload("res://Scenes/GameEditor/ConditionalEditor/vector2i_input.tscn"),
 	InputTypes.Vector2Input: preload("res://Scenes/GameEditor/ConditionalEditor/vector2f_input.tscn"),
 	
 	InputTypes.SlotInput: preload("res://Scenes/GameEditor/ConditionalEditor/slot_input.tscn"),

@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://bh1w4w8i5hk66"]
 
-[ext_resource type="PackedScene" path="res://Scenes/UI/ButtonContainer.tscn" id="1"]
+[ext_resource type="PackedScene" uid="uid://cfehp8ycqn0du" path="res://Scenes/UI/ButtonContainer.tscn" id="1"]
 [ext_resource type="Texture2D" uid="uid://dloowuaoma6he" path="res://assets/img/button_icons/slot_icons/red_diamond.png" id="2"]
 [ext_resource type="Texture2D" uid="uid://culhqx3s8v3hx" path="res://assets/img/button_icons/slot_icons/blue_square.png" id="3"]
 [ext_resource type="Script" uid="uid://b6ywa5nkprkff" path="res://src/GameEditor/SlotSelectorButton.gd" id="4"]
@@ -44,12 +44,13 @@ corner_radius_bottom_left = 8
 shadow_color = Color(0, 0, 0, 0.505882)
 shadow_size = 3
 
-[node name="SlotSelectorButton" type="CenterContainer" unique_id=1264497244]
+[node name="SlotSelectorButton" type="CenterContainer" unique_id=1264497244 node_paths=PackedStringArray("cur_display")]
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 theme = ExtResource("23")
 script = ExtResource("4")
+cur_display = NodePath("ButtonContainer/CenterContainer/CurrentSlotDisplay")
 
 [node name="ButtonContainer" parent="." unique_id=267361990 instance=ExtResource("1")]
 layout_mode = 2

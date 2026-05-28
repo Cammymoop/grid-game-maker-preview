@@ -13,7 +13,7 @@ signal slot_changed(new_slot_id)
 @export var show_categories: Array[String] = ["all"]
 
 @onready var picker = find_child("PopupPicker")
-@onready var cur_display = find_child("CurrentSlotDisplay")
+@export var cur_display: TextureRect
 
 const ANY_SLOT: int = -2
 const NUMBER_VALUE: int = -3

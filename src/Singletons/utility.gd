@@ -819,12 +819,17 @@ func rect2i_iter(rect: Rect2i) -> Array[Vector2i]:
 
 ## If treating a rect2i as inclusive of pos and exclusive of the last row/column, this makes the equivalent abs-sized rect.
 func rect2i_pos_inclusive_abs(rect: Rect2i) -> Rect2i:
+	var new_rect: = rect
 	if rect.size.x < 0:
-		rect.position.x = rect.end.x + 1
+		new_rect.position.x = rect.end.x + 1
 	if rect.size.y < 0:
-		rect.position.y = rect.end.y + 1
-	rect.size = rect.size.abs()
-	return rect
+		new_rect.position.y = rect.end.y + 1
+	new_rect.size = rect.size.abs()
+	return new_rect
+
+func rect2i_from_corners_inclusive(corner_a: Vector2i, corner_b: Vector2i) -> Rect2i:
+	var rect_exclusive: = Rect2i(corner_a, corner_b - corner_a).abs()
+	return Rect2i(rect_exclusive.position, rect_exclusive.size + Vector2i.ONE)
 
 func vec2i_key(vec: Vector2i) -> String:
 	return "%d|%d" % [vec.x, vec.y]
@@ -1055,3 +1060,60 @@ func int_with_commas(value: int) -> String:
 		result = "," + chars.right(3) + result
 		chars = chars.substr(0, chars.length() - 3)
 	return chars + result
+
+func get_rect2i_border_in_facing_direction(rect: Rect2i, direction: int) -> Rect2i:
+	if direction == 0:
+		return Rect2i(rect.position, Vector2i(rect.size.x, 1))
+	elif direction == 3:
+		return Rect2i(rect.position, Vector2i(1, rect.size.y))
+	elif direction == 1:
+		return Rect2i(rect.end.x - 1, rect.position.y, 1, rect.size.y)
+	elif direction == 2:
+		return Rect2i(rect.position.x, rect.end.y - 1, rect.size.x, 1)
+	return Rect2i()
+
+func filter_positions_in_rect(positions: Array[Vector2i], rect: Rect2i) -> Array[Vector2i]:
+	rect = rect.abs()
+	var filtered_positions: Array[Vector2i] = []
+	for pos in positions:
+		if rect.has_point(pos):
+			filtered_positions.append(pos)
+	return filtered_positions
+
+func filter_positions_furthest_in_direction(positions: Array[Vector2i], direction: int) -> Array[Vector2i]:
+	if not positions:
+		return []
+	var check_axis: int = 1 if direction == 0 or direction == 2 else 0
+	var check_sign: int = 1 if direction == 1 or direction == 2 else -1
+	var max_coord: int = positions[0][check_axis] * check_sign
+	for pos in positions:
+		var coord: int = pos[check_axis] * check_sign
+		max_coord = maxi(max_coord, coord)
+	var filtered_positions: Array[Vector2i] = []
+	for pos in positions:
+		if pos[check_axis] * check_sign == max_coord:
+			filtered_positions.append(pos)
+	return filtered_positions
+
+func facing_to_rect_side(facing: int) -> int:
+	if facing == 0:
+		return SIDE_TOP
+	elif facing == 1:
+		return SIDE_RIGHT
+	elif facing == 2:
+		return SIDE_BOTTOM
+	elif facing == 3:
+		return SIDE_LEFT
+	return -1
+
+func rect2i_opposite_inner_corner(rect: Rect2i, corner: Vector2i) -> Vector2i:
+	var clamped_corner: = clamp_point_in_rect2i(corner, rect)
+	var inner_end: = rect.end - Vector2i.ONE
+	var opposite_corner: = rect.position
+	if clamped_corner.x != inner_end.x:
+		opposite_corner.x = inner_end.x
+	if clamped_corner.y != inner_end.y:
+		opposite_corner.y = inner_end.y
+	return opposite_corner
+
+

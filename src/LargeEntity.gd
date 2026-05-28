@@ -48,13 +48,57 @@ func serialize() -> Dictionary:
 	serialized["shape_mask"] = _serialize_shape_mask()
 	return serialized
 
+func shrink_in_direction(in_facing_dir: int, is_relative: bool, amount: int) -> void:
+	set_size_in_direction(in_facing_dir, is_relative, -amount)
+
+func grow_in_direction(in_facing_dir: int, is_relative: bool, amount: int) -> void:
+	set_size_in_direction(in_facing_dir, is_relative, amount)
+
+func set_size_in_direction(in_facing_dir: int, is_relative: bool, amount: int) -> void:
+	var size_axis: = 1 if in_facing_dir == 0 or in_facing_dir == 2 else 0
+	var old_size: = int(entity_size[size_axis])
+	var new_size: = amount
+	if is_relative:
+		new_size = old_size + amount
+	new_size = maxi(new_size, 1)
+
+	if new_size == old_size or in_facing_dir < 0:
+		return
+	
+	var current_rect: = get_pos_rect_at(get_moving_position())
+	var new_rect: = current_rect.grow_side(Utility.facing_to_rect_side(in_facing_dir), new_size - old_size)
+	update_position_and_size(new_rect.position, new_rect.size)
+
 func update_size(new_size: Vector2i) -> void:
+	_update_size(new_size)
+
+func _update_size(new_size: Vector2i) -> void:
 	entity_size = new_size
 	# TODO preserve mask more
 	use_mask = false
 	set_default_mask()
 	if sprite:
 		update_sprite_pos_scale()
+	
+func update_size_by_corners(corner_a: Vector2i, corner_b: Vector2i) -> void:
+	var new_size_rect: = Utility.rect2i_from_corners_inclusive(corner_a, corner_b)
+	#prints("updating size by corners, old size rect:", Rect2i(tile_position, entity_size), "new size rect:", new_size_rect)
+	update_position_and_size(new_size_rect.position, new_size_rect.size)
+
+func update_position_and_size(new_position: Vector2i, new_size: Vector2i) -> void:
+	var delta_pos: = new_position - get_moving_position()
+	if delta_pos == Vector2i.ZERO:
+		update_size(new_size)
+		return
+	if moving:
+		next_tile_pos += delta_pos
+	else:
+		tile_position += delta_pos
+		next_tile_pos = tile_position
+		position = MapManager.tile_to_world_position(tile_position)
+	_update_size(new_size)
+
+
 
 func deserialize(data: Dictionary) -> void:
 	super.deserialize(data)
@@ -69,7 +113,7 @@ func deserialize(data: Dictionary) -> void:
 
 func is_at_multiple(check_positions: Array[Vector2i], include_moving_away: bool = false) -> bool:
 	var my_positions: = get_positions_at(tile_position)
-	var moving_pos_offset: = Vector2i(next_tile_pos - tile_position)
+	var moving_pos_offset: = next_tile_pos - tile_position
 	for check_pos in check_positions:
 		if check_pos in my_positions:
 			return true
@@ -79,12 +123,17 @@ func is_at_multiple(check_positions: Array[Vector2i], include_moving_away: bool 
 
 func is_at(check_position: Vector2i, include_moving_away: bool = false) -> bool:
 	if moving:
-		if is_at_relative(check_position - Vector2i(next_tile_pos)):
+		if is_at_relative(check_position - next_tile_pos):
 			return true
 		elif not include_moving_away:
 			return false
 	
-	return is_at_relative(check_position - Vector2i(tile_position))
+	return is_at_relative(check_position - tile_position)
+
+func is_half_at(check_position: Vector2i) -> bool:
+	if not moving or _pending_half_move:
+		return is_at_relative(check_position - tile_position)
+	return is_at_relative(check_position - next_tile_pos)
 
 func is_at_relative(check_relative: Vector2i) -> bool:
 	if use_mask:
@@ -110,6 +159,9 @@ func get_positions_at(at_tile_position: Vector2i) -> Array[Vector2i]:
 			offset_positions.append(at_tile_position + base_pos)
 	return offset_positions
 
+func get_pos_rect_at(at_tile_position: Vector2i) -> Rect2i:
+	return Rect2i(at_tile_position, Vector2i(entity_size))
+
 func get_auto_frontier(is_teleport: bool, from_tile_pos: Vector2i, to_tile_pos: Vector2i, in_facing_dir: int) -> Dictionary[String, Array]:
 	if is_teleport:
 		return get_teleport_frontier(from_tile_pos, to_tile_pos)
@@ -121,6 +173,11 @@ func get_frontier(in_facing_dir: int) -> Dictionary[String, Array]:
 
 func get_teleport_frontier(from_tile_pos: Vector2i, to_tile_pos: Vector2i) -> Dictionary[String, Array]:
 	return _get_frontier(from_tile_pos, to_tile_pos)
+
+func get_current_move_frontier() -> Dictionary[String, Array]:
+	if not moving:
+		return {}
+	return _get_frontier(tile_position, next_tile_pos)
 
 func _get_frontier(from_tile_pos: Vector2i, to_tile_pos: Vector2i) -> Dictionary[String, Array]:
 	var from_positions: = get_positions_at(from_tile_pos)
@@ -142,7 +199,6 @@ func is_square_aspect() -> bool:
 func start_move(in_facing_dir: int, change_visual_facing: bool = true, group_move: bool = false, is_revertable: bool = false) -> bool:
 	if moving or get_steps_per_tile() <= 0:
 		return false
-	prints("larg entity start move", tile_position)
 	if change_visual_facing and visual_turn_on_move and is_square_aspect():
 		set_facing(in_facing_dir)
 	set_move_facing(in_facing_dir)
@@ -192,7 +248,6 @@ func _start_move_common(to_pos: Vector2i, is_group_move: bool, is_teleport: bool
 	
 	var frontier: Dictionary[String, Array] = get_auto_frontier(is_teleport, tile_position, to_pos, move_facing)
 	var result: = MapManager.attempt_move(self, frontier.from, frontier.to, is_group_move)
-	prints("large entity frontier", frontier)
 	
 	if result:
 		moving = true

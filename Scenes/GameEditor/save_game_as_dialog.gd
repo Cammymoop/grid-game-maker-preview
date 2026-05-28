@@ -44,7 +44,7 @@ func save_requested() -> void:
 	if GameManager.is_name_overwriting(game_name_input.text):
 		var new_popup: = ConfirmationDialog.new()
 		new_popup.title = "Do you want to override"
-		new_popup.message = "A game with this directory name already exists.\nDo you want to delete it (including all assets and levels) and save over it?"
+		new_popup.dialog_text = "A game with this directory name already exists.\nDo you want to delete it (including all assets and levels) and save over it?"
 		new_popup.confirmed.connect(_do_overwrite_save)
 		new_popup.popup_exclusive_centered(self)
 	else:

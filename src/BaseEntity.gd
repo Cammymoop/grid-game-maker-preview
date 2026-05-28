@@ -939,6 +939,11 @@ func is_at_multiple(check_positions: Array, include_moving_away: bool = false) -
 		return true
 	return false
 
+func is_half_at(check_position: Vector2i) -> bool:
+	if not moving or _pending_half_move:
+		return check_position == tile_position
+	return check_position == next_tile_pos
+
 func add_deferred_signal(signaling_entity: BaseEntity, args: Array, signal_name: String) -> void:
 	deferred_signals.append({
 		"signaling_entity": signaling_entity.instance_id,

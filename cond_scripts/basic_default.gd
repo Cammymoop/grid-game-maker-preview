@@ -381,6 +381,44 @@ func cmd_select_first_entity_in_direction(slots: Dictionary, chosen_slot: int, s
 	
 	slots[chosen_slot] = null
 
+func desc_select_position_of_first_tile_or_entity_in_direction() -> String:
+	return "pos|<= Select the position [before:BoolChoice:false,before,where] the first entity or tile exists\n" \
+			+ "in a direct line in this direction [compl_dir:DirectionInput:1]\n" \
+			+ "from [single_pos_slot:SlotInput:pos,entity] with a [truthy:BoolChoice:true,true or non-zero,false or zero] [prop_name:PropertyInput] property"
+func cmd_select_position_of_first_tile_or_entity_in_direction(slots: Dictionary, chosen_slot: int, before: bool, single_pos_slot: int, compl_dir: Dictionary, truthy: bool, prop_name: String) -> void:
+	if not Commands.slot_is_positions(chosen_slot) or not Commands.slot_has_position(single_pos_slot):
+		push_error("Invalid slots to select position of first tile or entity in direction: %s, %s" % [chosen_slot, single_pos_slot])
+		return
+	var origin_pos: Vector2i = _single_tile_position_from_slot(slots, single_pos_slot)
+	var delta: = Utility.facing_vector_i(resolve_complex_direction(compl_dir, slots))
+	
+	var map_bounds: = MapManager.get_map_size().grow(5)
+	
+	prints("finding first tile or entity in direction", compl_dir, "from", single_pos_slot, "before", before, "truthy", truthy, "prop_name", prop_name)
+	prints("origin pos", origin_pos)
+	var cur_pos: = origin_pos
+	for i in 10000:
+		var next_pos: = cur_pos + delta
+		if MapManager.is_empty_blocking_at(next_pos) or not map_bounds.has_point(next_pos):
+			prints("blocked by empty or oob", next_pos)
+			slots[chosen_slot] = [cur_pos]
+			return
+		if MapManager.conditional_tile_event([next_pos], prop_name, null, false) == truthy:
+			prints("blocked by tile property", next_pos)
+			slots[chosen_slot] = [cur_pos if before else next_pos]
+			return
+		var entities_here: = EntityManager.get_entities_half_at(next_pos)
+		var stopped: = false
+		for e in entities_here:
+			if EntityManager.get_entity_prop_is_truthy(e, prop_name, false) == truthy:
+				prints("blocked by entity property on entity", e.entity_name, next_pos)
+				stopped = true
+		if stopped:
+			slots[chosen_slot] = [cur_pos if before else next_pos]
+			return
+		cur_pos = next_pos
+	slots[chosen_slot] = []
+
 
 func desc_select_number() -> String:
 	return "number,string|<= Select the number [complex_num:ComplexScalarInput]"
@@ -863,7 +901,6 @@ func cmd_select_created_entity(slots: Dictionary, chosen_slot: int, entity_name:
 	var pos: Vector2i = get_single_position_from_slot(pos_slot, slots)
 	var facing: int = resolve_complex_direction(compl_dir, slots)
 	var created: = _create_entity_at(e_id, pos, facing, is_moving)
-	prints("the created entity instance id is", created.instance_id)
 	slots[chosen_slot] = created
 
 
@@ -1683,3 +1720,169 @@ func cmd_select_positions_of_entity(slots: Dictionary, chosen_slot: int, entity_
 		slots[chosen_slot] = [slots[entity_slot].get_moving_position()]
 	else:
 		slots[chosen_slot] = slots[entity_slot].get_positions_at(slots[entity_slot].get_moving_position())
+
+func desc_filter_select_furthest_positions() -> String:
+	return "pos|<= Filter the positions in [from_pos_slot:SlotInput:pos] to those that are the furthest\n" \
+			+ "in the direction [compl_dir:DirectionInput:1]"
+func cmd_filter_select_furthest_positions(slots: Dictionary, chosen_slot: int, from_pos_slot: int, compl_dir: Dictionary) -> void:
+	if not Commands.slot_is_positions(chosen_slot) or not Commands.slot_is_positions(from_pos_slot):
+		push_error("Invalid slots to filter select furthest positions: %s and %s" % [chosen_slot, from_pos_slot])
+		return
+	var dir_val: int = resolve_complex_direction(compl_dir, slots)
+	if not slots[from_pos_slot]:
+		var map_bounds: = MapManager.get_map_size()
+		var border_rect: = Utility.get_rect2i_border_in_facing_direction(map_bounds, dir_val)
+		slots[chosen_slot] = Utility.filter_positions_in_rect(slots[from_pos_slot], border_rect)
+		return
+	else:
+		slots[chosen_slot] = Utility.filter_positions_furthest_in_direction(slots[from_pos_slot], dir_val)
+
+func desc_set_large_entity_size() -> String:
+	return "entity|Set the LARGE size of the entity to [size:Vector2iInput]"
+func cmd_set_large_entity_size(slots: Dictionary, chosen_slot: int, size: Vector2i) -> void:
+	if not Commands.slot_is_entity(chosen_slot):
+		push_error("Invalid slot or empty slot to set large entity size: %s" % chosen_slot)
+		return
+	if not slots[chosen_slot]:
+		return
+	slots[chosen_slot].update_size(size)
+
+func desc_set_large_entity_width() -> String:
+	return "entity|Set the LARGE width to [width:number]"
+func cmd_set_large_entity_width(slots: Dictionary, chosen_slot: int, width: int) -> void:
+	if not Commands.slot_is_entity(chosen_slot):
+		push_error("Invalid slot or empty slot to set large entity width and height: %s" % chosen_slot)
+		return
+	if not slots[chosen_slot] or not slots[chosen_slot] is LargeEntity:
+		return
+	var height: int = slots[chosen_slot].entity_size.y
+	slots[chosen_slot].update_size(Vector2i(width, height))
+
+func desc_select_large_entity_width() -> String:
+	return "number|<= Select the LARGE width of the entity"
+func cmd_select_large_entity_width(slots: Dictionary, chosen_slot: int) -> void:
+	if not Commands.slot_is_entity(chosen_slot):
+		push_error("Invalid slot or empty slot to select large entity width: %s" % chosen_slot)
+		return
+	if not slots[chosen_slot]:
+		set_value_slot_as_number(slots, chosen_slot, 0)
+		return
+	if not slots[chosen_slot].is_large():
+		set_value_slot_as_number(slots, chosen_slot, 1)
+		return
+	set_value_slot_as_number(slots, chosen_slot, slots[chosen_slot].entity_size.x)
+
+func desc_select_large_entity_height() -> String:
+	return "number|<= Select the LARGE height of the entity"
+func cmd_select_large_entity_height(slots: Dictionary, chosen_slot: int) -> void:
+	if not Commands.slot_is_entity(chosen_slot):
+		push_error("Invalid slot or empty slot to select large entity height: %s" % chosen_slot)
+		return
+	if not slots[chosen_slot]:
+		set_value_slot_as_number(slots, chosen_slot, 0)
+		return
+	if not slots[chosen_slot].is_large():
+		set_value_slot_as_number(slots, chosen_slot, 1)
+		return	
+	set_value_slot_as_number(slots, chosen_slot, slots[chosen_slot].entity_size.y)
+
+func desc_stretch_a_large_entity_to_position() -> String:
+	return "entity|Stretch the entity's LARGE size so that it [inclusive:BoolChoice:true,reaches,reaches up to] [target_pos_slot:SlotInput:pos,entity]\n" \
+			+ "(don't turn the entity)"
+func cmd_stretch_a_large_entity_to_position(slots: Dictionary, chosen_slot: int, inclusive: bool, target_pos_slot: int) -> void:
+	if not Commands.slot_is_entity(chosen_slot) or not Commands.slot_has_position(target_pos_slot):
+		push_error("Invalid slots to stretch a large entity to position: %s, %s and %s" % [chosen_slot, target_pos_slot])
+		return
+	var the_entity: = slots[chosen_slot] as LargeEntity
+	if not the_entity:
+		prints("no entity in slot or it's not a large entity")
+		return
+	if not _slot_has_single_tile_position(slots, target_pos_slot):
+		prints("no single tile position in slot", target_pos_slot)
+		return
+	var target_pos: Vector2i = get_single_position_from_slot(target_pos_slot, slots)
+	var original_target_pos: = target_pos
+	var entity_pos: Vector2i = the_entity.get_moving_position()
+	if the_entity.is_large():
+		var pos_rect: = the_entity.get_pos_rect_at(entity_pos)
+		if not pos_rect.has_point(target_pos):
+			var target_rect: = Rect2i(target_pos, Vector2i.ONE)
+			var combined: = pos_rect.merge(target_rect)
+			entity_pos = Utility.rect2i_opposite_inner_corner(combined, target_pos)
+	
+	# pull target inward if not inclusive
+	var inclusive_size: Vector2i = Vector2i(entity_pos - target_pos).abs()
+	if not inclusive and (inclusive_size.x > 1 or inclusive_size.y > 1):
+		if inclusive_size.x > 1:
+			target_pos.x += sign(entity_pos.x - target_pos.x)
+		if inclusive_size.y > 1:
+			target_pos.y += sign(entity_pos.y - target_pos.y)
+	
+	prints("before stretching", the_entity.get_moving_position(), Vector2i(the_entity.entity_size), "inclusive:", inclusive, "orig target:", original_target_pos)
+	prints("attempting to stretch", the_entity.entity_name, the_entity.instance_id, "corners:", entity_pos, target_pos)
+	the_entity.update_size_by_corners(entity_pos, target_pos)
+
+func desc_shrink_entity_in_direction_by() -> String:
+	return "entity|Shrink the entity's LARGE size from the direction [compl_dir:DirectionInput:1] by [amount:ComplexScalarInput:int]"
+func cmd_shrink_entity_in_direction(slots: Dictionary, chosen_slot: int, compl_dir: Dictionary, amount: Dictionary) -> void:
+	if not Commands.slot_is_entity(chosen_slot):
+		push_error("Invalid slot or empty slot to shrink entity in direction: %s" % chosen_slot)
+		return
+	var the_entity: = slots[chosen_slot] as LargeEntity
+	if not the_entity:
+		return
+	the_entity.shrink_in_direction(resolve_complex_direction(compl_dir, slots), true, int(resolve_complex_scalar(amount, slots)))
+
+func desc_grow_entity_in_direction_by() -> String:
+	return "entity|Grow the entity's LARGE size in the direction [compl_dir:DirectionInput:1] by [amount:ComplexScalarInput:int]"
+func cmd_grow_entity_in_direction(slots: Dictionary, chosen_slot: int, compl_dir: Dictionary, amount: Dictionary) -> void:
+	if not Commands.slot_is_entity(chosen_slot):
+		push_error("Invalid slot or empty slot to grow entity in direction: %s" % chosen_slot)
+		return
+	var the_entity: = slots[chosen_slot] as LargeEntity
+	if not the_entity:
+		return
+	the_entity.grow_in_direction(resolve_complex_direction(compl_dir, slots), true, int(resolve_complex_scalar(amount, slots)))
+
+
+func desc_set_large_entity_size_in_direction() -> String:
+	return "entity|Set the LARGE width/height in the direction [compl_dir:DirectionInput:1] to [new_size:ComplexScalarInput:int]"
+func cmd_set_large_entity_size_in_direction(slots: Dictionary, chosen_slot: int, compl_dir: Dictionary, new_size: Dictionary) -> void:
+	var dir_value: = resolve_complex_direction(compl_dir, slots)
+	_set_entity_slot_size_in_dir(slots, chosen_slot, dir_value, int(resolve_complex_scalar(new_size, slots)))
+
+func desc_set_large_entity_height_in_direction() -> String:
+	return "entity|Set the LARGE height in the direction [compl_dir:DirectionInput:1] to [new_height:ComplexScalarInput:int]"
+func cmd_set_large_entity_height_in_direction(slots: Dictionary, chosen_slot: int, compl_dir: Dictionary, new_height: Dictionary) -> void:
+	var the_dir: = resolve_complex_direction(compl_dir, slots)
+	if the_dir != 0 and the_dir != 2:
+		return
+	_set_entity_slot_size_in_dir(slots, chosen_slot, the_dir, int(resolve_complex_scalar(new_height, slots)))
+
+func desc_set_large_entity_width_in_direction() -> String:
+	return "entity|Set the LARGE width in the direction [compl_dir:DirectionInput:1] to [new_width:ComplexScalarInput:int]"
+func cmd_set_large_entity_width_in_direction(slots: Dictionary, chosen_slot: int, compl_dir: Dictionary, new_width: Dictionary) -> void:
+	var the_dir: = resolve_complex_direction(compl_dir, slots)
+	if the_dir != 1 and the_dir != 3:
+		return
+	_set_entity_slot_size_in_dir(slots, chosen_slot, the_dir, int(resolve_complex_scalar(new_width, slots)))
+
+func _set_entity_slot_size_in_dir(slots: Dictionary, chosen_slot: int, dir_value: int, new_size: int) -> void:
+	if not Commands.slot_is_entity(chosen_slot):
+		push_error("Invalid slot or empty slot to set large entity height: %s" % chosen_slot)
+		return
+	var the_entity: = slots[chosen_slot] as LargeEntity
+	if not the_entity:
+		return
+	the_entity.set_size_in_direction(dir_value, false, new_size)
+
+
+func desc_set_large_entity_width_height() -> String:
+	return "entity|Set the entity's LARGE width to [width:ComplexScalarInput:int] and height to [height:ComplexScalarInput:int]"
+func cmd_set_large_entity_width_height(slots: Dictionary, chosen_slot: int, width: int, height: int) -> void:
+	if not Commands.slot_is_entity(chosen_slot):
+		push_error("Invalid slot or empty slot to set large entity width and height: %s" % chosen_slot)
+		return
+	if not slots[chosen_slot] or not slots[chosen_slot] is LargeEntity:
+		return
+	slots[chosen_slot].update_size(Vector2i(width, height))
