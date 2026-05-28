@@ -2,10 +2,13 @@ extends Control
 
 signal entity_props_edited(entity: BaseEntity)
 signal entity_local_props_reset(entity: BaseEntity)
+signal edited_something()
 signal closing()
 signal cancel_popups()
 
 const ConditionalEditor = preload("res://src/GameEditor/ConditionalEditor/ConditionalEditor.gd")
+
+const Vector2iInput = preload("res://src/GameEditor/ConditionalEditor/vector2i_input.gd")
 
 const PropertyEditList = preload("res://Scenes/GameEditor/property_edit_list.gd")
 const PropertyEditListItem = preload("res://Scenes/GameEditor/property_edit_list_item.gd")
@@ -26,6 +29,9 @@ var conditional_editor_scn: = preload("res://Scenes/GameEditor/ConditionalEditor
 
 @export var reset_local_props_button: Button
 
+@export var large_entity_options: Control
+@export var entity_size_input: Vector2iInput
+
 var non_expanded_v_size_flags: int = Control.SIZE_SHRINK_CENTER
 var prop_list_default_min_size: Vector2 = Vector2.ZERO
 var edited_entity: BaseEntity = null
@@ -35,6 +41,9 @@ var edit_entity_pulse_period: float = 1.15
 var close_on_focus_lost: = true
 
 func _ready() -> void:
+    large_entity_options.hide()
+    entity_size_input.value_changed.connect(on_entity_size_input_changed)
+
     reset_local_props_button.pressed.connect(on_reset_local_props_button_pressed)
 
     property_edit_list.request_conditional_editor.connect(on_conditional_editor_requested)
@@ -78,6 +87,7 @@ func on_reset_local_props_button_pressed() -> void:
     entity_local_props_reset.emit(edited_entity)
 
 func on_entity_instance_props_edited(entity: BaseEntity) -> void:
+    edited_something.emit()
     entity_props_edited.emit(entity)
 
 func open_instance_editor(entity: BaseEntity) -> void:
@@ -86,6 +96,10 @@ func open_instance_editor(entity: BaseEntity) -> void:
     unedit_entity()
     show()
     edited_entity = entity
+    large_entity_options.visible = entity is LargeEntity
+    if entity is LargeEntity:
+        entity_size_input.set_value(Vector2i(entity.entity_size))
+
     if entity_active_toggle:
         entity_active_toggle.set_pressed_no_signal(entity.active)
     var title_label: = find_child("TitleLabel") as Label
@@ -169,6 +183,7 @@ func on_visibility_changed() -> void:
 func on_entity_active_toggled(active: bool) -> void:
     if edited_entity:
         edited_entity.set_active(active)
+    edited_something.emit()
 
 func on_gui_focus_changed(to_focus_owner: Control) -> void:
     if not visible or not is_visible_in_tree():
@@ -201,3 +216,11 @@ func show_conditional_editor(property_name: String, current_value: Variant, edit
 
 func on_save_conditional_prop(new_conditional_value: Variant, prop_name: String) -> void:
     property_edit_list.set_prop_conditional_value(prop_name, new_conditional_value)
+
+func on_entity_size_input_changed(new_size: Vector2i) -> void:
+    if not edited_entity or not edited_entity is LargeEntity:
+        return
+    new_size = new_size.maxi(1)
+    entity_size_input.set_value(new_size)
+    edited_entity.update_size(new_size)
+    edited_something.emit()

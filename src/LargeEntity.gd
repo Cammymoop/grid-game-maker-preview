@@ -48,6 +48,14 @@ func serialize() -> Dictionary:
 	serialized["shape_mask"] = _serialize_shape_mask()
 	return serialized
 
+func update_size(new_size: Vector2i) -> void:
+	entity_size = new_size
+	# TODO preserve mask more
+	use_mask = false
+	set_default_mask()
+	if sprite:
+		update_sprite_pos_scale()
+
 func deserialize(data: Dictionary) -> void:
 	super.deserialize(data)
 	entity_size = Utility.get_vector2_from_arr(data.get("entity_size", [2, 2]))

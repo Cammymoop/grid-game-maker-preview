@@ -3,6 +3,7 @@
 [ext_resource type="Theme" uid="uid://dmcr4fbsqe2fl" path="res://assets/ui/entity_instance_editor_theme.tres" id="1_b60re"]
 [ext_resource type="Script" uid="uid://buofscg2gv6nf" path="res://Scenes/GameEditor/entity_instance_editor.gd" id="1_hn6w8"]
 [ext_resource type="PackedScene" uid="uid://cxrfq7ld3ttmn" path="res://Scenes/GameEditor/property_edit_list.tscn" id="3_b60re"]
+[ext_resource type="PackedScene" uid="uid://yskjico8qrbl" path="res://Scenes/GameEditor/ConditionalEditor/vector2i_input.tscn" id="3_hn6w8"]
 [ext_resource type="Texture2D" uid="uid://cv8l7ymc05wg5" path="res://assets/img/button_icons/plus.png" id="6_57ay7"]
 [ext_resource type="PackedScene" uid="uid://cemds60k8ytal" path="res://Scenes/UI/icon_button.tscn" id="6_hn6w8"]
 
@@ -40,7 +41,7 @@ corner_radius_bottom_right = 3
 corner_radius_bottom_left = 3
 corner_detail = 7
 
-[node name="EntityInstanceEditor" type="PanelContainer" unique_id=1898877842 node_paths=PackedStringArray("property_edit_list", "popup_holder", "entity_active_toggle", "add_property_button", "reset_local_props_button")]
+[node name="EntityInstanceEditor" type="PanelContainer" unique_id=1898877842 node_paths=PackedStringArray("property_edit_list", "popup_holder", "entity_active_toggle", "add_property_button", "reset_local_props_button", "large_entity_options", "entity_size_input")]
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -55,6 +56,8 @@ popup_holder = NodePath("VBoxContainer2/CenterContainer/Control/PopupHolder")
 entity_active_toggle = NodePath("VBoxContainer/VBoxContainer/HBoxContainer/HBoxContainer/EntityActiveToggle")
 add_property_button = NodePath("VBoxContainer/VBoxContainer/HBoxContainer4/VBoxContainer/AddPropertyButton")
 reset_local_props_button = NodePath("VBoxContainer/VBoxContainer/HBoxContainer/HBoxContainer2/ResetLocalButton")
+large_entity_options = NodePath("VBoxContainer/VBoxContainer/LargeEntityOptions")
+entity_size_input = NodePath("VBoxContainer/VBoxContainer/LargeEntityOptions/HBoxContainer/SizeInput")
 
 [node name="VBoxContainer" type="VBoxContainer" parent="." unique_id=520120316]
 layout_mode = 2
@@ -106,6 +109,22 @@ layout_mode = 2
 size_flags_vertical = 4
 theme_override_font_sizes/font_size = 14
 text = "Reset all overriden"
+
+[node name="LargeEntityOptions" type="HBoxContainer" parent="VBoxContainer/VBoxContainer" unique_id=1511988373]
+layout_mode = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer/VBoxContainer/LargeEntityOptions" unique_id=378046044]
+layout_mode = 2
+size_flags_horizontal = 3
+alignment = 1
+
+[node name="Label" type="Label" parent="VBoxContainer/VBoxContainer/LargeEntityOptions/HBoxContainer" unique_id=485245915]
+layout_mode = 2
+text = "Size:"
+
+[node name="SizeInput" parent="VBoxContainer/VBoxContainer/LargeEntityOptions/HBoxContainer" unique_id=2047234622 instance=ExtResource("3_hn6w8")]
+layout_mode = 2
+starting_value = Vector2i(1, 1)
 
 [node name="HBoxContainer4" type="HBoxContainer" parent="VBoxContainer/VBoxContainer" unique_id=215106456]
 layout_mode = 2

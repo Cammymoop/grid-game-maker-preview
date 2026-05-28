@@ -862,3 +862,6 @@ func update_text_preview_style() -> void:
 func set_placing_text_offset(new_offset: Vector2) -> void:
 	_placing_text_offset = new_offset
 	text_preview.position = _placing_text_offset
+
+func on_instance_editor_edited_something() -> void:
+	has_edited_something = true
