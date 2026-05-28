@@ -43,17 +43,21 @@ func _deserialize_shape_mask(serialized_shape_mask: Dictionary) -> Dictionary[Ve
 func serialize() -> Dictionary:
 	var serialized = super.serialize()
 	serialized["can_be_large"] = true
+	serialized["entity_size"] = Utility.get_arr_from_vector2(entity_size)
 	serialized["use_mask"] = use_mask
 	serialized["shape_mask"] = _serialize_shape_mask()
 	return serialized
 
 func deserialize(data: Dictionary) -> void:
 	super.deserialize(data)
+	entity_size = Utility.get_vector2_from_arr(data.get("entity_size", [2, 2]))
 	use_mask = data.get("use_mask", false)
-	if shape_mask:
+	if use_mask:
 		shape_mask = _deserialize_shape_mask(data.get("shape_mask", {}))
 	else:
 		set_default_mask()
+	if sprite:
+		update_sprite_pos_scale()
 
 func is_at_multiple(check_positions: Array[Vector2i], include_moving_away: bool = false) -> bool:
 	var my_positions: = get_positions_at(tile_position)
@@ -130,6 +134,7 @@ func is_square_aspect() -> bool:
 func start_move(in_facing_dir: int, change_visual_facing: bool = true, group_move: bool = false, is_revertable: bool = false) -> bool:
 	if moving or get_steps_per_tile() <= 0:
 		return false
+	prints("larg entity start move", tile_position)
 	if change_visual_facing and visual_turn_on_move and is_square_aspect():
 		set_facing(in_facing_dir)
 	set_move_facing(in_facing_dir)
@@ -179,9 +184,11 @@ func _start_move_common(to_pos: Vector2i, is_group_move: bool, is_teleport: bool
 	
 	var frontier: Dictionary[String, Array] = get_auto_frontier(is_teleport, tile_position, to_pos, move_facing)
 	var result: = MapManager.attempt_move(self, frontier.from, frontier.to, is_group_move)
+	prints("large entity frontier", frontier)
 	
 	if result:
 		moving = true
+		_from_tile_pos = tile_position
 		next_tile_pos = to_pos
 		invalidate_cached_at_position(frontier.from)
 		_pending_half_move = true
@@ -235,7 +242,7 @@ func can_i_teleport_to(from_pos: Vector2i, to_pos: Vector2i, with_facing: int = 
 	return result
 
 func process_finish_move() -> void:
-	var frontier = get_frontier(move_facing)
+	var frontier = _get_frontier(_from_tile_pos, next_tile_pos)
 	MapManager.finish_move(self, frontier.to)
 
 func is_large() -> bool:

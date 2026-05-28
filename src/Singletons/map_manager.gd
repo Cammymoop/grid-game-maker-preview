@@ -942,13 +942,13 @@ func finish_move(moving_entity, onto_positions: Array) -> void:
     if ifmot and ifmot.is_conditional():
         ifmot.resolve(moving_entity, null, onto_positions)
     
-    resolve_tiles_events(onto_positions, "finish_move_onto_tile", moving_entity)
+    resolve_tile_individual_events(onto_positions, "finish_move_onto_tile", moving_entity)
     
     check_and_apply_terrain_sprite_modifier(moving_entity, onto_positions)
 
 
 func check_and_apply_terrain_sprite_modifier(entity: BaseEntity, tile_positions: Array) -> void:
-    if not entity.active:
+    if not entity.active or entity.is_large():
         return
     var tile_indices_to_check: = tiles_with_sprite_modifiers.duplicate()
     for ti in entity.terrain_sprite_modifiers:
@@ -1186,6 +1186,11 @@ func entity_idle_actions(entity: BaseEntity) -> void:
 func _check_and_remove_terrain_spr_mod_for_moving(moving_entity: BaseEntity, to_position: Vector2i) -> void:
     if not moving_entity.terrain_sprite_modifiers:
         return
+    elif moving_entity.is_large():
+        for terrain_mod_tile_id in moving_entity.terrain_sprite_modifiers:
+            var terrain_mod: Dictionary = tile_defs[terrain_mod_tile_id].get("terrain_sprite_modifier", {})
+            if terrain_mod:
+                moving_entity.remove_sprite_modifier(terrain_mod)
     
     var cur_terrain_mods: = moving_entity.terrain_sprite_modifiers.duplicate()
     

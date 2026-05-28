@@ -50,6 +50,7 @@ var controller_name: String = ""
 
 var tile_position: = Vector2i(0, 0)
 var next_tile_pos: = Vector2i(0, 0)
+var _from_tile_pos: = Vector2i(0, 0)
 
 var entity_index: int = 0
 var entity_name: String = ""
@@ -210,6 +211,7 @@ func serialize() -> Dictionary:
 		important_stuff['steps_remaining'] = steps_remaining
 		important_stuff['_this_move_steps'] = _this_move_steps
 		important_stuff['_this_move_is_teleport'] = _this_move_is_teleport
+		important_stuff['_from_tile_pos'] = Utility.get_arr_from_vector2(_from_tile_pos)
 	
 	if tailing and is_instance_valid(tailing):
 		important_stuff['tailing'] = tailing.instance_id
@@ -262,14 +264,16 @@ func deserialize(data: Dictionary) -> void:
 	moving = data['moving']
 	_pending_half_move = data.get('_pending_half_move', false)
 	position = Utility.get_vector2_from_arr(data['position'])
-	tile_position = Utility.get_vector2_from_arr(data['tile_position'])
-	next_tile_pos = Utility.get_vector2_from_arr(data['next_tile_pos'])
+	tile_position = Utility.get_vector2i_from_arr(data['tile_position'])
+	next_tile_pos = Utility.get_vector2i_from_arr(data['next_tile_pos'])
 	if "steps_remaining" in data:
 		steps_remaining = int(data["steps_remaining"])
 	if "_this_move_steps" in data:
 		_this_move_steps = int(data["_this_move_steps"])
 	if "_this_move_is_teleport" in data:
 		_this_move_is_teleport = data['_this_move_is_teleport']
+	if "_from_tile_pos" in data:
+		_from_tile_pos = Utility.get_vector2i_from_arr(data['_from_tile_pos'])
 	
 	if 'friend_instance_id' in data:
 		friend_instance_id = int(data['friend_instance_id'])
@@ -564,6 +568,7 @@ func _start_move_common(to_tile_pos: Vector2i, is_group_move: bool, is_teleport:
 
 	if result:
 		moving = true
+		_from_tile_pos = tile_position
 		next_tile_pos = to_tile_pos
 		invalidate_cached_at_position([tile_position])
 		_pending_half_move = true

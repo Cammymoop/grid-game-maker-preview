@@ -691,6 +691,7 @@ func create_entity(entity_index: int, tile_position: Vector2i, facing: int = 0, 
     return entity
 
 func setup_new_entity_size(entity: BaseEntity) -> void:
+    prints("setup_new_entity_size", entity)
     if not entity is LargeEntity:
         return
     

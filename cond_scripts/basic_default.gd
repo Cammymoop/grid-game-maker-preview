@@ -469,7 +469,7 @@ func desc_select_random_direction() -> String:
 	return "int|<= Select a random [dir_options:RandomDirectionOptionsInput] direction [exclude_dir:ExcludeDirectionInput]"
 func cmd_select_random_direction(slots: Dictionary, chosen_slot: int, dir_options: String = "any", exclude_dir: Dictionary = {}) -> void:
 	var choose_from: Array = rand_dir_options.get(dir_options, [0])
-	if exclude_dir.get("type", "") != "ignore":
+	if exclude_dir.get("type", "ignore") != "ignore":
 		var exclude_dir_val: int = resolve_complex_direction(exclude_dir, slots)
 		var is_exclude: bool = exclude_dir.get("is_exclude", true)
 		if is_exclude and exclude_dir_val in choose_from:
@@ -546,6 +546,14 @@ func cmd_if_property_value(slots: Dictionary, chosen_slot: int, property_name: S
 		result = MapManager.check_multiple_pos_for_property_bool(slots[chosen_slot], slots[Slot.RED], property_name, is_truthy)
 	#prints("if prop", property_name, "is", str(is_truthy), "prop val is: ", result)
 	return result if is_truthy else not result
+
+func desc_if_all_tiles_property_value() -> String:
+	return "pos|If all the tiles here have a [is_truthy:BoolChoice:true,true or non-zero,false or zero] [property_name:PropertyInput] property"
+func cmd_if_all_tiles_property_value(slots: Dictionary, chosen_slot: int, property_name: String, is_truthy: bool) -> bool:
+	if not Commands.slot_is_positions(chosen_slot):
+		push_error("Slot for if all tiles property value is not a positions slot: %s" % chosen_slot)
+		return false
+	return MapManager.check_multiple_pos_for_property_bool(slots[chosen_slot], slots[Slot.RED], property_name, is_truthy, true)
 
 func desc_c_is_named() -> String:
 	return "entity|If the entity [invert:InvertInput:is,is not] named [check_name:EntityNameInput:1]"
@@ -691,9 +699,9 @@ func cmd_c_is_moving(slots: Dictionary, chosen_slot: int, invert: bool, directio
 
 func desc_a_die() -> Dictionary:
 	return {
-		"display_name": "Destroy entity (die). Uses the default dying efect for this entity type",
+		"display_name": "Destroy entity (die)",
 		"slot_type_hint": "entity",
-		"template_text": "The entity dies now",
+		"template_text": "The entity dies now. (Uses the default dying efect for this entity type)",
 	}
 func cmd_a_die(slots: Dictionary, chosen_slot: int) -> void:
 	if Commands.slot_is_entity(chosen_slot) and slots[chosen_slot]:
@@ -1661,3 +1669,17 @@ func cmd_if_entity_is_large(slots: Dictionary, chosen_slot: int) -> bool:
 	if not slots[chosen_slot]:
 		return false
 	return slots[chosen_slot].is_large()
+
+func desc_select_positions_of_entity() -> String:
+	return "pos|<= Select all positions currently occupied by this entity [entity_slot:SlotInput:entity]"
+func cmd_select_positions_of_entity(slots: Dictionary, chosen_slot: int, entity_slot: int) -> void:
+	if not Commands.slot_is_entity(entity_slot) or not Commands.slot_is_positions(chosen_slot):
+		push_error("Invalid slots to select positions of entity: %s and %s" % [chosen_slot, entity_slot])
+		return
+	if not slots[entity_slot]:
+		slots[chosen_slot] = []
+		return
+	if not slots[entity_slot].is_large():
+		slots[chosen_slot] = [slots[entity_slot].get_moving_position()]
+	else:
+		slots[chosen_slot] = slots[entity_slot].get_positions_at(slots[entity_slot].get_moving_position())
