@@ -55,6 +55,8 @@ var interp_facing_timer: float = 0.0
 
 var layer_root: Node2D = null
 
+var _moving: bool = false
+
 var rotation_prop: float = 0:
     get:
         return current_rotation
@@ -89,6 +91,8 @@ func sprite_process(delta_time: float) -> void:
         _local_prop_updated = false
         if parent_entity:
             on_local_prop_update_frame(parent_entity)
+    if parent_entity and parent_entity.moving != _moving:
+        update_layers_moving_visibility()
     if interpolate_facing_enabled:
         if interp_facing_timer > 0:
             interp_facing_timer = maxf(0, interp_facing_timer - delta_time)
@@ -98,6 +102,14 @@ func sprite_process(delta_time: float) -> void:
             var interp_angle: float = lerp_angle(_facing_rotation, to_angle, eased_progress)
             set_sprite_rotation(interp_angle)
     process_animated_modifiers(delta_time)
+
+func update_layers_moving_visibility() -> void:
+    _moving = parent_entity.moving
+    for layer_node in layer_root.get_children():
+        if not layer_node.has_meta("show_when_moving"):
+            continue
+        layer_node.set_meta("moving_visible", _moving == layer_node.get_meta("show_when_moving"))
+        update_layer_visible(layer_node)
 
 func process_animated_modifiers(delta_time: float) -> void:
     var expired_modifiers: Array[String]
@@ -226,6 +238,8 @@ func refresh_layers() -> void:
     else:
         for layer_index in layers.size():
             create_and_add_nodes_for_layer(layers[layer_index], layer_index)
+    if parent_entity:
+        update_layers_moving_visibility()
     if is_inside_tree():
         on_local_prop_update_frame(get_parent() as BaseEntity)
 
@@ -457,6 +471,9 @@ func create_and_add_nodes_for_layer(layer_info: Dictionary, layer_index: int) ->
         if GameManager.cur_scene == "Play":
             check_register_cam_focus_updates()
     
+    if layer_info.get("when_moving", "ignore") != "ignore":
+        main_layer_node.set_meta("show_when_moving", layer_info["when_moving"] != "hide")
+    
     main_layer_node.z_index = int(layer_info.get("z_offset", 0))
 
     layer_root.add_child(main_layer_node, true)
@@ -496,7 +513,8 @@ func refresh_cam_focus() -> void:
     for layer_node in layer_root.get_children():
         if not layer_node.has_meta("show_when_cam_focus"):
             continue
-        layer_node.visible = is_in_focus == layer_node.get_meta("show_when_cam_focus")
+        layer_node.set_meta("camera_visible", is_in_focus == layer_node.get_meta("show_when_cam_focus"))
+        update_layer_visible(layer_node)
 
 func _add_prop_upate_callable(prop_name: String, update_func: Callable) -> void:
     if not prop_update_response.has(prop_name):
@@ -707,9 +725,18 @@ func set_digit_display_number(new_number: Variant, digit_display: DigitDisplay) 
 
 func show_hide_layer(new_prop_value: Variant, layer_node: Node2D) -> void:
     if new_prop_value:
-        layer_node.show()
+        layer_node.set_meta("property_visible", true)
     else:
-        layer_node.hide()
+        layer_node.set_meta("property_visible", false)
+    update_layer_visible(layer_node)
+
+func update_layer_visible(layer_node: Node2D) -> void:
+    var vis: bool = layer_node.get_meta("property_visible", true)
+    if layer_node.has_meta("moving_visible"):
+        vis = vis and layer_node.get_meta("moving_visible")
+    if layer_node.has_meta("camera_visible"):
+        vis = vis and layer_node.get_meta("camera_visible")
+    layer_node.visible = vis
 
 func show_hide_layer_expression(new_prop_value: Variant, expression: Expression, layer_node: Node2D) -> void:
     var result: Variant = expression.execute([new_prop_value])

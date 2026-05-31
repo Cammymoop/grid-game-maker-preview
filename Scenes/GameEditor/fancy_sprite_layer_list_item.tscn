@@ -289,18 +289,27 @@ item_count = 1
 popup/item_0/text = "ignore"
 popup/item_0/id = 0
 
-[node name="Section" type="VBoxContainer" parent="HBoxContainer/PanelContainer/HBoxContainer/SubsectionContainer" unique_id=1296096512]
+[node name="VisibilitySection2" type="VBoxContainer" parent="HBoxContainer/PanelContainer/HBoxContainer/SubsectionContainer" unique_id=1296096512]
 visible = false
 custom_minimum_size = Vector2(76, 0)
 layout_mode = 2
 alignment = 1
 
-[node name="Label" type="Label" parent="HBoxContainer/PanelContainer/HBoxContainer/SubsectionContainer/Section" unique_id=1230763582]
+[node name="HBoxContainer3" type="HBoxContainer" parent="HBoxContainer/PanelContainer/HBoxContainer/SubsectionContainer/VisibilitySection2" unique_id=1689587888]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="HBoxContainer/PanelContainer/HBoxContainer/SubsectionContainer/VisibilitySection2/HBoxContainer3" unique_id=1230763582]
 layout_mode = 2
 theme_override_constants/line_spacing = 1
 theme_override_font_sizes/font_size = 12
-text = "Visibility Property:"
+text = "If Moving:"
 horizontal_alignment = 1
+
+[node name="MovingVisibilitySelect" type="OptionButton" parent="HBoxContainer/PanelContainer/HBoxContainer/SubsectionContainer/VisibilitySection2/HBoxContainer3" unique_id=1568895435]
+layout_mode = 2
+item_count = 1
+popup/item_0/text = "ignore"
+popup/item_0/id = 0
 
 [node name="VSeparator" type="VSeparator" parent="HBoxContainer/PanelContainer/HBoxContainer" unique_id=71806959]
 layout_mode = 2

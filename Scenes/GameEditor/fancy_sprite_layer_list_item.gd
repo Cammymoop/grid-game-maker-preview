@@ -79,6 +79,8 @@ const CamFocusOptions: Array[String] = [CAM_FOCUS_IGNORE, CAM_FOCUS_SHOW, CAM_FO
 @export var mod_color_input: ColorPickerButton
 @export var cam_focus_visibility_select: OptionButton
 
+@export var moving_visibility_select: OptionButton
+
 @export var show_reorder_buttons: bool = true
 @export var enable_context_menu: bool = true
 
@@ -164,6 +166,12 @@ func _ready() -> void:
         cam_focus_visibility_select.add_item(cam_focus_option)
     cam_focus_visibility_select.selected = 0
     cam_focus_visibility_select.item_selected.connect(on_cam_focus_visibility_selected)
+    
+    moving_visibility_select.clear()
+    for cam_focus_option in CamFocusOptions:
+        moving_visibility_select.add_item(cam_focus_option)
+    moving_visibility_select.selected = 0
+    moving_visibility_select.item_selected.connect(on_moving_visibility_selected)
     
     subsection_nav_forward.pressed.connect(on_navigate_subsection.bind(1))
     subsection_nav_back.pressed.connect(on_navigate_subsection.bind(-1))
@@ -510,4 +518,12 @@ func on_cam_focus_visibility_selected(index: int) -> void:
         layer_info.erase('when_camera_focus')
     else:
         layer_info['when_camera_focus'] = new_cam_focus_visibility
+    changed.emit()
+
+func on_moving_visibility_selected(index: int) -> void:
+    var new_moving_visibility: = moving_visibility_select.get_item_text(index)
+    if new_moving_visibility == CAM_FOCUS_IGNORE:
+        layer_info.erase('when_moving')
+    else:
+        layer_info['when_moving'] = new_moving_visibility
     changed.emit()
