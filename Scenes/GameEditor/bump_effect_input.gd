@@ -36,7 +36,15 @@ func get_arg_name() -> String:
     return arg_name
 
 func set_value(new_value: Dictionary) -> void:
+    if not new_value["name"] in SpriteEffects.BUMP_EFFECTS:
+        push_warning("Invalid bump effect name: %s" % new_value["name"])
+        return
     Utility.opbtn_select_text(effect_picker_input, new_value["name"])
+    if new_value["name"] in EFFECTS_WITH_COLOR and new_value.has("color"):
+        var the_color: Color = Utility.get_dict_color(new_value, "color", Color.WHITE)
+        color_picker.color = the_color
+    if new_value["name"] in EFFECTS_WITH_AMOUNT and new_value.has("amount"):
+        amount_input.set_value(new_value["amount"])
 
 func get_value() -> Dictionary:
     var selected_effect: String = Utility.opbtn_get_selected_text(effect_picker_input)
