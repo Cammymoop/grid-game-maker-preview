@@ -156,7 +156,7 @@ material = SubResource("ShaderMaterial_exhar")
 position = Vector2(352, 327)
 texture = SubResource("NoiseTexture2D_7f2o1")
 region_enabled = true
-region_rect = Rect2(-1024, -1024, 4096, 4096)
+region_rect = Rect2(-1024, -1024, 5120, 4096)
 
 [node name="Lines" type="Sprite2D" parent="SubViewportContainer/SubViewport" unique_id=1181373835]
 visible = false
@@ -166,7 +166,7 @@ material = ExtResource("2_n4cem")
 position = Vector2(352, 327)
 texture = SubResource("NoiseTexture2D_exhar")
 region_enabled = true
-region_rect = Rect2(-1024, -1024, 4096, 4096)
+region_rect = Rect2(-1024, -1024, 5120, 4096)
 
 [node name="DustyParticles" type="GPUParticles2D" parent="SubViewportContainer/SubViewport" unique_id=201630246]
 modulate = Color(0.28503343, 0.5072171, 0.8768182, 0.27450982)
