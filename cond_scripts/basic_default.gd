@@ -1886,3 +1886,17 @@ func cmd_set_large_entity_width_height(slots: Dictionary, chosen_slot: int, widt
 	if not slots[chosen_slot] or not slots[chosen_slot] is LargeEntity:
 		return
 	slots[chosen_slot].update_size(Vector2i(width, height))
+
+func desc_select_distance_between() -> String:
+	return "number|<= Select the distance between the position of [pos1_slot:SlotInput:pos,entity] and [pos2_slot:SlotInput:pos,entity]"
+func cmd_select_distance_between(slots: Dictionary, chosen_slot: int, pos1_slot: int, pos2_slot: int) -> void:
+	if not Commands.slot_has_position(pos1_slot) or not Commands.slot_has_position(pos2_slot):
+		push_error("Invalid slots to select distance between: %s and %s" % [pos1_slot, pos2_slot])
+		return
+	if not _slot_has_single_tile_position(slots, pos1_slot) or not _slot_has_single_tile_position(slots, pos2_slot):
+		set_value_slot_as_number(slots, chosen_slot, 0)
+		return
+	var pos1: Vector2i = get_single_position_from_slot(pos1_slot, slots)
+	var pos2: Vector2i = get_single_position_from_slot(pos2_slot, slots)
+	var distance: int = (pos1 - pos2).length()
+	set_value_slot_as_number(slots, chosen_slot, distance)

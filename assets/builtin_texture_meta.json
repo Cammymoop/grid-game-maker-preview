@@ -30,5 +30,13 @@
 			"size_in_tiles": [4, 4],
 			"border": [0, 0],
 			"separation": [0, 0]
+		},
+	"frog.png":
+		{
+			"size": [128, 64],
+			"tile_size": [64, 64],
+			"size_in_tiles": [2, 1],
+			"border": [0, 0],
+			"separation": [0, 0]
 		}
 }

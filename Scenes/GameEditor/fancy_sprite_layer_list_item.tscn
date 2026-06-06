@@ -41,7 +41,7 @@ LineEdit/constants/minimum_character_width = 2
 atlas = ExtResource("3_jxcnp")
 region = Rect2(0, 64, 32, 32)
 
-[node name="FancySpriteLayerListItem" type="MarginContainer" unique_id=1110623540 node_paths=PackedStringArray("remove_button", "layer_image_button", "offset_type_selector", "offset_input", "mode_selector", "reorder_buttons", "rotates_option", "rotates_mode_select", "spin_speed_input", "offset_degrees_input", "z_offset_input", "digits_settings", "digits_max_digits_input", "digits_color_picker", "digits_pad_zeros_toggle", "digits_source_selector", "digits_number_input", "digits_property_input", "visibility_property_input", "mod_color_input", "cam_focus_visibility_select", "subsection_container", "subsection_nav_forward", "subsection_nav_back")]
+[node name="FancySpriteLayerListItem" type="MarginContainer" unique_id=1110623540 node_paths=PackedStringArray("remove_button", "layer_image_button", "offset_type_selector", "offset_input", "mode_selector", "reorder_buttons", "rotates_option", "rotates_mode_select", "spin_speed_input", "offset_degrees_input", "z_offset_input", "digits_settings", "digits_max_digits_input", "digits_color_picker", "digits_pad_zeros_toggle", "digits_source_selector", "digits_number_input", "digits_property_input", "visibility_property_input", "mod_color_input", "cam_focus_visibility_select", "moving_visibility_select", "subsection_container", "subsection_nav_forward", "subsection_nav_back")]
 offset_right = 503.0
 offset_bottom = 75.0
 theme = ExtResource("1_pj4t0")
@@ -72,6 +72,7 @@ digits_property_input = NodePath("HBoxContainer/PanelContainer/HBoxContainer/HBo
 visibility_property_input = NodePath("HBoxContainer/PanelContainer/HBoxContainer/SubsectionContainer/VisibilitySection/VisibilityProp/VisPropInput")
 mod_color_input = NodePath("HBoxContainer/PanelContainer/HBoxContainer/SubsectionContainer/VisibilitySection/VBoxContainer/HBoxContainer/ModColorPicker")
 cam_focus_visibility_select = NodePath("HBoxContainer/PanelContainer/HBoxContainer/SubsectionContainer/VisibilitySection/VBoxContainer/HBoxContainer2/CamFocusVisibilitySelect")
+moving_visibility_select = NodePath("HBoxContainer/PanelContainer/HBoxContainer/SubsectionContainer/VisibilitySection2/HBoxContainer3/MovingVisibilitySelect")
 subsection_container = NodePath("HBoxContainer/PanelContainer/HBoxContainer/SubsectionContainer")
 subsection_nav_forward = NodePath("HBoxContainer/PanelContainer/HBoxContainer/SectionNavButtons/NextSubsection")
 subsection_nav_back = NodePath("HBoxContainer/PanelContainer/HBoxContainer/SectionNavButtons/PrevSubsection")

@@ -91,8 +91,13 @@ func sprite_process(delta_time: float) -> void:
         _local_prop_updated = false
         if parent_entity:
             on_local_prop_update_frame(parent_entity)
-    if parent_entity and parent_entity.moving != _moving:
+    var is_visual_moving: bool = get_is_visual_moving();
+    if parent_entity and _moving != is_visual_moving:
+        _moving = is_visual_moving
         update_layers_moving_visibility()
+    elif not parent_entity:
+        update_layers_moving_visibility()
+        
     if interpolate_facing_enabled:
         if interp_facing_timer > 0:
             interp_facing_timer = maxf(0, interp_facing_timer - delta_time)
@@ -104,7 +109,6 @@ func sprite_process(delta_time: float) -> void:
     process_animated_modifiers(delta_time)
 
 func update_layers_moving_visibility() -> void:
-    _moving = parent_entity.moving
     for layer_node in layer_root.get_children():
         if not layer_node.has_meta("show_when_moving"):
             continue
@@ -239,7 +243,8 @@ func refresh_layers() -> void:
         for layer_index in layers.size():
             create_and_add_nodes_for_layer(layers[layer_index], layer_index)
     if parent_entity:
-        update_layers_moving_visibility()
+        _moving = get_is_visual_moving();
+    update_layers_moving_visibility()
     if is_inside_tree():
         on_local_prop_update_frame(get_parent() as BaseEntity)
 
@@ -909,3 +914,8 @@ func _anim___spin(effect_stack: Dictionary, _delta_time: float) -> void:
         if _animated_spinning:
             _animated_spinning = false
             set_sprite_rotation(current_rotation)
+
+func get_is_visual_moving() -> bool:
+    if not parent_entity:
+        return false
+    return parent_entity.is_visual_moving()

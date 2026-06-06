@@ -1,0 +1,154 @@
+{
+  "game_name": "Frogger Game",
+  "textures": [
+    {
+      "type": "builtin",
+      "texture_id": 0.0,
+      "name": "tiles.png"
+    },
+    {
+      "type": "builtin",
+      "texture_id": 1.0,
+      "name": "entityTiles.png"
+    },
+    {
+      "type": "builtin",
+      "name": "frog.png",
+      "texture_id": 2.0,
+      "filter": false
+    },
+    {
+      "type": "local_file",
+      "is_shared": false,
+      "image_name": "Crab.png",
+      "texture_id": 3.0,
+      "filter": false
+    }
+  ],
+  "game_settings": {
+    "pixel_scale": 3.0,
+    "window_width": 18.0,
+    "window_height": 14.0,
+    "default_move_interp": "stepped",
+    "camera_settings": {
+      "follow_entity": "player",
+      "enable_limits": true,
+      "extend_limits": 32.0
+    },
+    "entity_move_speed": 6.0,
+    "default_turn_animation": "quick",
+    "bg_style": {
+      "lines_on": true,
+      "dusty_particles_on": false,
+      "background_color": "#77b2ed",
+      "bg_gradient_color": "#1d30aceb"
+    },
+    "game_view_size": [
+      14.0,
+      12.0
+    ]
+  },
+  "entity_definitions": {
+    "1": {
+      "name": "player",
+      "texture": 2,
+      "tex_index": 1,
+      "properties": {
+        "player": true,
+        "post_move": {
+          "v": "3",
+          "conditions": [
+            "basic_default.c_is_moving::[\"i:0\",true,\"i:2\"]"
+          ],
+          "when true": [
+            "basic_default.entity_play_bump_effect::[\"i:0\",{\"args\":[\"s:name\",\"s:Hop\",\"s:amount\",\"f:10.0\"],\"type\":\"Dictionary\"}]"
+          ],
+          "when false": [],
+          "when always": []
+        },
+        "was_blocked": {
+          "v": "3",
+          "conditions": [
+            "basic_default.select_first_teleport_in_direction::[\"i:5\",\"i:5\",\"i:0\",{\"args\":[\"s:type\",\"s:plain\",\"s:direction\",\"i:12\"],\"type\":\"Dictionary\"},\"i:0\"]",
+            "basic_default.select_distance_between::[\"i:6\",\"i:5\",\"i:0\"]",
+            "basic_default.compare_property::[\"i:0\",\"s:distance\",\"s:>=\",{\"args\":[\"s:type\",\"s:slot_value\",\"s:slot_id\",\"i:6\"],\"type\":\"Dictionary\"}]"
+          ],
+          "when true": [
+            "basic_default.teleport_entity_to::[\"i:0\",\"i:5\"]",
+            "basic_default.override_move_animation::[\"i:0\",\"s:stepped\"]"
+          ],
+          "when false": [],
+          "when always": []
+        },
+        "distance": 3
+      },
+      "sprite_config": {
+        "layers": [
+          {
+            "mode": "normal",
+            "texture": 2.0,
+            "tex_index": 0.0,
+            "when_moving": "hide"
+          },
+          {
+            "mode": "normal",
+            "texture": 2.0,
+            "tex_index": 1.0,
+            "when_moving": "show"
+          }
+        ]
+      },
+      "controller": "InputController",
+      "controller_options": {
+        "stop_repeat_after_bonk": false,
+        "lock_for_idle_delay_after_bonk": false,
+        "allow_wait": false,
+        "only_rcv_when_cam": false
+      }
+    },
+    "2": {
+      "name": "block",
+      "texture": 1,
+      "tex_index": 24,
+      "properties": {
+        "move_onto": {
+          "v": "3",
+          "conditions": [
+            "basic_default.c_get_pushed::[\"i:0\",{\"args\":[\"s:type\",\"s:plain\",\"s:direction\",\"i:20\"],\"type\":\"Dictionary\"},true]"
+          ],
+          "when true": [],
+          "when false": [],
+          "when always": []
+        },
+        "pullable": true,
+        "z-index": -1
+      }
+    }
+  },
+  "tile_definitions": {
+    "1": {
+      "name": "lily-pad",
+      "texture": 1,
+      "tex_index": 50,
+      "properties": {
+
+      }
+    },
+    "2": {
+      "name": "lily-pad1",
+      "texture": 3,
+      "tex_index": 52,
+      "properties": {
+
+      }
+    }
+  },
+  "level_lists": [
+    {
+      "name": "Levels",
+      "level_names": [
+        "level"
+      ]
+    }
+  ]
+}

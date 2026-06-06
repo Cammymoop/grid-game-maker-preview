@@ -1028,3 +1028,13 @@ func is_teleporting() -> bool:
 
 func is_large() -> bool:
 	return false
+
+func is_visual_moving() -> bool:
+	if not moving:
+		return false
+	if _this_move_steps == 2:
+		return steps_remaining == 2
+	elif _this_move_steps >= 3:
+		if steps_remaining <= ceili(_this_move_steps / 3.0):
+			return false
+	return true
