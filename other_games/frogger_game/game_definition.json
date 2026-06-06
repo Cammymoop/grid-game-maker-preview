@@ -64,7 +64,9 @@
             "basic_default.entity_play_bump_effect::[\"i:0\",{\"args\":[\"s:name\",\"s:Hop\",\"s:amount\",\"f:10.0\"],\"type\":\"Dictionary\"}]"
           ],
           "when false": [],
-          "when always": []
+          "when always": [
+            "basic_default.entity_play_bump_effect::[\"i:0\",{\"args\":[\"s:name\",\"s:Expand\",\"s:amount\",\"f:0.7\"],\"type\":\"Dictionary\"}]"
+          ]
         },
         "was_blocked": [
           {
@@ -164,7 +166,33 @@
       "name": "Levels",
       "level_names": [
         "level"
-      ]
+      ],
+      "bg_style": {
+        "lines_on": true,
+        "dusty_particles_on": false,
+        "background_color": "#77b2ed",
+        "bg_gradient_color": "#1d30aceb",
+        "bg_gradient_on": true,
+        "bg_gradient_above": "below",
+        "dusty_particles_amount": 1.0,
+        "dusty_particles_speed": 1.0,
+        "dusty_particles_color": "#4981e046",
+        "pointy_particles_on": false,
+        "pointy_particles_amount": 1.0,
+        "pointy_particles_speed": 1.0,
+        "pointy_particles_rainbow_on": false,
+        "pointy_particles_color": "#ffffffff",
+        "pointy_particles_dark_mode": true,
+        "lines_solid_on": false,
+        "lines_color": "#ffffff40",
+        "lines_solid_color": "#2528a473",
+        "lines_scroll_speed": 0.06999999843536,
+        "lines_scroll_angle": 302.399993240755,
+        "lines_warp_strength": 1.30000001937156,
+        "lines_warp_scroll_speed": 0.06999999843536,
+        "lines_warp_scroll_angle": 197.999995574304,
+        "lines_above": "below"
+      }
     }
   ]
 }
