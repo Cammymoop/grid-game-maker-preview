@@ -856,7 +856,6 @@ func _anim___offset(effect_stack: Dictionary, _delta_time: float) -> void:
         var t: float = _get_anim_t(effect_data, mod_name)
         var offset_from: = Utility.get_vector2_from_arr(effect_data.get("offset_from", [0,0]))
         var offset_to: = Utility.get_vector2_from_arr(effect_data.get("offset_to", [0,0]))
-        prints("anim mod adding %s offset, (t = %s)" % [str(offset_from.lerp(offset_to, t)), t])
         accumulated_offset += offset_from.lerp(offset_to, t)
     layer_root.position = accumulated_offset
 

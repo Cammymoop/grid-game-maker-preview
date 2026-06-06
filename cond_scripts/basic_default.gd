@@ -988,6 +988,18 @@ func cmd_override_move_speed(slots: Dictionary, chosen_slot: int, speed: Variant
 	if Commands.slot_is_entity(chosen_slot) and slots[chosen_slot]:
 		slots[chosen_slot].set_move_speed_override(resolve_complex_scalar(speed, slots))
 
+func desc_override_teleport_speed_proportional() -> String:
+	return "entity|Override the entity's current teleport move speed to be proportional to the distance traveled"
+func cmd_override_teleport_speed_proportional(slots: Dictionary, chosen_slot: int) -> void:
+	if Commands.slot_is_entity(chosen_slot) and slots[chosen_slot]:
+		var entity: BaseEntity = slots[chosen_slot]
+		if entity.moving:
+			prints("entity is moving, overriding teleport speed")
+			var move_distance: int = (entity.next_tile_pos - entity.tile_position).length()
+			var base_steps_per_tile: int = entity.get_native_steps_per_tile()
+			prints("base spt:", base_steps_per_tile, "move distance:", move_distance, "new spt:", ceili(base_steps_per_tile * move_distance))
+			entity.set_steps_per_tile_override(ceili(base_steps_per_tile * move_distance))
+
 func desc_override_move_animation() -> String:
 	return "entity|Override the entity's move animation for the current/next movement to [anim_style:MoveAnimStyleInput]"
 func cmd_override_move_animation(slots: Dictionary, chosen_slot: int, anim_style: String) -> void:

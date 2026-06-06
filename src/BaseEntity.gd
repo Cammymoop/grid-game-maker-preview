@@ -367,6 +367,8 @@ func bump_move_step() -> void:
 	interpolate_pos()
 
 func get_move_progress() -> float:
+	if steps_remaining > _this_move_steps:
+		breakpoint
 	return 1 - (steps_remaining / float(_this_move_steps))
 
 func interpolate_pos() -> void:
@@ -688,6 +690,10 @@ func update_cached_tele_steps() -> void:
 func set_steps_per_tile_override(override_spt: int) -> void:
 	is_spt_override = true
 	override_steps_per_tile = override_spt
+	if moving:
+		var move_remaining = steps_remaining / float(_this_move_steps)
+		steps_remaining = roundi(move_remaining * override_steps_per_tile)
+		_this_move_steps = override_steps_per_tile
 	update_move_speed()
 
 func set_move_speed_override(speed: float) -> void:
@@ -711,6 +717,7 @@ func get_native_steps_per_tile() -> int:
 func get_teleport_steps() -> int:
 	if is_spt_override:
 		return override_steps_per_tile
+	prints("returning cached tele steps:", _cached_tele_steps)
 	return _cached_tele_steps
 
 func get_moving_steps_per_tile() -> int:

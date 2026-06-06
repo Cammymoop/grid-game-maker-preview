@@ -66,20 +66,35 @@
           "when false": [],
           "when always": []
         },
-        "was_blocked": {
-          "v": "3",
-          "conditions": [
-            "basic_default.select_first_teleport_in_direction::[\"i:5\",\"i:5\",\"i:0\",{\"args\":[\"s:type\",\"s:plain\",\"s:direction\",\"i:12\"],\"type\":\"Dictionary\"},\"i:0\"]",
-            "basic_default.select_distance_between::[\"i:6\",\"i:5\",\"i:0\"]",
-            "basic_default.compare_property::[\"i:0\",\"s:distance\",\"s:>=\",{\"args\":[\"s:type\",\"s:slot_value\",\"s:slot_id\",\"i:6\"],\"type\":\"Dictionary\"}]"
-          ],
-          "when true": [
-            "basic_default.teleport_entity_to::[\"i:0\",\"i:5\"]",
-            "basic_default.override_move_animation::[\"i:0\",\"s:stepped\"]"
-          ],
-          "when false": [],
-          "when always": []
-        },
+        "was_blocked": [
+          {
+            "v": "3",
+            "conditions": [
+              "basic_default.select_adjacent_tile::[\"i:4\",\"i:0\",{\"args\":[\"s:type\",\"s:plain\",\"s:direction\",\"i:4\"],\"type\":\"Dictionary\"}]",
+              "basic_default.is_entity_at::[\"i:4\",\"s:block\",false]"
+            ],
+            "when true": [
+              "basic_default.quit::[\"i:-1\"]"
+            ],
+            "when false": [],
+            "when always": []
+          },
+          {
+            "v": "3",
+            "conditions": [
+              "basic_default.select_first_teleport_in_direction::[\"i:5\",\"i:5\",\"i:0\",{\"args\":[\"s:type\",\"s:plain\",\"s:direction\",\"i:4\"],\"type\":\"Dictionary\"},\"i:0\"]",
+              "basic_default.select_distance_between::[\"i:6\",\"i:0\",\"i:5\"]",
+              "basic_default.compare_property::[\"i:0\",\"s:distance\",\"s:>=\",{\"args\":[\"s:type\",\"s:slot_value\",\"s:slot_id\",\"i:6\"],\"type\":\"Dictionary\"}]"
+            ],
+            "when true": [
+              "basic_default.teleport_entity_to::[\"i:0\",\"i:5\"]",
+              "basic_default.override_move_animation::[\"i:0\",\"s:stepped\"]",
+              "basic_default.override_teleport_speed_proportional::[\"i:0\"]"
+            ],
+            "when false": [],
+            "when always": []
+          }
+        ],
         "distance": 3
       },
       "sprite_config": {
@@ -121,7 +136,8 @@
           "when always": []
         },
         "pullable": true,
-        "z-index": -1
+        "z-index": -1,
+        "block": true
       }
     }
   },

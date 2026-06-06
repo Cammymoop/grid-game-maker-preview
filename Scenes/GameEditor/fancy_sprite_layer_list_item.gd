@@ -272,6 +272,15 @@ func refresh_ui() -> void:
     update_offset_vec_input()
     visibility_property_input.set_value(layer_info.get("when_property", ""))
 
+    if layer_info.has("when_camera_focus"):
+        Utility.opbtn_select_text(cam_focus_visibility_select, layer_info["when_camera_focus"])
+    else:
+        cam_focus_visibility_select.selected = 0
+    if layer_info.has("when_moving"):
+        Utility.opbtn_select_text(moving_visibility_select, layer_info["when_moving"])
+    else:
+        moving_visibility_select.selected = 0
+
     set_mode_picker_value(layer_info['mode'])
     if layer_info['mode'] == MODE_EMPTY:
         layer_image_button.disabled = true
