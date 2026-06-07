@@ -1686,6 +1686,16 @@ func cmd_select_tailing_entity(slots: Dictionary, chosen_slot: int, tail_parent:
 			return
 		slots[chosen_slot] = tailing_entities[0]
 
+func select_tail_size() -> String:
+	return "number|<= Select the total number of entities in the tailing chain of [entity_slot:SlotInput:entity]"
+func cmd_select_tail_size(slots: Dictionary, chosen_slot: int, entity_slot: int) -> void:
+	if not Commands.slot_is_entity(chosen_slot) or not Commands.slot_is_entity(entity_slot):
+		push_error("Invalid slot or empty slot to select tail size: %s" % chosen_slot)
+		return
+	if not slots[chosen_slot]:
+		return
+	slots[chosen_slot] = slots[chosen_slot].tailing.entity_size.x
+
 
 func desc_play_named_sfx() -> String:
 	return "none|Play the [sfx_name:SFXNameInput] sound effect [do_restart:BoolChoice:false,restarting if already playing,if it isn't already playing]"

@@ -23,7 +23,10 @@ enum Slot {
 	
 	# Internal use slot to keep track of the contextual tile position
 	# Deprecated
-	THIS_TILE 
+	THIS_TILE,
+
+	# Tile positions slot (not pre-filled) (added late)
+	ORANGE,
 }
 
 const SLOT_CATEGORIES: = {
@@ -33,6 +36,7 @@ const SLOT_CATEGORIES: = {
 	Slot.PINK: "entity",
 	Slot.GREY: "pos",
 	Slot.BLACK: "pos",
+	Slot.ORANGE: "pos",
 	Slot.A: "int",
 	Slot.B: "int",
 	Slot.C: "int",
@@ -103,7 +107,7 @@ func slot_is_entity(slot_id: int) -> bool:
 	return slot_id >= Slot.RED and slot_id <= Slot.PINK
 
 func slot_is_positions(slot_id: int) -> bool:
-	return slot_id >= Slot.GREY and slot_id <= Slot.BLACK
+	return slot_id == Slot.ORANGE or (slot_id >= Slot.GREY and slot_id <= Slot.BLACK)
 
 # Entity or tile position
 func slot_has_position(slot_id: int) -> bool:

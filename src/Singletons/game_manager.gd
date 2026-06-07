@@ -1078,6 +1078,7 @@ func rename_and_save_current_game_definition(new_game_name: String, delete_on_ov
 	var old_game_name: = get_game_name()
 	if FilesManager.rename_game(old_game_name, new_game_name):
 		_set_game_name(new_game_name)
+		loaded_from_game_name = get_game_name()
 		if FilesManager.get_default_game() == old_game_name:
 			FilesManager.save_default_game(new_game_name)
 	else:

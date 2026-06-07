@@ -21,6 +21,7 @@
 [ext_resource type="Texture2D" uid="uid://b2nforp64edf1" path="res://assets/img/button_icons/slot_icons/dark_orange_blob.png" id="14"]
 [ext_resource type="Texture2D" uid="uid://bew155qcnf64o" path="res://assets/img/button_icons/slot_icons/I.png" id="15"]
 [ext_resource type="Texture2D" uid="uid://mhi0u31mxryu" path="res://assets/img/button_icons/slot_icons/II.png" id="16"]
+[ext_resource type="Texture2D" uid="uid://l03y7ymt2ycr" path="res://assets/img/button_icons/slot_icons/orange_tiles.png" id="16_a2452"]
 [ext_resource type="Texture2D" uid="uid://262s027uv0y2" path="res://assets/img/button_icons/slot_icons/X.png" id="17"]
 [ext_resource type="Texture2D" uid="uid://cn0u0rkb2i246" path="res://assets/img/button_icons/slot_icons/III.png" id="18"]
 [ext_resource type="Texture2D" uid="uid://ccjgplwhqsyrh" path="res://assets/img/button_icons/slot_icons/A.png" id="19"]
@@ -260,6 +261,18 @@ layout_mode = 2
 mouse_filter = 2
 texture = ExtResource("8")
 
+[node name="PickOrange" parent="PopupPicker/MarginContainer/PopupPanel/MarginContainer/CategoryContainer/TilePosSlots" unique_id=853914025 instance=ExtResource("1")]
+layout_mode = 2
+
+[node name="CenterContainer" type="CenterContainer" parent="PopupPicker/MarginContainer/PopupPanel/MarginContainer/CategoryContainer/TilePosSlots/PickOrange" unique_id=1230445730]
+layout_mode = 2
+mouse_filter = 2
+
+[node name="TextureRect" type="TextureRect" parent="PopupPicker/MarginContainer/PopupPanel/MarginContainer/CategoryContainer/TilePosSlots/PickOrange/CenterContainer" unique_id=1592248646]
+layout_mode = 2
+mouse_filter = 2
+texture = ExtResource("16_a2452")
+
 [node name="TilePosSeparator" parent="PopupPicker/MarginContainer/PopupPanel/MarginContainer/CategoryContainer" unique_id=1349228039 instance=ExtResource("7")]
 custom_minimum_size = Vector2(0, 55)
 layout_mode = 2
@@ -475,6 +488,7 @@ texture = ExtResource("14")
 [connection signal="pressed" from="PopupPicker/MarginContainer/PopupPanel/MarginContainer/CategoryContainer/EntitySlots/PickPink" to="." method="_on_SlotSelected" binds= ["pink"]]
 [connection signal="pressed" from="PopupPicker/MarginContainer/PopupPanel/MarginContainer/CategoryContainer/TilePosSlots/PickGrey" to="." method="_on_SlotSelected" binds= ["grey"]]
 [connection signal="pressed" from="PopupPicker/MarginContainer/PopupPanel/MarginContainer/CategoryContainer/TilePosSlots/PickBlack" to="." method="_on_SlotSelected" binds= ["black"]]
+[connection signal="pressed" from="PopupPicker/MarginContainer/PopupPanel/MarginContainer/CategoryContainer/TilePosSlots/PickOrange" to="." method="_on_SlotSelected" binds= ["orange"]]
 [connection signal="pressed" from="PopupPicker/MarginContainer/PopupPanel/MarginContainer/CategoryContainer/IntSlots/PickA" to="." method="_on_SlotSelected" binds= ["a"]]
 [connection signal="pressed" from="PopupPicker/MarginContainer/PopupPanel/MarginContainer/CategoryContainer/IntSlots/PickB" to="." method="_on_SlotSelected" binds= ["b"]]
 [connection signal="pressed" from="PopupPicker/MarginContainer/PopupPanel/MarginContainer/CategoryContainer/IntSlots/PickC" to="." method="_on_SlotSelected" binds= ["c"]]

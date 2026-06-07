@@ -27,24 +27,25 @@ var slot_textures: = {
     Commands.Slot.WHITE:  preload("res://assets/img/button_icons/slot_icons/white_triangle.png"),
     Commands.Slot.PINK:   preload("res://assets/img/button_icons/slot_icons/pink_heart.png"), 
     
-    Commands.Slot.GREY:    preload("res://assets/img/button_icons/slot_icons/grey_pentagon.png"),
-    Commands.Slot.BLACK:   preload("res://assets/img/button_icons/slot_icons/black_hexagon.png"),
+    Commands.Slot.GREY:   preload("res://assets/img/button_icons/slot_icons/grey_pentagon.png"),
+    Commands.Slot.BLACK:  preload("res://assets/img/button_icons/slot_icons/black_hexagon.png"),
+    Commands.Slot.ORANGE: preload("res://assets/img/button_icons/slot_icons/orange_tiles.png"),
     
-    Commands.Slot.A:  preload("res://assets/img/button_icons/slot_icons/A.png"),
+    Commands.Slot.A:   preload("res://assets/img/button_icons/slot_icons/A.png"),
     Commands.Slot.B:   preload("res://assets/img/button_icons/slot_icons/B.png"), 
     Commands.Slot.C:   preload("res://assets/img/button_icons/slot_icons/C.png"), 
     
-    Commands.Slot.X:  preload("res://assets/img/button_icons/slot_icons/X.png"),
+    Commands.Slot.X:   preload("res://assets/img/button_icons/slot_icons/X.png"),
     Commands.Slot.Y:   preload("res://assets/img/button_icons/slot_icons/Y.png"), 
     Commands.Slot.Z:   preload("res://assets/img/button_icons/slot_icons/Z.png"), 
     
-    Commands.Slot.I:  preload("res://assets/img/button_icons/slot_icons/I.png"),
-    Commands.Slot.II:   preload("res://assets/img/button_icons/slot_icons/II.png"), 
-    Commands.Slot.III:   preload("res://assets/img/button_icons/slot_icons/III.png"), 
+    Commands.Slot.I:   preload("res://assets/img/button_icons/slot_icons/I.png"),
+    Commands.Slot.II:  preload("res://assets/img/button_icons/slot_icons/II.png"), 
+    Commands.Slot.III: preload("res://assets/img/button_icons/slot_icons/III.png"), 
     
-    Commands.Slot.DARK_RED:    preload("res://assets/img/button_icons/slot_icons/dark_red_blob.png"),
-    Commands.Slot.DARK_BLUE:   preload("res://assets/img/button_icons/slot_icons/dark_blue_blob.png"), 
-    Commands.Slot.DARK_GREEN:  preload("res://assets/img/button_icons/slot_icons/dark_green_blob.png"),
+    Commands.Slot.DARK_RED:      preload("res://assets/img/button_icons/slot_icons/dark_red_blob.png"),
+    Commands.Slot.DARK_BLUE:     preload("res://assets/img/button_icons/slot_icons/dark_blue_blob.png"), 
+    Commands.Slot.DARK_GREEN:    preload("res://assets/img/button_icons/slot_icons/dark_green_blob.png"),
     Commands.Slot.DARK_ORANGE:   preload("res://assets/img/button_icons/slot_icons/dark_orange_blob.png"), 
     
     ANY_SLOT: preload("res://assets/img/button_icons/slot_icons/any.png"),
@@ -62,6 +63,7 @@ var slot_ids: = {
     
     grey=  Commands.Slot.GREY,
     black= Commands.Slot.BLACK,
+    orange= Commands.Slot.ORANGE,
     
     a= Commands.Slot.A,
     b= Commands.Slot.B,

@@ -129,6 +129,7 @@ func slots_copy(slots: Dictionary) -> Dictionary:
     var slots_duplicate = slots.duplicate()
     slots[Slot.GREY] = slots[Slot.GREY].duplicate()
     slots[Slot.BLACK] = slots[Slot.BLACK].duplicate()
+    slots[Slot.ORANGE] = slots[Slot.ORANGE].duplicate()
     return slots_duplicate
 
 func add_command_script_auto(script_name: String, script_type: int, script_inst: Object = null) -> void:
@@ -409,6 +410,7 @@ func empty_slots() -> Dictionary:
         Slot.PINK: null,
         Slot.GREY: [],
         Slot.BLACK: [],
+        Slot.ORANGE: [],
         Slot.A: 0,
         Slot.B: 0,
         Slot.C: 0,
