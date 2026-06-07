@@ -32,10 +32,12 @@ const OFFSET_BOTH: = "Both"
 const ROTATES_ROTATES: = 0
 const ROTATES_FIXED: = 1
 const ROTATES_SPINS: = 2
+const ROTATES_TO_HEAD: = 3
 const RotatesModeNames: Dictionary[int, String] = {
     ROTATES_ROTATES: "rotates",
     ROTATES_FIXED: "fixed",
     ROTATES_SPINS: "spins",
+    ROTATES_TO_HEAD: "faces head",
 }
 static var rotates_modes: Dictionary[String, int] = {}
 const DEF_ROTATES_TEXT: = "rotates"
@@ -134,7 +136,7 @@ func _ready() -> void:
     #rotates_toggle.set_pressed_no_signal(layer_info.get("rotates", true))
     
     rotates_mode_select.clear()
-    for rotate_mode_id in [ROTATES_ROTATES, ROTATES_FIXED, ROTATES_SPINS]:
+    for rotate_mode_id in [ROTATES_ROTATES, ROTATES_FIXED, ROTATES_SPINS, ROTATES_TO_HEAD]:
         rotates_mode_select.add_item(RotatesModeNames[rotate_mode_id], rotate_mode_id)
     Utility.opbtn_select_id(rotates_mode_select, ROTATES_ROTATES)
     rotates_mode_select.item_selected.connect(on_rotates_mode_selected)
@@ -184,6 +186,8 @@ func _ready() -> void:
 func _current_rotates_mode() -> int:
     if layer_info.get("mode", MODE_EMPTY) == MODE_EMPTY:
         return ROTATES_ROTATES
+    if layer_info.get("rotates_to_head", false):
+        return ROTATES_TO_HEAD
     if not layer_info.get("rotates", true):
         return ROTATES_FIXED
     elif layer_info.has("spinning"):
@@ -471,6 +475,10 @@ func on_rotates_mode_selected(index: int) -> void:
     elif new_rotates_mode == ROTATES_SPINS:
         layer_info['rotates'] = true
         layer_info['spinning'] = last_spinning_value
+    elif new_rotates_mode == ROTATES_TO_HEAD:
+        layer_info['rotates'] = true
+        layer_info['rotates_to_head'] = true
+        layer_info.erase('spinning')
     refresh_spin_speed_input()
     changed.emit()
 
