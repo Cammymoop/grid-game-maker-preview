@@ -71,6 +71,15 @@ func set_options(options: Dictionary) -> void:
 func get_options() -> Dictionary:
 	return available_options
 
+func get_option_values() -> Dictionary:
+	return {
+		"stop_repeat_after_bonk": stop_repeat_after_bonk,
+		"lock_for_idle_delay_after_bonk": lock_for_idle_delay_after_bonk,
+		"idle_delay_multiplier": idle_delay_multiplier,
+		"allow_wait": allow_wait,
+		"only_rcv_when_cam": only_receive_when_camera_target,
+	}
+
 func _physics_process(_delta):
 	if load_delay_left > 0:
 		if GameManager.get_is_half_tick_rate():

@@ -31,6 +31,13 @@ func get_default_options() -> Dictionary:
 		"only_target_active": only_target_active,
 	}
 
+func get_option_values() -> Dictionary:
+	return {
+		"target_entity_property": target_entity_property,
+		"always_update_target": always_update_target,
+		"only_target_active": only_target_active,
+	}
+
 func get_max_move_intentions() -> int:
 	return 2
 

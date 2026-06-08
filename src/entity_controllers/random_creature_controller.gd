@@ -22,6 +22,11 @@ func set_options(new_options: Dictionary) -> void:
 	if "prefer_forward" in new_options:
 		prefer_forward = new_options["prefer_forward"]
 
+func get_option_values() -> Dictionary:
+	return {
+		"prefer_forward": prefer_forward,
+	}
+
 func get_max_move_intentions() -> int:
 	return 4
 

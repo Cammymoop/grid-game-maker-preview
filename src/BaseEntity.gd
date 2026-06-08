@@ -842,6 +842,8 @@ func do_bump_effect(effect_info: Dictionary, with_duration: float = -1) -> void:
 
 
 func set_tailing(entity_to_tail) -> void:
+	if tailing and tailing.started_move.is_connected(tail_follow):
+		tailing.started_move.disconnect(tail_follow)
 	tailing = entity_to_tail
 	if tailing:
 		tailing.started_move.connect(tail_follow)
@@ -1045,3 +1047,17 @@ func is_visual_moving() -> bool:
 		if steps_remaining <= ceili(_this_move_steps / 3.0):
 			return false
 	return true
+
+func pop_controller() -> Node:
+	var the_controller = controller
+	remove_child(controller)
+	controller = null
+	return the_controller
+
+func replace_controller(new_controller: Node) -> void:
+	if controller and controller.get_parent() == self:
+		remove_child(controller)
+		controller.queue_free()
+	controller = new_controller
+	if controller.get_parent() != self:
+		add_child(controller)

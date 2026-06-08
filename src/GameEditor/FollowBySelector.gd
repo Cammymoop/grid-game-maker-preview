@@ -2,17 +2,19 @@ extends MenuButton
 
 signal changed
 
+var options: Array[String] = ["controller", "name", "property", "name or property"]
+
 func _ready():
 	var list = get_popup()
 	
-	list.add_item("name")
-	list.add_item("property")
+	for option in options:
+		list.add_item(option)
 	
 	list.connect("index_pressed", Callable(self, "picked"))
 
 func picked(index) -> void:
-	var new_val = "property" if index == 1 else "name"
-	text = new_val
-	emit_signal("changed", new_val)
+	var new_text = options[index]
+	text = new_text
+	emit_signal("changed", new_text)
 
 

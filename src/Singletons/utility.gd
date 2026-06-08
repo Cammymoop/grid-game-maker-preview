@@ -367,6 +367,14 @@ func facing_from_adjacent_positions(from_pos, to_pos) -> int:
 
 func get_adjacent_positions(pos: Vector2i) -> Array[Vector2i]:
 	return [pos + Vector2i.LEFT, pos + Vector2i.RIGHT, pos + Vector2i.UP, pos + Vector2i.DOWN]
+
+func is_pos_adjacent(from_pos: Vector2i, to_pos: Vector2i, include_diagonal: bool = false) -> bool:
+	if from_pos == to_pos:
+		return false
+	var delta: = to_pos - from_pos
+	if include_diagonal:
+		return delta.length() < 2
+	return delta.length_squared() == 1
 	
 
 func dict_vectors_to_lists(dict: Dictionary) -> Dictionary:

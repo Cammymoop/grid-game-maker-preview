@@ -145,13 +145,19 @@ func on_entity_became_active(entity: BaseEntity) -> void:
 
 func should_follow_entity(entity: BaseEntity) -> bool:
 	var follow_this: String = Utility.get_camera_setting("follow_entity", "")
-	var by_mode: String = Utility.get_camera_setting("follow_entity_by", "property")
+	var by_mode: String = Utility.get_camera_setting("follow_entity_by", "controller")
 	if not follow_this or not by_mode:
 		return false
 	
-	if by_mode == "name":
+	if by_mode == "controller":
+		return EntityManager.is_entity_controller_type(entity, follow_this if follow_this else "InputController")
+	elif by_mode == "name":
 		return EntityManager.get_entity_name(entity.entity_index) == follow_this
 	elif by_mode == "property":
+		return EntityManager.get_entity_prop_is_truthy(entity, follow_this)
+	elif by_mode == "name or property":
+		if EntityManager.entity_name_exists(follow_this) and EntityManager.get_entity_index(follow_this) == entity.entity_index:
+			return true
 		return EntityManager.get_entity_prop_is_truthy(entity, follow_this)
 	else:
 		push_warning("Unknown follow entity by mode: " + by_mode)
@@ -178,7 +184,9 @@ func follow_next(dir: int = 1) -> void:
 	
 func get_follow_targets() -> Array[BaseEntity]:
 	var follow_this = Utility.get_camera_setting("follow_entity", "")
-	var by_mode = Utility.get_camera_setting("follow_entity_by", "property")
+	var by_mode = Utility.get_camera_setting("follow_entity_by", "controller")
+	if by_mode == "controller":
+		return EntityManager.get_all_with_controller_type(follow_this)
 	if by_mode == "instances":
 		var ent_arr: Array[BaseEntity] = []
 		ent_arr.assign(EntityManager.get_camera_following_instances())
@@ -188,10 +196,15 @@ func get_follow_targets() -> Array[BaseEntity]:
 	if follow_this:
 		if by_mode == "name":
 			#print_debug("finding name " + follow_this)
-			var ent_index = EntityManager.get_entity_index(follow_this)
-			follow_targets = EntityManager.find_all_entities_by_index(ent_index, false)
+			var ent_id = EntityManager.get_entity_index(follow_this)
+			follow_targets = EntityManager.find_all_entities_by_index(ent_id, false)
 		elif by_mode == "property":
 			follow_targets = EntityManager.find_all_entities_with_truthy_property(follow_this, false)
+		elif by_mode == "name or property":
+			if EntityManager.entity_name_exists(follow_this):
+				var ent_id = EntityManager.get_entity_index(follow_this)
+				follow_targets.append_array(EntityManager.find_all_entities_by_index(ent_id, false))
+			follow_targets.append_array(EntityManager.find_all_entities_with_truthy_property(follow_this, false))
 		else:
 			push_warning("Unknown follow entity by mode: " + by_mode)
 	return follow_targets

@@ -18,10 +18,11 @@ func set_hint_mode(new_mode: String) -> void:
 		_sync_autocomplete_menu()
 
 func get_all_values() -> Array[String]:
+	var prop_name_list: = GameManager.get_all_used_prop_names(false, false)
 	if cur_mode == "property":
-		return GameManager.get_all_used_prop_names()
+		return prop_name_list
 	elif cur_mode == "entity_name":
 		return EntityManager.get_all_entity_names()
 	elif cur_mode == "both":
-		return Utility.string_list_union(GameManager.get_all_used_prop_names(), EntityManager.get_all_entity_names())
+		return Utility.string_list_union(prop_name_list, EntityManager.get_all_entity_names())
 	return []

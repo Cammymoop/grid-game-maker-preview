@@ -32,6 +32,12 @@ func set_options(new_options: Dictionary) -> void:
 		num_directions = new_options["num_directions"]
 	update_facing_priority()
 
+func get_option_values() -> Dictionary:
+	return {
+		"direction_priority": direction_priority,
+		"num_directions": num_directions,
+	}
+
 func update_facing_priority() -> void:
 	_facing_priority = []
 	for direction in direction_priority:

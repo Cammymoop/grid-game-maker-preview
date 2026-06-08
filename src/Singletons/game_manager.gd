@@ -909,7 +909,7 @@ func _unhandled_input(event: InputEvent) -> void:
 			toggle_pause_menu()
 			get_viewport().set_input_as_handled()
 
-func get_all_used_prop_names() -> Array[String]:
+func get_all_used_prop_names(include_events: bool = true, include_special_props: bool = true) -> Array[String]:
 	var prop_names: Array[String] = []
 	
 	var tile_entity_defs: Array[Dictionary] = []
@@ -921,11 +921,16 @@ func get_all_used_prop_names() -> Array[String]:
 				push_error("Property name is not a string: " + str(prop_name))
 				continue
 			if not prop_name in prop_names:
+				if not include_events and is_event_name(prop_name):
+					continue
+				if not include_special_props and is_special_prop_name(prop_name):
+					continue
 				prop_names.append(prop_name)
 	
-	for special_prop_name in SPECIAL_PROPS:
-		if not special_prop_name in prop_names:
-			prop_names.append(special_prop_name)
+	if include_special_props:
+		for special_prop_name in SPECIAL_PROPS:
+			if not special_prop_name in prop_names:
+				prop_names.append(special_prop_name)
 
 	return prop_names
 

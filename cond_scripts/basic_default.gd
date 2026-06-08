@@ -1071,6 +1071,34 @@ func cmd_trigger_custom_event_for_each_bonded_entity(slots: Dictionary, chosen_s
 			else:
 				MapManager.resolve_tiles_events([bonded_entity.get_moving_position()], event_name, bonded_entity)
 
+func desc_trigger_custom_event_for_each_tailing_entity() -> String:
+	return "entity,pos|Trigger the [event_name:PropertyInput] custom event of the entity/tile\n" \
+			+ "for each entity tailing [tail_dir:TailDirInput] [tail_ref_slot:SlotInput:entity] ([include_self:BoolChoice:true,including,excluding] itself)"
+func cmd_trigger_custom_event_for_each_tailing_entity(slots: Dictionary, chosen_slot: int, event_name: String, tail_dir: String, tail_ref_slot: int, include_self: bool) -> void:
+	if not Commands.slot_is_entity(chosen_slot) and not Commands.slot_is_positions(chosen_slot):
+		push_error("Invalid slot to trigger custom event for each bonded entity: %s" % chosen_slot)
+		return
+	if not Commands.slot_is_entity(tail_ref_slot):
+		push_error("Invalid slot get tailing entities of: %s" % tail_ref_slot)
+		return
+	if not slots[tail_ref_slot]:
+		return
+
+	var with_behind: bool = tail_dir != "ahead of"
+	var with_ahead: bool = tail_dir != "behind"
+	var exclude_list: Array[BaseEntity] = []
+	if not include_self:
+		exclude_list.append(slots[tail_ref_slot])
+	var tailing_entities: = EntityManager.get_entity_tailing_chain(slots[tail_ref_slot], with_behind, with_ahead, exclude_list)
+	tailing_entities = EntityManager.get_sorted_tailing_chain(tailing_entities)
+	for e in tailing_entities:
+		if Commands.slot_is_entity(chosen_slot):
+			EntityManager.resolve_entity_interaction_event(event_name, slots[chosen_slot], e, [e.get_moving_position()])
+		elif slots[chosen_slot]:
+			MapManager.resolve_tiles_events(slots[chosen_slot], event_name, e)
+		else:
+			MapManager.resolve_tiles_events([e.get_moving_position()], event_name, e)
+
 func desc_delayed_custom_entity_event() -> String:
 	return "entity|Trigger the [event_name:PropertyInput] custom event of the entity after a [delay:ComplexScalarInput:default=0.5,step=0.1] second delay\n" \
 			+ "(If the entity is still active)"
@@ -1686,15 +1714,100 @@ func cmd_select_tailing_entity(slots: Dictionary, chosen_slot: int, tail_parent:
 			return
 		slots[chosen_slot] = tailing_entities[0]
 
-func select_tail_size() -> String:
-	return "number|<= Select the total number of entities in the tailing chain of [entity_slot:SlotInput:entity]"
-func cmd_select_tail_size(slots: Dictionary, chosen_slot: int, entity_slot: int) -> void:
-	if not Commands.slot_is_entity(chosen_slot) or not Commands.slot_is_entity(entity_slot):
-		push_error("Invalid slot or empty slot to select tail size: %s" % chosen_slot)
+func desc_select_tailing_positions() -> String:
+	return "pos|<= Select the positions of all entities tailing [tail_dir:TailDirInput:behind,ahead of] [ref_entity_slot:SlotInput:entity]\n" \
+			+ "([include_self:BoolChoice:true,including,excluding] itself)"
+func cmd_select_tailing_positions(slots: Dictionary, chosen_slot: int, tail_dir: String, ref_entity_slot: int, include_self: bool) -> void:
+	if not Commands.slot_is_entity(ref_entity_slot) or not Commands.slot_is_positions(chosen_slot):
+		push_error("Invalid slots to select tailing positions: %s and %s" % [chosen_slot, ref_entity_slot])
+		return
+	if not slots[ref_entity_slot]:
+		slots[chosen_slot] = []
+		return
+	var with_behind: bool = tail_dir != "ahead of"
+	var with_ahead: bool = tail_dir != "behind"
+	var exclude_list: Array[BaseEntity] = []
+	if not include_self:
+		exclude_list.append(slots[ref_entity_slot])
+	var tailing_entities: = EntityManager.get_entity_tailing_chain(slots[ref_entity_slot], with_behind, with_ahead, exclude_list)
+	slots[chosen_slot] = []
+	for e in tailing_entities:
+		slots[chosen_slot].append(e.get_moving_position())
+
+func desc_start_tailing() -> String:
+	return "entity|The entity starts tailing behind this entity [head_entity:SlotInput:entint]"
+func cmd_start_tailing(slots: Dictionary, chosen_slot: int, head_entity: int) -> void:
+	if not Commands.slot_is_entity(chosen_slot) or not Commands.slot_is_entity(head_entity):
+		push_error("Invalid slots to start tailing: %s and %s" % [chosen_slot, head_entity])
+		return
+	if not slots[chosen_slot] or not slots[head_entity] or slots[chosen_slot] == slots[head_entity]:
+		return
+	if slots[chosen_slot].tailing:
+		slots[chosen_slot].untail()
+	slots[chosen_slot].set_tailing(slots[head_entity])
+
+func desc_stop_tailling() -> String:
+	return "entity|The entity stops tailing the entity ahead of it"
+func cmd_stop_tailling(slots: Dictionary, chosen_slot: int) -> void:
+	if not Commands.slot_is_entity(chosen_slot):
+		push_error("Invalid slot or empty slot to stop tailing: %s" % chosen_slot)
 		return
 	if not slots[chosen_slot]:
 		return
-	slots[chosen_slot] = slots[chosen_slot].tailing.entity_size.x
+	slots[chosen_slot].untail()
+
+func desc_remove_tail() -> String:
+	return "entity|Cut off entities tailing behind the entity"
+func cmd_remove_tail(slots: Dictionary, chosen_slot: int) -> void:
+	if not Commands.slot_is_entity(chosen_slot):
+		push_error("Invalid slot or empty slot to remove tail: %s" % chosen_slot)
+		return
+	if not slots[chosen_slot]:
+		return
+	var tailing_entities: Array[BaseEntity] = EntityManager.get_direct_tailing_entities(slots[chosen_slot])
+	for e in tailing_entities:
+		e.untail()
+
+func select_tail_size() -> String:
+	return "number|<= Select the total number of entities in the tailing chain of [entity_slot:SlotInput:entity]"
+func cmd_select_tail_size(slots: Dictionary, chosen_slot: int, entity_slot: int) -> void:
+	if not Commands.slot_is_value(chosen_slot) or not Commands.slot_is_entity(entity_slot):
+		push_error("Invalid slot or empty slot to select tail size: %s" % chosen_slot)
+		return
+	if not slots[chosen_slot]:
+		set_value_slot_as_number(slots, chosen_slot, 0)
+		return
+	var all_tailing_entities: = EntityManager.get_entity_tailing_chain(slots[entity_slot], true, true)
+	set_value_slot_as_number(slots, chosen_slot, all_tailing_entities.size())
+
+func desc_convert_tailing_chain_to_bond_group() -> String:
+	return "entity|Convert the tailing chain of [entity_slot:SlotInput:entity] to a bond group"
+func cmd_convert_tailing_chain_to_bond_group(slots: Dictionary, chosen_slot: int, entity_slot: int) -> void:
+	if not Commands.slot_is_entity(chosen_slot) or not Commands.slot_is_entity(entity_slot):
+		push_error("Invalid slots to convert tailing chain to bond group: %s and %s" % [chosen_slot, entity_slot])
+		return
+	if not slots[entity_slot]:
+		return
+	var all_tailing_entities: = EntityManager.get_entity_tailing_chain(slots[entity_slot], true, true)
+	all_tailing_entities = EntityManager.get_sorted_tailing_chain(all_tailing_entities)
+	for e in all_tailing_entities:
+		e.untail()
+		if e.bond_group:
+			EntityManager.unbond_entity(e, false)
+	EntityManager.create_bond_group(all_tailing_entities)
+
+func desc_convert_bond_group_to_tailing_chain() -> String:
+	return "entity|Convert the bond group of [entity_slot:SlotInput:entity] to a tailing chain"
+func cmd_convert_bond_group_to_tailing_chain(slots: Dictionary, chosen_slot: int, entity_slot: int) -> void:
+	if not Commands.slot_is_entity(chosen_slot) or not Commands.slot_is_entity(entity_slot):
+		push_error("Invalid slots to convert bond group to tailing chain: %s and %s" % [chosen_slot, entity_slot])
+		return
+	if not slots[entity_slot]:
+		return
+	var bond_group: Array = slots[entity_slot].bond_group
+	if bond_group.size() < 2:
+		return
+	EntityManager.convert_sorted_group_to_tailing_chain(bond_group)
 
 
 func desc_play_named_sfx() -> String:
@@ -1922,3 +2035,64 @@ func cmd_select_distance_between(slots: Dictionary, chosen_slot: int, pos1_slot:
 	var pos2: Vector2i = get_single_position_from_slot(pos2_slot, slots)
 	var distance: int = (pos1 - pos2).length()
 	set_value_slot_as_number(slots, chosen_slot, distance)
+
+
+func if_entity_has_controller() -> String:
+	return "entity|If the entity has a controller"
+func cmd_if_entity_has_controller(slots: Dictionary, chosen_slot: int) -> bool:
+	if not Commands.slot_is_entity(chosen_slot):
+		push_error("Invalid slot or empty slot to check if entity has controller: %s" % chosen_slot)
+		return false
+	if not slots[chosen_slot]:
+		return false
+	return slots[chosen_slot].controller != null
+
+func desc_swap_entity_controllers() -> String:
+	return "entity|Swap the entity's controller with [other_entity_slot:SlotInput:entity]"
+func cmd_swap_entity_controllers(slots: Dictionary, chosen_slot: int, other_entity: int) -> void:
+	if not Commands.slot_is_entity(chosen_slot) or not Commands.slot_is_entity(other_entity):
+		push_error("Invalid slots to swap entity controllers: %s and %s" % [chosen_slot, other_entity])
+		return
+	if not slots[chosen_slot] or not slots[other_entity]:
+		return
+	var controller1: Node = slots[chosen_slot].pop_controller()
+	var controller2: Node = slots[other_entity].pop_controller()
+	if controller2:
+		slots[chosen_slot].replace_controller(controller2)
+	if controller1:
+		slots[other_entity].replace_controller(controller1)
+
+func desc_copy_entity_controller() -> String:
+	return "entity|Copy the entity's controller to [other_entity_slot:SlotInput:entity]"
+func cmd_copy_entity_controller(slots: Dictionary, chosen_slot: int, other_entity: int) -> void:
+	if not Commands.slot_is_entity(chosen_slot) or not Commands.slot_is_entity(other_entity):
+		push_error("Invalid slots to swap entity controllers: %s and %s" % [chosen_slot, other_entity])
+		return
+	if not slots[chosen_slot] or not slots[other_entity]:
+		return
+
+	if slots[chosen_slot].controller:
+		var duplicate_controller: Node = EntityManager.get_controller_duplicate(slots[chosen_slot].controller)
+		slots[other_entity].replace_controller(duplicate_controller)
+	else:
+		slots[other_entity].pop_controller()
+
+func desc_reset_entity_controller() -> String:
+	return "entity|Reset the entity's controller to the default of the entity type"
+func cmd_reset_entity_controller(slots: Dictionary, chosen_slot: int) -> void:
+	if not Commands.slot_is_entity(chosen_slot):
+		push_error("Invalid slot or empty slot to reset entity controller: %s" % chosen_slot)
+		return
+	if not slots[chosen_slot]:
+		return
+	EntityManager.reset_entity_controller(slots[chosen_slot])
+
+func desc_remove_entity_controller() -> String:
+	return "entity|Remove the entity's controller"
+func cmd_remove_entity_controller(slots: Dictionary, chosen_slot: int) -> void:
+	if not Commands.slot_is_entity(chosen_slot):
+		push_error("Invalid slot or empty slot to remove entity controller: %s" % chosen_slot)
+		return
+	if not slots[chosen_slot]:
+		return
+	slots[chosen_slot].pop_controller()

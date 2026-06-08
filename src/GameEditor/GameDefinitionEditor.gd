@@ -27,6 +27,8 @@ var invalid_field_color = Color(0.7, 0.4, 0.4)
 
 @export var auto_reload_checkpoint_for_no_cam_focus_toggle: CheckButton
 
+@export var follow_by_controller_picker: OptionButton
+
 var _save_as_dialog_open: bool = false
 
 func _ready():
@@ -59,8 +61,26 @@ func _ready():
 		find_child("FollowEntity").set_value(cam_settings["follow_entity"])
 	if "follow_entity_by" in cam_settings:
 		follow_by_button.text = cam_settings["follow_entity_by"]
+	else:
+		follow_by_button.text = "controller"
 	if "enable_limits" in cam_settings:
 		find_child("EnableLimitsToggle").button_pressed = cam_settings["enable_limits"]
+	
+	follow_by_controller_picker.clear()
+	for controller_type in EntityManager.controller_templates.keys():
+		follow_by_controller_picker.add_item(controller_type)
+	var selected_controller_type: String = "InputController"
+	if cam_settings.get("follow_entity_by", "controller") == "controller":
+		selected_controller_type = cam_settings.get("follow_entity", "InputController")
+		if selected_controller_type not in EntityManager.controller_templates.keys():
+			prints("changing follow setting to InputController")
+			selected_controller_type = "InputController"
+			game_settings["camera_settings"]["follow_entity"] = "InputController"
+	Utility.opbtn_select_text(follow_by_controller_picker, selected_controller_type)
+	follow_by_controller_picker.item_selected.connect(on_follow_by_controller_option_picked)
+
+	follow_by_controller_picker.visible = cam_settings.get("follow_entity_by", "controller") == "controller"
+	find_child("FollowEntity").visible = cam_settings.get("follow_entity_by", "controller") != "controller"
 	
 	var show_lvl_title_opt: String = GameManager.get_game_setting("show_level_title", "At Level Start").to_lower()
 	show_level_title_option_picker.select(0)
@@ -121,16 +141,30 @@ func init_movement_modes() -> void:
 	popup_menu.id_pressed.connect(movement_mode_picked)
 
 func change_follow_by(val: String) -> void:
+	var old_val: String = GameManager.get_cam_setting("follow_entity_by", "controller")
+	if old_val == val:
+		return
+	if old_val == "controller":
+		set_camera_settings("follow_entity", "")
 	set_camera_settings("follow_entity_by", val)
 	
 	var prop_entity_name_input: PropOrEntityNameInput = find_child("FollowEntity") as PropOrEntityNameInput
 	if prop_entity_name_input:
-		var mode: String = PropOrEntityNameInput.PROP_NAME
-		if val == "name":
-			mode = PropOrEntityNameInput.ENTITY_NAME
-		elif val == "name or property":
-			mode = PropOrEntityNameInput.BOTH
-		prop_entity_name_input.set_hint_mode(mode)
+		if val == "controller":
+			prop_entity_name_input.hide()
+		else:
+			prop_entity_name_input.show()
+			var mode: String = PropOrEntityNameInput.PROP_NAME
+			if val == "name":
+				mode = PropOrEntityNameInput.ENTITY_NAME
+			elif val == "name or property":
+				mode = PropOrEntityNameInput.BOTH
+			prop_entity_name_input.set_hint_mode(mode)
+	
+	follow_by_controller_picker.visible = val == "controller"
+	if val == "controller" and GameManager.get_cam_setting("follow_entity", "InputController") not in EntityManager.controller_templates:
+		GameManager.set_cam_setting("follow_entity", "InputController")
+		Utility.opbtn_select_text(follow_by_controller_picker, "InputController")
 
 func movement_mode_picked(mode_id: int) -> void:
 	var popup_menu: PopupMenu = find_child("MovementModeMenuButton").get_popup()
@@ -345,3 +379,6 @@ func on_default_dying_eff_option_picked(index: int) -> void:
 func on_auto_reload_checkpoint_for_no_cam_focus_toggled(button_pressed: bool) -> void:
 	GameManager.set_game_setting("auto_reload_checkpoint_for_no_cam_focus", button_pressed)
 	GameManager.game_settings_changed.emit()
+
+func on_follow_by_controller_option_picked(index: int) -> void:
+	set_camera_settings("follow_entity", follow_by_controller_picker.get_item_text(index))

@@ -723,14 +723,20 @@ func entity_id_has_controller(entity_id: int) -> bool:
         return true
     return false
 
+func reset_entity_controller(entity: BaseEntity) -> void:
+    if entity.controller:
+        entity.remove_child(entity.controller)
+        entity.controller.queue_free()
+    setup_entity_controller(entity)
+
 func setup_entity_controller(entity: BaseEntity) -> void:
-    var entity_index = entity.entity_index
-    if entity_index in entity_defs and "controller" in entity_defs[entity_index]:
-        var controller_name = entity_defs[entity_index]["controller"]
+    var entity_id = entity.entity_index
+    if entity_id in entity_defs and "controller" in entity_defs[entity_id]:
+        var controller_name = entity_defs[entity_id]["controller"]
         if controller_name in controller_templates:
             var controller = get_new_controller(controller_name)
-            if entity_defs[entity_index].has("controller_options"):
-                controller.set_options(entity_defs[entity_index]["controller_options"])
+            if entity_defs[entity_id].has("controller_options"):
+                controller.set_options(entity_defs[entity_id]["controller_options"])
             entity.add_child(controller)
             entity.set_controller(controller)
 
@@ -906,6 +912,10 @@ func unbond_entity(entity: BaseEntity, with_event: bool = false) -> void:
         entity.bond_group = []
         if with_event:
             entity.add_deferred_event("left_bond_group")
+
+func unbond_entities(entities: Array, with_event: bool = false) -> void:
+    for entity in entities:
+        unbond_entity(entity, with_event)
 
 func bond_group_cull() -> void:
     var to_remove: Array[int] = []
@@ -1696,7 +1706,7 @@ func clear_entity_special_effects(entity: BaseEntity) -> void:
         entity.remove_sprite_modifier(special_effects[effect_name])
 
 func get_camera_following_instances() -> Array:
-    if not GameManager.get_cam_setting("follow_entity_by", "property") != "instances":
+    if not GameManager.get_cam_setting("follow_entity_by", "controller") != "instances":
         return []
     
     var new_instance_list: Array = []
@@ -1719,19 +1729,21 @@ func remove_camera_following_instance(instance_id: int) -> void:
         GameManager.camera_refollow()
 
 func is_entity_in_camera_following(entity: BaseEntity) -> bool:
-    var follow_mode: String = GameManager.get_cam_setting("follow_entity_by", "property")
+    var follow_mode: String = GameManager.get_cam_setting("follow_entity_by", "controller")
     if follow_mode in ["name", "property"] and not GameManager.get_cam_setting("follow_entity", ""):
         return false
 
-    if follow_mode == "name":
-        var follow_name: String = GameManager.get_cam_setting("follow_entity", "")
-        if entity_name_exists(follow_name) and get_entity_index(follow_name) == entity.entity_index:
-            return true
-        else:
-            return false
+    var follow_text: String = GameManager.get_cam_setting("follow_entity", "")
+    var is_name_match: = entity_name_exists(follow_text) and get_entity_index(follow_text) == entity.entity_index
+    
+    if follow_mode == "controller":
+        return is_entity_controller_type(entity, follow_text if follow_text else "InputController")
+    elif follow_mode == "name":
+        return is_name_match
     elif follow_mode == "property":
-        var follow_property: String = GameManager.get_cam_setting("follow_entity", "")
-        return get_entity_prop_is_truthy(entity, follow_property)
+        return get_entity_prop_is_truthy(entity, follow_text)
+    elif follow_mode == "name or property":
+        return is_name_match or get_entity_prop_is_truthy(entity, follow_text)
     elif follow_mode == "instances":
         var follow_instances: Array = get_camera_following_instances()
         return entity.instance_id in follow_instances
@@ -2200,3 +2212,72 @@ func _revert_related_move_node(related_move_node: Dictionary) -> void:
 #    if instance_id in _move_stack_metadata["started_move_instances"]:
 #        return
 #    _move_stack_metadata["started_move_instances"].append(instance_id)
+
+func get_sorted_tailing_chain(tailing_chain: Array) -> Array[BaseEntity]:
+    var sorted: Array[BaseEntity] = []
+    
+    var left_to_check: = tailing_chain.duplicate()
+    while left_to_check.size() > 0:
+        var next_headmost: BaseEntity = null
+        for e in left_to_check:
+            if not e.tailing or e.tailing in sorted:
+                next_headmost = e
+                break
+        if not next_headmost:
+            break
+        sorted.append(next_headmost)
+        left_to_check.erase(next_headmost)
+    return sorted
+
+func convert_sorted_group_to_tailing_chain(sorted_instance_ids: Array, ensure_adjacent: bool = true) -> void:
+    if sorted_instance_ids.size() < 2 or not sorted_instance_ids[0].bond_group:
+        return
+
+    var entity_arr: Array[BaseEntity] = []
+    var ahead_entity: BaseEntity = null
+    for next_id in sorted_instance_ids:
+        if not has_instance(next_id):
+            continue
+        entity_arr.append(get_instance(next_id))
+        if not ahead_entity:
+            ahead_entity = get_instance(next_id)
+            continue
+
+        var next_entity: BaseEntity = get_instance(next_id)
+        if ensure_adjacent:
+            if not Utility.is_pos_adjacent(ahead_entity.get_moving_position(), next_entity.get_moving_position()):
+                continue
+        
+        ahead_entity.set_tailing(next_entity)
+    
+    unbond_entities(entity_arr, true)
+        
+func get_controller_duplicate(controller: Node) -> Node:
+    var controller_script: Script = controller.get_script()
+    if not controller_script:
+        return null
+    var controller_duplicate: Node = controller_script.new()
+    if controller_duplicate.has_method("set_options"):
+        controller_duplicate.set_options(controller.get_option_values())
+    return controller_duplicate
+
+func get_all_with_controller_type(controller_type: String, include_inactive: bool = false) -> Array[BaseEntity]:
+    var controller_inst: Node = controller_templates[controller_type].instantiate()
+    var controller_script: Script = controller_inst.get_script()
+    controller_inst.queue_free()
+
+    var entities: Array[BaseEntity] = []
+    for entity in entity_list:
+        if not include_inactive and not entity.active:
+            continue
+        if entity.controller and entity.controller.get_script() == controller_script:
+            entities.append(entity)
+    return entities
+
+func is_entity_controller_type(entity: BaseEntity, controller_type: String) -> bool:
+    if not entity or not entity.controller:
+        return false
+    var controller_inst: Node = controller_templates[controller_type].instantiate()
+    var controller_script: Script = entity.controller.get_script()
+    controller_inst.queue_free()
+    return entity.controller.get_script() == controller_script

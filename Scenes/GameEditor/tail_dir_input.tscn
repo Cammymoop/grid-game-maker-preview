@@ -1,0 +1,20 @@
+[gd_scene format=3 uid="uid://dxnuq3eivxkui"]
+
+[ext_resource type="Script" uid="uid://b2e3vs73ts471" path="res://Scenes/GameEditor/ConditionalEditor/generic_option_button_input.gd" id="2_1dr1i"]
+
+[node name="TailDirInput" type="OptionButton" unique_id=583237251]
+offset_top = 3.0
+offset_right = 20.0
+offset_bottom = 23.0
+size_flags_vertical = 4
+alignment = 1
+selected = 0
+fit_to_longest_item = false
+item_count = 3
+popup/item_0/text = "behind"
+popup/item_0/id = 0
+popup/item_1/text = "ahead of"
+popup/item_1/id = 1
+popup/item_2/text = "ahead of & behind"
+popup/item_2/id = 2
+script = ExtResource("2_1dr1i")
