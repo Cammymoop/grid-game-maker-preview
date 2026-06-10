@@ -71,6 +71,7 @@ const all_events: Array[String] = [
     "left_bond_group",
     
     "turn_start",
+    "pre_turn_end",
     "turn_end",
 ]
 
@@ -476,6 +477,10 @@ const EVENT_HINT_TEXT: Dictionary[String, String] = {
     
     "joined_bond_group": "Unconditional Event.\nResolved when this entity becomes bonded to a bond group of entities",
     "left_bond_group": "Unconditional Event.\nResolved when this entity leaves all bond groups",
+    
+    "turn_start": "[Discrete Movement Modes Only]\nEntities only, Resolved at the start of every game turn.",
+    "pre_turn_end": "[Discrete+ Only]\nEntities only, Resolved when a game turn is about to end.",
+    "turn_end": "[Discrete Movement Modes Only]\nEntities only, Resolved at the end of every game turn.",
 }
 
 const EVENT_CATEGORIES: Dictionary[String, String] = {
@@ -518,4 +523,8 @@ const EVENT_CATEGORIES: Dictionary[String, String] = {
     "joined_bond_group": "other",
     "left_bond_group": "other",
     "when_signal_[signal]": "other",
+    
+    "turn_start": "turn events",
+    "pre_turn_end": "turn events",
+    "turn_end": "turn events",
 }

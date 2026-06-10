@@ -157,7 +157,7 @@
       "tex_index": 25,
       "properties": {
         "blocks": true,
-        "idle_update": {
+        "pre_turn_end": {
           "v": "3",
           "conditions": [
             "basic_default.c_can_move::[\"i:0\",false,\"i:13\"]",
@@ -334,7 +334,7 @@
   "game_settings": {
     "pixel_scale": 2.0,
     "camera_settings": {
-      "follow_entity": "player",
+      "follow_entity": "InputController",
       "enable_limits": true,
       "extend_limits": 32.0
     },
@@ -365,7 +365,8 @@
       "lines_warp_scroll_speed": 0.02,
       "lines_scroll_angle": 308.0
     },
-    "action_signal_sent_to": "camera_target"
+    "action_signal_sent_to": "camera_target",
+    "movement_mode": 2.0
   },
   "game_metadata": {
     "credits": {

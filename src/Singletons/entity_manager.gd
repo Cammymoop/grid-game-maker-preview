@@ -193,6 +193,12 @@ func handle_turn_start_events() -> void:
             continue
         resolve_entity_interaction_event("turn_start", e, null, [e.get_moving_position()])
 
+func handle_pre_turn_end_events() -> void:
+    for e in entity_list:
+        if not e.active or not entity_has_property(e, "pre_turn_end"):
+            continue
+        resolve_entity_interaction_event("pre_turn_end", e, null, [e.get_moving_position()])
+
 func handle_turn_end_events() -> void:
     for e in entity_list:
         if not e.active or not entity_has_property(e, "turn_end"):
@@ -256,6 +262,12 @@ func _physics_process(delta: float) -> void:
     entity_list_process(delta)
 
 func handle_movement_mode_stuff() -> void:
+    var all_settled: = false
+    if movement_mode == GameManager.MovementMode.MOVEMENT_DISCRETE_WAIT:
+        if all_entities_settled():
+            handle_pre_turn_end_events()
+            all_settled = all_entities_settled()
+
     animation_frame_counter += 1
     var was_movement_enabled: = movements_enabled
     if movements_enabled:
@@ -269,7 +281,7 @@ func handle_movement_mode_stuff() -> void:
             turn_frames_remaining -= 1
             if turn_frames_remaining <= 0:
                 movements_enabled = false
-        elif movement_mode == GameManager.MovementMode.MOVEMENT_DISCRETE_WAIT and all_entities_settled():
+        elif movement_mode == GameManager.MovementMode.MOVEMENT_DISCRETE_WAIT and all_settled:
             movements_enabled = false
     elif turn_requested:
         turn_requested = false

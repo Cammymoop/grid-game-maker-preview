@@ -706,6 +706,10 @@ func edit_level_in_list(level_list_name: String, level_name: String) -> void:
 	if not edit_level_named(level_name):
 		current_level_list = was_level_list
 
+func cleanup_new_level() -> void:
+	clear_checkpoint()
+	clear_undo_stack()
+
 func new_empty_level():
 	loaded_level_name = ""
 	loaded_level_is_saved = false
@@ -715,6 +719,8 @@ func new_empty_level():
 	MapManager.create_plain_layer()
 	EntityManager.create_defaults()
 	
+	cleanup_new_level()
+	
 	save_edited()
 
 func new_museum_level():
@@ -723,6 +729,8 @@ func new_museum_level():
 	current_level_is_museum = true
 	EntityManager.clear()
 	MapManager.clear()
+	
+	cleanup_new_level()
 	
 	var entity_museum_start_pos: = Vector2i(2, -1)
 	var tile_museum_start_pos: = Vector2i(-2, -1)
