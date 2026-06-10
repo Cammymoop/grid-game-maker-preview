@@ -189,8 +189,11 @@ func on_edit_mode_enabled() -> void:
 		vp.rescale()
 	if not GameManager.is_live_edit():
 		GameManager.load_edited(false)
+		GameManager.clear_undo_stack()
+		GameManager.push_undo_state(true)
 		await get_tree().process_frame
-		await get_tree().process_frame
+	else:
+		GameManager.push_undo_state(false)
 	refresh_game_definition()
 
 	if cursor_mode == "text":

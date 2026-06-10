@@ -535,6 +535,8 @@ func save_edited() -> void:
 func load_edited(as_level_load: bool = true) -> void:
 	load_serialized_play_state(editor_save, as_level_load)
 	clear_checkpoint()
+	if not as_level_load:
+		push_undo_state(true)
 
 func save_quicksave() -> void:
 	quicksave_state = {

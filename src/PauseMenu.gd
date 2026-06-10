@@ -232,7 +232,7 @@ func _on_LoadLevelButton_pressed():
 	popup.popup_centered()
 
 func _on_RestartLevel_pressed():
-	GameManager.load_edited()
+	GameManager.load_edited(false)
 	close_pause_menu()
 
 func _on_resume_button_pressed() -> void:
