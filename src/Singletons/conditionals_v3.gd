@@ -69,6 +69,9 @@ const all_events: Array[String] = [
     
     "joined_bond_group",
     "left_bond_group",
+    
+    "turn_start",
+    "turn_end",
 ]
 
 const NO_OTHER_EVENTS: = [

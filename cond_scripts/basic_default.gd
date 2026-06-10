@@ -938,6 +938,11 @@ func cmd_take_a_turn(slots: Dictionary, chosen_slot: int) -> void:
 	if Commands.slot_is_entity(chosen_slot):
 		EntityManager.request_move(slots[chosen_slot])
 
+func desc_if_is_start_of_turn() -> String:
+	return "none|If this is the start of a turn (Discrete mode)"
+func cmd_if_is_start_of_turn(_slots: Dictionary) -> bool:
+	return EntityManager.controller_frame
+
 func desc_send_signal() -> String:
 	return "entity|The entity sends a [signal_name:SignalInput] signal"
 func cmd_send_signal(slots: Dictionary, chosen_slot: int, signal_name: String) -> void:
@@ -2096,3 +2101,19 @@ func cmd_remove_entity_controller(slots: Dictionary, chosen_slot: int) -> void:
 	if not slots[chosen_slot]:
 		return
 	slots[chosen_slot].pop_controller()
+
+
+func desc_create_undo_point() -> String:
+	return "none|Create a new undo point (end of this game tick), enabling rewinding to the previous undo point"
+func cmd_create_undo_point(_slots: Dictionary) -> void:
+	GameManager.push_undo_state.call_deferred(true)
+
+func desc_mark_changed_since_last_undo() -> String:
+	return "none|Mark the current state as changed since the last added undo point, enabling rewinding to it"
+func cmd_mark_changed_since_last_undo(_slots: Dictionary) -> void:
+	GameManager.cur_undo_is_current_state = false
+
+func desc_undo() -> String:
+	return "none|Load the next available undo point"
+func cmd_undo(_slots: Dictionary) -> void:
+	GameManager.pop_and_load_undo_state.call_deferred()

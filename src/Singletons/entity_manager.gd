@@ -78,6 +78,8 @@ var _nested_related_moves: Dictionary = {}
 var _cur_related_move_node: Dictionary = {}
 var _finished_related_move_node: Dictionary = {}
 
+var _pending_undo: = true
+
 #var _move_resolution_stack: Array[Dictionary] = []
 #var _move_stack_metadata: Dictionary = {}
 
@@ -94,6 +96,10 @@ func entity_list_process(delta_time: float) -> void:
     for action_num in ["1", "2", "3"]:
         if Input.is_action_just_pressed("input_action_" + action_num):
             new_action_activations.append("do_action_" + action_num)
+            if action_num == "1" and GameManager.action_1_does_undo():
+                if GameManager.has_undo_state():
+                    GameManager.pop_and_load_undo_state.call_deferred()
+                    return
     
     # Phased processing so each entity completes a phase before any entity processes the next phase
     
@@ -101,6 +107,10 @@ func entity_list_process(delta_time: float) -> void:
     
     # Phase 1 - Timed entity events, Starting movement and start of move actions
     process_phase = 1
+    if movement_mode != GameManager.MovementMode.MOVEMENT_CONTINUOUS and controller_frame:
+        GameManager.cur_undo_is_current_state = false
+        handle_turn_start_events()
+
     for e in entity_list:
         var events_this_tick: Array[Dictionary] = []
         if e.instance_id in timed_entity_events.keys():
@@ -172,8 +182,22 @@ func entity_list_process(delta_time: float) -> void:
     for e in entities_that_finished_moving:
         if e.active:
             e.process_finish_move()
+
+    handle_movement_mode_stuff()
     
     process_phase = 0
+
+func handle_turn_start_events() -> void:
+    for e in entity_list:
+        if not e.active or not entity_has_property(e, "turn_start"):
+            continue
+        resolve_entity_interaction_event("turn_start", e, null, [e.get_moving_position()])
+
+func handle_turn_end_events() -> void:
+    for e in entity_list:
+        if not e.active or not entity_has_property(e, "turn_end"):
+            continue
+        resolve_entity_interaction_event("turn_end", e, null, [e.get_moving_position()])
 
 func _build_entity_at_cache() -> void:
     _entity_at_cache.clear()
@@ -231,24 +255,32 @@ func should_bump_move() -> bool:
 func _physics_process(delta: float) -> void:
     entity_list_process(delta)
 
+func handle_movement_mode_stuff() -> void:
     animation_frame_counter += 1
+    var was_movement_enabled: = movements_enabled
     if movements_enabled:
         frame_counter += 1
+    if movement_mode == GameManager.MovementMode.MOVEMENT_CONTINUOUS:
+        return
     
-    if movement_mode != GameManager.MovementMode.MOVEMENT_CONTINUOUS:
-        controller_frame = false
-        if movements_enabled:
-            if movement_mode == GameManager.MovementMode.MOVEMENT_DISCRETE:
-                turn_frames_remaining -= 1
-                if turn_frames_remaining <= 0:
-                    movements_enabled = false
-            elif movement_mode == GameManager.MovementMode.MOVEMENT_DISCRETE_WAIT and all_entities_settled():
+    controller_frame = false
+    if movements_enabled:
+        if movement_mode == GameManager.MovementMode.MOVEMENT_DISCRETE:
+            turn_frames_remaining -= 1
+            if turn_frames_remaining <= 0:
                 movements_enabled = false
-        elif turn_requested:
-            turn_requested = false
-            turn_frames_remaining = requested_turn_frames
-            movements_enabled = true
-            controller_frame = true
+        elif movement_mode == GameManager.MovementMode.MOVEMENT_DISCRETE_WAIT and all_entities_settled():
+            movements_enabled = false
+    elif turn_requested:
+        turn_requested = false
+        turn_frames_remaining = requested_turn_frames
+        movements_enabled = true
+        controller_frame = true
+    
+    if was_movement_enabled and not movements_enabled:
+        handle_turn_end_events()
+        if GameManager.is_auto_undo_enabled():
+            GameManager.push_undo_state(true)
 
 func all_entities_settled() -> bool:
     var settled = true

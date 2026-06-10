@@ -29,6 +29,11 @@ var invalid_field_color = Color(0.7, 0.4, 0.4)
 
 @export var follow_by_controller_picker: OptionButton
 
+@export var auto_undo_option: Control
+@export var auto_undo_toggle: CheckButton
+
+@export var action_1_is_undo_toggle: CheckButton
+
 var _save_as_dialog_open: bool = false
 
 func _ready():
@@ -81,6 +86,15 @@ func _ready():
 
 	follow_by_controller_picker.visible = cam_settings.get("follow_entity_by", "controller") == "controller"
 	find_child("FollowEntity").visible = cam_settings.get("follow_entity_by", "controller") != "controller"
+	
+	var is_continuous: bool = game_settings.get("movement_mode", GameManager.MovementMode.MOVEMENT_CONTINUOUS) == GameManager.MovementMode.MOVEMENT_CONTINUOUS
+	auto_undo_option.visible = not is_continuous
+	
+	auto_undo_toggle.set_pressed_no_signal(game_settings.get("auto_undo", true) if not is_continuous else true)
+	auto_undo_toggle.toggled.connect(on_auto_undo_toggled)
+	
+	action_1_is_undo_toggle.set_pressed_no_signal(game_settings.get("action_1_does_undo", true))
+	action_1_is_undo_toggle.toggled.connect(on_action_1_is_undo_toggled)
 	
 	var show_lvl_title_opt: String = GameManager.get_game_setting("show_level_title", "At Level Start").to_lower()
 	show_level_title_option_picker.select(0)
@@ -172,6 +186,8 @@ func movement_mode_picked(mode_id: int) -> void:
 	find_child("MovementModeMenuButton").text = popup_menu.get_item_text(index)
 	
 	game_settings["movement_mode"] = mode_id
+	
+	auto_undo_option.visible = mode_id != GameManager.MovementMode.MOVEMENT_CONTINUOUS
 
 func _on_SaveButton_pressed() -> void:
 	if not GameManager.is_save_current_overwriting():
@@ -367,6 +383,7 @@ func _export_destination_picked(path: String, file_dialog: FileDialog) -> void:
 
 func on_default_move_speed_changed(value: float) -> void:
 	GameManager.set_game_setting("entity_move_speed", value)
+	GameManager.game_settings_changed.emit()
 
 func _on_import_levels_btn_pressed() -> void:
 	GameManager.start_import_levels()
@@ -382,3 +399,11 @@ func on_auto_reload_checkpoint_for_no_cam_focus_toggled(button_pressed: bool) ->
 
 func on_follow_by_controller_option_picked(index: int) -> void:
 	set_camera_settings("follow_entity", follow_by_controller_picker.get_item_text(index))
+
+func on_auto_undo_toggled(button_pressed: bool) -> void:
+	GameManager.set_game_setting("auto_undo", button_pressed)
+	GameManager.game_settings_changed.emit()
+
+func on_action_1_is_undo_toggled(button_pressed: bool) -> void:
+	GameManager.set_game_setting("action_1_does_undo", button_pressed)
+	GameManager.game_settings_changed.emit()

@@ -6,11 +6,13 @@ var move_mode = "direction"
 var stop_repeat_after_bonk: = true
 var lock_for_idle_delay_after_bonk: = true
 var idle_delay_multiplier: int = 1
+var auto_req_turn: = true
 var allow_wait: = true
 
 var only_receive_when_camera_target: = true
 
-var is_repeat = false
+var is_wait: = false
+var is_repeat: = false
 
 var is_delay_locked: = false
 var idle_delays_left: int = 0
@@ -33,6 +35,7 @@ var available_options = {
 	"stop_repeat_after_bonk": {"display_name": "Stop repeating movement after being blocked", "type": "bool"},
 	"lock_for_idle_delay_after_bonk": {"display_name": "Prevent movement briefly after being blocked", "type": "bool"},
 	"idle_delay_multiplier": {"display_name": "Multiply bonk delay", "type": "int", "min_value": 1, "max_value": 10},
+	"auto_req_turn": {"display_name": "In Discrete mode, automatically take turns", "type": "bool"},
 	"allow_wait": {"display_name": "Press a key to wait a turn", "type": "bool"},
 	"only_rcv_when_cam": {"display_name": "Only receive input when camera is following", "type": "bool"},
 }
@@ -63,6 +66,8 @@ func set_options(options: Dictionary) -> void:
 		lock_for_idle_delay_after_bonk = options["lock_for_idle_delay_after_bonk"]
 	if "idle_delay_multiplier" in options:
 		idle_delay_multiplier = int(options["idle_delay_multiplier"])
+	if "auto_req_turn" in options:
+		auto_req_turn = options["auto_req_turn"]
 	if "allow_wait" in options:
 		allow_wait = options["allow_wait"]
 	if "only_rcv_when_cam" in options:
@@ -76,6 +81,7 @@ func get_option_values() -> Dictionary:
 		"stop_repeat_after_bonk": stop_repeat_after_bonk,
 		"lock_for_idle_delay_after_bonk": lock_for_idle_delay_after_bonk,
 		"idle_delay_multiplier": idle_delay_multiplier,
+		"auto_req_turn": auto_req_turn,
 		"allow_wait": allow_wait,
 		"only_rcv_when_cam": only_receive_when_camera_target,
 	}
@@ -88,6 +94,8 @@ func _physics_process(_delta):
 			load_delay_left -= 1
 		return
 	var is_pressed = false
+	
+	is_wait = false
 	
 	up_held = true
 	if Input.is_action_just_pressed("move_up"):
@@ -121,18 +129,22 @@ func _physics_process(_delta):
 	is_repeat = not is_pressed
 	
 	if not EntityManager.movements_enabled:
-		if up_held or down_held or left_held or right_held:
-			EntityManager.request_move(get_parent())
+		if auto_req_turn and parent_entity and not parent_entity.moving:
+			var left_xor_right: = (left_held or right_held) and not (left_held and right_held)
+			var up_xor_down: = (up_held or down_held) and not (up_held and down_held)
+			if up_xor_down or left_xor_right:
+				EntityManager.request_move(parent_entity)
+			elif allow_wait and Input.is_action_just_pressed("wait_turn"):
+				EntityManager.request_move(parent_entity)
 		elif allow_wait and Input.is_action_just_pressed("wait_turn"):
-			if not get_parent().moving:
-				EntityManager.request_move(get_parent())
+			if parent_entity and not parent_entity.moving:
+				is_wait = true
+				EntityManager.request_move(parent_entity)
 
 func get_move(attempt_num: int = 0):
 	if only_receive_when_camera_target and not GameManager.is_entity_followed_by_camera(parent_entity):
 		return "none"
-	if attempt_num > 0:
-		return "none"
-	if not EntityManager.controller_frame:
+	if is_wait or attempt_num > 0 or (auto_req_turn and not EntityManager.controller_frame):
 		return "none"
 	var input_dir = "none"
 	var h_input_dir = "none"

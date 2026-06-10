@@ -10,6 +10,8 @@ signal bg_style_changed
 
 const CreditsUI = preload("res://Scenes/credits_ui.gd")
 
+var MAX_UNDO_LIMIT: int = 1000
+
 const FULL_TICK_RATE: int = 60
 @onready var TICK_RATE: int = ProjectSettings.get_setting_with_override("physics/common/physics_ticks_per_second")
 
@@ -30,6 +32,12 @@ var game_creators: Array[String] = []
 var checkpoint_save: = {}
 var editor_save: = {}
 var loaded_level: = {}
+
+var undo_stack: Array[Dictionary] = []
+var undo_checkpoints: Dictionary[int, Dictionary] = {}
+var undo_checkpoints_created: Dictionary[int, int] = {}
+var next_undo_checkpoint_id: int = 0
+var cur_undo_is_current_state: bool = false
 
 var quicksave_state: = {}
 
@@ -296,6 +304,7 @@ func load_game_definition_data(definition_data: Dictionary) -> void:
 	loaded_level = {}
 	clear_checkpoint()
 	clear_quicksave()
+	clear_undo_stack()
 	
 	# compatibility
 	if "window_width" in definition_data and "window_height" in definition_data:
@@ -409,7 +418,9 @@ func load_serialized_play_state(serialized_state: Dictionary, as_level_load: boo
 	
 	set_pause("gm_loading_state", true)
 	
-	await get_tree().process_frame
+	if EntityManager.process_phase != 0:
+		await get_tree().physics_frame
+
 	deserialize(serialized_state.get("game_state", {}))
 	MapManager.deserialize(serialized_state['map'])
 	EntityManager.deserialize(serialized_state['entities'])
@@ -419,7 +430,11 @@ func load_serialized_play_state(serialized_state: Dictionary, as_level_load: boo
 	
 	if as_level_load:
 		level_state_loaded.emit()
+		clear_undo_stack()
+		push_undo_state(true)
+
 	any_state_loaded.emit()
+
 	set_pause("gm_loading_state", false)
 	bg_style_changed.emit()
 
@@ -497,14 +512,20 @@ func _unpause() -> void:
 
 func save_checkpoint() -> void:
 	checkpoint_save = get_serialized_play_state()
+	if cur_undo_is_current_state and undo_stack.size() > 1:
+		undo_stack.pop_back()
+	push_undo_state(true, checkpoint_save.duplicate_deep())
 func load_checkpoint() -> void:
 	if not checkpoint_save:
 		if editor_save:
 			load_serialized_play_state(editor_save, false)
+			push_undo_state(true)
 		else:
 			push_error("cannot load level or checkpoint")
 		return
 	load_serialized_play_state(checkpoint_save, false)
+	push_undo_state(true)
+
 func clear_checkpoint() -> void:
 	checkpoint_save = {}
 
@@ -548,6 +569,9 @@ func load_quicksave() -> void:
 				editor_save = {}
 		else:
 			editor_save = {}
+	else:
+		clear_undo_stack()
+		push_undo_state(false)
 	
 	if quicksave_state.get("checkpoint_state", {}):
 		checkpoint_save = quicksave_state["checkpoint_state"].duplicate_deep()
@@ -599,8 +623,7 @@ func load_level_data(level_data: Dictionary, process_queued_load: bool = false):
 	current_level_is_museum = false
 	loaded_level_name = level_data["name"]
 	editor_save = level_data["state"]
-	load_edited()
-	clear_checkpoint()
+	load_edited(true)
 	close_pause_menu()
 
 func try_load_next_level(with_delay: float = 0.5):
@@ -995,7 +1018,7 @@ func save_edited_level_as(as_level_filename: String) -> void:
 	loaded_level_name = level_data["name"]
 	loaded_level_is_saved = true
 	loaded_is_autosave = false
-	save_checkpoint()
+	clear_checkpoint()
 
 func _get_textbox() -> Node:
 	if not cur_scene == "Play":
@@ -2206,3 +2229,96 @@ func add_imported_level_data(level_data: Dictionary) -> String:
 	save_current_game_definition()
 	
 	return unique_level_name
+
+
+func is_auto_undo_enabled() -> bool:
+	if get_game_setting("movement_mode", MovementMode.MOVEMENT_CONTINUOUS) == GameManager.MovementMode.MOVEMENT_CONTINUOUS:
+		return false
+	return get_game_setting("auto_undo", true)
+
+func action_1_does_undo() -> bool:
+	var is_continuous: bool = get_game_setting("movement_mode", MovementMode.MOVEMENT_CONTINUOUS) == GameManager.MovementMode.MOVEMENT_CONTINUOUS
+	return get_game_setting("action_1_does_undo", not is_continuous)
+
+func has_undo_state() -> bool:
+	return undo_stack.size() > 0
+
+func clear_undo_stack() -> void:
+	undo_stack.clear()
+	undo_checkpoints.clear()
+	undo_checkpoints_created.clear()
+	next_undo_checkpoint_id = 0
+
+# if as_current_state is false, will immediately be able to rewind to this state
+# if as_current_state is true, undoing will skip this state if undoing before setting cur_undo_is_current_state to false
+func push_undo_state(as_current_state: bool, with_state: Dictionary = {}) -> void:
+	var cur_state: Dictionary = with_state
+	if not cur_state:
+		cur_state = get_serialized_play_state()
+	
+	if not checkpoint_save:
+		cur_state["undo_checkpoint_id"] = -1
+	else:
+		var c_id: = _get_undo_checkpoint_id()
+		cur_state["undo_checkpoint_id"] = c_id
+		if c_id not in undo_checkpoints:
+			_register_undo_checkpoint(c_id, checkpoint_save)
+
+	undo_stack.append(cur_state)
+	if undo_stack.size() > MAX_UNDO_LIMIT:
+		remove_oldest_undo_state()
+	cur_undo_is_current_state = as_current_state
+
+func _register_undo_checkpoint(checkpoint_id: int, checkpoint_state: Dictionary) -> void:
+	undo_checkpoints[checkpoint_id] = checkpoint_state
+	undo_checkpoints_created[checkpoint_id] = undo_stack.size()
+
+func remove_oldest_undo_state() -> void:
+	if undo_stack.size() < 1:
+		return
+	undo_stack.pop_front()
+	for checkpoint_id in undo_checkpoints_created.keys():
+		var created_at: = undo_checkpoints_created[checkpoint_id]
+		if created_at < 1:
+			undo_checkpoints.erase(checkpoint_id)
+			undo_checkpoints_created.erase(checkpoint_id)
+		else:
+			undo_checkpoints_created[checkpoint_id] = created_at - 1
+
+func pop_and_load_undo_state() -> void:
+	if undo_stack.size() < 1:
+		return
+	
+	# only remove an undo from the stack if the top is the current state, otherwise load the top and set cur_undo_is_current_state
+	if cur_undo_is_current_state and undo_stack.size() > 1:
+		undo_stack.pop_back()
+	var popped_state: Dictionary = undo_stack.back()
+	cur_undo_is_current_state = true
+
+	if popped_state["undo_checkpoint_id"] == -1 or not popped_state["undo_checkpoint_id"] in undo_checkpoints:
+		clear_checkpoint()
+	else:
+		checkpoint_save = undo_checkpoints[popped_state["undo_checkpoint_id"]]
+
+	if undo_stack.size() < 1:
+		undo_checkpoints.clear()
+		undo_checkpoints_created.clear()
+	else:
+		clear_undo_checkpoints_after(undo_stack.size() - 1)
+	
+	print_debug("popped undo state, %d undos remain" % undo_stack.size())
+
+	load_serialized_play_state(popped_state, false)
+
+func clear_undo_checkpoints_after(index: int) -> void:
+	for checkpoint_id in undo_checkpoints_created.keys():
+		if undo_checkpoints_created[checkpoint_id] > index:
+			undo_checkpoints.erase(checkpoint_id)
+			undo_checkpoints_created.erase(checkpoint_id)
+
+func _get_undo_checkpoint_id() -> int:
+	for checkpoint_id in undo_checkpoints_created:
+		if is_same(undo_checkpoints[checkpoint_id], checkpoint_save):
+			return checkpoint_id
+	next_undo_checkpoint_id += 1
+	return next_undo_checkpoint_id
