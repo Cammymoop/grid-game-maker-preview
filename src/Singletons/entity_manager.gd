@@ -1434,7 +1434,11 @@ func can_move_to(moving_entity: BaseEntity, tile_position: Vector2i) -> bool:
                     return false
     return true
 
-func can_move_to_multiple(moving_entity: BaseEntity, tile_positions: Array[Vector2i]) -> bool:
+func can_move_to_multiple(moving_entity: BaseEntity, tile_positions: Array[Vector2i], change_facing_to: int = -1) -> bool:
+    var old_facing: int = moving_entity.facing
+    if change_facing_to >= 0:
+        moving_entity.facing = change_facing_to
+
     var entities_here: = get_entities_at_multiple(tile_positions, moving_entity)
     for e in entities_here:
         var blocks: = get_entity_property(e, "blocks")
@@ -1445,6 +1449,7 @@ func can_move_to_multiple(moving_entity: BaseEntity, tile_positions: Array[Vecto
             else:
                 if blocks.get_value():
                     return false
+    moving_entity.facing = old_facing
     return true
 
 func set_entity_property(entity: BaseEntity, property_name: String, property_value: Variant) -> void:

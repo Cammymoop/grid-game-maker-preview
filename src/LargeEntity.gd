@@ -6,6 +6,8 @@ var entity_size: Vector2 = Vector2(2, 2)
 var use_mask: bool = false
 var shape_mask: Dictionary[Vector2i, bool] = {}
 
+var _move_was_facing: int = -1
+
 func _ready() -> void:
 	super._ready()
 	#var grid_size = Vector2(MapManager.tile_width, MapManager.tile_width)
@@ -46,6 +48,7 @@ func serialize() -> Dictionary:
 	serialized["entity_size"] = Utility.get_arr_from_vector2(entity_size)
 	serialized["use_mask"] = use_mask
 	serialized["shape_mask"] = _serialize_shape_mask()
+	serialized["move_was_facing"] = _move_was_facing
 	return serialized
 
 func shrink_in_direction(in_facing_dir: int, is_relative: bool, amount: int) -> void:
@@ -110,6 +113,8 @@ func deserialize(data: Dictionary) -> void:
 		set_default_mask()
 	if sprite:
 		update_sprite_pos_scale()
+	if "move_was_facing" in data:
+		_move_was_facing = int(data["move_was_facing"])
 
 func is_at_multiple(check_positions: Array[Vector2i], include_moving_away: bool = false) -> bool:
 	var my_positions: = get_positions_at(tile_position)
@@ -141,8 +146,10 @@ func is_at_relative(check_relative: Vector2i) -> bool:
 	else:
 		return check_relative.x >= 0 and check_relative.x < entity_size.x and check_relative.y >= 0 and check_relative.y < entity_size.y
 
-func check_mask(check_offset: Vector2i) -> bool:
-	return shape_mask.get(mask_offset_rotated_by(check_offset, facing), false)
+func check_mask(check_offset: Vector2i, with_facing: int = -1) -> bool:
+	if with_facing < 0:
+		with_facing = facing
+	return shape_mask.get(mask_offset_rotated_by(check_offset, with_facing), false)
 
 func mask_offset_rotated_by(offset: Vector2i, by_facing: int) -> Vector2i:
 	if by_facing == 0 or entity_size == Vector2.ONE:
@@ -151,7 +158,9 @@ func mask_offset_rotated_by(offset: Vector2i, by_facing: int) -> Vector2i:
 	var radians: = Utility.facing_rotation(by_facing)
 	return Vector2i((Vector2(offset) - mask_pivot).rotated(radians) + mask_pivot)
 
-func get_positions_at(at_tile_position: Vector2i) -> Array[Vector2i]:
+func get_positions_at(at_tile_position: Vector2i, with_facing: int = -1) -> Array[Vector2i]:
+	if with_facing < 0:
+		with_facing = facing
 	var base_positions: = Utility.get_width_height_position_list(entity_size.x, entity_size.y)
 	var offset_positions: Array[Vector2i] = []
 	for base_pos in base_positions:
@@ -164,24 +173,31 @@ func get_pos_rect_at(at_tile_position: Vector2i) -> Rect2i:
 
 func get_auto_frontier(is_teleport: bool, from_tile_pos: Vector2i, to_tile_pos: Vector2i, in_facing_dir: int) -> Dictionary[String, Array]:
 	if is_teleport:
-		return get_teleport_frontier(from_tile_pos, to_tile_pos)
+		return get_teleport_frontier(from_tile_pos, to_tile_pos, in_facing_dir)
 	else:
 		return get_frontier(in_facing_dir)
 
 func get_frontier(in_facing_dir: int) -> Dictionary[String, Array]:
 	return _get_frontier(tile_position, tile_position + Utility.facing_vector_i(in_facing_dir))
 
-func get_teleport_frontier(from_tile_pos: Vector2i, to_tile_pos: Vector2i) -> Dictionary[String, Array]:
-	return _get_frontier(from_tile_pos, to_tile_pos)
+func get_teleport_frontier(from_tile_pos: Vector2i, to_tile_pos: Vector2i, to_facing: int = -1) -> Dictionary[String, Array]:
+	return _get_frontier(from_tile_pos, to_tile_pos, facing, to_facing)
 
 func get_current_move_frontier() -> Dictionary[String, Array]:
 	if not moving:
 		return {}
-	return _get_frontier(tile_position, next_tile_pos)
+	return _get_frontier(tile_position, next_tile_pos, _move_was_facing)
 
-func _get_frontier(from_tile_pos: Vector2i, to_tile_pos: Vector2i) -> Dictionary[String, Array]:
-	var from_positions: = get_positions_at(from_tile_pos)
-	var to_positions: = get_positions_at(to_tile_pos)
+func _get_frontier(from_tile_pos: Vector2i, to_tile_pos: Vector2i, from_facing: int = -1, to_facing: int = -1) -> Dictionary[String, Array]:
+	if to_facing < 0:
+		to_facing = facing
+	if from_facing < 0:
+		if moving:
+			from_facing = _move_was_facing
+		else:
+			from_facing = facing
+	var from_positions: = get_positions_at(from_tile_pos, from_facing)
+	var to_positions: = get_positions_at(to_tile_pos, to_facing)
 	var a_v2i: Array[Vector2i] = []
 	var frontier: Dictionary[String, Array] = {"from": a_v2i.duplicate(), "to": a_v2i}
 	for from_pos in from_positions:
@@ -221,14 +237,14 @@ func start_teleport_to(from_pos: Vector2i, to_pos: Vector2i, override_move_facin
 		override_move_facing = move_facing
 	set_move_facing(implicit_facing if override_move_facing == -1 else override_move_facing)
 
-	if override_facing == -2:
-		override_facing = facing
-	var set_facing_to: = implicit_facing if override_facing == -1 else override_facing
-	if set_facing_to != facing:
-		var do_turn_interp: = sprite.interpolate_facing_enabled
-		if not Utility.is_interp_style_smooth(get_teleport_interp_style(_is_diagonal_adj(from_pos, to_pos))):
-			do_turn_interp = false
-		set_facing(set_facing_to, not do_turn_interp)
+	var teleport_dependant_facing: int = -1
+	if override_facing >= 0:
+		teleport_dependant_facing = override_facing
+	elif override_facing == -1:
+		teleport_dependant_facing = implicit_facing
+
+	if teleport_dependant_facing == facing:
+		teleport_dependant_facing = -1
 	
 	if override_steps > 0:
 		set_steps_per_tile_override(override_steps)
@@ -239,15 +255,27 @@ func start_teleport_to(from_pos: Vector2i, to_pos: Vector2i, override_move_facin
 	# where to set tile_position to
 	var base_to_pos: = to_pos - from_delta
 	
-	return _start_move_common(base_to_pos, group_move, true, is_revertable)
+	return _start_move_common(base_to_pos, group_move, true, is_revertable, teleport_dependant_facing)
 	
-func _start_move_common(to_pos: Vector2i, is_group_move: bool, is_teleport: bool, is_revertable: bool) -> bool:
+func _start_move_common(to_pos: Vector2i, is_group_move: bool, is_teleport: bool, is_revertable: bool, change_facing_to: int = -1) -> bool:
 	var related_move_node: = EntityManager.track_move_starting(self, is_group_move, is_revertable)
 	_currently_starting_move = true
 	_current_starting_move_facing = move_facing
 	
-	var frontier: Dictionary[String, Array] = get_auto_frontier(is_teleport, tile_position, to_pos, move_facing)
-	var result: = MapManager.attempt_move(self, frontier.from, frontier.to, is_group_move)
+	var facing_to_check: int = move_facing
+	if is_teleport:
+		if change_facing_to >= 0:
+			facing_to_check = change_facing_to
+		else:
+			facing_to_check = facing
+
+	var frontier: Dictionary[String, Array] = get_auto_frontier(is_teleport, tile_position, to_pos, facing_to_check)
+
+	var force_immediate_turn: = false
+	if change_facing_to >= 0 and sprite.interpolate_facing_enabled:
+		if not Utility.is_interp_style_smooth(get_teleport_interp_style(_is_diagonal_adj(tile_position, to_pos))):
+			force_immediate_turn = true
+	var result: = MapManager.attempt_move(self, frontier.from, frontier.to, is_group_move, change_facing_to, force_immediate_turn)
 	
 	if result:
 		moving = true
@@ -284,23 +312,25 @@ func can_i_move(at_facing: int) -> bool:
 	
 	return result
 
-func can_i_teleport_to(from_pos: Vector2i, to_pos: Vector2i, with_facing: int = -1, with_move_facing: int = -1) -> bool:
-	var old_facing = facing
+func can_i_teleport_to(from_pos: Vector2i, to_pos: Vector2i, with_move_facing: int = -1, with_facing: int = -2) -> bool:
 	var old_move_facing = move_facing
-	if with_facing != -1:
-		facing = with_facing
-	elif with_facing != -2:
-		facing = _get_teleport_implicit_facing(from_pos, to_pos)
-	if with_move_facing != -1:
+	var implicit_facing: = _get_teleport_implicit_facing(from_pos, to_pos)
+
+	var check_facing: int = with_facing
+	if with_facing == -1:
+		check_facing = implicit_facing
+	elif with_facing == -2:
+		check_facing = -1
+
+	if with_move_facing >= 0:
 		set_move_facing(with_move_facing)
-	elif with_move_facing != -2:
-		set_move_facing(_get_teleport_implicit_facing(from_pos, to_pos))
+	elif with_move_facing == -1:
+		set_move_facing(implicit_facing)
 	
 	var to_base_pos: = to_pos - (from_pos - tile_position)
-	var frontier: = get_teleport_frontier(tile_position, to_base_pos)
+	var frontier: = get_teleport_frontier(tile_position, to_base_pos, check_facing)
 
 	var result: = MapManager.can_move_to_multiple(self, frontier.to)
-	facing = old_facing
 	set_move_facing(old_move_facing)
 	return result
 

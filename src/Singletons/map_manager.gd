@@ -901,17 +901,21 @@ func can_move_to(entity, tile_position) -> bool:
     
     return check_blocks_allow_move(entity, [tile_position])
 
-func can_move_to_multiple(entity: BaseEntity, tile_positions: Array[Vector2i]) -> bool:
-    if not EntityManager.can_move_to_multiple(entity, tile_positions):
+func can_move_to_multiple(entity: BaseEntity, tile_positions: Array[Vector2i], change_facing_to: int = -1) -> bool:
+    if not EntityManager.can_move_to_multiple(entity, tile_positions, change_facing_to):
         return false
     
-    return check_blocks_allow_move(entity, tile_positions)
+    return check_blocks_allow_move(entity, tile_positions, change_facing_to)
     
-func check_blocks_allow_move(entity: BaseEntity, tile_positions: Array[Vector2i]) -> bool:
+func check_blocks_allow_move(entity: BaseEntity, tile_positions: Array[Vector2i], change_facing_to: int = -1) -> bool:
     var tile_ids_here: Array[int] = []
     for layer in layers:
         for pos in tile_positions:
             Utility.arr_add_if_not_included(tile_ids_here, layer.get_cell_s(pos))
+    
+    var old_facing: int = entity.facing
+    if change_facing_to >= 0:
+        entity.facing = change_facing_to
     
     # For now we run all conditionals even if blocked already, no shortcuts, should be configurable later
     var result: = true
@@ -922,6 +926,7 @@ func check_blocks_allow_move(entity: BaseEntity, tile_positions: Array[Vector2i]
         # Run conditional on all pos where tile id exists, any true result is a block
         if conditional_tile_event(tile_positions, "blocks", entity, false, tile_id):
             result = false
+    entity.facing = old_facing
     return result
 
 func get_tile_facing_at(tile_position: Vector2i) -> int:
@@ -1088,7 +1093,7 @@ func tracked_conditional_tile_event(at_tile_positions: Array, event_name: String
     return result_info
 
 
-func attempt_move(moving_entity: BaseEntity, leaving_ps: Array[Vector2i], entering_ps: Array[Vector2i], is_group_move: bool = false) -> bool:
+func attempt_move(moving_entity: BaseEntity, leaving_ps: Array[Vector2i], entering_ps: Array[Vector2i], is_group_move: bool = false, change_facing_to: int = -1, force_immediate_turn: bool = false) -> bool:
     #var result: = conditional_tile_event(leaving_ps, "move_off_of", moving_entity, true)
     var tracked_result: = tracked_conditional_tile_event(leaving_ps, "move_off_of", moving_entity, true)
     var result: bool = tracked_result["overall"]
@@ -1100,9 +1105,21 @@ func attempt_move(moving_entity: BaseEntity, leaving_ps: Array[Vector2i], enteri
     if not result:
         return false
     
+    # Change facing dir in between leaving and entering
+    var old_facing: int = moving_entity.facing
+    if change_facing_to >= 0:
+        moving_entity.facing = change_facing_to
+    
     result = check_blocks_allow_move(moving_entity, entering_ps)
     if not EntityManager.attempt_move_enter(moving_entity, result, entering_ps, skip_collection):
         result = false
+    
+    # Restore facing if move dependant facing change exists and move failed
+    if result:
+        if change_facing_to >= 0:
+            moving_entity.set_facing(change_facing_to, force_immediate_turn)
+    else:
+        moving_entity.facing = old_facing
     
     return result
 

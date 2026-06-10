@@ -746,16 +746,16 @@ func can_i_move(at_facing: int) -> bool:
 	
 	return result
 
-func can_i_teleport_to(from_pos: Vector2i, to_pos: Vector2i, with_facing: int = -1, with_move_facing: int = -1) -> bool:
+func can_i_teleport_to(from_pos: Vector2i, to_pos: Vector2i, with_move_facing: int = -1, with_facing: int = -1) -> bool:
 	var old_facing = facing
 	var old_move_facing = move_facing
-	if with_facing != -1:
+	if with_facing >= 0:
 		facing = with_facing
-	elif with_facing != -2:
+	elif with_facing == -1:
 		facing = _get_teleport_implicit_facing(from_pos, to_pos)
-	if with_move_facing != -1:
+	if with_move_facing >= 0:
 		set_move_facing(with_move_facing)
-	elif with_move_facing != -2:
+	elif with_move_facing == -1:
 		set_move_facing(_get_teleport_implicit_facing(from_pos, to_pos))
 
 	var result: = MapManager.can_move_to(self, to_pos)

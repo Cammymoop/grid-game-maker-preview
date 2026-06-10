@@ -244,6 +244,7 @@ func refresh_layers() -> void:
         for layer_index in layers.size():
             create_and_add_nodes_for_layer(layers[layer_index], layer_index)
     if parent_entity:
+        refresh_cam_focus()
         _moving = get_is_visual_moving();
     update_layers_moving_visibility()
     if is_inside_tree():
@@ -473,7 +474,6 @@ func create_and_add_nodes_for_layer(layer_info: Dictionary, layer_index: int) ->
     
     if layer_info.get("when_camera_focus", "ignore") != "ignore":
         main_layer_node.set_meta("show_when_cam_focus", layer_info["when_camera_focus"] != "hide")
-        refresh_cam_focus()
         if GameManager.cur_scene == "Play":
             check_register_cam_focus_updates()
     
