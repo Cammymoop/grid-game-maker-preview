@@ -274,6 +274,15 @@ func get_games_list() -> Array:
 		games_list.append(game_definition['game_name'])
 	return games_list
 
+func get_game_list_with_titles() -> Array:
+	var games_list: Array[Dictionary] = []
+	for game_definition in _get_all_game_definitions():
+		games_list.append({
+			'game_name': game_definition['game_name'],
+			'game_title': game_definition.get('game_settings', {}).get('title', game_definition['game_name']),
+		})
+	return games_list
+
 func get_game_definitions_by_name() -> Dictionary[String, Dictionary]:
 	var game_defs_by_name: Dictionary[String, Dictionary] = {}
 	for game_definition in _get_all_game_definitions():

@@ -722,8 +722,12 @@ func new_empty_level():
 	EntityManager.create_defaults()
 	
 	cleanup_new_level()
+	new_level_edited_state_and_emit()
 	
+func new_level_edited_state_and_emit() -> void:
 	save_edited()
+	level_state_loaded.emit()
+	any_state_loaded.emit()
 
 func new_museum_level():
 	loaded_level_name = "Museum"
@@ -746,14 +750,9 @@ func new_museum_level():
 	var tile_museum_spacing: = Vector2i(-museum_spacing.x, museum_spacing.y)
 	MapManager.create_museum_layer(museum_player_pos, tile_museum_start_pos, tile_museum_spacing, [entity_museum])
 	
-	save_edited()
-
-func load_random_level():
-	EntityManager.clear()
-	MapManager.create_random_layer()
-	EntityManager.create_randoms()
+	MapManager.set_level_subtitle("Auto-generated showcase")
 	
-	save_edited()
+	new_level_edited_state_and_emit()
 
 func change_scene(new_scene: String):
 	if cur_scene != "Loading":
@@ -1028,6 +1027,7 @@ func save_edited_level_as(as_level_filename: String) -> void:
 	loaded_level_name = level_data["name"]
 	loaded_level_is_saved = true
 	loaded_is_autosave = false
+	current_level_is_museum = false
 	clear_checkpoint()
 
 func _get_textbox() -> Node:

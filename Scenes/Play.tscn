@@ -149,6 +149,19 @@ corner_radius_bottom_right = 3
 corner_radius_bottom_left = 3
 corner_detail = 5
 
+[sub_resource type="Gradient" id="Gradient_vpmux"]
+offsets = PackedFloat32Array(0.5, 0.5056391, 0.9906015, 1)
+colors = PackedColorArray(0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1)
+metadata/_snap_count = 8
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_ijdo8"]
+gradient = SubResource("Gradient_vpmux")
+fill_from = Vector2(0, 1)
+fill_to = Vector2(0.5, 0.5)
+repeat = 1
+metadata/_snap_enabled = true
+metadata/_snap_count = 8
+
 [node name="Play" type="Control" unique_id=357405740 node_paths=PackedStringArray("background_scene")]
 layout_mode = 3
 anchors_preset = 15
@@ -203,7 +216,7 @@ z_index = 5
 [node name="OverlayLayer" type="CanvasLayer" parent="." unique_id=912846084]
 layer = 8
 
-[node name="OverlayUI" type="Control" parent="OverlayLayer" unique_id=570287762 node_paths=PackedStringArray("level_title_label", "level_title_animator")]
+[node name="OverlayUI" type="Control" parent="OverlayLayer" unique_id=570287762 node_paths=PackedStringArray("level_title_label", "level_subtitle_label", "level_title_animator")]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -213,6 +226,7 @@ grow_vertical = 2
 mouse_filter = 2
 script = ExtResource("3_vx41i")
 level_title_label = NodePath("TopCenter/AnimationRoot/PanelContainer/VBoxContainer/LevelTitleLabel")
+level_subtitle_label = NodePath("TopCenter/AnimationRoot/PanelContainer/VBoxContainer/LevelSubtitleLabel")
 level_title_animator = NodePath("TopCenter/AnimationRoot/AnimationPlayer")
 
 [node name="TopCenter" type="Control" parent="OverlayLayer/OverlayUI" unique_id=158356953]
@@ -227,26 +241,29 @@ mouse_filter = 2
 position = Vector2(0, -81)
 
 [node name="PanelContainer" type="PanelContainer" parent="OverlayLayer/OverlayUI/TopCenter/AnimationRoot" unique_id=153308375]
-anchors_preset = 8
+anchors_preset = 5
 anchor_left = 0.5
-anchor_top = 0.5
 anchor_right = 0.5
-anchor_bottom = 0.5
-offset_top = 12.0
-offset_bottom = 12.0
+offset_top = -8.0
+offset_bottom = -8.0
 grow_horizontal = 2
-grow_vertical = 2
 
 [node name="VBoxContainer" type="VBoxContainer" parent="OverlayLayer/OverlayUI/TopCenter/AnimationRoot/PanelContainer" unique_id=1390456184]
 layout_mode = 2
 
 [node name="BlankLabel" type="Label" parent="OverlayLayer/OverlayUI/TopCenter/AnimationRoot/PanelContainer/VBoxContainer" unique_id=1505847387]
+visible = false
 layout_mode = 2
 
 [node name="LevelTitleLabel" type="Label" parent="OverlayLayer/OverlayUI/TopCenter/AnimationRoot/PanelContainer/VBoxContainer" unique_id=934599978]
 layout_mode = 2
 theme_override_font_sizes/font_size = 28
 text = "LEVEL NAME"
+
+[node name="LevelSubtitleLabel" type="Label" parent="OverlayLayer/OverlayUI/TopCenter/AnimationRoot/PanelContainer/VBoxContainer" unique_id=1172656503]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "subtitle"
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="OverlayLayer/OverlayUI/TopCenter/AnimationRoot" unique_id=921051847]
 libraries/ = SubResource("AnimationLibrary_r5y0w")
@@ -263,6 +280,7 @@ grow_vertical = 0
 mouse_filter = 2
 
 [node name="TextBoxAnimRoot" type="Node2D" parent="OverlayLayer/OverlayUI/BottomCenter" unique_id=1132113936 node_paths=PackedStringArray("text_label", "text_box_panel", "animator") groups=["TextBox"]]
+process_mode = 1
 position = Vector2(0, 86)
 script = ExtResource("5_q86eb")
 text_label = NodePath("TextBoxPanel/VBoxContainer/TextBoxLabel")
@@ -402,6 +420,7 @@ layout_mode = 2
 
 [node name="MapEditorUILayer" type="CanvasLayer" parent="." unique_id=1275328928]
 layer = 10
+visible = false
 
 [node name="MapEditorOverlay" type="Control" parent="MapEditorUILayer" unique_id=1493144217 node_paths=PackedStringArray("controls_help") groups=["MapEditorOverlay"]]
 process_mode = 3
@@ -415,6 +434,38 @@ mouse_filter = 2
 mouse_behavior_recursive = 1
 script = ExtResource("12_n87tl")
 controls_help = NodePath("MarginContainer/EditorControlsHelp")
+
+[node name="HBoxContainer2" type="HBoxContainer" parent="MapEditorUILayer/MapEditorOverlay" unique_id=9272406]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="TextureRect" type="TextureRect" parent="MapEditorUILayer/MapEditorOverlay/HBoxContainer2" unique_id=256487976]
+modulate = Color(0.9840464, 0.6769989, 0.41602302, 1)
+custom_minimum_size = Vector2(12, 0)
+layout_mode = 2
+mouse_filter = 2
+texture = SubResource("GradientTexture2D_ijdo8")
+expand_mode = 1
+stretch_mode = 1
+
+[node name="Spacer" type="Control" parent="MapEditorUILayer/MapEditorOverlay/HBoxContainer2" unique_id=873468444]
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 2
+
+[node name="TextureRect2" type="TextureRect" parent="MapEditorUILayer/MapEditorOverlay/HBoxContainer2" unique_id=169171515]
+modulate = Color(0.9840464, 0.6769989, 0.41602302, 1)
+custom_minimum_size = Vector2(12, 0)
+layout_mode = 2
+mouse_filter = 2
+texture = SubResource("GradientTexture2D_ijdo8")
+expand_mode = 1
+stretch_mode = 1
 
 [node name="HBoxContainer" type="HBoxContainer" parent="MapEditorUILayer/MapEditorOverlay" unique_id=827881825]
 layout_mode = 1
@@ -452,10 +503,10 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_constants/margin_left = 6
-theme_override_constants/margin_top = 6
-theme_override_constants/margin_right = 6
-theme_override_constants/margin_bottom = 6
+theme_override_constants/margin_left = 24
+theme_override_constants/margin_top = 12
+theme_override_constants/margin_right = 24
+theme_override_constants/margin_bottom = 12
 
 [node name="EditorControlsHelp" parent="MapEditorUILayer/MapEditorOverlay/MarginContainer" unique_id=1779930358 instance=ExtResource("14_n5m2s")]
 layout_mode = 2

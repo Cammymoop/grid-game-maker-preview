@@ -3,12 +3,12 @@ extends ConfirmationDialog
 func _ready():
 	if OS.has_feature("web"):
 		find_child("WebClearLocalDataButton").visible = true
-	var games = FilesManager.get_games_list()
+	var games: Array[Dictionary] = FilesManager.get_game_list_with_titles()
 	
 	var list = find_child("GamesList")
 	for i in games.size():
-		var game_name = games[i]
-		var game_title = FilesManager.get_game_definition(game_name).get("game_settings", {}).get("title", game_name)
+		var game_name = games[i]['game_name']
+		var game_title = games[i]['game_title']
 		if game_title.to_lower() != game_name.to_lower():
 			game_title = "%s (%s)" % [game_title, game_name]
 		list.add_item(game_title)

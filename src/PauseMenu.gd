@@ -4,6 +4,7 @@ const BGStyleEditor = preload("res://Scenes/GameEditor/bg_style_editor.gd")
 
 signal gameplay_paused
 signal pause_menu_closed
+signal level_metadata_changed
 
 var save_dialog = preload("res://Scenes/SaveLevelDialog.tscn")
 var load_dialog = preload("res://Scenes/LoadLevelDialog.tscn")
@@ -12,6 +13,7 @@ var active = false
 
 @export var next_level_list: OptionButton
 @export var level_title_edit: LineEdit
+@export var level_subtitle_edit: LineEdit
 
 @export var non_editor_stuff: Control
 @export var editor_stuff: Control
@@ -40,6 +42,8 @@ var active = false
 
 @export var save_as_button: Button
 
+@export var level_info_panel: Control
+
 func _ready():
 	level_editor_controls_help_toggle.toggled.connect(on_level_editor_controls_help_toggle_pressed)
 
@@ -61,8 +65,10 @@ func _ready():
 		next_level_list.item_selected.connect(next_level_picked)
 	
 	GameManager.level_state_loaded.connect(refresh_level_settings)
-	if level_title_edit:
-		level_title_edit.text_changed.connect(on_level_title_edited)
+	level_title_edit.text_changed.connect(on_level_title_edited)
+	
+	level_subtitle_edit.text_changed.connect(on_level_subtitle_edited)
+	
 	
 	level_list_picker.item_selected.connect(level_list_picked)
 
@@ -106,9 +112,11 @@ func switch_panel(to_panel: String) -> void:
 	main_panel.visible = is_main_panel
 	level_settings_panel.visible = not is_main_panel
 	if level_settings_panel.visible:
+		level_info_panel.force_show_level_info()
 		show_background_editor()
 		refresh_level_settings()
 	else:
+		level_info_panel.refresh_ui()
 		hide_background_editor()
 
 func toggle():
@@ -252,6 +260,14 @@ func on_level_title_edited(new_title: String) -> void:
 		MapManager.erase_metadata_value("title")
 	else:
 		MapManager.set_metadata_value("title", new_title)
+	level_metadata_changed.emit()
+
+func on_level_subtitle_edited(new_subtitle: String) -> void:
+	if new_subtitle == "":
+		MapManager.erase_metadata_value("subtitle")
+	else:
+		MapManager.set_metadata_value("subtitle", new_subtitle)
+	level_metadata_changed.emit()
 
 func _on_edit_level_settings_button_pressed() -> void:
 	switch_panel("level_settings")
@@ -269,6 +285,8 @@ func refresh_level_settings() -> void:
 			list_of_current_level = GameManager.get_list_containing_level(GameManager.loaded_level_name)
 	else:
 		level_title_edit.placeholder_text = ""
+	
+	level_subtitle_edit.text = MapManager.get_level_subtitle()
 	
 	refresh_level_list_picker(list_of_current_level)
 
@@ -372,6 +390,7 @@ func set_current_level_list_to(list_name: String) -> void:
 		GameManager.current_level_list = list_name
 	GameManager.save_current_game_definition()
 	GlobalToaster.show_toast_message("Saved Level List")
+	level_metadata_changed.emit()
 
 func on_web_export_level_button_pressed() -> void:
 	if not GameManager.is_in_level_edit_mode:

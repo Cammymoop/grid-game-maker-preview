@@ -1,6 +1,7 @@
 extends Control
 
 @export var level_title_label: Label
+@export var level_subtitle_label: Label
 @export var level_title_animator: AnimationPlayer
 
 @export var hide_level_title_delay_time: float = 3
@@ -11,6 +12,8 @@ var is_keep_level_title_shown: = false
 var level_title_is_showing: = false
 
 var hide_delay_timer: = Timer.new()
+
+var _paused_hidden: = false
 
 func _ready() -> void:
     process_mode = Node.PROCESS_MODE_ALWAYS
@@ -28,6 +31,21 @@ func _ready() -> void:
     if credits:
         credits.credits_opened.connect(on_credits_opened)
         credits.credits_closed.connect(on_credits_closed)
+    
+    var pause_menu: = Utility.get_pause_menu()
+    if pause_menu:
+        pause_menu.pause_menu_closed.connect(on_pause_menu_closed)
+        pause_menu.gameplay_paused.connect(on_pause_menu_opened)
+
+func on_pause_menu_closed() -> void:
+    if _paused_hidden:
+        _paused_hidden = false
+        show()
+
+func on_pause_menu_opened() -> void:
+    if visible and level_title_is_showing:
+        _paused_hidden = true
+        hide()
 
 func on_credits_opened() -> void:
     hide()
@@ -43,25 +61,28 @@ func on_level_state_loaded() -> void:
 func switch_level_title() -> void:
     await get_tree().process_frame
     var new_title: = MapManager.get_level_title()
+    var new_subtitle: = MapManager.get_level_subtitle()
     if not is_show_level_title or not new_title:
-        _set_level_title_to(new_title)
+        _set_level_title_to(new_title, new_subtitle)
         return
     if level_title_is_showing:
-        hide_show_level_title(new_title)
+        hide_show_level_title(new_title, new_subtitle)
     else:
-        _set_level_title_to(new_title)
+        _set_level_title_to(new_title, new_subtitle)
         show_level_title()
 
-func hide_show_level_title(new_title: String) -> void:
+func hide_show_level_title(new_title: String, new_subtitle: String) -> void:
     level_title_animator.play("hide")
     if level_title_animator.animation_finished.is_connected(_set_level_title_to):
         level_title_animator.animation_finished.disconnect(_set_level_title_to)
-    level_title_animator.animation_finished.connect(_set_level_title_to.bind(new_title).unbind(1))
+    level_title_animator.animation_finished.connect(_set_level_title_to.bind(new_title, new_subtitle).unbind(1))
     level_title_animator.queue("show")
     level_title_is_showing = true
 
-func _set_level_title_to(new_title: String) -> void:
+func _set_level_title_to(new_title: String, new_subtitle: String) -> void:
     level_title_label.text = new_title
+    level_subtitle_label.text = new_subtitle
+    level_subtitle_label.visible = new_subtitle != ""
 
 func show_level_title() -> void:
     if not is_show_level_title:

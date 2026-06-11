@@ -1,17 +1,18 @@
 extends PanelContainer
 
+const GameSelector = preload("res://Scenes/game_selector.gd")
+
 @export var quit_button: Button
+
+@export var game_selector: GameSelector
 
 func _ready():
 	if OS.has_feature("web"):
 		quit_button.hide()
 	quit_button.pressed.connect(get_tree().quit)
 
-	var game_title_label: Label = find_child("GameTitleLabel")
-	if GameManager.cur_game_name:
-		game_title_label.text = GameManager.get_game_title()
-	else:
-		game_title_label.visible = false
+	if game_selector:
+		game_selector.grab_focus.call_deferred()
 		
 
 func _on_PlayButton_pressed():

@@ -548,6 +548,19 @@ func get_level_title() -> String:
         return GameManager.loaded_level_name
     return title
 
+func has_level_subtitle() -> bool:
+    return map_metadata.get("subtitle", "") != ""
+
+func get_level_subtitle() -> String:
+    if not has_level_subtitle():
+        return ""
+    return map_metadata.get("subtitle", "")
+
+func set_level_subtitle(subtitle: String, update_edited_metadata: bool = true) -> void:
+    map_metadata["subtitle"] = subtitle
+    if update_edited_metadata:
+        GameManager.update_edited_level_metadata_value("subtitle", subtitle)
+
 func set_metadata_value(key: String, value: Variant, update_edited_metadata: bool = true) -> void:
     map_metadata[key] = value
     if update_edited_metadata:

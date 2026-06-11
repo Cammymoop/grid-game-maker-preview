@@ -6,6 +6,10 @@
 [ext_resource type="Theme" uid="uid://cqgddn3sedqqw" path="res://src/UI/MainMenuTheme.tres" id="3"]
 [ext_resource type="FontFile" uid="uid://cxxr3l22y0327" path="res://assets/font/NotoSans-Regular.ttf" id="3_idohh"]
 [ext_resource type="Texture2D" uid="uid://dqnmn0kgpkmm5" path="res://assets/cammy_birb_tiny.svg" id="3_ma218"]
+[ext_resource type="Texture2D" uid="uid://dbewldhewludm" path="res://assets/img/button_icons/prev_small.png" id="6_3jcrr"]
+[ext_resource type="Script" uid="uid://dir0jkugrnyfi" path="res://Scenes/game_selector.gd" id="6_ab40c"]
+[ext_resource type="Texture2D" uid="uid://c8uoricgpavvk" path="res://assets/img/button_icons/next_small.png" id="6_wfhf6"]
+[ext_resource type="Texture2D" uid="uid://rj1klhsd1xaj" path="res://assets/img/button_icons/game_list.png" id="9_sjh0l"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_syfuq"]
 content_margin_left = 16.0
@@ -34,6 +38,21 @@ func _gui_input(event: InputEvent) -> void:
 		get_node(\"../GGMLabel\").show()
 		queue_free()
 "
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ab40c"]
+draw_center = false
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+expand_margin_left = 4.0
+expand_margin_top = 4.0
+expand_margin_right = 4.0
+expand_margin_bottom = 4.0
 
 [node name="Menu" type="Control" unique_id=151932809]
 layout_mode = 3
@@ -128,7 +147,9 @@ quit_button = NodePath("MarginContainer/VBoxContainer/QuitButton")
 
 [node name="MarginContainer" type="MarginContainer" parent="MarginContainer/MainMenu" unique_id=1377947446]
 layout_mode = 2
+theme_override_constants/margin_left = 10
 theme_override_constants/margin_top = 12
+theme_override_constants/margin_right = 10
 theme_override_constants/margin_bottom = 12
 
 [node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/MainMenu/MarginContainer" unique_id=734175218]
@@ -137,12 +158,70 @@ size_flags_vertical = 4
 theme_override_constants/separation = 18
 alignment = 1
 
-[node name="GameTitleLabel" type="Label" parent="MarginContainer/MainMenu/MarginContainer/VBoxContainer" unique_id=986413740]
+[node name="GameSelector" type="MarginContainer" parent="MarginContainer/MainMenu/MarginContainer/VBoxContainer" unique_id=442655736 node_paths=PackedStringArray("focus_panel", "prev_tex_button", "next_tex_button", "list_menu_tex_button", "game_list_menu")]
+layout_mode = 2
+script = ExtResource("6_ab40c")
+focus_panel = NodePath("FocusPanel")
+prev_tex_button = NodePath("HBoxContainer/PrevTexBtn")
+next_tex_button = NodePath("HBoxContainer/NextTexBtn")
+list_menu_tex_button = NodePath("GameListTexBtn")
+game_list_menu = NodePath("GameListMenu")
+flash_color = Color(0.8678479, 0.99999994, 0.9751963, 1)
+
+[node name="FocusPanel" type="Panel" parent="MarginContainer/MainMenu/MarginContainer/VBoxContainer/GameSelector" unique_id=1609945039]
+layout_mode = 2
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_ab40c")
+
+[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/MainMenu/MarginContainer/VBoxContainer/GameSelector" unique_id=1381437813]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 6
+alignment = 1
+
+[node name="PrevTexBtn" type="TextureRect" parent="MarginContainer/MainMenu/MarginContainer/VBoxContainer/GameSelector/HBoxContainer" unique_id=219992255]
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+texture = ExtResource("6_3jcrr")
+stretch_mode = 2
+
+[node name="GameTitleLabel" type="Label" parent="MarginContainer/MainMenu/MarginContainer/VBoxContainer/GameSelector/HBoxContainer" unique_id=986413740]
 layout_mode = 2
 size_flags_horizontal = 4
 theme_override_fonts/font = ExtResource("2_s2c3o")
 theme_override_font_sizes/font_size = 24
 text = "Game Name"
+
+[node name="NextTexBtn" type="TextureRect" parent="MarginContainer/MainMenu/MarginContainer/VBoxContainer/GameSelector/HBoxContainer" unique_id=766805534]
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+texture = ExtResource("6_wfhf6")
+stretch_mode = 2
+
+[node name="GameListTexBtn" type="TextureRect" parent="MarginContainer/MainMenu/MarginContainer/VBoxContainer/GameSelector" unique_id=448414233]
+layout_mode = 2
+size_flags_horizontal = 8
+size_flags_vertical = 4
+texture = ExtResource("9_sjh0l")
+stretch_mode = 2
+
+[node name="GameListMenu" type="PopupMenu" parent="MarginContainer/MainMenu/MarginContainer/VBoxContainer/GameSelector" unique_id=1638586540]
+oversampling_override = 1.0
+position = Vector2i(200, 200)
+size = Vector2i(197, 140)
+theme_override_font_sizes/font_size = 20
+item_count = 4
+item_0/text = "example"
+item_0/id = 3
+item_0/separator = true
+item_1/text = "Chip Challonge"
+item_1/id = 0
+item_2/text = "Geode"
+item_2/id = 1
+item_3/text = "Basic"
+item_3/id = 2
 
 [node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/MainMenu/MarginContainer/VBoxContainer" unique_id=1147939781]
 custom_minimum_size = Vector2(0, 50)
