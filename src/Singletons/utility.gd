@@ -1124,4 +1124,20 @@ func rect2i_opposite_inner_corner(rect: Rect2i, corner: Vector2i) -> Vector2i:
 		opposite_corner.y = inner_end.y
 	return opposite_corner
 
+func get_transposed_v2(v2: Vector2) -> Vector2:
+	return Vector2(v2.y, v2.x)
 
+func get_fixed_point_of_orthogonal_translate_rotate(translation: Vector2, from_facing: int, to_facing: int) -> Vector2:
+	if from_facing == to_facing:
+		return Vector2.ZERO
+	var h_tr: = translation / 2
+	var delta_rotation: = posmod(to_facing - from_facing, 4)
+	if delta_rotation == 1:
+		return Vector2(h_tr.x + h_tr.y, (-h_tr.x) + h_tr.y)
+	elif delta_rotation == 3:
+		return Vector2(h_tr.x - h_tr.y, h_tr.x + h_tr.y)
+	elif delta_rotation == 2:
+		return h_tr
+	else:
+		push_error("Invalid delta rotation: %s" % delta_rotation)
+		return Vector2.ZERO

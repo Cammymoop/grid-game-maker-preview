@@ -104,7 +104,7 @@ func pre_init() -> void:
 	_pre_init_called = true
 	entity_name = EntityManager.get_entity_name(entity_index)
 	_make_sprite()
-	sprite.position = get_center_offset()
+	sprite.set_sprite_size(Vector2(MapManager.tile_width, MapManager.tile_width))
 	
 
 func initialize() -> void:
@@ -319,7 +319,8 @@ func entity_process_starting_actions() -> void:
 			for attempt in max_intentions:
 				# if a previous attempt failed, reset the visual move_facing and move move_facing
 				if attempt > 0:
-					set_facing(start_v_facing)
+					if is_square_aspect():
+						set_facing(start_v_facing)
 					set_move_facing(start_move_facing)
 				var intended_move_facing: int = -1
 				if pre_fetch_move_list.size() > 0:
@@ -339,7 +340,8 @@ func entity_process_starting_actions() -> void:
 						break
 			
 			if not moving and first_attempt_v_facing > -1:
-				set_facing(first_attempt_v_facing)
+				if is_square_aspect():
+					set_facing(first_attempt_v_facing)
 				set_move_facing(first_attempt_move_facing)
 
 func entity_process_idle_actions() -> void:
@@ -566,7 +568,7 @@ func _start_move_common(to_tile_pos: Vector2i, is_group_move: bool, is_teleport:
 	_currently_starting_move = true
 	_current_starting_move_facing = move_facing
 	
-	var result: = MapManager.attempt_move(self, [tile_position], [to_tile_pos], is_group_move)
+	var result: = MapManager.attempt_move(self, [tile_position], [to_tile_pos], to_tile_pos, is_group_move)
 
 	if result:
 		moving = true
@@ -652,6 +654,9 @@ func set_facing(new_facing: int, immediate: bool = false) -> void:
 	if no_rotate != null and no_rotate.get_value():
 		return
 	sprite.set_sprite_facing(facing, immediate)
+
+func set_facing_only(new_facing: int) -> void:
+	facing = new_facing
 
 func set_move_facing(new_facing: int) -> void:
 	move_facing = new_facing
@@ -1038,6 +1043,9 @@ func is_teleporting() -> bool:
 func is_large() -> bool:
 	return false
 
+func is_square_aspect() -> bool:
+	return true
+
 func is_visual_moving() -> bool:
 	if not moving:
 		return false
@@ -1061,3 +1069,6 @@ func replace_controller(new_controller: Node) -> void:
 	controller = new_controller
 	if controller.get_parent() != self:
 		add_child(controller)
+
+func apply_teleport_facing_change(_to_pos: Vector2i, new_facing: int, force_immediate_turn: bool) -> void:
+	set_facing(new_facing, force_immediate_turn)

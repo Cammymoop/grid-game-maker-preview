@@ -18,11 +18,20 @@ func set_default_mask() -> void:
 		for x in int(entity_size.x):
 			shape_mask[Vector2i(x, y)] = true
 
+func get_oriented_size() -> Vector2i:
+	if facing % 2 == 0:
+		return Vector2i(entity_size)
+	else:
+		return Vector2i(entity_size.y, entity_size.x)
+
+func get_oriented_half_size() -> Vector2:
+	return (get_oriented_size() * MapManager.tile_width) * 0.5
+
 func get_half_size() -> Vector2:
 	return (entity_size * MapManager.tile_width) * 0.5
 
 func update_sprite_pos_scale() -> void:
-	sprite.position = Vector2(MapManager.tile_width * entity_size.x, MapManager.tile_width * entity_size.y) / 2
+	sprite.set_sprite_size(Vector2(MapManager.tile_width * entity_size.x, MapManager.tile_width * entity_size.y))
 	if EntityManager.get_entity_prop_with_default(self, "auto-scale", true):
 		sprite.scale = entity_size
 	else:
@@ -59,7 +68,8 @@ func grow_in_direction(in_facing_dir: int, is_relative: bool, amount: int) -> vo
 
 func set_size_in_direction(in_facing_dir: int, is_relative: bool, amount: int) -> void:
 	var size_axis: = 1 if in_facing_dir == 0 or in_facing_dir == 2 else 0
-	var old_size: = int(entity_size[size_axis])
+	var oriented_size: = get_oriented_size()
+	var old_size: = int(oriented_size[size_axis])
 	var new_size: = amount
 	if is_relative:
 		new_size = old_size + amount
@@ -72,11 +82,25 @@ func set_size_in_direction(in_facing_dir: int, is_relative: bool, amount: int) -
 	var new_rect: = current_rect.grow_side(Utility.facing_to_rect_side(in_facing_dir), new_size - old_size)
 	update_position_and_size(new_rect.position, new_rect.size)
 
-func update_size(new_size: Vector2i) -> void:
-	_update_size(new_size)
+func update_size(new_size: Vector2i, is_oriented: bool = true) -> void:
+	if is_oriented:
+		_update_oriented_size(new_size)
+	else:
+		_update_size(new_size)
 
 func _update_size(new_size: Vector2i) -> void:
 	entity_size = new_size
+	# TODO preserve mask more
+	use_mask = false
+	set_default_mask()
+	if sprite:
+		update_sprite_pos_scale()
+
+func _update_oriented_size(new_size: Vector2i) -> void:
+	if facing % 2 == 0:
+		entity_size = Vector2(new_size)
+	else:
+		entity_size = Vector2(new_size.y, new_size.x)
 	# TODO preserve mask more
 	use_mask = false
 	set_default_mask()
@@ -91,7 +115,7 @@ func update_size_by_corners(corner_a: Vector2i, corner_b: Vector2i) -> void:
 func update_position_and_size(new_position: Vector2i, new_size: Vector2i) -> void:
 	var delta_pos: = new_position - get_moving_position()
 	if delta_pos == Vector2i.ZERO:
-		update_size(new_size)
+		update_size(new_size, true)
 		return
 	if moving:
 		next_tile_pos += delta_pos
@@ -99,7 +123,7 @@ func update_position_and_size(new_position: Vector2i, new_size: Vector2i) -> voi
 		tile_position += delta_pos
 		next_tile_pos = tile_position
 		position = MapManager.tile_to_world_position(tile_position)
-	_update_size(new_size)
+	update_size(new_size, true)
 
 
 
@@ -154,17 +178,28 @@ func check_mask(check_offset: Vector2i, with_facing: int = -1) -> bool:
 func mask_offset_rotated_by(offset: Vector2i, by_facing: int) -> Vector2i:
 	if by_facing == 0 or entity_size == Vector2.ONE:
 		return offset
-	var mask_pivot: = entity_size / 2 - Vector2(.5, .5)
-	var radians: = Utility.facing_rotation(by_facing)
-	return Vector2i((Vector2(offset) - mask_pivot).rotated(radians) + mask_pivot)
+	if by_facing == 2 or by_facing == 3:
+		var symmetric_pivot: = (entity_size / 2) - Vector2(.5, .5)
+		offset = Vector2i((Vector2(offset) - symmetric_pivot).rotated(TAU/2) + symmetric_pivot)
+
+	if by_facing == 2:
+		return offset
+	else:
+		var max_square: = maxf(entity_size.x, entity_size.y)
+		var odd_pivot: = (Vector2.ONE * max_square / 2) - Vector2(.5, .5)
+		return Vector2i((Vector2(offset) - odd_pivot).rotated(TAU/4) + odd_pivot)
+
+func _oriented_size_for_facing(with_facing: int) -> Vector2i:
+	return Utility.get_transposed_v2(entity_size) if with_facing % 2 == 1 else entity_size
 
 func get_positions_at(at_tile_position: Vector2i, with_facing: int = -1) -> Array[Vector2i]:
 	if with_facing < 0:
 		with_facing = facing
-	var base_positions: = Utility.get_width_height_position_list(entity_size.x, entity_size.y)
+	var check_size: = _oriented_size_for_facing(with_facing)
+	var base_positions: = Utility.get_width_height_position_list(check_size.x, check_size.y)
 	var offset_positions: Array[Vector2i] = []
 	for base_pos in base_positions:
-		if not use_mask or check_mask(base_pos):
+		if not use_mask or check_mask(base_pos, with_facing):
 			offset_positions.append(at_tile_position + base_pos)
 	return offset_positions
 
@@ -275,7 +310,7 @@ func _start_move_common(to_pos: Vector2i, is_group_move: bool, is_teleport: bool
 	if change_facing_to >= 0 and sprite.interpolate_facing_enabled:
 		if not Utility.is_interp_style_smooth(get_teleport_interp_style(_is_diagonal_adj(tile_position, to_pos))):
 			force_immediate_turn = true
-	var result: = MapManager.attempt_move(self, frontier.from, frontier.to, is_group_move, change_facing_to, force_immediate_turn)
+	var result: = MapManager.attempt_move(self, frontier.from, frontier.to, to_pos, is_group_move, change_facing_to, force_immediate_turn)
 	
 	if result:
 		moving = true
@@ -334,9 +369,38 @@ func can_i_teleport_to(from_pos: Vector2i, to_pos: Vector2i, with_move_facing: i
 	set_move_facing(old_move_facing)
 	return result
 
+func _find_teleport_fixed_point(from_facing: int, to_facing: int, to_pos: Vector2i) -> Vector2:
+	if from_facing == to_facing:
+		return Vector2.ZERO
+	
+	var from_size: = _oriented_size_for_facing(from_facing)
+	var to_size: = _oriented_size_for_facing(to_facing)
+	
+	var tile_space_from_center: = Vector2(tile_position) + (Vector2(from_size) / 2)
+	var tile_space_to_center: = Vector2(to_pos) + (Vector2(to_size) / 2)
+	var tile_space_translation: = tile_space_to_center - tile_space_from_center
+
+	# return fixed point relative to to_pos
+	var fp_relative_to_from: = Utility.get_fixed_point_of_orthogonal_translate_rotate(tile_space_translation, from_facing, to_facing)
+	return (fp_relative_to_from - tile_space_from_center) - Vector2(to_pos)
+
 func process_finish_move() -> void:
 	var frontier = _get_frontier(_from_tile_pos, next_tile_pos)
 	MapManager.finish_move(self, frontier.to)
 
 func is_large() -> bool:
 	return entity_size.x > 1 or entity_size.y > 1
+
+func apply_teleport_facing_change(to_pos: Vector2i, new_facing: int, immediate: bool) -> void:
+	if new_facing == facing or is_square_aspect() or not sprite.interpolate_facing_enabled:
+		set_facing(new_facing, immediate)
+		return
+	var no_rotate = EntityManager.get_entity_property(self, "no-rotate")
+	if no_rotate != null and no_rotate.get_value():
+		return
+	
+	var is_smooth_move_interp: = Utility.is_interp_style_smooth(get_teleport_interp_style(_is_diagonal_adj(tile_position, to_pos)))
+	
+	# fixed point is relative to new position
+	var fixed_point: = _find_teleport_fixed_point(facing, new_facing, to_pos) * MapManager.tile_width
+	sprite.set_sprite_facing_with_fixed_point(new_facing, fixed_point, immediate)

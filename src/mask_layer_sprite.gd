@@ -48,6 +48,10 @@ var _local_prop_updated: = false
 var _dying_with_animated_mod: String = ""
 var parent_entity: BaseEntity = null
 
+var unoriented_center: Vector2 = Vector2.ZERO
+var unoriented_bounds: Vector2 = Vector2(32, 32)
+var simple_rotate: bool = true
+
 var interpolate_facing_enabled: bool = true
 var interp_facing_timer: float = 0.0
 @export var interp_duration: float = 0.24
@@ -936,3 +940,14 @@ func get_is_visual_moving() -> bool:
     if not parent_entity:
         return false
     return parent_entity.is_visual_moving()
+
+func set_sprite_size(new_unoriented_bounds: Vector2) -> void:
+    unoriented_bounds = new_unoriented_bounds
+    unoriented_center = unoriented_bounds / 2
+    simple_rotate = unoriented_bounds.x == unoriented_bounds.y
+    _update_oriented_position()
+
+func _update_oriented_position() -> void:
+    if simple_rotate or _current_facing == 0:
+        position = unoriented_center
+        return

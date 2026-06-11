@@ -915,7 +915,7 @@ func check_blocks_allow_move(entity: BaseEntity, tile_positions: Array[Vector2i]
     
     var old_facing: int = entity.facing
     if change_facing_to >= 0:
-        entity.facing = change_facing_to
+        entity.set_facing_only(change_facing_to)
     
     # For now we run all conditionals even if blocked already, no shortcuts, should be configurable later
     var result: = true
@@ -926,7 +926,7 @@ func check_blocks_allow_move(entity: BaseEntity, tile_positions: Array[Vector2i]
         # Run conditional on all pos where tile id exists, any true result is a block
         if conditional_tile_event(tile_positions, "blocks", entity, false, tile_id):
             result = false
-    entity.facing = old_facing
+    entity.set_facing_only(old_facing)
     return result
 
 func get_tile_facing_at(tile_position: Vector2i) -> int:
@@ -1093,7 +1093,7 @@ func tracked_conditional_tile_event(at_tile_positions: Array, event_name: String
     return result_info
 
 
-func attempt_move(moving_entity: BaseEntity, leaving_ps: Array[Vector2i], entering_ps: Array[Vector2i], is_group_move: bool = false, change_facing_to: int = -1, force_immediate_turn: bool = false) -> bool:
+func attempt_move(moving_entity: BaseEntity, leaving_ps: Array[Vector2i], entering_ps: Array[Vector2i], new_pos: Vector2i, is_group_move: bool = false, change_facing_to: int = -1, force_immediate_turn: bool = false) -> bool:
     #var result: = conditional_tile_event(leaving_ps, "move_off_of", moving_entity, true)
     var tracked_result: = tracked_conditional_tile_event(leaving_ps, "move_off_of", moving_entity, true)
     var result: bool = tracked_result["overall"]
@@ -1117,7 +1117,7 @@ func attempt_move(moving_entity: BaseEntity, leaving_ps: Array[Vector2i], enteri
     # Restore facing if move dependant facing change exists and move failed
     if result:
         if change_facing_to >= 0:
-            moving_entity.set_facing(change_facing_to, force_immediate_turn)
+            moving_entity.apply_teleport_facing_change(new_pos, change_facing_to, force_immediate_turn)
     else:
         moving_entity.facing = old_facing
     
