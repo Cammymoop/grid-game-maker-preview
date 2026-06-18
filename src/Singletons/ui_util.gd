@@ -12,6 +12,7 @@ var command_item_tab_template: StyleBoxFlat = preload("res://assets/ui/PropertyE
     Slot.PINK: Color.PINK,
     Slot.GREY: Color.GRAY,
     Slot.BLACK: Color.BLACK,
+    Slot.ORANGE: Color.ORANGE,
     Slot.A: Color.RED * 0.5,
     Slot.B: Color.RED * 0.5,
     Slot.C: Color.RED * 0.5,
