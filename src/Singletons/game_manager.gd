@@ -331,7 +331,7 @@ func load_game_definition_data(definition_data: Dictionary) -> void:
 		EntityManager.refresh_definition()
 		EntityManager.build_sprite_previews()
 	
-	if cur_scene != "Loading":
+	if cur_scene != "Loading" and cur_scene != "Menu":
 		change_scene(cur_scene)
 		
 		if cur_scene == "GameEditor":

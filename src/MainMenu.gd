@@ -1,10 +1,12 @@
 extends PanelContainer
 
 const GameSelector = preload("res://Scenes/game_selector.gd")
+const MainMenuEffects = preload("res://src/MainMenuEffects.gd")
 
 @export var quit_button: Button
 
 @export var game_selector: GameSelector
+@export var bg_entity_effect: MainMenuEffects
 
 func _ready():
 	if OS.has_feature("web"):
@@ -13,7 +15,9 @@ func _ready():
 
 	if game_selector:
 		game_selector.grab_focus.call_deferred()
-		
+		game_selector.changed_game.connect(on_game_changed)
+	
+	EntityManager.initial_sprite_previews_finished.connect(on_initial_sprite_previews_finished)
 
 func _on_PlayButton_pressed():
 	if GameManager.is_in_level_edit_mode:
@@ -43,3 +47,10 @@ func _on_import_new_game_button_pressed() -> void:
 
 func _on_import_levels_button_pressed() -> void:
 	GameManager.start_import_levels()
+
+func on_game_changed(_game_name: String) -> void:
+	bg_entity_effect.pause_drops()
+
+func on_initial_sprite_previews_finished() -> void:
+	await get_tree().process_frame
+	bg_entity_effect.restart()

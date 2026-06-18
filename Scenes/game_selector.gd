@@ -22,15 +22,52 @@ var game_titles: Dictionary[String, String] = {}
 var non_unique_titles: Array[String] = []
 
 var anim_time: = 0.0
+var _min_width: = 0.0
+var _width_extra: = 0.0
+
+@export var _root_container: Container
 
 func _ready() -> void:
+    _min_width = size.x
+    var main_menu_panel: Control = find_parent("MainMenu")
+    _width_extra = 100 + (main_menu_panel.size.x - _min_width) + 2
+
     focus_mode = Control.FOCUS_ALL
     focus_panel.visible = false
     focus_entered.connect(on_focus_entered)
     focus_exited.connect(on_focus_exited)
     
+    get_viewport().size_changed.connect(update_title_text)
+    
+    update_title_text()
+    
+    next_tex_button.gui_input.connect(on_tex_button_gui_input.bind(next_tex_button))
+    prev_tex_button.gui_input.connect(on_tex_button_gui_input.bind(prev_tex_button))
+    list_menu_tex_button.gui_input.connect(on_tex_button_gui_input.bind(list_menu_tex_button))
+    
+    game_list_menu.index_pressed.connect(on_game_list_menu_index_pressed)
+
+func update_title_text() -> void:
+    refresh_game_list()
+    game_title_label.text_overrun_behavior = TextServer.OVERRUN_NO_TRIMMING
+    game_title_label.size_flags_horizontal = Control.SIZE_FILL
     if not GameManager.cur_game_name:
-        pass
+        game_title_label.text = "..."
+    else:
+        game_title_label.text = get_display_title(GameManager.cur_game_name)
+    prints("updated title", game_title_label.text)
+    
+    await get_tree().process_frame
+    var root_container_width: = _root_container.size.x
+    var vp: Viewport = get_viewport()
+    if root_container_width > vp.size.x:
+        # title overrun detected
+        game_title_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+        game_title_label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+        custom_minimum_size.x = vp.size.x - _width_extra
+    else:
+        custom_minimum_size.x = 0
+
 
 func get_display_title(game_name: String) -> String:
     var title: String = game_titles.get(game_name, game_name)
@@ -70,7 +107,8 @@ func change_game(dir: int) -> void:
         updated_game()
 
 func updated_game() -> void:
-    pass
+    update_title_text()
+    changed_game.emit(GameManager.cur_game_name)
 
 func _process(delta: float) -> void:
     if not has_focus():
@@ -78,6 +116,10 @@ func _process(delta: float) -> void:
             anim_time = 0.0
             set_arrow_modulate(Color.WHITE)
         return
+    
+    if Input.is_action_just_pressed("ui_select"):
+        if not game_list_menu.visible:
+            show_game_list_menu()
     
     anim_time += delta
     var arrow_mod: = flash_color * (flash_base_amt + sin(anim_time * TAU * anim_speed) * flash_delta)
@@ -103,3 +145,35 @@ func on_focus_entered() -> void:
 
 func on_focus_exited() -> void:
     focus_panel.visible = false
+
+func show_game_list_menu() -> void:
+    refresh_game_list()
+    if game_list_menu.visible:
+        hide_game_list_menu()
+    game_list_menu.popup_centered()
+
+func hide_game_list_menu() -> void:
+    game_list_menu.hide()
+
+func on_tex_button_gui_input(event: InputEvent, tex_btn: TextureRect) -> void:
+    if not event is InputEventMouseButton or event.is_pressed() or not event.button_index == MOUSE_BUTTON_LEFT:
+        return
+    prints("tex button mouse up")
+    if is_same(tex_btn, list_menu_tex_button):
+        print("show_game_list_menu")
+        show_game_list_menu()
+    else:
+        var dir: int = 1 if is_same(tex_btn, next_tex_button) else -1
+        change_game(dir)
+    if not has_focus():
+        grab_focus.call_deferred()
+    accept_event()
+
+func on_game_list_menu_index_pressed(index: int) -> void:
+    var game_name: = game_list[index]
+    if game_name and FilesManager.game_exists(game_name):
+        GameManager.load_game_definition_from_file(game_name)
+        updated_game()
+    await get_tree().process_frame
+    await get_tree().process_frame
+    hide_game_list_menu()

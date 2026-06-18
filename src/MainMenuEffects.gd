@@ -33,6 +33,8 @@ var bg_color:Color
 @export_exp_easing var mouse_push_ease_param: float = 0.2
 const ROTATION_ADJUST = 1/20.0
 
+var dropping_allowed: = true
+
 func _ready() -> void:
 	TextureManager.textures_loaded.connect(on_textures_loaded)
 	set_fall_direction(fall_direction)
@@ -49,6 +51,17 @@ func _ready() -> void:
 	
 	# Start with stuff already on the screen
 	start_fill()
+
+func restart() -> void:
+	for child in get_children():
+		if child is VelocitySprite:
+			child.queue_free()
+	reload_definitions()
+	dropping_allowed = true
+	start_fill()
+
+func pause_drops() -> void:
+	dropping_allowed = false
 
 func reload_definitions() -> void:
 	tile_indexes = MapManager.get_all_tile_indexes()
@@ -69,6 +82,8 @@ func size_changed() -> void:
 	$NewObjTimer.start()
 
 func spawn_random_obj(fall_delta: float = 0) -> void:
+	if not dropping_allowed:
+		return
 	if get_child_count() >= max_objects_cap or not visible:
 		return
 	var num_entities = entity_indexes.size()

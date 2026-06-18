@@ -137,13 +137,15 @@ layout_mode = 2
 size_flags_vertical = 3
 size_flags_stretch_ratio = 8.0
 
-[node name="MainMenu" type="PanelContainer" parent="MarginContainer" unique_id=1211793288 node_paths=PackedStringArray("quit_button")]
+[node name="MainMenu" type="PanelContainer" parent="MarginContainer" unique_id=1211793288 node_paths=PackedStringArray("quit_button", "game_selector", "bg_entity_effect")]
 custom_minimum_size = Vector2(450, 160)
 layout_mode = 2
 size_flags_horizontal = 4
 size_flags_vertical = 4
 script = ExtResource("1")
 quit_button = NodePath("MarginContainer/VBoxContainer/QuitButton")
+game_selector = NodePath("MarginContainer/VBoxContainer/GameSelector")
+bg_entity_effect = NodePath("../../FallingEntities/CanvasLayer2/Effects")
 
 [node name="MarginContainer" type="MarginContainer" parent="MarginContainer/MainMenu" unique_id=1377947446]
 layout_mode = 2
@@ -158,15 +160,18 @@ size_flags_vertical = 4
 theme_override_constants/separation = 18
 alignment = 1
 
-[node name="GameSelector" type="MarginContainer" parent="MarginContainer/MainMenu/MarginContainer/VBoxContainer" unique_id=442655736 node_paths=PackedStringArray("focus_panel", "prev_tex_button", "next_tex_button", "list_menu_tex_button", "game_list_menu")]
+[node name="GameSelector" type="MarginContainer" parent="MarginContainer/MainMenu/MarginContainer/VBoxContainer" unique_id=442655736 node_paths=PackedStringArray("focus_panel", "game_title_label", "prev_tex_button", "next_tex_button", "list_menu_tex_button", "game_list_menu", "_root_control", "_root_container")]
 layout_mode = 2
 script = ExtResource("6_ab40c")
 focus_panel = NodePath("FocusPanel")
+game_title_label = NodePath("HBoxContainer/GameTitleLabel")
 prev_tex_button = NodePath("HBoxContainer/PrevTexBtn")
 next_tex_button = NodePath("HBoxContainer/NextTexBtn")
 list_menu_tex_button = NodePath("GameListTexBtn")
 game_list_menu = NodePath("GameListMenu")
 flash_color = Color(0.8678479, 0.99999994, 0.9751963, 1)
+_root_control = NodePath("../../../../..")
+_root_container = NodePath("../../../..")
 
 [node name="FocusPanel" type="Panel" parent="MarginContainer/MainMenu/MarginContainer/VBoxContainer/GameSelector" unique_id=1609945039]
 layout_mode = 2
@@ -179,10 +184,16 @@ size_flags_horizontal = 3
 theme_override_constants/separation = 6
 alignment = 1
 
+[node name="Margin" type="Control" parent="MarginContainer/MainMenu/MarginContainer/VBoxContainer/GameSelector/HBoxContainer" unique_id=1273423205]
+custom_minimum_size = Vector2(50, 0)
+layout_mode = 2
+mouse_filter = 2
+
 [node name="PrevTexBtn" type="TextureRect" parent="MarginContainer/MainMenu/MarginContainer/VBoxContainer/GameSelector/HBoxContainer" unique_id=219992255]
 layout_mode = 2
 size_flags_horizontal = 4
 size_flags_vertical = 4
+mouse_default_cursor_shape = 2
 texture = ExtResource("6_3jcrr")
 stretch_mode = 2
 
@@ -197,13 +208,20 @@ text = "Game Name"
 layout_mode = 2
 size_flags_horizontal = 4
 size_flags_vertical = 4
+mouse_default_cursor_shape = 2
 texture = ExtResource("6_wfhf6")
 stretch_mode = 2
+
+[node name="Margin2" type="Control" parent="MarginContainer/MainMenu/MarginContainer/VBoxContainer/GameSelector/HBoxContainer" unique_id=2120093539]
+custom_minimum_size = Vector2(50, 0)
+layout_mode = 2
+mouse_filter = 2
 
 [node name="GameListTexBtn" type="TextureRect" parent="MarginContainer/MainMenu/MarginContainer/VBoxContainer/GameSelector" unique_id=448414233]
 layout_mode = 2
 size_flags_horizontal = 8
 size_flags_vertical = 4
+mouse_default_cursor_shape = 2
 texture = ExtResource("9_sjh0l")
 stretch_mode = 2
 
@@ -269,3 +287,5 @@ text = "Quit"
 [connection signal="pressed" from="MarginContainer/MainMenu/MarginContainer/VBoxContainer/HBoxContainer/EditButton" to="MarginContainer/MainMenu" method="_on_EditButton_pressed"]
 [connection signal="pressed" from="MarginContainer/MainMenu/MarginContainer/VBoxContainer/HBoxContainer2/ImportNewGameButton" to="MarginContainer/MainMenu" method="_on_import_new_game_button_pressed"]
 [connection signal="pressed" from="MarginContainer/MainMenu/MarginContainer/VBoxContainer/HBoxContainer2/ImportLevelsButton" to="MarginContainer/MainMenu" method="_on_import_levels_button_pressed"]
+
+[editable path="FallingEntities"]
