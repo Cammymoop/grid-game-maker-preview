@@ -1886,7 +1886,7 @@ func cmd_convert_bond_group_to_tailing_chain(slots: Dictionary, chosen_slot: int
 
 
 func desc_play_named_sfx() -> String:
-	return "none|Play the [sfx_name:SFXNameInput] sound effect [do_restart:BoolChoice:false,restarting if already playing,if it isn't already playing]"
+	return "none|Play the [sfx_name:SFXNameInput] sound effect [do_restart:BoolChoice:true,restarting if already playing,if it isn't already playing]"
 func cmd_play_named_sfx(slots: Dictionary, _slot: int, sfx_name: Dictionary, do_restart: bool) -> void:
 	if not sfx_name:
 		return

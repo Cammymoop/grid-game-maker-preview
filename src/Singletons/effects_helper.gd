@@ -36,9 +36,10 @@ func _fetch_effects_holder() -> void:
         return
     effects_holder = world.get_node_or_null("Effects")
     if not effects_holder:
+        prints("no effects holder")
         effects_holder = Node2D.new()
         effects_holder.name = "Effects"
-        world.add_child(effects_holder, true)
+        world.add_child.call_deferred(effects_holder, true)
     effects_holder.z_index = base_effects_z_index
 
 func _spawn_entity_layer_effect(effect_node: Node2D, at_pos: Vector2, use_id: int = -1) -> int:

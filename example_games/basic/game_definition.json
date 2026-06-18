@@ -65,6 +65,24 @@
           "when true": [],
           "when false": [],
           "when always": []
+        },
+        "post_move": {
+          "v": "3",
+          "conditions": [],
+          "when true": [
+            "basic_default.play_named_sfx::[\"i:-1\",{\"args\":[\"s:type\",\"s:plain\",\"s:value\",\"s:Step\"],\"type\":\"Dictionary\"},true]"
+          ],
+          "when false": [],
+          "when always": []
+        },
+        "was_blocked": {
+          "v": "3",
+          "conditions": [],
+          "when true": [
+            "basic_default.play_named_sfx::[\"i:-1\",{\"args\":[\"s:type\",\"s:plain\",\"s:value\",\"s:Oof\"],\"type\":\"Dictionary\"},true]"
+          ],
+          "when false": [],
+          "when always": []
         }
       },
       "controller": "InputController",
@@ -85,7 +103,9 @@
           "conditions": [
             "basic_default.c_get_pushed::[\"i:0\",{\"args\":[\"s:type\",\"s:plain\",\"s:direction\",\"i:20\"],\"type\":\"Dictionary\"},true]"
           ],
-          "when true": [],
+          "when true": [
+            "basic_default.play_named_sfx::[\"i:-1\",{\"args\":[\"s:type\",\"s:plain\",\"s:value\",\"s:Slide\"],\"type\":\"Dictionary\"},true]"
+          ],
           "when false": [],
           "when always": []
         },
@@ -142,7 +162,9 @@
             "conditions": [
               "basic_default.c_get_pushed::[\"i:0\",{\"args\":[\"s:type\",\"s:plain\",\"s:direction\",\"i:22\"],\"type\":\"Dictionary\"},true]"
             ],
-            "when true": [],
+            "when true": [
+              "basic_default.play_named_sfx::[\"i:-1\",{\"args\":[\"s:type\",\"s:plain\",\"s:value\",\"s:Reverse\"],\"type\":\"Dictionary\"},true]"
+            ],
             "when false": [],
             "when always": []
           }
@@ -221,7 +243,18 @@
         "no-rotate": true,
         "heavy": true,
         "slides": true,
-        "z-index": 2
+        "z-index": 2,
+        "post_move": {
+          "v": "3",
+          "conditions": [
+            "basic_default.if_property_value::[\"i:0\",\"s:sliding\",true]"
+          ],
+          "when true": [
+            "basic_default.keep_named_sfx_playing::[\"i:-1\",{\"args\":[\"s:type\",\"s:plain\",\"s:value\",\"s:Floating\"],\"type\":\"Dictionary\"}]"
+          ],
+          "when false": [],
+          "when always": []
+        }
       },
       "sprite_config": {
         "layers": [
@@ -252,7 +285,8 @@
             "basic_default.if_property_value::[\"i:1\",\"s:pushes-button\",true]"
           ],
           "when true": [
-            "basic_default.a_swap_tiles::[\"i:5\",\"s:toggle-floor\",\"s:toggle-wall\"]"
+            "basic_default.a_swap_tiles::[\"i:5\",\"s:toggle-floor\",\"s:toggle-wall\"]",
+            "basic_default.play_named_sfx::[\"i:-1\",{\"args\":[\"s:type\",\"s:plain\",\"s:value\",\"s:Toggle\"],\"type\":\"Dictionary\"},true]"
           ],
           "when false": [],
           "when always": []
@@ -269,7 +303,9 @@
           "conditions": [
             "basic_default.c_get_pushed::[\"i:0\",{\"args\":[\"s:type\",\"s:plain\",\"s:direction\",\"i:21\"],\"type\":\"Dictionary\"},true]"
           ],
-          "when true": [],
+          "when true": [
+            "basic_default.play_named_sfx::[\"i:-1\",{\"args\":[\"s:type\",\"s:plain\",\"s:value\",\"s:Bloop\"],\"type\":\"Dictionary\"},true]"
+          ],
           "when false": [],
           "when always": []
         },
@@ -315,7 +351,8 @@
             "basic_default.if_property_value::[\"i:1\",\"s:pushes-button\",true]"
           ],
           "when true": [
-            "basic_default.a_property_add::[\"i:0\",\"s:holding-button\",{\"args\":[\"s:type\",\"s:plain\",\"s:value\",\"f:1.0\"],\"type\":\"Dictionary\"}]"
+            "basic_default.a_property_add::[\"i:0\",\"s:holding-button\",{\"args\":[\"s:type\",\"s:plain\",\"s:value\",\"f:1.0\"],\"type\":\"Dictionary\"}]",
+            "basic_default.play_named_sfx::[\"i:-1\",{\"args\":[\"s:type\",\"s:plain\",\"s:value\",\"s:Click\"],\"type\":\"Dictionary\"},false]"
           ],
           "when false": [],
           "when always": []
@@ -372,7 +409,8 @@
             ],
             "when true": [
               "basic_default.a_turn::[\"i:1\",{\"args\":[\"s:type\",\"s:plain\",\"s:direction\",\"i:12\"],\"type\":\"Dictionary\"}]",
-              "basic_default.destroy_entity_with_effect::[\"i:0\",{\"args\":[\"s:name\",\"s:Shrink Out\"],\"type\":\"Dictionary\"}]"
+              "basic_default.destroy_entity_with_effect::[\"i:0\",{\"args\":[\"s:name\",\"s:Shrink Out\"],\"type\":\"Dictionary\"}]",
+              "basic_default.play_named_sfx::[\"i:-1\",{\"args\":[\"s:type\",\"s:plain\",\"s:value\",\"s:Pusher\"],\"type\":\"Dictionary\"},false]"
             ],
             "when false": [
               "basic_default.quit::[\"i:-1\"]"
@@ -411,7 +449,8 @@
               "basic_default.if_property_value::[\"i:1\",\"s:pushes\",true]"
             ],
             "when true": [
-              "basic_default.a_move::[\"i:0\",{\"args\":[\"s:type\",\"s:plain\",\"s:direction\",\"i:20\"],\"type\":\"Dictionary\"}]"
+              "basic_default.a_move::[\"i:0\",{\"args\":[\"s:type\",\"s:plain\",\"s:direction\",\"i:20\"],\"type\":\"Dictionary\"}]",
+              "basic_default.play_named_sfx::[\"i:-1\",{\"args\":[\"s:type\",\"s:plain\",\"s:value\",\"s:Bloop\"],\"type\":\"Dictionary\"},true]"
             ],
             "when false": [
               "basic_default.true::[\"i:-1\"]"
@@ -466,7 +505,8 @@
             "basic_default.if_all_entities_property::[\"i:5\",\"s:door-button\",true,false,\"s:holding-button\"]"
           ],
           "when true": [
-            "basic_default.a_set_tiles::[\"i:4\",\"s:open-door\"]"
+            "basic_default.a_set_tiles::[\"i:4\",\"s:open-door\"]",
+            "basic_default.play_named_sfx::[\"i:-1\",{\"args\":[\"s:type\",\"s:plain\",\"s:value\",\"s:Door Open\"],\"type\":\"Dictionary\"},false]"
           ],
           "when false": [],
           "when always": []
@@ -512,7 +552,12 @@
             "basic_default.if_property_value::[\"i:1\",\"s:player\",true]"
           ],
           "when true": [
-            "basic_default.load_next_level::[\"i:-1\",{\"args\":[\"s:type\",\"s:plain\",\"s:value\",\"f:0.40000000000001\"],\"type\":\"Dictionary\"}]"
+            "basic_default.load_next_level::[\"i:-1\",{\"args\":[\"s:type\",\"s:plain\",\"s:value\",\"f:0.40000000000001\"],\"type\":\"Dictionary\"}]",
+            "basic_default.remove_entity_controller::[\"i:1\"]",
+            "basic_default.select_text::[\"i:12\",{\"args\":[\"s:type\",\"s:plain\",\"s:value\",\"s:Level Complete!\"],\"type\":\"Dictionary\"}]",
+            "basic_default.show_mini_text_at::[\"i:1\",\"i:12\",true]",
+            "basic_default.play_named_sfx::[\"i:-1\",{\"args\":[\"s:type\",\"s:plain\",\"s:value\",\"s:Win\"],\"type\":\"Dictionary\"},false]",
+            "basic_default.play_named_sfx::[\"i:-1\",{\"args\":[\"s:type\",\"s:plain\",\"s:value\",\"s:Win 2\"],\"type\":\"Dictionary\"},false]"
           ],
           "when false": [],
           "when always": []
@@ -549,7 +594,8 @@
             "basic_default.a_set_tiles::[\"i:4\",\"s:checkp-saved\"]",
             "basic_default.select_text::[\"i:12\",{\"args\":[\"s:type\",\"s:plain\",\"s:value\",\"s:Checkpoint\"],\"type\":\"Dictionary\"}]",
             "basic_default.show_mini_text_at::[\"i:1\",\"i:12\",true]",
-            "basic_default.a_save_checkpoint::[\"i:-1\"]"
+            "basic_default.a_save_checkpoint::[\"i:-1\"]",
+            "basic_default.play_named_sfx::[\"i:-1\",{\"args\":[\"s:type\",\"s:plain\",\"s:value\",\"s:Checkpoint\"],\"type\":\"Dictionary\"},true]"
           ],
           "when false": [],
           "when always": []
@@ -577,6 +623,7 @@
             ],
             "when true": [
               "basic_default.a_move::[\"i:1\",{\"args\":[\"s:type\",\"s:plain\",\"s:direction\",\"i:22\"],\"type\":\"Dictionary\"}]",
+              "basic_default.play_named_sfx::[\"i:-1\",{\"args\":[\"s:type\",\"s:plain\",\"s:value\",\"s:Soft Splash\"],\"type\":\"Dictionary\"},true]",
               "basic_default.quit::[\"i:-1\"]"
             ],
             "when false": [],
@@ -590,7 +637,8 @@
             ],
             "when true": [
               "basic_default.destroy_entity_immediately::[\"i:1\"]",
-              "basic_default.a_set_tiles::[\"i:4\",\"s:filled-water\"]"
+              "basic_default.a_set_tiles::[\"i:4\",\"s:filled-water\"]",
+              "basic_default.play_named_sfx::[\"i:-1\",{\"args\":[\"s:type\",\"s:plain\",\"s:value\",\"s:Splash\"],\"type\":\"Dictionary\"},false]"
             ],
             "when false": [],
             "when always": []
@@ -626,6 +674,120 @@
         "Wet Boxes",
         "Sinking Feeling"
       ]
+    }
+  ],
+  "sfx_definitions": [
+    {
+      "type": "sample",
+      "name": "Splash",
+      "volume": 0.5,
+      "pitch": 1.27340536727286,
+      "sample_name": "splash"
+    },
+    {
+      "type": "sample",
+      "name": "Toggle",
+      "volume": 1.0,
+      "pitch": 0.802741561760231,
+      "sample_name": "knock"
+    },
+    {
+      "type": "sample",
+      "name": "Click",
+      "volume": 1.0,
+      "pitch": 2.57231576293474,
+      "sample_name": "switch"
+    },
+    {
+      "type": "sample",
+      "name": "Step",
+      "volume": 0.09,
+      "pitch": 2.15766927997459,
+      "sample_name": "scoot"
+    },
+    {
+      "type": "ps_sfx",
+      "name": "Door Open",
+      "volume": 0.08,
+      "pitch": 0.876486940230357,
+      "ps_seed": 593300
+    },
+    {
+      "type": "ps_sfx",
+      "name": "Checkpoint",
+      "volume": 1.55,
+      "pitch": 0.719223093324864,
+      "ps_seed": 409409
+    },
+    {
+      "type": "sample",
+      "name": "Slide",
+      "volume": 0.31,
+      "pitch": 1.77052903207834,
+      "sample_name": "burn"
+    },
+    {
+      "type": "sample",
+      "name": "Win",
+      "volume": 0.62,
+      "pitch": 0.957007077981387,
+      "sample_name": "fanfare"
+    },
+    {
+      "type": "sample",
+      "name": "Reverse",
+      "volume": 0.93,
+      "pitch": 1.19217332647245,
+      "sample_name": "undo"
+    },
+    {
+      "type": "ps_sfx",
+      "name": "Floating",
+      "volume": 0.26,
+      "pitch": 1.62156122939933,
+      "ps_seed": 905903
+    },
+    {
+      "type": "ps_sfx",
+      "name": "Pusher",
+      "volume": 1.02,
+      "pitch": 1.04492435114409,
+      "ps_seed": 997105
+    },
+    {
+      "type": "sample",
+      "name": "Oof",
+      "volume": 0.45,
+      "pitch": 0.936208812301164,
+      "sample_name": "oof"
+    },
+    {
+      "type": "sample",
+      "name": "Bloop",
+      "volume": 0.81,
+      "pitch": 0.380306103871584,
+      "sample_name": "pop"
+    },
+    {
+      "type": "ps_sfx",
+      "name": "Win 2",
+      "volume": 1.36,
+      "pitch": 0.688301590959563,
+      "ps_seed": 203909
+    },
+    {
+      "type": "sample",
+      "name": "Adder",
+      "volume": 0.45,
+      "pitch": 2.62946082069107,
+      "sample_name": "oof"
+    },
+    {
+      "type": "sample",
+      "name": "Soft Splash",
+      "volume": 0.27,
+      "pitch": 1.73205080756888,
+      "sample_name": "splash"
     }
   ]
 }
