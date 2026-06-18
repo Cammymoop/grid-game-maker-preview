@@ -23,7 +23,7 @@
     "window_height": 14.0,
     "auto_aspect": true,
     "camera_settings": {
-      "follow_entity": "player"
+      "follow_entity": "InputController"
     },
     "game_view_size": [
       22.0,
@@ -544,8 +544,12 @@
           "v": "3",
           "conditions": [],
           "when true": [
-            "basic_default.a_save_checkpoint::[\"i:-1\"]",
-            "basic_default.a_set_tiles::[\"i:4\",\"s:checkp-saved\"]"
+            "basic_default.select_tiles_named::[\"i:20\",\"s:checkp-saved\"]",
+            "basic_default.a_set_tiles::[\"i:20\",\"s:checkpoint\"]",
+            "basic_default.a_set_tiles::[\"i:4\",\"s:checkp-saved\"]",
+            "basic_default.select_text::[\"i:12\",{\"args\":[\"s:type\",\"s:plain\",\"s:value\",\"s:Checkpoint\"],\"type\":\"Dictionary\"}]",
+            "basic_default.show_mini_text_at::[\"i:1\",\"i:12\",true]",
+            "basic_default.a_save_checkpoint::[\"i:-1\"]"
           ],
           "when false": [],
           "when always": []
