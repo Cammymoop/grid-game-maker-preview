@@ -244,7 +244,8 @@
           "when true": [],
           "when false": [],
           "when always": []
-        }
+        },
+        "turn-animation": "none"
       },
       "controller": "BounceController"
     },
