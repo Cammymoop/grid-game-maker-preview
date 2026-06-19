@@ -1,0 +1,7 @@
+
+Hi! Welcome to Grid Game Maker Preview!
+This is an early preview of what I want Grid Game Maker to be, please excuse the rough edges.
+
+I'm calling this a Preview instead of an Alpha or similar because this basically represents the endpoint of all of the work I've done up until now, and the start of a new version built from the ground up with what I've learned. As such, please take everything featured here as tentative, and dont expect anything to carry over seamlessly to future versions. I will also not be updating this version very much as I'll be working on what will become a GGM 1.0 instead.
+
+Have Fun! -Cammymoop
