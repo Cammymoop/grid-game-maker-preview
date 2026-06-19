@@ -1,0 +1,32 @@
+
+
+Video guides:
+
+GGM 101:
+* Play vs Edit
+* Importing/Exporting Games
+* Editing Levels
+* Basic Editing Items
+  - Controllable player
+  - Pushable block
+  - Wall Tile
+  - Lock & Key
+  - Completing a level
+* Add simple SFX
+* Make custom image with built-in graphics variant in Tile Compositor
+  - Note on bundled images when exporting games
+* Import image (web)
+* Edit background style
+* Level list overview
+
+
+Conditionals and Entity features:
+* Conditionals 101 review:
+  - Pushable block, wall, lock & key
+* Conditional vs Unconditional events, step results and multiple steps
+
+
+Visuals & Audio:
+* About grid-vs-image-tile size
+* Movement and rotation interpolation
+* Per-entity-type animation overrides

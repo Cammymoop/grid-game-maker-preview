@@ -3,6 +3,7 @@ extends HBoxContainer
 signal step_changed(step_num: int)
 signal add_step_after(step_num: int)
 signal remove_step(step_num: int)
+signal request_move_step(direction: int)
 
 @onready var prev_step_button = find_child("PrevStepButton")
 @onready var next_step_button = find_child("NextStepButton")
@@ -10,10 +11,16 @@ signal remove_step(step_num: int)
 @onready var remove_step_button = find_child("RemoveStepButton")
 @onready var num_label = find_child("StepNumLabel")
 
+@export var move_back_button: Button
+@export var move_forward_button: Button
+
 var step_count: int = 1
 var current_step: int = 0
 
 func _ready():
+	move_back_button.pressed.connect(move_cur_step.bind(-1))
+	move_forward_button.pressed.connect(move_cur_step.bind(1))
+
 	update_ui()
 	prev_step_button.pressed.connect(prev_step)
 	next_step_button.pressed.connect(next_step)
@@ -53,7 +60,15 @@ func update_step_label() -> void:
 	num_label.text = "%d/%d" % [current_step + 1, step_count]
 
 func update_button_states() -> void:
-	prev_step_button.disabled = current_step < 1
-	next_step_button.disabled = current_step >= step_count - 1
+	var no_prev: = current_step < 1
+	var no_next: = current_step >= step_count - 1
+
+	prev_step_button.disabled = no_prev
+	move_back_button.disabled = no_prev
+	next_step_button.disabled = no_next
+	move_forward_button.disabled = no_next
 	
 	remove_step_button.disabled = step_count <= 1
+
+func move_cur_step(direction: int) -> void:
+	request_move_step.emit(direction)

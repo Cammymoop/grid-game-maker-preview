@@ -1,0 +1,2 @@
+
+Grid Game Maker is a free tool to create, play, and make custom content for games which take place on discrete 2d grids. The goal is to give you accessible tools to quickly hash out unique ideas while also adding some level of presentational flair and polish. All while being general enough to be usable for many different genres, play styles, and so forth. 

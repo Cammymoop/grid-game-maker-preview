@@ -47,11 +47,21 @@ var adding_command_to_destination: String = "conditions"
 
 static var last_size: Vector2i = Vector2i(0, 0)
 
+var _sized: = false
+
 func _init() -> void:
     if last_size.x > 0 and last_size.y > 0:
         size = last_size
+        _sized = true
 
 func _ready():
+    if not _sized:
+        var window_size: = get_tree().root.size
+        prints("window size", window_size, "old size", size)
+        size.y = maxf(size.y, window_size.y * 0.8)
+        size.x = maxf(size.x, window_size.x * 0.7)
+        prints("new size", size)
+
     if not event_name:
         event_name_label.hide()
     else:
@@ -73,16 +83,21 @@ func _ready():
     if not use_conditionalv3:
         steps_ui.hide()
     else:
-        for tab_node in action_tabs.get_children():
-            tab_node.queue_free()
+        var when_list_names: = ["when true", "when false", "always"]
+        for i in when_list_names.size():
+            when_lists[when_list_names[i]] = action_tabs.get_child(i)
+
         true_actions_list = null
         false_actions_list = null
         always_actions_list = null
         steps_ui.show()
     
+    action_tabs.tab_changed.connect(on_actions_tab_changed)
+    
     steps_ui.step_changed.connect(on_step_changed)
     steps_ui.add_step_after.connect(on_add_step_after)
     steps_ui.remove_step.connect(on_remove_step)
+    steps_ui.request_move_step.connect(on_move_step)
     
     close_requested.connect(cancel)
     
@@ -217,9 +232,9 @@ func set_v3_full_data(new_data: Array) -> void:
 
 func load_v3_conditional_data_step(from_data: Dictionary) -> void:
     clear_edited_step()
-    add_when_list("when true")
-    add_when_list("when false")
-    add_when_list("always")
+    #add_when_list("when true")
+    #add_when_list("when false")
+    #add_when_list("always")
     var show_when_list: String = "when true"
     if "when always" in from_data and from_data["when always"].size() > 0:
         show_when_list = "always"
@@ -240,6 +255,8 @@ func load_v3_conditional_data_step(from_data: Dictionary) -> void:
                 var new_list_item = create_v3_command_item(qualified_name, arg_string)
                 new_list_items.append(new_list_item)
         set_command_list_items(new_list_items, key)
+    
+    update_actions_list_content_flags()
 
 func set_command_list_items(new_list_items: Array, command_list_name: String) -> void:
     if command_list_name == "conditions":
@@ -255,8 +272,9 @@ func append_item_to_command_list(new_list_item: CommandListItem, command_list_na
         if command_list_name == "when always":
             command_list_name = "always"
         if command_list_name not in when_lists:
-            prints("when list: %s not found, adding" % command_list_name)
-            add_when_list(command_list_name)
+            push_error("when list: %s not found, adding" % command_list_name)
+            #prints("when list: %s not found, adding" % command_list_name)
+            #add_when_list(command_list_name)
         when_lists[command_list_name].get_list().add_child(new_list_item)
 
 func add_when_list(command_list_name: String) -> void:
@@ -340,9 +358,9 @@ func _on_NewConditionButton_pressed():
     add_command_dialog.popup_centered()
     
 func _on_NewActionButton_pressed():
-    var action_list_name: = get_current_action_list_tab_name()
+    var action_list_title: = get_current_action_list_tab_title()
     adding_command_to_destination = "actions"
-    add_command_dialog.set_list_and_mode(action_list_name, false)
+    add_command_dialog.set_list_and_mode(action_list_title, false)
     add_command_dialog.popup_centered()
     #_old_add_action_dialog.popup_centered()
 
@@ -355,7 +373,7 @@ func open_new_command_for_replace(command_list: Control, command_index: int) -> 
         add_command_dialog.set_list_and_mode("Conditions", true)
     else:
         adding_command_to_destination = "actions"
-        add_command_dialog.set_list_and_mode(get_current_action_list_tab_name(), false)
+        add_command_dialog.set_list_and_mode(get_current_action_list_tab_title(), false)
     add_command_dialog.popup_centered()
 
 func _on_SaveButton_pressed():
@@ -407,8 +425,9 @@ func _clear_list(list_node: Node) -> void:
         child.queue_free()
 
 func clear_when_lists() -> void:
-    for when_list_name in when_lists.keys():
-        remove_when_list(when_list_name)
+    action_tabs.clear_list_contents()
+    #for when_list_name in when_lists.keys():
+        #remove_when_list(when_list_name)
 
 func cancel() -> void:
     emit_signal("cancelled")
@@ -419,5 +438,43 @@ func on_add_command_hidden() -> void:
     if is_new_command_replace:
         is_new_command_replace = false
 
-func get_current_action_list_tab_name() -> String:
+func get_current_action_list_tab_title() -> String:
     return action_tabs.get_tab_title(action_tabs.current_tab)
+
+func on_move_step(direction: int) -> void:
+    var new_step_index: = current_step + direction
+    if new_step_index < 0 or new_step_index >= step_count:
+        return
+    if current_conditional.size() != step_count:
+        push_error("Step count mismatch: %d != %d" % [current_conditional.size(), step_count])
+        return
+    update_current_step()
+    
+    var step_data = current_conditional[current_step]
+    current_conditional.erase(current_step)
+    current_conditional.insert(new_step_index, step_data)
+    current_step = new_step_index
+    steps_ui.set_step(step_count, current_step)
+    
+func update_actions_list_content_flags() -> void:
+    var content_flags: Array = []
+
+    var true_list_count = 0
+    if "when true" in when_lists:
+        true_list_count = when_lists["when true"].get_list().get_child_count()
+    content_flags.append(true_list_count > 0)
+
+    var false_list_count = 0
+    if "when true" in when_lists:
+        false_list_count = when_lists["when false"].get_list().get_child_count()
+    content_flags.append(false_list_count > 0)
+
+    var always_list_count = 0
+    if "always" in when_lists:
+        always_list_count = when_lists["always"].get_list().get_child_count()
+    content_flags.append(always_list_count > 0)
+
+    action_tabs.update_list_content_flags(content_flags)
+
+func on_actions_tab_changed(_tab_index: int) -> void:
+    update_actions_list_content_flags()
