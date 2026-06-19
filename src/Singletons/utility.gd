@@ -1141,3 +1141,11 @@ func get_fixed_point_of_orthogonal_translate_rotate(translation: Vector2, from_f
 	else:
 		push_error("Invalid delta rotation: %s" % delta_rotation)
 		return Vector2.ZERO
+
+func is_variant_valid_scalar(value: Variant) -> bool:
+	if typeof(value) in [TYPE_INT, TYPE_FLOAT]:
+		return true
+	elif typeof(value) == TYPE_STRING:
+		return value.is_valid_float()
+	else:
+		return false

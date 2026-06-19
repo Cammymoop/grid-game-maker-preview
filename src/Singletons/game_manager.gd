@@ -1371,8 +1371,44 @@ func is_level_list_unlocked(level_list_name: String) -> bool:
 	if level_list_index == 0:
 		return true
 	else:
-		# Check if level list should be unlocked here
-		return true
+		var list_info: = _get_level_list(level_list_name)
+		if list_info.get("default_locked", false):
+			return _is_level_list_unlocked_in_save(level_list_name)
+		else:
+			return true
+
+func unlock_level_in_list(level_list_name: String, level_name: String) -> void:
+	if not level_list_name:
+		var list_of_level: String = get_list_containing_level(level_name)
+		if not list_of_level:
+			return
+		level_list_name = list_of_level
+	var level_list_info: = _get_level_list(level_list_name)
+	if not level_list_info:
+		return
+	if not level_name in level_list_info.get("level_names", []):
+		return
+	if level_list_info.get("default_locked", false):
+		_unlock_level_list(level_list_name)
+	_unlock_level_code(_level_code(level_list_name, level_name))
+
+func _unlock_level_list(level_list_name: String) -> void:
+	var unlocked_lists: Array = get_game_save_data("unlocked_lists", [])
+	if level_list_name in unlocked_lists:
+		return
+	unlocked_lists.append(level_list_name)
+	set_game_save_data("unlocked_lists", unlocked_lists)
+
+func _unlock_level_code(level_code: String) -> void:
+	var unlocked_codes: Array = get_game_save_data("unlocked_level_codes", [])
+	if level_code in unlocked_codes:
+		return
+	unlocked_codes.append(level_code)
+	set_game_save_data("unlocked_level_codes", unlocked_codes)
+
+func _is_level_list_unlocked_in_save(level_list_name: String) -> bool:
+	var unlocked_lists: Array = get_game_save_data("unlocked_lists", [])
+	return level_list_name in unlocked_lists
 
 func get_unlocked_levels_in_level_list(level_list_name: String) -> Array:
 	if not is_level_list_unlocked(level_list_name):
@@ -1380,8 +1416,8 @@ func get_unlocked_levels_in_level_list(level_list_name: String) -> Array:
 	var level_list_info: = _get_level_list(level_list_name)
 	var existing_levels: = get_levels_in_level_list(level_list_name)
 	var prog_unlock_num: int = level_list_info.get("progressive_locked_levels", 0)
-	if prog_unlock_num <= 0:
-		return existing_levels
+	
+	var default_locked: bool = level_list_info.get("default_individual_locked", false)
 
 	var all_completed_levels: Array = get_game_save_data("completed_levels", [])
 	var unlocked_levels: Array = []
@@ -1389,11 +1425,18 @@ func get_unlocked_levels_in_level_list(level_list_name: String) -> Array:
 	for idx in existing_levels.size():
 		if not _level_code(level_list_name, existing_levels[idx]) in all_completed_levels:
 			continue
-		max_completed_idx = maxi(max_completed_idx, idx)
+		max_completed_idx = idx
+
 	for idx in existing_levels.size():
-		if max_completed_idx + prog_unlock_num >= idx:
+		if prog_unlock_num > 0 and max_completed_idx + prog_unlock_num >= idx:
+			unlocked_levels.append(existing_levels[idx])
+		elif not default_locked or _is_level_code_unlocked_in_save(_level_code(level_list_name, existing_levels[idx])):
 			unlocked_levels.append(existing_levels[idx])
 	return unlocked_levels
+
+func _is_level_code_unlocked_in_save(level_code: String) -> bool:
+	var unlocked_codes: Array = get_game_save_data("unlocked_level_codes", [])
+	return level_code in unlocked_codes
 
 func get_list_of_unlisted_levels() -> Array:
 	var all_level_lists: Array = get_list_of_level_lists()
@@ -1595,7 +1638,7 @@ func goto_level_in_level_list(level_list_name: String, level_name: String, as_qu
 	try_load_level(level_name, as_queued_load)
 
 
-func complete_level(level_list_name: String, level_name: String) -> void:
+func _complete_level(level_list_name: String, level_name: String) -> void:
 	if is_in_level_edit_mode:
 		return
 	var level_code: String = _level_code(level_list_name, level_name)
@@ -1604,18 +1647,24 @@ func complete_level(level_list_name: String, level_name: String) -> void:
 		completed_levels.append(level_code)
 		set_game_save_data("completed_levels", completed_levels)
 
-func complete_for_advance() -> void:
-	if is_in_level_edit_mode or not current_level_list or not loaded_level_name:
+# Complete the current level in the current list and persist any pending dependant save file values
+func complete_current_level() -> void:
+	if is_in_level_edit_mode or not loaded_level_name:
 		return
-	complete_level(current_level_list, loaded_level_name)
-	set_last_played_level_as_next_advance_to()
+	
+	var complete_in_list: String = current_level_list
+	var list_of_loaded_level: String = get_list_containing_level(loaded_level_name)
+	if not complete_in_list and list_of_loaded_level:
+		complete_in_list = list_of_loaded_level
+	_complete_level(complete_in_list, loaded_level_name)
+	MapManager.flush_save_persist_on_completion()
 
 
-func advance_level(with_delay: float = 0, complete_current_level: bool = true) -> void:
+func advance_level(with_delay: float = 0, with_complete_current_level: bool = true) -> void:
 	if cur_scene != "Play" or is_in_level_edit_mode:
 		return
-	if complete_current_level:
-		complete_level(current_level_list, loaded_level_name)
+	if with_complete_current_level:
+		complete_current_level()
 	var adv_to_level_and_list: Array = get_advance_to_level_and_list()
 	if not adv_to_level_and_list:
 		return
@@ -1624,12 +1673,31 @@ func advance_level(with_delay: float = 0, complete_current_level: bool = true) -
 	elif adv_to_level_and_list[0] == "select":
 		go_to_level_select(with_delay)
 	else:
-		if with_delay <= 0:
-			goto_level_in_level_list(adv_to_level_and_list[0], adv_to_level_and_list[1])
-		else:
-			var level_code: = _level_code(adv_to_level_and_list[0], adv_to_level_and_list[1])
-			set_game_save_data("last_played_level", level_code)
-			queue_delayed_goto_level(with_delay, level_code)
+		var level_code: String = _level_code(adv_to_level_and_list[0], adv_to_level_and_list[1])
+		_move_to_code_with_delay(level_code, with_delay)
+
+func move_to_level(level_list_name: String, level_name: String, with_delay: float = 0) -> void:
+	if cur_scene != "Play" or is_in_level_edit_mode:
+		return
+	var level_code: String = _level_code(level_list_name, level_name)
+	_move_to_code_with_delay(level_code, with_delay)
+
+func move_to_level_list_start(level_list_name: String, with_delay: float = 0) -> void:
+	if cur_scene != "Play" or is_in_level_edit_mode:
+		return
+	var list_info: = _get_level_list(level_list_name)
+	if not list_info or list_info.get("level_names", []).size() < 1:
+		return
+	var level_code: String = _level_code(level_list_name, list_info.get("level_names", [])[0])
+	_move_to_code_with_delay(level_code, with_delay)
+
+func _move_to_code_with_delay(level_code: String, with_delay: float) -> void:
+	if with_delay <= 0:
+		goto_level_code(level_code)
+	else:
+		set_game_save_data("last_played_level", level_code)
+		queue_delayed_goto_level(with_delay, level_code)
+
 
 func set_last_played_level_as_next_advance_to() -> void:
 	var adv_to_level_and_list: Array = get_advance_to_level_and_list()

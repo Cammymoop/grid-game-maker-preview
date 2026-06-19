@@ -324,3 +324,31 @@ func get_entity_from_slot(slot_id: int, slots: Dictionary) -> BaseEntity:
 		push_error("Invalid slot to get entity from: %s" % [slot_id])
 		return null
 	return slots[slot_id]
+
+func resolve_complex_string(complex_string: Dictionary, slots: Dictionary) -> String:
+	if complex_string["type"] == "plain":
+		return str(complex_string["value"])
+	elif complex_string["type"] == "slot_value":
+		var chosen_slot: int = complex_string["slot_id"]
+		if Commands.slot_is_value(chosen_slot):
+			return get_value_slot_as_string(slots, chosen_slot)
+		else:
+			push_error("Invalid complex string slot: %s" % [chosen_slot])
+			return ""
+	else:
+		push_error("Invalid complex string type: %s" % [complex_string["type"]])
+		return ""
+
+func resolve_complex_multi_type_val(complex_multi_type_val: Dictionary, slots: Dictionary) -> Variant:
+	if complex_multi_type_val["type"] == "plain":
+		return complex_multi_type_val["value"]
+	elif complex_multi_type_val["type"] == "slot_value":
+		var chosen_slot: int = complex_multi_type_val["slot_id"]
+		if Commands.slot_is_value(chosen_slot):
+			return slots[chosen_slot]
+		else:
+			push_error("Invalid complex multi type value slot: %s" % [chosen_slot])
+			return 0
+	else:
+		push_error("Invalid complex multi type value type: %s" % [complex_multi_type_val["type"]])
+		return 0

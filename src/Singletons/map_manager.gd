@@ -1330,3 +1330,47 @@ func get_max_z_at(at_tile_pos: Vector2i) -> int:
                 continue
             max_z = maxi(max_z, Utility.property_value_scalar(tile_def_props["z-index"], max_z))
     return max_z
+
+func set_save_persist_on_completion(save_key: String, value: Variant, allow_in_level_edit: bool = false) -> void:
+    if not allow_in_level_edit and GameManager.is_in_level_edit_mode:
+        return
+    if not map_metadata.has("save_persist_on_completion"):
+        map_metadata["save_persist_on_completion"] = {}
+    map_metadata["save_persist_on_completion"][save_key] = value
+
+func add_save_persist_on_completion(save_key: String, to_add: float, default_start: float = 0, allow_in_level_edit: bool = false) -> void:
+    if not allow_in_level_edit and GameManager.is_in_level_edit_mode:
+        return
+    if not map_metadata.has("save_increment_on_completion"):
+        map_metadata["save_increment_on_completion"] = {}
+    if not map_metadata["save_increment_on_completion"].has(save_key):
+        map_metadata["save_increment_on_completion"][save_key] = default_start
+    map_metadata["save_increment_on_completion"][save_key] += to_add
+
+func clear_save_adds_for(save_key: String) -> void:
+    if not map_metadata.get("save_increment_on_completion", {}).has(save_key):
+        return
+    map_metadata["save_increment_on_completion"].erase(save_key)
+
+func get_save_adds_for(save_key: String) -> float:
+    if not map_metadata.get("save_increment_on_completion", {}).has(save_key):
+        return 0
+    return map_metadata["save_increment_on_completion"][save_key]
+
+func clear_save_persist_on_completion() -> void:
+    map_metadata.erase("save_persist_on_completion")
+    map_metadata.erase("save_increment_on_completion")
+
+func flush_save_persist_on_completion() -> void:
+    for save_key in map_metadata["save_persist_on_completion"].keys():
+        var val: Variant = map_metadata["save_persist_on_completion"][save_key]
+        GameManager.set_game_save_data(save_key, val)
+    for save_key in map_metadata["save_increment_on_completion"].keys():
+        var to_add: float = map_metadata["save_increment_on_completion"][save_key]
+        var exisiting_val: Variant = GameManager.get_game_save_data(save_key, 0)
+        if not Utility.is_variant_valid_scalar(exisiting_val):
+            GameManager.set_game_save_data(save_key, to_add)
+        else:
+            var existing_scalar: float = float(exisiting_val)
+            GameManager.set_game_save_data(save_key, existing_scalar + to_add)
+    clear_save_persist_on_completion()
