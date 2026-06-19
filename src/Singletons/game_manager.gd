@@ -7,6 +7,7 @@ signal game_settings_changed
 signal game_dir_name_changed(new_game_dir_name: String)
 signal scene_changed(new_scene: String)
 signal bg_style_changed
+signal level_edit_mode_changed()
 
 const CreditsUI = preload("res://Scenes/credits_ui.gd")
 
@@ -85,6 +86,25 @@ const SPECIAL_PROPS: Array[String] = [
 	"dying-effect",
 ]
 
+const SPECIAL_PROPS_DEFAULTS: Dictionary[String, Variant] = {
+	"z-index": 0,
+	"move-turns": false,
+	
+	"auto-bond": true,
+	"auto-bond-adjacent": true,
+	
+	"die-when-blocked": true,
+
+	"move-animation": "smooth",
+	"turn-animation": "none",
+	
+	"museum-active": false,
+	"no-rotate": true,
+	"teleport-duration": 0.5,
+	"move-speed": 6,
+	"dying-effect": "Real Explosion",
+}
+
 static var SPECIAL_PROPS_HINT_TEXT: Dictionary[String, String] = {
 	"z-index": "Relative sorting offset, Entities or tiles with a higher sorting offset will be shown over others, can be negative.\nBy default entities are 5 higher than tiles.",
 	"move-turns": "If false, the entity will not automatically turn it's facing direction to match it's moving direction when it moves.",
@@ -110,7 +130,7 @@ static var SPECIAL_PROPS_HINT_TEXT: Dictionary[String, String] = {
 	"move-speed": "The default speed (grid spaces per second) that this entity moves at.\nIf not set, the default from the game settings is used.\n" +
 		'This speed can be overridden for a single movement using the "Override Move Speed" Conditional command or automatically by the "Get Pushed" command.',
 	"dying-effect": "The default effect on this entity's sprite when it is destroyed. If set, overrides the game's default dying effect.\n" +
-		"Effects: " + ", ".join(SpriteEffects.DYING_EFFECTS.keys()),
+		"Available Effects: " + ", ".join(SpriteEffects.DYING_EFFECTS.keys()),
 }
 
 enum OneTimeMessages {
@@ -2332,3 +2352,16 @@ func _get_undo_checkpoint_id() -> int:
 			return checkpoint_id
 	next_undo_checkpoint_id += 1
 	return next_undo_checkpoint_id
+
+
+func get_default_value_for_prop_name(prop_name: String) -> Variant:
+	if prop_name in ConditionalsV3.all_events:
+		if prop_name == "blocks":
+			return true
+		else:
+			return {}
+	elif prop_name in SPECIAL_PROPS and SPECIAL_PROPS_DEFAULTS.has(prop_name):
+		return SPECIAL_PROPS_DEFAULTS[prop_name]
+	elif prop_name in SPECIAL_PROPS:
+		return true
+	return true

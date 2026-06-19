@@ -595,6 +595,8 @@ func _start_move_common(to_tile_pos: Vector2i, is_group_move: bool, is_teleport:
 func on_move_was_blocked() -> void:
 	EntityManager.resolve_entity_interaction_event("was_blocked", self, null, [tile_position])
 	blocked.emit()
+	if EntityManager.get_entity_prop_is_truthy(self, "die-when-blocked"):
+		die()
 
 func _move_bump_check() -> void:
 	if EntityManager.should_bump_move():

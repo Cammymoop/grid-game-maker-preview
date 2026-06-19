@@ -422,7 +422,7 @@ func add_prop(new_prop_popup) -> void:
         show_alert('Property names cannot contain spaces or ":"')
         new_prop_popup.queue_free()
         return
-    _add_new_prop(new_prop_name, true)
+    _add_new_prop(new_prop_name, GameManager.get_default_value_for_prop_name(new_prop_name), true)
     
     await get_tree().process_frame
     if new_prop_popup and not new_prop_popup.is_queued_for_deletion():

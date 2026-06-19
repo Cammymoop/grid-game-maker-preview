@@ -93,6 +93,10 @@ func _ready() -> void:
 
 	editor_cam.edge_limit_tile_count = extend_camera_limits_by_tiles
 	editor_cam.update_bounds()
+	
+	ui_layer.visible = GameManager.is_in_level_edit_mode
+	
+	GameManager.level_edit_mode_changed.connect(on_level_edit_mode_changed)
 
 	visibility_changed.connect(on_visibility_changed)
 	var cursor_move_timer: = Utility.create_auto_repeat_delay_timer(self, 0.45, -1, is_holding_cursor_move, on_cursor_move_activated)
@@ -731,6 +735,7 @@ func switch_to_non_level_edit_mode() -> void:
 	if edit_mode:
 		switch_edit_mode(false)
 	GameManager.is_in_level_edit_mode = false
+	GameManager.level_edit_mode_changed.emit()
 	GameManager.set_live_edit_mode_enabled(false)
 	var list_of_current_level: String = ""
 	for level_list_name in GameManager.get_list_of_level_lists():
@@ -780,8 +785,7 @@ func is_alt_mode_active() -> bool:
 	return false
 
 func on_visibility_changed() -> void:
-	if ui_layer:
-		ui_layer.visible = visible
+	map_editor_overlay.visible = visible
 
 func is_other_paused() -> bool:
 	return GameManager.is_paused_by_other("map_editor")
@@ -868,3 +872,6 @@ func set_placing_text_offset(new_offset: Vector2) -> void:
 
 func on_instance_editor_edited_something() -> void:
 	has_edited_something = true
+
+func on_level_edit_mode_changed() -> void:
+	ui_layer.visible = GameManager.is_in_level_edit_mode

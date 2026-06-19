@@ -775,6 +775,7 @@ func get_minimum_list_height() -> float:
     return self_margin_height + scroll_container.get_child(0).get_minimum_size().y
 
 func _add_new_property(property_name: String, as_conditional: bool, include_value: bool = false, value: Variant = null, as_overridden: bool = false) -> int:
+    prints("adding prop:", property_name)
     if not enable_local_props and not enable_edit_base_props:
         push_error("Cannot add properties because local props are disabled and base property editing is disabled")
         return -1
@@ -798,13 +799,16 @@ func _add_new_property(property_name: String, as_conditional: bool, include_valu
         info["is_base_definition_property"] = false
         info["is_overridden"] = true
 
-    if (include_value and typeof(value) in [TYPE_DICTIONARY, TYPE_ARRAY]) or as_conditional:
-        info["is_conditional"] = true
-        if not include_value:
-            info["value"] = {}
-
     if include_value:
         info["value"] = value
+    elif as_conditional:
+        info["value"] = {}
+    else:
+        info["value"] = GameManager.get_default_value_for_prop_name(property_name)
+    prints("adding new property: %s, include_value: %s, default for name: %s, value: %s" % [property_name, include_value, GameManager.get_default_value_for_prop_name(property_name), info["value"]])
+
+    if typeof(info["value"]) in [TYPE_DICTIONARY, TYPE_ARRAY]:
+        info["is_conditional"] = true
     _add_list_item_for(new_index)
     return new_index
 
@@ -825,7 +829,7 @@ func add_pasted_new_properties_with_values(property_names: Array, prop_values: A
 func add_new_or_duplicate_property(property_name: String, as_conditional: bool, is_duplicate_of: String = "") -> void:
     var duplicate_of_index: int = index_map.get(is_duplicate_of, -1)
     var duplicate_value: Variant = null
-    if duplicate_of_index != -1:
+    if is_duplicate_of and duplicate_of_index != -1:
         as_conditional = properties_info[duplicate_of_index]["is_conditional"]
         duplicate_value = properties_info[duplicate_of_index]["value"]
         if typeof(duplicate_value) in [TYPE_DICTIONARY, TYPE_ARRAY]:
@@ -835,6 +839,8 @@ func add_new_or_duplicate_property(property_name: String, as_conditional: bool, 
     if new_index != -1:
         if is_duplicate_of:
             properties_info[new_index]["value"] = duplicate_value
+            if typeof(duplicate_value) in [TYPE_DICTIONARY, TYPE_ARRAY]:
+                properties_info[new_index]["is_conditional"] = true
         properties_info[new_index]["list_item"].start_value_editting()
         on_prop_name_width_changed()
         resort_list_items()
@@ -980,6 +986,8 @@ func focus_in_edit_mode(property_name: String) -> void:
     if not list_item.is_active():
         set_active_list_item(list_item)
     list_item.start_value_editting()
+    if properties_info[p_index]["is_conditional"]:
+        request_conditional_editor.emit(property_name, properties_info[p_index]["value"], true)
 
 func set_prop_conditional_value(property_name: String, new_value: Variant) -> void:
     var p_index: int = index_map.get(property_name, -1)

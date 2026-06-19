@@ -346,6 +346,7 @@ func switch_to_level_edit_mode() -> void:
 	if active:
 		toggle()
 	GameManager.is_in_level_edit_mode = true
+	GameManager.level_edit_mode_changed.emit()
 	GameManager.set_live_edit_mode_enabled(false)
 	var map_editor = Utility.get_map_editor()
 	if map_editor:
