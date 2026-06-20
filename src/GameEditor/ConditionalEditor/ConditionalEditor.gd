@@ -57,10 +57,8 @@ func _init() -> void:
 func _ready():
     if not _sized:
         var window_size: = get_tree().root.size
-        prints("window size", window_size, "old size", size)
         size.y = maxf(size.y, window_size.y * 0.8)
         size.x = maxf(size.x, window_size.x * 0.7)
-        prints("new size", size)
 
     if not event_name:
         event_name_label.hide()

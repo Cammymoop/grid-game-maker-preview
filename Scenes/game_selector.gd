@@ -55,7 +55,6 @@ func update_title_text() -> void:
         game_title_label.text = "..."
     else:
         game_title_label.text = get_display_title(GameManager.cur_game_name)
-    prints("updated title", game_title_label.text)
     
     await get_tree().process_frame
     var root_container_width: = _root_container.size.x
@@ -158,9 +157,7 @@ func hide_game_list_menu() -> void:
 func on_tex_button_gui_input(event: InputEvent, tex_btn: TextureRect) -> void:
     if not event is InputEventMouseButton or event.is_pressed() or not event.button_index == MOUSE_BUTTON_LEFT:
         return
-    prints("tex button mouse up")
     if is_same(tex_btn, list_menu_tex_button):
-        print("show_game_list_menu")
         show_game_list_menu()
     else:
         var dir: int = 1 if is_same(tex_btn, next_tex_button) else -1

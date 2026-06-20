@@ -77,7 +77,6 @@ func build_credits_list() -> void:
         if item_type != "role_name" and current_role_name_grid:
             current_role_name_grid = null
         elif item_type != "just_name" and current_just_names_flow:
-            prints("dropping just names flow", item_type)
             current_just_names_flow = null
 
         if item_type == "section":
@@ -93,7 +92,6 @@ func build_credits_list() -> void:
             _add_role_name_item(current_role_name_grid, credit_item.get("role", ""), credit_item.get("name", ""))
         elif item_type == "just_name":
             if not current_just_names_flow:
-                prints("adding new just names flow", credit_item)
                 current_just_names_flow = _start_just_names_flow()
             var name_label: Label = _get_centered_label(credit_item.get("name", ""), "NameListName")
             current_just_names_flow.add_child(name_label)

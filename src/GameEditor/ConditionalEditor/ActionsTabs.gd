@@ -15,7 +15,6 @@ func change_tab_to(tab_index: int) -> void:
 	fake_tabs.set_tab_index(tab_index)
 	var new_border_color = fake_tabs.get_current_tab_border_color()
 	var bg_sb: StyleBoxFlat = get_theme_stylebox("panel")
-	prints("setting border color:", new_border_color)
 	bg_sb.bg_color = new_border_color
 
 func get_current_list() -> Control:

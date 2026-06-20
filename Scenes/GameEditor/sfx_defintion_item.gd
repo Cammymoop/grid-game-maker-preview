@@ -117,7 +117,6 @@ func set_sfx_definition(sfx_definition: Dictionary) -> void:
         sfx_input.text = str(ps_seed)
         var generator_index: int = PuzzleScriptSFXR.get_generator_index_from_seed(ps_seed)
         Utility.opbtn_select_id(sfx_style_picker, generator_index)
-        prints(Utility.opbtn_get_selected_text(sfx_style_picker))
     else:
         var sample_name: String = sfx_definition.get("sample_name", "")
         var sample_name_list: Array[String] = SfxPlayer.get_sample_name_list()

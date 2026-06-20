@@ -1,0 +1,29 @@
+[gd_scene format=3 uid="uid://cscjctk2jon4t"]
+
+[ext_resource type="PackedScene" uid="uid://bh1w4w8i5hk66" path="res://Scenes/GameEditor/SlotSelectorButton.tscn" id="1_r5ayn"]
+[ext_resource type="Script" uid="uid://bt1m45a016h7k" path="res://src/GameEditor/ConditionalEditor/multi_type_cmd_input.gd" id="1_ypcqd"]
+[ext_resource type="PackedScene" uid="uid://ba6ojoxwk1drt" path="res://Scenes/GameEditor/multi_type_input.tscn" id="2_ypcqd"]
+
+[node name="MultiTypeCmdInput" type="HBoxContainer" unique_id=546195378 node_paths=PackedStringArray("slot_selector", "multi_type_input")]
+script = ExtResource("1_ypcqd")
+slot_selector = NodePath("SlotSelectorButton")
+multi_type_input = NodePath("MultiTypeInput")
+
+[node name="SlotSelectorButton" parent="." unique_id=1264497244 instance=ExtResource("1_r5ayn")]
+layout_mode = 2
+show_number_option = true
+show_text_option = true
+show_bool_option = true
+default_slot_id = -4
+show_categories = Array[String](["number", "string"])
+
+[node name="MultiTypeInput" parent="." unique_id=1750676706 instance=ExtResource("2_ypcqd")]
+custom_minimum_size = Vector2(130, 0)
+layout_mode = 2
+size_flags_vertical = 4
+show_type_picker = false
+
+[node name="OptionButton" parent="MultiTypeInput" index="0" unique_id=153621437]
+visible = false
+
+[editable path="MultiTypeInput"]

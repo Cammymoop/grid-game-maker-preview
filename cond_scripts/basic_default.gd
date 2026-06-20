@@ -1007,7 +1007,7 @@ func cmd_complete_level_and_show_level_select(_slots: Dictionary, delay: Diction
 
 func desc_exit_to_level_select() -> String:
 	return "none|Leave the current level and show the level select screen after a [delay:ComplexScalarInput:default=1,step=0.1] second delay"
-func cmd_exit_to_level_select(_slots: Dictionary, delay: Dictionary) -> void:
+func cmd_exit_to_level_select(_slots: Dictionary, _slot: int, delay: Dictionary) -> void:
 	GameManager.go_to_level_select(resolve_complex_scalar(delay, _slots))
 
 func desc_complete_level() -> String:
@@ -1017,14 +1017,14 @@ func cmd_complete_level(_slots: Dictionary) -> void:
 
 func desc_load_first_level_of_list() -> String:
 	return "none|Unlock and load the first level of the level list [list_val:LevelListNameInput] with a [delay:ComplexScalarInput:default=1,step=0.1] second delay"
-func cmd_load_first_level_of_list(_slots: Dictionary, list_val: Dictionary, delay: Dictionary) -> void:
+func cmd_load_first_level_of_list(_slots: Dictionary, _slot: int, list_val: Dictionary, delay: Dictionary) -> void:
 	var list_name: String = resolve_complex_string(list_val, _slots)
 	var delay_val: float = resolve_complex_scalar(delay, _slots)
 	GameManager.move_to_level_list_start(list_name, delay_val)
 
 func desc_load_level_within_list() -> String:
 	return "none|Unlock and load the level [level_val:LevelNameInput] within the level list [list_val:LevelListNameInput] with a [delay:ComplexScalarInput:default=1,step=0.1] second delay"
-func cmd_load_level_within_list(_slots: Dictionary, level_val: Dictionary, list_val: Dictionary, delay: Dictionary) -> void:
+func cmd_load_level_within_list(_slots: Dictionary, _slot: int, level_val: Dictionary, list_val: Dictionary, delay: Dictionary) -> void:
 	var list_name: String = resolve_complex_string(list_val, _slots)
 	var level_name: String = resolve_complex_string(level_val, _slots)
 	var delay_val: float = resolve_complex_scalar(delay, _slots)
@@ -2286,7 +2286,7 @@ func cmd_undo(_slots: Dictionary) -> void:
 
 
 func desc_select_save_file_value() -> String:
-	return "number,string|<= Select the save file value [key_val:StringInput]"
+	return "number,string|<= Select the save file value [key_val:ComplexStringInput]"
 func cmd_select_save_file_value(slots: Dictionary, chosen_slot: int, key_val: Dictionary) -> void:
 	if not Commands.slot_is_value(chosen_slot):
 		push_error("Invalid slot to select save file value into: %s" % chosen_slot)
@@ -2308,41 +2308,41 @@ func cmd_select_save_file_value(slots: Dictionary, chosen_slot: int, key_val: Di
 
 
 func desc_set_save_file_value() -> String:
-	return "none|Set the save file value [key_val:StringInput] to [val:MultiTypeInput]"
-func cmd_set_save_file_value(slots: Dictionary, key_val: Dictionary, val: Dictionary) -> void:
+	return "none|Set the save file value [key_val:ComplexStringInput] to [val:MultiTypeInput]"
+func cmd_set_save_file_value(slots: Dictionary, _slot: int, key_val: Dictionary, val: Dictionary) -> void:
 	var key_str: String = resolve_complex_string(key_val, slots)
 	var value: Variant = resolve_complex_multi_type_val(val, slots)
 	GameManager.set_game_save_data("::cmd::%s" % key_str, value)
 
 func desc_add_to_save_file_value() -> String:
-	return "none|Add [to_add:ComplexScalarInput] to the save file value [key_val:StringInput]"
-func cmd_add_to_save_file_value(slots: Dictionary, key_val: Dictionary, to_add: Dictionary) -> void:
+	return "none|Add [to_add:ComplexScalarInput] to the save file value [key_val:ComplexStringInput]"
+func cmd_add_to_save_file_value(slots: Dictionary, _slot: int, key_val: Dictionary, to_add: Dictionary) -> void:
 	var key_str: String = resolve_complex_string(key_val, slots)
 	var to_add_val: float = resolve_complex_scalar(to_add, slots)
 	GameManager.add_game_save_data("::cmd::%s" % key_str, to_add_val)
 
 func desc_set_save_file_value_on_level_completed() -> String:
-	return "none|Set the save file value [key_val:StringInput] to [val:MultiTypeInput] once the current level is completed"
-func cmd_set_save_file_value_on_level_completed(slots: Dictionary, key_val: Dictionary, val: Dictionary) -> void:
+	return "none|Set the save file value [key_val:ComplexStringInput] to [val:MultiTypeInput] once the current level is completed"
+func cmd_set_save_file_value_on_level_completed(slots: Dictionary, _slot: int, key_val: Dictionary, val: Dictionary) -> void:
 	var key_str: String = resolve_complex_string(key_val, slots)
 	var value: Variant = resolve_complex_multi_type_val(val, slots)
 	MapManager.set_save_persist_on_completion("::cmd::%s" % key_str, value)
 
 func desc_add_to_save_file_value_on_level_completed() -> String:
-	return "none|Add [to_add:ComplexScalarInput] to the save file value [key_val:StringInput] once the current level is completed"
-func cmd_add_to_save_file_value_on_level_completed(slots: Dictionary, key_val: Dictionary, to_add: Dictionary) -> void:
+	return "none|Add [to_add:ComplexScalarInput] to the save file value [key_val:ComplexStringInput] once the current level is completed"
+func cmd_add_to_save_file_value_on_level_completed(slots: Dictionary, _slot: int, key_val: Dictionary, to_add: Dictionary) -> void:
 	var key_str: String = resolve_complex_string(key_val, slots)
 	var to_add_val: float = resolve_complex_scalar(to_add, slots)
 	MapManager.add_save_persist_on_completion("::cmd::%s" % key_str, to_add_val)
 
 func desc_reset_level_complete_save_file_adds() -> String:
-	return "none|Remove pending adds to the save file value [key_val:StringInput] on level completion"
-func cmd_reset_level_complete_save_file_adds(slots: Dictionary, key_val: Dictionary) -> void:
+	return "none|Remove pending adds to the save file value [key_val:ComplexStringInput] on level completion"
+func cmd_reset_level_complete_save_file_adds(slots: Dictionary, _slot: int, key_val: Dictionary) -> void:
 	var key_str: String = resolve_complex_string(key_val, slots)
 	MapManager.clear_save_adds_for("::cmd::%s" % key_str)
 
 func desc_select_level_complete_save_file_adds() -> String:
-	return "number,string|<= Select the pending adds to the save file value [key_val:StringInput] on level completion"
+	return "number,string|<= Select the pending adds to the save file value [key_val:ComplexStringInput] on level completion"
 func cmd_select_level_complete_save_file_adds(slots: Dictionary, chosen_slot: int, key_val: Dictionary) -> void:
 	if not Commands.slot_is_value(chosen_slot):
 		push_error("Invalid slot to select level complete save file adds into: %s" % chosen_slot)

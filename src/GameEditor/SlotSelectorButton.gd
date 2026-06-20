@@ -298,3 +298,13 @@ func _on_SlotSelected(slot_name: String):
 
 func update_texture() -> void:
     cur_display.texture = slot_textures[current_slot_id]
+
+func get_value_gd_type() -> int:
+    if current_slot_id == NUMBER_VALUE:
+        return TYPE_FLOAT
+    elif current_slot_id == TEXT_VALUE:
+        return TYPE_STRING
+    elif current_slot_id == BOOL_VALUE:
+        return TYPE_BOOL
+    else:
+        return TYPE_NIL

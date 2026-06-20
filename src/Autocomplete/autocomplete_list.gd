@@ -23,6 +23,7 @@ var _bus: Node
 func _init() -> void:
 	_scroll = ScrollContainer.new()
 	_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	_scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_RESERVE
 	_vbox = VBoxContainer.new()
 	_vbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_scroll.mouse_filter = Control.MOUSE_FILTER_PASS
@@ -202,11 +203,11 @@ func position_under_anchor() -> void:
 	if sep < 0.0:
 		sep = 4.0
 	var n := _strings.size()
-	var content_h := float(n) * row_h + maxf(0.0, float(n - 1)) * sep
+	var content_h := float(n) * row_h + maxf(0.0, float(n - 1)) * sep + 2.0
 	var cap_n := maxi(1, max_visible_rows)
-	var cap_h := float(cap_n) * row_h + maxf(0.0, float(cap_n - 1)) * sep
+	var cap_h := float(cap_n) * row_h + maxf(0.0, float(cap_n - 1)) * sep + 2.0
 	var inner_h := minf(content_h, cap_h)
-	var margin_v := 4.0 + absf(_scroll.offset_top) + absf(_scroll.offset_bottom)
+	var margin_v := 6.0 + absf(_scroll.offset_top) + absf(_scroll.offset_bottom)
 	var target_h := inner_h + margin_v
 
 	global_position = gr.position + Vector2(0.0, gr.size.y)
@@ -225,8 +226,8 @@ func show_list() -> void:
 	if _strings.is_empty():
 		return
 	_ensure_bus()
-	position_under_anchor()
 	visible = true
+	position_under_anchor()
 	if _bus:
 		_bus.begin_outside_click_watch(self)
 	set_current_index(0)

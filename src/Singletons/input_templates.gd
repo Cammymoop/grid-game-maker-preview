@@ -26,6 +26,8 @@ enum InputTypes {
 	Vector2iInput,
 	Vector2Input,
 	
+	MultiTypeInput,
+	
 	SlotInput,
 	
 	MoveAnimStyleInput,
@@ -35,7 +37,10 @@ enum InputTypes {
 	DyingEffectInput,
 	BumpEffectInput,
 	
+	LevelListNameInput,
+	
 	# Janky stuff
+	LevelNameInput,
 	SpecialEffectInput,
 	ExcludeDirectionInput,
 }
@@ -66,6 +71,8 @@ var templates: = {
 	InputTypes.Vector2iInput: preload("res://Scenes/GameEditor/ConditionalEditor/vector2i_input.tscn"),
 	InputTypes.Vector2Input: preload("res://Scenes/GameEditor/ConditionalEditor/vector2f_input.tscn"),
 	
+	InputTypes.MultiTypeInput: preload("res://Scenes/GameEditor/ConditionalEditor/multi_type_cmd_input.tscn"),
+
 	InputTypes.SlotInput: preload("res://Scenes/GameEditor/ConditionalEditor/slot_input.tscn"),
 	
 	InputTypes.MoveAnimStyleInput: preload("res://Scenes/GameEditor/ConditionalEditor/move_anim_style_input.tscn"),
@@ -75,6 +82,9 @@ var templates: = {
 	InputTypes.SpecialEffectInput: preload("res://Scenes/GameEditor/static_effect_input.tscn"),
 	InputTypes.ExcludeDirectionInput: preload("res://Scenes/GameEditor/ConditionalEditor/exclude_dir_input.tscn"),
 	
+	InputTypes.LevelListNameInput: preload("res://Scenes/GameEditor/ConditionalEditor/complex_level_list_input.tscn"),
+
+	InputTypes.LevelNameInput: preload("res://Scenes/GameEditor/ConditionalEditor/complex_level_name_input.tscn"),
 
 	InputTypes.DyingEffectInput: preload("res://Scenes/GameEditor/dying_effect_input.tscn"),
 	InputTypes.BumpEffectInput: preload("res://Scenes/GameEditor/bump_effect_input.tscn"),

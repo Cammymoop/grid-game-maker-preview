@@ -160,7 +160,7 @@ size_flags_vertical = 4
 theme_override_constants/separation = 18
 alignment = 1
 
-[node name="GameSelector" type="MarginContainer" parent="MarginContainer/MainMenu/MarginContainer/VBoxContainer" unique_id=442655736 node_paths=PackedStringArray("focus_panel", "game_title_label", "prev_tex_button", "next_tex_button", "list_menu_tex_button", "game_list_menu", "_root_control", "_root_container")]
+[node name="GameSelector" type="MarginContainer" parent="MarginContainer/MainMenu/MarginContainer/VBoxContainer" unique_id=442655736 node_paths=PackedStringArray("focus_panel", "game_title_label", "prev_tex_button", "next_tex_button", "list_menu_tex_button", "game_list_menu", "_root_container")]
 layout_mode = 2
 script = ExtResource("6_ab40c")
 focus_panel = NodePath("FocusPanel")
@@ -170,7 +170,6 @@ next_tex_button = NodePath("HBoxContainer/NextTexBtn")
 list_menu_tex_button = NodePath("GameListTexBtn")
 game_list_menu = NodePath("GameListMenu")
 flash_color = Color(0.8678479, 0.99999994, 0.9751963, 1)
-_root_control = NodePath("../../../../..")
 _root_container = NodePath("../../../..")
 
 [node name="FocusPanel" type="Panel" parent="MarginContainer/MainMenu/MarginContainer/VBoxContainer/GameSelector" unique_id=1609945039]

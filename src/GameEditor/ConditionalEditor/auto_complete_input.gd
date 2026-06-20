@@ -63,9 +63,10 @@ func _create_autocomplete_menu() -> void:
 	_ac_list.item_clicked.connect(_on_ac_item_clicked)
 
 func fetch_now() -> void:
+	all_values.clear()
 	if include_other_list_in_completions:
-		all_values.assign(other_list)
-	all_values = fetch_values_func.call()
+		all_values.append_array(other_list)
+	all_values.append_array(fetch_values_func.call())
 	_fetched = true
 
 func set_fetch_values_func(new_func: Callable) -> void:
@@ -76,19 +77,26 @@ func set_fetch_values_func(new_func: Callable) -> void:
 
 
 func _gui_input(event: InputEvent) -> void:
+	if Utility.fixed_just_pressed_by_event("ui_up", event):
+		if not _ac_list or not _ac_list.visible:
+			_typed_this_focus = true
+			_sync_autocomplete_menu()
+		_ac_list.move_current(-1)
+		accept_event()
+		return
+	if Utility.fixed_just_pressed_by_event("ui_down", event):
+		if not _ac_list or not _ac_list.visible:
+			_typed_this_focus = true
+			_sync_autocomplete_menu()
+		else:
+			_ac_list.move_current(1)
+		accept_event()
 	if not use_autocomplete_menu or _ac_list == null or not _ac_list.visible:
 		return
 	if Utility.fixed_just_pressed_by_event("ui_text_completion_accept", event):
 		_accept_highlighted_autocomplete()
 		accept_event()
 		return
-	if Utility.fixed_just_pressed_by_event("ui_up", event):
-		_ac_list.move_current(-1)
-		accept_event()
-		return
-	if Utility.fixed_just_pressed_by_event("ui_down", event):
-		_ac_list.move_current(1)
-		accept_event()
 
 
 func set_arg_name(new_arg_name: String) -> void:

@@ -775,7 +775,6 @@ func get_minimum_list_height() -> float:
     return self_margin_height + scroll_container.get_child(0).get_minimum_size().y
 
 func _add_new_property(property_name: String, as_conditional: bool, include_value: bool = false, value: Variant = null, as_overridden: bool = false) -> int:
-    prints("adding prop:", property_name)
     if not enable_local_props and not enable_edit_base_props:
         push_error("Cannot add properties because local props are disabled and base property editing is disabled")
         return -1
