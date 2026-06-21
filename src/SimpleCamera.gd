@@ -42,7 +42,6 @@ func _ready():
 func update_bounds() -> void:
 	if not respect_level_bounds:
 		return
-	prints("updating camera level bounds")
 	var level_bounds = MapManager.get_level_bounds().grow(extend_level_bounds)
 	limit_left = level_bounds.position.x
 	limit_top = level_bounds.position.y
@@ -60,6 +59,8 @@ func update_bounds() -> void:
 		limit_bottom = center_y + vp_size.y/2
 
 func activate():
+	if active and is_current():
+		return
 	active = true
 	make_current()
 	if explicitly_following and target_entity and is_instance_valid(target_entity):
@@ -216,8 +217,11 @@ func find_entity_to_follow() -> void:
 	var next_to_follow: = _find_entity_to_follow()
 	target_entity = next_to_follow
 	if not target_entity:
+		prints("find entity: no target")
+		#print_stack()
 		no_more_targets.emit()
 	else:
+		prints("find entity: found target")
 		camera_target_changed.emit(target_entity)
 
 func _find_entity_to_follow() -> BaseEntity:
@@ -249,15 +253,16 @@ func get_next_prev_follow_target(dir: int = 1) -> BaseEntity:
 	return follow_targets[posmod(cur_index + dir, follow_targets.size())]
 
 func teleport(pos: Vector2) -> void:
-	prints("teleporting to: %s" % pos)
 	position = pos
 
 func on_state_loaded() -> void:
 	if not active:
 		return
 	if target_entity and is_instance_valid(target_entity):
+		prints("state loaded, camera active, target is ready")
 		teleport(get_target_iterpolated_pos())
 	else:
+		prints("state loaded, camera active, looking for target")
 		find_entity_to_follow()
 
 func get_target_iterpolated_pos() -> Vector2:

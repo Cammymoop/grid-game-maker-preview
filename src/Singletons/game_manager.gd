@@ -436,8 +436,6 @@ func load_serialized_play_state(serialized_state: Dictionary, as_level_load: boo
 	if not serialized_state or queued_level_load:
 		return
 	
-	set_pause("gm_loading_state", true)
-	
 	if EntityManager.process_phase != 0:
 		await get_tree().physics_frame
 
@@ -455,7 +453,6 @@ func load_serialized_play_state(serialized_state: Dictionary, as_level_load: boo
 
 	any_state_loaded.emit()
 
-	set_pause("gm_loading_state", false)
 	bg_style_changed.emit()
 
 func deserialize(serialized_state: Dictionary) -> void:
@@ -477,6 +474,7 @@ func on_no_more_camera_targets() -> void:
 		return
 	if get_game_setting("auto_reload_checkpoint_for_no_cam_focus", false):
 		queue_delayed_other_load(0.5, _reload_for_lack_of_cam_target)
+		_queued_reload_for_lack_of_cam_target = true
 
 func on_game_camera_target_changed(entity: BaseEntity) -> void:
 	if entity and _queued_reload_for_lack_of_cam_target:
@@ -498,8 +496,6 @@ func get_gameplay_camera_position() -> Vector2:
 	return Vector2.ZERO
 
 func activate_gameplay_camera() -> void:
-	if _queued_reload_for_lack_of_cam_target:
-		cancel_queued_level_load()
 	if game_camera:
 		game_camera.activate()
 
@@ -693,6 +689,7 @@ func queue_delayed_other_load(with_delay: float, callback: Callable) -> void:
 
 func cancel_queued_level_load() -> void:
 	queued_level_load = false
+	_queued_reload_for_lack_of_cam_target = false
 	if queued_level_load_timer:
 		queued_level_load_timer.stop()
 		queued_level_load_timer.queue_free()
