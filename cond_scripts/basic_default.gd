@@ -1985,7 +1985,7 @@ func cmd_select_position_of_entity(slots: Dictionary, chosen_slot: int, entity_s
 	if not slots[entity_slot]:
 		slots[chosen_slot] = []
 		return
-	slots[chosen_slot] = slots[entity_slot].get_moving_position()
+	slots[chosen_slot] = [slots[entity_slot].get_moving_position()]
 
 func desc_select_all_positions_of_entity() -> String:
 	return "pos|<= Select all positions currently occupied by this entity [entity_slot:SlotInput:entity]"
@@ -2010,7 +2010,7 @@ func cmd_select_position_entity_moving_from(slots: Dictionary, chosen_slot: int,
 	if not slots[entity_slot]:
 		slots[chosen_slot] = []
 		return
-	slots[chosen_slot] = slots[entity_slot].get_stationary_position()
+	slots[chosen_slot] = [slots[entity_slot].get_stationary_position()]
 
 func desc_select_all_positions_entity_moving_from() -> String:
 	return "pos|<= Select all positions the entity is moving away from [entity_slot:SlotInput:entity]"
@@ -2022,7 +2022,7 @@ func cmd_select_all_positions_entity_moving_from(slots: Dictionary, chosen_slot:
 		slots[chosen_slot] = []
 		return
 	if not slots[entity_slot].is_large():
-		slots[chosen_slot] = slots[entity_slot].get_stationary_position()
+		slots[chosen_slot] = [slots[entity_slot].get_stationary_position()]
 	else:
 		slots[chosen_slot] = slots[entity_slot].get_positions_at(slots[entity_slot].get_stationary_position())
 
