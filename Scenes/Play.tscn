@@ -10,8 +10,9 @@
 [ext_resource type="Script" uid="uid://evq6x474ma1n" path="res://Scenes/text_box_anim_root.gd" id="5_q86eb"]
 [ext_resource type="PackedScene" uid="uid://bnomndi6o3mmb" path="res://Scenes/credits_ui.tscn" id="6_4cgsu"]
 [ext_resource type="Script" uid="uid://bpb7t48ncq7im" path="res://Scenes/level_select_root.gd" id="7_hagi3"]
-[ext_resource type="Texture2D" uid="uid://d0uyc2rshryrj" path="res://assets/img/entityTiles.png" id="7_pbhrd"]
-[ext_resource type="FontFile" uid="uid://ctnllh13x3iqi" path="res://assets/font/NotoSans-Bold.ttf" id="8_me4dj"]
+[ext_resource type="PackedScene" uid="uid://68i3a0ubiwjf" path="res://Scenes/UI/info_item.tscn" id="7_ijdo8"]
+[ext_resource type="Script" uid="uid://c3bms4d5nxkgw" path="res://Scenes/UI/info_panel.gd" id="7_me4dj"]
+[ext_resource type="Script" uid="uid://c2808f1t1qlra" path="res://Scenes/info_list.gd" id="8_lcjex"]
 [ext_resource type="PackedScene" uid="uid://cfhftqjjfjyv" path="res://Scenes/level_select_ui.tscn" id="9_t3can"]
 [ext_resource type="PackedScene" uid="uid://c08hfkcpibqpg" path="res://Scenes/GameEditor/new_list_panel.tscn" id="10_ui3gn"]
 [ext_resource type="PackedScene" uid="uid://b1a6s2o32t35i" path="res://Scenes/GameEditor/bg_style_editor.tscn" id="11_ui3gn"]
@@ -141,10 +142,6 @@ corner_radius_top_left = 6
 corner_radius_top_right = 6
 corner_radius_bottom_right = 6
 corner_radius_bottom_left = 6
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_lcjex"]
-atlas = ExtResource("7_pbhrd")
-region = Rect2(0, 0, 32, 32)
 
 [sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_4cgsu"]
 blend_mode = 3
@@ -339,6 +336,7 @@ grow_vertical = 2
 
 [node name="InfoRoot" type="Control" parent="OverlayLayer/OverlayUI/RightCenter" unique_id=348307798]
 layout_mode = 1
+anchors_preset = 6
 anchor_left = 1.0
 anchor_top = 0.5
 anchor_right = 1.0
@@ -348,7 +346,7 @@ offset_right = -10.0
 grow_horizontal = 0
 grow_vertical = 2
 
-[node name="PanelContainer" type="PanelContainer" parent="OverlayLayer/OverlayUI/RightCenter/InfoRoot" unique_id=13396665]
+[node name="InfoPanel" type="PanelContainer" parent="OverlayLayer/OverlayUI/RightCenter/InfoRoot" unique_id=13396665 node_paths=PackedStringArray("info_list")]
 layout_mode = 1
 anchors_preset = 6
 anchor_left = 1.0
@@ -361,35 +359,15 @@ offset_bottom = 8.0
 grow_horizontal = 0
 grow_vertical = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_vpmux")
+script = ExtResource("7_me4dj")
+info_list = NodePath("InfoList")
 
-[node name="VBoxContainer" type="VBoxContainer" parent="OverlayLayer/OverlayUI/RightCenter/InfoRoot/PanelContainer" unique_id=2046434623]
+[node name="InfoList" type="VBoxContainer" parent="OverlayLayer/OverlayUI/RightCenter/InfoRoot/InfoPanel" unique_id=2046434623]
 layout_mode = 2
+script = ExtResource("8_lcjex")
 
-[node name="InfoItem" type="HBoxContainer" parent="OverlayLayer/OverlayUI/RightCenter/InfoRoot/PanelContainer/VBoxContainer" unique_id=2118360114]
+[node name="InfoItem" parent="OverlayLayer/OverlayUI/RightCenter/InfoRoot/InfoPanel/InfoList" unique_id=739492208 instance=ExtResource("7_ijdo8")]
 layout_mode = 2
-
-[node name="InfoIcon" type="TextureRect" parent="OverlayLayer/OverlayUI/RightCenter/InfoRoot/PanelContainer/VBoxContainer/InfoItem" unique_id=423501206]
-layout_mode = 2
-texture = SubResource("AtlasTexture_lcjex")
-stretch_mode = 2
-
-[node name="Label" type="Label" parent="OverlayLayer/OverlayUI/RightCenter/InfoRoot/PanelContainer/VBoxContainer/InfoItem" unique_id=1650024870]
-layout_mode = 2
-theme_override_fonts/font = ExtResource("8_me4dj")
-theme_override_font_sizes/font_size = 14
-text = "jimmies"
-
-[node name="InfoSeparator" type="Label" parent="OverlayLayer/OverlayUI/RightCenter/InfoRoot/PanelContainer/VBoxContainer/InfoItem" unique_id=2018185777]
-layout_mode = 2
-theme_override_fonts/font = ExtResource("8_me4dj")
-theme_override_font_sizes/font_size = 14
-text = "-"
-
-[node name="Label2" type="Label" parent="OverlayLayer/OverlayUI/RightCenter/InfoRoot/PanelContainer/VBoxContainer/InfoItem" unique_id=829267573]
-layout_mode = 2
-theme_override_fonts/font = ExtResource("8_me4dj")
-theme_override_font_sizes/font_size = 14
-text = "24"
 
 [node name="CreditsUI" parent="OverlayLayer" unique_id=1760736673 groups=["Credits"] instance=ExtResource("6_4cgsu")]
 visible = false

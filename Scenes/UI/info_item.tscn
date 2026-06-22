@@ -1,0 +1,42 @@
+[gd_scene format=3 uid="uid://68i3a0ubiwjf"]
+
+[ext_resource type="Script" uid="uid://byjfmxy6qrtqj" path="res://Scenes/UI/info_item.gd" id="1_54pcc"]
+[ext_resource type="Texture2D" uid="uid://d0uyc2rshryrj" path="res://assets/img/entityTiles.png" id="2_68uiq"]
+[ext_resource type="FontFile" uid="uid://ctnllh13x3iqi" path="res://assets/font/NotoSans-Bold.ttf" id="3_v4fhb"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_lcjex"]
+atlas = ExtResource("2_68uiq")
+region = Rect2(0, 0, 32, 32)
+
+[node name="InfoItem" type="HBoxContainer" unique_id=739492208 node_paths=PackedStringArray("icon_texrect", "text_label", "separator_label", "value_label")]
+script = ExtResource("1_54pcc")
+icon_texrect = NodePath("InfoIcon")
+text_label = NodePath("Label")
+separator_label = NodePath("InfoSeparator")
+value_label = NodePath("Label2")
+
+[node name="InfoIcon" type="TextureRect" parent="." unique_id=1787515167]
+custom_minimum_size = Vector2(16, 16)
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+texture = SubResource("AtlasTexture_lcjex")
+expand_mode = 3
+
+[node name="Label" type="Label" parent="." unique_id=572402729]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("3_v4fhb")
+theme_override_font_sizes/font_size = 14
+text = "jimmies"
+
+[node name="InfoSeparator" type="Label" parent="." unique_id=1206440753]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("3_v4fhb")
+theme_override_font_sizes/font_size = 14
+text = "-"
+
+[node name="Label2" type="Label" parent="." unique_id=1476744202]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("3_v4fhb")
+theme_override_font_sizes/font_size = 14
+text = "24"

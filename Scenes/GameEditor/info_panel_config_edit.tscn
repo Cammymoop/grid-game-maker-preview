@@ -1,0 +1,33 @@
+[gd_scene format=3 uid="uid://ci5jvijwn0j60"]
+
+[ext_resource type="Script" uid="uid://drugvxk46yhcm" path="res://Scenes/GameEditor/info_panel_config_edit.gd" id="1_7jo73"]
+[ext_resource type="PackedScene" uid="uid://cemds60k8ytal" path="res://Scenes/UI/icon_button.tscn" id="1_25yjy"]
+[ext_resource type="Texture2D" uid="uid://cv8l7ymc05wg5" path="res://assets/img/button_icons/plus.png" id="2_7jo73"]
+
+[node name="InfoPanelConfigEdit" type="VBoxContainer" unique_id=478230925 node_paths=PackedStringArray("add_item_button", "item_list_container", "enable_toggle")]
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 36.0
+grow_horizontal = 2
+script = ExtResource("1_7jo73")
+add_item_button = NodePath("HBoxContainer/AddItemButton")
+item_list_container = NodePath("ItemList")
+enable_toggle = NodePath("CheckButton")
+
+[node name="CheckButton" type="CheckButton" parent="." unique_id=855893088]
+layout_mode = 2
+button_pressed = true
+text = "Enable"
+alignment = 2
+
+[node name="ItemList" type="VBoxContainer" parent="." unique_id=1187457872]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="HBoxContainer" type="HBoxContainer" parent="." unique_id=183920158]
+layout_mode = 2
+alignment = 1
+
+[node name="AddItemButton" parent="HBoxContainer" unique_id=762124749 instance=ExtResource("1_25yjy")]
+layout_mode = 2
+icon = ExtResource("2_7jo73")

@@ -1,0 +1,216 @@
+[gd_scene format=3 uid="uid://5d16ggjwhdd2"]
+
+[ext_resource type="Script" uid="uid://u7rfxogoeo13" path="res://Scenes/GameEditor/info_panel_config_item.gd" id="1_sni1q"]
+[ext_resource type="Texture2D" uid="uid://cfokfsynll5sp" path="res://assets/img/err_small.png" id="2_0wj8y"]
+[ext_resource type="PackedScene" uid="uid://cemds60k8ytal" path="res://Scenes/UI/icon_button.tscn" id="2_vs1f6"]
+[ext_resource type="Texture2D" uid="uid://byrc346tgh55x" path="res://assets/img/button_icons/up_layer_small.png" id="3_0wj8y"]
+[ext_resource type="Texture2D" uid="uid://c0i7dg7wf45sj" path="res://assets/img/button_icons/down_layer_small.png" id="4_mvlsa"]
+[ext_resource type="Script" uid="uid://bgrcxdoa3c0cb" path="res://src/GameEditor/ConditionalEditor/entity_name_input.gd" id="5_f54oc"]
+[ext_resource type="Texture2D" uid="uid://d0uyc2rshryrj" path="res://assets/img/entityTiles.png" id="6_q6bcp"]
+[ext_resource type="Script" uid="uid://cl85nh88oleho" path="res://src/GameEditor/ConditionalEditor/property_name_input.gd" id="8_0wj8y"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_jpp23"]
+atlas = ExtResource("6_q6bcp")
+region = Rect2(0, 0, 32, 32)
+
+[node name="InfoPanelConfigItem" type="HBoxContainer" unique_id=129416809 node_paths=PackedStringArray("order_button_up", "order_button_down", "remove_button", "icon_mode_picker", "pick_image_button", "icon_entity_name_input", "label_input", "separator_input", "value_prop_option", "entity_filter_option", "prop_filter_option", "hide_zero_value_option", "prop_truthy_suboption", "tracking_type_picker", "value_prop_input", "entity_filter_input", "prop_filter_input", "prop_truthy_picker", "hide_zero_toggle", "hide_empty_toggle")]
+offset_right = 863.0
+offset_bottom = 102.0
+script = ExtResource("1_sni1q")
+not_found_icon = ExtResource("2_0wj8y")
+order_button_up = NodePath("OrderButtons/UpButton")
+order_button_down = NodePath("OrderButtons/DownButton")
+remove_button = NodePath("RemoveButton/RemoveButton")
+icon_mode_picker = NodePath("InfoPanelConfigItem/DisplayConfig/IconConfig/OptionButton")
+pick_image_button = NodePath("InfoPanelConfigItem/DisplayConfig/IconConfig/PickButton")
+icon_entity_name_input = NodePath("InfoPanelConfigItem/DisplayConfig/IconConfig/EntityNameInput")
+label_input = NodePath("InfoPanelConfigItem/DisplayConfig/LabelConfig/LineEdit")
+separator_input = NodePath("InfoPanelConfigItem/DisplayConfig/SeparatorConfig/LineEdit")
+value_prop_option = NodePath("InfoPanelConfigItem/TrackingConfig/ValuePropConfig")
+entity_filter_option = NodePath("InfoPanelConfigItem/TrackingConfig/EntityFilterConfig")
+prop_filter_option = NodePath("InfoPanelConfigItem/TrackingConfig/PropFilterConfig")
+hide_zero_value_option = NodePath("InfoPanelConfigItem/TrackingConfig/ShowZeroOption")
+prop_truthy_suboption = NodePath("InfoPanelConfigItem/TrackingConfig/PropFilterConfig/PropFilterTruthy")
+tracking_type_picker = NodePath("InfoPanelConfigItem/TrackingConfig/TypeConfig/OptionButton")
+value_prop_input = NodePath("InfoPanelConfigItem/TrackingConfig/ValuePropConfig/PropNameInput")
+entity_filter_input = NodePath("InfoPanelConfigItem/TrackingConfig/EntityFilterConfig/EntityNameInput")
+prop_filter_input = NodePath("InfoPanelConfigItem/TrackingConfig/PropFilterConfig/PropNameInput")
+prop_truthy_picker = NodePath("InfoPanelConfigItem/TrackingConfig/PropFilterConfig/PropFilterTruthy/OptionButton")
+hide_zero_toggle = NodePath("InfoPanelConfigItem/TrackingConfig/ShowZeroOption/HideZeroToggle")
+hide_empty_toggle = NodePath("InfoPanelConfigItem/TrackingConfig/ShowZeroOption/HideEmptyToggle")
+
+[node name="OrderButtons" type="VBoxContainer" parent="." unique_id=321230846]
+layout_mode = 2
+alignment = 1
+
+[node name="UpButton" parent="OrderButtons" unique_id=451892711 instance=ExtResource("2_vs1f6")]
+layout_mode = 2
+tooltip_text = "move up"
+icon = ExtResource("3_0wj8y")
+
+[node name="DownButton" parent="OrderButtons" unique_id=645285901 instance=ExtResource("2_vs1f6")]
+layout_mode = 2
+tooltip_text = "move down"
+icon = ExtResource("4_mvlsa")
+
+[node name="InfoPanelConfigItem" type="VBoxContainer" parent="." unique_id=1026393029]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="DisplayConfig" type="HBoxContainer" parent="InfoPanelConfigItem" unique_id=1898232611]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="IconConfig" type="HBoxContainer" parent="InfoPanelConfigItem/DisplayConfig" unique_id=308346182]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="InfoPanelConfigItem/DisplayConfig/IconConfig" unique_id=265559608]
+layout_mode = 2
+text = "Icon:"
+
+[node name="OptionButton" type="OptionButton" parent="InfoPanelConfigItem/DisplayConfig/IconConfig" unique_id=963594468]
+layout_mode = 2
+size_flags_vertical = 4
+selected = 0
+item_count = 3
+popup/item_0/text = "none"
+popup/item_0/id = 0
+popup/item_1/text = "Entity"
+popup/item_1/id = 1
+popup/item_2/text = "Image"
+popup/item_2/id = 2
+
+[node name="EntityNameInput" type="LineEdit" parent="InfoPanelConfigItem/DisplayConfig/IconConfig" unique_id=1188336944]
+custom_minimum_size = Vector2(120, 0)
+layout_mode = 2
+script = ExtResource("5_f54oc")
+
+[node name="PickButton" parent="InfoPanelConfigItem/DisplayConfig/IconConfig" unique_id=2101373888 instance=ExtResource("2_vs1f6")]
+layout_mode = 2
+icon = SubResource("AtlasTexture_jpp23")
+
+[node name="LabelConfig" type="HBoxContainer" parent="InfoPanelConfigItem/DisplayConfig" unique_id=599564247]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="InfoPanelConfigItem/DisplayConfig/LabelConfig" unique_id=1692409066]
+layout_mode = 2
+text = "Label:"
+
+[node name="LineEdit" type="LineEdit" parent="InfoPanelConfigItem/DisplayConfig/LabelConfig" unique_id=643323270]
+layout_mode = 2
+placeholder_text = "<none>"
+
+[node name="SeparatorConfig" type="HBoxContainer" parent="InfoPanelConfigItem/DisplayConfig" unique_id=445940609]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="InfoPanelConfigItem/DisplayConfig/SeparatorConfig" unique_id=751331856]
+layout_mode = 2
+text = "Separator:"
+
+[node name="LineEdit" type="LineEdit" parent="InfoPanelConfigItem/DisplayConfig/SeparatorConfig" unique_id=1856863845]
+layout_mode = 2
+placeholder_text = "-"
+
+[node name="TrackingConfig" type="HFlowContainer" parent="InfoPanelConfigItem" unique_id=543268323]
+layout_mode = 2
+theme_override_constants/h_separation = 12
+
+[node name="TypeConfig" type="HBoxContainer" parent="InfoPanelConfigItem/TrackingConfig" unique_id=1510066883]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="InfoPanelConfigItem/TrackingConfig/TypeConfig" unique_id=631881759]
+layout_mode = 2
+text = "Show:"
+
+[node name="OptionButton" type="OptionButton" parent="InfoPanelConfigItem/TrackingConfig/TypeConfig" unique_id=1729307070]
+layout_mode = 2
+size_flags_vertical = 4
+theme_override_font_sizes/font_size = 12
+selected = 0
+item_count = 3
+popup/item_0/text = "property (only camera target)"
+popup/item_0/id = 1
+popup/item_1/text = "property"
+popup/item_1/id = 0
+popup/item_2/text = "entity count"
+popup/item_2/id = 2
+
+[node name="ValuePropConfig" type="HBoxContainer" parent="InfoPanelConfigItem/TrackingConfig" unique_id=795863329]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="InfoPanelConfigItem/TrackingConfig/ValuePropConfig" unique_id=1522845953]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "Property:"
+
+[node name="PropNameInput" type="LineEdit" parent="InfoPanelConfigItem/TrackingConfig/ValuePropConfig" unique_id=1002648561]
+custom_minimum_size = Vector2(120, 0)
+layout_mode = 2
+script = ExtResource("8_0wj8y")
+
+[node name="EntityFilterConfig" type="HBoxContainer" parent="InfoPanelConfigItem/TrackingConfig" unique_id=886634858]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="InfoPanelConfigItem/TrackingConfig/EntityFilterConfig" unique_id=1083694170]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "Count Entities of Type:"
+
+[node name="EntityNameInput" type="LineEdit" parent="InfoPanelConfigItem/TrackingConfig/EntityFilterConfig" unique_id=1111589951]
+custom_minimum_size = Vector2(120, 0)
+layout_mode = 2
+placeholder_text = "<any type>"
+script = ExtResource("5_f54oc")
+
+[node name="PropFilterConfig" type="HBoxContainer" parent="InfoPanelConfigItem/TrackingConfig" unique_id=508970585]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="InfoPanelConfigItem/TrackingConfig/PropFilterConfig" unique_id=754366464]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "Filter by Property:"
+
+[node name="PropNameInput" type="LineEdit" parent="InfoPanelConfigItem/TrackingConfig/PropFilterConfig" unique_id=1644350291]
+custom_minimum_size = Vector2(120, 0)
+layout_mode = 2
+placeholder_text = "<no filter>"
+script = ExtResource("8_0wj8y")
+
+[node name="PropFilterTruthy" type="HBoxContainer" parent="InfoPanelConfigItem/TrackingConfig/PropFilterConfig" unique_id=370594614]
+layout_mode = 2
+
+[node name="Label2" type="Label" parent="InfoPanelConfigItem/TrackingConfig/PropFilterConfig/PropFilterTruthy" unique_id=1023877442]
+layout_mode = 2
+text = "is"
+
+[node name="OptionButton" type="OptionButton" parent="InfoPanelConfigItem/TrackingConfig/PropFilterConfig/PropFilterTruthy" unique_id=2040469494]
+layout_mode = 2
+size_flags_vertical = 4
+theme_override_font_sizes/font_size = 14
+selected = 0
+item_count = 2
+popup/item_0/text = "true or non-zero"
+popup/item_0/id = 0
+popup/item_1/text = "false or zero"
+popup/item_1/id = 1
+
+[node name="ShowZeroOption" type="HBoxContainer" parent="InfoPanelConfigItem/TrackingConfig" unique_id=1592553420]
+layout_mode = 2
+
+[node name="HideZeroToggle" type="CheckButton" parent="InfoPanelConfigItem/TrackingConfig/ShowZeroOption" unique_id=328208576]
+layout_mode = 2
+button_pressed = true
+text = "Hide if 0"
+
+[node name="HideEmptyToggle" type="CheckButton" parent="InfoPanelConfigItem/TrackingConfig/ShowZeroOption" unique_id=970227088]
+layout_mode = 2
+button_pressed = true
+text = "Hide if Empty"
+
+[node name="RemoveButton" type="VBoxContainer" parent="." unique_id=757975207]
+layout_mode = 2
+alignment = 1
+
+[node name="RemoveButton" parent="RemoveButton" unique_id=914739346 instance=ExtResource("2_vs1f6")]
+layout_mode = 2
+tooltip_text = "remove"

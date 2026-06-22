@@ -26,6 +26,54 @@
       "dusty_particles_speed": 1.2,
       "bg_gradient_on": true,
       "bg_gradient_above": "below"
+    },
+    "info_panel_enabled": true,
+    "info_panel_items": {
+      "1": {
+        "type": "property",
+        "filtered": false,
+        "camera_tracked": true,
+        "value_prop": "chips",
+        "entity_icon": 14,
+        "hide_zero_value": false,
+        "hide_empty_value": true
+      },
+      "2": {
+        "type": "property",
+        "filtered": false,
+        "camera_tracked": true,
+        "value_prop": "purple-keys",
+        "entity_icon": 22,
+        "hide_zero_value": true,
+        "hide_empty_value": true
+      },
+      "3": {
+        "type": "property",
+        "filtered": false,
+        "camera_tracked": true,
+        "value_prop": "green-keys",
+        "entity_icon": 33,
+        "hide_zero_value": true,
+        "hide_empty_value": true
+      },
+      "4": {
+        "type": "property",
+        "filtered": false,
+        "camera_tracked": true,
+        "value_prop": "orange-keys",
+        "entity_icon": 31,
+        "hide_zero_value": true,
+        "hide_empty_value": true
+      },
+      "5": {
+        "type": "property",
+        "filtered": false,
+        "camera_tracked": true,
+        "value_prop": "blue-keys",
+        "entity_icon": 32,
+        "hide_zero_value": true,
+        "hide_empty_value": true
+      }
     }
   },
   "textures": [
@@ -843,7 +891,6 @@
           ],
           "when true": [
             "basic_default.play_named_sfx::[\"i:-1\",{\"args\":[\"s:type\",\"s:plain\",\"s:value\",\"s:Trash\"],\"type\":\"Dictionary\"},true]",
-            "basic_default.a_remove_property::[\"i:1\",\"s:purple-keys\"]",
             "basic_default.a_remove_property::[\"i:1\",\"s:floats\"]",
             "basic_default.a_remove_property::[\"i:1\",\"s:fire-resistant\"]",
             "basic_default.a_remove_property::[\"i:1\",\"s:ice-skater\"]",
@@ -2333,7 +2380,8 @@
       "level_names": [
         "Intro",
         "bolts and nuts",
-        "chips revival"
+        "chips revival",
+        "test"
       ]
     },
     {
@@ -2357,7 +2405,7 @@
       "name": "Grab Chip",
       "volume": 0.86,
       "pitch": 1.55184557391536,
-      "ps_seed": 526707
+      "ps_seed": 526707.0
     },
     {
       "type": "sample",
@@ -2378,7 +2426,7 @@
       "name": "Pickups",
       "volume": 0.81,
       "pitch": 1.0,
-      "ps_seed": 702203
+      "ps_seed": 702203.0
     },
     {
       "type": "sample",
@@ -2399,7 +2447,7 @@
       "name": "Trash",
       "volume": 0.69,
       "pitch": 0.802741561760231,
-      "ps_seed": 428604
+      "ps_seed": 428604.0
     },
     {
       "type": "sample",
@@ -2441,7 +2489,7 @@
       "name": "Push Ice",
       "volume": 0.57,
       "pitch": 1.27340536727286,
-      "ps_seed": 423309
+      "ps_seed": 423309.0
     },
     {
       "type": "sample",
@@ -2455,7 +2503,7 @@
       "name": "Checkpoint",
       "volume": 1.27,
       "pitch": 0.820574797310544,
-      "ps_seed": 344809
+      "ps_seed": 344809.0
     },
     {
       "type": "sample",
@@ -2469,7 +2517,7 @@
       "name": "Pop up",
       "volume": 0.33,
       "pitch": 0.540520409799777,
-      "ps_seed": 554903
+      "ps_seed": 554903.0
     },
     {
       "type": "sample",
@@ -2483,21 +2531,21 @@
       "name": "Gate Open",
       "volume": 1.19,
       "pitch": 0.517281857971787,
-      "ps_seed": 656104
+      "ps_seed": 656104.0
     },
     {
       "type": "ps_sfx",
       "name": "Win",
       "volume": 0.36,
       "pitch": 0.768229356394374,
-      "ps_seed": 555403
+      "ps_seed": 555403.0
     },
     {
       "type": "ps_sfx",
       "name": "Grizzly",
       "volume": 1.0,
       "pitch": 1.0,
-      "ps_seed": 200698
+      "ps_seed": 200698.0
     },
     {
       "type": "sample",
@@ -2511,14 +2559,14 @@
       "name": "Slide Old",
       "volume": 1.67,
       "pitch": 0.978267385729171,
-      "ps_seed": 183609
+      "ps_seed": 183609.0
     },
     {
       "type": "ps_sfx",
       "name": "Slide",
       "volume": 0.41,
       "pitch": 1.30169459377786,
-      "ps_seed": 882109
+      "ps_seed": 882109.0
     }
   ]
 }
