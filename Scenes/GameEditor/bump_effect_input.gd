@@ -10,10 +10,10 @@ var arg_name: String = ""
 @export var amount_input: ScalarValueInput
 
 const EFFECTS_WITH_COLOR: Array[String] = [
-    "Flash",
+    "Flash", "Sparkle"
 ]
 const EFFECTS_WITH_AMOUNT: Array[String] = [
-    "Expand", "Shrink", "Flash", "Hop", "Sparkle",
+    "Expand", "Shrink", "Flash", "Hop",
 ]
 const DEFAULT_AMOUNTS: Dictionary[String, float] = {
     "Expand": 0.2,
