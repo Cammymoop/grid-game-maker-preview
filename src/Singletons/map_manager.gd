@@ -1362,10 +1362,10 @@ func clear_save_persist_on_completion() -> void:
     map_metadata.erase("save_increment_on_completion")
 
 func flush_save_persist_on_completion() -> void:
-    for save_key in map_metadata["save_persist_on_completion"].keys():
+    for save_key in map_metadata.get("save_persist_on_completion", {}).keys():
         var val: Variant = map_metadata["save_persist_on_completion"][save_key]
         GameManager.set_game_save_data(save_key, val)
-    for save_key in map_metadata["save_increment_on_completion"].keys():
+    for save_key in map_metadata.get("save_increment_on_completion", {}).keys():
         var to_add: float = map_metadata["save_increment_on_completion"][save_key]
         var exisiting_val: Variant = GameManager.get_game_save_data(save_key, 0)
         if not Utility.is_variant_valid_scalar(exisiting_val):

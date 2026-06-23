@@ -449,7 +449,7 @@ func on_move_step(direction: int) -> void:
     update_current_step()
     
     var step_data = current_conditional[current_step]
-    current_conditional.erase(current_step)
+    current_conditional.remove_at(current_step)
     current_conditional.insert(new_step_index, step_data)
     current_step = new_step_index
     steps_ui.set_step(step_count, current_step)

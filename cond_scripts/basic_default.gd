@@ -165,7 +165,7 @@ func cmd_select_tiles_rect(slots: Dictionary, chosen_slot: Slot, top_left: Vecto
 func desc_select_tiles_in_direction() -> String:
 	return "pos|<= Select the position(s) [dist:ComplexScalarInput:int] spaces in this direction [compl_dir:DirectionInput:1] from [from_slot:SlotInput:pos,entity]"
 func cmd_select_tiles_in_direction(slots: Dictionary, chosen_slot: int, compl_dir: Dictionary, dist: Dictionary, from_slot: int) -> void:
-	if not Commands.slot_is_positions(chosen_slot) or not Commands.slot_is_positions(from_slot) or not Commands.slot_is_entity(from_slot):
+	if not Commands.slot_is_positions(chosen_slot) or not Commands.slot_has_position(from_slot):
 		push_error("Invalid slots to select tile in direction: %s, %s" % [chosen_slot, from_slot])
 		return
 	var distance_int: = int(resolve_complex_scalar(dist, slots))
@@ -675,7 +675,7 @@ func cmd_if_all_entities_property(slots: Dictionary, chosen_slot: int, entity_na
 
 func desc_if_any_entity_exists() -> String:
 	return "pos|If any entity exists here with a [invert:InvertInput:true or non-zero,false or zero] [prop_name:PropertyInput] property\n" \
-		+ "Excluding [exclude_entity:SlotInput:entity]"
+		+ "Excluding [exclude_slot:SlotInput:entity]"
 func cmd_if_any_entity_exists(slots: Dictionary, chosen_slot: int, exclude_slot: int, invert: bool, prop_name: String) -> bool:
 	if not Commands.slot_is_positions(chosen_slot):
 		push_error("Slot for if any entity exists is not a positions slot: %s" % chosen_slot)

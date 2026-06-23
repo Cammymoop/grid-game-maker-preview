@@ -379,7 +379,7 @@ func set_prop_base_value_only(prop_name: String, new_base_value: Variant) -> voi
         push_error("Cannot set property base value only: %s, not a base definition property" % prop_name)
         return
 
-    if info["is_overriden"]:
+    if info["is_overridden"]:
         var overriden_value: Variant = info["value"]
         restore_prop_name(prop_name)
         change_prop_current_value(prop_name, new_base_value)
