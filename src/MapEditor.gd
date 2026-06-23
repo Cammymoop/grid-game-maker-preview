@@ -31,6 +31,7 @@ var current_entity_facing: int = 0
 
 var has_copied_properties: = false
 var entity_properties_copied: = {}
+var entity_active_copied: = true
 
 var cur_tile_i: int = 0
 var current_tile_index: int = -1 
@@ -224,7 +225,7 @@ func _refresh_edited_entity_indicators() -> void:
 	var edited_entities: Array[BaseEntity] = []
 	var edited_entity_ids: Array[int] = []
 	for e in all_level_entities:
-		if e.has_local_data():
+		if e.has_local_data() or not e.active:
 			edited_entities.append(e)
 			edited_entity_ids.append(e.instance_id)
 	
@@ -271,13 +272,15 @@ func set_as_placing_mode(tile_entity: String) -> void:
 
 func pick_entity(entity: BaseEntity) -> void:
 	pick_index("entity", entity.entity_index, entity.facing)
-	has_copied_properties = entity.has_any_local_properties()
+	has_copied_properties = entity.has_any_local_properties() or not entity.active
 	if is_alt_mode_active():
 		has_copied_properties = false
 	if has_copied_properties:
 		entity_properties_copied = entity.get_local_properties_dict()
+		entity_active_copied = entity.active
 	else:
 		entity_properties_copied = {}
+		entity_active_copied = true
 	check_show_star()
 
 func pick_index(tile_entity: String, index: int, facing: int = -1) -> void:
@@ -293,6 +296,7 @@ func _set_entity_index_to(index: int) -> void:
 	if has_copied_properties:
 		has_copied_properties = false
 		entity_properties_copied = {}
+		entity_active_copied = true
 		check_show_star()
 	if cursor_mode == "entity" and index > -1:
 		preview_entity(index)
@@ -435,7 +439,9 @@ func _primary_action_at_cursor(holding: bool = false) -> void:
 				EntityManager.remove_entity(e)
 		var new_entity: BaseEntity = EntityManager.create_entity(current_entity_index, cursor_tile_pos, current_entity_facing)
 		if has_copied_properties:
-			new_entity.set_local_properties_dict(entity_properties_copied)
+			if entity_properties_copied:
+				new_entity.set_local_properties_dict(entity_properties_copied)
+			new_entity.active = entity_active_copied
 			_refresh_edited_entity_indicators()
 	elif cursor_mode == "text":
 		var text_offset: = get_cur_placeable_text_offset()

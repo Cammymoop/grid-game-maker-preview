@@ -1030,7 +1030,9 @@
         "blocks": {
           "v": "3",
           "conditions": [
-            "basic_default.c_has_property::[\"i:1\",false,\"s:box\"]"
+            "basic_default.c_has_property::[\"i:1\",false,\"s:box\"]",
+            "basic_default.if_property_value::[\"i:1\",\"s:creature\",true]",
+            "or"
           ],
           "when true": [],
           "when false": [],
@@ -2583,6 +2585,7 @@
     {
       "name": "CCLP4",
       "level_names": [
+        "Rivets",
         "Molecule"
       ]
     },

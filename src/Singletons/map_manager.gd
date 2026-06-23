@@ -1118,21 +1118,25 @@ func attempt_move(moving_entity: BaseEntity, leaving_ps: Array[Vector2i], enteri
     if not result:
         return false
     
-    # Change facing dir in between leaving and entering
+    # Move-dependent facing: Change facing dir in between leaving and entering
     var old_facing: int = moving_entity.facing
     if change_facing_to >= 0:
         moving_entity.facing = change_facing_to
     
     result = check_blocks_allow_move(moving_entity, entering_ps)
+    if result:
+        var tracked_onto: = tracked_conditional_tile_event(entering_ps, "move_onto", moving_entity, true)
+        if not tracked_onto["overall"]:
+            result = false
     if not EntityManager.attempt_move_enter(moving_entity, result, entering_ps, skip_collection):
         result = false
     
-    # Restore facing if move dependant facing change exists and move failed
-    if result:
-        if change_facing_to >= 0:
+    if change_facing_to >= 0:
+        if result:
             moving_entity.apply_teleport_facing_change(new_pos, change_facing_to, force_immediate_turn)
-    else:
-        moving_entity.facing = old_facing
+        else:
+            # Restore facing if move dependent facing change exists and move failed
+            moving_entity.facing = old_facing
     
     return result
 

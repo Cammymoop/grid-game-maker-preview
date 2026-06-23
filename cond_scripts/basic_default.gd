@@ -1133,9 +1133,9 @@ func cmd_trigger_custom_event_for_each_entity(
 	var pos_filtered_enities: Array[BaseEntity] = []
 	var self_exclude: BaseEntity = null if include_self else slots[Slot.RED]
 	if filter_positions:
-		pos_filtered_enities = EntityManager.get_entities_at_multiple(filter_positions, self_exclude, [], true, false)
+		pos_filtered_enities.assign(EntityManager.get_entities_at_multiple(filter_positions, self_exclude, [], true, false))
 	else:
-		pos_filtered_enities = EntityManager.get_all_active_entities()
+		pos_filtered_enities.assign(EntityManager.get_all_active_entities())
 	var final_entities: Array[BaseEntity] = []
 	for entity in pos_filtered_enities:
 		if EntityManager.get_entity_prop_is_truthy(entity, prop_name, false) == truthy:
