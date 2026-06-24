@@ -377,7 +377,12 @@
         "eats": true,
         "no-rotate": true,
         "box": true
-      }
+      },
+      "can_be_large": true,
+      "default_size": [
+        1,
+        1
+      ]
     },
     "2": {
       "name": "bouncer",
@@ -2711,6 +2716,14 @@
       "name": "CCLP5",
       "level_names": [
         "Thunderwave Cave"
+      ]
+    },
+    {
+      "name": "Other",
+      "level_names": [
+        "Block Around the Clock",
+        "Closed Circuit",
+        "Tight Run"
       ]
     }
   ],
