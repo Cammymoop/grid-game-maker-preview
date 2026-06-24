@@ -639,7 +639,7 @@ func property_value_to_string(prop_value: Variant) -> String:
 		if is_float_integer(prop_value):
 			return str(roundi(prop_value))
 		else:
-			return str(prop_value)
+			return String.num(prop_value, 5)
 	elif typeof(prop_value) in [TYPE_INT, TYPE_BOOL]:
 		return str(prop_value)
 	else:

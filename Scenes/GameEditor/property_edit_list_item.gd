@@ -255,7 +255,7 @@ func make_overridden() -> void:
         push_error("Cannot make property overridden: %s" % property_name)
         return
     var new_value: Variant = property_value
-    if is_conditional():
+    if is_conditional() and not is_conditional_edit_allowed():
         new_value = true
     set_override_state(is_base_definition_property, true, false, new_value)
     start_value_editting()

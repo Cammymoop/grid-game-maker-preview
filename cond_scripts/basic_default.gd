@@ -341,7 +341,7 @@ func cmd_select_named_entity_at(slots: Dictionary, chosen_slot: int, at_pos_slot
 	if not at_positions:
 		slots[chosen_slot] = null
 		return
-	var filtered_entities: Array = EntityManager.get_entities_at_multiple(at_positions, slots[Slot.RED], [], true, false)
+	var filtered_entities: Array = EntityManager.get_entities_at_multiple(at_positions, slots[Slot.RED], [], false, false)
 	for e in filtered_entities:
 		if e.entity_index == e_id:
 			slots[chosen_slot] = e
@@ -477,7 +477,7 @@ func cmd_select_number(slots: Dictionary, chosen_slot: int, complex_num: Diction
 	set_value_slot_as_number(slots, chosen_slot, resolve_complex_scalar(complex_num, slots))
 
 func desc_select_number_property() -> String:
-	return "string,number|<= Select the text value of [target_slot:SlotInput:entity,pos]'s [property_name:PropertyInput] property"
+	return "string,number|<= Select the numeric value of [target_slot:SlotInput:entity,pos]'s [property_name:PropertyInput] property"
 func cmd_select_number_property(slots: Dictionary, chosen_slot: int, target_slot: int, property_name: String) -> void:
 	if not Commands.slot_is_scalar(chosen_slot) and not Commands.slot_is_string(chosen_slot):
 		push_error("Invalid slot to select property value as scalar into: %s" % chosen_slot)
@@ -699,7 +699,7 @@ func cmd_if_any_entity_exists(slots: Dictionary, chosen_slot: int, exclude_slot:
 		found_entities.erase(exclude_entity)
 		return found_entities.size() > 0
 
-	for entity in EntityManager.get_entities_at_multiple(tile_positions, exclude_entity, [], true, false):
+	for entity in EntityManager.get_entities_at_multiple(tile_positions, exclude_entity, [], false, false):
 		if EntityManager.get_entity_prop_is_truthy(entity, prop_name, false) != invert:
 			return true
 	return false
