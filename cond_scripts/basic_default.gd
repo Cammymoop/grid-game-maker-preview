@@ -1224,6 +1224,16 @@ func cmd_delayed_custom_entity_event(slots: Dictionary, chosen_slot: int, event_
 	if not slots[chosen_slot]:
 		return
 	EntityManager.add_delayed_entity_prop_event(slots[chosen_slot], event_name, resolve_complex_scalar(delay, slots))
+
+func desc_cancel_delayed_custom_entity_event() -> String:
+	return "entity|Cancel all delayed [event_name:PropertyInput] custom events of the entity that haven't triggered yet"
+func cmd_cancel_delayed_custom_entity_event(slots: Dictionary, chosen_slot: int, event_name: String) -> void:
+	if not Commands.slot_is_entity(chosen_slot):
+		push_error("Invalid slot or empty slot to cancel delayed custom entity event: %s" % chosen_slot)
+		return
+	if not slots[chosen_slot]:
+		return
+	EntityManager.remove_delayed_entity_prop_event(slots[chosen_slot], event_name)
 		
 
 func _entity_has_controller_intention_count(slots: Dictionary, chosen_slot: int) -> bool:

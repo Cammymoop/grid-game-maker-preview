@@ -50,6 +50,7 @@ func set_value(new_val: Variant) -> void:
         effect_picker_input.set_value(new_val["effect"])
         color_picker.color = Utility.get_dict_color(new_val, "color", Color.WHITE)
         amount_input.set_value(new_val.get("amount", default_amount))
+    refresh_ui()
 
 
 func on_effect_picker_item_selected(_picked_index: int) -> void:

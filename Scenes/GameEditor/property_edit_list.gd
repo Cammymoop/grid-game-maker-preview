@@ -338,8 +338,8 @@ func _setup_list_item_signals(list_item: ListItem) -> void:
     list_item.request_activate.connect(set_active_list_item)
 
 func on_conditional_editor_requested(prop_name: String, list_item: ListItem) -> void:
-    var is_base_prop: bool = not list_item.is_overridden and not list_item.is_removed
-    request_conditional_editor.emit(prop_name, list_item.property_value, enable_edit_base_props or not is_base_prop)
+    #var is_base_prop: bool = not list_item.is_overridden and not list_item.is_removed
+    request_conditional_editor.emit(prop_name, list_item.property_value, true)#enable_edit_base_props or not is_base_prop)
 
 func convert_prop_is_conditional(prop_name: String, set_is_conditional: bool) -> void:
     var p_index: int = index_map.get(prop_name, -1)

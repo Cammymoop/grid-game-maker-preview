@@ -119,6 +119,8 @@ func entity_list_process(delta_time: float) -> void:
                 if GameManager.has_undo_state():
                     GameManager.pop_and_load_undo_state.call_deferred()
                     return
+        elif action_num == "3" and not GameManager.is_in_level_edit_mode and Input.is_action_just_pressed("input_action_3_no_editor"):
+            new_action_activations.append("do_action_" + action_num)
     
     # Phased processing so each entity completes a phase before any entity processes the next phase
     
@@ -1842,6 +1844,15 @@ func add_delayed_entity_prop_event(entity: BaseEntity, prop_event_name: String, 
         "timeout_tick": _get_timeout_tick_after(delay, is_anim_delay),
         "property_event": prop_event_name,
     })
+
+func remove_delayed_entity_prop_event(entity: BaseEntity, prop_event_name: String) -> void:
+    if not entity.instance_id in timed_entity_events:
+        return
+    var new_events: Array[Dictionary] = []
+    for event_info in timed_entity_events[entity.instance_id]:
+        if event_info["property_event"] != prop_event_name:
+            new_events.append(event_info)
+    timed_entity_events[entity.instance_id] = new_events
 
 func merge_entity_bond_groups(entity1: BaseEntity, entity2: BaseEntity) -> void:
     if not entity1.bond_group and not entity2.bond_group:

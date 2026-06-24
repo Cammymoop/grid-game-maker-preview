@@ -125,9 +125,6 @@ func update_z():
 	var z = EntityManager.get_entity_property(self, "z-index")
 	if z:
 		z_index = z.get_or_resolve(self, null, tile_position)
-		prints("update_z", entity_name, z_index)
-	else:
-		prints("update_z", entity_name, "no z-index")
 
 func get_center_offset() -> Vector2:
 	return Vector2(floor(MapManager.tile_width/2.0), floor(MapManager.tile_width/2.0))

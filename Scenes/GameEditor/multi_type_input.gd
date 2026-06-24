@@ -107,7 +107,10 @@ func set_value(new_value: Variant) -> void:
     if not is_node_ready():
         push_error("Setting multi-type input value before ready")
         return
+    var debug: = false
     if typeof(new_value) in [TYPE_ARRAY, TYPE_DICTIONARY]:
+        prints("(debug) set arr or dict value: %s" % [new_value])
+        debug = true
         current_value = new_value.duplicate_deep()
         _last_conditional_value = new_value.duplicate_deep()
         new_type_id = 8
@@ -120,6 +123,8 @@ func set_value(new_value: Variant) -> void:
     else:
         current_value = str(new_value)
         new_type_id = 1
+    if debug:
+        prints("(debug) current type:", current_type_id, "new type:", new_type_id)
     if current_type_id != new_type_id:
         pick_type_id(new_type_id)
     set_input_value_from_current_value()

@@ -374,7 +374,7 @@ func refresh_value_edit() -> void:
     conditional_label_1.hide()
     conditional_label_2.hide()
     conditional_edit_button.hide()
-    value_edit.set_value(base_property_value)
+    value_edit.set_value(property_value)
 
     _show_hide_edit_value_button()
     value_label.visible = not _value_editting

@@ -292,6 +292,8 @@ func _resolve_conditional_step(step_index: int, cond_step: Dictionary, overall_r
         step_result["result"] = conditions_collapse(condition_stack)
     elif len(condition_stack) == 1:
         step_result["result"] = condition_stack[0]
+    elif len(condition_stack) == 0:
+        step_result["result"] = true
     
     if extra_debug:
         prints("step result: %s" % step_result)
