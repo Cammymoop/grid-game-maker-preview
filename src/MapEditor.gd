@@ -195,7 +195,7 @@ func on_edit_mode_enabled() -> void:
 	if vp.has_method("rescale"):
 		vp.rescale()
 	if not GameManager.is_live_edit():
-		GameManager.load_edited(false)
+		GameManager.load_edited(false, true)
 		GameManager.clear_undo_stack()
 		GameManager.push_undo_state(true)
 		await get_tree().process_frame

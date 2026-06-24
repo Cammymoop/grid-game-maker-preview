@@ -329,19 +329,14 @@ func _ready():
     
     GameManager.game_settings_changed.connect(on_game_settings_changed)
     
-    GameManager.level_state_loaded.connect(on_level_state_loaded)
     GameManager.any_state_loaded.connect(on_any_state_loaded)
-
-func on_level_state_loaded() -> void:
-    if movement_mode != GameManager.MovementMode.MOVEMENT_CONTINUOUS:
-        return
-    if GameManager.get_game_setting("start_level_paused", false):
-        paused_at_start = true
 
 func on_any_state_loaded() -> void:
     if movement_mode != GameManager.MovementMode.MOVEMENT_CONTINUOUS:
         return
-    if GameManager.get_game_setting("start_any_paused", false):
+    paused_at_start = false
+    #if GameManager._state_load_is_start_of_level
+    if MapManager.is_level_start_paused():
         paused_at_start = true
 
 func setup():

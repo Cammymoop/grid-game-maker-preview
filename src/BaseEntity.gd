@@ -963,6 +963,9 @@ func is_half_at(check_position: Vector2i) -> bool:
 		return check_position == tile_position
 	return check_position == next_tile_pos
 
+func is_half_done_moving() -> bool:
+	return moving and not _pending_half_move
+
 func add_deferred_signal(signaling_entity: BaseEntity, args: Array, signal_name: String) -> void:
 	deferred_signals.append({
 		"signaling_entity": signaling_entity.instance_id,

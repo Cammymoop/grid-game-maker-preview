@@ -189,6 +189,8 @@ func on_show() -> void:
 				has_clipboard_level = true
 		paste_from_clipboard_button.disabled = not has_clipboard_level
 		
+		start_level_paused_toggle.set_pressed_no_signal(MapManager.is_level_start_paused())
+		
 		var map_editor_overlay: Node = Utility.get_map_editor_overlay()
 		if map_editor_overlay:
 			level_editor_controls_help_toggle.set_pressed_no_signal(map_editor_overlay.is_showing_controls_help())

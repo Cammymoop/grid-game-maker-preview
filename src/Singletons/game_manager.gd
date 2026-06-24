@@ -47,6 +47,7 @@ var loaded_level_is_saved: = false
 var loaded_is_autosave: = false
 
 var is_in_level_edit_mode: = true
+var _state_load_is_start_of_level: = false
 
 var loaded = false
 
@@ -454,6 +455,7 @@ func load_serialized_play_state(serialized_state: Dictionary, as_level_load: boo
 	any_state_loaded.emit()
 
 	bg_style_changed.emit()
+	_state_load_is_start_of_level = false
 
 func deserialize(serialized_state: Dictionary) -> void:
 	stateful_camera_settings = serialized_state.get("stateful_camera_settings", {}).duplicate_deep()
@@ -534,6 +536,7 @@ func save_checkpoint() -> void:
 func load_checkpoint() -> void:
 	if not checkpoint_save:
 		if editor_save:
+			_state_load_is_start_of_level = true
 			load_serialized_play_state(editor_save, false)
 			push_undo_state(true)
 		else:
@@ -548,7 +551,10 @@ func clear_checkpoint() -> void:
 func save_edited() -> void:
 	editor_save = get_serialized_play_state()
 	clear_checkpoint()
-func load_edited(as_level_load: bool = true) -> void:
+func load_edited(as_level_load: bool = true, as_start_of_level: bool = false) -> void:
+	if as_level_load:
+		as_start_of_level = true
+	_state_load_is_start_of_level = as_start_of_level
 	load_serialized_play_state(editor_save, as_level_load)
 	clear_checkpoint()
 	if not as_level_load:

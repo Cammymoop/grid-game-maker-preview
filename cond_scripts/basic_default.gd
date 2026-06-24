@@ -48,6 +48,16 @@ func cmd_if_entity_is_moving_or_starting_to_move(slots: Dictionary, chosen_slot:
 		return true
 	return false
 
+func desc_if_entity_is_half_done_moving() -> String:
+	return "entity|If the entity is moving and is at least halfway through the move"
+func cmd_if_entity_is_half_done_moving(slots: Dictionary, chosen_slot: int) -> bool:
+	if not Commands.slot_is_entity(chosen_slot):
+		push_error("Invalid slot or empty slot to check if entity is half done moving: %s" % chosen_slot)
+		return false
+	if not slots[chosen_slot]:
+		return false
+	return slots[chosen_slot].is_half_done_moving()
+
 
 func desc_exclude_positions() -> String:
 	return "pos|<= Remove all positions in [exclusion_slot:SlotInput:pos] from the slot's selection (Difference)"
