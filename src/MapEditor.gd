@@ -132,6 +132,8 @@ func on_any_state_loaded() -> void:
 		editor_cam.set_position_immediate(game_camera_starting_pos)
 
 		_refresh_edited_entity_indicators()
+	if edit_mode:
+		editor_cam.make_current()
 
 func is_holding_cursor_move() -> bool:
 	if not edit_mode or not _input_priority:

@@ -35,6 +35,8 @@ var active = false
 @onready var main_panel: PanelContainer = find_child("MainPausePanel")
 @onready var level_settings_panel: PanelContainer = find_child("LevelSettingsPausePanel")
 
+@export var start_level_paused_toggle: CheckButton
+
 @export var level_list_picker: OptionButton
 
 @export var copy_to_clipboard_button: Button
@@ -69,6 +71,9 @@ func _ready():
 	
 	level_subtitle_edit.text_changed.connect(on_level_subtitle_edited)
 	
+	start_level_paused_toggle.toggled.connect(on_start_level_paused_toggle_toggled)
+	if GameManager.is_in_level_edit_mode:
+		start_level_paused_toggle.set_pressed_no_signal(MapManager.is_level_start_paused())
 	
 	level_list_picker.item_selected.connect(level_list_picked)
 
@@ -419,3 +424,7 @@ func on_level_editor_controls_help_toggle_pressed(toggled_on: bool) -> void:
 	var map_editor_overlay: = Utility.get_map_editor_overlay()
 	if map_editor_overlay:
 		map_editor_overlay.set_show_controls_help(toggled_on)
+
+func on_start_level_paused_toggle_toggled(toggled_on: bool) -> void:
+	if GameManager.is_in_level_edit_mode:
+		MapManager.set_level_start_paused(toggled_on)

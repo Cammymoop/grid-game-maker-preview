@@ -21,6 +21,7 @@
 [ext_resource type="FontFile" uid="uid://cpry5rd5ecdc5" path="res://assets/font/small_font.tres" id="19"]
 [ext_resource type="Script" uid="uid://ctv3pyo6boi3h" path="res://src/GameEditor/PickedCrosshair.gd" id="20"]
 [ext_resource type="PackedScene" uid="uid://dyjhlku4kgqkm" path="res://src/Singletons/global_toaster.tscn" id="20_63ggb"]
+[ext_resource type="Script" uid="uid://dpuajjdauwd7f" path="res://Scenes/GameEditor/remembering_color_picker_button.gd" id="20_fd7wg"]
 
 [sub_resource type="AtlasTexture" id="3"]
 atlas = ExtResource("2")
@@ -782,6 +783,7 @@ text = "Colorize"
 custom_minimum_size = Vector2(0, 28)
 layout_mode = 2
 color = Color(1, 1, 1, 1)
+script = ExtResource("20_fd7wg")
 
 [node name="BrushColorPreview" type="TextureRect" parent="PanelContainer/MarginContainer/VBoxContainer/CollapsableSection/HBoxContainer5/PanelContainer2/MarginContainer/HBoxContainer" unique_id=1787369423]
 texture_filter = 1

@@ -15,17 +15,19 @@
     "window_width": 19.0,
     "auto_reload_checkpoint_for_no_cam_focus": true,
     "bg_style": {
-      "background_color": "#6dbbf0",
-      "bg_gradient_color": "#5a8df4ff",
-      "dusty_particles_on": true,
-      "pointy_particles_on": false,
-      "pointy_particles_amount": 0.1,
-      "pointy_particles_color": "#c739393a",
+      "background_color": "#82e4ee",
+      "bg_gradient_color": "#16aeadff",
+      "dusty_particles_on": false,
+      "pointy_particles_on": true,
+      "pointy_particles_amount": 0.5,
+      "pointy_particles_color": "#c7393926",
       "dusty_particles_color": "#0081f80b",
       "dusty_particles_amount": 2.8,
       "dusty_particles_speed": 1.2,
       "bg_gradient_on": true,
-      "bg_gradient_above": "below"
+      "bg_gradient_above": "below",
+      "pointy_particles_speed": 0.1,
+      "pointy_particles_rainbow_on": false
     },
     "info_panel_enabled": true,
     "info_panel_items": {
@@ -74,7 +76,8 @@
         "hide_zero_value": true,
         "hide_empty_value": true
       }
-    }
+    },
+    "start_level_paused": false
   },
   "textures": [
     {

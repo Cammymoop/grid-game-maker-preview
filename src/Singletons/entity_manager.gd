@@ -80,6 +80,8 @@ var _finished_related_move_node: Dictionary = {}
 
 var _pending_undo: = true
 
+var paused_at_start: bool = false
+
 #var _move_resolution_stack: Array[Dictionary] = []
 #var _move_stack_metadata: Dictionary = {}
 
@@ -87,7 +89,24 @@ func paused_visual_process(delta_time: float) -> void:
     for e in entity_list:
         e.sprite_process(delta_time)
 
+func pressed_any_to_start() -> bool:
+    for dir in ["up", "down", "left", "right"]:
+        if Input.is_action_just_pressed("move_" + dir):
+            return true
+    for action_num in ["1", "2", "3"]:
+        if Input.is_action_just_pressed("input_action_" + action_num):
+            return true
+    return false
+
 func entity_list_process(delta_time: float) -> void:
+    if paused_at_start:
+        if pressed_any_to_start():
+            paused_at_start = false
+
+    if paused_at_start:
+        paused_visual_process(delta_time)
+        return
+
     var active_entities: Array[BaseEntity] = []
     var moving_entities: Array[BaseEntity] = []
     var idle_entities: Array[BaseEntity] = []
@@ -309,6 +328,21 @@ func _ready():
     idle_delay_frames = roundi(default_idle_delay * GameManager.get_tick_rate())
     
     GameManager.game_settings_changed.connect(on_game_settings_changed)
+    
+    GameManager.level_state_loaded.connect(on_level_state_loaded)
+    GameManager.any_state_loaded.connect(on_any_state_loaded)
+
+func on_level_state_loaded() -> void:
+    if movement_mode != GameManager.MovementMode.MOVEMENT_CONTINUOUS:
+        return
+    if GameManager.get_game_setting("start_level_paused", false):
+        paused_at_start = true
+
+func on_any_state_loaded() -> void:
+    if movement_mode != GameManager.MovementMode.MOVEMENT_CONTINUOUS:
+        return
+    if GameManager.get_game_setting("start_any_paused", false):
+        paused_at_start = true
 
 func setup():
     fix_string_keys()

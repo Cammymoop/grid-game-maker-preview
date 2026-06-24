@@ -2,6 +2,7 @@
 
 [ext_resource type="Script" uid="uid://bjpay8vts773f" path="res://Scenes/GameEditor/dying_effect_input.gd" id="1_p5tp7"]
 [ext_resource type="Script" uid="uid://b2e3vs73ts471" path="res://Scenes/GameEditor/ConditionalEditor/generic_option_button_input.gd" id="2_y2k6b"]
+[ext_resource type="Script" uid="uid://dpuajjdauwd7f" path="res://Scenes/GameEditor/remembering_color_picker_button.gd" id="3_y2k6b"]
 
 [node name="DyingEffectInput" type="HBoxContainer" unique_id=790260579 node_paths=PackedStringArray("effect_picker_input")]
 anchors_preset = 15
@@ -26,3 +27,4 @@ script = ExtResource("2_y2k6b")
 visible = false
 custom_minimum_size = Vector2(40, 0)
 layout_mode = 2
+script = ExtResource("3_y2k6b")

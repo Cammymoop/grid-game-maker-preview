@@ -34,6 +34,9 @@ var invalid_field_color = Color(0.7, 0.4, 0.4)
 
 @export var action_1_is_undo_toggle: CheckButton
 
+@export var start_paused_option: Control
+@export var start_level_paused_toggle: CheckButton
+
 var _save_as_dialog_open: bool = false
 
 func _ready():
@@ -87,7 +90,7 @@ func _ready():
 	follow_by_controller_picker.visible = cam_settings.get("follow_entity_by", "controller") == "controller"
 	find_child("FollowEntity").visible = cam_settings.get("follow_entity_by", "controller") != "controller"
 	
-	var is_continuous: bool = game_settings.get("movement_mode", GameManager.MovementMode.MOVEMENT_CONTINUOUS) == GameManager.MovementMode.MOVEMENT_CONTINUOUS
+	var is_continuous: bool = is_continuous_movement_mode()
 	auto_undo_option.visible = not is_continuous
 	
 	auto_undo_toggle.set_pressed_no_signal(game_settings.get("auto_undo", true) if not is_continuous else true)
@@ -130,6 +133,10 @@ func _ready():
 			action_signal_sent_to_option_picker.select(i)
 			break
 	
+	start_paused_option.visible = is_continuous
+	start_level_paused_toggle.set_pressed_no_signal(GameManager.get_game_setting("start_level_paused", false))
+	start_level_paused_toggle.toggled.connect(on_start_level_paused_toggle_toggled)
+	
 	def_dying_eff_picker.item_selected.connect(on_default_dying_eff_option_picked)
 	var cur_dying_eff: String = GameManager.get_game_setting("default_dying_effect", "")
 	def_dying_eff_picker.clear()
@@ -145,6 +152,9 @@ func _ready():
 		Utility.opbtn_select_text(def_dying_eff_picker, cur_dying_eff)
 	else:
 		def_dying_eff_picker.selected = 0
+
+func is_continuous_movement_mode() -> bool:
+	return GameManager.get_game_setting("movement_mode", GameManager.MovementMode.MOVEMENT_CONTINUOUS) == GameManager.MovementMode.MOVEMENT_CONTINUOUS
 
 func init_movement_modes() -> void:
 	var popup_menu: PopupMenu = find_child("MovementModeMenuButton").get_popup()
@@ -185,9 +195,11 @@ func movement_mode_picked(mode_id: int) -> void:
 	var index = popup_menu.get_item_index(mode_id)
 	find_child("MovementModeMenuButton").text = popup_menu.get_item_text(index)
 	
-	game_settings["movement_mode"] = mode_id
+	GameManager.set_game_setting("movement_mode", mode_id)
 	
-	auto_undo_option.visible = mode_id != GameManager.MovementMode.MOVEMENT_CONTINUOUS
+	var is_continuous: bool = is_continuous_movement_mode()
+	auto_undo_option.visible = not is_continuous
+	start_paused_option.visible = is_continuous
 
 func _on_SaveButton_pressed() -> void:
 	if not GameManager.is_save_current_overwriting():
@@ -406,4 +418,8 @@ func on_auto_undo_toggled(button_pressed: bool) -> void:
 
 func on_action_1_is_undo_toggled(button_pressed: bool) -> void:
 	GameManager.set_game_setting("action_1_does_undo", button_pressed)
+	GameManager.game_settings_changed.emit()
+
+func on_start_level_paused_toggle_toggled(button_pressed: bool) -> void:
+	GameManager.set_game_setting("start_level_paused", button_pressed)
 	GameManager.game_settings_changed.emit()

@@ -2,6 +2,7 @@
 
 [ext_resource type="Script" uid="uid://ddhsn1v0xq64b" path="res://Scenes/GameEditor/bump_effect_input.gd" id="1_8mgq2"]
 [ext_resource type="PackedScene" uid="uid://bleyoj5f36kfy" path="res://Scenes/GameEditor/ConditionalEditor/scalar_value_input.tscn" id="2_bq0lu"]
+[ext_resource type="Script" uid="uid://dpuajjdauwd7f" path="res://Scenes/GameEditor/remembering_color_picker_button.gd" id="2_n7qfm"]
 
 [node name="BumpEffectInput" type="HBoxContainer" unique_id=790260579 node_paths=PackedStringArray("effect_picker_input", "color_picker", "amount_container", "amount_input")]
 anchors_preset = 15
@@ -28,6 +29,7 @@ fit_to_longest_item = false
 visible = false
 custom_minimum_size = Vector2(40, 0)
 layout_mode = 2
+script = ExtResource("2_n7qfm")
 
 [node name="HBoxContainer" type="HBoxContainer" parent="." unique_id=645982276]
 layout_mode = 2

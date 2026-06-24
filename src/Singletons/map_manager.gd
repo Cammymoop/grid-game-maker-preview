@@ -1378,3 +1378,16 @@ func flush_save_persist_on_completion() -> void:
             var existing_scalar: float = float(exisiting_val)
             GameManager.set_game_save_data(save_key, existing_scalar + to_add)
     clear_save_persist_on_completion()
+
+func is_level_start_paused() -> bool:
+    if not map_metadata.has("start_level_paused"):
+        return GameManager.get_game_setting("start_level_paused", false)
+    else:
+        return map_metadata["start_level_paused"]
+
+func set_level_start_paused(paused: bool) -> void:
+    var def: bool = GameManager.get_game_setting("start_level_paused", false)
+    if def != paused:
+        set_metadata_value("start_level_paused", paused, GameManager.is_in_level_edit_mode)
+    else:
+        erase_metadata_value("start_level_paused", GameManager.is_in_level_edit_mode)

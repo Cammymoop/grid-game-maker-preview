@@ -2,6 +2,7 @@
 
 [ext_resource type="Script" uid="uid://dtjijhjsp7d5g" path="res://Scenes/GameEditor/bg_style_editor.gd" id="1_pxgli"]
 [ext_resource type="PackedScene" uid="uid://bleyoj5f36kfy" path="res://Scenes/GameEditor/ConditionalEditor/scalar_value_input.tscn" id="2_87jfg"]
+[ext_resource type="Script" uid="uid://dpuajjdauwd7f" path="res://Scenes/GameEditor/remembering_color_picker_button.gd" id="2_pvmex"]
 
 [sub_resource type="Theme" id="Theme_48hio"]
 default_font_size = 14
@@ -75,6 +76,7 @@ text = "Background Color:"
 custom_minimum_size = Vector2(34, 24)
 layout_mode = 2
 edit_alpha = false
+script = ExtResource("2_pvmex")
 
 [node name="HSeparator" type="HSeparator" parent="." unique_id=2065519064]
 layout_mode = 2
@@ -106,6 +108,7 @@ text = "Color:"
 [node name="ColorPickerButton" type="ColorPickerButton" parent="VBoxContainer/GradientSuboptions/HBoxContainer3" unique_id=1494971218]
 custom_minimum_size = Vector2(34, 24)
 layout_mode = 2
+script = ExtResource("2_pvmex")
 
 [node name="HBoxContainer4" type="HBoxContainer" parent="VBoxContainer/GradientSuboptions" unique_id=1466643898]
 layout_mode = 2
@@ -155,6 +158,7 @@ text = "Color:"
 [node name="ColorPickerButton" type="ColorPickerButton" parent="VBoxContainer2/CloudsSuboptions/HBoxContainer3" unique_id=746370805]
 custom_minimum_size = Vector2(34, 24)
 layout_mode = 2
+script = ExtResource("2_pvmex")
 
 [node name="HBoxContainer4" type="HBoxContainer" parent="VBoxContainer2/CloudsSuboptions" unique_id=75483177]
 layout_mode = 2
@@ -212,6 +216,7 @@ text = "Color:"
 [node name="ColorPickerButton" type="ColorPickerButton" parent="VBoxContainer4/SparksSuboptions/HBoxContainer3" unique_id=1384611050]
 custom_minimum_size = Vector2(34, 24)
 layout_mode = 2
+script = ExtResource("2_pvmex")
 
 [node name="HBoxContainer5" type="HBoxContainer" parent="VBoxContainer4/SparksSuboptions" unique_id=1714812141]
 layout_mode = 2
@@ -317,6 +322,7 @@ text = "Lines Color:"
 [node name="ColorPickerButton" type="ColorPickerButton" parent="VBoxContainer3/NoiseSuboptions/HBoxContainer3" unique_id=775456445]
 custom_minimum_size = Vector2(34, 24)
 layout_mode = 2
+script = ExtResource("2_pvmex")
 
 [node name="HBoxContainer5" type="HBoxContainer" parent="VBoxContainer3/NoiseSuboptions" unique_id=2110732092]
 layout_mode = 2
@@ -329,6 +335,7 @@ text = "Solids Color:"
 [node name="ColorPickerButton" type="ColorPickerButton" parent="VBoxContainer3/NoiseSuboptions/HBoxContainer5" unique_id=1759660424]
 custom_minimum_size = Vector2(34, 24)
 layout_mode = 2
+script = ExtResource("2_pvmex")
 
 [node name="HBoxContainer8" type="HBoxContainer" parent="VBoxContainer3/NoiseSuboptions" unique_id=250992645]
 layout_mode = 2
