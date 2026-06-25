@@ -713,7 +713,7 @@ func reset_entity_move_interp_style(entity: BaseEntity) -> void:
         var teleport_interp_str: Variant = get_entity_prop_with_default(entity, "teleport-animation", "")
         entity.teleport_interp_style = BaseEntity.read_move_interp_style_string(str(teleport_interp_str), default_teleport_interp_style)
 
-func create_entity(entity_index: int, tile_position: Vector2i, facing: int = 0, activate: bool = true) -> Node2D:
+func create_entity(entity_index: int, tile_position: Vector2i, facing: int = 0, activate: bool = true, from_editor: bool = false) -> Node2D:
     if entity_list.size() >= entity_instance_cap:
         return null
     var entity_info = entity_defs[entity_index]
@@ -758,7 +758,7 @@ func create_entity(entity_index: int, tile_position: Vector2i, facing: int = 0, 
     entity.active = activate
     on_entity_added(entity)
     
-    if activate:
+    if activate and not from_editor:
         post_activated_actions(entity)
     
     MapManager.check_terrain_spr_mod_for_created(entity)

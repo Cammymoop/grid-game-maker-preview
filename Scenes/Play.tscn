@@ -273,6 +273,7 @@ layout_mode = 2
 layout_mode = 2
 theme_override_font_sizes/font_size = 28
 text = "LEVEL NAME"
+horizontal_alignment = 1
 
 [node name="LevelSubtitleLabel" type="Label" parent="OverlayLayer/OverlayUI/TopCenter/AnimationRoot/PanelContainer/VBoxContainer" unique_id=1172656503]
 layout_mode = 2

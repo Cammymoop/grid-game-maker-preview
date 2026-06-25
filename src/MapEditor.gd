@@ -439,11 +439,11 @@ func _primary_action_at_cursor(holding: bool = false) -> void:
 				if EntityManager.get_entity_prop_with_default(e, "edit-place-multiple", false):
 					continue
 				EntityManager.remove_entity(e)
-		var new_entity: BaseEntity = EntityManager.create_entity(current_entity_index, cursor_tile_pos, current_entity_facing)
+		var as_active: = not has_copied_properties or entity_active_copied
+		var new_entity: BaseEntity = EntityManager.create_entity(current_entity_index, cursor_tile_pos, current_entity_facing, as_active, true)
 		if has_copied_properties:
 			if entity_properties_copied:
 				new_entity.set_local_properties_dict(entity_properties_copied)
-			new_entity.active = entity_active_copied
 			_refresh_edited_entity_indicators()
 	elif cursor_mode == "text":
 		var text_offset: = get_cur_placeable_text_offset()

@@ -220,7 +220,8 @@
           ],
           "when false": [],
           "when always": []
-        }
+        },
+        "blocking-clones": true
       },
       "groups": [
         "Player"
@@ -379,7 +380,8 @@
         "fire-resistant": true,
         "eats": true,
         "no-rotate": true,
-        "box": true
+        "box": true,
+        "blocking-clones": true
       },
       "can_be_large": true,
       "default_size": [
@@ -404,7 +406,8 @@
           "when false": [],
           "when always": []
         },
-        "turn-animation": "none"
+        "turn-animation": "none",
+        "blocking-clones": true
       },
       "controller": "BounceController"
     },
@@ -467,7 +470,8 @@
           "when always": []
         },
         "solid": true,
-        "move-speed": 6
+        "move-speed": 6,
+        "blocking-clones": true
       },
       "controller": "creature_controller",
       "controller_options": {
@@ -518,7 +522,8 @@
         },
         "solid": true,
         "fire-resistant": true,
-        "move-speed": 6
+        "move-speed": 6,
+        "blocking-clones": true
       },
       "controller": "creature_controller",
       "controller_options": {
@@ -550,7 +555,8 @@
         "solid": true,
         "move-animation": "stepped",
         "eats": true,
-        "move-speed": 5
+        "move-speed": 5,
+        "blocking-clones": true
       },
       "controller": "creature_controller",
       "controller_options": {
@@ -581,7 +587,8 @@
         "solid": true,
         "move-animation": "stepped",
         "eats": true,
-        "move-speed": 5
+        "move-speed": 5,
+        "blocking-clones": true
       },
       "controller": "creature_controller",
       "controller_options": {
@@ -624,7 +631,8 @@
           "when false": [],
           "when always": []
         },
-        "no-rotate": true
+        "no-rotate": true,
+        "blocking-clones": true
       }
     },
     "15": {
@@ -646,7 +654,8 @@
         "solid": true,
         "move-animation": "stepped",
         "eats": true,
-        "move-speed": 3
+        "move-speed": 3,
+        "blocking-clones": true
       },
       "controller": "direct_chase_controller",
       "controller_options": {
@@ -719,7 +728,8 @@
       "properties": {
         "blocks": true,
         "z-index": -1,
-        "solid": true
+        "solid": true,
+        "blocking-clones": true
       }
     },
     "19": {
@@ -750,7 +760,8 @@
           "when false": [],
           "when always": []
         },
-        "no-rotate": true
+        "no-rotate": true,
+        "blocking-clones": true
       }
     },
     "20": {
@@ -781,7 +792,8 @@
           "when false": [],
           "when always": []
         },
-        "no-rotate": true
+        "no-rotate": true,
+        "blocking-clones": true
       }
     },
     "21": {
@@ -811,7 +823,8 @@
           "when false": [],
           "when always": []
         },
-        "no-rotate": true
+        "no-rotate": true,
+        "blocking-clones": true
       }
     },
     "22": {
@@ -1046,7 +1059,8 @@
         },
         "fire-averse": true,
         "eats": true,
-        "move-speed": 2
+        "move-speed": 2,
+        "blocking-clones": true
       },
       "controller": "random_creature_controller",
       "controller_options": {
@@ -1071,7 +1085,8 @@
         "solid": true,
         "fire-averse": true,
         "turn-animation": "none",
-        "move-speed": 4
+        "move-speed": 4,
+        "blocking-clones": true
       },
       "controller": "random_creature_controller",
       "controller_options": {
@@ -1159,7 +1174,8 @@
           "when always": []
         },
         "fire-averse": true,
-        "move-speed": 5
+        "move-speed": 5,
+        "blocking-clones": true
       },
       "controller": "creature_controller",
       "controller_options": {
@@ -1199,7 +1215,8 @@
           "when true": [],
           "when false": [],
           "when always": []
-        }
+        },
+        "blocking-clones": true
       }
     },
     "31": {
@@ -1293,7 +1310,8 @@
           ],
           "when false": [],
           "when always": []
-        }
+        },
+        "blocking-clones": true
       },
       "sprite_config": {
         "layers": [
@@ -1394,7 +1412,8 @@
             "when always": []
           }
         ],
-        "solid": true
+        "solid": true,
+        "blocking-clones": true
       },
       "sprite_config": {
         "layers": [
@@ -1431,7 +1450,7 @@
               "and",
               "and",
               "basic_default.select_entity_at::[\"i:2\",\"i:20\",\"s:player\",false]",
-              "basic_default.if_any_entity_exists::[\"i:20\",\"i:2\",false,\"s:solid\"]",
+              "basic_default.if_any_entity_exists::[\"i:20\",\"i:2\",false,\"s:blocking-clones\"]",
               "and",
               "or"
             ],
@@ -1508,7 +1527,8 @@
           ],
           "when false": [],
           "when always": []
-        }
+        },
+        "blocking-clones": true
       }
     },
     "38": {
@@ -1622,7 +1642,7 @@
             "v": "3",
             "conditions": [
               "basic_default.select_adjacent_tile::[\"i:4\",\"i:0\",{\"args\":[\"s:type\",\"s:plain\",\"s:direction\",\"i:12\"],\"type\":\"Dictionary\"}]",
-              "basic_default.select_entity_at::[\"i:2\",\"i:4\",\"s:solid\",false]",
+              "basic_default.select_entity_at::[\"i:2\",\"i:4\",\"s:blocking-clones\",false]",
               "basic_default.exists::[\"i:2\"]",
               "not"
             ],
@@ -1632,10 +1652,23 @@
             ],
             "when false": [],
             "when always": []
+          },
+          {
+            "v": "3",
+            "conditions": [
+              "basic_default.if_entity_is_moving::[\"i:3\"]",
+              "not"
+            ],
+            "when true": [
+              "basic_default.destroy_entity_immediately::[\"i:3\"]"
+            ],
+            "when false": [],
+            "when always": []
           }
         ],
         "created-preview": false,
-        "solid": true
+        "solid": true,
+        "blocking-clones": true
       }
     },
     "41": {
@@ -1796,7 +1829,8 @@
         "eats": true,
         "no-rotate": true,
         "pushes-ice": true,
-        "box": true
+        "box": true,
+        "blocking-clones": true
       }
     }
   },
@@ -2729,7 +2763,8 @@
         "chips revival",
         "test",
         "Treats",
-        "Ice Dispenser"
+        "Ice Dispenser",
+        "Stuck Toggles"
       ]
     },
     {
@@ -2750,16 +2785,11 @@
     },
     {
       "name": "CCLP4",
-      "level_names": [
-        "Rivets",
-        "Molecule"
-      ]
+      "level_names": []
     },
     {
       "name": "CCLP5",
-      "level_names": [
-        "Thunderwave Cave"
-      ]
+      "level_names": []
     },
     {
       "name": "Other",
@@ -2770,7 +2800,9 @@
         "Closed Circuit",
         "Work Ethic",
         "Tiny",
-        "The Last Starfighter"
+        "The Last Starfighter",
+        "Thunderwave Cave",
+        "Rivets"
       ]
     }
   ],
@@ -2780,7 +2812,7 @@
       "name": "Grab Chip",
       "volume": 0.86,
       "pitch": 1.55184557391536,
-      "ps_seed": 526707
+      "ps_seed": 526707.0
     },
     {
       "type": "sample",
@@ -2801,7 +2833,7 @@
       "name": "Pickups",
       "volume": 0.81,
       "pitch": 1.0,
-      "ps_seed": 702203
+      "ps_seed": 702203.0
     },
     {
       "type": "sample",
@@ -2822,7 +2854,7 @@
       "name": "Trash",
       "volume": 0.69,
       "pitch": 0.802741561760231,
-      "ps_seed": 428604
+      "ps_seed": 428604.0
     },
     {
       "type": "sample",
@@ -2864,7 +2896,7 @@
       "name": "Push Ice",
       "volume": 0.57,
       "pitch": 1.27340536727286,
-      "ps_seed": 423309
+      "ps_seed": 423309.0
     },
     {
       "type": "sample",
@@ -2878,7 +2910,7 @@
       "name": "Checkpoint",
       "volume": 1.27,
       "pitch": 0.820574797310544,
-      "ps_seed": 344809
+      "ps_seed": 344809.0
     },
     {
       "type": "sample",
@@ -2892,7 +2924,7 @@
       "name": "Pop up",
       "volume": 0.33,
       "pitch": 0.540520409799777,
-      "ps_seed": 554903
+      "ps_seed": 554903.0
     },
     {
       "type": "sample",
@@ -2906,21 +2938,21 @@
       "name": "Gate Open",
       "volume": 1.19,
       "pitch": 0.517281857971787,
-      "ps_seed": 656104
+      "ps_seed": 656104.0
     },
     {
       "type": "ps_sfx",
       "name": "Win",
       "volume": 0.36,
       "pitch": 0.768229356394374,
-      "ps_seed": 555403
+      "ps_seed": 555403.0
     },
     {
       "type": "ps_sfx",
       "name": "Grizzly",
       "volume": 1.0,
       "pitch": 1.0,
-      "ps_seed": 200698
+      "ps_seed": 200698.0
     },
     {
       "type": "sample",
@@ -2934,14 +2966,14 @@
       "name": "Slide Old",
       "volume": 1.67,
       "pitch": 0.978267385729171,
-      "ps_seed": 183609
+      "ps_seed": 183609.0
     },
     {
       "type": "ps_sfx",
       "name": "Slide",
       "volume": 0.41,
       "pitch": 1.30169459377786,
-      "ps_seed": 882109
+      "ps_seed": 882109.0
     },
     {
       "type": "sample",

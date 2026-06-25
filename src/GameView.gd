@@ -40,7 +40,7 @@ func set_resolution(new_resolution: Vector2) -> void:
 	#get_window().min_size = Vector2i(new_resolution / 2)
 	intended_resolution = new_resolution
 	resolution = fit_resolution_into_aspect(aspect_expand)
-	if maxf(resolution.x, resolution.y) > 1024:
+	if maxf(resolution.x, resolution.y) > 2048:
 		size = resolution
 		size_2d_override = resolution
 	else:

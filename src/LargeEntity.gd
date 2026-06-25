@@ -129,7 +129,7 @@ func update_position_and_size(new_position: Vector2i, new_size: Vector2i) -> voi
 
 func deserialize(data: Dictionary) -> void:
 	super.deserialize(data)
-	entity_size = Utility.get_vector2_from_arr(data.get("entity_size", [2, 2]))
+	entity_size = Utility.get_vector2_from_arr(data.get("entity_size", [1, 1]))
 	use_mask = data.get("use_mask", false)
 	if use_mask:
 		shape_mask = _deserialize_shape_mask(data.get("shape_mask", {}))
