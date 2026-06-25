@@ -111,7 +111,7 @@ func slot_is_positions(slot_id: int) -> bool:
 
 # Entity or tile position
 func slot_has_position(slot_id: int) -> bool:
-	return slot_id >= Slot.RED and slot_id <= Slot.BLACK
+	return slot_id == Slot.ORANGE or (slot_id >= Slot.RED and slot_id <= Slot.BLACK)
 
 
 func slot_is_scalar(slot_id: int) -> bool:

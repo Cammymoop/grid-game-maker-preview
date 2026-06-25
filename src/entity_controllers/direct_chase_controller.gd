@@ -67,4 +67,4 @@ func update_targeted_entity() -> void:
 	if not always_update_target:
 		if targeted_entity and EntityManager.is_valid_entity_in_world(targeted_entity):
 			return
-	targeted_entity = EntityManager.find_closest_entity_with_property(target_entity_property, parent.tile_position, [parent])
+	targeted_entity = EntityManager.find_closest_entity_with_property(target_entity_property, parent.tile_position, [parent], not only_target_active)

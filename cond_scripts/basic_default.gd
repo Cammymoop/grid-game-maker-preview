@@ -183,6 +183,7 @@ func cmd_select_tiles_in_direction(slots: Dictionary, chosen_slot: int, compl_di
 	var from_positions: Array = slots[from_slot] if Commands.slot_is_positions(from_slot) else [slots[from_slot].get_moving_position()]
 	var moved_positions: Array[Vector2i] = []
 	var delta: = facing_vec * distance_int
+	prints("selecting in direction, delta:", delta)
 	for from_pos in from_positions:
 		moved_positions.append(from_pos + delta)
 	slots[chosen_slot] = moved_positions
