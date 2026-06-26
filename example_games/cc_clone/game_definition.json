@@ -2760,11 +2760,20 @@
       "level_names": [
         "Intro",
         "bolts and nuts",
+        "Tiny",
+        "Stuck Toggles",
+        "Rivets",
+        "Tight Run",
+        "Respawn",
         "chips revival",
-        "test",
         "Treats",
+        "Thunderwave Cave",
+        "The Last Starfighter",
         "Ice Dispenser",
-        "Stuck Toggles"
+        "Block Around the Clock",
+        "Closed Circuit",
+        "Pipe Dream",
+        "Work Ethic"
       ]
     },
     {
@@ -2784,26 +2793,8 @@
       ]
     },
     {
-      "name": "CCLP4",
-      "level_names": []
-    },
-    {
-      "name": "CCLP5",
-      "level_names": []
-    },
-    {
       "name": "Other",
-      "level_names": [
-        "Tight Run",
-        "Pipe Dream",
-        "Block Around the Clock",
-        "Closed Circuit",
-        "Work Ethic",
-        "Tiny",
-        "The Last Starfighter",
-        "Thunderwave Cave",
-        "Rivets"
-      ]
+      "level_names": []
     }
   ],
   "sfx_definitions": [
