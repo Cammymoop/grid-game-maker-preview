@@ -90,7 +90,7 @@ func set_v3_data(qualified_name: String, short_name: String, new_command_info: D
         is_builtin = true
         ui_data = {"display_name": qualified_name.capitalize()}
     else:
-        ui_data = {"display_name": command_info["display_name"]}
+        ui_data = {"display_name": command_info.get("display_name", qualified_name.capitalize())}
 
 func set_disabled_slots(disabled_slots: Array) -> void:
     var command_slot_selector: Control = find_child("CommandSlot")
