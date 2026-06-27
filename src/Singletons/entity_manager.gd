@@ -78,8 +78,6 @@ var _nested_related_moves: Dictionary = {}
 var _cur_related_move_node: Dictionary = {}
 var _finished_related_move_node: Dictionary = {}
 
-var _pending_undo: = true
-
 var paused_at_start: bool = false
 
 #var _move_resolution_stack: Array[Dictionary] = []
@@ -766,7 +764,6 @@ func create_entity(entity_index: int, tile_position: Vector2i, facing: int = 0, 
     return entity
 
 func setup_new_entity_size(entity: BaseEntity) -> void:
-    prints("setup_new_entity_size", entity)
     if not entity is LargeEntity:
         return
     
@@ -839,21 +836,18 @@ func auto_bond_handler(entity: BaseEntity) -> void:
         return
     var auto_bond_val: String = Utility.property_value_nonempty_string(get_entity_prop_with_default(entity, "auto-bond", false), "false")
     if auto_bond_val != "false":
-        prints("instance", entity.instance_id, "auto bond val", auto_bond_val)
         var bonded: = false
         var bond_to_entity_ids: Array = []
         if auto_bond_val == "true":
             bond_to_entity_ids = [entity.entity_index]
         else:
             bond_to_entity_ids = filter_entity_types_by_property(auto_bond_val)
-        prints("checking for entities with ids:", bond_to_entity_ids)
         var bond_adjacent: = get_entity_prop_is_truthy(entity, "auto-bond-adjacent", false)
         var adjacent_positions: Array[Vector2i] = []
         if bond_adjacent:
             var e_pos: = entity.get_moving_position()
             adjacent_positions = [e_pos]
             adjacent_positions.append_array(Utility.get_adjacent_positions(e_pos))
-            prints("checking for positions", adjacent_positions)
 
         for potential_group in bond_groups:
             # This doesn't keep track of which groups were created as auto-bond groups for specific entities, more work to do later
@@ -866,12 +860,10 @@ func auto_bond_handler(entity: BaseEntity) -> void:
                     continue
                 if bond_adjacent and not group_entity.is_at_multiple(adjacent_positions):
                     continue
-                prints("found a bond group", potential_group)
                 bond_entity(entity, potential_group)
                 bonded = true
                 break
         if not bonded:
-            prints("making new bond group")
             create_bond_group([entity])
 
 func restore_entity(serialized_entity: Dictionary, refresh: bool = false) -> void:
@@ -1127,6 +1119,31 @@ func get_entities_at_multiple(tile_positions: Array, exclude_entity: Object = nu
                         entities_here.append(e)
     return entities_here
 
+func get_entities_adjacent_to_multiple(tile_positions: Array, exclude_list: Array = [], include_inactive: bool = false) -> Array:
+    return get_entities_adjacent_to_multiple_move_from(tile_positions, -1, exclude_list, include_inactive)
+
+func get_entities_adjacent_to_multiple_move_from(tile_positions: Array, move_direction: int, exclude_list: Array = [], include_inactive: bool = false) -> Array:
+    var adjacent_positions: Array[Vector2i] = []
+    var adjacent_entities: Array = []
+    var facing_vectors: Array[Vector2i] = [Vector2i.UP, Vector2i.RIGHT, Vector2i.DOWN, Vector2i.LEFT]
+    for pos in tile_positions:
+        for dir in 4:
+            if dir == move_direction:
+                continue
+            var adjacent_pos: Vector2i = pos + facing_vectors[dir]
+            if adjacent_pos in adjacent_positions or not adjacent_pos in _entity_at_cache:
+                continue
+            adjacent_positions.append(pos + facing_vectors[dir])
+    
+    for pos in adjacent_positions:
+        for e in _entity_at_cache[pos]:
+            if (not include_inactive and not e.active) or (exclude_list and e.instance_id in exclude_list):
+                continue
+            if e in adjacent_entities:
+                continue
+            adjacent_entities.append(e)
+    return adjacent_entities
+
 func find_entity_by_index(entity_index: int, first: bool = true) -> BaseEntity:
     for i in Utility.array_iter(entity_list, not first):
         if entity_list[i].entity_index == entity_index:
@@ -1279,6 +1296,24 @@ func finish_move(moving_entity, onto_positions: Array) -> void:
         return
     for i in entities_here.size():
         resolve_entity_interaction_old("finish_move_onto", entities_here[i], moving_entity, entities_overlapped_at[i])
+    
+    if not moving_entity.active:
+        return
+    
+    var adjacent_entities: = get_entities_adjacent_to_multiple(onto_positions, [], false)
+    if entity_has_property(moving_entity, "i_finish_move_next_to"):
+        for e in adjacent_entities:
+            var e_positions: = get_all_positions_of_entity(e)
+            var this_intersect_pos: Array[Vector2i] = Utility.filter_adjacent_positions_of_multiple(e_positions, onto_positions)
+            resolve_entity_interaction_event("i_finish_move_next_to", moving_entity, e, this_intersect_pos, true)
+    if not moving_entity.active:
+        return
+    for e in adjacent_entities:
+        if not entity_has_property(e, "finish_move_next_to"):
+            continue
+        var e_positions: = get_all_positions_of_entity(e)
+        var this_intersect_pos: Array[Vector2i] = Utility.filter_adjacent_positions_of_multiple(onto_positions, e_positions)
+        resolve_entity_interaction_event("finish_move_next_to", e, moving_entity, this_intersect_pos, true)
 
 func resolve_entity_interaction_old(event_name: String, actor, interactee, at_tile_position: Vector2i, extra_debug: bool = false) -> void:
     resolve_entity_interaction_event(event_name, actor, interactee, [at_tile_position], extra_debug)
@@ -1302,13 +1337,28 @@ func attempt_move_leave(moving_entity: BaseEntity, leaving_ps: Array[Vector2i], 
     if is_group_move:
         skip_entity_inst_ids.assign(moving_entity.bond_group.duplicate())
     var entities_here: = get_entities_at_multiple(leaving_ps, moving_entity, skip_entity_inst_ids)
-    for e in entities_here:
-        skip_entity_inst_ids.append(e.instance_id)
-        if not conditional_entity_interaction("i_move_off_of", moving_entity, e, leaving_ps, true):
-            result = false
+    
+    if entity_has_property(moving_entity, "i_move_off_of"):
+        for e in entities_here:
+            skip_entity_inst_ids.append(e.instance_id)
+            if not conditional_entity_interaction("i_move_off_of", moving_entity, e, leaving_ps, true):
+                result = false
     for e in entities_here:
         if not conditional_entity_interaction("move_off_of", e, moving_entity, leaving_ps, true):
             result = false
+    if not result:
+        return false
+    
+    if not moving_entity._this_move_is_teleport:
+        var entities_moving_away_from: = get_entities_adjacent_to_multiple_move_from(leaving_ps, moving_entity.move_facing, skip_entity_inst_ids)
+        if entity_has_property(moving_entity, "i_move_away_from"):
+            for e in entities_moving_away_from:
+                if not conditional_entity_interaction("i_move_away_from", moving_entity, e, leaving_ps, true):
+                    result = false
+        for e in entities_moving_away_from:
+            if not conditional_entity_interaction("move_away_from", e, moving_entity, leaving_ps, true):
+                result = false
+
     return result
 
 func attempt_move_enter(moving_entity: BaseEntity, tile_move_allowed: bool, entering_ps: Array[Vector2i], skip_entity_inst_ids: Array[int]) -> bool:
@@ -2370,3 +2420,18 @@ func is_entity_controller_type(entity: BaseEntity, controller_type: String) -> b
     var controller_script: Script = entity.controller.get_script()
     controller_inst.queue_free()
     return entity.controller.get_script() == controller_script
+
+func get_all_positions_of_entity(entity: BaseEntity, include_moving_away: bool = false) -> Array[Vector2i]:
+    var positions: Array[Vector2i] = []
+    if not entity.is_large():
+        positions.append(entity.get_moving_position())
+        if include_moving_away and entity.moving:
+            positions.append(entity.get_stationary_position())
+    else:
+        positions.append_array(entity.get_positions_at(entity.get_moving_position()))
+        if include_moving_away and entity.moving:
+            for away_pos in entity.get_positions_at(entity.get_stationary_position()):
+                if away_pos not in positions:
+                    positions.append(away_pos)
+    return positions
+        

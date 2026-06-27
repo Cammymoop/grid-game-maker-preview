@@ -56,6 +56,12 @@ const all_events: Array[String] = [
 	"post_move_onto", "post_move_off_of",
 	"post_move",
     
+    "i_move_away_from", "i_move_away_from_tile",
+    "move_away_from",
+    
+    "i_finish_move_next_to", "i_finish_move_next_to_tile",
+    "finish_move_next_to",
+    
     "do_action_1", "do_action_2", "do_action_3",
     
     "was_blocked",

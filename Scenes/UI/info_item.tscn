@@ -27,7 +27,7 @@ expand_mode = 3
 layout_mode = 2
 theme_override_fonts/font = ExtResource("3_v4fhb")
 theme_override_font_sizes/font_size = 14
-text = "jimmies"
+text = "ji"
 
 [node name="InfoSeparator" type="Label" parent="." unique_id=1206440753]
 layout_mode = 2

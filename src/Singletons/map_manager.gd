@@ -34,6 +34,8 @@ var im_ready: = false
 var _positioned_props_set: Array[String] = []
 var _tile_ids_of_positioned_props: Dictionary[String, Array] = {}
 
+var _check_moving_away: = false
+
 var _move_blocking_positions: Array[Vector2i] = []
 var _move_blocking_instances: Array[int] = []
 
@@ -52,7 +54,16 @@ func refresh_definition():
     create_tileset()
     find_blocking()
     find_tiles_with_sprite_modifiers()
+    update_should_check_moving_away()
     update_index_map()
+
+func update_should_check_moving_away() -> void:
+    _check_moving_away = false
+    for tile_id in tile_defs.keys():
+        var tile_properties: Dictionary = tile_defs[tile_id].get("properties", {})
+        if tile_properties.has("move_away_from"):
+            _check_moving_away = true
+            break
 
 func fix_string_keys():
     var old_definition = tile_defs
@@ -956,11 +967,37 @@ func set_tile_facing_at(tile_position: Vector2i, facing: int) -> void:
 func finish_move(moving_entity, onto_positions: Array) -> void:
     EntityManager.finish_move(moving_entity, onto_positions)
     
+    if not moving_entity.active:
+        return
+    
     var ifmot: = EntityManager.get_entity_property(moving_entity, "i_finish_move_onto_tile")
     if ifmot and ifmot.is_conditional():
         ifmot.resolve(moving_entity, null, onto_positions)
+
+    if not moving_entity.active:
+        return
     
     resolve_tile_individual_events(onto_positions, "finish_move_onto_tile", moving_entity)
+
+    if not moving_entity.active:
+        return
+    
+    var adjacent_positions: Array[Vector2i] = []
+    for pos in onto_positions:
+        for adj_pos in Utility.get_adjacent_positions(pos):
+            if adj_pos not in onto_positions and adj_pos not in adjacent_positions:
+                adjacent_positions.append(adj_pos)
+    
+    var ifmntt: = EntityManager.get_entity_property(moving_entity, "i_finish_move_next_to_tile")
+    if ifmntt and ifmntt.is_conditional():
+        ifmntt.resolve(moving_entity, null, adjacent_positions)
+    if not moving_entity.active:
+        return
+    
+    resolve_tile_individual_events(adjacent_positions, "finish_move_next_to", moving_entity)
+    
+    if not moving_entity.active:
+        return
     
     check_and_apply_terrain_sprite_modifier(moving_entity, onto_positions)
 
@@ -1115,6 +1152,12 @@ func attempt_move(moving_entity: BaseEntity, leaving_ps: Array[Vector2i], enteri
     var skip_collection: Array[int] = []
     if not EntityManager.attempt_move_leave(moving_entity, leaving_ps, skip_collection, is_group_move):
         result = false
+    if _check_moving_away:
+        var moving_away_from_ps: = get_positions_moving_away_from(leaving_ps, moving_entity.facing)
+        for pos in moving_away_from_ps:
+            var tracked_away: = tracked_conditional_tile_event([pos], "move_away_from", moving_entity, false)
+            if not tracked_away["overall"]:
+                result = false
     if not result:
         return false
     
@@ -1139,6 +1182,21 @@ func attempt_move(moving_entity: BaseEntity, leaving_ps: Array[Vector2i], enteri
             moving_entity.facing = old_facing
     
     return result
+
+func get_positions_moving_away_from(tile_positions: Array[Vector2i], move_direction: int) -> Array[Vector2i]:
+    var adjacent_positions: Array[Vector2i] = []
+    var facing_vectors: Array[Vector2i] = [Vector2i.UP, Vector2i.RIGHT, Vector2i.DOWN, Vector2i.LEFT]
+    
+    for pos in tile_positions:
+        for dir in 4:
+            if dir == move_direction:
+                continue
+            var adjacent_pos: = pos + facing_vectors[dir]
+            if adjacent_pos in adjacent_positions:
+                continue
+            adjacent_positions.append(adjacent_pos)
+    return adjacent_positions
+    
 
 func is_blocked(tile_position, empty_blocks: bool = true) -> bool:
     if empty_blocks and not tile_exists_at(tile_position):

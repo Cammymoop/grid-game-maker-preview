@@ -541,6 +541,13 @@ func desc_select_direction() -> String:
 func cmd_select_direction(slots: Dictionary, chosen_slot: int, complex_dir: Dictionary) -> void:
 	set_value_slot_as_number(slots, chosen_slot, resolve_complex_direction(complex_dir, slots))
 
+func desc_select_rotated_direction() -> String:
+	return "int|<= Select the direction [direction:DirectionInput:1] rotated by [rotate_dir:DirectionInput:1]"
+func cmd_select_rotated_direction(slots: Dictionary, chosen_slot: int, direction: Dictionary, rotate_dir: Dictionary) -> void:
+	var dir_a: int = resolve_complex_direction(direction, slots)
+	var dir_b: int = resolve_complex_direction(rotate_dir, slots)
+	set_value_slot_as_number(slots, chosen_slot, Utility.facing_rotated(dir_a, dir_b))
+
 var rand_dir_options: Dictionary = {
 	"any": [0, 1, 2, 3],
 	"horizontal": [0, 1],
@@ -786,6 +793,33 @@ func cmd_c_is_moving(slots: Dictionary, chosen_slot: int, invert: bool, directio
 
 	var result = selected.move_facing == resolve_direction_value(direction, slots)
 	return not result if invert else result
+
+func desc_if_entity_moving_direction_matches() -> Dictionary:
+	return {
+		"display_name": "If entity moving direction matches",
+		"slot_type_hint": "entity",
+		"template_text": "If the entity [invert:InvertInput:is,is not] moving this way [compl_dir:DirectionInput:1]",
+	}
+func cmd_if_entity_moving_direction_matches(slots: Dictionary, chosen_slot: int, invert: bool, compl_dir: Dictionary) -> bool:
+	if not Commands.slot_is_entity(chosen_slot):
+		return false
+	var selected = slots[chosen_slot]
+
+	var direction: int = resolve_complex_direction(compl_dir, slots)
+	var result = selected.move_facing != -1 and selected.move_facing == direction
+	return not result if invert else result
+
+func desc_select_direction_to_position() -> String:
+	return "int|<= Select the direction to the single position [to_pos_slot:SlotInput:pos,entity] from [from_pos_slot:SlotInput:pos,entity]"
+func cmd_select_direction_to_position(slots: Dictionary, chosen_slot: int, to_pos_slot: int, from_pos_slot: int) -> void:
+	if not Commands.slot_is_scalar(chosen_slot) or not Commands.slot_has_position(to_pos_slot) or not Commands.slot_has_position(from_pos_slot):
+		push_error("Invalid slots to select direction to position: %s and %s" % [chosen_slot, to_pos_slot])
+		return
+	if not _slot_has_single_tile_position(slots, from_pos_slot) or not _slot_has_single_tile_position(slots, to_pos_slot):
+		slots[chosen_slot] = -1
+	var from_pos: Vector2i = _single_tile_position_from_slot(slots, from_pos_slot)
+	var to_pos: Vector2i = _single_tile_position_from_slot(slots, to_pos_slot)
+	slots[chosen_slot] = Utility.get_direction_from_delta(from_pos, to_pos)
 
 func desc_a_die() -> Dictionary:
 	return {
@@ -2017,10 +2051,7 @@ func cmd_select_all_positions_of_entity(slots: Dictionary, chosen_slot: int, ent
 	if not slots[entity_slot]:
 		slots[chosen_slot] = []
 		return
-	if not slots[entity_slot].is_large():
-		slots[chosen_slot] = [slots[entity_slot].get_moving_position()]
-	else:
-		slots[chosen_slot] = slots[entity_slot].get_positions_at(slots[entity_slot].get_moving_position())
+	slots[chosen_slot] = EntityManager.get_all_positions_of_entity(slots[entity_slot])
 
 func desc_select_position_entity_moving_from() -> String:
 	return "pos|<= Select the position the entity is moving away from [entity_slot:SlotInput:entity]"

@@ -459,6 +459,124 @@
           }
         ]
       }
+    },
+    "9": {
+      "name": "bumper",
+      "texture": 1,
+      "tex_index": 32,
+      "properties": {
+        "finish_move_next_to": [
+          {
+            "v": "3",
+            "conditions": [
+              "basic_default.select_direction_to_position::[\"i:6\",\"i:4\",\"i:0\"]",
+              "basic_default.select_direction::[\"i:7\",{\"args\":[\"s:type\",\"s:plain\",\"s:direction\",\"i:12\"],\"type\":\"Dictionary\"}]",
+              "basic_default.compare_values::[\"i:6\",{\"args\":[\"s:type\",\"s:slot_value\",\"s:slot_id\",\"i:7\"],\"type\":\"Dictionary\"},\"s:=\"]",
+              "basic_default.c_is_named::[\"i:1\",true,\"s:swap-box\"]",
+              "basic_default.if_property_value::[\"i:1\",\"s:sliding\",true]",
+              "or"
+            ],
+            "when true": [],
+            "when false": [
+              "basic_default.quit::[\"i:-1\"]"
+            ],
+            "when always": []
+          },
+          {
+            "v": "3",
+            "conditions": [
+              "basic_default.c_get_pushed::[\"i:1\",{\"args\":[\"s:type\",\"s:plain\",\"s:direction\",\"i:12\"],\"type\":\"Dictionary\"},true]"
+            ],
+            "when true": [
+              "basic_default.override_move_animation::[\"i:1\",\"s:smooth\"]",
+              "basic_default.play_named_sfx::[\"i:-1\",{\"args\":[\"s:type\",\"s:plain\",\"s:value\",\"s:Slide\"],\"type\":\"Dictionary\"},true]"
+            ],
+            "when false": [],
+            "when always": []
+          }
+        ],
+        "box": true,
+        "pushes-button": true,
+        "blocks": {
+          "v": "3",
+          "conditions": [
+            "basic_default.if_property_value::[\"i:1\",\"s:box\",true]"
+          ],
+          "when true": [],
+          "when false": [],
+          "when always": []
+        },
+        "move_onto": [
+          {
+            "v": "3",
+            "conditions": [
+              "basic_default.if_property_value::[\"i:1\",\"s:pushes\",false]"
+            ],
+            "when true": [
+              "basic_default.quit::[\"i:-1\"]"
+            ],
+            "when false": [],
+            "when always": []
+          },
+          {
+            "v": "3",
+            "conditions": [
+              "basic_default.c_get_pushed::[\"i:0\",{\"args\":[\"s:type\",\"s:plain\",\"s:direction\",\"i:20\"],\"type\":\"Dictionary\"},true]"
+            ],
+            "when true": [
+              "basic_default.play_named_sfx::[\"i:-1\",{\"args\":[\"s:type\",\"s:plain\",\"s:value\",\"s:Slide\"],\"type\":\"Dictionary\"},true]"
+            ],
+            "when false": [],
+            "when always": []
+          }
+        ],
+        "finish_move_onto": {
+          "v": "3",
+          "conditions": [
+            "basic_default.c_is_named::[\"i:1\",false,\"s:pusher\"]"
+          ],
+          "when true": [
+            "basic_default.a_move::[\"i:0\",{\"args\":[\"s:type\",\"s:plain\",\"s:direction\",\"i:28\"],\"type\":\"Dictionary\"}]",
+            "basic_default.override_move_animation::[\"i:0\",\"s:smooth\"]",
+            "basic_default.override_move_speed::[\"i:0\",{\"args\":[\"s:type\",\"s:plain\",\"s:value\",\"f:10.0\"],\"type\":\"Dictionary\"}]",
+            "basic_default.a_die::[\"i:1\"]"
+          ],
+          "when false": [],
+          "when always": []
+        },
+        "i_finish_move_next_to": [
+          {
+            "v": "3",
+            "conditions": [
+              "basic_default.select_direction_to_position::[\"i:6\",\"i:4\",\"i:0\"]",
+              "basic_default.select_direction::[\"i:7\",{\"args\":[\"s:type\",\"s:plain\",\"s:direction\",\"i:12\"],\"type\":\"Dictionary\"}]",
+              "basic_default.compare_values::[\"i:6\",{\"args\":[\"s:type\",\"s:slot_value\",\"s:slot_id\",\"i:7\"],\"type\":\"Dictionary\"},\"s:=\"]",
+              "basic_default.c_is_named::[\"i:1\",true,\"s:swap-box\"]",
+              "basic_default.if_property_value::[\"i:1\",\"s:sliding\",true]",
+              "or",
+              "basic_default.if_entity_is_moving::[\"i:1\"]",
+              "not"
+            ],
+            "when true": [],
+            "when false": [
+              "basic_default.quit::[\"i:-1\"]"
+            ],
+            "when always": []
+          },
+          {
+            "v": "3",
+            "conditions": [
+              "basic_default.c_get_pushed::[\"i:1\",{\"args\":[\"s:type\",\"s:plain\",\"s:direction\",\"i:12\"],\"type\":\"Dictionary\"},true]"
+            ],
+            "when true": [
+              "basic_default.override_move_animation::[\"i:1\",\"s:smooth\"]",
+              "basic_default.play_named_sfx::[\"i:-1\",{\"args\":[\"s:type\",\"s:plain\",\"s:value\",\"s:Slide\"],\"type\":\"Dictionary\"},true]"
+            ],
+            "when false": [],
+            "when always": []
+          }
+        ]
+      }
     }
   },
   "tile_definitions": {
@@ -672,7 +790,7 @@
         "At Least One Way",
         "Clockwise",
         "Wet Boxes",
-        "Sinking Feeling"
+        "Bridge Building"
       ]
     }
   ],
@@ -710,14 +828,14 @@
       "name": "Door Open",
       "volume": 0.08,
       "pitch": 0.876486940230357,
-      "ps_seed": 593300
+      "ps_seed": 593300.0
     },
     {
       "type": "ps_sfx",
       "name": "Checkpoint",
       "volume": 1.55,
       "pitch": 0.719223093324864,
-      "ps_seed": 409409
+      "ps_seed": 409409.0
     },
     {
       "type": "sample",
@@ -745,14 +863,14 @@
       "name": "Floating",
       "volume": 0.26,
       "pitch": 1.62156122939933,
-      "ps_seed": 905903
+      "ps_seed": 905903.0
     },
     {
       "type": "ps_sfx",
       "name": "Pusher",
       "volume": 1.02,
       "pitch": 1.04492435114409,
-      "ps_seed": 997105
+      "ps_seed": 997105.0
     },
     {
       "type": "sample",
@@ -773,7 +891,7 @@
       "name": "Win 2",
       "volume": 1.36,
       "pitch": 0.688301590959563,
-      "ps_seed": 203909
+      "ps_seed": 203909.0
     },
     {
       "type": "sample",

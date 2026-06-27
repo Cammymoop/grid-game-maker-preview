@@ -1149,3 +1149,31 @@ func is_variant_valid_scalar(value: Variant) -> bool:
 		return value.is_valid_float()
 	else:
 		return false
+
+func filter_adjacent_positions_of_multiple(pos_arr: Array, pos_check_arr: Array) -> Array[Vector2i]:
+	prints("filtering adj positions", pos_arr, pos_check_arr)
+	if not pos_arr or not pos_check_arr:
+		return []
+	
+	for pos in pos_check_arr.duplicate():
+		prints("expanding with pos:", pos)
+		for adj_pos in get_adjacent_positions(pos):
+			if adj_pos not in pos_check_arr:
+				pos_check_arr.append(adj_pos)
+	prints("filter expanded check positions", pos_check_arr)
+	
+	var filtered_positions: Array[Vector2i] = []
+	for pos in pos_arr:
+		if pos in pos_check_arr:
+			filtered_positions.append(pos)
+	print("filter filtered positions", filtered_positions)
+	return filtered_positions
+
+func get_direction_from_delta(from_pos: Vector2i, to_pos: Vector2i, bias_vertical: bool = true) -> int:
+	var delta: = to_pos - from_pos
+	if delta.abs().x == delta.abs().y:
+		if bias_vertical:
+			delta.x = 0
+		else:
+			delta.y = 0
+	return vector_to_facing(delta)
