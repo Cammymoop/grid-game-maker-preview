@@ -32,6 +32,7 @@ var current_entity_facing: int = 0
 var has_copied_properties: = false
 var entity_properties_copied: = {}
 var entity_active_copied: = true
+var entity_size_copied: = Vector2i.ONE
 
 var cur_tile_i: int = 0
 var current_tile_index: int = -1 
@@ -89,7 +90,16 @@ var _placing_text_string: = ""
 var _placeable_text_style_info: = {}
 var _placing_text_offset: Vector2 = Vector2.ZERO
 
+var autosave_delay: float = 5
+var autosave_delay_timer: Timer = null
+
 func _ready() -> void:
+	autosave_delay_timer = Timer.new()
+	autosave_delay_timer.wait_time = autosave_delay
+	autosave_delay_timer.one_shot = true
+	autosave_delay_timer.timeout.connect(on_autosave_delay_timeout)
+	add_child(autosave_delay_timer)
+
 	text_preview.hide()
 
 	editor_cam.edge_limit_tile_count = extend_camera_limits_by_tiles
@@ -107,6 +117,7 @@ func _ready() -> void:
 	entity_instance_editor.closing.connect(entity_instance_editor_closed)
 	entity_instance_editor.entity_props_edited.connect(on_entity_props_edited)
 	entity_instance_editor.entity_local_props_reset.connect(on_entity_local_props_reset)
+	entity_instance_editor.request_delete_entity.connect(on_request_delete_entity)
 	
 	placeable_text_input_panel.hidden.connect(on_placeable_text_input_panel_hidden)
 	placeable_text_input_panel.text_picked.connect(on_placeable_text_input_panel_text_picked)
@@ -120,6 +131,19 @@ func _ready() -> void:
 	var pause_menu: Control = Utility.get_pause_menu()
 	if pause_menu:
 		pause_menu.pause_menu_closed.connect(pause_menu_closed)
+
+func something_edited() -> void:
+	has_edited_something = true
+	if do_autosave:
+		autosave_delay_timer.start()
+
+func on_autosave_delay_timeout() -> void:
+	if not do_autosave or not edit_mode:
+		return
+	await get_tree().process_frame
+	print_debug("autosaving now")
+	_auto_save(GameManager.get_serialized_play_state())
+
 
 func _physics_process(delta: float) -> void:
 	if edit_mode and not is_other_paused():
@@ -165,6 +189,7 @@ func switch_edit_mode(edit_enabled: bool, do_save_state: bool = true) -> void:
 	
 
 func after_edit_mode_switched() -> void:
+	autosave_delay_timer.stop()
 	EntityManager.switch_entities_preview_mode(edit_mode)
 	MapManager.switch_tiles_preview_mode(edit_mode)
 
@@ -178,7 +203,7 @@ func on_edit_mode_disabled(do_save_state: bool) -> void:
 	#set_cursor_mode("none")
 	if do_save_state:
 		GameManager.save_edited()
-		if do_autosave and has_edited_something:
+		if do_autosave:
 			_auto_save(GameManager.editor_save)
 	#GameManager.position_gameplay_camera(editor_cam.position)
 	GameManager.activate_gameplay_camera()
@@ -275,14 +300,19 @@ func set_as_placing_mode(tile_entity: String) -> void:
 func pick_entity(entity: BaseEntity) -> void:
 	pick_index("entity", entity.entity_index, entity.facing)
 	has_copied_properties = entity.has_any_local_properties() or not entity.active
+	if entity is LargeEntity and not entity.is_default_size():
+		has_copied_properties = true
 	if is_alt_mode_active():
 		has_copied_properties = false
+
 	if has_copied_properties:
 		entity_properties_copied = entity.get_local_properties_dict()
 		entity_active_copied = entity.active
+		entity_size_copied = Vector2i.ONE
+		if entity is LargeEntity:
+			entity_size_copied = Vector2i(entity.entity_size)
 	else:
-		entity_properties_copied = {}
-		entity_active_copied = true
+		reset_copied_entity_properties()
 	check_show_star()
 
 func pick_index(tile_entity: String, index: int, facing: int = -1) -> void:
@@ -291,14 +321,18 @@ func pick_index(tile_entity: String, index: int, facing: int = -1) -> void:
 	if facing >= 0:
 		set_current_facing(facing)
 
+func reset_copied_entity_properties() -> void:
+	has_copied_properties = false
+	entity_properties_copied = {}
+	entity_active_copied = true
+	entity_size_copied = Vector2i.ONE
+
 func _set_entity_index_to(index: int) -> void:
 	if index == current_entity_index:
 		return
 	current_entity_index = index
 	if has_copied_properties:
-		has_copied_properties = false
-		entity_properties_copied = {}
-		entity_active_copied = true
+		reset_copied_entity_properties()
 		check_show_star()
 	if cursor_mode == "entity" and index > -1:
 		preview_entity(index)
@@ -379,9 +413,9 @@ func set_cursor_mode(new_mode: String):
 		_last_tile_entity_mode = new_mode
 		preview.visible = true
 		show_item_name()
-		check_show_star()
 	else:
 		preview.visible = false
+	check_show_star()
 	
 	text_preview.visible = cursor_mode == "text"
 
@@ -408,7 +442,7 @@ func check_show_star() -> void:
 	if not cursor_mode == "entity":
 		cursor_star.hide()
 		return
-	cursor_star.visible = has_copied_properties
+	cursor_star.visible = is_copied_editied_entity()
 
 func is_in_placing_mode() -> bool:
 	return cursor_mode in ["tile", "entity"]
@@ -425,26 +459,34 @@ func show_item_name() -> void:
 		item_name_text_animator.stop()
 	item_name_text_animator.play("show_fade")
 
+func is_copied_editied_entity() -> bool:
+	return has_copied_properties
+
 func _primary_action_at_cursor(holding: bool = false) -> void:
-	has_edited_something = true
 	if cursor_mode == "none":
 		set_cursor_mode(_last_tile_entity_mode)
 	if cursor_mode == "tile":
 		MapManager.replace_tiles_at(cursor_tile_pos, current_tile_index, current_tile_facing)
+		something_edited()
 	elif cursor_mode == "entity":
 		var entities_here = get_all_entities_at_tile_pos(cursor_tile_pos)
 		# remove existing entities of the same index
 		for e in entities_here:
 			if e.entity_index == current_entity_index:
-				if EntityManager.get_entity_prop_with_default(e, "edit-place-multiple", false):
+				if e.is_large() or EntityManager.get_entity_prop_with_default(e, "edit-place-multiple", false):
 					continue
 				EntityManager.remove_entity(e)
-		var as_active: = not has_copied_properties or entity_active_copied
+		var as_active: = true
+		if is_copied_editied_entity() and not entity_active_copied:
+			as_active = false
 		var new_entity: BaseEntity = EntityManager.create_entity(current_entity_index, cursor_tile_pos, current_entity_facing, as_active, true)
-		if has_copied_properties:
+		if is_copied_editied_entity():
 			if entity_properties_copied:
 				new_entity.set_local_properties_dict(entity_properties_copied)
-			_refresh_edited_entity_indicators()
+			if new_entity is LargeEntity:
+				new_entity.update_size(entity_size_copied)
+		_refresh_edited_entity_indicators()
+		something_edited()
 	elif cursor_mode == "text":
 		var text_offset: = get_cur_placeable_text_offset()
 		var max_tile_z: int = MapManager.get_max_z_at(cursor_tile_pos)
@@ -463,6 +505,7 @@ func _primary_action_at_cursor(holding: bool = false) -> void:
 				_placeable_text_style_info["outline_enabled"],
 				_placeable_text_style_info["outline_color"]
 			)
+		something_edited()
 	elif cursor_mode == "delete":
 		var force_everything: = holding and not delete_held_on_entity
 		var force_only_entities: = holding and delete_held_on_entity
@@ -493,6 +536,7 @@ func _standard_delete_at_cursor(force_everything: bool = false, force_only_entit
 			EntityManager.remove_entity(e)
 			deleted_something = true	
 	if deleted_something:
+		something_edited()
 		_refresh_edited_entity_indicators()
 		$DustParticles.emit_at(MapManager.tile_to_world_position_centered(cursor_tile_pos))
 
@@ -543,13 +587,14 @@ func _process(delta: float) -> void:
 	if not edit_mode or is_other_paused():
 		return
 	
-	if Input.is_action_just_pressed("editor_zoom_in"):
-		last_zoom_amt = editor_cam.zoom_in()
-	elif Input.is_action_just_pressed("editor_zoom_out"):
-		last_zoom_amt = editor_cam.zoom_out()
-	elif Input.is_action_just_pressed("editor_reset_zoom"):
-		editor_cam.reset_zoom()
-		last_zoom_amt = 1
+	if _input_priority:
+		if Input.is_action_just_pressed("editor_zoom_in"):
+			last_zoom_amt = editor_cam.zoom_in()
+		elif Input.is_action_just_pressed("editor_zoom_out"):
+			last_zoom_amt = editor_cam.zoom_out()
+		elif Input.is_action_just_pressed("editor_reset_zoom"):
+			editor_cam.reset_zoom()
+			last_zoom_amt = 1
 	
 	# camera scroll that doesn't interact with GUI can scroll regardless of input priority
 	var dedicated_scroll_input: = Utility.input_vector_by_prefix("editor_camera_dedicated")
@@ -728,16 +773,20 @@ func forwarded_shortcut_input(event: InputEvent) -> void:
 	elif Utility.fixed_just_pressed_by_event("editor_save_level", event, true) and edit_mode:
 		if edit_mode:
 			GameManager.save_edited()
-		if GameManager.loaded_level_name:
-			GameManager.save_edited_level_as(GameManager.loaded_level_name)
-		else:
-			var pause_menu: = Utility.get_pause_menu()
-			if pause_menu:
-				pause_menu.pause_and_open()
-				pause_menu.on_save_as_button_pressed()
-		GlobalToaster.show_toast_message("Saved")
+		save_current_or_save_as()
 	elif Utility.fixed_just_pressed_by_event("editor_new_map", event, true):
 		GameManager.new_empty_level()
+
+func save_current_or_save_as() -> bool:
+	if GameManager.loaded_level_name:
+		GameManager.save_edited_level_as(GameManager.loaded_level_name)
+		return true
+	else:
+		var pause_menu: = Utility.get_pause_menu()
+		if pause_menu:
+			pause_menu.pause_and_open()
+			pause_menu.on_save_as_button_pressed()
+		return false
 
 func switch_to_non_level_edit_mode() -> void:
 	if edit_mode:
@@ -763,7 +812,7 @@ func _auto_save(level_state: Dictionary) -> void:
 	var level_name: = GameManager.loaded_level_name
 	if not level_name.strip_edges():
 		level_name = "LEVEL"
-	prints("autosaving level: ", level_name)
+	#prints("autosaving level: ", level_name)
 
 	var level_data: = {
 		"name": level_name,
@@ -843,9 +892,11 @@ func on_placeable_text_input_panel_hidden() -> void:
 func on_entity_props_edited(entity: BaseEntity) -> void:
 	_refresh_entity_is_edited(entity)
 	_refresh_edited_entity_indicators()
+	something_edited()
 
 func on_entity_local_props_reset(_entity: BaseEntity) -> void:
 	_refresh_edited_entity_indicators()
+	something_edited()
 
 func get_all_entities_at_tile_pos(tile_pos: Vector2i) -> Array:
 	return EntityManager.get_entities_at(tile_pos, null, [], true, true)
@@ -879,7 +930,60 @@ func set_placing_text_offset(new_offset: Vector2) -> void:
 	text_preview.position = _placing_text_offset
 
 func on_instance_editor_edited_something() -> void:
-	has_edited_something = true
+	something_edited()
 
 func on_level_edit_mode_changed() -> void:
 	ui_layer.visible = GameManager.is_in_level_edit_mode
+
+
+func load_level_in_list(level_name: String, level_list_name: String) -> void:
+	var confirm_text: = ""
+	#if GameManager.loaded_is_autosave:
+		#confirm_text = ""
+
+	if not GameManager.loaded_level_is_saved:
+		confirm_text = "Changes have not been saved. Load anyway?"
+	
+	if confirm_text:
+		_show_save_confirm_dialog(confirm_text, level_name, level_list_name)
+		return
+	
+	_confirmed_load_level_in_list(level_name, level_list_name)
+
+func _show_save_confirm_dialog(confirm_text: String, load_level_name: String, load_level_list_name: String) -> void:
+	var confirm_dialog: = ConfirmationDialog.new()
+	confirm_dialog.title = "Unsaved changes"
+	confirm_dialog.dialog_text = confirm_text
+	confirm_dialog.ok_button_text = "Discard changes and continue"
+	confirm_dialog.confirmed.connect(_confirmed_load_level_in_list.bind(load_level_name, load_level_list_name))
+	
+	GameManager.set_pause("editor_confirm_dialog", true)
+	
+	confirm_dialog.add_button("Save changes", false, "save_changes")
+	confirm_dialog.custom_action.connect(
+		func(action: String):
+			if action == "save_changes":
+				if save_current_or_save_as():
+					_confirmed_load_level_in_list(load_level_name, load_level_list_name)
+	)
+	confirm_dialog.visibility_changed.connect(_closed_save_confirm_dialog.bind(confirm_dialog))
+	add_child(confirm_dialog)
+	confirm_dialog.popup_centered()
+
+func _closed_save_confirm_dialog(dialog: ConfirmationDialog) -> void:
+	if not dialog.visible:
+		dialog.queue_free()
+		GameManager.set_pause("editor_confirm_dialog", false)
+	if edit_mode:
+		request_grab_gui_focus.emit()
+
+func _confirmed_load_level_in_list(level_name: String, level_list_name: String) -> void:
+	if not level_list_name:
+		GameManager.edit_level_named(level_name)
+	else:
+		GameManager.edit_level_in_list(level_list_name, level_name)
+	
+func on_request_delete_entity(entity: BaseEntity) -> void:
+	EntityManager.delete_entity(entity)
+	_refresh_edited_entity_indicators()
+	something_edited()

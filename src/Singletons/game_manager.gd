@@ -7,6 +7,7 @@ signal game_settings_changed
 signal game_dir_name_changed(new_game_dir_name: String)
 signal scene_changed(new_scene: String)
 signal bg_style_changed
+@warning_ignore("unused_signal")
 signal level_edit_mode_changed()
 
 const CreditsUI = preload("res://Scenes/credits_ui.gd")
@@ -445,8 +446,10 @@ func load_serialized_play_state(serialized_state: Dictionary, as_level_load: boo
 	MapManager.deserialize(serialized_state['map'])
 	EntityManager.deserialize(serialized_state['entities'])
 	
-	if game_camera and (not is_in_level_edit_mode or game_camera.active):
-		activate_gameplay_camera()
+	if game_camera:
+		var map_editor: = Utility.get_map_editor()
+		if map_editor and not map_editor.edit_mode:
+			activate_gameplay_camera()
 	
 	if as_level_load:
 		level_state_loaded.emit()
@@ -705,19 +708,24 @@ func cancel_queued_level_load() -> void:
 func try_load_level(level_name: String, as_queued_load: bool = false):
 	if not FilesManager.level_exists(cur_game_name, level_name) or (not as_queued_load and queued_level_load):
 		return
+	if level_name == "editor_autosave":
+		load_editor_autosave()
+		return
+
 	var the_level_data: = FilesManager.get_level_data(cur_game_name, level_name)
 	if not the_level_data["name"] == level_name:
 		the_level_data["name"] = level_name
 	load_level_data(the_level_data, as_queued_load)
 
-func edit_level_named(level_name: String) -> bool:
+func edit_level_named(level_name: String, auto_list: bool = false) -> bool:
 	if not FilesManager.level_exists(cur_game_name, level_name):
 		push_error("Level %s does not exist" % [level_name])
 		return false
 	var the_level_data: = FilesManager.get_level_data(cur_game_name, level_name)
 	if not the_level_data["name"] == level_name:
 		the_level_data["name"] = level_name
-	current_level_list = get_list_containing_level(level_name)
+	if auto_list:
+		current_level_list = get_list_containing_level(level_name)
 	load_level_data(the_level_data)
 	return true
 
@@ -729,7 +737,7 @@ func edit_level_in_list(level_list_name: String, level_name: String) -> void:
 
 	var was_level_list: = current_level_list
 	current_level_list = level_list_name
-	if not edit_level_named(level_name):
+	if not edit_level_named(level_name, false):
 		current_level_list = was_level_list
 
 func cleanup_new_level() -> void:
@@ -856,14 +864,14 @@ func post_scene_change() -> void:
 				load_serialized_play_state(loaded_level)
 			elif has_editor_autosave():
 				if FilesManager.get_editor_autosave_is_newer(cur_game_name):
-					GlobalToaster.show_toast_message("Loading autosave")
+					GlobalToaster.show_toast_message("Loaded level autosave", 1.2)
 					load_editor_autosave()
 				else:
 					var autosave_level_name: String = FilesManager.get_editor_autosave_level_name(cur_game_name)
 					if autosave_level_name:
 						load_level_data(FilesManager.get_level_data(cur_game_name, autosave_level_name))
 					else:
-						GlobalToaster.show_toast_message("Loading autosave")
+						GlobalToaster.show_toast_message("Loading level autosave", 1.2)
 						load_editor_autosave()
 			else:
 				new_empty_level()

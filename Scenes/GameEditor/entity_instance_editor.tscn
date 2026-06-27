@@ -41,7 +41,7 @@ corner_radius_bottom_right = 3
 corner_radius_bottom_left = 3
 corner_detail = 7
 
-[node name="EntityInstanceEditor" type="PanelContainer" unique_id=1898877842 node_paths=PackedStringArray("property_edit_list", "popup_holder", "entity_active_toggle", "add_property_button", "reset_local_props_button", "large_entity_options", "entity_size_input")]
+[node name="EntityInstanceEditor" type="PanelContainer" unique_id=1898877842 node_paths=PackedStringArray("property_edit_list", "popup_holder", "entity_active_toggle", "add_property_button", "reset_local_props_button", "large_entity_options", "entity_size_input", "delete_entity_button")]
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -58,6 +58,7 @@ add_property_button = NodePath("VBoxContainer/VBoxContainer/HBoxContainer4/VBoxC
 reset_local_props_button = NodePath("VBoxContainer/VBoxContainer/HBoxContainer/HBoxContainer2/ResetLocalButton")
 large_entity_options = NodePath("VBoxContainer/VBoxContainer/LargeEntityOptions")
 entity_size_input = NodePath("VBoxContainer/VBoxContainer/LargeEntityOptions/HBoxContainer/SizeInput")
+delete_entity_button = NodePath("VBoxContainer/HBoxContainer3/HBoxContainer2/DeleteInstanceButton")
 
 [node name="VBoxContainer" type="VBoxContainer" parent="." unique_id=520120316]
 layout_mode = 2
@@ -146,10 +147,26 @@ layout_mode = 2
 theme_override_constants/separation = 24
 alignment = 1
 
+[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer/HBoxContainer3" unique_id=669732446]
+layout_mode = 2
+size_flags_horizontal = 3
+alignment = 1
+
 [node name="CloseButton" type="Button" parent="VBoxContainer/HBoxContainer3" unique_id=1533796461]
 custom_minimum_size = Vector2(100, 50)
 layout_mode = 2
 text = "Close"
+
+[node name="HBoxContainer2" type="HBoxContainer" parent="VBoxContainer/HBoxContainer3" unique_id=1495512488]
+layout_mode = 2
+size_flags_horizontal = 3
+alignment = 1
+
+[node name="DeleteInstanceButton" type="Button" parent="VBoxContainer/HBoxContainer3/HBoxContainer2" unique_id=1835909726]
+layout_mode = 2
+size_flags_vertical = 4
+tooltip_text = "Delete this entity instance"
+text = "Delete"
 
 [node name="VBoxContainer2" type="VBoxContainer" parent="." unique_id=1807164450]
 layout_mode = 2

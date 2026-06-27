@@ -30,6 +30,12 @@ func get_oriented_half_size() -> Vector2:
 func get_half_size() -> Vector2:
 	return (entity_size * MapManager.tile_width) * 0.5
 
+func get_default_size() -> Vector2:
+	return EntityManager.get_default_size_for_entity(entity_index)
+
+func is_default_size() -> bool:
+	return entity_size == get_default_size()
+
 func update_sprite_pos_scale() -> void:
 	sprite.set_sprite_size(Vector2(MapManager.tile_width * entity_size.x, MapManager.tile_width * entity_size.y))
 	if EntityManager.get_entity_prop_with_default(self, "auto-scale", true):

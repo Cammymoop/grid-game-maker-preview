@@ -3,7 +3,7 @@
 [ext_resource type="Script" uid="uid://bj140a5xc87r7" path="res://src/PauseMenu.gd" id="1"]
 [ext_resource type="StyleBox" uid="uid://bwqqm7x8mbrp5" path="res://assets/ui/pause_menu_bg_panel.tres" id="1_5w4ur"]
 [ext_resource type="FontFile" uid="uid://biuf4hpin33j3" path="res://assets/font/medium_font.tres" id="2"]
-[ext_resource type="Script" uid="uid://2uqmln215cr8" path="res://Scenes/level_info_panel.gd" id="3_lptsj"]
+[ext_resource type="Script" path="res://Scenes/level_info_panel.gd" id="3_lptsj"]
 [ext_resource type="PackedScene" uid="uid://b1a6s2o32t35i" path="res://Scenes/GameEditor/bg_style_editor.tscn" id="4_ey1tb"]
 [ext_resource type="FontFile" uid="uid://ctnllh13x3iqi" path="res://assets/font/NotoSans-Bold.ttf" id="4_gqxqw"]
 [ext_resource type="FontFile" uid="uid://cxxr3l22y0327" path="res://assets/font/NotoSans-Regular.ttf" id="5_lptsj"]
@@ -77,7 +77,7 @@ corner_radius_bottom_right = 3
 corner_radius_bottom_left = 3
 corner_detail = 5
 
-[node name="PauseMenu" type="Control" unique_id=1906408289 node_paths=PackedStringArray("next_level_list", "level_title_edit", "level_subtitle_edit", "non_editor_stuff", "editor_stuff", "level_select_button", "level_editor_controls_help_toggle", "play_mode_button", "level_edit_mode_button", "web_export_level_button", "background_editor_container", "background_editor", "darkener", "level_size_label", "start_level_paused_toggle", "level_list_picker", "copy_to_clipboard_button", "paste_from_clipboard_button", "save_as_button", "level_info_panel") groups=["PauseMenu"]]
+[node name="PauseMenu" type="Control" unique_id=1906408289 node_paths=PackedStringArray("level_title_edit", "level_subtitle_edit", "non_editor_stuff", "editor_stuff", "level_select_button", "level_editor_controls_help_toggle", "play_mode_button", "level_edit_mode_button", "web_export_level_button", "background_editor_container", "background_editor", "darkener", "level_size_label", "start_level_paused_toggle", "level_list_picker", "copy_to_clipboard_button", "paste_from_clipboard_button", "save_as_button", "level_info_panel") groups=["PauseMenu"]]
 process_mode = 3
 layout_mode = 3
 anchors_preset = 15
@@ -87,7 +87,6 @@ grow_horizontal = 2
 grow_vertical = 2
 theme = SubResource("Theme_ey1tb")
 script = ExtResource("1")
-next_level_list = NodePath("HBoxContainer/CenterContainer/VBoxContainer/LevelSettingsPausePanel/MarginContainer/VBoxContainer/GridContainer/NextLevelChooser")
 level_title_edit = NodePath("HBoxContainer/CenterContainer/VBoxContainer/LevelSettingsPausePanel/MarginContainer/VBoxContainer/GridContainer/LevelTitleInput")
 level_subtitle_edit = NodePath("HBoxContainer/CenterContainer/VBoxContainer/LevelSettingsPausePanel/MarginContainer/VBoxContainer/GridContainer/LevelSubtitleInput")
 non_editor_stuff = NodePath("HBoxContainer/CenterContainer/VBoxContainer/MainPausePanel/MarginContainer/VBoxContainer/NonEditorStuff")
@@ -527,14 +526,6 @@ layout_mode = 2
 visible = false
 layout_mode = 2
 text = "Set Next Level:"
-
-[node name="NextLevelChooser" type="OptionButton" parent="HBoxContainer/CenterContainer/VBoxContainer/LevelSettingsPausePanel/MarginContainer/VBoxContainer/GridContainer" unique_id=677048469]
-visible = false
-layout_mode = 2
-selected = 0
-item_count = 1
-popup/item_0/text = "None"
-popup/item_0/id = 0
 
 [node name="Spacer2" type="Control" parent="HBoxContainer/CenterContainer/VBoxContainer/LevelSettingsPausePanel/MarginContainer/VBoxContainer" unique_id=8952199]
 layout_mode = 2

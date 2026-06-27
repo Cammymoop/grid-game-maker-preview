@@ -78,6 +78,7 @@ func _enter_tree() -> void:
     if parent is BaseEntity:
         parent_entity = parent
         parent.local_prop_changed.connect(_notify_local_prop_updated.unbind(1))
+        is_preview_mode = EntityManager.is_entity_preview_mode
         EntityManager.entity_preview_mode_changed.connect(on_entity_preview_mode_changed)
     else:
         parent_entity = null

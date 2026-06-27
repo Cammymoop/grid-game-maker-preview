@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://cylqeyps4jgre"]
 
 [ext_resource type="Script" uid="uid://bq8qgs0mv5uiy" path="res://src/GameEditor/TileEntityButton.gd" id="2"]
-[ext_resource type="PackedScene" path="res://Scenes/GameEditor/basic_item_tex_rect.tscn" id="2_pyg1f"]
+[ext_resource type="PackedScene" uid="uid://dsjbo767ulglw" path="res://Scenes/GameEditor/basic_item_tex_rect.tscn" id="2_pyg1f"]
 
 [sub_resource type="StyleBoxFlat" id="3"]
 bg_color = Color(0, 0, 0, 0.25)

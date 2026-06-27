@@ -1,0 +1,45 @@
+[gd_scene format=3 uid="uid://dv7v4pijmjdab"]
+
+[ext_resource type="Script" uid="uid://concogn6ua267" path="res://Scenes/GameEditor/tile_entity_display_container.gd" id="1_j8u8s"]
+[ext_resource type="PackedScene" uid="uid://dsjbo767ulglw" path="res://Scenes/GameEditor/basic_item_tex_rect.tscn" id="2_kd1or"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_j8u8s"]
+content_margin_left = 12.0
+content_margin_top = 12.0
+content_margin_right = 12.0
+content_margin_bottom = 12.0
+bg_color = Color(0.7581918, 0.7581918, 0.7581917, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_kd1or"]
+bg_color = Color(0.6052746, 0.60527426, 0.6052743, 1)
+draw_center = false
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.6039216, 0.6039216, 0.6039216, 1)
+
+[node name="ItemPreviewContainer" type="PanelContainer" unique_id=1957172120 node_paths=PackedStringArray("item_display", "center_container")]
+texture_filter = 1
+offset_right = 76.0
+offset_bottom = 76.0
+mouse_default_cursor_shape = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_j8u8s")
+script = ExtResource("1_j8u8s")
+item_display = NodePath("PanelContainer/CenterContainer/ItemDisplay")
+center_container = NodePath("PanelContainer/CenterContainer")
+
+[node name="PanelContainer" type="PanelContainer" parent="." unique_id=564552748]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_kd1or")
+
+[node name="CenterContainer" type="CenterContainer" parent="PanelContainer" unique_id=1668844922]
+layout_mode = 2
+mouse_filter = 2
+
+[node name="ItemDisplay" parent="PanelContainer/CenterContainer" unique_id=1890262040 instance=ExtResource("2_kd1or")]
+layout_mode = 2

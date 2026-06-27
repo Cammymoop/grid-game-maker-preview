@@ -104,13 +104,13 @@
     {
       "type": "builtin",
       "name": "oversize_tiles.png",
-      "texture_id": 4,
+      "texture_id": 4.0,
       "filter": false
     },
     {
       "type": "builtin",
       "name": "oversize_tiles_2.png",
-      "texture_id": 5,
+      "texture_id": 5.0,
       "filter": false
     }
   ],
@@ -401,7 +401,11 @@
       "default_size": [
         1.0,
         1.0
-      ]
+      ],
+      "preview_variant": {
+        "texture": 1,
+        "tex_index": 58
+      }
     },
     "2": {
       "name": "bouncer",
@@ -2981,14 +2985,6 @@
         "so",
         "ghost test"
       ]
-    },
-    {
-      "name": "CCLP4",
-      "level_names": []
-    },
-    {
-      "name": "CCLP5",
-      "level_names": []
     },
     {
       "name": "Other",

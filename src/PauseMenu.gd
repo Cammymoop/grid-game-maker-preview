@@ -11,7 +11,6 @@ var load_dialog = preload("res://Scenes/LoadLevelDialog.tscn")
 
 var active = false
 
-@export var next_level_list: OptionButton
 @export var level_title_edit: LineEdit
 @export var level_subtitle_edit: LineEdit
 
@@ -63,8 +62,6 @@ func _ready():
 
 	switch_panel("main")
 	visible = false
-	if next_level_list:
-		next_level_list.item_selected.connect(next_level_picked)
 	
 	GameManager.level_state_loaded.connect(refresh_level_settings)
 	level_title_edit.text_changed.connect(on_level_title_edited)
@@ -219,7 +216,6 @@ func _on_SaveLevelButton_pressed():
 		if map_editor and map_editor.edit_mode:
 			GameManager.save_edited()
 		GameManager.save_edited_level_as(GameManager.loaded_level_name)
-		GlobalToaster.show_toast_message("Saved")
 
 func on_save_as_button_pressed() -> void:
 	var popup: Window = save_dialog.instantiate()
@@ -229,13 +225,12 @@ func on_save_as_button_pressed() -> void:
 	popup.hidden.connect(refresh_level_settings)
 
 func level_was_saved(level_name: String, old_level_name: String) -> void:
-	GlobalToaster.show_toast_message("Saved")
 	# in case it was a new level or it was saved as a new name, set it up to be in the selected list
 	if not old_level_name or old_level_name != level_name:
 		var current_selected_list: String = Utility.opbtn_get_selected_text(level_list_picker)
 		if current_selected_list == "[No List]":
 			current_selected_list = ""
-		set_current_level_list_to(current_selected_list)
+		set_current_level_list_to(current_selected_list, false)
 
 func _on_new_level_button_pressed() -> void:
 	GameManager.new_empty_level()
@@ -259,12 +254,6 @@ func _on_resume_button_pressed() -> void:
 
 func _on_live_edit_mode_toggle_toggled(toggled_on: bool) -> void:
 	GameManager.set_live_edit_mode_enabled(toggled_on)
-
-func next_level_picked(index: int) -> void:
-	var level_name = next_level_list.get_item_text(index)
-	if level_name == "[None]":
-		level_name = ""
-	MapManager.set_metadata_value("next_level", level_name)
 
 func on_level_title_edited(new_title: String) -> void:
 	if new_title == "":
@@ -311,26 +300,6 @@ func refresh_level_list_picker(list_of_current_level: String) -> void:
 		level_list_picker.selected = 0
 	else:
 		Utility.opbtn_select_text(level_list_picker, list_of_current_level)
-
-
-func refresh_next_level_list() -> void:
-	if not next_level_list:
-		return
-	
-	next_level_list.clear()
-
-	var level_list: = FilesManager.get_level_list(GameManager.cur_game_name)
-	level_list.push_front("[None]")
-
-	for level in level_list:
-		if level == "editor_autosave" or level == "editor autosave":
-			continue
-		next_level_list.add_item(level)
-
-	if MapManager.has_next_level():
-		Utility.opbtn_select_text(next_level_list, MapManager.get_metadata_value("next_level"))
-	else:
-		next_level_list.selected = 0
 
 func _on_back_button_pressed() -> void:
 	switch_panel("main")
@@ -391,9 +360,9 @@ func level_list_picked(index: int) -> void:
 	if list_name == "[No List]":
 		list_name = ""
 	
-	set_current_level_list_to(list_name)
+	set_current_level_list_to(list_name, true)
 
-func set_current_level_list_to(list_name: String) -> void:
+func set_current_level_list_to(list_name: String, show_toast: bool) -> void:
 	if not list_name:
 		GameManager._remove_level_from_all_lists(GameManager.loaded_level_name)
 		GameManager.current_level_list = ""
@@ -401,7 +370,8 @@ func set_current_level_list_to(list_name: String) -> void:
 		GameManager.move_level_to_level_list(GameManager.loaded_level_name, list_name)
 		GameManager.current_level_list = list_name
 	GameManager.save_current_game_definition()
-	GlobalToaster.show_toast_message("Saved Level List")
+	if show_toast:
+		GlobalToaster.show_toast_message("Saved Level List")
 	level_metadata_changed.emit()
 
 func on_web_export_level_button_pressed() -> void:

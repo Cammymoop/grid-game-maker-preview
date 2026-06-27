@@ -15,6 +15,8 @@ var level_item_scene: = preload("res://Scenes/level_list_item.tscn")
 @export var edit_settings_icon_button: ButtonContainer
 @export var export_list_button: Button
 
+@export var remove_list_button: ButtonContainer
+
 @export var is_list_of_unlisted_levels: bool = false
 
 var level_list_name: String = ""
@@ -30,7 +32,11 @@ const CTX_REMOVE_FROM_LIST = 14
 
 
 func _ready() -> void:
+    if not GameManager.is_in_level_edit_mode:
+        remove_list_button.visible = false
+
     export_list_button.pressed.connect(on_export_list_button_pressed)
+    remove_list_button.pressed.connect(on_remove_list_button_pressed)
 
     edit_list_settings_button.pressed.connect(on_edit_list_settings_button_pressed)
     edit_settings_icon_button.pressed.connect(on_edit_list_settings_button_pressed)
@@ -135,10 +141,12 @@ func on_level_item_play_level(level_name: String) -> void:
 func on_level_item_request_edit_level(level_name: String) -> void:
     if not level_name or not _is_in_edit_mode():
         return
-    if is_list_of_unlisted_levels:
-        GameManager.edit_level_named(level_name)
-    else:
-        GameManager.edit_level_in_list(level_list_name, level_name)
+    var map_editor: = Utility.get_map_editor()
+    if map_editor:
+        if is_list_of_unlisted_levels:
+            map_editor.load_level_in_list(level_name, "")
+        else:
+            map_editor.load_level_in_list(level_name, level_list_name)
 
 func clear_level_items() -> void:
     for child in level_item_container.get_children():
@@ -216,9 +224,10 @@ func on_context_menu_id_pressed(context_menu_id: int, for_list_item: LevelListIt
         var end_index: = level_item_container.get_child_count() - 1
         move_list_item_to(for_list_item, 0 if context_menu_id == CTX_MOVE_TO_TOP else end_index)
     elif context_menu_id == CTX_REMOVE_FROM_LIST:
-        GameManager.remove_level_from_list(for_list_item.level_name, level_list_name)
-        edited.emit()
-        reload_list_info()
+        if not is_list_of_unlisted_levels:
+            GameManager.remove_level_from_list(for_list_item.level_name, level_list_name)
+            edited.emit()
+            reload_list_info()
     elif context_menu_id in [CTX_MOVE_TO_LIST_ABOVE, CTX_MOVE_TO_LIST_BELOW]:
         if is_list_of_unlisted_levels:
             var total_lists: int = GameManager.get_list_of_level_lists().size()
@@ -241,3 +250,9 @@ func on_export_list_button_pressed() -> void:
     if not level_list_name:
         return
     GameManager.export_level_list(level_list_name)
+
+func on_remove_list_button_pressed() -> void:
+    if not GameManager.is_in_level_edit_mode or not level_list_name:
+        return
+    GameManager.remove_level_list(level_list_name)
+    list_membership_changed.emit()

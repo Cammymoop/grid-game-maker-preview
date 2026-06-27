@@ -13,6 +13,8 @@ const AdaptiveMultiLineEdit: = preload("res://Scenes/GameEditor/adaptable_multi_
 
 const Vector2iInput: = preload("res://src/GameEditor/ConditionalEditor/vector2i_input.gd")
 
+const ItemPreviewContainer: = preload("res://Scenes/GameEditor/tile_entity_display_container.gd")
+
 var conditional_editor_scene: = preload("res://Scenes/GameEditor/ConditionalEditor/ConditionalEditor.tscn")
 var tex_popup_scene: = preload("res://Scenes/GameEditor/BetterTextureDialog.tscn")
 var fancy_sprite_editor_scene: = preload("res://Scenes/GameEditor/fancy_sprite_editor.tscn")
@@ -32,6 +34,8 @@ var the_definition: = {}
 
 var last_fancy_sprite_config: Dictionary = {}
 
+static var image_section_is_expanded: bool = true
+
 const SPRITE_SIMPLE: = "simple"
 const SPRITE_FANCY: = "fancy"
 
@@ -47,6 +51,10 @@ var sprite_snapshot_scale: float = 1.0
 
 @export var terrain_sprite_modifier_edit: AdaptiveMultiLineEdit
 
+@export var item_preview_container: ItemPreviewContainer
+
+@export var image_section: FoldableContainer
+
 @export var entity_size_option: Control
 @export var large_toggle: CheckButton
 @export var entity_size_input_container: Control
@@ -54,6 +62,7 @@ var sprite_snapshot_scale: float = 1.0
 
 func _ready():
     visibility_changed.connect(_on_vis_changed)
+    image_section.folding_changed.connect(_image_section_toggled)
     var controller_list = find_child("EditController").get_popup()
     controller_list.clear()
     controller_list.add_item("None")
@@ -84,8 +93,16 @@ func _ready():
     
     close_requested.connect(close_window)
 
+func refresh_item_preview() -> void:
+    var is_entity: bool = tile_entity_mode == "entity"
+    item_preview_container.load_item_from_current_game(is_entity, the_index)
+
 func on_properties_changed() -> void:
     the_definition["properties"] = property_edit_list.get_base_properties_dict()
+    on_info_changed()
+
+func on_info_changed() -> void:
+    save_definition()
 
 func update_preview_variant_settings() -> void:
     var has_preview_variant: bool = not the_definition.get("preview_variant", {}).is_empty()
@@ -115,6 +132,7 @@ func on_conditional_editor_requested(prop_name: String, current_value: Variant, 
 
 func on_save_conditional_prop(new_conditional_value: Variant, prop_name: String) -> void:
     the_definition["properties"][prop_name] = new_conditional_value
+    on_info_changed()
 
 func _shortcut_input(event: InputEvent) -> void:
     if Utility.event_is_menu_back_just_pressed(event):
@@ -145,6 +163,7 @@ func set_controller(list_index) -> void:
         find_child("ControllerOpContainer").visible = false
     
     controller_button.text = controller_name
+    on_info_changed()
 
 func load_entity_info(entity_index: int):
     set_tile_entity_mode("entity")
@@ -164,6 +183,7 @@ func load_entity_info(entity_index: int):
     var text = "None"
     if "controller" in the_definition:
         text = the_definition['controller']
+        find_child("ControllerOpContainer").visible = true
     else:
         find_child("ControllerOpContainer").visible = false
     controller_select.text = text
@@ -199,8 +219,7 @@ func load_common():
     sprite_style_option.visible = tile_entity_mode == "entity"
 
     update_image_button()
-    
-    #show_property_list()
+    refresh_item_preview()
     refresh_property_edit_list()
 
 func refresh_property_edit_list() -> void:
@@ -256,30 +275,12 @@ func _set_img_button_texture(the_image_button: Control, with_texture: Texture2D,
 func set_tile_entity_mode(tile_or_entity: String) -> void:
     tile_entity_mode = tile_or_entity
     title = "Edit " + Utility.ucfirst(tile_or_entity)
-    
-    if tile_entity_mode == "entity":
-        find_child("Controller").visible = true
-        find_child("ControllerOpContainer").visible = true
-        find_child("MoveSpeed").visible = true
-    else:
-        find_child("Controller").visible = false
-        find_child("ControllerOpContainer").visible = false
-        find_child("MoveSpeed").visible = false
+    var is_entity: bool = tile_entity_mode == "entity"
 
+    find_child("Controller").visible = is_entity
+    find_child("ControllerOpContainer").visible = is_entity
+    find_child("MoveSpeed").visible = is_entity
 
-func show_property_list() -> void:
-    var prop_list:ItemList = find_child("PropertyList")
-    prop_list.custom_minimum_size.x = 0
-    prop_list.clear()
-    for p in the_definition["properties"]:
-        var val = the_definition["properties"][p]
-        if typeof(val) in [TYPE_DICTIONARY, TYPE_ARRAY]:
-            prop_list.add_item(p + ": " + "{CONDITIONAL}")
-        else:
-            prop_list.add_item(p + ": " + str(val))
-    
-    if prop_list.get_item_count() > 0:
-        prop_list.custom_minimum_size.x = 300
 
 func fix_size():
     var panel = $PanelContainer
@@ -305,6 +306,7 @@ func update_tex_simple(tex_popup: Node) -> void:
     # dont update sprite style picker, it just picks which edit popup to show
     #update_sprite_style_picker()
     update_image_button()
+    refresh_item_preview()
     tex_popup.queue_free()
 
 func update_preview_variant_info(tex_popup: Node) -> void:
@@ -313,6 +315,7 @@ func update_preview_variant_info(tex_popup: Node) -> void:
         "tex_index": tex_popup.get_selected_sub_index(),
     }
     update_preview_image_button()
+    on_info_changed()
     tex_popup.queue_free()
 
 func update_sprite_config(new_sprite_config: Dictionary) -> void:
@@ -322,7 +325,9 @@ func update_sprite_config(new_sprite_config: Dictionary) -> void:
         the_definition["sprite_config"] = new_sprite_config.duplicate_deep()
         last_fancy_sprite_config = new_sprite_config.duplicate_deep()
     update_image_button()
+    refresh_item_preview()
     # dont update sprite style picker, it just picks which edit popup to show
+    on_info_changed()
 
 func _on_ImageButton_pressed() -> void:
     if get_selected_sprite_style() == SPRITE_FANCY:
@@ -365,6 +370,7 @@ func get_selected_sprite_style() -> String:
 
 func _on_NameInput_text_changed(new_text):
     the_definition['name'] = new_text
+    on_info_changed()
 
 func _on_TestTerrainSprMod_toggled(button_pressed):
     if not tile_entity_mode == "tile":
@@ -379,9 +385,13 @@ func _on_TestTerrainSprMod_toggled(button_pressed):
     else:
         the_definition.erase("terrain_sprite_modifier")
     _update_terrain_sprite_modifier_ui()
-
+    on_info_changed()
 
 func _on_UpdateButton_pressed():
+    save_definition()
+    close_window()
+
+func save_definition() -> void:
     if tile_entity_mode == "tile":
         MapManager.update_tile_definition(the_index, the_definition)
     else:
@@ -389,20 +399,6 @@ func _on_UpdateButton_pressed():
         if sprite_snapshot_tex:
             if not EntityManager.entity_sprite_snapshots.has(the_index) or EntityManager.entity_sprite_snapshots[the_index] != sprite_snapshot_tex:
                 EntityManager.save_entity_sprite_snapshot(the_index, sprite_snapshot_tex)
-    close_window()
-
-func _on_RemovePropertyButton_pressed():
-    var prop_list:ItemList = find_child("PropertyList")
-    var indexes = prop_list.get_selected_items()
-    var selected_index = 0
-    if indexes:
-        selected_index = indexes[0]
-    else:
-        return
-    
-    var key = prop_list.get_item_text(selected_index).split(':')[0]
-    the_definition["properties"].erase(key)
-    prop_list.remove_item(selected_index)
 
 
 func show_alert(message, alert_title="Alert!"):
@@ -474,7 +470,6 @@ func update_property_to(prop_key, update_property_popup):
         the_definition["properties"].erase(prop_key)
     the_definition['properties'][new_key] = new_value
     
-    #show_property_list()
     await get_tree().process_frame
     fix_size()
     if update_property_popup and not update_property_popup.is_queued_for_deletion():
@@ -534,6 +529,7 @@ func _on_ControllerOptionsShow_pressed():
 func _on_ControllerOptionsReset_pressed():
     if "controller_options" in the_definition:
         the_definition.erase("controller_options")
+    on_info_changed()
 
 func close_window():
     hide()
@@ -541,6 +537,8 @@ func close_window():
 func _on_vis_changed():
     if not visible:
         hidden.emit()
+    else:
+        image_section.folded = not image_section_is_expanded
 
 func update_sprite_style_picker() -> void:
     var sprite_style_picker: = find_child("SpriteStylePicker") as OptionButton
@@ -583,6 +581,7 @@ func set_basic_texture_indices_from_sprite_config() -> void:
             texture_index = 0
     the_definition['texture'] = texture_index
     the_definition['tex_index'] = tex_sub_index
+    on_info_changed()
     update_image_button()
 
 func restore_last_fancy_sprite() -> void:
@@ -598,7 +597,7 @@ func on_sprite_style_selected(index: int) -> void:
         restore_last_fancy_sprite()
     else:
         the_definition.erase("sprite_config")
-
+    on_info_changed()
 
 func _on_remove_preview_variant_button_pressed() -> void:
     var preview_variant_settings: = find_child("PreviewVariantSettings") as Control
@@ -606,6 +605,7 @@ func _on_remove_preview_variant_button_pressed() -> void:
     var add_preview_variant_button: = find_child("AddPreviewVariantButton") as Control
     add_preview_variant_button.show()
     the_definition.erase("preview_variant")
+    on_info_changed()
 
 func _on_add_preview_variant_button_pressed() -> void:
     the_definition["preview_variant"] = {
@@ -616,6 +616,7 @@ func _on_add_preview_variant_button_pressed() -> void:
     preview_variant_settings.show()
     var add_preview_variant_button: = find_child("AddPreviewVariantButton") as Control
     add_preview_variant_button.hide()
+    on_info_changed()
 
 func save_fancy_sprite_snapshot(fancy_sprite_editor: FancySpriteEditor) -> void:
     if not fancy_sprite_editor.snapshot_tex:
@@ -623,19 +624,21 @@ func save_fancy_sprite_snapshot(fancy_sprite_editor: FancySpriteEditor) -> void:
     sprite_snapshot_tex = ImageTexture.create_from_image(fancy_sprite_editor.snapshot_tex.get_image())
     sprite_snapshot_scale = GameManager.get_default_pixel_scale()
     update_image_button()
-
+    refresh_item_preview()
 
 func _on_set_move_speed_button_pressed() -> void:
     if the_definition.get("properties", {}).has("move-speed"):
         property_edit_list.focus_in_edit_mode("move-speed")
     else:
         _add_new_prop("move-speed", EntityManager.get_default_move_speed(), true)
+    on_info_changed()
 
 func on_terrain_sprite_modifier_text_changed(new_text: String) -> void:
     var jsonified: Variant = JSON.parse_string(new_text)
     if not jsonified or not typeof(jsonified) == TYPE_DICTIONARY:
         return
     the_definition["terrain_sprite_modifier"] = jsonified
+    on_info_changed()
 
 func on_terrain_sprite_modifier_text_submitted(new_text: String) -> void:
     var jsonified: Variant = JSON.parse_string(new_text)
@@ -644,6 +647,7 @@ func on_terrain_sprite_modifier_text_submitted(new_text: String) -> void:
     else:
         the_definition["terrain_sprite_modifier"] = jsonified
     _update_terrain_sprite_modifier_ui()
+    on_info_changed()
 
 func on_large_toggle_toggled(button_pressed: bool) -> void:
     if not tile_entity_mode == "entity":
@@ -655,6 +659,7 @@ func on_large_toggle_toggled(button_pressed: bool) -> void:
         the_definition["can_be_large"] = true
         the_definition["default_size"] = Utility.get_arr_from_vector2i(entity_size_input.get_value())
     _update_entity_size_ui()
+    on_info_changed()
 
 func on_entity_size_input_changed(new_value: Vector2i) -> void:
     if not tile_entity_mode == "entity":
@@ -662,3 +667,7 @@ func on_entity_size_input_changed(new_value: Vector2i) -> void:
     if not the_definition.get("can_be_large", false):
         return
     the_definition["default_size"] = Utility.get_arr_from_vector2i(new_value)
+    on_info_changed()
+
+func _image_section_toggled(folded: bool) -> void:
+    image_section_is_expanded = not folded

@@ -1,5 +1,7 @@
 extends Control
 
+@export var tight_crop: bool = true
+
 @export var main_min_size: Vector2 = Vector2(32, 32)
 @export var main_max_size: Vector2 = Vector2(96, 96)
 @export var small_size_ratio: float = 0.4

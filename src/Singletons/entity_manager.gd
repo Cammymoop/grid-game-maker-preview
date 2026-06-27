@@ -774,14 +774,20 @@ func setup_new_entity_size(entity: BaseEntity) -> void:
         return
     
     var entity_def: Dictionary = entity_defs[entity.entity_index]
+    var default_size: Vector2 = get_default_size_for_entity(entity.entity_index)
 
-    var default_size: Vector2 = Utility.get_vector2_from_arr(entity_def.get("default_size", [1, 1]))
     entity.entity_size = default_size
     entity.set_default_mask()
     if entity_def.has("starting_mask_out"):
         for masked_pos in entity_def["starting_mask_out"]:
             var mask_pos_vec: Vector2i = Utility.get_vector2i_from_arr(masked_pos)
             entity.shape_mask[mask_pos_vec] = false
+
+func get_default_size_for_entity(entity_id: int) -> Vector2:
+    var entity_def: Dictionary = entity_defs.get(entity_id, {})
+    if not entity_def.get("can_be_large", false):
+        return Vector2.ONE
+    return Utility.get_vector2_from_arr(entity_def.get("default_size", [1, 1]))
 
 func post_activated_actions(entity: BaseEntity) -> void:
     if not entity.active:
@@ -1847,6 +1853,7 @@ func get_default_tele_steps() -> int:
     return ceili(default_teleport_duration * GameManager.get_full_tick_rate())
 
 func switch_entities_preview_mode(enable_preview: bool) -> void:
+    prints("switching entities preview mode to ", enable_preview)
     is_entity_preview_mode = enable_preview
     entity_preview_mode_changed.emit(enable_preview)
 

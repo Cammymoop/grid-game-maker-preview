@@ -56,6 +56,10 @@ func _init():
 	
 	child_entered_tree.connect(on_child_entered_tree)
 
+func _ready() -> void:
+	if tooltip_text and not button.tooltip_text:
+		button.tooltip_text = tooltip_text
+
 func set_disabled(new_disabled: bool) -> void:
 	button.disabled = new_disabled
 

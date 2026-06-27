@@ -126,8 +126,11 @@ func on_level_list_edited() -> void:
 func on_level_list_play_level(level_list_name: String, level_name: String) -> void:
     close()
     if GameManager.is_in_level_edit_mode:
-        GameManager.current_level_list = level_list_name
-        GameManager.try_load_level(level_name)
+        var map_editor: = Utility.get_map_editor()
+        if map_editor:
+            map_editor.load_level_in_list(level_name, level_list_name)
+        #GameManager.current_level_list = level_list_name
+        #GameManager.try_load_level(level_name)
     else:
         GameManager.goto_level_in_level_list(level_list_name, level_name)
 

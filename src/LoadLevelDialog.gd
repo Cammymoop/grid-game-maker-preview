@@ -57,7 +57,13 @@ func _on_LoadFileButton_pressed():
 		close_dialog()
 		return
 
-	GameManager.edit_level_named(selected_level)
+	if not GameManager.is_in_level_edit_mode:
+		push_error("Trying to load a level from load level dialog while not in level edit mode")
+	else:
+		var map_editor: = Utility.get_map_editor()
+		if map_editor:
+			var list_of_level: = GameManager.get_list_containing_level(selected_level)
+			map_editor.load_level_in_list(selected_level, list_of_level)
 	close_dialog()
 
 func _on_cancel_button_pressed() -> void:

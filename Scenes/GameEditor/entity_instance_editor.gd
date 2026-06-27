@@ -5,6 +5,7 @@ signal entity_local_props_reset(entity: BaseEntity)
 signal edited_something()
 signal closing()
 signal cancel_popups()
+signal request_delete_entity(entity: BaseEntity)
 
 const ConditionalEditor = preload("res://src/GameEditor/ConditionalEditor/ConditionalEditor.gd")
 
@@ -32,6 +33,8 @@ var conditional_editor_scn: = preload("res://Scenes/GameEditor/ConditionalEditor
 @export var large_entity_options: Control
 @export var entity_size_input: Vector2iInput
 
+@export var delete_entity_button: Button
+
 var non_expanded_v_size_flags: int = Control.SIZE_SHRINK_CENTER
 var prop_list_default_min_size: Vector2 = Vector2.ZERO
 var edited_entity: BaseEntity = null
@@ -43,6 +46,8 @@ var close_on_focus_lost: = true
 func _ready() -> void:
     large_entity_options.hide()
     entity_size_input.value_changed.connect(on_entity_size_input_changed)
+    
+    delete_entity_button.pressed.connect(on_delete_entity_button_pressed)
 
     reset_local_props_button.pressed.connect(on_reset_local_props_button_pressed)
 
@@ -224,3 +229,8 @@ func on_entity_size_input_changed(new_size: Vector2i) -> void:
     entity_size_input.set_value(new_size)
     edited_entity.update_size(new_size)
     edited_something.emit()
+
+func on_delete_entity_button_pressed() -> void:
+    if edited_entity:
+        request_delete_entity.emit(edited_entity)
+    close_instance_editor()

@@ -48,11 +48,14 @@ texture = SubResource("AtlasTexture_41xpm")
 expand_mode = 4
 
 [node name="Panel" type="Panel" parent="." unique_id=837662279]
-layout_mode = 0
-offset_left = 39.0
+custom_minimum_size = Vector2(29, 29)
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 1.0
+anchor_right = 1.0
 offset_top = -4.0
-offset_right = 68.0
-offset_bottom = 25.0
+offset_right = 4.0
+grow_horizontal = 0
 theme_override_styles/panel = SubResource("StyleBoxFlat_uq43k")
 
 [node name="SmallTexture" type="TextureRect" parent="Panel" unique_id=1610100322]

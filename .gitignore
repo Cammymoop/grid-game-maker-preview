@@ -1,3 +1,5 @@
 .import/
 .godot/
 build/
+
+example_games/*/other_versions/

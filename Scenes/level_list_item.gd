@@ -133,6 +133,7 @@ func refresh_icons_and_text() -> void:
 func set_is_unlocked(new_is_unlocked: bool) -> void:
     is_unlocked = new_is_unlocked
     start_level_button.disabled = not is_unlocked
+    start_level_button.tooltip_text = "Play level" if is_unlocked else "Locked"
     refresh_icons_and_text()
 
 func on_start_level_button_pressed() -> void:
