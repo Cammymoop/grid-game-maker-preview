@@ -1,5 +1,6 @@
 extends BaseConditionalScript
 
+const DEFAULT_MAX_LOOPS: int = 10
 
 func get_command_display_name(cmd_name: String, custom_meta_info: Dictionary) -> String:
 	cmd_name = cmd_name.trim_prefix("a_").trim_prefix("c_")
@@ -58,6 +59,27 @@ func cmd_if_entity_is_half_done_moving(slots: Dictionary, chosen_slot: int) -> b
 		return false
 	return slots[chosen_slot].is_half_done_moving()
 
+func desc_select_all_positions_with_any_tile() -> String:
+	return "pos|<= Select all positions where any tile exists in the level"
+func cmd_select_all_positions_with_any_tile(slots: Dictionary, chosen_slot: int) -> void:
+	if not Commands.slot_is_positions(chosen_slot):
+		return
+	if not slots[chosen_slot]:
+		return
+	slots[chosen_slot] = MapManager.get_used_positions_in_all_layers()
+
+func desc_filter_positions_with_any_tile() -> String:
+	return "pos|<= Filter the positions in this slot to those where [is_exists:BoolChoice:true,any tile exists,false,no tile exists] in the level"
+func cmd_filter_positions_with_any_tile(slots: Dictionary, chosen_slot: int, is_exists: bool) -> void:
+	if not Commands.slot_is_positions(chosen_slot):
+		return
+	if not slots[chosen_slot]:
+		return
+	var filtered_positions: Array = []
+	for pos in slots[chosen_slot]:
+		if MapManager.tile_exists_at(pos) == is_exists:
+			filtered_positions.append(pos)
+	slots[chosen_slot] = filtered_positions
 
 func desc_exclude_positions() -> String:
 	return "pos|<= Remove all positions in [exclusion_slot:SlotInput:pos] from the slot's selection (Difference)"
@@ -203,6 +225,26 @@ func cmd_select_next_tile_after(slots: Dictionary, chosen_slot: int, in_position
 	var after_pos: Vector2i = _single_tile_position_from_slot(slots, after_pos_slot)
 	slots[chosen_slot] = [Utility.next_prev_pos_reading_order(in_positions, after_pos, invert)]
 
+func desc_select_closest_position_to() -> String:
+	return "pos|<= Select the closest position in [in_positions:SlotInput:pos] to [ref_pos_slot:SlotInput:pos,entity] by [distance_mode:DistanceModeInput]"
+func cmd_select_closest_position_to(slots: Dictionary, chosen_slot: int, in_positions: int, ref_pos_slot: int, distance_mode: String) -> void:
+	if not Commands.slot_is_positions(chosen_slot) or not Commands.slot_is_positions(in_positions) or not Commands.slot_has_position(ref_pos_slot):
+		push_error("Invalid slots to select closest position to: %s, %s, %s" % [chosen_slot, ref_pos_slot, in_positions])
+		return
+	if not _slot_has_single_tile_position(slots, ref_pos_slot):
+		if slots[in_positions]:
+			slots[chosen_slot] = [slots[in_positions][0]]
+		else:
+			slots[chosen_slot] = []
+		return
+	var ref_pos: Vector2i = _single_tile_position_from_slot(slots, ref_pos_slot)
+	if not slots[in_positions]:
+		slots[chosen_slot] = [ref_pos]
+		return
+
+	slots[chosen_slot] = [biased_closest_position_to(ref_pos, slots[in_positions], distance_mode)]
+
+
 func desc_select_first_teleport_in_direction() -> String:
 	return "pos|<= Select the first position in [in_positions_slot:SlotInput:pos] that [entity_slot:SlotInput:entity] can teleport to\n" \
 			+ "in this direction [compl_dir:DirectionInput:1] from [single_pos_slot:SlotInput:pos,entity]"
@@ -305,15 +347,37 @@ func cmd_if_position_is_adjacent(slots: Dictionary, chosen_slot: int, single_pos
 	return false
 
 func desc_select_tiles_around() -> String:
-	return "pos|<= Select positions within [radius:ComplexScalarInput] (full square)"
-func cmd_select_tiles_around(slots: Dictionary, chosen_slot: int, radius: Dictionary) -> void:
-	var radius_int: = int(resolve_complex_scalar(radius, slots))
-	var top_left = get_context_position(slots) - Vector2i(radius_int, radius_int)
-	var width: = radius_int * 2 + 1
+	return "pos|<= Select all positions within [radius:ComplexScalarInput] (square radius) of [ref_pos_slot:SlotInput:pos,entity]"
+func cmd_select_tiles_around(slots: Dictionary, chosen_slot: int, radius: Dictionary, ref_pos_slot: int = Commands.Slot.RED) -> void:
+	if not Commands.slot_has_position(ref_pos_slot):
+		push_error("Invalid slot to select tiles around: %s" % ref_pos_slot)
+		return
+	if not _slot_has_single_tile_position(slots, ref_pos_slot):
+		slots[chosen_slot] = []
+		return
+
+	var center_pos: Vector2i = _single_tile_position_from_slot(slots, ref_pos_slot)
+	slots[chosen_slot] = Utility.positions_square_radius_iter(center_pos, resolve_complex_scalar(radius, slots))
+
+func desc_select_tiles_within_distance() -> String:
+	return "pos|<= Select all positions within [distance:ComplexScalarInput] of this single position [ref_pos_slot:SlotInput:pos,entity] using [distance_mode:DistanceModeInput] distance"
+func cmd_select_tiles_within_distance(slots: Dictionary, chosen_slot: int, distance: Dictionary, ref_pos_slot: int, distance_mode: String) -> void:
+	if not Commands.slot_is_positions(chosen_slot) or not Commands.slot_has_position(ref_pos_slot):
+		push_error("Invalid slots to select tiles within distance: %s and %s" % [chosen_slot, ref_pos_slot])
+		return
+	if distance_mode == "long axis":
+		cmd_select_tiles_around(slots, chosen_slot, distance, ref_pos_slot)
+		return
+
+	if not _slot_has_single_tile_position(slots, ref_pos_slot):
+		slots[chosen_slot] = []
+		return
+	var max_distance: float = resolve_complex_scalar(distance, slots)
+	var ref_pos: Vector2i = _single_tile_position_from_slot(slots, ref_pos_slot)
 	var positions: Array = []
-	for xi in range(width):
-		for yi in range(width):
-			positions.append(top_left + Vector2i(xi, yi))
+	for pos in Utility.positions_square_radius_iter(ref_pos, max_distance):
+		if Utility.get_distance_of_positions_by_mode(pos, ref_pos, distance_mode) <= max_distance:
+			positions.append(pos)
 	slots[chosen_slot] = positions
 
 func desc_select_entity_at() -> String:
@@ -1107,6 +1171,7 @@ func cmd_compare_property(slots: Dictionary, chosen_slot: int, property_name: St
 				number_result = float(prop.resolve(selected, slots[Slot.RED], [selected.get_moving_position()]))
 			else:
 				number_result = float(prop.get_value())
+			prints("number result:", number_result, "compare to val:", compare_to_val, "comparison:", comparison, "prop name:", property_name)
 			return Utility.check_comparison(number_result, compare_to_val, comparison)
 	elif Commands.slot_is_positions(chosen_slot) and selected:
 		return MapManager.compare_multiple_pos_prop_value(selected, slots[Slot.RED], property_name, comparison, compare_to_val)
@@ -1157,22 +1222,30 @@ func cmd_override_move_animation(slots: Dictionary, chosen_slot: int, anim_style
 		slots[chosen_slot].set_move_interp_override(BaseEntity.read_move_interp_style_string(anim_style))
 
 func desc_trigger_custom_event() -> String:
-	return "entity,pos|Trigger the [event_name:PropertyInput] custom event of the entity/tiles"
-func cmd_trigger_custom_event(slots: Dictionary, chosen_slot: int, event_name: String) -> void:
+	return "entity,pos|Trigger the [event_name:PropertyInput] custom event of the entity/tiles [is_immediate:BoolChoice:true,now,immediately after this event]"
+func cmd_trigger_custom_event(slots: Dictionary, chosen_slot: int, event_name: String, is_immediate: bool = true) -> void:
 	var pass_blue_entity: BaseEntity = null if chosen_slot == Slot.RED else slots[Slot.RED]
 	if not pass_blue_entity:
 		pass_blue_entity = slots[Slot.BLUE]
+	
+	var event_call: Callable = Callable()
 	if Commands.slot_is_entity(chosen_slot):
-		EntityManager.resolve_entity_interaction_event(event_name, slots[chosen_slot], pass_blue_entity, [slots[chosen_slot].get_moving_position()])
+		event_call = EntityManager.resolve_entity_interaction_event.bind(event_name, slots[chosen_slot], pass_blue_entity, [slots[chosen_slot].get_moving_position()])
 	elif Commands.slot_is_positions(chosen_slot):
-		MapManager.resolve_tiles_events(slots[chosen_slot], event_name, pass_blue_entity)
+		event_call = MapManager.resolve_tiles_events.bind(slots[chosen_slot], event_name, pass_blue_entity)
+	
+	if is_immediate:
+		event_call.call()
+	else:
+		ConditionalsV3.add_deferred_call(event_call)
 
 func desc_trigger_custom_event_for_each_entity() -> String:
 	return "entity,pos|Trigger the [event_name:PropertyInput] custom event of the entity/tile for each entity ([include_self:InvertInput:excluding,including] self)\n" \
-			+ "at [pos_filter_slot:SlotInput:pos] with a [truthy:BoolChoice:true,true or non-zero,false or zero] [prop_name:PropertyInput] property"
+			+ "at [pos_filter_slot:SlotInput:pos] with a [truthy:BoolChoice:true,true or non-zero,false or zero] [prop_name:PropertyInput] property, [is_immediate:BoolChoice:true,now,immediately after this event]"
 func cmd_trigger_custom_event_for_each_entity(
 		slots: Dictionary, chosen_slot: int, event_name: String,
-		pos_filter_slot: int, include_self: bool, truthy: bool, prop_name: String
+		pos_filter_slot: int, include_self: bool, truthy: bool, prop_name: String,
+		is_immediate: bool = true
 	) -> void:
 	var filter_positions: Array = slots[pos_filter_slot]
 	var pos_filtered_enities: Array[BaseEntity] = []
@@ -1186,20 +1259,33 @@ func cmd_trigger_custom_event_for_each_entity(
 		if EntityManager.get_entity_prop_is_truthy(entity, prop_name, false) == truthy:
 			final_entities.append(entity)
 
+	var deferred_calls: Array[Callable] = []
 	if Commands.slot_is_entity(chosen_slot):
 		for e in final_entities:
-			EntityManager.resolve_entity_interaction_event(event_name, slots[chosen_slot], e, [slots[chosen_slot].get_moving_position()])
+			if is_immediate:
+				EntityManager.resolve_entity_interaction_event(event_name, slots[chosen_slot], e, [slots[chosen_slot].get_moving_position()])
+			else:
+				deferred_calls.append(EntityManager.resolve_entity_interaction_event.bind(event_name, slots[chosen_slot], e, [slots[chosen_slot].get_moving_position()]))
 	elif Commands.slot_is_positions(chosen_slot):
 		for e in final_entities:
 			if slots[chosen_slot]:
-				MapManager.resolve_tiles_events(slots[chosen_slot], event_name, e)
+				if is_immediate:
+					MapManager.resolve_tiles_events(slots[chosen_slot], event_name, e)
+				else:
+					deferred_calls.append(MapManager.resolve_tiles_events.bind(slots[chosen_slot], event_name, e))
 			else:
-				MapManager.resolve_tiles_events([e.get_moving_position()], event_name, e)
+				if is_immediate:
+					MapManager.resolve_tiles_events([e.get_moving_position()], event_name, e)
+				else:
+					deferred_calls.append(MapManager.resolve_tiles_events.bind([e.get_moving_position()], event_name, e))
+	
+	for c in deferred_calls:
+		ConditionalsV3.add_deferred_call(c)
 
 func desc_trigger_custom_event_for_each_bonded_entity() -> String:
 	return "entity,pos|Trigger the [event_name:PropertyInput] custom event of the entity/tile\n" \
-			+ "for each entity bonded to [bonded_ref_slot:SlotInput:entity] ([include_self:BoolChoice:true,including,excluding] itself)"
-func cmd_trigger_custom_event_for_each_bonded_entity(slots: Dictionary, chosen_slot: int, event_name: String, bonded_ref_slot: int, include_self: bool) -> void:
+			+ "for each entity bonded to [bonded_ref_slot:SlotInput:entity] ([include_self:BoolChoice:true,including,excluding] itself), [is_immediate:BoolChoice:true,now,immediately after this event]"
+func cmd_trigger_custom_event_for_each_bonded_entity(slots: Dictionary, chosen_slot: int, event_name: String, bonded_ref_slot: int, include_self: bool, is_immediate: bool) -> void:
 	if not Commands.slot_is_entity(chosen_slot) and not Commands.slot_is_positions(chosen_slot):
 		push_error("Invalid slot to trigger custom event for each bonded entity: %s" % chosen_slot)
 		return
@@ -1209,22 +1295,35 @@ func cmd_trigger_custom_event_for_each_bonded_entity(slots: Dictionary, chosen_s
 	if not slots[bonded_ref_slot]:
 		return
 
+	var deferred_calls: Array[Callable] = []
 	for inst_id in slots[chosen_slot].bond_group:
 		if not include_self and inst_id == slots[bonded_ref_slot].instance_id:
 			continue
 		if EntityManager.has_instance(inst_id):
 			var bonded_entity: BaseEntity = EntityManager.get_instance(inst_id)
 			if Commands.slot_is_entity(chosen_slot):
-				EntityManager.resolve_entity_interaction_event(event_name, slots[chosen_slot], bonded_entity, [bonded_entity.get_moving_position()])
+				if is_immediate:
+					EntityManager.resolve_entity_interaction_event(event_name, slots[chosen_slot], bonded_entity, [bonded_entity.get_moving_position()])
+				else:
+					deferred_calls.append(EntityManager.resolve_entity_interaction_event.bind(event_name, slots[chosen_slot], bonded_entity, [bonded_entity.get_moving_position()]))
 			elif slots[chosen_slot]:
-				MapManager.resolve_tiles_events(slots[chosen_slot], event_name, bonded_entity)
+				if is_immediate:
+					MapManager.resolve_tiles_events(slots[chosen_slot], event_name, bonded_entity)
+				else:
+					deferred_calls.append(MapManager.resolve_tiles_events.bind(slots[chosen_slot], event_name, bonded_entity))
 			else:
-				MapManager.resolve_tiles_events([bonded_entity.get_moving_position()], event_name, bonded_entity)
+				if is_immediate:
+					MapManager.resolve_tiles_events([bonded_entity.get_moving_position()], event_name, bonded_entity)
+				else:
+					deferred_calls.append(MapManager.resolve_tiles_events.bind([bonded_entity.get_moving_position()], event_name, bonded_entity))
+	
+	for c in deferred_calls:
+		ConditionalsV3.add_deferred_call(c)
 
 func desc_trigger_custom_event_for_each_tailing_entity() -> String:
 	return "entity,pos|Trigger the [event_name:PropertyInput] custom event of the entity/tile\n" \
-			+ "for each entity tailing [tail_dir:TailDirInput] [tail_ref_slot:SlotInput:entity] ([include_self:BoolChoice:true,including,excluding] itself)"
-func cmd_trigger_custom_event_for_each_tailing_entity(slots: Dictionary, chosen_slot: int, event_name: String, tail_dir: String, tail_ref_slot: int, include_self: bool) -> void:
+			+ "for each entity tailing [tail_dir:TailDirInput] [tail_ref_slot:SlotInput:entity] ([include_self:BoolChoice:true,including,excluding] itself), [is_immediate:BoolChoice:true,now,immediately after this event]"
+func cmd_trigger_custom_event_for_each_tailing_entity(slots: Dictionary, chosen_slot: int, event_name: String, tail_dir: String, tail_ref_slot: int, include_self: bool, is_immediate: bool) -> void:
 	if not Commands.slot_is_entity(chosen_slot) and not Commands.slot_is_positions(chosen_slot):
 		push_error("Invalid slot to trigger custom event for each bonded entity: %s" % chosen_slot)
 		return
@@ -1241,17 +1340,73 @@ func cmd_trigger_custom_event_for_each_tailing_entity(slots: Dictionary, chosen_
 		exclude_list.append(slots[tail_ref_slot])
 	var tailing_entities: = EntityManager.get_entity_tailing_chain(slots[tail_ref_slot], with_behind, with_ahead, exclude_list)
 	tailing_entities = EntityManager.get_sorted_tailing_chain(tailing_entities)
+	
+	var deferred_calls: Array[Callable] = []
 	for e in tailing_entities:
 		if Commands.slot_is_entity(chosen_slot):
-			EntityManager.resolve_entity_interaction_event(event_name, slots[chosen_slot], e, [e.get_moving_position()])
+			if is_immediate:
+				EntityManager.resolve_entity_interaction_event(event_name, slots[chosen_slot], e, [e.get_moving_position()])
+			else:
+				deferred_calls.append(EntityManager.resolve_entity_interaction_event.bind(event_name, slots[chosen_slot], e, [e.get_moving_position()]))
 		elif slots[chosen_slot]:
-			MapManager.resolve_tiles_events(slots[chosen_slot], event_name, e)
+			if is_immediate:
+				MapManager.resolve_tiles_events(slots[chosen_slot], event_name, e)
+			else:
+				deferred_calls.append(MapManager.resolve_tiles_events.bind(slots[chosen_slot], event_name, e))
 		else:
-			MapManager.resolve_tiles_events([e.get_moving_position()], event_name, e)
+			if is_immediate:
+				MapManager.resolve_tiles_events([e.get_moving_position()], event_name, e)
+			else:
+				deferred_calls.append(MapManager.resolve_tiles_events.bind([e.get_moving_position()], event_name, e))
+	
+	for c in deferred_calls:
+		ConditionalsV3.add_deferred_call(c)
+
+func desc_trigger_custom_event_for_each_position() -> String:
+	return "entity|Trigger the [event_name:PropertyInput] custom event of the entity at each position in [in_positions_slot:SlotInput:pos], [is_immediate:BoolChoice:true,now,immediately after this event]"
+func cmd_trigger_custom_event_for_each_position(slots: Dictionary, chosen_slot: int, event_name: String, in_positions_slot: int, is_immediate: bool) -> void:
+	if not Commands.slot_is_entity(chosen_slot) or not Commands.slot_is_positions(in_positions_slot):
+		push_error("Invalid slots to trigger custom event for each position: %s and %s" % [chosen_slot, in_positions_slot])
+		return
+	if not slots[chosen_slot]:
+		return
+	var positions: Array = slots[in_positions_slot]
+	if not positions:
+		positions = MapManager.get_used_positions_in_all_layers()
+		
+	var deferred_calls: Array[Callable] = []
+	for pos in positions:
+		if is_immediate:
+			EntityManager.resolve_entity_interaction_event(event_name, slots[chosen_slot], null, [pos])
+		else:
+			deferred_calls.append(EntityManager.resolve_entity_interaction_event.bind(event_name, slots[chosen_slot], null, [pos]))
+	
+	for c in deferred_calls:
+		ConditionalsV3.add_deferred_call(c)
+
+func desc_trigger_custom_event_for_tile_at_each_position() -> String:
+	return "pos|Trigger the [event_name:PropertyInput] custom event of the each tile at the positions in this slot,\n" \
+			+ "with the entity [blue_entity:SlotInput:entity,none] as the *blue entity, [is_immediate:BoolChoice:true,now,immediately after this event]"
+func cmd_trigger_custom_event_for_tile_at_each_position(slots: Dictionary, chosen_slot: int, event_name: String, blue_entity_slot: int, is_immediate: bool) -> void:
+	if not Commands.slot_is_positions(chosen_slot) or (blue_entity_slot != SlotSelectorButton.NONE_SLOTS and not Commands.slot_is_entity(blue_entity_slot)):
+		push_error("Invalid slots to trigger custom event for each position: %s" % [chosen_slot])
+		return
+	var blue_entity: BaseEntity = null
+	if blue_entity_slot != SlotSelectorButton.NONE_SLOTS:
+		blue_entity = slots[blue_entity_slot]
+
+	var positions: Array = slots[chosen_slot]
+	if not positions:
+		positions = MapManager.get_used_positions_in_all_layers()
+	
+	if is_immediate:
+		MapManager.resolve_tile_individual_events(positions, event_name, blue_entity)
+	else:
+		ConditionalsV3.add_deferred_call(MapManager.resolve_tile_individual_events.bind(positions, event_name, blue_entity))
 
 func desc_delayed_custom_entity_event() -> String:
 	return "entity|Trigger the [event_name:PropertyInput] custom event of the entity after a [delay:ComplexScalarInput:default=0.5,step=0.1] second delay\n" \
-			+ "(If the entity is still active)"
+			+ "(If the entity is still active at that time)"
 func cmd_delayed_custom_entity_event(slots: Dictionary, chosen_slot: int, event_name: String, delay: Dictionary) -> void:
 	if not Commands.slot_is_entity(chosen_slot):
 		push_error("Invalid slot or empty slot to trigger delayed custom entity event: %s" % chosen_slot)
@@ -1699,6 +1854,26 @@ func cmd_if_entity_is_bonded(slots: Dictionary, chosen_slot: int) -> bool:
 		return false
 	return slots[chosen_slot].bond_group.size() > 0
 
+func desc_if_entity_is_bonded_with() -> String:
+	return "entity|If the entity is currently bonded to [check_entity_slot:SlotInput:entity]"
+func cmd_if_entity_is_bonded_with(slots: Dictionary, chosen_slot: int, check_entity_slot: int) -> bool:
+	if not Commands.slot_is_entity(chosen_slot) or not Commands.slot_is_entity(check_entity_slot):
+		push_error("Invalid slots to check if entity is bonded with: %s and %s" % [chosen_slot, check_entity_slot])
+		return false
+	if not slots[chosen_slot] or not slots[check_entity_slot] or not slots[chosen_slot].bond_group:
+		return false
+	return slots[chosen_slot].bond_group.has(slots[check_entity_slot].instance_id)
+
+func desc_bond_entity_with() -> String:
+	return "entity|Bond the entity with this entity [bond_to_entity_slot:SlotInput:entity]"
+func cmd_bond_entity_with(slots: Dictionary, chosen_slot: int, bond_to_entity_slot: int) -> void:
+	if not Commands.slot_is_entity(chosen_slot) or not Commands.slot_is_entity(bond_to_entity_slot):
+		push_error("Invalid slots to bond entity with: %s and %s" % [chosen_slot, bond_to_entity_slot])
+		return
+	if not slots[chosen_slot] or not slots[bond_to_entity_slot]:
+		return
+	EntityManager.merge_entity_bond_groups(slots[chosen_slot], slots[bond_to_entity_slot])
+
 func desc_unbond_entity() -> String:
 	return "entity|Unbond [whole_group:BoolChoice:true,all entities bonded to the entity,the entity itself only] from all other entities"
 func cmd_unbond_entity(slots: Dictionary, chosen_slot: int, whole_group: bool) -> void:
@@ -1711,15 +1886,20 @@ func cmd_unbond_entity(slots: Dictionary, chosen_slot: int, whole_group: bool) -
 		else:
 			EntityManager.unbond_entity(slots[chosen_slot], true)
 
-func desc_bond_entity_with() -> String:
-	return "entity|Bond the entity with this entity [bond_to_entity_slot:SlotInput:entity]"
-func cmd_bond_entity_with(slots: Dictionary, chosen_slot: int, bond_to_entity_slot: int) -> void:
-	if not Commands.slot_is_entity(chosen_slot) or not Commands.slot_is_entity(bond_to_entity_slot):
-		push_error("Invalid slots to bond entity with: %s and %s" % [chosen_slot, bond_to_entity_slot])
+func desc_break_bond_group_into_connected_groups() -> String:
+	return "entity|Split the entity's bond group into connected groups of adjacent entities [with_diagonal:BoolChoice:false,including,ignoring] diagonal connections"
+func cmd_break_bond_group_into_connected_groups(slots: Dictionary, chosen_slot: int, with_diagonal: bool) -> void:
+	if not Commands.slot_is_entity(chosen_slot):
+		push_error("Invalid slot or empty slot to break bond group into connected groups: %s" % chosen_slot)
 		return
-	if not slots[chosen_slot] or not slots[bond_to_entity_slot]:
+	if not slots[chosen_slot] or not slots[chosen_slot].bond_group:
 		return
-	EntityManager.merge_entity_bond_groups(slots[chosen_slot], slots[bond_to_entity_slot])
+	EntityManager.break_bond_group_into_connected_groups(slots[chosen_slot], with_diagonal)
+
+func desc_break_all_bond_groups_into_connected() -> String:
+	return "none|Split all bonded groups of entities into connected groups of adjacent entities [with_diagonal:BoolChoice:false,including,ignoring] diagonal connections"
+func cmd_break_all_bond_groups_into_connected(_slots: Dictionary, _slot: int, with_diagonal: bool) -> void:
+	EntityManager.break_all_bond_groups_into_connected(with_diagonal)
 
 func desc_select_math() -> String:
 	return "number|<= Select the numerical result of [a:ComplexScalarInput] [operator:BinaryMathOperatorInput] [b:ComplexScalarInput]"
@@ -2245,17 +2425,18 @@ func cmd_set_large_entity_width_height(slots: Dictionary, chosen_slot: int, widt
 	slots[chosen_slot].update_size(Vector2i(width, height))
 
 func desc_select_distance_between() -> String:
-	return "number|<= Select the distance between the position of [pos1_slot:SlotInput:pos,entity] and [pos2_slot:SlotInput:pos,entity]"
-func cmd_select_distance_between(slots: Dictionary, chosen_slot: int, pos1_slot: int, pos2_slot: int) -> void:
+	return "number|<= Select the [distance_mode:DistanceModeInput] distance between the position of [pos1_slot:SlotInput:pos,entity] and [pos2_slot:SlotInput:pos,entity]"
+func cmd_select_distance_between(slots: Dictionary, chosen_slot: int, pos1_slot: int, pos2_slot: int, distance_mode: String = "") -> void:
 	if not Commands.slot_has_position(pos1_slot) or not Commands.slot_has_position(pos2_slot):
 		push_error("Invalid slots to select distance between: %s and %s" % [pos1_slot, pos2_slot])
 		return
 	if not _slot_has_single_tile_position(slots, pos1_slot) or not _slot_has_single_tile_position(slots, pos2_slot):
+		prints("invalid distance")
 		set_value_slot_as_number(slots, chosen_slot, 0)
 		return
 	var pos1: Vector2i = get_single_position_from_slot(pos1_slot, slots)
 	var pos2: Vector2i = get_single_position_from_slot(pos2_slot, slots)
-	var distance: int = (pos1 - pos2).length()
+	var distance: float = Utility.get_distance_of_positions_by_mode(pos1, pos2, distance_mode)
 	set_value_slot_as_number(slots, chosen_slot, distance)
 
 
@@ -2331,10 +2512,9 @@ func cmd_mark_changed_since_last_undo(_slots: Dictionary) -> void:
 	GameManager.cur_undo_is_current_state = false
 
 func desc_undo() -> String:
-	return "none|Load the next available undo point"
+	return "none|Load the next available undo point (after this event)"
 func cmd_undo(_slots: Dictionary) -> void:
 	GameManager.pop_and_load_undo_state.call_deferred()
-
 
 
 func desc_select_save_file_value() -> String:
@@ -2402,3 +2582,35 @@ func cmd_select_level_complete_save_file_adds(slots: Dictionary, chosen_slot: in
 	var key_str: String = resolve_complex_string(key_val, slots)
 	var adds: float = MapManager.get_save_adds_for("::cmd::%s" % key_str)
 	set_value_slot_as_number(slots, chosen_slot, adds)
+
+func desc_toggle_property() -> String:
+	return "entity,pos|Toggle the entity or tile's [property_name:PropertyInput] property between true and false"
+func cmd_toggle_property(slots: Dictionary, chosen_slot: int, property_name: String) -> void:
+	if Commands.slot_is_entity(chosen_slot):
+		if slots[chosen_slot]:
+			var cur_value: Variant = EntityManager.get_entity_prop_with_default(slots[chosen_slot], property_name, false)
+			slots[chosen_slot].set_local_property(property_name, not Utility.property_value_bool(cur_value))
+	elif Commands.slot_is_positions(chosen_slot):
+		var positions: Array = slots[chosen_slot]
+		if positions.size() > 0:
+			for pos in positions:
+				var cur_value: Variant = MapManager.get_tile_property_at(pos, property_name)
+				MapManager.set_tile_property_for_all_tiles_at(pos, property_name, not Utility.property_value_bool(cur_value))
+
+
+func desc_if_loop_detected() -> String:
+	return "none|If a logic loop has been detected with a limit of [max_loops:ComplexScalarInput:int,default=%s]" % [DEFAULT_MAX_LOOPS]
+func cmd_if_loop_detected(slots: Dictionary, _slot: int, max_loops: Dictionary) -> bool:
+	var max_loops_val: int = resolve_complex_scalar(max_loops, slots)
+	if max_loops_val <= 0:
+		max_loops_val = DEFAULT_MAX_LOOPS
+	return ConditionalsV3.is_loop_detected(slots, max_loops_val)
+
+func desc_if_named_loop_detected() -> String:
+	return "none|If a logic loop has been detected (counter name [loop_name:ComplexStringInput]) with a limit of [max_loops:ComplexScalarInput:int,default=%s]" % [DEFAULT_MAX_LOOPS]
+func cmd_if_named_loop_detected(slots: Dictionary, _slot: int, loop_name: Dictionary, max_loops: Dictionary) -> bool:
+	var max_loops_val: int = resolve_complex_scalar(max_loops, slots)
+	if max_loops_val <= 0:
+		max_loops_val = DEFAULT_MAX_LOOPS
+	var loop_name_str: String = resolve_complex_string(loop_name, slots)
+	return ConditionalsV3.is_loop_detected(slots, max_loops_val, loop_name_str)

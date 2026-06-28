@@ -189,7 +189,7 @@ func current_tileset() -> TileSet:
 func create_empty_layer():
     var map_layer = map_layer_template.instantiate()
     var ents = Utility.get_world().get_node("Entities")
-    ents.add_sibling(map_layer, true)
+    ents.add_sibling.bind(map_layer, true).call_deferred()
     map_layer.tile_set = current_tileset()
     layers.append(map_layer)
     return map_layer
@@ -990,7 +990,8 @@ func finish_move(moving_entity, onto_positions: Array) -> void:
     
     var ifmntt: = EntityManager.get_entity_property(moving_entity, "i_finish_move_next_to_tile")
     if ifmntt and ifmntt.is_conditional():
-        ifmntt.resolve(moving_entity, null, adjacent_positions)
+        for pos in adjacent_positions:
+            ifmntt.resolve(moving_entity, null, [pos])
     if not moving_entity.active:
         return
     

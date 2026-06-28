@@ -83,6 +83,7 @@ const all_events: Array[String] = [
 
 const NO_OTHER_EVENTS: = [
 	"i_finish_move_onto_tile", "i_move_off_of_tile", "i_move_onto_tile", "half_moved_off_of_tile", "half_moved_onto_tile",
+    "i_finish_move_next_to_tile", "i_move_away_from_tile",
     "post_move", "idle_update",
     "joined_bond_group", "left_bond_group",
     "dying", "do_action_1", "do_action_2", "do_action_3",
@@ -104,7 +105,16 @@ const BUILTIN_COMMANDS: Array[String] = ["and", "or", "xor", "not", "false", "tr
 
 var verbose = false
 
+var MAX_DEFERS: int = 100000
+
+var _loop_counters: Dictionary[String, int] = {}
+
+var _is_in_evaluation: bool = false
+var deferred_calls_evaluation_counter: int = 0
+var deferred_calls_queue: Array[Callable] = []
+
 func _ready() -> void:
+    _is_in_evaluation = false
     for script_name in DEFAULT_SCRIPTS:
         add_command_script_auto(script_name, ScriptType.GDSCRIPT, null)
     for orch_script_path in add_orch_scripts:
@@ -137,6 +147,8 @@ func is_builtin(call_string: String) -> bool:
 
 func slots_copy(slots: Dictionary) -> Dictionary:
     var slots_duplicate = slots.duplicate()
+    if slots.has("reset_slots"):
+        slots.erase("reset_slots")
     slots[Slot.GREY] = slots[Slot.GREY].duplicate()
     slots[Slot.BLACK] = slots[Slot.BLACK].duplicate()
     slots[Slot.ORANGE] = slots[Slot.ORANGE].duplicate()
@@ -237,7 +249,15 @@ func resolve_conditional(conditional: Variant, slots: Dictionary, extra_debug: b
         regularized_conditional.append(conditional)
     return _resolve_conditional(regularized_conditional, slots, extra_debug)
 
+func _reset_loop_counters() -> void:
+    _loop_counters.clear()
+
 func _resolve_conditional(conditional: Array[Dictionary], slots: Dictionary, extra_debug: bool = false) -> Dictionary:
+    var top_level_eval: bool = not _is_in_evaluation
+    if top_level_eval:
+        _reset_loop_counters()
+        _is_in_evaluation = true
+
     slots["reset_slots"] = slots_copy(slots)
     
     var this_step_result = {"result": true, "quit": false}
@@ -248,9 +268,29 @@ func _resolve_conditional(conditional: Array[Dictionary], slots: Dictionary, ext
     var reset_slots: Dictionary = slots["reset_slots"]
     if reset_slots[Slot.RED] and slots[Slot.PINK]:
         reset_slots[Slot.RED].friend_instance_id = slots[Slot.PINK].instance_id
+    
+    if top_level_eval:
+        process_deferred_calls()
+        _is_in_evaluation = false
 
     return this_step_result
-    
+
+func process_deferred_calls() -> void:
+    while deferred_calls_queue.size() > 0:
+        deferred_calls_evaluation_counter += 1
+        if deferred_calls_evaluation_counter > MAX_DEFERS:
+            push_error("Conditional evaluator: Max deferred calls evaluation counter %s reached, skipping remaining calls" % [MAX_DEFERS])
+            break
+        _eval_next_queued_call()
+
+    deferred_calls_queue.clear()
+    deferred_calls_evaluation_counter = 0
+
+func _eval_next_queued_call() -> void:
+    var next_call: Callable = deferred_calls_queue.pop_front()
+    if next_call.is_valid():
+        next_call.call()
+
 func _resolve_conditional_step(step_index: int, cond_step: Dictionary, overall_result: Dictionary, slots: Dictionary, extra_debug: bool = false) -> Dictionary:
     var step_result = overall_result.duplicate()
     var break_step = false
@@ -399,6 +439,28 @@ func call_conditional_command(call_str: String, slots: Dictionary) -> Dictionary
 func _call_conditional_command(cmd_script: Node, main_cmd_name: String, slots: Dictionary, full_call_str: String) -> Variant:
     return cmd_script.call_command(main_cmd_name, slots, full_call_str)
 
+func add_deferred_call(callable: Callable) -> void:
+    if not _is_in_evaluation:
+        push_error("Trying to queue a deferred callable in conditional evaluator outside of conditional evaluation")
+    elif deferred_calls_queue.size() < MAX_DEFERS:
+        deferred_calls_queue.append(callable)
+    else:
+        push_error("Max deferred calls queue size reached, skipping")
+
+
+func is_loop_detected(slots: Dictionary, max_loops: int, named_loop: String = "") -> bool:
+    max_loops = maxi(max_loops, 1)
+    var key: Variant = named_loop
+    if not named_loop:
+        key = 42
+    if not _loop_counters.has(key):
+        _loop_counters[key] = 0
+        return false
+    else:
+        _loop_counters[key] += 1
+        return _loop_counters[key] >= max_loops
+
+
 func select_reset(slots: Dictionary) -> void:
     slots.clear()
     var reset_slots: Dictionary = slots["reset_slots"]
@@ -444,23 +506,34 @@ func get_event_hint_text(event_name: String) -> String:
     return EVENT_HINT_TEXT[event_name]
 
 const EVENT_HINT_TEXT: Dictionary[String, String] = {
-	"blocks": "Conditional Event.\nIf true, the incoming entity will be blocked and will not be able to move onto this entity/tile",
-	"move_onto": "Conditional Event.\nIf false, the incoming entity will not be allowed to move onto this entity/tile",
-    "move_off_of": "Conditional Event.\nIf false, the outgoing entity will not be allowed to move off of this entity/tile",
-    "i_move_onto": "Conditional Event.\nIf false, this entity will not be allowed to move onto the other entity at the target location",
-    "i_move_onto_tile": "Conditional Event.\nIf false, this entity will not be allowed to move onto the tile at the target location",
-    "i_move_off_of": "Conditional Event.\nIf false, this entity will not be allowed to move off of the other entity at this location",
-    "i_move_off_of_tile": "Conditional Event.\nIf false, this entity will not be allowed to move off of the tile at this location",
+	"blocks": "Conditional Event.\nEntities or Tiles. If true, the incoming entity will be blocked and will not be able to move onto this entity/tile. further events for the move will not be evaluated",
+	"move_onto": "Conditional Event.\nEntities or Tiles. If false, the incoming entity will not be allowed to move onto this entity/tile",
+    "move_off_of": "Conditional Event.\nEntities or Tiles. If false, the outgoing entity will not be allowed to move off of this entity/tile",
+    "i_move_onto": "Conditional Event.\nEntities only. If false, this entity will not be allowed to move onto the other entity at the target location",
+    "i_move_onto_tile": "Conditional Event.\nEntities only. If false, this entity will not be allowed to move onto the tile at the target location",
+    "i_move_off_of": "Conditional Event.\nEntities only. If false, this entity will not be allowed to move off of the other entity at this location",
+    "i_move_off_of_tile": "Conditional Event.\nEntities only. If false, this entity will not be allowed to move off of the tile at this location",
+    
+    "move_away_from": "Conditional Event.\nEntities or Tiles. Resolved when another entity is attempting to move from an adjacent position to this entity/tile.\n" \
+        + "If false, the entity will not be allowed to move away.",
+    "i_move_away_from": "Conditional Event.\nEntities only. Resolved when this entity attempts to move away from an entity at an adjacent position" \
+        + "If false, this entity will not be allowed to move away.",
+    "i_move_away_from_tile": "Conditional Event.\nEntities only. Resolved once for each adjacent tile position that this entity starts moving away from, not including adjacent positions they are moving onto." \
+        + "If false, this entity will not be allowed to move away.",
 
-	"finish_move_onto": "Unconditional Event.\nEntities only. Resolved when another entity finishes moving onto this entity",
+	"finish_move_onto": "Unconditional Event.\nEntities only. Resolved when another entity finishes moving onto this entity\n(see finish_move_onto_tile for the tile equivalent)",
 	"finish_move_onto_tile": "Unconditional Event.\nTiles only. Resolved every time an entity finishes moving to a tile position with this tile",
-	"i_finish_move_onto": "Unconditional Event.\nResolved when the entity finishes moving onto another entity",
-	"i_finish_move_onto_tile": "Unconditional Event.\nResolved every time the entity finishes moving to a new tile position",
+	"i_finish_move_onto": "Unconditional Event.\nEntities only. Resolved when the entity finishes moving onto another entity",
+	"i_finish_move_onto_tile": "Unconditional Event.\nEntities only. Resolved every time the entity finishes moving to a new tile position",
+    
+    "finish_move_next_to": "Unconditional Event.\nEntities or Tiles. Resolved when another entity finishes moving next to this entity/tile",
+    "i_finish_move_next_to": "Unconditional Event.\nEntities only. Resolved when this entity finishes moving next to another entity",
+    "i_finish_move_next_to_tile": "Unconditional Event.\nEntities only. Resolved once for each adjacent tile position every time this entity finishes moving next to a new tile position",
 
-    "half_moved_onto": "Unconditional Event.\nEntities only. Resolved when this entity begins overlapping with another entity (past half-way point of movement)",
-    "half_moved_off_of": "Unconditional Event.\nEntities only. Resolved when this entity begins overlapping with another entity (past half-way point of movement)",
-    "half_moved_onto_tile": "Unconditional Event.\nTiles only. Resolved when an entity passes the half-way point moving to tile position with this tile",
-    "half_moved_off_of_tile": "Unconditional Event.\nTiles only. Resolved when an entity passes the half-way point moving from tile position with this tile",
+    "half_moved_onto": "Unconditional Event.\nEntities or Tiles. Resolved when this entity or tile begins overlapping with another entity (past half-way point of movement)",
+    "half_moved_off_of": "Unconditional Event.\nEntities or Tiles. Resolved when this entity or tile begins overlapping with another entity (past half-way point of movement)",
+    "half_moved_onto_tile": "Unconditional Event.\nEntities only. Resolved when this entity passes the half-way point moving to a new tile position",
+    "half_moved_off_of_tile": "Unconditional Event.\nEntities only. Resolved when this entity passes the half-way point leaving a tile position",
 
     "covered_by_[property]": "Not Implemented Yet x.x",
     "uncovered_by_[property]": "Not Implemented Yet x.x",
@@ -470,21 +543,21 @@ const EVENT_HINT_TEXT: Dictionary[String, String] = {
     "post_move_off_of": "Unconditional Event.\nEntities only. Resolved immediately once another entity has started moving off of this entity",
 	"post_move": "Unconditional Event.\nEntities only. Resolved immediately once this entity has started moving to a new tile position",
     
-    "do_action_1": "Unconditional Event.\nResolved when action 1 is pressed (if this entity can receive action events)",
-    "do_action_2": "Unconditional Event.\nResolved when action 2 is pressed (if this entity can receive action events)",
-    "do_action_3": "Unconditional Event.\nResolved when action 3 is pressed (if this entity can receive action events)",
+    "do_action_1": "Unconditional Event.\nEntities only. Resolved when action 1 is pressed (if this entity can receive action events)",
+    "do_action_2": "Unconditional Event.\nEntities only. Resolved when action 2 is pressed (if this entity can receive action events)",
+    "do_action_3": "Unconditional Event.\nEntities only. Resolved when action 3 is pressed (if this entity can receive action events)",
     
-    "was_blocked": "Unconditional Event.\nResolved when this entity is blocked from moving (by another entity or tile)",
+    "was_blocked": "Unconditional Event.\nEntities only. Resolved when this entity is blocked from moving (by another entity or tile)",
 
-	"idle_update": "Unconditional Event.\nFor entities, resolved every idle interval after the entity stops moving.\nFor tiles, resolved every idle interval for every tile type",
-    "idle_on": "Unconditional Event.\nTiles only, resolved for any idle entity on this tile every idle interval (after that entity stopped moving)",
+	"idle_update": "Unconditional Event.\nEntities or Tiles. For entities, resolved every idle interval after the entity stops moving.\nFor tiles, resolved every idle interval for every tile type",
+    "idle_on": "Unconditional Event.\nTiles only, resolved for any idle entity on this tile every idle interval after that entity stopped moving",
 	"dying": "Unconditional Event.\nEntities only, resolved when the entity is being destroyed",
     
-    "started_tailing": "Unconditional Event.\nResolved when this entity starts tailing another entity",
-    "stopped_tailing": "Unconditional Event.\nResolved when this entity stops tailing another entity",
+    "started_tailing": "Unconditional Event.\nEntities only. Resolved when this entity starts tailing another entity",
+    "stopped_tailing": "Unconditional Event.\nEntities only. Resolved when this entity stops tailing another entity",
     
-    "joined_bond_group": "Unconditional Event.\nResolved when this entity becomes bonded to a bond group of entities",
-    "left_bond_group": "Unconditional Event.\nResolved when this entity leaves all bond groups",
+    "joined_bond_group": "Unconditional Event.\nEntities only. Resolved when this entity becomes bonded to a bond group of entities",
+    "left_bond_group": "Unconditional Event.\nEntities only. Resolved when this entity leaves all bond groups",
     
     "turn_start": "[Discrete Movement Modes Only]\nEntities only, Resolved at the start of every game turn.",
     "pre_turn_end": "[Discrete+ Only]\nEntities only, Resolved when a game turn is about to end.",
@@ -503,6 +576,10 @@ const EVENT_CATEGORIES: Dictionary[String, String] = {
     "i_move_onto": "move events",
     "i_move_onto_tile": "move events",
     
+    "move_away_from": "move events",
+    "i_move_away_from": "move events",
+    "i_move_away_from_tile": "move events",
+    
     "post_move_off_of": "move events",
     "post_move_onto": "move events",
     "post_move": "move events",
@@ -516,6 +593,10 @@ const EVENT_CATEGORIES: Dictionary[String, String] = {
     "i_finish_move_onto": "move events",
     "finish_move_onto_tile": "move events",
     "i_finish_move_onto_tile": "move events",
+    
+    "finish_move_next_to": "move events",
+    "i_finish_move_next_to": "move events",
+    "i_finish_move_next_to_tile": "move events",
     
     "do_action_1": "input events",
     "do_action_2": "input events",

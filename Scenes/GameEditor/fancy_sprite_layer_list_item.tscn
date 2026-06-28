@@ -322,7 +322,6 @@ theme_override_constants/separation = 2
 alignment = 2
 
 [node name="DigitSettings" type="HFlowContainer" parent="HBoxContainer/PanelContainer/HBoxContainer/HBoxContainer" unique_id=897502454]
-visible = false
 custom_minimum_size = Vector2(167, 0)
 layout_mode = 2
 size_flags_horizontal = 3

@@ -1,0 +1,27 @@
+[gd_scene format=3 uid="uid://dcwhkqp04n8sm"]
+
+[ext_resource type="Script" uid="uid://b2e3vs73ts471" path="res://Scenes/GameEditor/ConditionalEditor/generic_option_button_input.gd" id="1_xi3bb"]
+
+[node name="DistInput" type="OptionButton" unique_id=583237251]
+offset_top = 3.0
+offset_right = 20.0
+offset_bottom = 23.0
+size_flags_vertical = 4
+alignment = 1
+selected = 0
+fit_to_longest_item = false
+item_count = 6
+popup/item_0/text = "exact"
+popup/item_0/id = 0
+popup/item_1/text = "manhattan"
+popup/item_1/id = 1
+popup/item_2/text = "horizontal"
+popup/item_2/id = 2
+popup/item_3/text = "vertical"
+popup/item_3/id = 3
+popup/item_4/text = "long axis"
+popup/item_4/id = 4
+popup/item_5/text = "short axis"
+popup/item_5/id = 5
+script = ExtResource("1_xi3bb")
+tooltips = Array[String](["Geometric distance sqrt((a - b)²)", "Taxicab distance, number of moves if diagonal moves aren't allowed", "Unsigned difference in horizontal position", "Unsigned difference in vertical position", "The larger of horizontal or vertical distance. Square radius distance. Number of moves if diagonal moves are allowed.", "The smaller of horizontal or vertical distance. Distance from the closest axis-aligned line passing through the other point."])

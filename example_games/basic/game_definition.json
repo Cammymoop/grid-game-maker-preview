@@ -290,7 +290,8 @@
           ],
           "when false": [],
           "when always": []
-        }
+        },
+        "immovable": true
       }
     },
     "5": {
@@ -341,7 +342,7 @@
     "6": {
       "name": "door-button",
       "texture": 1,
-      "tex_index": 19,
+      "tex_index": 45,
       "properties": {
         "z-index": -1,
         "holding-button": 0,
@@ -367,7 +368,8 @@
           ],
           "when false": [],
           "when always": []
-        }
+        },
+        "immovable": true
       }
     },
     "7": {
@@ -393,7 +395,9 @@
           "when false": [],
           "when always": []
         },
-        "z-index": 5
+        "z-index": 5,
+        "edit-place-multiple": true,
+        "immovable": true
       }
     },
     "8": {
@@ -466,6 +470,17 @@
       "tex_index": 32,
       "properties": {
         "finish_move_next_to": [
+          {
+            "v": "3",
+            "conditions": [
+              "basic_default.if_property_value::[\"i:1\",\"s:immovable\",true]"
+            ],
+            "when true": [
+              "basic_default.quit::[\"i:-1\"]"
+            ],
+            "when false": [],
+            "when always": []
+          },
           {
             "v": "3",
             "conditions": [
@@ -548,6 +563,17 @@
           {
             "v": "3",
             "conditions": [
+              "basic_default.if_property_value::[\"i:1\",\"s:immovable\",true]"
+            ],
+            "when true": [
+              "basic_default.quit::[\"i:-1\"]"
+            ],
+            "when false": [],
+            "when always": []
+          },
+          {
+            "v": "3",
+            "conditions": [
               "basic_default.select_direction_to_position::[\"i:6\",\"i:4\",\"i:0\"]",
               "basic_default.select_direction::[\"i:7\",{\"args\":[\"s:type\",\"s:plain\",\"s:direction\",\"i:12\"],\"type\":\"Dictionary\"}]",
               "basic_default.compare_values::[\"i:6\",{\"args\":[\"s:type\",\"s:slot_value\",\"s:slot_id\",\"i:7\"],\"type\":\"Dictionary\"},\"s:=\"]",
@@ -574,6 +600,207 @@
             ],
             "when false": [],
             "when always": []
+          }
+        ]
+      }
+    },
+    "10": {
+      "name": "gate-button",
+      "texture": 1,
+      "tex_index": 47,
+      "properties": {
+        "z-index": -1,
+        "half_moved_onto": {
+          "v": "3",
+          "conditions": [
+            "basic_default.if_property_value::[\"i:1\",\"s:pushes-button\",true]"
+          ],
+          "when true": [
+            "basic_default.a_property_add::[\"i:0\",\"s:holding-button\",{\"args\":[\"s:type\",\"s:plain\",\"s:value\",\"f:1.0\"],\"type\":\"Dictionary\"}]",
+            "basic_default.play_named_sfx::[\"i:-1\",{\"args\":[\"s:type\",\"s:plain\",\"s:value\",\"s:Click\"],\"type\":\"Dictionary\"},false]",
+            "basic_default.trigger_custom_event::[\"i:0\",\"s:button-update\"]"
+          ],
+          "when false": [],
+          "when always": []
+        },
+        "half_moved_off_of": {
+          "v": "3",
+          "conditions": [
+            "basic_default.if_property_value::[\"i:1\",\"s:pushes-button\",true]"
+          ],
+          "when true": [
+            "basic_default.a_property_subtract::[\"i:0\",\"s:holding-button\",{\"args\":[\"s:type\",\"s:plain\",\"s:value\",\"f:1.0\"],\"type\":\"Dictionary\"},true]",
+            "basic_default.trigger_custom_event::[\"i:0\",\"s:button-update\"]"
+          ],
+          "when false": [],
+          "when always": []
+        },
+        "immovable": true,
+        "channel": 0,
+        "holding-button": 0,
+        "button-update": {
+          "v": "3",
+          "conditions": [],
+          "when true": [
+            "basic_default.send_signal::[\"i:0\",\"s:gate_button\"]"
+          ],
+          "when false": [],
+          "when always": []
+        },
+        "max-distance": 10
+      },
+      "sprite_config": {
+        "layers": [
+          {
+            "mode": "normal",
+            "texture": 1,
+            "tex_index": 47
+          },
+          {
+            "mode": "digits",
+            "texture": 1,
+            "tex_index": 47,
+            "pad_zeros": true,
+            "max_digits": 1,
+            "offset": [
+              7,
+              -8
+            ],
+            "mod_color": "#131e79ff",
+            "property": "channel",
+            "when_property": "channel"
+          }
+        ]
+      }
+    },
+    "11": {
+      "name": "gate",
+      "texture": 1,
+      "tex_index": 52,
+      "properties": {
+        "blocks": {
+          "v": "3",
+          "conditions": [
+            "basic_default.if_property_value::[\"i:0\",\"s:closed\",true]"
+          ],
+          "when true": [],
+          "when false": [],
+          "when always": []
+        },
+        "closed": true,
+        "z-index": -2,
+        "when_signal_gate_button": [
+          {
+            "v": "3",
+            "conditions": [
+              "basic_default.if_property_value::[\"i:0\",\"s:closed\",true]"
+            ],
+            "when true": [
+              "basic_default.a_set_property::[\"i:0\",\"s:old-closed\",\"s:true\"]"
+            ],
+            "when false": [
+              "basic_default.a_set_property::[\"i:0\",\"s:old-closed\",\"s:false\"]"
+            ],
+            "when always": []
+          },
+          {
+            "v": "3",
+            "conditions": [
+              "basic_default.select_number_property::[\"i:6\",\"i:1\",\"s:channel\"]",
+              "basic_default.compare_property::[\"i:0\",\"s:channel\",\"s:!=\",{\"args\":[\"s:type\",\"s:slot_value\",\"s:slot_id\",\"i:6\"],\"type\":\"Dictionary\"}]",
+              "and",
+              "basic_default.select_distance_between::[\"i:7\",\"i:0\",\"i:1\"]",
+              "basic_default.compare_property::[\"i:0\",\"s:max-distance\",\"s:<\",{\"args\":[\"s:type\",\"s:slot_value\",\"s:slot_id\",\"i:7\"],\"type\":\"Dictionary\"}]",
+              "and",
+              "or"
+            ],
+            "when true": [
+              "basic_default.quit::[\"i:-1\"]"
+            ],
+            "when false": [],
+            "when always": []
+          },
+          {
+            "v": "3",
+            "conditions": [
+              "basic_default.if_property_value::[\"i:1\",\"s:holding-button\",true]"
+            ],
+            "when true": [
+              "basic_default.a_set_property::[\"i:0\",\"s:closed\",\"s:false\"]"
+            ],
+            "when false": [
+              "basic_default.a_set_property::[\"i:0\",\"s:closed\",\"s:true\"]"
+            ],
+            "when always": []
+          },
+          {
+            "v": "3",
+            "conditions": [
+              "basic_default.if_property_value::[\"i:0\",\"s:inverted\",true]"
+            ],
+            "when true": [
+              "basic_default.toggle_property::[\"i:0\",\"s:closed\"]"
+            ],
+            "when false": [],
+            "when always": []
+          },
+          {
+            "v": "3",
+            "conditions": [
+              "basic_default.select_number_property::[\"i:6\",\"i:0\",\"s:closed\"]",
+              "basic_default.compare_property::[\"i:0\",\"s:old-closed\",\"s:=\",{\"args\":[\"s:type\",\"s:slot_value\",\"s:slot_id\",\"i:6\"],\"type\":\"Dictionary\"}]"
+            ],
+            "when true": [
+              "basic_default.quit::[\"i:-1\"]"
+            ],
+            "when false": [],
+            "when always": []
+          },
+          {
+            "v": "3",
+            "conditions": [
+              "basic_default.if_property_value::[\"i:0\",\"s:closed\",true]"
+            ],
+            "when true": [
+              "basic_default.play_named_sfx::[\"i:-1\",{\"args\":[\"s:type\",\"s:plain\",\"s:value\",\"s:Gate Close\"],\"type\":\"Dictionary\"},true]"
+            ],
+            "when false": [
+              "basic_default.play_named_sfx::[\"i:-1\",{\"args\":[\"s:type\",\"s:plain\",\"s:value\",\"s:Gate Open\"],\"type\":\"Dictionary\"},true]"
+            ],
+            "when always": []
+          }
+        ],
+        "inverted": false,
+        "channel": 0,
+        "old-closed": true
+      },
+      "sprite_config": {
+        "layers": [
+          {
+            "mode": "normal",
+            "texture": 1.0,
+            "tex_index": 52.0
+          },
+          {
+            "mode": "normal",
+            "texture": 1.0,
+            "tex_index": 51.0,
+            "when_property": "closed"
+          },
+          {
+            "mode": "digits",
+            "texture": 1.0,
+            "tex_index": 51.0,
+            "pad_zeros": true,
+            "max_digits": 1.0,
+            "mod_color": "#93d3f5ff",
+            "rotates": false,
+            "offset": [
+              10.0,
+              -9.0
+            ],
+            "property": "channel",
+            "when_property": "channel"
           }
         ]
       }
@@ -828,14 +1055,14 @@
       "name": "Door Open",
       "volume": 0.08,
       "pitch": 0.876486940230357,
-      "ps_seed": 593300.0
+      "ps_seed": 593300
     },
     {
       "type": "ps_sfx",
       "name": "Checkpoint",
       "volume": 1.55,
       "pitch": 0.719223093324864,
-      "ps_seed": 409409.0
+      "ps_seed": 409409
     },
     {
       "type": "sample",
@@ -863,14 +1090,14 @@
       "name": "Floating",
       "volume": 0.26,
       "pitch": 1.62156122939933,
-      "ps_seed": 905903.0
+      "ps_seed": 905903
     },
     {
       "type": "ps_sfx",
       "name": "Pusher",
       "volume": 1.02,
       "pitch": 1.04492435114409,
-      "ps_seed": 997105.0
+      "ps_seed": 997105
     },
     {
       "type": "sample",
@@ -891,7 +1118,7 @@
       "name": "Win 2",
       "volume": 1.36,
       "pitch": 0.688301590959563,
-      "ps_seed": 203909.0
+      "ps_seed": 203909
     },
     {
       "type": "sample",
@@ -906,6 +1133,20 @@
       "volume": 0.27,
       "pitch": 1.73205080756888,
       "sample_name": "splash"
+    },
+    {
+      "type": "ps_sfx",
+      "name": "Gate Open",
+      "volume": 1.19,
+      "pitch": 1.0,
+      "ps_seed": 83604
+    },
+    {
+      "type": "ps_sfx",
+      "name": "Gate Close",
+      "volume": 0.38,
+      "pitch": 1.19217332647245,
+      "ps_seed": 905203
     }
   ]
 }

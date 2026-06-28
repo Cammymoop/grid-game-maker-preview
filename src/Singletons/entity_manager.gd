@@ -480,10 +480,8 @@ func refresh_entity_list():
 func resort_entity_list() -> void:
     entity_list.sort_custom(entity_order)
 
-func on_entity_added(entity: BaseEntity) -> void:
-    entity_list.append(entity)
+func on_entity_added(_entity: BaseEntity) -> void:
     resort_entity_list()
-    entity_instance_map[entity.instance_id] = entity
     on_entity_list_changed()
 
 func on_entities_removed() -> void:
@@ -727,6 +725,8 @@ func create_entity(entity_index: int, tile_position: Vector2i, facing: int = 0, 
 
     entity.entity_index = entity_index
     entity.instance_id = instance_counter
+    entity_instance_map[entity.instance_id] = entity
+    entity_list.append(entity)
     instance_counter += 1
     
     reset_entity_move_interp_style(entity)
@@ -750,10 +750,11 @@ func create_entity(entity_index: int, tile_position: Vector2i, facing: int = 0, 
         for g in entity_info["groups"]:
             entity.add_to_group(g)
     
+    entity.active = activate
+
     auto_bond_handler(entity)
     auto_tail_handler(entity)
     
-    entity.active = activate
     on_entity_added(entity)
     
     if activate and not from_editor:
@@ -832,9 +833,14 @@ func auto_tail_handler(entity: BaseEntity) -> void:
             break
 
 func auto_bond_handler(entity: BaseEntity) -> void:
-    if not entity or entity.bond_group:
+    if not entity or entity.bond_group or not entity.active:
         return
     var auto_bond_val: String = Utility.property_value_nonempty_string(get_entity_prop_with_default(entity, "auto-bond", false), "false")
+    if auto_bond_val.to_lower() == "true":
+        auto_bond_val = "true"
+    elif auto_bond_val.to_lower() == "false":
+        auto_bond_val = "false"
+
     if auto_bond_val != "false":
         var bonded: = false
         var bond_to_entity_ids: Array = []
@@ -842,29 +848,48 @@ func auto_bond_handler(entity: BaseEntity) -> void:
             bond_to_entity_ids = [entity.entity_index]
         else:
             bond_to_entity_ids = filter_entity_types_by_property(auto_bond_val)
-        var bond_adjacent: = get_entity_prop_is_truthy(entity, "auto-bond-adjacent", false)
-        var adjacent_positions: Array[Vector2i] = []
-        if bond_adjacent:
-            var e_pos: = entity.get_moving_position()
-            adjacent_positions = [e_pos]
-            adjacent_positions.append_array(Utility.get_adjacent_positions(e_pos))
 
-        for potential_group in bond_groups:
-            # This doesn't keep track of which groups were created as auto-bond groups for specific entities, more work to do later
-            if not potential_group:
-                continue
-            for instance_id in potential_group:
-                var group_entity: = get_instance(instance_id)
-                var entity_type_id: int = get_instance(instance_id).entity_index
-                if entity_type_id not in bond_to_entity_ids:
+        var bond_adjacent_val: Variant = get_entity_prop_with_default(entity, "auto-bond-adjacent", true)
+        var is_bond_adjacent: bool = Utility.property_value_bool(bond_adjacent_val, true)
+        var is_bond_adjacent_diagonal: bool = typeof(bond_adjacent_val) == TYPE_STRING and bond_adjacent_val.to_lower() == "diagonal"
+        if is_bond_adjacent:
+            var adjacent_positions: = Utility.get_adjacent_positions_of_multiple(get_all_positions_of_entity(entity), is_bond_adjacent_diagonal)
+            var entities_to_bond: Array[BaseEntity] = []
+            for e in get_entities_at_multiple(adjacent_positions):
+                if not e.active or e.instance_id == entity.instance_id:
                     continue
-                if bond_adjacent and not group_entity.is_at_multiple(adjacent_positions):
+                if auto_bond_val == "true":
+                    if e.entity_index in bond_to_entity_ids:
+                        entities_to_bond.append(e)
+                elif get_entity_prop_is_truthy(e, auto_bond_val, false):
+                    entities_to_bond.append(e)
+            #prints("auto bond adjacent,", entity.entity_name, "found entities adjacent:", entities_to_bond.size())
+            if entities_to_bond.size() > 0:
+                entities_to_bond.append(entity)
+                merge_entity_array_bond_groups(entities_to_bond)
+        else:
+            var bg_copy: Array = bond_groups.duplicate()
+            bg_copy.reverse()
+            for potential_group in bg_copy:
+                if bonded:
+                    break
+                if not potential_group:
                     continue
-                bond_entity(entity, potential_group)
-                bonded = true
-                break
-        if not bonded:
-            create_bond_group([entity])
+                for instance_id in potential_group:
+                    var group_entity: = get_instance(instance_id)
+                    if group_entity.entity_index not in bond_to_entity_ids:
+                        continue
+                    bond_entity(entity, potential_group)
+                    bonded = true
+                    break
+            
+            # if any other existing entities with the correct ids, make a new group now to contain them
+            if not bonded:
+                var bondable_entities: Array[BaseEntity] = [entity]
+                for e_id in bond_to_entity_ids:
+                    bondable_entities.append_array(find_all_entities_by_index(e_id, true))
+                merge_entity_array_bond_groups(bondable_entities)
+
 
 func restore_entity(serialized_entity: Dictionary, refresh: bool = false) -> void:
     var entity: BaseEntity
@@ -952,17 +977,59 @@ func deserialize(data: Dictionary) -> void:
     
     post_deserialize.emit()
 
-func create_bond_group(entities: Array) -> void:
+func create_bond_group(entities: Array, create_lonely_group: bool = false) -> void:
+    if not entities:
+        return
     var group = []
     bond_groups.append(group)
+    var included_instances: Array[int] = []
+    for e in entities:
+        if has_instance(e.instance_id):
+            included_instances.append(e.instance_id)
+    var not_creating: bool = not create_lonely_group and included_instances.size() < 2
+    if not_creating:
+        prints("not making a group of only one entity", included_instances)
+
     for e in entities:
         if e.bond_group:
-            unbond_entity(e, false)
-        else:
+            var left_instances: Array[int] = []
+            for inst_id in e.bond_group:
+                if has_instance(inst_id) and inst_id not in included_instances:
+                    left_instances.append(inst_id)
+            if left_instances.size() < 2:
+                disolve_entity_bond_group(e, false)
+                # notify lonely group member of dissolution
+                if left_instances.size() == 1:
+                    var left_entity: BaseEntity = get_instance(left_instances[0])
+                    if left_entity.active:
+                        left_entity.add_deferred_event("left_bond_group")
+            else:
+                unbond_entity(e, false)
+            
+            if not_creating:
+                e.add_deferred_event("left_bond_group")
+        elif not not_creating:
             e.add_deferred_event("joined_bond_group")
+    
+    if not create_lonely_group and included_instances.size() < 2:
+        return
+    
+    for e in entities:
         group.append(e.instance_id)
         e.bond_group = group
     #bond_group_cull()
+
+func create_bond_group_directly(instance_list: Array, emit_joined: bool = false) -> void:
+    bond_groups.append(instance_list)
+    
+    for inst_id in instance_list:
+        if not has_instance(inst_id):
+            continue
+        var entity: BaseEntity = get_instance(inst_id)
+        entity.bond_group = instance_list
+        if emit_joined:
+            entity.add_deferred_event("joined_bond_group")
+
 
 func bond_entity(entity, bond_group) -> void:
     entity.bond_group = bond_group
@@ -980,9 +1047,38 @@ func unbond_entity(entity: BaseEntity, with_event: bool = false) -> void:
         if with_event:
             entity.add_deferred_event("left_bond_group")
 
+func unbond_single_entity_with_lonely_group_dissolve(entity: BaseEntity, with_event: bool = false, lonely_event_if_active: bool = false) -> void:
+    if not entity or not entity.bond_group:
+        return
+    var bg: Array = entity.bond_group
+    bg.erase(entity.instance_id)
+    if with_event:
+        entity.add_deferred_event("left_bond_group")
+    if bg.size() == 0:
+        bond_groups.erase(bg)
+        return
+
+    if bg.size() == 1:
+        if has_instance(bg[0]):
+            var other_entity: BaseEntity = get_instance(bg[0])
+            if not with_event and lonely_event_if_active and other_entity.active:
+                with_event = true
+            unbond_entity(other_entity, with_event)
+
 func unbond_entities(entities: Array, with_event: bool = false) -> void:
+    var bond_groups_with_removed_entities: Array = []
+    for entity in entities:
+        if not entity.bond_group:
+            continue
+        if entity.bond_group not in bond_groups_with_removed_entities:
+            bond_groups_with_removed_entities.append(entity.bond_group)
+    
     for entity in entities:
         unbond_entity(entity, with_event)
+    
+    for bond_group in bond_groups_with_removed_entities:
+        if bond_group.size() == 1:
+            disolve_entity_bond_group(get_instance(bond_group[0]), with_event)
 
 func bond_group_cull() -> void:
     var to_remove: Array[int] = []
@@ -1666,9 +1762,19 @@ func remove_entity(entity: BaseEntity, do_emit: bool = true) -> void:
     _remove_entities(get_all_entities_depending_on(entity), do_emit)
 
 func _remove_entities(to_remove_entities: Array[BaseEntity], do_emit: bool = true) -> void:
-    for entity in to_remove_entities:
+    var input_list: = to_remove_entities
+    to_remove_entities = []
+    for entity in input_list:
         if not entity.instance_id in entity_instance_map:
             continue
+        to_remove_entities.append(entity)
+        entity.set_active(false)
+
+    for entity in to_remove_entities:
+        if entity.bond_group:
+            unbond_single_entity_with_lonely_group_dissolve(entity, false, true)
+
+    for entity in to_remove_entities:
         if entity in entity_signal_connections:
             for connected_sig in entity_signal_connections.get(entity, []):
                 var signal_connections = get_signal_connection_list(connected_sig)
@@ -1676,13 +1782,10 @@ func _remove_entities(to_remove_entities: Array[BaseEntity], do_emit: bool = tru
                     if (sig_conn.callable as Callable).get_object() == entity:
                         sig_conn.signal.disconnect(sig_conn.callable)
             entity_signal_connections.erase(entity)
+        entity.remove_from_group("_entity_")
         entity_instance_map.erase(entity.instance_id)
         entity_list.erase(entity)
-        if entity.bond_group:
-            unbond_entity(entity, false)
-        entity.remove_from_group("_entity_")
-        entity.set_active(false)
-        entity.call_deferred("queue_free")
+        entity.queue_free()
     
     if do_emit:
         on_entities_removed()
@@ -1905,10 +2008,20 @@ func remove_delayed_entity_prop_event(entity: BaseEntity, prop_event_name: Strin
     timed_entity_events[entity.instance_id] = new_events
 
 func merge_entity_bond_groups(entity1: BaseEntity, entity2: BaseEntity) -> void:
+    if entity1.bond_group and entity1.bond_group.has(entity2.instance_id):
+        prints("group already merged")
+        return
+
     if not entity1.bond_group and not entity2.bond_group:
+        prints("creating new bond group with ", entity1.instance_id, "and", entity2.instance_id)
         create_bond_group([entity1, entity2])
+        return
     elif not entity1.bond_group or not entity2.bond_group:
-        bond_entity(entity2 if entity1.bond_group else entity1, entity1.bond_group if entity1.bond_group else entity2.bond_group)
+        bond_entity(
+            entity2 if entity1.bond_group else entity1,
+            entity1.bond_group if entity1.bond_group else entity2.bond_group
+        )
+        return
     
     var all_entities: Array[BaseEntity] = []
     for inst_id in entity1.bond_group:
@@ -1919,14 +2032,88 @@ func merge_entity_bond_groups(entity1: BaseEntity, entity2: BaseEntity) -> void:
             all_entities.append(get_instance(inst_id))
     create_bond_group(all_entities)
 
-func disolve_entity_bond_group(entity: BaseEntity) -> void:
+func merge_entity_array_bond_groups(entities: Array[BaseEntity]) -> void:
+    var old_bond_groups: Array = bond_groups.duplicate()
+    bond_groups = []
+    for bg in old_bond_groups:
+        if bg.size() > 0:
+            bond_groups.append(bg)
+            
+    prints("merge_entity_array_bond_groups,", entities.size(), "entities")
+    prints(entities.map(func(e: BaseEntity): return e.instance_id))
+    if entities.size() < 2:
+        prints("not enough entities to make a bond group")
+        return
+    
+    var entity_a: BaseEntity = entities.pop_front()
+    for entity_b in entities:
+        prints("merging", entity_a.instance_id, "with", entity_b.instance_id)
+        merge_entity_bond_groups(entity_a, entity_b)
+    
+    prints("all bond groups:", bond_groups)
+    
+
+func disolve_entity_bond_group(entity: BaseEntity, with_event: bool = true) -> void:
     if not entity.bond_group:
         return
     var bond_group_of_entity: Array = find_bond_group_of_entity(entity)
     for inst_id in bond_group_of_entity:
         if has_instance(inst_id):
             var bonded_entity: BaseEntity = get_instance(inst_id)
-            unbond_entity(bonded_entity, true)
+            unbond_entity(bonded_entity, false)
+            if with_event:
+                bonded_entity.add_deferred_event("left_bond_group")
+
+func break_bond_group_into_connected_groups(bond_group: Array, with_diagonal: bool, with_event: bool = true) -> void:
+    var all_entities: Array[BaseEntity] = []
+    var entity_positions: Dictionary[int, Array] = {}
+    for inst_id in bond_group:
+        if has_instance(inst_id):
+            var entity: BaseEntity = get_instance(inst_id)
+            all_entities.append(entity)
+            entity_positions[inst_id] = get_all_positions_of_entity(entity)
+    if not all_entities:
+        return
+    disolve_entity_bond_group(all_entities[0], false)
+    
+    var connected_groups: Array = []
+    for entity in all_entities:
+        var is_in_existing: bool = false
+        var existing_indices: Array[int] = []
+        var this_positions: Array[Vector2i] = entity_positions[entity.instance_id]
+        for i in connected_groups.size():
+            for e in connected_groups[i]:
+                var other_positions: Array[Vector2i] = entity_positions[e.instance_id]
+                if Utility.is_any_position_adjacent(this_positions, other_positions, with_diagonal):
+                    is_in_existing = true
+                    existing_indices.append(i)
+                    break # now check next subgroup
+        
+        if not is_in_existing:
+            connected_groups.append(Array([entity.instance_id], TYPE_INT, "", null))
+            continue
+        
+        if existing_indices.size() == 1:
+            connected_groups[existing_indices[0]].append(entity.instance_id)
+        elif existing_indices.size() > 1:
+            var merged_group: Array = []
+            existing_indices.reverse()
+            for i in existing_indices:
+                merged_group.append_array(connected_groups[i])
+                connected_groups.remove_at(i)
+            connected_groups.append(merged_group)
+    
+    for group in connected_groups:
+        if group.size() == 1:
+            if with_event:
+                var entity: BaseEntity = get_instance(group[0])
+                entity.add_deferred_event("left_bond_group")
+            continue
+        create_bond_group_directly(group, false)
+
+func break_all_bond_groups_into_connected(with_diagonal: bool, with_event: bool = true) -> void:
+    for bond_group in bond_groups:
+        break_bond_group_into_connected_groups(bond_group, with_diagonal, with_event)
 
 func removing_texture_id(texture_id_to_remove: int) -> void:
     var fallback_tex: int = TextureManager.get_fallback_texture_id()

@@ -111,8 +111,8 @@ static var SPECIAL_PROPS_HINT_TEXT: Dictionary[String, String] = {
 	"move-turns": "If false, the entity will not automatically turn it's facing direction to match it's moving direction when it moves.",
 	"inherit-properties": "[Experimental] If true, the entity will inherit properties it does not have from another entity type with this name.",
 	"auto-bond": "If true, this entity will automatically join a bond group with other entities of the same type when first created.\n" +
-		"If set to the name of a property, will instead automatically bond with any other entity type with that property set.",
-	"auto-bond-adjacent": "If true, this entity will only automatically bond with adjacent entities at the time it is created.",
+		"If set to the name of a property, will instead automatically bond with any other entity type with that property set. see also auto-bond-adjacent.",
+	"auto-bond-adjacent": "If false, this entity will automatically bond with any entities based on auto-bond instead of only adjacent entities.",
 	"auto-tail": "If true, this entity will automatically start tailing an entity in front of it when first created (if there is one)",
 	"auto-scale": "[Experimental] if the entity is LARGE, this controls if it's sprite is automatically scaled up to cover the entire area taken up by the entity",
 	"die-when-blocked": "If true, when this entity tries to move and is blocked it will automatically be destroyed",

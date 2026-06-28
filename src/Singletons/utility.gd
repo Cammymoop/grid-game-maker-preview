@@ -366,7 +366,17 @@ func facing_from_adjacent_positions(from_pos, to_pos) -> int:
 		return -1
 
 func get_adjacent_positions(pos: Vector2i) -> Array[Vector2i]:
-	return [pos + Vector2i.LEFT, pos + Vector2i.RIGHT, pos + Vector2i.UP, pos + Vector2i.DOWN]
+	return [pos + Vector2i.UP, pos + Vector2i.RIGHT, pos + Vector2i.DOWN, pos + Vector2i.LEFT]
+
+func get_adjacent_with_diagonal(pos: Vector2i, include_diagonal: bool = true) -> Array[Vector2i]:
+	if not include_diagonal:
+		return get_adjacent_positions(pos)
+	return [
+		pos + Vector2i.UP, pos + Vector2i(1, -1),
+		pos + Vector2i.RIGHT, pos + Vector2i(1, 1),
+		pos + Vector2i.DOWN, pos + Vector2i(-1, 1),
+		pos + Vector2i.LEFT, pos + Vector2i(-1, -1),
+	]
 
 func is_pos_adjacent(from_pos: Vector2i, to_pos: Vector2i, include_diagonal: bool = false) -> bool:
 	if from_pos == to_pos:
@@ -675,6 +685,19 @@ func property_value_scalar(prop_value: Variant, default_value: float) -> float:
 		push_error("Tried to convert unexpectedly typed (%s) property value to scalar: %s" % [type_string(typeof(prop_value)), prop_value])
 		return default_value
 
+func property_value_bool(prop_value: Variant, default_value: bool = true) -> bool:
+	if typeof(prop_value) == TYPE_BOOL:
+		return prop_value
+	elif typeof(prop_value) == TYPE_STRING:
+		return prop_value.to_lower() == "true"
+	elif typeof(prop_value) in [TYPE_INT, TYPE_FLOAT]:
+		return prop_value != 0
+	elif typeof(prop_value) in [TYPE_DICTIONARY, TYPE_ARRAY]:
+		return default_value
+	else:
+		push_error("unknown property value type to convert to bool: %s" % type_string(typeof(prop_value)))
+		return default_value
+
 func _fixed_just_press_released_by_event(action: String, event: InputEvent, exact: bool, as_pressed: bool) -> bool:
 	if not InputMap.has_action(action):
 		push_error("Action %s not found in InputMap" % action)
@@ -824,6 +847,20 @@ func rect2i_iter(rect: Rect2i) -> Array[Vector2i]:
 		for x in rect.size.x:
 			positions.append(Vector2i(x, y) + rect.position)
 	return positions
+
+func positions_rect_iter(top_left_pos: Vector2i, size: Vector2i) -> Array[Vector2i]:
+	var positions: Array[Vector2i] = []
+	for y in size.y:
+		for x in size.x:
+			positions.append(top_left_pos + Vector2i(x, y))
+	return positions
+
+func positions_square_radius_iter(center_pos: Vector2i, radius: float) -> Array[Vector2i]:
+	radius = floorf(radius)
+	if radius <= 0:
+		return []
+	var tl_pos: = center_pos - Vector2i(radius, radius)
+	return positions_rect_iter(tl_pos, Vector2i.ONE * (radius * 2))
 
 ## If treating a rect2i as inclusive of pos and exclusive of the last row/column, this makes the equivalent abs-sized rect.
 func rect2i_pos_inclusive_abs(rect: Rect2i) -> Rect2i:
@@ -1169,6 +1206,35 @@ func filter_adjacent_positions_of_multiple(pos_arr: Array, pos_check_arr: Array)
 	print("filter filtered positions", filtered_positions)
 	return filtered_positions
 
+func is_any_position_adjacent(pos_arr: Array[Vector2i], other_pos_arr: Array[Vector2i], with_diagonal: bool = false) -> bool:
+	if not pos_arr or not other_pos_arr:
+		return false
+	
+	var checked: Array[Vector2i] = []
+	for pos in pos_arr:
+		var use_checked_positions: bool = checked.size() < other_pos_arr.size()
+		if pos in other_pos_arr:
+			if use_checked_positions:
+				checked.append(pos)
+			return true
+		for adjacent_pos in get_adjacent_with_diagonal(pos, with_diagonal):
+			if use_checked_positions:
+				if adjacent_pos not in checked:
+					continue
+			if adjacent_pos in other_pos_arr:
+				if use_checked_positions:
+					checked.append(adjacent_pos)
+				return true
+	return false
+
+func get_adjacent_positions_of_multiple(pos_arr: Array, with_diagonal: bool = false) -> Array[Vector2i]:
+	var all_included: Array[Vector2i] = pos_arr.duplicate()
+	for pos in pos_arr:
+		for adj_pos in get_adjacent_with_diagonal(pos, with_diagonal):
+			if adj_pos not in all_included:
+				all_included.append(adj_pos)
+	return all_included
+
 func get_direction_from_delta(from_pos: Vector2i, to_pos: Vector2i, bias_vertical: bool = true) -> int:
 	var delta: = to_pos - from_pos
 	if delta.abs().x == delta.abs().y:
@@ -1177,3 +1243,33 @@ func get_direction_from_delta(from_pos: Vector2i, to_pos: Vector2i, bias_vertica
 		else:
 			delta.y = 0
 	return vector_to_facing(delta)
+
+const DISTANCE_MODES: = [
+	"exact",
+	"manhattan",
+	"horizontal",
+	"vertical",
+	"long axis",
+	"short axis",
+]
+func get_distance_of_positions_by_mode(pos_a: Vector2i, pos_b: Vector2i, distance_mode: String) -> float:
+	distance_mode = distance_mode.to_lower()
+	if distance_mode not in DISTANCE_MODES:
+		push_warning("Unknown distance mode: %s" % distance_mode)
+		distance_mode = DISTANCE_MODES[0]
+	
+	if not distance_mode or distance_mode == "exact":
+		return (pos_a - pos_b).length()
+	else:
+		var abs_delta: = (pos_a - pos_b).abs()
+		if distance_mode == "manhattan":
+			return abs_delta.x + abs_delta.y
+		elif distance_mode == "horizontal":
+			return abs_delta.x
+		elif distance_mode == "vertical":
+			return abs_delta.y
+		elif distance_mode == "long axis":
+			return maxf(abs_delta.x, abs_delta.y)
+		elif distance_mode == "short axis":
+			return minf(abs_delta.x, abs_delta.y)
+	return 0

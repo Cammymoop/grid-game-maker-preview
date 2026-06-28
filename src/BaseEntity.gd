@@ -564,7 +564,7 @@ func _is_diagonal_adj(from_pos: Vector2i, to_pos: Vector2i) -> bool:
 	return false
 
 func _start_move_common(to_tile_pos: Vector2i, is_group_move: bool, is_teleport: bool, is_revertable: bool) -> bool:
-	var related_move_node: = EntityManager.track_move_starting(self, is_group_move, is_revertable)
+	var related_move_node: Dictionary = EntityManager.track_move_starting(self, is_group_move, is_revertable)
 	_currently_starting_move = true
 	_current_starting_move_facing = move_facing
 	

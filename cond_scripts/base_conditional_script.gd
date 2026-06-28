@@ -197,7 +197,7 @@ func set_tiles_to_facing(slots: Dictionary, slot_id: int, facing: int) -> void:
 
 func set_value_slot_as_number(slots: Dictionary, slot_id: int, value: float) -> void:
 	if Commands.slot_is_int(slot_id):
-		slots[slot_id] = int(value)
+		slots[slot_id] = int(roundf(value))
 	elif Commands.slot_is_float(slot_id):
 		slots[slot_id] = float(value)
 	elif Commands.slot_is_string(slot_id):
@@ -352,3 +352,42 @@ func resolve_complex_multi_type_val(complex_multi_type_val: Dictionary, slots: D
 	else:
 		push_error("Invalid complex multi type value type: %s" % [complex_multi_type_val["type"]])
 		return 0
+
+func biased_closest_position_to(ref_pos: Vector2i, in_positions: Array, distance_mode: String) -> Vector2i:
+	var min_distance: float = 100000000
+	var min_bias: float = 0
+	var current_min_pos: Vector2i = Vector2i.ZERO
+
+	for pos in in_positions:
+		if typeof(pos) != TYPE_VECTOR2I and typeof(pos) != TYPE_VECTOR2:
+			continue
+		var dist: float = Utility.get_distance_of_positions_by_mode(pos, ref_pos, distance_mode)
+		if dist <= 0:
+			return pos
+
+		if dist > min_distance:
+			continue
+
+		var bias: float = 0
+		var delta: = Vector2(ref_pos - pos)
+		if delta.abs().x != 0 and delta.abs().y != 0:
+			bias = 3
+		elif delta.abs().y != 0:
+			bias = 2
+		elif delta.abs().x != 0:
+			bias = 1
+
+		# favor shorter manhattan distances
+		if distance_mode != "manhattan":
+			bias += 100 * Utility.get_distance_of_positions_by_mode(pos, ref_pos, "manhattan")
+		
+		# octant bias, south-east quadrant is best, east is better than south, within quadrants shorter horizontal distance compared to vertical is better
+		bias += 0.2 if signf(delta.x) < 0 else 0.0
+		bias += 0.1 if signf(delta.y) < 0 else 0.0
+		bias += 0.01 if delta.abs().x > delta.abs().y else 0.0
+
+		if dist < min_distance or bias < min_bias:
+			min_distance = dist
+			min_bias = bias
+			current_min_pos = pos
+	return current_min_pos

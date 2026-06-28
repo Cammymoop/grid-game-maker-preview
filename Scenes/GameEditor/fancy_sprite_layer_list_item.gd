@@ -440,8 +440,8 @@ func _get_digits_source_from_selector() -> int:
     
 func on_digits_source_selected(index: int) -> void:
     var new_source_id: = digits_source_selector.get_item_id(index)
-    digits_number_input.disabled = new_source_id == DIGITS_SOURCE_PROPERTY
-    digits_property_input.disabled = new_source_id == DIGITS_SOURCE_NUMBER
+    digits_number_input.value_input.visible = new_source_id == DIGITS_SOURCE_NUMBER
+    digits_property_input.visible = new_source_id == DIGITS_SOURCE_PROPERTY
     _update_digits_source_from_selector()
 
 func on_digits_color_changed(new_color: Color) -> void:

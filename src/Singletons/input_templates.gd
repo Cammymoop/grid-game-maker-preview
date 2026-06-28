@@ -19,6 +19,9 @@ enum InputTypes {
 	BinaryMathOperatorInput,
 	RandomDirectionOptionsInput,
 	
+	TailDirInput,
+	DistanceModeInput,
+	
 	DirectionInput,
 	BoolChoice,
 	InvertInput,
@@ -62,6 +65,9 @@ var templates: = {
 	InputTypes.OrderComparison: preload("res://Scenes/GameEditor/ConditionalEditor/order_comparison_input.tscn"),
 	InputTypes.BinaryMathOperatorInput: preload("res://Scenes/GameEditor/ConditionalEditor/binary_math_op_input.tscn"),
 	InputTypes.RandomDirectionOptionsInput: preload("res://Scenes/GameEditor/ConditionalEditor/random_dir_options_input.tscn"),
+	
+	InputTypes.TailDirInput: preload("res://Scenes/GameEditor/tail_dir_input.tscn"),
+	InputTypes.DistanceModeInput: preload("res://Scenes/GameEditor/distance_type_input.tscn"),
 	
 	InputTypes.DirectionInput: preload("res://Scenes/GameEditor/ConditionalEditor/DirectionInput.tscn"),
 	InputTypes.BoolChoice: preload("res://Scenes/GameEditor/ConditionalEditor/bool_choice_input.tscn"),
