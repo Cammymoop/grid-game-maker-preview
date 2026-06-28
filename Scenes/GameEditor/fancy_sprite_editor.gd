@@ -15,6 +15,8 @@ var _sprite_config_backup: Dictionary = {}
 var entity_def: = {}
 var sprite_config: = {}
 
+var entity_id: int = -1
+
 var snapshot_tex: ViewportTexture = null
 
 func _ready() -> void:
@@ -29,7 +31,8 @@ func _shortcut_input(event: InputEvent) -> void:
     if Utility.event_is_menu_back_just_pressed(event):
         close_sprite_editor()
 
-func setup(new_entity_def: Dictionary) -> void:
+func setup(new_entity_def: Dictionary, the_entity_id: int = -1) -> void:
+    entity_id = the_entity_id
     entity_def = new_entity_def.duplicate_deep()
     sprite_config = new_entity_def.get("sprite_config", {})
     refresh()
@@ -87,13 +90,13 @@ func update_scroll_container_size() -> void:
 
 func refresh_previewer() -> void:
     if sprite_previewer:
-        sprite_previewer.update_sprite_config(entity_def)
+        sprite_previewer.update_sprite_config(entity_def, entity_id)
 
 func get_snapshot() -> ViewportTexture:
     if not sprite_previewer:
         prints("No sprite previewer, returning null")
         return null
-    sprite_previewer.reset_sprite(entity_def)
+    sprite_previewer.reset_sprite(entity_def, entity_id)
     sprite_previewer.find_child("PreviewBG").hide()
     await RenderingServer.frame_post_draw
     return sprite_previewer.preview_subviewport.get_texture()

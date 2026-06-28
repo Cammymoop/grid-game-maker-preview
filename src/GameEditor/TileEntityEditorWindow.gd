@@ -329,7 +329,7 @@ func _on_ImageButton_pressed() -> void:
         restore_last_fancy_sprite()
         var fancy_spr_edit: Node = fancy_sprite_editor_scene.instantiate()
         add_child(fancy_spr_edit)
-        fancy_spr_edit.setup(the_definition)
+        fancy_spr_edit.setup(the_definition, the_index)
         fancy_spr_edit.popup_centered()
         fancy_spr_edit.sprite_config_changed.connect(update_sprite_config)
         fancy_spr_edit.closing.connect(set_basic_texture_indices_from_sprite_config)

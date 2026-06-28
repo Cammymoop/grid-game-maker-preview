@@ -1254,6 +1254,8 @@ const DISTANCE_MODES: = [
 ]
 func get_distance_of_positions_by_mode(pos_a: Vector2i, pos_b: Vector2i, distance_mode: String) -> float:
 	distance_mode = distance_mode.to_lower()
+	if not distance_mode:
+		distance_mode = DISTANCE_MODES[0]
 	if distance_mode not in DISTANCE_MODES:
 		push_warning("Unknown distance mode: %s" % distance_mode)
 		distance_mode = DISTANCE_MODES[0]

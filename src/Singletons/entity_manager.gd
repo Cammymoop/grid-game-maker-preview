@@ -922,6 +922,7 @@ func setup_entity_sprite(entity: BaseEntity) -> void:
     var sprite_config: Dictionary = entity_defs[entity.entity_index].get("sprite_config", {})
 
     var sprite: MaskLayerSprite = entity.sprite
+    sprite.set_base_entity_info(entity.entity_index)
     if sprite_config and sprite_config.get("layers", []):
         sprite.set_main_layers(sprite_config["layers"])
     else:
@@ -1414,7 +1415,7 @@ func finish_move(moving_entity, onto_positions: Array) -> void:
 func resolve_entity_interaction_old(event_name: String, actor, interactee, at_tile_position: Vector2i, extra_debug: bool = false) -> void:
     resolve_entity_interaction_event(event_name, actor, interactee, [at_tile_position], extra_debug)
 
-func resolve_entity_interaction_event(event_name: String, actor, interactee, at_tile_positions: Array[Vector2i], extra_debug: bool = false) -> void:
+func resolve_entity_interaction_event(event_name: String, actor, interactee, at_tile_positions: Array, extra_debug: bool = false) -> void:
     var event_prop: = get_entity_property(actor, event_name)
     if event_prop and event_prop.is_conditional():
         event_prop.resolve(actor, interactee, at_tile_positions, [], extra_debug)
@@ -1839,11 +1840,11 @@ func switch_entities_preview_mode(enable_preview: bool) -> void:
     is_entity_preview_mode = enable_preview
     entity_preview_mode_changed.emit(enable_preview)
 
-func save_entity_sprite_snapshot(entity_index: int, snapshot: ImageTexture, snapshot_zoom: float = -1) -> void:
+func save_entity_sprite_snapshot(entity_id: int, snapshot: ImageTexture, snapshot_zoom: float = -1) -> void:
     if snapshot_zoom < 0:
         snapshot_zoom = GameManager.get_default_pixel_scale()
-    entity_sprite_snapshots[entity_index] = snapshot
-    entity_sprite_snapshot_scales[entity_index] = snapshot_zoom
+    entity_sprite_snapshots[entity_id] = snapshot
+    entity_sprite_snapshot_scales[entity_id] = snapshot_zoom
 
 func entity_has_preview_variant(entity_index: int) -> bool:
     return not entity_defs[entity_index].get("preview_variant", {}).is_empty()
@@ -2165,6 +2166,7 @@ func is_texture_id_in_use(texture_id: int) -> bool:
     return false
 
 func rerender_entity_sprite_preview(entity_id: int) -> void:
+    prints("rerendering entity sprite preview for entity %s" % get_entity_name(entity_id))
     var entity_def: Dictionary = entity_defs[entity_id]
     if not entity_def.get("preview_variant", {}).is_empty():
         if entity_sprite_snapshots.has(entity_id):
@@ -2209,7 +2211,7 @@ func render_single_sprite_preview(entity_id: int) -> void:
     var entity_def: Dictionary = entity_defs[entity_id]
 
     var sprite_previewer: = _get_snapshot_renderer()
-    sprite_previewer.update_sprite_config(entity_def)
+    sprite_previewer.update_sprite_config(entity_def, entity_id)
 
     var sub_vp: SubViewport = sprite_previewer.get_subviewport()
     await Utility.force_rerender_subviewport(sub_vp)
@@ -2221,7 +2223,7 @@ func render_single_sprite_preview(entity_id: int) -> void:
 func _update_sprite_preview_for_entity(entity_id: int, entity_def: Dictionary, sprite_previewer: SpritePreviewer) -> void:
     if not entity_def.get("preview_variant", {}).is_empty():
         return
-    sprite_previewer.update_sprite_config(entity_def)
+    sprite_previewer.update_sprite_config(entity_def, entity_id)
     var sub_vp: SubViewport = sprite_previewer.get_subviewport()
 
     await Utility.force_rerender_subviewport(sub_vp)

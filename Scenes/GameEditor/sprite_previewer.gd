@@ -19,6 +19,8 @@ var rotation_interp_target: float = 0
 var rotation_interp_from: float = 0
 var interp_timer: float = 0
 
+var base_entity_id: int = -1
+
 var _sprite_is_setup: bool = false
 var _has_custom_size: bool = false
 
@@ -78,7 +80,8 @@ func stop_spinning() -> void:
         spin_sprite_toggle.set_pressed_no_signal(false)
     is_spinning = false
 
-func update_sprite_config(entity_def: Dictionary) -> void:
+func update_sprite_config(entity_def: Dictionary, entity_id: int = -1) -> void:
+    base_entity_id = entity_id
     if not the_sprite:
         return
     
@@ -91,9 +94,11 @@ func update_sprite_config(entity_def: Dictionary) -> void:
     if not sprite_config:
         update_simple_sprite(entity_def)
     else:
+        the_sprite.set_base_entity_info(base_entity_id, entity_def.get("properties", {}))
         the_sprite.set_main_layers(sprite_config["layers"])
 
 func update_simple_sprite(entity_def: Dictionary) -> void:
+    the_sprite.set_base_entity_info(base_entity_id, entity_def.get("properties", {}))
     the_sprite.set_as_single(entity_def['texture'], entity_def['tex_index'])
 
 func set_sprite_facing(facing: int) -> void:
@@ -117,8 +122,10 @@ func set_preview_spr_rotation(rotation_val: float) -> void:
 func set_rotation_immediate(rotation_val: float) -> void:
     the_sprite.set_sprite_rotation(rotation_val)
 
-func reset_sprite(entity_def: Dictionary) -> void:
+func reset_sprite(entity_def: Dictionary, entity_id: int = -1) -> void:
     stop_spinning()
     sprite_rotation = 0
     _sprite_is_setup = false
-    update_sprite_config(entity_def)
+    prints("resetting sprite to render thumbnail")
+    update_sprite_config(entity_def, entity_id)
+    prints("done resetting sprite to render thumbnail")

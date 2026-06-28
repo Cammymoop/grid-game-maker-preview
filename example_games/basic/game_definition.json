@@ -653,18 +653,18 @@
         "layers": [
           {
             "mode": "normal",
-            "texture": 1,
-            "tex_index": 47
+            "texture": 1.0,
+            "tex_index": 47.0
           },
           {
             "mode": "digits",
-            "texture": 1,
-            "tex_index": 47,
+            "texture": 1.0,
+            "tex_index": 47.0,
             "pad_zeros": true,
-            "max_digits": 1,
+            "max_digits": 1.0,
             "offset": [
-              7,
-              -8
+              7.0,
+              -8.0
             ],
             "mod_color": "#131e79ff",
             "property": "channel",
@@ -709,8 +709,8 @@
               "basic_default.select_number_property::[\"i:6\",\"i:1\",\"s:channel\"]",
               "basic_default.compare_property::[\"i:0\",\"s:channel\",\"s:!=\",{\"args\":[\"s:type\",\"s:slot_value\",\"s:slot_id\",\"i:6\"],\"type\":\"Dictionary\"}]",
               "and",
-              "basic_default.select_distance_between::[\"i:7\",\"i:0\",\"i:1\"]",
-              "basic_default.compare_property::[\"i:0\",\"s:max-distance\",\"s:<\",{\"args\":[\"s:type\",\"s:slot_value\",\"s:slot_id\",\"i:7\"],\"type\":\"Dictionary\"}]",
+              "basic_default.select_distance_between::[\"i:9\",\"i:0\",\"i:1\",\"s:exact\"]",
+              "basic_default.compare_property::[\"i:1\",\"s:max-distance\",\"s:<\",{\"args\":[\"s:type\",\"s:slot_value\",\"s:slot_id\",\"i:9\"],\"type\":\"Dictionary\"}]",
               "and",
               "or"
             ],
@@ -762,10 +762,10 @@
               "basic_default.if_property_value::[\"i:0\",\"s:closed\",true]"
             ],
             "when true": [
-              "basic_default.play_named_sfx::[\"i:-1\",{\"args\":[\"s:type\",\"s:plain\",\"s:value\",\"s:Gate Close\"],\"type\":\"Dictionary\"},true]"
+              "basic_default.play_named_sfx::[\"i:-1\",{\"args\":[\"s:type\",\"s:plain\",\"s:value\",\"s:Gate Close\"],\"type\":\"Dictionary\"},false]"
             ],
             "when false": [
-              "basic_default.play_named_sfx::[\"i:-1\",{\"args\":[\"s:type\",\"s:plain\",\"s:value\",\"s:Gate Open\"],\"type\":\"Dictionary\"},true]"
+              "basic_default.play_named_sfx::[\"i:-1\",{\"args\":[\"s:type\",\"s:plain\",\"s:value\",\"s:Gate Open\"],\"type\":\"Dictionary\"},false]"
             ],
             "when always": []
           }
@@ -1055,14 +1055,14 @@
       "name": "Door Open",
       "volume": 0.08,
       "pitch": 0.876486940230357,
-      "ps_seed": 593300
+      "ps_seed": 593300.0
     },
     {
       "type": "ps_sfx",
       "name": "Checkpoint",
       "volume": 1.55,
       "pitch": 0.719223093324864,
-      "ps_seed": 409409
+      "ps_seed": 409409.0
     },
     {
       "type": "sample",
@@ -1090,14 +1090,14 @@
       "name": "Floating",
       "volume": 0.26,
       "pitch": 1.62156122939933,
-      "ps_seed": 905903
+      "ps_seed": 905903.0
     },
     {
       "type": "ps_sfx",
       "name": "Pusher",
       "volume": 1.02,
       "pitch": 1.04492435114409,
-      "ps_seed": 997105
+      "ps_seed": 997105.0
     },
     {
       "type": "sample",
@@ -1118,7 +1118,7 @@
       "name": "Win 2",
       "volume": 1.36,
       "pitch": 0.688301590959563,
-      "ps_seed": 203909
+      "ps_seed": 203909.0
     },
     {
       "type": "sample",
@@ -1139,14 +1139,14 @@
       "name": "Gate Open",
       "volume": 1.19,
       "pitch": 1.0,
-      "ps_seed": 83604
+      "ps_seed": 83604.0
     },
     {
       "type": "ps_sfx",
       "name": "Gate Close",
       "volume": 0.38,
       "pitch": 1.19217332647245,
-      "ps_seed": 905203
+      "ps_seed": 905203.0
     }
   ]
 }

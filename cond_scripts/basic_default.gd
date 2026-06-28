@@ -205,7 +205,6 @@ func cmd_select_tiles_in_direction(slots: Dictionary, chosen_slot: int, compl_di
 	var from_positions: Array = slots[from_slot] if Commands.slot_is_positions(from_slot) else [slots[from_slot].get_moving_position()]
 	var moved_positions: Array[Vector2i] = []
 	var delta: = facing_vec * distance_int
-	prints("selecting in direction, delta:", delta)
 	for from_pos in from_positions:
 		moved_positions.append(from_pos + delta)
 	slots[chosen_slot] = moved_positions
@@ -510,8 +509,6 @@ func cmd_select_position_of_first_tile_or_entity_in_direction(slots: Dictionary,
 	
 	var map_bounds: = MapManager.get_map_size().grow(5)
 	
-	prints("finding first tile or entity in direction", compl_dir, "from", single_pos_slot, "before", before, "truthy", truthy, "prop_name", prop_name)
-	prints("origin pos", origin_pos)
 	var cur_pos: = origin_pos
 	for i in 10000:
 		var next_pos: = cur_pos + delta
@@ -1171,7 +1168,6 @@ func cmd_compare_property(slots: Dictionary, chosen_slot: int, property_name: St
 				number_result = float(prop.resolve(selected, slots[Slot.RED], [selected.get_moving_position()]))
 			else:
 				number_result = float(prop.get_value())
-			prints("number result:", number_result, "compare to val:", compare_to_val, "comparison:", comparison, "prop name:", property_name)
 			return Utility.check_comparison(number_result, compare_to_val, comparison)
 	elif Commands.slot_is_positions(chosen_slot) and selected:
 		return MapManager.compare_multiple_pos_prop_value(selected, slots[Slot.RED], property_name, comparison, compare_to_val)
@@ -1209,10 +1205,8 @@ func cmd_override_teleport_speed_proportional(slots: Dictionary, chosen_slot: in
 	if Commands.slot_is_entity(chosen_slot) and slots[chosen_slot]:
 		var entity: BaseEntity = slots[chosen_slot]
 		if entity.moving:
-			prints("entity is moving, overriding teleport speed")
 			var move_distance: int = (entity.next_tile_pos - entity.tile_position).length()
 			var base_steps_per_tile: int = entity.get_native_steps_per_tile()
-			prints("base spt:", base_steps_per_tile, "move distance:", move_distance, "new spt:", ceili(base_steps_per_tile * move_distance))
 			entity.set_steps_per_tile_override(ceili(base_steps_per_tile * move_distance))
 
 func desc_override_move_animation() -> String:
@@ -2355,8 +2349,8 @@ func cmd_stretch_a_large_entity_to_position(slots: Dictionary, chosen_slot: int,
 		if inclusive_size.y > 1:
 			target_pos.y += sign(entity_pos.y - target_pos.y)
 	
-	prints("before stretching", the_entity.get_moving_position(), Vector2i(the_entity.entity_size), "inclusive:", inclusive, "orig target:", original_target_pos)
-	prints("attempting to stretch", the_entity.entity_name, the_entity.instance_id, "corners:", entity_pos, target_pos)
+	#prints("before stretching", the_entity.get_moving_position(), Vector2i(the_entity.entity_size), "inclusive:", inclusive, "orig target:", original_target_pos)
+	#prints("attempting to stretch", the_entity.entity_name, the_entity.instance_id, "corners:", entity_pos, target_pos)
 	the_entity.update_size_by_corners(entity_pos, target_pos)
 
 func desc_shrink_entity_in_direction_by() -> String:

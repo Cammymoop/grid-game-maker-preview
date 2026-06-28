@@ -25,6 +25,9 @@ var _facing_rotation: float = 0.0
 var _current_facing: int = 0
 var elapsed_time: float = 0.0
 
+var base_entity_id: int = -1
+var base_entity_props: Dictionary = {}
+
 var _animated_spinning: bool = false
 
 var preview_info: Dictionary = {}
@@ -155,6 +158,10 @@ func set_preview_info(new_preview_info: Dictionary) -> void:
     if is_preview_mode:
         refresh_layers()
 
+func set_base_entity_info(entity_id: int, new_props: Dictionary = {}) -> void:
+    base_entity_id = entity_id
+    base_entity_props = new_props.duplicate_deep()
+
 func set_as_single(single_texture_id: int, tex_index: int, rotates: bool = true) -> void:
     var layer_info: Dictionary = {
         "mode": "normal",
@@ -188,6 +195,8 @@ func set_main_layers(new_layers: Array) -> void:
             new_layer_order_id = old_main_layers[main_layer_idx]["order_id"]
         _append_layer(new_main_layer, new_layer_order_id)
     refresh_layers()
+    
+    base_entity_props.clear()
 
 func remove_main_layers() -> void:
     if not layers:
@@ -236,6 +245,8 @@ func _track_layer_angles() -> void:
             layer["_was_fixed"] = false
 
 func refresh_layers() -> void:
+    if not parent_entity and is_inside_tree():
+        parent_entity = get_parent() as BaseEntity
     ensure_layer_root()
     resort_layers()
     clear_children()
@@ -251,8 +262,13 @@ func refresh_layers() -> void:
         refresh_cam_focus()
         _moving = get_is_visual_moving();
     update_layers_moving_visibility()
-    if is_inside_tree():
-        on_local_prop_update_frame(get_parent() as BaseEntity)
+    if parent_entity:
+        on_local_prop_update_frame(parent_entity)
+    elif base_entity_id != -1:
+        prints("doing base prop update for entity %s" % base_entity_id)
+        do_base_prop_update(base_entity_id)
+    else:
+        prints("no parent entity and base entity id is -1")
 
 func clear() -> void:
     modifier_masks.clear()
@@ -368,6 +384,7 @@ func create_and_add_nodes_for_layer(layer_info: Dictionary, layer_index: int) ->
     if not layer_info or layer_info.get("mode", "empty") == "empty":
         return
 
+            
     var main_layer_node: Node2D = null
     var is_masked: bool = false
 
@@ -418,16 +435,6 @@ func create_and_add_nodes_for_layer(layer_info: Dictionary, layer_index: int) ->
         if layer_info.get("property", ""):
             var prop_name: String = layer_info["property"]
             _add_prop_upate_callable(prop_name, set_digit_display_number.bind(digit_display))
-            
-            var entity_parent: BaseEntity = null
-            if is_inside_tree():
-                entity_parent = get_parent() as BaseEntity
-
-            if entity_parent:
-                var prop_val: Variant = EntityManager.get_entity_prop_with_default(entity_parent, prop_name, 0)
-                set_digit_display_number.call_deferred(prop_val, digit_display)
-            else:
-                set_digit_display_number.call_deferred(layer_info.get("preview_number", 0), digit_display)
         else:
             set_digit_display_number.call_deferred(layer_info.get("digits_number", 1), digit_display)
     elif layer_info.get("mode") == "particles":
@@ -542,6 +549,29 @@ func on_local_prop_update_frame(entity: BaseEntity) -> void:
         var prop_val: Variant = EntityManager.get_entity_prop_with_default(entity, prop_name, 0)
         for update_func in prop_update_response[prop_name]:
             update_func.call(prop_val)
+
+func do_base_prop_update(for_entity_id: int) -> void:
+    var props: Dictionary = base_entity_props
+    if not props:
+        var entity_def: Dictionary = EntityManager.entity_defs.get(for_entity_id, {})
+        if not entity_def:
+            return
+        props = entity_def.get("properties", {})
+    for prop_name in prop_update_response:
+        prints("base update for prop %s" % prop_name)
+        if not prop_name in props:
+            prints("prop not in base props")
+            for update_func in prop_update_response[prop_name]:
+                update_func.call(0)
+            continue
+        if typeof(props[prop_name]) in [TYPE_ARRAY, TYPE_DICTIONARY]:
+            prints("prop in base props is conditional")
+            for update_func in prop_update_response[prop_name]:
+                update_func.call(0)
+            continue
+        for update_func in prop_update_response[prop_name]:
+            prints("using base prop value:", props[prop_name])
+            update_func.call(props[prop_name])
 
 
 func _apply_most_recent_modifier_mask() -> void:
