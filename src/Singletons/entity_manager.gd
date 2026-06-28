@@ -41,6 +41,8 @@ var _pending_half_move_actions: Array[BaseEntity] = []
 var _entity_at_cache: Dictionary[Vector2i, Array] = {}
 var _entity_leaving_cache: Dictionary[Vector2i, Array] = {}
 
+#var _next_to_include_diagonal: bool = false
+
 var initial_sprite_previews_created: bool = false
 var im_ready: = false
 
@@ -1216,17 +1218,20 @@ func get_entities_at_multiple(tile_positions: Array, exclude_entity: Object = nu
                         entities_here.append(e)
     return entities_here
 
-func get_entities_adjacent_to_multiple(tile_positions: Array, exclude_list: Array = [], include_inactive: bool = false) -> Array:
-    return get_entities_adjacent_to_multiple_move_from(tile_positions, -1, exclude_list, include_inactive)
+func get_entities_next_to_multiple(tile_positions: Array, exclude_list: Array = [], include_inactive: bool = false) -> Array:
+    return get_entities_next_to_multiple_move_from(tile_positions, -1, exclude_list, include_inactive)
 
-func get_entities_adjacent_to_multiple_move_from(tile_positions: Array, move_direction: int, exclude_list: Array = [], include_inactive: bool = false) -> Array:
+func get_entities_next_to_multiple_move_from(tile_positions: Array, move_direction: int, exclude_list: Array = [], include_inactive: bool = false) -> Array:
     var adjacent_positions: Array[Vector2i] = []
     var adjacent_entities: Array = []
     var facing_vectors: Array[Vector2i] = [Vector2i.UP, Vector2i.RIGHT, Vector2i.DOWN, Vector2i.LEFT]
+
     for pos in tile_positions:
-        for dir in 4:
+        for dir in facing_vectors.size():
             if dir == move_direction:
                 continue
+            #if dir >= 4 and Vector2(facing_vectors[dir]).dot(Vector2(facing_vectors[move_direction])) > 0:
+                #continue
             var adjacent_pos: Vector2i = pos + facing_vectors[dir]
             if adjacent_pos in adjacent_positions or not adjacent_pos in _entity_at_cache:
                 continue
@@ -1397,7 +1402,7 @@ func finish_move(moving_entity, onto_positions: Array) -> void:
     if not moving_entity.active:
         return
     
-    var adjacent_entities: = get_entities_adjacent_to_multiple(onto_positions, [], false)
+    var adjacent_entities: = get_entities_next_to_multiple(onto_positions, [], false)
     if entity_has_property(moving_entity, "i_finish_move_next_to"):
         for e in adjacent_entities:
             var e_positions: = get_all_positions_of_entity(e)
@@ -1447,7 +1452,7 @@ func attempt_move_leave(moving_entity: BaseEntity, leaving_ps: Array[Vector2i], 
         return false
     
     if not moving_entity._this_move_is_teleport:
-        var entities_moving_away_from: = get_entities_adjacent_to_multiple_move_from(leaving_ps, moving_entity.move_facing, skip_entity_inst_ids)
+        var entities_moving_away_from: = get_entities_next_to_multiple_move_from(leaving_ps, moving_entity.move_facing, skip_entity_inst_ids)
         if entity_has_property(moving_entity, "i_move_away_from"):
             for e in entities_moving_away_from:
                 if not conditional_entity_interaction("i_move_away_from", moving_entity, e, leaving_ps, true):

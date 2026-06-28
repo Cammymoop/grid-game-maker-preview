@@ -1189,11 +1189,13 @@ func get_positions_moving_away_from(tile_positions: Array[Vector2i], move_direct
     var facing_vectors: Array[Vector2i] = [Vector2i.UP, Vector2i.RIGHT, Vector2i.DOWN, Vector2i.LEFT]
     
     for pos in tile_positions:
-        for dir in 4:
+        for dir in facing_vectors.size():
             if dir == move_direction:
                 continue
+            #if dir >= 4 and Vector2(facing_vectors[dir]).dot(Vector2(facing_vectors[move_direction])) > 0:
+                #continue
             var adjacent_pos: = pos + facing_vectors[dir]
-            if adjacent_pos in adjacent_positions:
+            if adjacent_pos in adjacent_positions or adjacent_pos in tile_positions:
                 continue
             adjacent_positions.append(adjacent_pos)
     return adjacent_positions

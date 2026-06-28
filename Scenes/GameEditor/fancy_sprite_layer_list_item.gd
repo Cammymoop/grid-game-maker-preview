@@ -302,6 +302,9 @@ func refresh_ui() -> void:
         elif digits_source == DIGITS_SOURCE_PROPERTY:
             digits_property_input.set_value(layer_info.get("property", ""))
         digits_color_picker.color = Utility.get_dict_color(layer_info, "mod_color", Color.WHITE)
+        
+        digits_number_input.visible = digits_source == DIGITS_SOURCE_NUMBER
+        digits_property_input.visible = digits_source == DIGITS_SOURCE_PROPERTY
     
     z_offset_input.set_value(layer_info.get("z_offset", 0))
     

@@ -1187,23 +1187,19 @@ func is_variant_valid_scalar(value: Variant) -> bool:
 	else:
 		return false
 
-func filter_adjacent_positions_of_multiple(pos_arr: Array, pos_check_arr: Array) -> Array[Vector2i]:
-	prints("filtering adj positions", pos_arr, pos_check_arr)
+func filter_adjacent_positions_of_multiple(pos_arr: Array, pos_check_arr: Array, with_diagonal: bool = false) -> Array[Vector2i]:
 	if not pos_arr or not pos_check_arr:
 		return []
 	
 	for pos in pos_check_arr.duplicate():
-		prints("expanding with pos:", pos)
-		for adj_pos in get_adjacent_positions(pos):
+		for adj_pos in get_adjacent_with_diagonal(pos, with_diagonal):
 			if adj_pos not in pos_check_arr:
 				pos_check_arr.append(adj_pos)
-	prints("filter expanded check positions", pos_check_arr)
 	
 	var filtered_positions: Array[Vector2i] = []
 	for pos in pos_arr:
 		if pos in pos_check_arr:
 			filtered_positions.append(pos)
-	print("filter filtered positions", filtered_positions)
 	return filtered_positions
 
 func is_any_position_adjacent(pos_arr: Array[Vector2i], other_pos_arr: Array[Vector2i], with_diagonal: bool = false) -> bool:
