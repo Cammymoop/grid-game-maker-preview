@@ -113,9 +113,10 @@
       "controller_options": {
         "stop_repeat_after_bonk": false,
         "lock_for_idle_delay_after_bonk": true,
+        "auto_req_turn": false,
         "allow_wait": false,
         "only_rcv_when_cam": true,
-        "idle_delay_multiplier": 4.0
+        "idle_delay_multiplier": 4
       }
     },
     "1": {
@@ -273,10 +274,12 @@
       },
       "controller": "InputController",
       "controller_options": {
-        "stop_repeat_after_bonk": true,
-        "lock_for_idle_delay_after_bonk": false,
+        "stop_repeat_after_bonk": false,
+        "lock_for_idle_delay_after_bonk": true,
+        "auto_req_turn": false,
         "allow_wait": false,
-        "only_rcv_when_cam": true
+        "only_rcv_when_cam": true,
+        "idle_delay_multiplier": 2
       }
     },
     "11": {

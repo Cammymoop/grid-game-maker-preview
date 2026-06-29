@@ -618,7 +618,7 @@
           "when true": [
             "basic_default.a_property_add::[\"i:0\",\"s:holding-button\",{\"args\":[\"s:type\",\"s:plain\",\"s:value\",\"f:1.0\"],\"type\":\"Dictionary\"}]",
             "basic_default.play_named_sfx::[\"i:-1\",{\"args\":[\"s:type\",\"s:plain\",\"s:value\",\"s:Click\"],\"type\":\"Dictionary\"},false]",
-            "basic_default.trigger_custom_event::[\"i:0\",\"s:button-update\",true]"
+            "basic_default.trigger_custom_event::[\"i:0\",\"s:button-update\"]"
           ],
           "when false": [],
           "when always": []
