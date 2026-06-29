@@ -284,10 +284,13 @@ func _physics_process(delta: float) -> void:
 
 func handle_movement_mode_stuff() -> void:
     var all_settled: = false
-    if movement_mode == GameManager.MovementMode.MOVEMENT_DISCRETE_WAIT:
+    if movement_mode == GameManager.MovementMode.MOVEMENT_DISCRETE_WAIT and movements_enabled:
         if all_entities_settled():
+            prints("all entities settled at", frame_counter)
             handle_pre_turn_end_events()
             all_settled = all_entities_settled()
+            if not all_settled:
+                prints("going around again")
 
     animation_frame_counter += 1
     var was_movement_enabled: = movements_enabled

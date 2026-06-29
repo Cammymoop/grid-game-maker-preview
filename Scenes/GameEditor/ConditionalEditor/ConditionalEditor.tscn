@@ -16,7 +16,7 @@
 [ext_resource type="Texture2D" uid="uid://cqjmmw6tvi74p" path="res://assets/img/button_icons/shift_right_small.png" id="9_aaw12"]
 [ext_resource type="Script" uid="uid://pug70er83mb4" path="res://Scenes/GameEditor/ConditionalEditor/slot_category_reference.gd" id="12_4ctmb"]
 [ext_resource type="StyleBox" uid="uid://c03cwku27i376" path="res://src/UI/tab_true_deselected.tres" id="12_kaa04"]
-[ext_resource type="Script" uid="uid://c2lo8nw3j1bkg" path="res://Scenes/GameEditor/ConditionalEditor/fake_tabs.gd" id="12_ph6tk"]
+[ext_resource type="Script" path="res://Scenes/GameEditor/ConditionalEditor/fake_tabs.gd" id="12_ph6tk"]
 [ext_resource type="StyleBox" uid="uid://xscqjtmd8vl6" path="res://src/UI/tab_true_selected.tres" id="13_0dp8f"]
 [ext_resource type="Texture2D" uid="uid://cuijgrj50yplx" path="res://assets/docs/SlotCategories.png" id="13_6syyh"]
 [ext_resource type="StyleBox" uid="uid://g82aj1ep8l0w" path="res://src/UI/tab_false_deselected.tres" id="14_f1sik"]
@@ -412,6 +412,7 @@ ref_image_node = NodePath("TextureRect")
 
 [node name="TextureRect" type="TextureRect" parent="PanelContainer/Control/SlotCategoryReference" unique_id=239247996]
 visible = false
+z_index = 3
 layout_mode = 1
 anchors_preset = -1
 anchor_top = 1.0

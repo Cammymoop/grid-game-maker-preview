@@ -1215,9 +1215,30 @@ func cmd_override_move_animation(slots: Dictionary, chosen_slot: int, anim_style
 	if Commands.slot_is_entity(chosen_slot) and slots[chosen_slot]:
 		slots[chosen_slot].set_move_interp_override(BaseEntity.read_move_interp_style_string(anim_style))
 
-func desc_trigger_custom_event() -> String:
+func desc_trigger_custom_event() -> Dictionary:
+	return {
+		"name": "trigger_custom_event",
+		"slot_type_hint": "entity,pos",
+		"template_text": "(deprecated) Trigger the [event_name:PropertyInput] custom event of the entity/tiles",
+		"tooltip": "deprecated: use trigger_custom_event_immediate instead",
+		"is_deprecated": true,
+	}
+func cmd_trigger_custom_event(slots: Dictionary, chosen_slot: int, event_name: String) -> void:
+	var pass_blue_entity: BaseEntity = null if chosen_slot == Slot.RED else slots[Slot.RED]
+	if not pass_blue_entity:
+		pass_blue_entity = slots[Slot.BLUE]
+	
+	var event_call: Callable = Callable()
+	if Commands.slot_is_entity(chosen_slot):
+		event_call = EntityManager.resolve_entity_interaction_event.bind(event_name, slots[chosen_slot], pass_blue_entity, [slots[chosen_slot].get_moving_position()])
+	elif Commands.slot_is_positions(chosen_slot):
+		event_call = MapManager.resolve_tiles_events.bind(slots[chosen_slot], event_name, pass_blue_entity)
+	
+	event_call.call()
+
+func desc_trigger_custom_event_immediate() -> String:
 	return "entity,pos|Trigger the [event_name:PropertyInput] custom event of the entity/tiles [is_immediate:BoolChoice:true,now,immediately after this event]"
-func cmd_trigger_custom_event(slots: Dictionary, chosen_slot: int, event_name: String, is_immediate: bool = true) -> void:
+func cmd_trigger_custom_event_immediate(slots: Dictionary, chosen_slot: int, event_name: String, is_immediate: bool = true) -> void:
 	var pass_blue_entity: BaseEntity = null if chosen_slot == Slot.RED else slots[Slot.RED]
 	if not pass_blue_entity:
 		pass_blue_entity = slots[Slot.BLUE]

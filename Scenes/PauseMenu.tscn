@@ -3,7 +3,7 @@
 [ext_resource type="Script" uid="uid://bj140a5xc87r7" path="res://src/PauseMenu.gd" id="1"]
 [ext_resource type="StyleBox" uid="uid://bwqqm7x8mbrp5" path="res://assets/ui/pause_menu_bg_panel.tres" id="1_5w4ur"]
 [ext_resource type="FontFile" uid="uid://biuf4hpin33j3" path="res://assets/font/medium_font.tres" id="2"]
-[ext_resource type="Script" path="res://Scenes/level_info_panel.gd" id="3_lptsj"]
+[ext_resource type="Script" uid="uid://2uqmln215cr8" path="res://Scenes/level_info_panel.gd" id="3_lptsj"]
 [ext_resource type="PackedScene" uid="uid://b1a6s2o32t35i" path="res://Scenes/GameEditor/bg_style_editor.tscn" id="4_ey1tb"]
 [ext_resource type="FontFile" uid="uid://ctnllh13x3iqi" path="res://assets/font/NotoSans-Bold.ttf" id="4_gqxqw"]
 [ext_resource type="FontFile" uid="uid://cxxr3l22y0327" path="res://assets/font/NotoSans-Regular.ttf" id="5_lptsj"]
@@ -223,11 +223,22 @@ size_flags_horizontal = 4
 theme_override_fonts/font = ExtResource("2")
 text = "Resume"
 
-[node name="RestartLevel" type="Button" parent="HBoxContainer/CenterContainer/VBoxContainer/MainPausePanel/MarginContainer/VBoxContainer/HBoxContainer5" unique_id=1345456108]
+[node name="HBoxContainer" type="HBoxContainer" parent="HBoxContainer/CenterContainer/VBoxContainer/MainPausePanel/MarginContainer/VBoxContainer/HBoxContainer5" unique_id=1844821398]
+layout_mode = 2
+theme_override_constants/separation = 8
+alignment = 1
+
+[node name="RestartLevel" type="Button" parent="HBoxContainer/CenterContainer/VBoxContainer/MainPausePanel/MarginContainer/VBoxContainer/HBoxContainer5/HBoxContainer" unique_id=1345456108]
 layout_mode = 2
 size_flags_horizontal = 4
 theme_override_fonts/font = ExtResource("2")
 text = "Restart Level"
+
+[node name="ReloadCheckpoint" type="Button" parent="HBoxContainer/CenterContainer/VBoxContainer/MainPausePanel/MarginContainer/VBoxContainer/HBoxContainer5/HBoxContainer" unique_id=726365940]
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_fonts/font = ExtResource("2")
+text = "Reload Last Checkpoint"
 
 [node name="NonEditorStuff" type="VBoxContainer" parent="HBoxContainer/CenterContainer/VBoxContainer/MainPausePanel/MarginContainer/VBoxContainer" unique_id=1150744553]
 visible = false
@@ -621,7 +632,8 @@ theme_override_constants/margin_bottom = 3
 layout_mode = 2
 
 [connection signal="pressed" from="HBoxContainer/CenterContainer/VBoxContainer/MainPausePanel/MarginContainer/VBoxContainer/HBoxContainer5/ResumeButton" to="." method="_on_resume_button_pressed"]
-[connection signal="pressed" from="HBoxContainer/CenterContainer/VBoxContainer/MainPausePanel/MarginContainer/VBoxContainer/HBoxContainer5/RestartLevel" to="." method="_on_RestartLevel_pressed"]
+[connection signal="pressed" from="HBoxContainer/CenterContainer/VBoxContainer/MainPausePanel/MarginContainer/VBoxContainer/HBoxContainer5/HBoxContainer/RestartLevel" to="." method="_on_RestartLevel_pressed"]
+[connection signal="pressed" from="HBoxContainer/CenterContainer/VBoxContainer/MainPausePanel/MarginContainer/VBoxContainer/HBoxContainer5/HBoxContainer/ReloadCheckpoint" to="." method="_on_ReloadCheckpoint_pressed"]
 [connection signal="pressed" from="HBoxContainer/CenterContainer/VBoxContainer/MainPausePanel/MarginContainer/VBoxContainer/NonEditorStuff/LvlSelect" to="." method="go_to_level_select"]
 [connection signal="pressed" from="HBoxContainer/CenterContainer/VBoxContainer/MainPausePanel/MarginContainer/VBoxContainer/NonEditorStuff/CreditsButton" to="." method="_on_credits_button_pressed"]
 [connection signal="pressed" from="HBoxContainer/CenterContainer/VBoxContainer/MainPausePanel/MarginContainer/VBoxContainer/NonEditorStuff/QuitToMenu" to="." method="_on_QuitToMenu_pressed"]

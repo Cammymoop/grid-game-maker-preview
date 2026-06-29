@@ -60,6 +60,8 @@ func build_v3_list() -> void:
 	
 	for qualified_cmd in ConditionalsV3.all_commands:
 		var cmd_info = ConditionalsV3.get_command_info(qualified_cmd)
+		if cmd_info.get("is_deprecated", false):
+			continue
 		var base_display_name: String = cmd_info["display_name"]
 		var display_name: = base_display_name
 		for i in 1000:

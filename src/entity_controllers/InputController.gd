@@ -177,7 +177,8 @@ func got_blocked() -> void:
 		cancelled = true
 		if lock_for_idle_delay_after_bonk:
 			is_delay_locked = true
-			idle_delays_left = idle_delay_multiplier - 1
+			idle_delays_left = maxi(idle_delay_multiplier - 1, 1)
+			prints("multiplier", idle_delay_multiplier, "left", idle_delays_left)
 
 func on_start_move(_facing_dir) -> void:
 	if load_delay_left > 0:
