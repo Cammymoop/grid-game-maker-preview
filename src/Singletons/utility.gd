@@ -98,6 +98,8 @@ func vector_to_facing(vector: Vector2) -> int:
 	else:
 		return 2 if vector.y > 0 else 0
 
+func is_valid_facing(facing: int) -> bool:
+	return facing >= 0 and facing < 4
 
 func dict_map(dict: Dictionary, callback: Callable) -> Dictionary:
 	var new_dict: = Dictionary({}, 
@@ -663,6 +665,7 @@ func property_value_nonempty_string(prop_value: Variant, default_value: String) 
 	return str_value
 
 func property_value_from_string(str_value: String) -> Variant:
+	str_value = str_value.strip_edges()
 	if str_value.is_valid_float():
 		var float_value: = float(str_value)
 		if is_float_integer(float_value):
@@ -673,17 +676,25 @@ func property_value_from_string(str_value: String) -> Variant:
 	return str_value
 
 func property_value_scalar(prop_value: Variant, default_value: float) -> float:
-	if typeof(prop_value) in [TYPE_INT, TYPE_FLOAT]:
+	if typeof(prop_value) in [TYPE_INT, TYPE_FLOAT, TYPE_BOOL]:
 		return float(prop_value)
 	elif typeof(prop_value) == TYPE_STRING:
-		if not prop_value or not prop_value.is_valid_float():
-			return default_value
-		return float(prop_value)
-	elif typeof(prop_value) == TYPE_BOOL:
-		return 1.0 if prop_value else 0.0
+		return string_to_float_including_booleans(prop_value, default_value)
 	else:
 		push_error("Tried to convert unexpectedly typed (%s) property value to scalar: %s" % [type_string(typeof(prop_value)), prop_value])
 		return default_value
+
+func string_to_float_including_booleans(str_value: String, default_value: float = 0.0) -> float:
+	if str_value.strip_edges() == "":
+		return default_value
+
+	if str_value.is_valid_float():
+		return float(str_value)
+	var lower_str: String = str_value.strip_edges().to_lower()
+	if lower_str == "true":
+		return 1.0
+	else:
+		return 0.0
 
 func property_value_bool(prop_value: Variant, default_value: bool = true) -> bool:
 	if typeof(prop_value) == TYPE_BOOL:
@@ -1271,3 +1282,10 @@ func get_distance_of_positions_by_mode(pos_a: Vector2i, pos_b: Vector2i, distanc
 		elif distance_mode == "short axis":
 			return minf(abs_delta.x, abs_delta.y)
 	return 0
+
+func do_positions_align_orthogonally(pos_a: Vector2i, pos_b: Vector2i) -> bool:
+	return pos_a.x == pos_b.x or pos_a.y == pos_b.y
+
+func do_positions_align_diagonally(pos_a: Vector2i, pos_b: Vector2i) -> bool:
+	var abs_delta: = (pos_b - pos_a).abs()
+	return abs_delta.x == abs_delta.y

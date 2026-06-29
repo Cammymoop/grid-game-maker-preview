@@ -26,6 +26,8 @@ const local_prop_icon: Texture2D = preload("res://assets/img/property_list/local
 
 const no_icon: Texture2D = preload("res://assets/img/property_list/no_icon.png")
 
+static var bool_emoji_enabled: bool = true
+
 @export var property_name: String = ""
 @export var property_value: Variant = true
 
@@ -89,6 +91,9 @@ var _name_edited: bool = false
 var _name_edited_from: String = ""
 
 var _skip_internal_focus_neighbors_refresh: bool = false
+
+static func _static_init() -> void:
+    bool_emoji_enabled = not OS.has_feature("web")
 
 func _ready() -> void:
     focus_entered.connect(list_item_focused)

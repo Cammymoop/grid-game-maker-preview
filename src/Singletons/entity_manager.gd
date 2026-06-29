@@ -1410,7 +1410,7 @@ func finish_move(moving_entity, onto_positions: Array) -> void:
         for e in adjacent_entities:
             var e_positions: = get_all_positions_of_entity(e)
             var this_intersect_pos: Array[Vector2i] = Utility.filter_adjacent_positions_of_multiple(e_positions, onto_positions)
-            resolve_entity_interaction_event("i_finish_move_next_to", moving_entity, e, this_intersect_pos, true)
+            resolve_entity_interaction_event("i_finish_move_next_to", moving_entity, e, this_intersect_pos)
     if not moving_entity.active:
         return
     for e in adjacent_entities:
@@ -1418,7 +1418,7 @@ func finish_move(moving_entity, onto_positions: Array) -> void:
             continue
         var e_positions: = get_all_positions_of_entity(e)
         var this_intersect_pos: Array[Vector2i] = Utility.filter_adjacent_positions_of_multiple(onto_positions, e_positions)
-        resolve_entity_interaction_event("finish_move_next_to", e, moving_entity, this_intersect_pos, true)
+        resolve_entity_interaction_event("finish_move_next_to", e, moving_entity, this_intersect_pos)
 
 func resolve_entity_interaction_old(event_name: String, actor, interactee, at_tile_position: Vector2i, extra_debug: bool = false) -> void:
     resolve_entity_interaction_event(event_name, actor, interactee, [at_tile_position], extra_debug)
@@ -2632,3 +2632,5 @@ func get_all_positions_of_entity(entity: BaseEntity, include_moving_away: bool =
                     positions.append(away_pos)
     return positions
         
+func is_discrete_mode() -> bool:
+    return GameManager.get_game_mode() != GameManager.MovementMode.MOVEMENT_CONTINUOUS

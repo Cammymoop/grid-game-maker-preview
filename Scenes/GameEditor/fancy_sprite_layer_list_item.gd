@@ -12,6 +12,7 @@ signal height_changed()
 const Vec2IInput: = preload("res://src/GameEditor/ConditionalEditor/vector2i_input.gd")
 const BetterTextureDialog: = preload("res://src/GameEditor/BetterTextureDialog.gd")
 const ScalarValueInput: = preload("res://src/GameEditor/ConditionalEditor/scalar_value_input.gd")
+const OrderComparisonInput: = preload("res://src/GameEditor/ConditionalEditor/order_comparison_input.gd")
 
 static var texture_picker_scene: = preload("res://Scenes/GameEditor/BetterTextureDialog.tscn")
 
@@ -49,6 +50,15 @@ const DigitsSourceTexts: Dictionary[int, String] = {
     DIGITS_SOURCE_PROPERTY: "Property:",
 }
 
+const VIS_PROP_TYPE_TRUTHY: = 0
+const VIS_PROP_TYPE_FALSEY: = 1
+const VIS_PROP_TYPE_NUMBER_COMPARE: = 2
+const VisPropTypeTexts: Dictionary[int, String] = {
+    VIS_PROP_TYPE_TRUTHY: "True or non-zero",
+    VIS_PROP_TYPE_FALSEY: "False or zero",
+    VIS_PROP_TYPE_NUMBER_COMPARE: "Compare",
+}
+
 const CAM_FOCUS_IGNORE: = "ignore"
 const CAM_FOCUS_SHOW: = "show"
 const CAM_FOCUS_HIDE: = "hide"
@@ -78,9 +88,12 @@ const CamFocusOptions: Array[String] = [CAM_FOCUS_IGNORE, CAM_FOCUS_SHOW, CAM_FO
 @export var digits_property_input: LineEdit
 
 @export var visibility_property_input: FuzzyAutocompleteInput
+@export var vis_prop_comparison_selector: OrderComparisonInput
+@export var vis_prop_compare_number_input: ScalarValueInput
+@export var vis_prop_type_selector: OptionButton
+
 @export var mod_color_input: ColorPickerButton
 @export var cam_focus_visibility_select: OptionButton
-
 @export var moving_visibility_select: OptionButton
 
 @export var show_reorder_buttons: bool = true
@@ -162,6 +175,15 @@ func _ready() -> void:
     
     visibility_property_input.text_changed.connect(on_visibility_prop_changed)
     mod_color_input.color_changed.connect(on_mod_color_changed)
+    
+    vis_prop_type_selector.item_selected.connect(on_vis_prop_type_selected)
+    vis_prop_type_selector.clear()
+    for vis_prop_type_id in VisPropTypeTexts:
+        vis_prop_type_selector.add_item(VisPropTypeTexts[vis_prop_type_id], vis_prop_type_id)
+    Utility.opbtn_select_id(vis_prop_type_selector, VIS_PROP_TYPE_TRUTHY)
+    
+    vis_prop_comparison_selector.item_selected.connect(on_vis_prop_comparison_selected)
+    vis_prop_compare_number_input.value_changed.connect(on_vis_prop_compare_number_changed)
     
     cam_focus_visibility_select.clear()
     for cam_focus_option in CamFocusOptions:
@@ -317,6 +339,8 @@ func refresh_ui() -> void:
         refresh_spin_speed_input()
     
     offset_degrees_input.set_value(layer_info.get("offset_degrees", 0))
+    
+    _update_vis_prop_inputs_from_layer_info()
     
     digits_settings.visible = layer_info['mode'] == MODE_DIGITS
     layer_image_button.visible = layer_info['mode'] != MODE_DIGITS
@@ -546,4 +570,69 @@ func on_moving_visibility_selected(index: int) -> void:
         layer_info.erase('when_moving')
     else:
         layer_info['when_moving'] = new_moving_visibility
+    changed.emit()
+
+
+func _set_current_vis_prop_compare_expression() -> void:
+    var compare_to_num: = float(vis_prop_compare_number_input.get_value())
+    var comparison_op_str: = vis_prop_comparison_selector.get_value()
+    if comparison_op_str == "=":
+        comparison_op_str = "=="
+    layer_info['when_prop_expression'] = "V %s %s" % [comparison_op_str, str(compare_to_num)]
+
+func _get_comparison_op_and_number_from_expression(expr_str: String) -> Array:
+    if not expr_str or not expr_str.begins_with("V "):
+        return [">", 1.0]
+    expr_str = expr_str.trim_prefix("V ")
+    var found_op: String = ""
+    # Make sure to check for longer versions before prefixes of them (<= before <)
+    for op in [">=", "<=", "<", ">", "==", "!="]:
+        if expr_str.begins_with(op):
+            found_op = op
+            break
+    if not found_op:
+        return [">", 1.0]
+    
+    var the_rest: = expr_str.trim_prefix(found_op).strip_edges()
+    if not the_rest.is_valid_float():
+        return [found_op, 1.0]
+    return [found_op, float(the_rest)]
+
+func _update_vis_prop_inputs_from_layer_info() -> void:
+    var vis_type: = _get_vis_type_from_layer_info()
+    Utility.opbtn_select_id(vis_prop_type_selector, vis_type)
+    if vis_type == VIS_PROP_TYPE_NUMBER_COMPARE:
+        var op_and_num: = _get_comparison_op_and_number_from_expression(layer_info.get("when_prop_expression", ""))
+        vis_prop_comparison_selector.set_value(op_and_num[0])
+        vis_prop_compare_number_input.set_value(str(op_and_num[1]))
+
+    vis_prop_comparison_selector.visible = vis_type == VIS_PROP_TYPE_NUMBER_COMPARE
+    vis_prop_compare_number_input.visible = vis_type == VIS_PROP_TYPE_NUMBER_COMPARE
+
+func _get_vis_type_from_layer_info() -> int:
+    if not layer_info.get("when_prop_expression", ""):
+        return VIS_PROP_TYPE_TRUTHY
+    if layer_info["when_prop_expression"] == "falsey":
+        return VIS_PROP_TYPE_FALSEY
+    return VIS_PROP_TYPE_NUMBER_COMPARE
+
+func on_vis_prop_type_selected(index: int) -> void:
+    var new_vis_prop_type: = vis_prop_type_selector.get_item_id(index)
+    
+    if new_vis_prop_type == VIS_PROP_TYPE_NUMBER_COMPARE:
+        _set_current_vis_prop_compare_expression()
+    elif new_vis_prop_type == VIS_PROP_TYPE_FALSEY:
+        layer_info["when_prop_expression"] = "falsey"
+    else:
+        layer_info.erase('when_prop_expression')
+    changed.emit()
+    
+    refresh_ui()
+
+func on_vis_prop_comparison_selected(_index: int) -> void:
+    _set_current_vis_prop_compare_expression()
+    changed.emit()
+
+func on_vis_prop_compare_number_changed(_new_value: float) -> void:
+    _set_current_vis_prop_compare_expression()
     changed.emit()

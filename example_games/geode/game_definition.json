@@ -20,29 +20,35 @@
       "type": "builtin",
       "name": "playerVariants.png",
       "texture_id": 3.0
+    },
+    {
+      "type": "builtin",
+      "name": "oversize_tiles.png",
+      "texture_id": 4,
+      "filter": false
     }
   ],
   "tile_definitions": {
     "0": {
       "name": "floor",
-      "texture": 0,
-      "tex_index": 40,
+      "texture": 4,
+      "tex_index": 25,
       "properties": {
 
       }
     },
     "1": {
       "name": "unstable",
-      "texture": 0,
-      "tex_index": 42,
+      "texture": 4,
+      "tex_index": 26,
       "properties": {
 
       }
     },
     "2": {
       "name": "lava",
-      "texture": 0,
-      "tex_index": 41,
+      "texture": 4,
+      "tex_index": 28,
       "properties": {
         "finish_move_onto_tile": {
           "v": "3",
@@ -57,7 +63,8 @@
           ],
           "when false": [],
           "when always": []
-        }
+        },
+        "z-index": 1.0
       }
     }
   },
@@ -116,7 +123,7 @@
         "auto_req_turn": false,
         "allow_wait": false,
         "only_rcv_when_cam": true,
-        "idle_delay_multiplier": 4
+        "idle_delay_multiplier": 4.0
       }
     },
     "1": {
@@ -279,7 +286,7 @@
         "auto_req_turn": false,
         "allow_wait": false,
         "only_rcv_when_cam": true,
-        "idle_delay_multiplier": 2
+        "idle_delay_multiplier": 2.0
       }
     },
     "11": {

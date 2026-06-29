@@ -17,6 +17,8 @@
 [ext_resource type="Texture2D" uid="uid://dbewldhewludm" path="res://assets/img/button_icons/prev_small.png" id="8_k3uxh"]
 [ext_resource type="StyleBox" uid="uid://cu78oa72kple8" path="res://assets/ui/button_styles/thin_button_normal.tres" id="9_vov2b"]
 [ext_resource type="StyleBox" uid="uid://cf4b0mxp54ien" path="res://assets/ui/button_styles/thin_button_pressed.tres" id="10_jq3ql"]
+[ext_resource type="StyleBox" uid="uid://ch63py1vky05t" path="res://assets/ui/plain_input_bg.tres" id="15_5xfb3"]
+[ext_resource type="PackedScene" uid="uid://b0nx61j31pwcv" path="res://Scenes/GameEditor/ConditionalEditor/order_comparison_input.tscn" id="17_vov2b"]
 
 [sub_resource type="Theme" id="Theme_tghr5"]
 Button/font_sizes/font_size = 14
@@ -41,7 +43,7 @@ LineEdit/constants/minimum_character_width = 2
 atlas = ExtResource("3_jxcnp")
 region = Rect2(0, 64, 32, 32)
 
-[node name="FancySpriteLayerListItem" type="MarginContainer" unique_id=1110623540 node_paths=PackedStringArray("remove_button", "layer_image_button", "offset_type_selector", "offset_input", "mode_selector", "reorder_buttons", "rotates_option", "rotates_mode_select", "spin_speed_input", "offset_degrees_input", "z_offset_input", "digits_settings", "digits_max_digits_input", "digits_color_picker", "digits_pad_zeros_toggle", "digits_source_selector", "digits_number_input", "digits_property_input", "visibility_property_input", "mod_color_input", "cam_focus_visibility_select", "moving_visibility_select", "subsection_container", "subsection_nav_forward", "subsection_nav_back")]
+[node name="FancySpriteLayerListItem" type="MarginContainer" unique_id=1110623540 node_paths=PackedStringArray("remove_button", "layer_image_button", "offset_type_selector", "offset_input", "mode_selector", "reorder_buttons", "rotates_option", "rotates_mode_select", "spin_speed_input", "offset_degrees_input", "z_offset_input", "digits_settings", "digits_max_digits_input", "digits_color_picker", "digits_pad_zeros_toggle", "digits_source_selector", "digits_number_input", "digits_property_input", "visibility_property_input", "vis_prop_comparison_selector", "vis_prop_compare_number_input", "vis_prop_type_selector", "mod_color_input", "cam_focus_visibility_select", "moving_visibility_select", "subsection_container", "subsection_nav_forward", "subsection_nav_back")]
 offset_right = 503.0
 offset_bottom = 75.0
 theme = ExtResource("1_pj4t0")
@@ -69,10 +71,13 @@ digits_pad_zeros_toggle = NodePath("HBoxContainer/PanelContainer/HBoxContainer/H
 digits_source_selector = NodePath("HBoxContainer/PanelContainer/HBoxContainer/HBoxContainer/DigitSettings/HBoxContainer3/DigitsSourcePicker")
 digits_number_input = NodePath("HBoxContainer/PanelContainer/HBoxContainer/HBoxContainer/DigitSettings/HBoxContainer3/DigitNumberInput")
 digits_property_input = NodePath("HBoxContainer/PanelContainer/HBoxContainer/HBoxContainer/DigitSettings/HBoxContainer3/DigitPropertyInput")
-visibility_property_input = NodePath("HBoxContainer/PanelContainer/HBoxContainer/SubsectionContainer/VisibilitySection/VisibilityProp/VisPropInput")
-mod_color_input = NodePath("HBoxContainer/PanelContainer/HBoxContainer/SubsectionContainer/VisibilitySection/VBoxContainer/HBoxContainer/ModColorPicker")
-cam_focus_visibility_select = NodePath("HBoxContainer/PanelContainer/HBoxContainer/SubsectionContainer/VisibilitySection/VBoxContainer/HBoxContainer2/CamFocusVisibilitySelect")
-moving_visibility_select = NodePath("HBoxContainer/PanelContainer/HBoxContainer/SubsectionContainer/VisibilitySection2/HBoxContainer3/MovingVisibilitySelect")
+visibility_property_input = NodePath("HBoxContainer/PanelContainer/HBoxContainer/SubsectionContainer/VisibilitySection/VisibilityProp/HBoxContainer/VisPropInput")
+vis_prop_comparison_selector = NodePath("HBoxContainer/PanelContainer/HBoxContainer/SubsectionContainer/VisibilitySection/VisibilityProp/HBoxContainer/VisPropComparisonSelector")
+vis_prop_compare_number_input = NodePath("HBoxContainer/PanelContainer/HBoxContainer/SubsectionContainer/VisibilitySection/VisibilityProp/HBoxContainer/VisPropCompareNumberInput")
+vis_prop_type_selector = NodePath("HBoxContainer/PanelContainer/HBoxContainer/SubsectionContainer/VisibilitySection/VisibilityProp/HBoxContainer/VisPropTypeSelect")
+mod_color_input = NodePath("HBoxContainer/PanelContainer/HBoxContainer/SubsectionContainer/VisibilitySection2/VBoxContainer2/HBoxContainer/ModColorPicker")
+cam_focus_visibility_select = NodePath("HBoxContainer/PanelContainer/HBoxContainer/SubsectionContainer/VisibilitySection2/VBoxContainer/HBoxContainer2/CamFocusVisibilitySelect")
+moving_visibility_select = NodePath("HBoxContainer/PanelContainer/HBoxContainer/SubsectionContainer/VisibilitySection2/VBoxContainer/HBoxContainer3/MovingVisibilitySelect")
 subsection_container = NodePath("HBoxContainer/PanelContainer/HBoxContainer/SubsectionContainer")
 subsection_nav_forward = NodePath("HBoxContainer/PanelContainer/HBoxContainer/SectionNavButtons/NextSubsection")
 subsection_nav_back = NodePath("HBoxContainer/PanelContainer/HBoxContainer/SectionNavButtons/PrevSubsection")
@@ -122,6 +127,7 @@ size_flags_horizontal = 3
 alignment = 1
 
 [node name="MainSubsection" type="HBoxContainer" parent="HBoxContainer/PanelContainer/HBoxContainer/SubsectionContainer" unique_id=1247727667]
+visible = false
 layout_mode = 2
 
 [node name="VBoxContainer" type="VBoxContainer" parent="HBoxContainer/PanelContainer/HBoxContainer/SubsectionContainer/MainSubsection" unique_id=860413154]
@@ -238,7 +244,6 @@ allow_lesser = true
 suffix = "°"
 
 [node name="VisibilitySection" type="HBoxContainer" parent="HBoxContainer/PanelContainer/HBoxContainer/SubsectionContainer" unique_id=1756168412]
-visible = false
 layout_mode = 2
 
 [node name="VisibilityProp" type="VBoxContainer" parent="HBoxContainer/PanelContainer/HBoxContainer/SubsectionContainer/VisibilitySection" unique_id=825182032]
@@ -253,64 +258,93 @@ theme_override_font_sizes/font_size = 12
 text = "Visibility Property:"
 horizontal_alignment = 1
 
-[node name="VisPropInput" type="LineEdit" parent="HBoxContainer/PanelContainer/HBoxContainer/SubsectionContainer/VisibilitySection/VisibilityProp" unique_id=1000030449]
-custom_minimum_size = Vector2(180, 0)
+[node name="HBoxContainer" type="HBoxContainer" parent="HBoxContainer/PanelContainer/HBoxContainer/SubsectionContainer/VisibilitySection/VisibilityProp" unique_id=1126104250]
 layout_mode = 2
+
+[node name="VisPropInput" type="LineEdit" parent="HBoxContainer/PanelContainer/HBoxContainer/SubsectionContainer/VisibilitySection/VisibilityProp/HBoxContainer" unique_id=1000030449]
+custom_minimum_size = Vector2(150, 0)
+layout_mode = 2
+theme_override_styles/normal = ExtResource("15_5xfb3")
 script = ExtResource("7_d3nlp")
 override_default_min_size = Vector2(180, -1)
 
-[node name="VBoxContainer" type="VBoxContainer" parent="HBoxContainer/PanelContainer/HBoxContainer/SubsectionContainer/VisibilitySection" unique_id=2067204801]
+[node name="VisPropComparisonSelector" parent="HBoxContainer/PanelContainer/HBoxContainer/SubsectionContainer/VisibilitySection/VisibilityProp/HBoxContainer" unique_id=744951564 instance=ExtResource("17_vov2b")]
 layout_mode = 2
-alignment = 1
+selected = 2
 
-[node name="HBoxContainer" type="HBoxContainer" parent="HBoxContainer/PanelContainer/HBoxContainer/SubsectionContainer/VisibilitySection/VBoxContainer" unique_id=499940092]
+[node name="VisPropCompareNumberInput" parent="HBoxContainer/PanelContainer/HBoxContainer/SubsectionContainer/VisibilitySection/VisibilityProp/HBoxContainer" unique_id=1816022916 instance=ExtResource("7_101gm")]
 layout_mode = 2
-size_flags_horizontal = 4
+min_value = -10000.0
+max_value = 10000.0
 
-[node name="Label" type="Label" parent="HBoxContainer/PanelContainer/HBoxContainer/SubsectionContainer/VisibilitySection/VBoxContainer/HBoxContainer" unique_id=300957757]
+[node name="VisPropTypeSelect" type="OptionButton" parent="HBoxContainer/PanelContainer/HBoxContainer/SubsectionContainer/VisibilitySection/VisibilityProp/HBoxContainer" unique_id=1563762346]
 layout_mode = 2
-text = "Modify Color:"
-
-[node name="ModColorPicker" type="ColorPickerButton" parent="HBoxContainer/PanelContainer/HBoxContainer/SubsectionContainer/VisibilitySection/VBoxContainer/HBoxContainer" unique_id=1409117670]
-custom_minimum_size = Vector2(32, 28)
-layout_mode = 2
-color = Color(1, 1, 1, 1)
-edit_intensity = false
-
-[node name="HBoxContainer2" type="HBoxContainer" parent="HBoxContainer/PanelContainer/HBoxContainer/SubsectionContainer/VisibilitySection/VBoxContainer" unique_id=1589483168]
-layout_mode = 2
-
-[node name="Label" type="Label" parent="HBoxContainer/PanelContainer/HBoxContainer/SubsectionContainer/VisibilitySection/VBoxContainer/HBoxContainer2" unique_id=1012186701]
-layout_mode = 2
-text = "If Camera Focus:"
-
-[node name="CamFocusVisibilitySelect" type="OptionButton" parent="HBoxContainer/PanelContainer/HBoxContainer/SubsectionContainer/VisibilitySection/VBoxContainer/HBoxContainer2" unique_id=554422872]
-layout_mode = 2
-item_count = 1
-popup/item_0/text = "ignore"
+selected = 2
+fit_to_longest_item = false
+item_count = 3
+popup/item_0/text = "true or non-zero"
 popup/item_0/id = 0
+popup/item_1/text = "false or zero"
+popup/item_1/id = 1
+popup/item_2/text = "compare"
+popup/item_2/id = 2
 
-[node name="VisibilitySection2" type="VBoxContainer" parent="HBoxContainer/PanelContainer/HBoxContainer/SubsectionContainer" unique_id=1296096512]
+[node name="VisibilitySection2" type="HBoxContainer" parent="HBoxContainer/PanelContainer/HBoxContainer/SubsectionContainer" unique_id=83209365]
 visible = false
 custom_minimum_size = Vector2(76, 0)
 layout_mode = 2
 alignment = 1
 
-[node name="HBoxContainer3" type="HBoxContainer" parent="HBoxContainer/PanelContainer/HBoxContainer/SubsectionContainer/VisibilitySection2" unique_id=1689587888]
+[node name="VBoxContainer" type="VBoxContainer" parent="HBoxContainer/PanelContainer/HBoxContainer/SubsectionContainer/VisibilitySection2" unique_id=1748559654]
+layout_mode = 2
+alignment = 1
+
+[node name="HBoxContainer3" type="HBoxContainer" parent="HBoxContainer/PanelContainer/HBoxContainer/SubsectionContainer/VisibilitySection2/VBoxContainer" unique_id=1689587888]
 layout_mode = 2
 
-[node name="Label" type="Label" parent="HBoxContainer/PanelContainer/HBoxContainer/SubsectionContainer/VisibilitySection2/HBoxContainer3" unique_id=1230763582]
+[node name="Label" type="Label" parent="HBoxContainer/PanelContainer/HBoxContainer/SubsectionContainer/VisibilitySection2/VBoxContainer/HBoxContainer3" unique_id=1230763582]
 layout_mode = 2
 theme_override_constants/line_spacing = 1
 theme_override_font_sizes/font_size = 12
 text = "If Moving:"
 horizontal_alignment = 1
 
-[node name="MovingVisibilitySelect" type="OptionButton" parent="HBoxContainer/PanelContainer/HBoxContainer/SubsectionContainer/VisibilitySection2/HBoxContainer3" unique_id=1568895435]
+[node name="MovingVisibilitySelect" type="OptionButton" parent="HBoxContainer/PanelContainer/HBoxContainer/SubsectionContainer/VisibilitySection2/VBoxContainer/HBoxContainer3" unique_id=1568895435]
 layout_mode = 2
 item_count = 1
 popup/item_0/text = "ignore"
 popup/item_0/id = 0
+
+[node name="HBoxContainer2" type="HBoxContainer" parent="HBoxContainer/PanelContainer/HBoxContainer/SubsectionContainer/VisibilitySection2/VBoxContainer" unique_id=1589483168]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="HBoxContainer/PanelContainer/HBoxContainer/SubsectionContainer/VisibilitySection2/VBoxContainer/HBoxContainer2" unique_id=1012186701]
+layout_mode = 2
+text = "If Camera Focus:"
+
+[node name="CamFocusVisibilitySelect" type="OptionButton" parent="HBoxContainer/PanelContainer/HBoxContainer/SubsectionContainer/VisibilitySection2/VBoxContainer/HBoxContainer2" unique_id=554422872]
+layout_mode = 2
+item_count = 1
+popup/item_0/text = "ignore"
+popup/item_0/id = 0
+
+[node name="VBoxContainer2" type="VBoxContainer" parent="HBoxContainer/PanelContainer/HBoxContainer/SubsectionContainer/VisibilitySection2" unique_id=2067204801]
+layout_mode = 2
+alignment = 1
+
+[node name="HBoxContainer" type="HBoxContainer" parent="HBoxContainer/PanelContainer/HBoxContainer/SubsectionContainer/VisibilitySection2/VBoxContainer2" unique_id=499940092]
+layout_mode = 2
+size_flags_horizontal = 4
+
+[node name="Label" type="Label" parent="HBoxContainer/PanelContainer/HBoxContainer/SubsectionContainer/VisibilitySection2/VBoxContainer2/HBoxContainer" unique_id=300957757]
+layout_mode = 2
+text = "Modify Color:"
+
+[node name="ModColorPicker" type="ColorPickerButton" parent="HBoxContainer/PanelContainer/HBoxContainer/SubsectionContainer/VisibilitySection2/VBoxContainer2/HBoxContainer" unique_id=1409117670]
+custom_minimum_size = Vector2(32, 28)
+layout_mode = 2
+color = Color(1, 1, 1, 1)
+edit_intensity = false
 
 [node name="VSeparator" type="VSeparator" parent="HBoxContainer/PanelContainer/HBoxContainer" unique_id=71806959]
 layout_mode = 2

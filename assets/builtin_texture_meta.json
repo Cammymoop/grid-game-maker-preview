@@ -17,9 +17,9 @@
 		},
 	"shapes32x.png":
 		{
-			"size": [288, 128],
+			"size": [288, 160],
 			"tile_size": [32, 32],
-			"size_in_tiles": [9, 4],
+			"size_in_tiles": [9, 5],
 			"border": [0, 0],
 			"separation": [0, 0]
 		},
@@ -36,6 +36,14 @@
 			"size": [128, 64],
 			"tile_size": [64, 64],
 			"size_in_tiles": [2, 1],
+			"border": [0, 0],
+			"separation": [0, 0]
+		},
+	"oversize_tiles.png":
+		{
+			"size": [264, 264],
+			"tile_size": [44, 44],
+			"size_in_tiles": [6, 6],
 			"border": [0, 0],
 			"separation": [0, 0]
 		}

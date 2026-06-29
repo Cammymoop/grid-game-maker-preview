@@ -32,6 +32,8 @@ func get_value() -> String:
 	return raw_val
 
 func set_value(new_val: String) -> void:
+	if new_val == "==":
+		new_val = "="
 	if new_val in conversions:
 		new_val = conversions[new_val]
 	var index = all_items.find(new_val)

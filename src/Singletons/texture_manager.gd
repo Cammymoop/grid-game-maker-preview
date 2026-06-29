@@ -16,6 +16,7 @@ var builtin_textures: Array[String] = [
     "entityTiles.png",
     "playerVariants.png",
     "frog.png",
+    "oversize_tiles.png",
     "shapes32x.png",
 ]
 var builtin_meta: = {}

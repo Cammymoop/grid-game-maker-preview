@@ -265,10 +265,7 @@ func refresh_layers() -> void:
     if parent_entity:
         on_local_prop_update_frame(parent_entity)
     elif base_entity_id != -1:
-        prints("doing base prop update for entity %s" % base_entity_id)
         do_base_prop_update(base_entity_id)
-    else:
-        prints("no parent entity and base entity id is -1")
 
 func clear() -> void:
     modifier_masks.clear()
@@ -451,11 +448,14 @@ func create_and_add_nodes_for_layer(layer_info: Dictionary, layer_index: int) ->
         var when_property_name: String = layer_info["when_property"]
         if layer_info.get("when_prop_expression", ""):
             var expr: Expression = Expression.new()
-            var err: = expr.parse(layer_info.get("when_prop_expression", ""), ["V"])
+            var expr_str: String = layer_info["when_prop_expression"]
+            if expr_str == "falsey":
+                expr_str = "V == 0"
+            var err: = expr.parse(expr_str, ["V"])
             if err != OK:
-                push_error("Failed to parse expression: %s" % layer_info.get("when_prop_expression", ""))
+                push_error("Failed to parse expression: %s" % layer_info["when_prop_expression"])
                 return
-            _add_prop_upate_callable(when_property_name, show_hide_layer_expression.bind(main_layer_node, expr))
+            _add_prop_upate_callable(when_property_name, show_hide_layer_expression.bind(expr, main_layer_node))
         else:
             _add_prop_upate_callable(when_property_name, show_hide_layer.bind(main_layer_node))
 
@@ -546,9 +546,10 @@ func _add_prop_upate_callable(prop_name: String, update_func: Callable) -> void:
 
 func on_local_prop_update_frame(entity: BaseEntity) -> void:
     for prop_name in prop_update_response:
-        var prop_val: Variant = EntityManager.get_entity_prop_with_default(entity, prop_name, 0)
+        var raw_val: Variant = EntityManager.get_entity_prop_with_default(entity, prop_name, 0.0)
+        var num_val: = Utility.property_value_scalar(raw_val, 0.0)
         for update_func in prop_update_response[prop_name]:
-            update_func.call(prop_val)
+            update_func.call(num_val)
 
 func do_base_prop_update(for_entity_id: int) -> void:
     var props: Dictionary = base_entity_props
@@ -558,20 +559,9 @@ func do_base_prop_update(for_entity_id: int) -> void:
             return
         props = entity_def.get("properties", {})
     for prop_name in prop_update_response:
-        prints("base update for prop %s" % prop_name)
-        if not prop_name in props:
-            prints("prop not in base props")
-            for update_func in prop_update_response[prop_name]:
-                update_func.call(0)
-            continue
-        if typeof(props[prop_name]) in [TYPE_ARRAY, TYPE_DICTIONARY]:
-            prints("prop in base props is conditional")
-            for update_func in prop_update_response[prop_name]:
-                update_func.call(0)
-            continue
+        var num_val: = Utility.property_value_scalar(props.get(prop_name, 0.0), 0.0)
         for update_func in prop_update_response[prop_name]:
-            prints("using base prop value:", props[prop_name])
-            update_func.call(props[prop_name])
+            update_func.call(num_val)
 
 
 func _apply_most_recent_modifier_mask() -> void:
@@ -781,10 +771,16 @@ func set_digit_display_number(new_number: Variant, digit_display: DigitDisplay) 
         digit_display.set_number(0)
 
 func show_hide_layer(new_prop_value: Variant, layer_node: Node2D) -> void:
-    if new_prop_value:
-        layer_node.set_meta("property_visible", true)
-    else:
+    layer_node.set_meta("property_visible", Utility.truthy(new_prop_value))
+    update_layer_visible(layer_node)
+
+func show_hide_layer_expression(new_prop_value: Variant, expression: Expression, layer_node: Node2D) -> void:
+    var result: Variant = expression.execute([new_prop_value])
+    if expression.has_execute_failed():
+        push_error("Failed to execute expression: %s" % expression.get_error_text())
         layer_node.set_meta("property_visible", false)
+    else:
+        layer_node.set_meta("property_visible", Utility.truthy(result))
     update_layer_visible(layer_node)
 
 func update_layer_visible(layer_node: Node2D) -> void:
@@ -794,18 +790,6 @@ func update_layer_visible(layer_node: Node2D) -> void:
     if layer_node.has_meta("camera_visible"):
         vis = vis and layer_node.get_meta("camera_visible")
     layer_node.visible = vis
-
-func show_hide_layer_expression(new_prop_value: Variant, expression: Expression, layer_node: Node2D) -> void:
-    var result: Variant = expression.execute([new_prop_value])
-    if expression.has_execute_failed():
-        push_error("Failed to execute expression: %s" % expression.get_error_text())
-        layer_node.hide()
-        return
-
-    if result:
-        layer_node.show()
-    else:
-        layer_node.hide()
 
 func _apply_modifier_effects_to(layer_node: Node2D) -> void:
     layer_node.scale *= _get_modifiers_scale()

@@ -19,6 +19,10 @@ var default_looping_cutoff_time: float = 2.0
 
 var default_restart_secs: float = 0.05
 
+const WEB_PS_SFX_COMPENSATION: = 0.7
+var ps_sfx_volume_compensation: float = 1.0
+
+
 const BUILTIN_SAMPLE_STREAMS: Dictionary[String, AudioStreamWAV] = {
 	"abscond": preload("res://assets/sound/wav_sfx/abscond_fast.wav"),
 	"attention": preload("res://assets/sound/wav_sfx/attention.wav"),
@@ -69,6 +73,8 @@ func get_sample_stream(sample_name: String) -> AudioStreamWAV:
     return BUILTIN_SAMPLE_STREAMS[sample_name]
 
 func _ready() -> void:
+    if OS.has_feature("web"):
+        ps_sfx_volume_compensation = WEB_PS_SFX_COMPENSATION
     priorities.resize(num_stream_players)
     looping_players.resize(num_stream_players)
     looping_players.fill(false)
@@ -265,6 +271,8 @@ func _play_sfx_options_on_player(player_idx: int, options: SfxPlayOptions) -> vo
     var player: = stream_players[player_idx]
 
     player.volume_linear = sfx_info.get("volume", 1.0) * options.relative_volume
+    if sfx_info.get("type", "ps_sfx") == "ps_sfx":
+        player.volume_linear *= ps_sfx_volume_compensation
     player.pitch_scale = sfx_info.get("pitch", 1.0) * options.relative_pitch
     priorities[player_idx] = options.priority
 

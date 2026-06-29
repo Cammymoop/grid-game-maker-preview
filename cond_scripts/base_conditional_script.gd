@@ -178,8 +178,8 @@ func resolve_complex_scalar(complex_scalar: Dictionary, slots: Dictionary) -> fl
 		if Commands.slot_is_argument(chosen_slot):
 			push_error("Arguments not implemented")
 			return 0
-		if Commands.slot_is_scalar(chosen_slot) or Commands.slot_is_string(chosen_slot):
-			return float(slots[chosen_slot])
+		if Commands.slot_is_value(chosen_slot):
+			return get_value_slot_as_float(slots, chosen_slot)
 		else:
 			push_error("Invalid complex scalar slot: %s" % [chosen_slot])
 			return 0
@@ -210,12 +210,10 @@ func set_value_slot_as_number(slots: Dictionary, slot_id: int, value: float) -> 
 
 func get_value_slot_as_int(slots: Dictionary, slot_id: int) -> int:
 	if Commands.slot_is_scalar(slot_id):
-		return int(slots[slot_id])
+		return roundi(slots[slot_id])
 	elif Commands.slot_is_string(slot_id):
-		var str_value: String = slots[slot_id]
-		if not str_value.is_valid_float():
-			return 0
-		return roundi(float(str_value))
+		var num_val: = Utility.string_to_float_including_booleans(slots[slot_id], 0.0)
+		return roundi(num_val)
 	else:
 		push_error("Non-value slot or get int not implemented: %s" % slot_id)
 		return 0
@@ -224,13 +222,22 @@ func get_value_slot_as_float(slots: Dictionary, slot_id: int) -> float:
 	if Commands.slot_is_scalar(slot_id):
 		return float(slots[slot_id])
 	elif Commands.slot_is_string(slot_id):
-		var str_value: String = slots[slot_id]
-		if not str_value.is_valid_float():
-			return 0
-		return float(str_value)
+		return Utility.string_to_float_including_booleans(slots[slot_id], 0.0)
 	else:
 		push_error("Non-value slot or get float not implemented: %s" % slot_id)
 		return 0
+
+func get_value_slot_as_number(slots: Dictionary, slot_id: int) -> Variant:
+	if Commands.slot_is_scalar(slot_id):
+		return slots[slot_id]
+	elif Commands.slot_is_string(slot_id):
+		var num_val: = Utility.string_to_float_including_booleans(slots[slot_id], 0.0)
+		if Utility.is_float_integer(num_val):
+			return int(num_val)
+		return num_val
+	else:
+		push_error("Non-value slot or get number not implemented: %s" % slot_id)
+		return 0.0
 
 func get_value_slot_as_string(slots: Dictionary, slot_id: int) -> String:
 	if Commands.slot_is_scalar(slot_id):

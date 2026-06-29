@@ -1,5 +1,10 @@
 extends MarginContainer
 
+@export var preview_bg_sprite: Sprite2D
+
+@export var preview_bg_dark: Texture2D
+@export var preview_bg_light: Texture2D
+
 @export var do_interpolate_rotation: bool = true
 @export var interp_duration: float = 0.24
 @export_exp_easing() var interp_ease_param: float = 0.2
@@ -9,6 +14,8 @@ extends MarginContainer
 @export var preview_subviewport: SubViewport
 @export var the_sprite: MaskLayerSprite
 @export var spin_sprite_toggle: CheckButton
+
+@export var dark_bg_toggle: CheckButton
 
 @export var is_spinning: bool = false
 @export var spin_speed: float = 1.2
@@ -24,10 +31,15 @@ var base_entity_id: int = -1
 var _sprite_is_setup: bool = false
 var _has_custom_size: bool = false
 
+static var saved_bg_is_dark: bool = true
+
 func _ready() -> void:
+    set_bg_is_dark(saved_bg_is_dark)
     update_preview_size()
     if spin_sprite_toggle:
         spin_sprite_toggle.toggled.connect(on_spin_sprite_toggled)
+    
+    dark_bg_toggle.toggled.connect(on_dark_bg_toggled)
 
 func update_preview_size() -> void:
     if _has_custom_size:
@@ -126,6 +138,14 @@ func reset_sprite(entity_def: Dictionary, entity_id: int = -1) -> void:
     stop_spinning()
     sprite_rotation = 0
     _sprite_is_setup = false
-    prints("resetting sprite to render thumbnail")
     update_sprite_config(entity_def, entity_id)
-    prints("done resetting sprite to render thumbnail")
+
+func on_dark_bg_toggled(button_pressed: bool) -> void:
+    saved_bg_is_dark = button_pressed
+    set_bg_is_dark(saved_bg_is_dark)
+
+func set_bg_is_dark(new_is_dark: bool) -> void:
+    if new_is_dark:
+        preview_bg_sprite.texture = preview_bg_dark
+    else:
+        preview_bg_sprite.texture = preview_bg_light

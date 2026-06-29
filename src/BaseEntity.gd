@@ -427,9 +427,9 @@ func _reset_local_property(property_name: String) -> void:
 	refresh_cached_prop(property_name)
 
 func reset_all_local_properties() -> void:
-	for property_name in local_properties:
+	for property_name in local_properties.keys():
 		_reset_local_property(property_name)
-	for deleted_name in removed_properties:
+	for deleted_name in removed_properties.duplicate():
 		_reset_local_property(deleted_name)
 	_local_prop_changed()
 

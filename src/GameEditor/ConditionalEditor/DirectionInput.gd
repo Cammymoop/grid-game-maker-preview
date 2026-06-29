@@ -3,6 +3,8 @@ extends HBoxContainer
 @export var is_reference_position: bool = false
 
 var is_absolute_mode: = true
+# in rotation mode, always show the relative icons and dont use the entity relative selector ui, is always complex mode
+var is_rotation_mode: = false
 
 var arg_name: String = ""
 
@@ -25,13 +27,17 @@ func get_arg_name() -> String:
 func set_input_args(new_args: Array) -> void:
 	if not new_args:
 		return
-	if new_args[0]:
+	is_reference_position = false
+	is_rotation_mode = false
+	if new_args[0].is_valid_float() and float(new_args[0]) >= 2:
+		is_rotation_mode = true
+	if new_args[0].strip_edges().length() > 0:
 		is_reference_position = true
-	else:
-		is_reference_position = false
-	$DirectionSelectorButton.set_slots_enabled(is_reference_position)
 
-# Return all the info about the selected direction and relativeness as a single int value
+	$DirectionSelectorButton.set_slots_enabled(is_reference_position)
+	update_relative_selector()
+
+# Return all the info about the selected direction and relativeness as a single int value if not in complex mode
 func get_value() -> Variant:
 	if not is_reference_position:
 		return get_int_value()
@@ -48,7 +54,8 @@ func get_complex_value() -> Dictionary:
 	if slot_id == -1:
 		return {"type": "plain", "direction": _relativify(value)}
 	else:
-		return {"type": "slot_reference", "slot_id": slot_id, "direction": _relativify(0)}
+		var relative_info: int = 0 if is_rotation_mode else _relativify(0)
+		return {"type": "slot_reference", "slot_id": slot_id, "direction": relative_info}
 
 func _relativify(plain_value: int) -> int:
 	var slot_id: int = $SlotSelectorButton.current_slot_id
@@ -92,7 +99,10 @@ func absolute_changed(new_value: String) -> void:
 		$SlotSelectorButton.visible = false
 		$EntityRelativeMode.visible = false
 		is_absolute_mode = true
-		$DirectionSelectorButton.show_absolute()
+		if is_rotation_mode:
+			$DirectionSelectorButton.show_relative()
+		else:
+			$DirectionSelectorButton.show_absolute()
 	else:
 		$SlotSelectorButton.visible = true
 		$EntityRelativeMode.visible = true
@@ -103,6 +113,9 @@ func slot_changed(_new_slot_id: int) -> void:
 	update_relative_selector()
 
 func update_relative_selector() -> void:
+	$EntityRelativeMode.visible = not is_rotation_mode
+	if is_rotation_mode:
+		return
 	if Commands.slot_is_positions($SlotSelectorButton.current_slot_id):
 		$EntityRelativeMode.select_index(1)
 		$EntityRelativeMode.disabled = true

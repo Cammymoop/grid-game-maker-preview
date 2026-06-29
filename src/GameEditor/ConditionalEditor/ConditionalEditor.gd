@@ -186,6 +186,9 @@ func create_v3_command_item(qualified_name: String, arg_string: String = "") -> 
     var disabled_slots: Array = []
     if not has_me_entity_slot:
         disabled_slots.append(Commands.Slot.RED)
+        # I want to disable pink but if the event has neither red nor blue prefilled slots then it wouldn't have at least two entity slots which would not be ideal
+        # TODO: Should add at least one more general purpose entity slot
+        #disabled_slots.append(Commands.Slot.PINK)
     if not has_them_entity_slot:
         disabled_slots.append(Commands.Slot.BLUE)
     if disabled_slots:

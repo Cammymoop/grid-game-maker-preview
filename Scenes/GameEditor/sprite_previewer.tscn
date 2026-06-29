@@ -3,6 +3,7 @@
 [ext_resource type="Script" uid="uid://sxkikutun5ce" path="res://Scenes/GameEditor/sprite_previewer.gd" id="1_44mtw"]
 [ext_resource type="Script" uid="uid://c2uppviixc87y" path="res://src/previewing_viewport.gd" id="2_l2fur"]
 [ext_resource type="Texture2D" uid="uid://paqnkrgyyol3" path="res://assets/img/preview_backgrounds/computer_green.png" id="3_a1r42"]
+[ext_resource type="Texture2D" uid="uid://d3qqopjbhl4ly" path="res://assets/img/preview_backgrounds/transparency_help.png" id="3_l2fur"]
 [ext_resource type="Script" uid="uid://kgd8llopg4rb" path="res://src/mask_layer_sprite.gd" id="4_kxp56"]
 [ext_resource type="Texture2D" uid="uid://d1pgxolpq4uu5" path="res://icon.png" id="5_mb6s5"]
 [ext_resource type="PackedScene" uid="uid://rafo4lh58320" path="res://Scenes/GameEditor/directional_buttons.tscn" id="6_jxpck"]
@@ -34,14 +35,18 @@ corner_radius_bottom_right = 4
 corner_radius_bottom_left = 4
 corner_detail = 7
 
-[node name="SpritePreviewer" type="MarginContainer" unique_id=84080552 node_paths=PackedStringArray("preview_vp_container", "preview_subviewport", "the_sprite", "spin_sprite_toggle")]
+[node name="SpritePreviewer" type="MarginContainer" unique_id=84080552 node_paths=PackedStringArray("preview_bg_sprite", "preview_vp_container", "preview_subviewport", "the_sprite", "spin_sprite_toggle", "dark_bg_toggle")]
 size_flags_vertical = 3
 script = ExtResource("1_44mtw")
+preview_bg_sprite = NodePath("PreviewSection/HBoxContainer/VBoxContainer/PanelContainer/MarginContainer/SubViewportContainer/SubViewport/PreviewBG")
+preview_bg_dark = ExtResource("3_a1r42")
+preview_bg_light = ExtResource("3_l2fur")
 interp_duration = 0.12
 preview_vp_container = NodePath("PreviewSection/HBoxContainer/VBoxContainer/PanelContainer/MarginContainer/SubViewportContainer")
 preview_subviewport = NodePath("PreviewSection/HBoxContainer/VBoxContainer/PanelContainer/MarginContainer/SubViewportContainer/SubViewport")
 the_sprite = NodePath("PreviewSection/HBoxContainer/VBoxContainer/PanelContainer/MarginContainer/SubViewportContainer/SubViewport/PreviewSprite")
 spin_sprite_toggle = NodePath("PreviewSection/HBoxContainer/VBoxContainer/CheckButton")
+dark_bg_toggle = NodePath("PreviewSection/HBoxContainer/VBoxContainer/DarkBGToggle")
 spin_speed = 2.4
 
 [node name="PreviewSection" type="VBoxContainer" parent="." unique_id=258202469]
@@ -82,7 +87,7 @@ stretch = true
 [node name="SubViewport" type="SubViewport" parent="PreviewSection/HBoxContainer/VBoxContainer/PanelContainer/MarginContainer/SubViewportContainer" unique_id=1607159026]
 transparent_bg = true
 handle_input_locally = false
-size = Vector2i(72, 64)
+size = Vector2i(90, 64)
 size_2d_override = Vector2i(32, 32)
 size_2d_override_stretch = true
 render_target_update_mode = 4
@@ -113,8 +118,15 @@ theme_override_styles/panel = SubResource("StyleBoxFlat_b74fv")
 [node name="CheckButton" type="CheckButton" parent="PreviewSection/HBoxContainer/VBoxContainer" unique_id=1337365076]
 layout_mode = 2
 size_flags_horizontal = 4
-theme_override_font_sizes/font_size = 14
+theme_override_font_sizes/font_size = 12
 text = "spin"
+
+[node name="DarkBGToggle" type="CheckButton" parent="PreviewSection/HBoxContainer/VBoxContainer" unique_id=1831581278]
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_font_sizes/font_size = 12
+button_pressed = true
+text = "dark BG"
 
 [node name="DirectionalButtons" parent="PreviewSection/HBoxContainer" unique_id=1971834257 instance=ExtResource("6_jxpck")]
 layout_mode = 2

@@ -89,6 +89,13 @@ var slot_ids: = {
     none= NONE_SLOTS,
 }
 
+const SPECIAL_SLOT_TOOLTIPS: = {
+    Commands.Slot.RED: "The \"Self\" entity",
+    Commands.Slot.BLUE: "The interacting entity",
+    Commands.Slot.PINK: "The remembered entity (of this event's entity)",
+    Commands.Slot.GREY: "The position(s) of the current event",
+}
+
 var disabled_slots: Array = []
 
 var current_slot_id: int = Commands.Slot.RED
@@ -105,6 +112,41 @@ func _ready():
         update_texture()
     set_valid_slot_categories(show_categories)
     update_disabled_slots()
+    
+    setup_button_tooltips()
+    update_main_button_tooltip()
+
+func update_main_button_tooltip() -> void:
+    get_node("ButtonContainer").button.tooltip_text = get_slot_button_tooltip(current_slot_id)
+
+func setup_button_tooltips() -> void:
+    for category_child in find_child("CategoryContainer").get_children():
+        if not category_child is Control:
+            continue
+        for button_child in category_child.get_children():
+            if not button_child is ButtonContainer:
+                continue
+            var button_slot_id: int = get_slot_id_from_button_texture(button_child)
+            button_child.button.tooltip_text = get_slot_button_tooltip(button_slot_id)
+
+static func get_slot_button_tooltip(slot_id: int) -> String:
+    if SPECIAL_SLOT_TOOLTIPS.has(slot_id):
+        return SPECIAL_SLOT_TOOLTIPS[slot_id]
+    elif Commands.slot_is_entity(slot_id):
+        return "General purpose entity slot"
+    elif Commands.slot_is_positions(slot_id):
+        return "General purpose tile position(s) slot"
+    elif Commands.slot_is_int(slot_id):
+        return "General purpose integer (whole number) slot"
+    elif Commands.slot_is_float(slot_id):
+        return "General purpose decimal number slot"
+    elif Commands.slot_is_string(slot_id):
+        return "General purpose text slot"
+    elif Commands.slot_is_argument(slot_id):
+        return "Extra event parameter slot"
+    elif slot_id == BOOL_VALUE:
+        return "True or False"
+    return ""
 
 func update_disabled_slots() -> void:
     var category_container: Control = find_child("CategoryContainer")
@@ -274,6 +316,7 @@ func set_current_slot(slot_id: int, do_emit: bool = true) -> void:
     update_texture()
     if do_emit:
         emit_signal("slot_changed", current_slot_id)
+    update_main_button_tooltip()
 
 func _on_ButtonContainer_pressed():
     if not picker_open:

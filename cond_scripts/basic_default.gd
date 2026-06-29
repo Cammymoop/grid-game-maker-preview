@@ -35,6 +35,16 @@ func cmd_if_entity_is_moving(slots: Dictionary, chosen_slot: int) -> bool:
 		return false
 	return slots[chosen_slot].moving
 
+func desc_if_entity_is_starting_to_move() -> String:
+	return "entity|If the entity is currently checking if it can move"
+func cmd_if_entity_is_starting_to_move(slots: Dictionary, chosen_slot: int) -> bool:
+	if not Commands.slot_is_entity(chosen_slot):
+		push_error("Invalid slot or empty slot to check if entity is moving: %s" % chosen_slot)
+		return false
+	if not slots[chosen_slot]:
+		return false
+	return slots[chosen_slot]._currently_starting_move and not slots[chosen_slot].moving
+
 func desc_if_entity_is_moving_or_starting_to_move() -> String:
 	return "entity|If the entity is currently moving or starting to move"
 func cmd_if_entity_is_moving_or_starting_to_move(slots: Dictionary, chosen_slot: int) -> bool:
@@ -609,6 +619,13 @@ func cmd_select_rotated_direction(slots: Dictionary, chosen_slot: int, direction
 	var dir_b: int = resolve_complex_direction(rotate_dir, slots)
 	set_value_slot_as_number(slots, chosen_slot, Utility.facing_rotated(dir_a, dir_b))
 
+func desc_if_is_valid_direction() -> String:
+	return "int|If the number in this slot represents a valid orthogonal direction (0-3)"
+func cmd_if_is_valid_direction(slots: Dictionary, chosen_slot: int) -> bool:
+	if not Commands.slot_is_int(chosen_slot):
+		return false
+	return Utility.is_valid_facing(slots[chosen_slot])
+
 var rand_dir_options: Dictionary = {
 	"any": [0, 1, 2, 3],
 	"horizontal": [0, 1],
@@ -1139,8 +1156,10 @@ func cmd_load_level_within_list(_slots: Dictionary, _slot: int, level_val: Dicti
 
 
 func desc_take_a_turn() -> String:
-	return "entity|The entity takes a turn"
+	return "entity|The entity causes a turn to start (Discrete movement modes)"
 func cmd_take_a_turn(slots: Dictionary, chosen_slot: int) -> void:
+	if not EntityManager.is_discrete_mode():
+		return
 	if Commands.slot_is_entity(chosen_slot):
 		EntityManager.request_move(slots[chosen_slot])
 
@@ -1174,7 +1193,7 @@ func cmd_compare_property(slots: Dictionary, chosen_slot: int, property_name: St
 	return false
 
 func desc_compare_values() -> String:
-	return "string,number|If the value in this slot is [comparison:OrderComparison] [compl_scalar:ComplexScalarInput]"
+	return "string,number|If the numeric value in this slot is [comparison:OrderComparison] [compl_scalar:ComplexScalarInput]"
 func cmd_compare_values(slots: Dictionary, chosen_slot: int, compl_scalar: Dictionary, comparison: String) -> bool:
 	if not Commands.slot_is_value(chosen_slot):
 		push_error("Invalid slot to compare values: %s" % chosen_slot)
@@ -1184,12 +1203,14 @@ func cmd_compare_values(slots: Dictionary, chosen_slot: int, compl_scalar: Dicti
 	return Utility.check_comparison(slot_value, compare_to_val, comparison)
 
 func desc_exists() -> String:
-	return "entity,pos|If there are any entities/tiles selected in the slot"
+	return "entity,pos,string|If there is any entities/tiles/text selected in the slot"
 func cmd_exists(slots: Dictionary, chosen_slot: int) -> bool:
 	var selected = slots[chosen_slot]
 	if Commands.slot_is_entity(chosen_slot):
 		return selected != null
 	elif Commands.slot_is_positions(chosen_slot):
+		return selected.size() > 0
+	elif Commands.slot_is_string(chosen_slot):
 		return selected.size() > 0
 	return false
 
@@ -1517,6 +1538,47 @@ func desc_false() -> Dictionary:
 	}
 func cmd_false(_slots: Dictionary) -> Dictionary:
 	return {"step_result": false}
+
+func desc_number_result() -> Dictionary:
+	return {
+		"non_condition": true,
+		"slot_type_hint": "number,string",
+		"template_text": "Change this step's result to be the numeric value of this slot",
+	}
+func cmd_number_result(slots: Dictionary, chosen_slot: int) -> Dictionary:
+	if not Commands.slot_is_value(chosen_slot):
+		push_error("Invalid slot to get number result from: %s" % chosen_slot)
+		return {"step_result": 0.0}
+	# might be float or int
+	var numeric_val: Variant = get_value_slot_as_number(slots, chosen_slot)
+	return {"step_result": numeric_val}
+
+func desc_text_result() -> Dictionary:
+	return {
+		"non_condition": true,
+		"slot_type_hint": "number,string",
+		"template_text": "Change this step's result to be the text value of this slot",
+	}
+func cmd_text_result(slots: Dictionary, chosen_slot: int) -> Dictionary:
+	if not Commands.slot_is_value(chosen_slot):
+		push_error("Invalid slot to get text result from: %s" % chosen_slot)
+		return {"step_result": ""}
+	return {"step_result": get_value_slot_as_string(slots, chosen_slot)}
+
+func desc_property_result() -> Dictionary:
+	return {
+		"non_condition": true,
+		"slot_type_hint": "entity",
+		"template_text": "Change this step's result to be the value of the [property_name:PropertyInput] property of this entity",
+	}
+func cmd_property_result(slots: Dictionary, chosen_slot: int, property_name: String) -> Dictionary:
+	if not Commands.slot_is_entity(chosen_slot):
+		push_error("Invalid slot to get property result from: %s" % chosen_slot)
+		return {"step_result": false}
+	if not slots[chosen_slot]:
+		return {"step_result": false}
+	return {"step_result": EntityManager.get_entity_prop_with_default(slots[chosen_slot], property_name, false)}
+
 
 func desc_make_entity_dependent() -> String:
 	return "entity|Make the entity dependent on this entity [on_entity_slot:SlotInput:entity]"
@@ -1855,8 +1917,11 @@ func cmd_if_entity_gets_teleported_to_from_rotating(slots: Dictionary, chosen_sl
 		return false
 	if not _slot_has_single_tile_position(slots, from_pos_slot):
 		return false
+	var direction: int = resolve_complex_direction(compl_dir, slots)
+	if direction == -1:
+		direction = -2
 	var from_pos: Vector2i = _single_tile_position_from_slot(slots, from_pos_slot)
-	return _teleport_entity_to(slots, chosen_slot, to_pos_slot, true, from_pos)
+	return _teleport_entity_to(slots, chosen_slot, to_pos_slot, true, from_pos, direction)
 
 
 func desc_if_entity_is_bonded() -> String:
@@ -2353,7 +2418,7 @@ func cmd_stretch_a_large_entity_to_position(slots: Dictionary, chosen_slot: int,
 		prints("no single tile position in slot", target_pos_slot)
 		return
 	var target_pos: Vector2i = get_single_position_from_slot(target_pos_slot, slots)
-	var original_target_pos: = target_pos
+	#var original_target_pos: = target_pos
 	var entity_pos: Vector2i = the_entity.get_moving_position()
 	if the_entity.is_large():
 		var pos_rect: = the_entity.get_pos_rect_at(entity_pos)
@@ -2453,6 +2518,30 @@ func cmd_select_distance_between(slots: Dictionary, chosen_slot: int, pos1_slot:
 	var pos2: Vector2i = get_single_position_from_slot(pos2_slot, slots)
 	var distance: float = Utility.get_distance_of_positions_by_mode(pos1, pos2, distance_mode)
 	set_value_slot_as_number(slots, chosen_slot, distance)
+
+func desc_if_positions_align_orthogonally() -> String:
+	return "pos|If the single position in this slot aligns orthogonally (same row or column) with the single position in [ref_pos_slot:SlotInput:pos,entity]"
+func cmd_if_positions_align_orthogonally(slots: Dictionary, chosen_slot: int, ref_pos_slot: int) -> bool:
+	if not Commands.slot_is_positions(chosen_slot) or not Commands.slot_has_position(ref_pos_slot):
+		push_error("Invalid slots to check if positions align orthogonally: %s, %s" % [chosen_slot, ref_pos_slot])
+		return false
+	if not _slot_has_single_tile_position(slots, chosen_slot) or not _slot_has_single_tile_position(slots, ref_pos_slot):
+		return false
+	var pos_a: Vector2i = _single_tile_position_from_slot(slots, chosen_slot)
+	var pos_b: Vector2i = _single_tile_position_from_slot(slots, ref_pos_slot)
+	return Utility.do_positions_align_orthogonally(pos_a, pos_b)
+
+func desc_if_positions_align_diagonally() -> String:
+	return "pos|If the single position in this slot aligns exactly diagonally with the single position in [ref_pos_slot:SlotInput:pos,entity]"
+func cmd_if_positions_align_diagonally(slots: Dictionary, chosen_slot: int, ref_pos_slot: int) -> bool:
+	if not Commands.slot_is_positions(chosen_slot) or not Commands.slot_has_position(ref_pos_slot):
+		push_error("Invalid slots to check if positions align diagonally: %s, %s" % [chosen_slot, ref_pos_slot])
+		return false
+	if not _slot_has_single_tile_position(slots, chosen_slot) or not _slot_has_single_tile_position(slots, ref_pos_slot):
+		return false
+	var pos_a: Vector2i = _single_tile_position_from_slot(slots, chosen_slot)
+	var pos_b: Vector2i = _single_tile_position_from_slot(slots, ref_pos_slot)
+	return Utility.do_positions_align_diagonally(pos_a, pos_b)
 
 
 func if_entity_has_controller() -> String:
