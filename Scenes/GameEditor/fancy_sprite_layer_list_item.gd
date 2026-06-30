@@ -584,15 +584,19 @@ func _set_current_vis_prop_compare_expression() -> void:
     layer_info['when_prop_expression'] = E.e_wrap(expr)
 
 func _get_comparison_op_and_number_from_expression(expr_data: Dictionary) -> Array:
+    prints("reading expression data", expr_data)
     var default: Array = [">", 1.0]
     if not expr_data or not GGMExpressionBuilder._validate_expr_data(expr_data):
+        prints("invalid or empty expression data")
         return default
     var op_expr = expr_data["expression_tree"]
-    if op_expr.get("type", "") != "operation":
+    if op_expr.get("node", "") != "operation":
+        prints("expression top level is not an operation")
         return default
     var op: String = op_expr.get("op", "")
     var right_expr = op_expr.get("right", {})
-    if not right_expr or right_expr.get("type", "") != "decimal":
+    if not op or not right_expr or right_expr.get("node", "") != "decimal":
+        prints("Unable to get operator, or right operand as a float")
         return default
     
     return [op, right_expr.get("value", 1.0)]
