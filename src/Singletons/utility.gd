@@ -1202,14 +1202,15 @@ func filter_adjacent_positions_of_multiple(pos_arr: Array, pos_check_arr: Array,
 	if not pos_arr or not pos_check_arr:
 		return []
 	
-	for pos in pos_check_arr.duplicate():
+	var check_with_adjacent: Array = pos_check_arr.duplicate()
+	for pos in pos_check_arr:
 		for adj_pos in get_adjacent_with_diagonal(pos, with_diagonal):
-			if adj_pos not in pos_check_arr:
-				pos_check_arr.append(adj_pos)
+			if adj_pos not in check_with_adjacent:
+				check_with_adjacent.append(adj_pos)
 	
 	var filtered_positions: Array[Vector2i] = []
 	for pos in pos_arr:
-		if pos in pos_check_arr:
+		if pos in check_with_adjacent:
 			filtered_positions.append(pos)
 	return filtered_positions
 

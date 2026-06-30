@@ -31,6 +31,7 @@ var current_level_list: String = ""
 var game_creators: Array[String] = []
 
 var checkpoint_save: = {}
+var previous_checkpoint_save: = {}
 var editor_save: = {}
 var loaded_level: = {}
 

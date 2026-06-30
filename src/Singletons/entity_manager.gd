@@ -1406,18 +1406,20 @@ func finish_move(moving_entity, onto_positions: Array) -> void:
         return
     
     var adjacent_entities: = get_entities_next_to_multiple(onto_positions, [], false)
+    var entities_positions: Dictionary[BaseEntity, Array] = {}
+    for e in adjacent_entities:
+        entities_positions[e] = get_all_positions_of_entity(e)
+
     if entity_has_property(moving_entity, "i_finish_move_next_to"):
         for e in adjacent_entities:
-            var e_positions: = get_all_positions_of_entity(e)
-            var this_intersect_pos: Array[Vector2i] = Utility.filter_adjacent_positions_of_multiple(e_positions, onto_positions)
+            var this_intersect_pos: Array[Vector2i] = Utility.filter_adjacent_positions_of_multiple(entities_positions[e], onto_positions)
             resolve_entity_interaction_event("i_finish_move_next_to", moving_entity, e, this_intersect_pos)
     if not moving_entity.active:
         return
     for e in adjacent_entities:
         if not entity_has_property(e, "finish_move_next_to"):
             continue
-        var e_positions: = get_all_positions_of_entity(e)
-        var this_intersect_pos: Array[Vector2i] = Utility.filter_adjacent_positions_of_multiple(onto_positions, e_positions)
+        var this_intersect_pos: Array[Vector2i] = Utility.filter_adjacent_positions_of_multiple(onto_positions, entities_positions[e])
         resolve_entity_interaction_event("finish_move_next_to", e, moving_entity, this_intersect_pos)
 
 func resolve_entity_interaction_old(event_name: String, actor, interactee, at_tile_position: Vector2i, extra_debug: bool = false) -> void:

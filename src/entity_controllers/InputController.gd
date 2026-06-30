@@ -31,6 +31,8 @@ var parent_entity: BaseEntity = null
 var level_load_delay_frames: int = 20
 var load_delay_left: int = 0
 
+var _during_movment_phase: bool = false
+
 var available_options = {
 	"stop_repeat_after_bonk": {"display_name": "Stop repeating movement after being blocked", "type": "bool"},
 	"lock_for_idle_delay_after_bonk": {"display_name": "Prevent movement briefly after being blocked", "type": "bool"},
@@ -173,12 +175,15 @@ func get_move(attempt_num: int = 0):
 	return input_dir
 
 func got_blocked() -> void:
+	if not _during_movment_phase:
+		prints("got blocked but not during movement phase")
+		return
 	if stop_repeat_after_bonk or lock_for_idle_delay_after_bonk:
 		cancelled = true
 		if lock_for_idle_delay_after_bonk:
 			is_delay_locked = true
 			idle_delays_left = maxi(idle_delay_multiplier - 1, 1)
-			prints("multiplier", idle_delay_multiplier, "left", idle_delays_left)
+			prints("locking for", idle_delays_left, "idle delays")
 
 func on_start_move(_facing_dir) -> void:
 	if load_delay_left > 0:
@@ -193,3 +198,10 @@ func on_idle() -> void:
 	if is_delay_locked:
 		cancelled = false
 	is_delay_locked = false
+
+
+func start_of_movement_phase() -> void:
+	_during_movment_phase = true
+
+func end_of_movement_phase() -> void:
+	_during_movment_phase = false

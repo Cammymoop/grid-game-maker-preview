@@ -30,7 +30,9 @@ func set_input_args(new_args: Array) -> void:
 	is_reference_position = false
 	is_rotation_mode = false
 	if new_args[0].is_valid_float() and float(new_args[0]) >= 2:
-		is_rotation_mode = true
+		is_absolute_mode = true
+		change_is_rotation_mode(true)
+		$AbsoluteModeSelect.select_index(0)
 	if new_args[0].strip_edges().length() > 0:
 		is_reference_position = true
 
@@ -95,25 +97,37 @@ func set_value(new_val) -> void:
 	update_relative_selector()
 
 func absolute_changed(new_value: String) -> void:
+	if is_rotation_mode:
+		return
 	if new_value == "Absolute":
 		$SlotSelectorButton.visible = false
 		$EntityRelativeMode.visible = false
 		is_absolute_mode = true
-		if is_rotation_mode:
-			$DirectionSelectorButton.show_relative()
-		else:
-			$DirectionSelectorButton.show_absolute()
+		$DirectionSelectorButton.show_absolute()
 	else:
 		$SlotSelectorButton.visible = true
 		$EntityRelativeMode.visible = true
 		is_absolute_mode = false
 		$DirectionSelectorButton.show_relative()
 
+func change_is_rotation_mode(new_is_rotation_mode: bool) -> void:
+	is_rotation_mode = new_is_rotation_mode
+	if is_rotation_mode:
+		is_absolute_mode = false
+		$SlotSelectorButton.visible = false
+		$EntityRelativeMode.visible = false
+		$AbsoluteModeSelect.visible = false
+		$DirectionSelectorButton.show_relative.call_deferred()
+	else:
+		$AbsoluteModeSelect.visible = true
+		absolute_changed($AbsoluteModeSelect.selected_value)
+	
+	update_relative_selector()
+
 func slot_changed(_new_slot_id: int) -> void:
 	update_relative_selector()
 
 func update_relative_selector() -> void:
-	$EntityRelativeMode.visible = not is_rotation_mode
 	if is_rotation_mode:
 		return
 	if Commands.slot_is_positions($SlotSelectorButton.current_slot_id):

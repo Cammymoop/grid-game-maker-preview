@@ -217,11 +217,9 @@ func find_entity_to_follow() -> void:
 	var next_to_follow: = _find_entity_to_follow()
 	target_entity = next_to_follow
 	if not target_entity:
-		prints("find entity: no target")
 		#print_stack()
 		no_more_targets.emit()
 	else:
-		prints("find entity: found target")
 		camera_target_changed.emit(target_entity)
 
 func _find_entity_to_follow() -> BaseEntity:
@@ -259,10 +257,8 @@ func on_state_loaded() -> void:
 	if not active:
 		return
 	if target_entity and is_instance_valid(target_entity):
-		prints("state loaded, camera active, target is ready")
 		teleport(get_target_iterpolated_pos())
 	else:
-		prints("state loaded, camera active, looking for target")
 		find_entity_to_follow()
 
 func get_target_iterpolated_pos() -> Vector2:

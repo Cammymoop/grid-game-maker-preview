@@ -305,6 +305,8 @@ func sprite_process(delta_time: float) -> void:
 	sprite.sprite_process(delta_time)
 
 func entity_process_starting_actions() -> void:
+	if controller and controller.has_method("start_of_movement_phase"):
+		controller.start_of_movement_phase()
 	if not moving:
 		var max_intentions: int = get_max_move_intentions()
 		if max_intentions > 0:
@@ -343,6 +345,8 @@ func entity_process_starting_actions() -> void:
 				if is_square_aspect():
 					set_facing(first_attempt_v_facing)
 				set_move_facing(first_attempt_move_facing)
+	if controller and controller.has_method("end_of_movement_phase"):
+		controller.end_of_movement_phase()
 
 func entity_process_idle_actions() -> void:
 	if has_idle_update_conditional:

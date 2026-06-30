@@ -132,7 +132,7 @@ func make_slots(owning_entity: BaseEntity, target_entity: BaseEntity, tile_posit
     var slots = empty_slots()
     slots[Slot.RED] = owning_entity
     slots[Slot.BLUE] = target_entity
-    slots[Slot.GREY] = tile_positions
+    slots[Slot.GREY] = tile_positions.duplicate()
     if owning_entity and owning_entity.friend_instance_id > -1:
         slots[Slot.PINK] = EntityManager.get_instance(owning_entity.friend_instance_id)
     

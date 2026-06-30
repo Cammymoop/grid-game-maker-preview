@@ -613,7 +613,7 @@ func cmd_select_direction(slots: Dictionary, chosen_slot: int, complex_dir: Dict
 	set_value_slot_as_number(slots, chosen_slot, resolve_complex_direction(complex_dir, slots))
 
 func desc_select_rotated_direction() -> String:
-	return "int|<= Select the direction [direction:DirectionInput:1] rotated by [rotate_dir:DirectionInput:1]"
+	return "int|<= Select the direction [direction:DirectionInput:1] rotated by [rotate_dir:DirectionInput:2]"
 func cmd_select_rotated_direction(slots: Dictionary, chosen_slot: int, direction: Dictionary, rotate_dir: Dictionary) -> void:
 	var dir_a: int = resolve_complex_direction(direction, slots)
 	var dir_b: int = resolve_complex_direction(rotate_dir, slots)
@@ -952,6 +952,7 @@ func cmd_a_swap_tiles(slots: Dictionary, chosen_slot: int, a_name: String, b_nam
 func desc_a_set_tiles() -> String:
 	return "pos|Change the tile(s) here to [tile_name:TileNameInput]"
 func cmd_a_set_tiles(slots: Dictionary, chosen_slot: int, tile_name: String) -> void:
+	prints("setting tiles to: ", tile_name, " at ", slots[chosen_slot])
 	MapManager.replace_tiles_at_array(slots[chosen_slot], MapManager.get_tile_index(tile_name))
 
 func desc_erase_tiles() -> String:
