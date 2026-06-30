@@ -1,5 +1,6 @@
 extends Node
 
+# Really simple whitelisted expression builder to make godot expressions in a way that avoids arbitrary code execution exploits from unknown data
 
 var expression_cache: Dictionary[StringName, Dictionary] = {}
 
@@ -12,10 +13,12 @@ const OPERATORS: Array[String] = [
     "+", "-", "*", "**", "/", "%",
     "&&", "||",
     "in", "and", "or",
+    
+    "&", "|", "^", "<<", ">>",
 ]
 
 const UNARY_OPERATORS: Array[String] = [
-    "not", 
+    "not", "~"
 ]
 
 const CONSTANTS: Array[String] = [
@@ -24,9 +27,9 @@ const CONSTANTS: Array[String] = [
 
 const UNARY_FUNCTIONS: Array[String] = [
     "abs", "acos", "asin", "atan", "ceil", "cos", "deg_to_rad", "exp", "floor", "is_finite", "is_nan", "is_zero_approx", "log",
-    "nearest_po2", "round", "sign", "sin", "sqrt", "tan",
+    "nearest_po2", "rad_to_deg", "round", "roundf", "roundi", "sign", "sin", "sqrt", "tan",
 
-    "str", "int", "float"
+    "str", "int", "float",
 ]
 
 const TWO_ARG_FUNCTIONS: Array[String] = [
@@ -35,12 +38,12 @@ const TWO_ARG_FUNCTIONS: Array[String] = [
 ]
 
 const THREE_ARG_FUNCTIONS: Array[String] = [
-    "clamp", "clampf", "clampi", "inverse_lerp", "lerp", "lerp_angle", "max", "min", "move_toward", "rotate_toward",
+    "clamp", "clampf", "clampi", "inverse_lerp", "lerp", "lerp_angle", "lerpf", "max", "min", "move_toward", "rotate_toward",
     "smoothstep", "wrap", "wrapf", "wrapi",
 ]
 
 
-func get_godot_expression_string(unsafe_expr_string: StringName, variable_names: Array = []) -> String:
+func get_safe_godot_expression_string(unsafe_expr_string: StringName, variable_names: Array = []) -> String:
     if unsafe_expr_string in expression_cache:
         return _make_godot_expression(expression_cache[unsafe_expr_string])
     
@@ -104,6 +107,8 @@ func _build_basic_expression(expr: Dictionary, variable_names: Array[String] = [
     return ggm_expression
 
 func _basic_expression_build_recursive(sub_expression: Dictionary, vars: Array[String] = []) -> String:
+    if not sub_expression:
+        return ""
     var node_type: = _dict_get_string(sub_expression, "node")
     if node_type == "decimal":
         return str(_dict_get_float(sub_expression, "value"))
@@ -161,7 +166,66 @@ func _basic_expression_build_recursive(sub_expression: Dictionary, vars: Array[S
                 return function_name + "(" + arg1 + ", " + arg2 + ", " + arg3 + ")"
         return ""
     return ""
-            
+
+
+func e_wrap(expr: Dictionary) -> Dictionary:
+    return {
+        "ggm-expr": "basic_expr",
+        "ggm-expr-version": 1,
+        "expression_tree": expr,
+    }
+
+func e_val(literal_value: Variant) -> Dictionary:
+    if typeof(literal_value) == TYPE_FLOAT:
+        return { "node": "decimal", "value": literal_value, }
+    elif typeof(literal_value) == TYPE_INT:
+        return { "node": "integer", "value": literal_value, }
+    elif typeof(literal_value) == TYPE_BOOL:
+        return { "node": "bool", "value": literal_value, }
+    elif typeof(literal_value) == TYPE_STRING:
+        return { "node": "string", "value": str(literal_value), }
+    else:
+        push_error("Unsupported value type: %s" % [type_string(typeof(literal_value))])
+        return {}
+
+func e_var(var_name: String) -> Dictionary:
+    return { "node": "variable", "name": var_name, }
+
+func e_const(constant_name: String) -> Dictionary:
+    if constant_name not in CONSTANTS:
+        push_error("Invalid constant name: %s" % constant_name)
+        return {}
+    return { "node": "constant", "name": constant_name, }
+
+func e_not(sub_expr: Dictionary) -> Dictionary:
+    return { "node": "unary_op", "op": "not", "operand": sub_expr, }
+
+func e_bit_not(sub_expr: Dictionary) -> Dictionary:
+    return { "node": "unary_op", "op": "~", "operand": sub_expr, }
+
+func e_op(left_expr: Dictionary, op: String, right_expr: Dictionary) -> Dictionary:
+    if op not in OPERATORS:
+        push_error("Invalid operator: %s" % op)
+        return {}
+    return { "node": "operation", "op": op, "left": left_expr, "right": right_expr, }
+
+func e_func1(func_name: String, arg: Dictionary) -> Dictionary:
+    if func_name not in UNARY_FUNCTIONS:
+        push_error("Invalid unary function name: %s" % func_name)
+        return {}
+    return { "node": "unary_func", "name": func_name, "arg": arg, }
+
+func e_func2(func_name: String, arg1: Dictionary, arg2: Dictionary) -> Dictionary:
+    if func_name not in TWO_ARG_FUNCTIONS:
+        push_error("Invalid two-argument function name: %s" % func_name)
+        return {}
+    return { "node": "two_func", "name": func_name, "arg1": arg1, "arg2": arg2, }
+
+func e_func3(func_name: String, arg1: Dictionary, arg2: Dictionary, arg3: Dictionary) -> Dictionary:
+    if func_name not in THREE_ARG_FUNCTIONS:
+        push_error("Invalid three-argument function name: %s" % func_name)
+        return {}
+    return { "node": "three_func", "name": func_name, "arg1": arg1, "arg2": arg2, "arg3": arg3, }
 
 
 func _dict_get_dict(dict: Dictionary, key: String) -> Dictionary:

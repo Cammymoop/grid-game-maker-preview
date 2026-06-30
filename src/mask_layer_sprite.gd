@@ -446,18 +446,18 @@ func create_and_add_nodes_for_layer(layer_info: Dictionary, layer_index: int) ->
     
     if layer_info.get("when_property", ""):
         var when_property_name: String = layer_info["when_property"]
-        if layer_info.get("when_prop_expression", ""):
+        if layer_info.get("when_prop_expression", {}):
             var expr: Expression = Expression.new()
-            var expr_str: String = layer_info["when_prop_expression"]
-            if expr_str == "falsey":
-                expr_str = "V == 0"
-            var err: = expr.parse(expr_str, ["V"])
+            var input_expr_str: String = GGMExpressionBuilder.make_expression_data_str(layer_info["when_prop_expression"])
+            var safe_expr_str: String = GGMExpressionBuilder.get_safe_godot_expression_string(input_expr_str, ["V"])
+            var err: = expr.parse(safe_expr_str, ["V"])
             if err != OK:
-                push_error("Failed to parse expression: %s" % layer_info["when_prop_expression"])
+                push_error("Failed to parse expression: %s" % safe_expr_str)
                 return
             _add_prop_upate_callable(when_property_name, show_hide_layer_expression.bind(expr, main_layer_node))
         else:
-            _add_prop_upate_callable(when_property_name, show_hide_layer.bind(main_layer_node))
+            var is_truthy: bool = not layer_info.get("when_prop_falsey", false)
+            _add_prop_upate_callable(when_property_name, show_hide_layer.bind(main_layer_node, is_truthy))
 
 
     var base_mod_color: Color = Utility.get_dict_color(layer_info, "mod_color", Color.WHITE)
@@ -770,8 +770,8 @@ func set_digit_display_number(new_number: Variant, digit_display: DigitDisplay) 
     else:
         digit_display.set_number(0)
 
-func show_hide_layer(new_prop_value: Variant, layer_node: Node2D) -> void:
-    layer_node.set_meta("property_visible", Utility.truthy(new_prop_value))
+func show_hide_layer(new_prop_value: Variant, layer_node: Node2D, is_truthy: bool) -> void:
+    layer_node.set_meta("property_visible", Utility.truthy(new_prop_value) == is_truthy)
     update_layer_visible(layer_node)
 
 func show_hide_layer_expression(new_prop_value: Variant, expression: Expression, layer_node: Node2D) -> void:

@@ -869,22 +869,67 @@
             "mode": "normal",
             "texture": 3.0,
             "tex_index": 32.0,
-            "when_prop_expression": "V <= 0.0",
-            "when_property": "variant"
+            "when_property": "variant",
+            "when_prop_expression": {
+              "ggm-expr": "basic_expr",
+              "ggm-expr-version": 1,
+              "expression_tree": {
+                "node": "operation",
+                "op": "<=",
+                "left": {
+                  "node": "variable",
+                  "name": "V"
+                },
+                "right": {
+                  "node": "decimal",
+                  "value": 0.0
+                }
+              }
+            }
           },
           {
             "mode": "normal",
             "texture": 3.0,
             "tex_index": 34.0,
             "when_property": "variant",
-            "when_prop_expression": "V == 1.0"
+            "when_prop_expression": {
+              "ggm-expr": "basic_expr",
+              "ggm-expr-version": 1,
+              "expression_tree": {
+                "node": "operation",
+                "op": "==",
+                "left": {
+                  "node": "variable",
+                  "name": "V"
+                },
+                "right": {
+                  "node": "decimal",
+                  "value": 1.0
+                }
+              }
+            }
           },
           {
             "mode": "normal",
             "texture": 3.0,
             "tex_index": 33.0,
             "when_property": "variant",
-            "when_prop_expression": "V == 2.0"
+            "when_prop_expression": {
+              "ggm-expr": "basic_expr",
+              "ggm-expr-version": 1,
+              "expression_tree": {
+                "node": "operation",
+                "op": "==",
+                "left": {
+                  "node": "variable",
+                  "name": "V"
+                },
+                "right": {
+                  "node": "decimal",
+                  "value": 2.0
+                }
+              }
+            }
           },
           {
             "mode": "normal",
@@ -895,7 +940,22 @@
               3.0,
               0.0
             ],
-            "when_prop_expression": "V >= 3.0"
+            "when_prop_expression": {
+              "ggm-expr": "basic_expr",
+              "ggm-expr-version": 1,
+              "expression_tree": {
+                "node": "operation",
+                "op": ">=",
+                "left": {
+                  "node": "variable",
+                  "name": "V"
+                },
+                "right": {
+                  "node": "decimal",
+                  "value": 3.0
+                }
+              }
+            }
           }
         ]
       }
@@ -1162,14 +1222,14 @@
       "name": "Door Open",
       "volume": 0.08,
       "pitch": 0.876486940230357,
-      "ps_seed": 593300
+      "ps_seed": 593300.0
     },
     {
       "type": "ps_sfx",
       "name": "Checkpoint",
       "volume": 1.0,
       "pitch": 0.8388042055587,
-      "ps_seed": 344809
+      "ps_seed": 344809.0
     },
     {
       "type": "sample",
@@ -1197,14 +1257,14 @@
       "name": "Floating",
       "volume": 0.26,
       "pitch": 1.62156122939933,
-      "ps_seed": 905903
+      "ps_seed": 905903.0
     },
     {
       "type": "ps_sfx",
       "name": "Pusher",
       "volume": 0.5,
       "pitch": 1.02221541327848,
-      "ps_seed": 997105
+      "ps_seed": 997105.0
     },
     {
       "type": "sample",
@@ -1225,7 +1285,7 @@
       "name": "Win 2",
       "volume": 1.36,
       "pitch": 0.688301590959563,
-      "ps_seed": 203909
+      "ps_seed": 203909.0
     },
     {
       "type": "sample",
@@ -1246,14 +1306,14 @@
       "name": "Gate Open",
       "volume": 1.19,
       "pitch": 1.0,
-      "ps_seed": 83604
+      "ps_seed": 83604.0
     },
     {
       "type": "ps_sfx",
       "name": "Gate Close",
       "volume": 0.38,
       "pitch": 1.19217332647245,
-      "ps_seed": 905203
+      "ps_seed": 905203.0
     }
   ]
 }

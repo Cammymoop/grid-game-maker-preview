@@ -18,6 +18,7 @@ static var texture_picker_scene: = preload("res://Scenes/GameEditor/BetterTextur
 
 const MODE_NORMAL: = "normal"
 const MODE_DIGITS: = "digits"
+#const MODE_PARTICLES: = "particles"
 const MODE_EMPTY: = "empty"
 
 const LayerModeOptions: Dictionary[String, String] = {
@@ -578,31 +579,30 @@ func _set_current_vis_prop_compare_expression() -> void:
     var comparison_op_str: = vis_prop_comparison_selector.get_value()
     if comparison_op_str == "=":
         comparison_op_str = "=="
-    layer_info['when_prop_expression'] = "V %s %s" % [comparison_op_str, str(compare_to_num)]
+    var E = GGMExpressionBuilder
+    var expr = E.e_op(E.e_var("V"), comparison_op_str, E.e_val(compare_to_num))
+    layer_info['when_prop_expression'] = E.e_wrap(expr)
 
-func _get_comparison_op_and_number_from_expression(expr_str: String) -> Array:
-    if not expr_str or not expr_str.begins_with("V "):
-        return [">", 1.0]
-    expr_str = expr_str.trim_prefix("V ")
-    var found_op: String = ""
-    # Make sure to check for longer versions before prefixes of them (<= before <)
-    for op in [">=", "<=", "<", ">", "==", "!="]:
-        if expr_str.begins_with(op):
-            found_op = op
-            break
-    if not found_op:
-        return [">", 1.0]
+func _get_comparison_op_and_number_from_expression(expr_data: Dictionary) -> Array:
+    var default: Array = [">", 1.0]
+    if not expr_data or not GGMExpressionBuilder._validate_expr_data(expr_data):
+        return default
+    var op_expr = expr_data["expression_tree"]
+    if op_expr.get("type", "") != "operation":
+        return default
+    var op: String = op_expr.get("op", "")
+    var right_expr = op_expr.get("right", {})
+    if not right_expr or right_expr.get("type", "") != "decimal":
+        return default
     
-    var the_rest: = expr_str.trim_prefix(found_op).strip_edges()
-    if not the_rest.is_valid_float():
-        return [found_op, 1.0]
-    return [found_op, float(the_rest)]
+    return [op, right_expr.get("value", 1.0)]
 
 func _update_vis_prop_inputs_from_layer_info() -> void:
     var vis_type: = _get_vis_type_from_layer_info()
     Utility.opbtn_select_id(vis_prop_type_selector, vis_type)
     if vis_type == VIS_PROP_TYPE_NUMBER_COMPARE:
-        var op_and_num: = _get_comparison_op_and_number_from_expression(layer_info.get("when_prop_expression", ""))
+        var expr_data: Dictionary = layer_info.get("when_prop_expression", {})
+        var op_and_num: = _get_comparison_op_and_number_from_expression(expr_data)
         vis_prop_comparison_selector.set_value(op_and_num[0])
         vis_prop_compare_number_input.set_value(str(op_and_num[1]))
 
@@ -610,21 +610,24 @@ func _update_vis_prop_inputs_from_layer_info() -> void:
     vis_prop_compare_number_input.visible = vis_type == VIS_PROP_TYPE_NUMBER_COMPARE
 
 func _get_vis_type_from_layer_info() -> int:
-    if not layer_info.get("when_prop_expression", ""):
-        return VIS_PROP_TYPE_TRUTHY
-    if layer_info["when_prop_expression"] == "falsey":
+    if layer_info.get("when_prop_expression", {}):
+        return VIS_PROP_TYPE_NUMBER_COMPARE
+    if layer_info.get("when_prop_falsey", false):
         return VIS_PROP_TYPE_FALSEY
-    return VIS_PROP_TYPE_NUMBER_COMPARE
+    return VIS_PROP_TYPE_TRUTHY
 
 func on_vis_prop_type_selected(index: int) -> void:
     var new_vis_prop_type: = vis_prop_type_selector.get_item_id(index)
     
     if new_vis_prop_type == VIS_PROP_TYPE_NUMBER_COMPARE:
+        layer_info.erase('when_prop_falsey')
         _set_current_vis_prop_compare_expression()
     elif new_vis_prop_type == VIS_PROP_TYPE_FALSEY:
-        layer_info["when_prop_expression"] = "falsey"
+        layer_info.erase('when_prop_expression')
+        layer_info["when_prop_falsey"] = true
     else:
         layer_info.erase('when_prop_expression')
+        layer_info.erase('when_prop_falsey')
     changed.emit()
     
     refresh_ui()

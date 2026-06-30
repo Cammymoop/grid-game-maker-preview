@@ -276,6 +276,7 @@ selected = 2
 layout_mode = 2
 min_value = -10000.0
 max_value = 10000.0
+custom_step = true
 
 [node name="VisPropTypeSelect" type="OptionButton" parent="HBoxContainer/PanelContainer/HBoxContainer/SubsectionContainer/VisibilitySection/VisibilityProp/HBoxContainer" unique_id=1563762346]
 layout_mode = 2

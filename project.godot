@@ -44,7 +44,7 @@ ImportZipExtractor="*uid://bg40rb011v4ol"
 ImporterExporter="*uid://cff2g1aawe1xa"
 CurrentClipboard="*res://src/Singletons/current_clipboard.gd"
 SfxPlayer="*uid://dm1nxrmglvk2b"
-GgmExpressionBuilder="*uid://ce1e0lc4gdx8t"
+GGMExpressionBuilder="*uid://ce1e0lc4gdx8t"
 
 [debug]
 
