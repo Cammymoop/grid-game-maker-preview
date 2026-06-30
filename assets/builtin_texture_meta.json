@@ -46,5 +46,13 @@
 			"size_in_tiles": [6, 6],
 			"border": [0, 0],
 			"separation": [0, 0]
+		},
+	"oversize_tiles_2.png":
+		{
+			"size": [264, 264],
+			"tile_size": [44, 44],
+			"size_in_tiles": [6, 6],
+			"border": [0, 0],
+			"separation": [0, 0]
 		}
 }

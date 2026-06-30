@@ -552,7 +552,7 @@ func update_entity_definition(entity_id: int, entity_definition: Dictionary) -> 
 
 func update_entity_def_properties(entity_id: int, properties: Dictionary) -> void:
     if not entity_id in entity_defs:
-        push_error("ERROR tried to update non-existing entity: " + str(entity_id))
+        push_error("ERROR tried to update properties of non-existing entity: " + str(entity_id))
         return
     entity_defs[entity_id]["properties"] = properties.duplicate_deep()
     refresh_definition()

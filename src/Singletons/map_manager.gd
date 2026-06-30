@@ -717,6 +717,13 @@ func update_tile_definition(tile_id: int, definition: Dictionary) -> void:
     tile_defs[tile_id] = definition.duplicate_deep()
     refresh_definition()
 
+func update_tile_def_properties(tile_id: int, properties: Dictionary) -> void:
+    if not tile_id in tile_defs:
+        push_error("ERROR tried to update properties of non-existing tile: " + str(tile_id))
+        return
+    tile_defs[tile_id]["properties"] = properties.duplicate_deep()
+    refresh_definition()
+
 func make_new_tile(new_tile_definition: Dictionary) -> int:
     new_tile_definition = clean_for_existing_assets(new_tile_definition)
     var new_id: = max_tile_index() + 1
