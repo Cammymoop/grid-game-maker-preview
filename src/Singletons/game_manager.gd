@@ -789,6 +789,9 @@ func new_museum_level():
 func change_scene(new_scene: String):
 	if cur_scene != "Loading":
 		show_scene_transition()
+		if new_scene != "Menu" and is_current_game_saved():
+			if FilesManager.get_default_game() != get_game_name():
+				FilesManager.save_default_game(get_game_name())
 	
 	if not new_scene in scenes:
 		print("I dont know about scene " + new_scene)

@@ -723,7 +723,12 @@ alignment = 1
 layout_mode = 2
 size_flags_horizontal = 3
 
+[node name="SpaceHolder" type="Control" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/HBoxContainer6" unique_id=97795727]
+layout_mode = 2
+size_flags_horizontal = 3
+
 [node name="SetDefault" type="Button" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/HBoxContainer6" unique_id=129913275]
+visible = false
 custom_minimum_size = Vector2(160, 0)
 layout_mode = 2
 size_flags_vertical = 4

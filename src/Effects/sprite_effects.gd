@@ -144,7 +144,7 @@ const BUMP_EFFECTS: Dictionary[String, Dictionary] = {
 }
 
 static func set_bump_effect_params(effect_name: String, effect_params: Dictionary, effect_info: Dictionary) -> void:
-    prints("setting bump effect params: %s, %s, %s" % [effect_name, effect_params, effect_info])
+    #prints("setting bump effect params: %s, %s, %s" % [effect_name, effect_params, effect_info])
     if not effect_name in BUMP_EFFECTS:
         return
     if effect_params.has("color"):
