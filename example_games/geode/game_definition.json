@@ -24,7 +24,7 @@
     {
       "type": "builtin",
       "name": "oversize_tiles.png",
-      "texture_id": 4,
+      "texture_id": 4.0,
       "filter": false
     }
   ],
@@ -111,8 +111,7 @@
           }
         ],
         "cutter": true,
-        "blocks": true,
-        "move-speed": 6
+        "blocks": true
       },
       "groups": [
         "Player"
@@ -120,10 +119,10 @@
       "controller_options": {
         "stop_repeat_after_bonk": false,
         "lock_for_idle_delay_after_bonk": true,
-        "auto_req_turn": false,
+        "auto_req_turn": true,
         "allow_wait": false,
         "only_rcv_when_cam": true,
-        "idle_delay_multiplier": 4.0
+        "idle_delay_multiplier": 2
       }
     },
     "1": {
@@ -247,8 +246,7 @@
           ],
           "when always": []
         },
-        "geode": true,
-        "move-speed": 6
+        "geode": true
       }
     },
     "5": {
@@ -276,17 +274,16 @@
         "breaker": true,
         "cutter": true,
         "blocks": true,
-        "player": true,
-        "move-speed": 6
+        "player": true
       },
       "controller": "InputController",
       "controller_options": {
         "stop_repeat_after_bonk": false,
         "lock_for_idle_delay_after_bonk": true,
-        "auto_req_turn": false,
+        "auto_req_turn": true,
         "allow_wait": false,
         "only_rcv_when_cam": true,
-        "idle_delay_multiplier": 2.0
+        "idle_delay_multiplier": 2
       }
     },
     "11": {
@@ -376,7 +373,8 @@
       "lines_scroll_angle": 308.0
     },
     "action_signal_sent_to": "camera_target",
-    "movement_mode": 2.0
+    "movement_mode": 2.0,
+    "entity_move_speed": 9.0
   },
   "game_metadata": {
     "credits": {

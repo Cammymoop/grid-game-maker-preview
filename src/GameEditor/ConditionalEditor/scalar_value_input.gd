@@ -34,6 +34,9 @@ func _ready() -> void:
     
     value_input.focus_exited.connect(on_value_input_focus_out)
 
+func set_tooltip(new_tooltip: String) -> void:
+    value_input.tooltip_text = new_tooltip
+
 func update_input_settings() -> void:
     value_input.min_value = min_value
     value_input.max_value = max_value

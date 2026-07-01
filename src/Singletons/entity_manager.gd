@@ -59,7 +59,7 @@ var controller_frame: bool = true
 var movement_mode: int
 
 const DEFAULT_MOVE_SPEED: float = 6
-var default_teleport_duration: float = 1/6.0
+const DEFAULT_TELEPORT_DURATION: float = 1/6.0
 var default_idle_delay: float = 1/10.0
 var idle_delay_frames: int = -1
 
@@ -448,6 +448,12 @@ func update_movement_mode():
     else:
         default_move_interp_style = BaseEntity.read_move_interp_style_string(def_move_interp_string)
     
+    var def_tele_interp_string: = GameManager.get_game_setting("default_teleport_interp", "") as String
+    if not def_tele_interp_string:
+        default_teleport_interp_style = Utility.PosInterpStyle.NONE
+    else:
+        default_teleport_interp_style = BaseEntity.read_move_interp_style_string(def_tele_interp_string)
+    
     #print_debug("MOVEMENT MODE is now " + GameManager.describe_movement_mode(movement_mode))
 
 func fix_string_keys():
@@ -533,6 +539,7 @@ func request_move(entity: BaseEntity, request_frames: int = -1) -> void:
             requested_turn_frames = entity.get_steps_per_tile()
         else:
             requested_turn_frames = idle_delay_frames
+    prints("entity:", entity, "requested move, on frame", frame_counter)
     turn_requested = true
 
 func has_instance(instance_id: int) -> bool:
@@ -1850,7 +1857,8 @@ func get_default_spt() -> int:
     return BaseEntity._speed_to_spt(get_default_move_speed())
 
 func get_default_tele_steps() -> int:
-    return ceili(default_teleport_duration * GameManager.get_full_tick_rate())
+    var def_duration: float = GameManager.get_game_setting("default_teleport_duration", DEFAULT_TELEPORT_DURATION)
+    return ceili(def_duration * GameManager.get_full_tick_rate())
 
 func switch_entities_preview_mode(enable_preview: bool) -> void:
     prints("switching entities preview mode to ", enable_preview)

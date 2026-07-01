@@ -500,6 +500,7 @@ func _on_PropertyList_item_activated(index):
 func update_controller_options(the_popup):
     the_definition["controller_options"] = the_popup.option_values.duplicate()
     
+    on_info_changed()
     the_popup.queue_free()
 
 func _on_ControllerOptionsShow_pressed():

@@ -2,6 +2,8 @@ extends Node
 
 var move_mode = "direction"
 
+var ignore_discrete_turns: = false
+
 # Options
 var stop_repeat_after_bonk: = true
 var lock_for_idle_delay_after_bonk: = true
@@ -130,20 +132,21 @@ func _physics_process(_delta):
 	
 	is_repeat = not is_pressed
 	
-	if not EntityManager.movements_enabled:
-		if auto_req_turn and parent_entity and not parent_entity.moving:
+	if not EntityManager.movements_enabled and parent_entity and not parent_entity.moving:
+		if auto_req_turn:
 			var left_xor_right: = (left_held or right_held) and not (left_held and right_held)
 			var up_xor_down: = (up_held or down_held) and not (up_held and down_held)
-			if up_xor_down or left_xor_right:
+			if up_xor_down or left_xor_right or not is_repeat:
 				EntityManager.request_move(parent_entity)
 			elif allow_wait and Input.is_action_just_pressed("wait_turn"):
 				EntityManager.request_move(parent_entity)
 		elif allow_wait and Input.is_action_just_pressed("wait_turn"):
-			if parent_entity and not parent_entity.moving:
-				is_wait = true
-				EntityManager.request_move(parent_entity)
+			is_wait = true
+			EntityManager.request_move(parent_entity)
 
 func get_move(attempt_num: int = 0):
+	if not ignore_discrete_turns and not EntityManager.controller_frame:
+		return "none"
 	if only_receive_when_camera_target and not GameManager.is_entity_followed_by_camera(parent_entity):
 		return "none"
 	if is_wait or attempt_num > 0 or (auto_req_turn and not EntityManager.controller_frame):
@@ -172,6 +175,9 @@ func get_move(attempt_num: int = 0):
 	
 	if input_dir == "none":
 		is_repeat = false
+
+	if not auto_req_turn and not EntityManager.controller_frame and input_dir != "none":
+		prints("moving when I'm not allowed to")
 	return input_dir
 
 func got_blocked() -> void:

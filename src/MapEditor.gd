@@ -937,6 +937,10 @@ func on_level_edit_mode_changed() -> void:
 
 
 func load_level_in_list(level_name: String, level_list_name: String) -> void:
+	if not has_edited_something:
+		_confirmed_load_level_in_list(level_name, level_list_name)
+		return
+
 	var confirm_text: = ""
 	#if GameManager.loaded_is_autosave:
 		#confirm_text = ""

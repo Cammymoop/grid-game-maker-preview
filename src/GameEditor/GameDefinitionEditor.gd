@@ -18,12 +18,14 @@ var invalid_field_color = Color(0.7, 0.4, 0.4)
 @export var edit_game_dir_button: Button
 
 @export var move_interp_option_picker: OptionButton
+@export var tele_interp_option_picker: OptionButton
 @export var action_signal_sent_to_option_picker: OptionButton
 @export var turn_animation_option_picker: OptionButton
 
 @export var def_dying_eff_picker: OptionButton
 
 @export var default_move_speed_input: ScalarValueInput
+@export var default_teleport_duration_input: ScalarValueInput
 
 @export var auto_reload_checkpoint_for_no_cam_focus_toggle: CheckButton
 
@@ -111,6 +113,10 @@ func _ready():
 	move_interp_option_picker.clear()
 	for intertp_id in Utility.POS_INTERP_STRINGS.keys():
 		move_interp_option_picker.add_item(Utility.POS_INTERP_STRINGS[intertp_id], intertp_id)
+	
+	tele_interp_option_picker.clear()
+	for intertp_id in Utility.POS_INTERP_STRINGS.keys():
+		tele_interp_option_picker.add_item(Utility.POS_INTERP_STRINGS[intertp_id], intertp_id)
 
 	move_interp_option_picker.item_selected.connect(on_move_interp_option_picked)
 	var cur_interp: = GameManager.get_game_setting("default_move_interp", "") as String
@@ -119,11 +125,25 @@ func _ready():
 		interp_id = BaseEntity.read_move_interp_style_string(cur_interp)
 	Utility.opbtn_select_id(move_interp_option_picker, interp_id)
 	
+	tele_interp_option_picker.item_selected.connect(on_tele_interp_option_picked)
+	var cur_tele_interp: = GameManager.get_game_setting("default_teleport_interp", "") as String
+	var tele_interp_id: int = Utility.PosInterpStyle.CONTINUOUS_LINEAR
+	if cur_tele_interp:
+		tele_interp_id = BaseEntity.read_move_interp_style_string(cur_tele_interp)
+	Utility.opbtn_select_id(tele_interp_option_picker, tele_interp_id)
+	
 	turn_animation_option_picker.item_selected.connect(on_turn_animation_option_picked)
 	Utility.opbtn_select_text(turn_animation_option_picker, GameManager.get_game_setting("default_turn_animation", "quick"))
 	
 	default_move_speed_input.set_value(GameManager.get_game_setting("entity_move_speed", EntityManager.DEFAULT_MOVE_SPEED))
 	default_move_speed_input.value_changed.connect(on_default_move_speed_changed)
+	
+	var def_raw: = EntityManager.DEFAULT_TELEPORT_DURATION
+	var tps: = GameManager.get_full_tick_rate()
+	var def_tele_rounded: float = floorf((ceilf(def_raw * tps) / tps) * 100) / 100
+	default_teleport_duration_input.set_value(GameManager.get_game_setting("default_teleport_duration", def_tele_rounded))
+	default_teleport_duration_input.value_changed.connect(on_default_teleport_duration_changed)
+	refresh_teleport_duration_tooltip()
 	
 	action_signal_sent_to_option_picker.item_selected.connect(on_action_signal_sent_to_option_picked)
 	var cur_action_signal_sent_to: = GameManager.get_game_setting("action_signal_sent_to", "all_entities") as String
@@ -274,6 +294,11 @@ func on_move_interp_option_picked(index: int) -> void:
 	GameManager.set_game_setting("default_move_interp", BaseEntity.get_move_interp_style_string(interp_style))
 	GameManager.game_settings_changed.emit()
 
+func on_tele_interp_option_picked(index: int) -> void:
+	var interp_style: = tele_interp_option_picker.get_item_id(index) as Utility.PosInterpStyle
+	GameManager.set_game_setting("default_teleport_interp", BaseEntity.get_move_interp_style_string(interp_style))
+	GameManager.game_settings_changed.emit()
+
 func on_action_signal_sent_to_option_picked(index: int) -> void:
 	var item_text: = action_signal_sent_to_option_picker.get_item_text(index)
 	GameManager.set_game_setting("action_signal_sent_to", item_text)
@@ -396,6 +421,16 @@ func _export_destination_picked(path: String, file_dialog: FileDialog) -> void:
 func on_default_move_speed_changed(value: float) -> void:
 	GameManager.set_game_setting("entity_move_speed", value)
 	GameManager.game_settings_changed.emit()
+
+func on_default_teleport_duration_changed(value: float) -> void:
+	GameManager.set_game_setting("default_teleport_duration", value)
+	GameManager.game_settings_changed.emit()
+	refresh_teleport_duration_tooltip()
+
+func refresh_teleport_duration_tooltip() -> void:
+	var dur: float = default_teleport_duration_input.get_value()
+	var frames: int = ceili(dur * GameManager.get_full_tick_rate())
+	default_teleport_duration_input.set_tooltip("Teleport duration (seconds) rounded to logical frames at 60 FPS\n= %d frames" % [frames])
 
 func _on_import_levels_btn_pressed() -> void:
 	GameManager.start_import_levels()
