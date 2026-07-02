@@ -131,7 +131,9 @@ func on_conditional_editor_requested(prop_name: String, current_value: Variant, 
     new_conditional_editor.popup_centered()
 
 func on_save_conditional_prop(new_conditional_value: Variant, prop_name: String) -> void:
+    prints("now saving conditional")
     the_definition["properties"][prop_name] = new_conditional_value
+    refresh_property_edit_list()
     on_info_changed()
 
 func _shortcut_input(event: InputEvent) -> void:
@@ -219,8 +221,8 @@ func load_common():
     sprite_style_option.visible = tile_entity_mode == "entity"
 
     update_image_button()
-    refresh_item_preview()
     refresh_property_edit_list()
+    refresh_item_preview()
 
 func refresh_property_edit_list() -> void:
     if property_edit_list:
@@ -305,6 +307,7 @@ func update_tex_simple(tex_popup: Node) -> void:
 
     # dont update sprite style picker, it just picks which edit popup to show
     #update_sprite_style_picker()
+    on_info_changed()
     update_image_button()
     refresh_item_preview()
     tex_popup.queue_free()
@@ -325,9 +328,9 @@ func update_sprite_config(new_sprite_config: Dictionary) -> void:
         the_definition["sprite_config"] = new_sprite_config.duplicate_deep()
         last_fancy_sprite_config = new_sprite_config.duplicate_deep()
     update_image_button()
-    refresh_item_preview()
     # dont update sprite style picker, it just picks which edit popup to show
     on_info_changed()
+    refresh_item_preview()
 
 func _on_ImageButton_pressed() -> void:
     if get_selected_sprite_style() == SPRITE_FANCY:
@@ -419,6 +422,7 @@ func add_prop(new_prop_popup) -> void:
         new_prop_popup.queue_free()
         return
     _add_new_prop(new_prop_name, GameManager.get_default_value_for_prop_name(new_prop_name), true)
+    on_info_changed()
     
     await get_tree().process_frame
     if new_prop_popup and not new_prop_popup.is_queued_for_deletion():
@@ -624,6 +628,7 @@ func save_fancy_sprite_snapshot(fancy_sprite_editor: FancySpriteEditor) -> void:
         return
     sprite_snapshot_tex = ImageTexture.create_from_image(fancy_sprite_editor.snapshot_tex.get_image())
     sprite_snapshot_scale = GameManager.get_default_pixel_scale()
+    on_info_changed()
     update_image_button()
     refresh_item_preview()
 

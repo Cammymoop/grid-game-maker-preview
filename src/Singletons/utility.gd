@@ -101,6 +101,9 @@ func vector_to_facing(vector: Vector2) -> int:
 func is_valid_facing(facing: int) -> bool:
 	return facing >= 0 and facing < 4
 
+func facing_to_axis_index(facing: int) -> int:
+	return (clampi(facing, 0, 3) + 1) % 2
+
 func dict_map(dict: Dictionary, callback: Callable) -> Dictionary:
 	var new_dict: = Dictionary({}, 
 		dict.get_typed_key_builtin(), dict.get_typed_key_class_name(), dict.get_typed_key_script(),

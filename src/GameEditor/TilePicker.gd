@@ -4,7 +4,7 @@ signal confirmed
 
 @export var confirm_on_dbl_click: = true
 
-var index_of_texture
+var cur_texture_id: int
 var tile_size: Vector2
 var origin: Vector2
 var separation: Vector2
@@ -64,7 +64,7 @@ func _generate_size_in_tiles(metadata: Dictionary, texture_size: Vector2) -> Vec
 
 
 func set_raw_texture(tex: Texture2D, metadata: Dictionary) -> void:
-	index_of_texture = -1
+	cur_texture_id = -1
 	var grid_cells: = Vector2i(metadata.get("size_in_tiles", Vector2(1, 1)))
 	if not metadata.has("size_in_tiles"):
 		grid_cells = _generate_size_in_tiles(metadata, tex.get_size())
@@ -81,11 +81,11 @@ func set_raw_texture(tex: Texture2D, metadata: Dictionary) -> void:
 	custom_minimum_size = tex.get_size() * view_scale
 	update_minimum_size()
 
-func set_picking_texture(texture_index) -> void:
-	index_of_texture = texture_index
+func set_picking_texture(texture_id: int) -> void:
+	cur_texture_id = texture_id
 	
-	var tex = TextureManager.get_texture(texture_index)
-	var meta = TextureManager.get_texture_metadata(texture_index).duplicate_deep()
+	var tex = TextureManager.get_texture(texture_id)
+	var meta = TextureManager.get_texture_metadata(texture_id).duplicate_deep()
 	if not meta.has("size_in_tiles"):
 		meta["size_in_tiles"] = _generate_size_in_tiles(meta, tex.get_size())
 	tpr = meta['size_in_tiles'].x

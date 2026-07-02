@@ -176,15 +176,11 @@ func _sync_autocomplete_menu() -> void:
 	if text.is_empty() and not _typed_this_focus:
 		_hide_autocomplete()
 		return
-	var raw := _filter_values(text)
-	var showable: Array[String] = []
-	for n in raw:
-		if n != text:
-			showable.append(n)
-	if showable.is_empty():
+	var filtered := _filter_values(text)
+	if filtered.is_empty() or filtered.size() == 1 and filtered[0] == text:
 		_hide_autocomplete()
 		return
-	_filtered = showable
+	_filtered = filtered
 	_ac_list.clear_items()
 	for n in _filtered:
 		_ac_list.add_item(n)

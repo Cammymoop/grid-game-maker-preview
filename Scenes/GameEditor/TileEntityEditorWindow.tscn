@@ -136,7 +136,7 @@ layout_mode = 2
 [node name="Label" type="Label" parent="PanelContainer/VBoxContainer/DefaultSizeOption/SizeInputContainer" unique_id=2058783725]
 layout_mode = 2
 size_flags_stretch_ratio = 0.5
-text = "size:"
+text = "default size:"
 horizontal_alignment = 2
 
 [node name="EntitySizeInput" parent="PanelContainer/VBoxContainer/DefaultSizeOption/SizeInputContainer" unique_id=2047234622 instance=ExtResource("7_47s6f")]

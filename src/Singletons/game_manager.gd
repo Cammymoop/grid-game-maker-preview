@@ -105,7 +105,7 @@ const SPECIAL_PROPS_DEFAULTS: Dictionary[String, Variant] = {
 	"no-rotate": true,
 	"teleport-duration": 0.5,
 	"move-speed": 6,
-	"dying-effect": "Real Explosion",
+	"dying-effect": "Shrink Out",
 }
 
 static var SPECIAL_PROPS_HINT_TEXT: Dictionary[String, String] = {
@@ -133,7 +133,7 @@ static var SPECIAL_PROPS_HINT_TEXT: Dictionary[String, String] = {
 	"move-speed": "The default speed (grid spaces per second) that this entity moves at.\nIf not set, the default from the game settings is used.\n" +
 		'This speed can be overridden for a single movement using the "Override Move Speed" Conditional command or automatically by the "Get Pushed" command.',
 	"dying-effect": "The default effect on this entity's sprite when it is destroyed. If set, overrides the game's default dying effect.\n" +
-		"Available Effects: " + ", ".join(SpriteEffects.DYING_EFFECTS.keys()),
+		"Available Effects: None, " + ", ".join(SpriteEffects.DYING_EFFECTS.keys()),
 }
 
 enum OneTimeMessages {
@@ -971,7 +971,7 @@ func _process(_delta):
 				load_checkpoint()
 
 func _unhandled_input(event: InputEvent) -> void:
-	if Utility.event_is_menu_back_just_pressed(event):
+	if Utility.fixed_just_pressed_by_event("pause_game", event) or Utility.fixed_just_pressed_by_event("escape", event):
 		if cur_scene == "Play":
 			toggle_pause_menu()
 			get_viewport().set_input_as_handled()

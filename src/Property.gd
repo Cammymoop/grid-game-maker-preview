@@ -8,6 +8,7 @@ static func resolve_truthy(the_prop: Property, owner: BaseEntity, target: BaseEn
 	if not the_prop or not the_prop.is_conditional():
 		return the_prop and the_prop.get_value()
 	var resolve_result = the_prop.resolve(owner, target, tile_positions, args, extra_debug)
+	prints("resolve truthy resolve result:", resolve_result)
 	if resolve_result:
 		return true
 	return false

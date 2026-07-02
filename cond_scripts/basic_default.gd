@@ -771,13 +771,13 @@ func cmd_if_all_entities_property(slots: Dictionary, chosen_slot: int, entity_na
 
 func desc_if_any_entity_exists() -> String:
 	return "pos|If any entity exists here with a [invert:InvertInput:true or non-zero,false or zero] [prop_name:PropertyInput] property\n" \
-		+ "Excluding [exclude_slot:SlotInput:entity]"
+		+ "Excluding [exclude_slot:SlotInput:entity,none]"
 func cmd_if_any_entity_exists(slots: Dictionary, chosen_slot: int, exclude_slot: int, invert: bool, prop_name: String) -> bool:
 	if not Commands.slot_is_positions(chosen_slot):
 		push_error("Slot for if any entity exists is not a positions slot: %s" % chosen_slot)
 		return false
 	var exclude_entity: BaseEntity = null
-	if exclude_slot != -1:
+	if exclude_slot != SlotSelectorButton.NONE_SLOTS:
 		exclude_entity = slots[exclude_slot]
 	var tile_positions: Array = slots[chosen_slot]
 	if not tile_positions:
@@ -789,6 +789,31 @@ func cmd_if_any_entity_exists(slots: Dictionary, chosen_slot: int, exclude_slot:
 		if EntityManager.get_entity_prop_is_truthy(entity, prop_name, false) != invert:
 			return true
 	return false
+
+func desc_if_entity_exists_at_all_positions() -> String:
+	return "pos|If at least one active entity with a [truthy:BoolChoice:true,true or non-zero,false or zero] [prop_name:PropertyInput] property exists at every position here"
+func cmd_if_entity_exists_at_all_positions(slots: Dictionary, chosen_slot: int, truthy: bool, prop_name: String) -> bool:
+	if not Commands.slot_is_positions(chosen_slot):
+		push_error("Slot for if entity exists at all positions is not a positions slot: %s" % chosen_slot)
+		return false
+	if not slots[chosen_slot]:
+		return false
+	var all_valid_entities: Array[BaseEntity] = EntityManager.find_all_entities_with_truthy_property(prop_name, true, not truthy)
+	var entities_cur_positions: Dictionary[BaseEntity, Array] = {}
+	for pos in slots[chosen_slot]:
+		if EntityManager.process_phase != 0:
+			if pos not in EntityManager._entity_at_cache:
+				return false
+		var found_entity: = false
+		for e in all_valid_entities:
+			if not e in entities_cur_positions:
+				entities_cur_positions[e] = EntityManager.get_all_positions_of_entity(e)
+			if pos in entities_cur_positions[e]:
+				found_entity = true
+				break
+		if not found_entity:
+			return false
+	return true
 
 func desc_c_can_move() -> String:
 	return "entity|If the entity [invert:InvertInput:can,cannot] move this way [direction:DirectionInput]"
@@ -1237,6 +1262,27 @@ func cmd_override_move_animation(slots: Dictionary, chosen_slot: int, anim_style
 	if Commands.slot_is_entity(chosen_slot) and slots[chosen_slot]:
 		slots[chosen_slot].set_move_interp_override(BaseEntity.read_move_interp_style_string(anim_style))
 
+func desc_if_custom_conditional_event_result() -> String:
+	return "entity,pos|If the result of triggering the [event_name:PropertyInput] custom event of the entity/tile is [truthy:BoolChoice:true,true or non-zero,false or zero]\n" \
+			+ "with [blue_entity_slot:SlotInput:entity,none] as the *blue entity"
+func cmd_if_custom_conditional_event_result(slots: Dictionary, chosen_slot: int, event_name: String, blue_entity_slot: int, truthy: bool) -> bool:
+	if not Commands.slot_is_entity(chosen_slot) and not Commands.slot_is_positions(chosen_slot):
+		push_error("Invalid slot (entity/pos) for custom conditional event result: %s" % chosen_slot)
+		return false
+	if blue_entity_slot != SlotSelectorButton.NONE_SLOTS and not Commands.slot_is_entity(blue_entity_slot):
+		push_error("Invalid slot (blue entity) for custom conditional event result: %s" % blue_entity_slot)
+		return false
+	var result: bool = false
+	if Commands.slot_is_entity(chosen_slot):
+		result = EntityManager.get_entity_prop_is_truthy(slots[chosen_slot], event_name, false, slots[blue_entity_slot])
+		prints("result of", event_name, "is", result)
+	elif Commands.slot_is_positions(chosen_slot):
+		if slots[chosen_slot]:
+			result = MapManager.conditional_tile_event(slots[chosen_slot], event_name, slots[blue_entity_slot], truthy)
+		else:
+			result = false
+	return result == truthy
+
 func desc_trigger_custom_event() -> Dictionary:
 	return {
 		"name": "trigger_custom_event",
@@ -1423,7 +1469,7 @@ func cmd_trigger_custom_event_for_each_position(slots: Dictionary, chosen_slot: 
 
 func desc_trigger_custom_event_for_tile_at_each_position() -> String:
 	return "pos|Trigger the [event_name:PropertyInput] custom event of the each tile at the positions in this slot,\n" \
-			+ "with the entity [blue_entity:SlotInput:entity,none] as the *blue entity, [is_immediate:BoolChoice:true,now,immediately after this event]"
+			+ "with the entity [blue_entity_slot:SlotInput:entity,none] as the *blue entity, [is_immediate:BoolChoice:true,now,immediately after this event]"
 func cmd_trigger_custom_event_for_tile_at_each_position(slots: Dictionary, chosen_slot: int, event_name: String, blue_entity_slot: int, is_immediate: bool) -> void:
 	if not Commands.slot_is_positions(chosen_slot) or (blue_entity_slot != SlotSelectorButton.NONE_SLOTS and not Commands.slot_is_entity(blue_entity_slot)):
 		push_error("Invalid slots to trigger custom event for each position: %s" % [chosen_slot])
@@ -2377,32 +2423,33 @@ func cmd_set_large_entity_width(slots: Dictionary, chosen_slot: int, width: int)
 	slots[chosen_slot].update_size(Vector2i(width, height))
 
 func desc_select_large_entity_width() -> String:
-	return "number|<= Select the LARGE width of the entity"
-func cmd_select_large_entity_width(slots: Dictionary, chosen_slot: int) -> void:
-	if not Commands.slot_is_entity(chosen_slot):
-		push_error("Invalid slot or empty slot to select large entity width: %s" % chosen_slot)
-		return
-	if not slots[chosen_slot]:
-		set_value_slot_as_number(slots, chosen_slot, 0)
-		return
-	if not slots[chosen_slot].is_large():
-		set_value_slot_as_number(slots, chosen_slot, 1)
-		return
-	set_value_slot_as_number(slots, chosen_slot, slots[chosen_slot].entity_size.x)
+	return "number|<= Select the LARGE width of [entity_slot:SlotInput:entity]"
+func cmd_select_large_entity_width(slots: Dictionary, chosen_slot: int, entity_slot: int) -> void:
+	_select_large_entity_size_axis(slots, chosen_slot, entity_slot, 0)
 
 func desc_select_large_entity_height() -> String:
-	return "number|<= Select the LARGE height of the entity"
-func cmd_select_large_entity_height(slots: Dictionary, chosen_slot: int) -> void:
-	if not Commands.slot_is_entity(chosen_slot):
-		push_error("Invalid slot or empty slot to select large entity height: %s" % chosen_slot)
+	return "number|<= Select the LARGE height of [entity_slot:SlotInput:entity]"
+func cmd_select_large_entity_height(slots: Dictionary, chosen_slot: int, entity_slot: int) -> void:
+	_select_large_entity_size_axis(slots, chosen_slot, entity_slot, 1)
+
+func desc_select_large_entity_size_in_direction() -> String:
+	return "number|<= Select the LARGE size (width or height) of [entity_slot:SlotInput:entity] in the direction [compl_dir:DirectionInput:1]"
+func cmd_select_large_entity_size_in_direction(slots: Dictionary, chosen_slot: int, entity_slot: int, compl_dir: Dictionary) -> void:
+	var facing_dir: = resolve_complex_direction(compl_dir, slots)
+	_select_large_entity_size_axis(slots, chosen_slot, entity_slot, Utility.facing_to_axis_index(facing_dir))
+
+func _select_large_entity_size_axis(slots: Dictionary, select_into_slot: int, entity_slot: int, axis: int) -> void:
+	if not Commands.slot_is_entity(entity_slot) or not Commands.slot_is_scalar(select_into_slot):
+		push_error("Invalid slots to select large entity width: %s and %s" % [select_into_slot, entity_slot])
 		return
-	if not slots[chosen_slot]:
-		set_value_slot_as_number(slots, chosen_slot, 0)
+	if not slots[entity_slot]:
+		set_value_slot_as_number(slots, select_into_slot, 0)
 		return
-	if not slots[chosen_slot].is_large():
-		set_value_slot_as_number(slots, chosen_slot, 1)
-		return	
-	set_value_slot_as_number(slots, chosen_slot, slots[chosen_slot].entity_size.y)
+	if not slots[entity_slot].is_large():
+		set_value_slot_as_number(slots, select_into_slot, 1)
+		return
+	var oriented_size: Vector2i = slots[entity_slot].get_oriented_size()
+	set_value_slot_as_number(slots, select_into_slot, oriented_size[axis])
 
 func desc_stretch_a_large_entity_to_position() -> String:
 	return "entity|Stretch the entity's LARGE size so that it [inclusive:BoolChoice:true,reaches,reaches up to] [target_pos_slot:SlotInput:pos,entity]\n" \
@@ -2631,7 +2678,7 @@ func cmd_select_save_file_value(slots: Dictionary, chosen_slot: int, key_val: Di
 	var key_str: String = resolve_complex_string(key_val, slots)
 	var value: Variant = GameManager.get_game_save_data("::cmd::%s" % key_str, "")
 	if typeof(value) in [TYPE_ARRAY, TYPE_DICTIONARY]:
-		if Commands.slot_is_number(chosen_slot):
+		if Commands.slot_is_scalar(chosen_slot):
 			set_value_slot_as_number(slots, chosen_slot, 0)
 		else:
 			slots[chosen_slot] = ""

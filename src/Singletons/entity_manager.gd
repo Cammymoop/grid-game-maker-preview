@@ -286,11 +286,8 @@ func handle_movement_mode_stuff() -> void:
     var all_settled: = false
     if movement_mode == GameManager.MovementMode.MOVEMENT_DISCRETE_WAIT and movements_enabled:
         if all_entities_settled():
-            prints("all entities settled at", frame_counter)
             handle_pre_turn_end_events()
             all_settled = all_entities_settled()
-            if not all_settled:
-                prints("going around again")
 
     animation_frame_counter += 1
     var was_movement_enabled: = movements_enabled
@@ -533,13 +530,12 @@ func request_move(entity: BaseEntity, request_frames: int = -1) -> void:
     if movement_mode == GameManager.MovementMode.MOVEMENT_CONTINUOUS:
         return
     if movement_mode == GameManager.MovementMode.MOVEMENT_DISCRETE:
-        if request_frames:
+        if request_frames > 0:
             requested_turn_frames = request_frames
         elif entity:
             requested_turn_frames = entity.get_steps_per_tile()
         else:
             requested_turn_frames = idle_delay_frames
-    prints("entity:", entity, "requested move, on frame", frame_counter)
     turn_requested = true
 
 func has_instance(instance_id: int) -> bool:
@@ -1716,10 +1712,10 @@ func get_entity_prop_scalar_value(entity: BaseEntity, property_name: String, def
     var prop_value: Variant = prop.get_or_resolve(entity, null, entity.tile_position)
     return Utility.property_value_scalar(prop_value, default_value)
 
-func get_entity_prop_is_truthy(entity: BaseEntity, property_name: String, default_val: bool = false) -> bool:
+func get_entity_prop_is_truthy(entity: BaseEntity, property_name: String, default_val: bool = false, custom_ctx_entity: BaseEntity = null) -> bool:
     if not entity_has_property(entity, property_name):
         return default_val
-    return Property.resolve_truthy(get_entity_property(entity, property_name), entity, null, entity.tile_position)
+    return Property.resolve_truthy(get_entity_property(entity, property_name), entity, custom_ctx_entity, entity.tile_position)
 
 func entity_has_property(entity: BaseEntity, property_name: String) -> bool:
     if not entity:
@@ -1861,7 +1857,6 @@ func get_default_tele_steps() -> int:
     return ceili(def_duration * GameManager.get_full_tick_rate())
 
 func switch_entities_preview_mode(enable_preview: bool) -> void:
-    prints("switching entities preview mode to ", enable_preview)
     is_entity_preview_mode = enable_preview
     entity_preview_mode_changed.emit(enable_preview)
 
@@ -2395,10 +2390,12 @@ func get_default_dying_effect_for_entity_id(entity_id: int) -> Dictionary:
         push_error("Entity id not found: %s" % entity_id)
         return {}
     var dying_effect_prop_val: Variant = entity_defs[entity_id]["properties"].get("dying-effect", "")
-    if typeof(dying_effect_prop_val) in [TYPE_DICTIONARY, TYPE_ARRAY]:
+    if typeof(dying_effect_prop_val) != TYPE_STRING:
         prints("entity dying-effect is the wrong type: %s" % type_string(typeof(dying_effect_prop_val)))
         return default_dying_effect
-    if not dying_effect_prop_val or not typeof(dying_effect_prop_val) == TYPE_STRING or not dying_effect_prop_val in SpriteEffects.DYING_EFFECTS:
+    if dying_effect_prop_val.to_lower() == "none":
+        return {}
+    if not dying_effect_prop_val or not dying_effect_prop_val in SpriteEffects.DYING_EFFECTS:
         return default_dying_effect
     return SpriteEffects.DYING_EFFECTS[dying_effect_prop_val]
 
@@ -2615,6 +2612,8 @@ func get_controller_duplicate(controller: Node) -> Node:
     return controller_duplicate
 
 func get_all_with_controller_type(controller_type: String, include_inactive: bool = false) -> Array[BaseEntity]:
+    if not controller_type:
+        return []
     var controller_inst: Node = controller_templates[controller_type].instantiate()
     var controller_script: Script = controller_inst.get_script()
     controller_inst.queue_free()

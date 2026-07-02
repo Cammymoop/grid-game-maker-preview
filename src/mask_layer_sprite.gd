@@ -352,6 +352,8 @@ func get_serialized_info() -> Dictionary:
     if not _all_modifiers.is_empty():
         serialized_info["modifiers"] = _all_modifiers.duplicate_deep()
         serialized_info["animation_timers"] = _animation_timers.duplicate()
+    if _dying_with_animated_mod:
+        serialized_info["dying_with_animated_mod"] = _dying_with_animated_mod
     return serialized_info
 
 func deserialize_sprite_info(info: Dictionary) -> void:
@@ -363,6 +365,8 @@ func deserialize_sprite_info(info: Dictionary) -> void:
         apply_modifier_info(info["modifiers"][modifier_name])
         if animation_timers.has(modifier_name):
             _animation_timers[modifier_name] = animation_timers[modifier_name]
+    if info.has("dying_with_animated_mod"):
+        _dying_with_animated_mod = info["dying_with_animated_mod"]
 
 func _remove_all_modifier_layers() -> void:
     var new_layers: Array[Dictionary] = []

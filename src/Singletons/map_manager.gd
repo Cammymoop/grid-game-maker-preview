@@ -373,12 +373,10 @@ func _register_persistant_effect(effect_info: Dictionary) -> void:
 func _remove_effects_at(at_tile_pos: Vector2i) -> void:
     var key: = Utility.vec2i_key(at_tile_pos)
     if not map_metadata.get("persistant_effects", {}).has(key):
-        prints("no effects at: ", at_tile_pos)
         return
     for effect_info in map_metadata["persistant_effects"][key]:
         if effect_info.has("effect_id"):
             EffectsHelper.remove_effect_by_id(effect_info["effect_id"])
-    prints("removing effect metadata: %s" % [key])
     map_metadata["persistant_effects"].erase(key)
 
 func serialize() -> Dictionary:
@@ -685,7 +683,6 @@ func replace_tiles_at(tile_position, new_tile, facing: int = 0) -> void:
         level_size_changed.emit()
 
 func erase_tiles_and_effects_at(tile_position: Vector2i) -> void:
-    prints("erasing tiles and effects at: ", tile_position)
     clear_all_at(tile_position)
     _remove_effects_at(tile_position)
 

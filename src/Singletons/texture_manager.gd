@@ -414,7 +414,7 @@ func has_loaded_texture_id(texture_id: int) -> bool:
 func get_fallback_texture_id() -> int:
     if texture_spec.size() == 0:
         return -1
-    return texture_spec[0]['texture_id']
+    return int(texture_spec[0]['texture_id'])
 
 func get_max_texture_index(texture_id: int) -> int:
     if not texture_rows.has(texture_id):

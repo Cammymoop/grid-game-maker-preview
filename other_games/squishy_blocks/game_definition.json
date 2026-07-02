@@ -1,0 +1,503 @@
+{
+  "game_name": "Squishy Blocks",
+  "textures": [
+    {
+      "type": "builtin",
+      "texture_id": 1.0,
+      "name": "entityTiles.png"
+    },
+    {
+      "type": "builtin",
+      "name": "shapes32x.png",
+      "texture_id": 2.0,
+      "filter": false
+    },
+    {
+      "type": "local_file",
+      "is_shared": false,
+      "image_name": "tiles.png",
+      "texture_id": 3.0,
+      "filter": false
+    },
+    {
+      "type": "local_file",
+      "is_shared": false,
+      "image_name": "oversize_tiles.png",
+      "texture_id": 4.0,
+      "filter": false
+    }
+  ],
+  "game_settings": {
+    "pixel_scale": 2.4,
+    "window_width": 18.0,
+    "window_height": 14.0,
+    "game_view_size": [
+      18.0,
+      12.0
+    ],
+    "title": "Squishy Blocks",
+    "camera_settings": {
+      "follow_entity": "InputController",
+      "enable_limits": true
+    },
+    "default_move_interp": "stepped",
+    "movement_mode": 1.0,
+    "default_dying_effect": "Shrink Out",
+    "entity_move_speed": 10.0
+  },
+  "entity_definitions": {
+    "1": {
+      "name": "player",
+      "texture": 1,
+      "tex_index": 7,
+      "properties": {
+        "player": true,
+        "pushes": true,
+        "turn_end": [
+          {
+            "v": "3",
+            "conditions": [
+              "basic_default.select_tiles_named::[\"i:20\",\"s:negative-target\"]",
+              "basic_default.exists::[\"i:20\"]",
+              "basic_default.if_any_entity_exists::[\"i:20\",\"i:-6\",false,\"s:block\"]"
+            ],
+            "when true": [
+              "basic_default.trigger_custom_event_for_each_position::[\"i:0\",\"s:spawn_x\",\"i:20\",false]",
+              "basic_default.select_number::[\"i:8\",{\"args\":[\"s:type\",\"s:plain\",\"s:value\",\"f:0.0\"],\"type\":\"Dictionary\"}]"
+            ],
+            "when false": [
+              "basic_default.select_number::[\"i:8\",{\"args\":[\"s:type\",\"s:plain\",\"s:value\",\"f:1.0\"],\"type\":\"Dictionary\"}]"
+            ],
+            "when always": []
+          },
+          {
+            "v": "3",
+            "conditions": [
+              "basic_default.select_tiles_named::[\"i:20\",\"s:target-tile\"]",
+              "basic_default.if_entity_exists_at_all_positions::[\"i:20\",true,\"s:block\"]",
+              "basic_default.compare_values::[\"i:8\",{\"args\":[\"s:type\",\"s:plain\",\"s:value\",\"f:1.0\"],\"type\":\"Dictionary\"},\"s:=\"]"
+            ],
+            "when true": [
+              "basic_default.trigger_custom_event_for_each_position::[\"i:0\",\"s:remove_check\",\"i:20\",false]",
+              "basic_default.trigger_custom_event_for_each_position::[\"i:0\",\"s:spawn_crown\",\"i:20\",false]",
+              "basic_default.select_text::[\"i:12\",{\"args\":[\"s:type\",\"s:plain\",\"s:value\",\"s:Level Complete!\"],\"type\":\"Dictionary\"}]",
+              "basic_default.show_mini_text_at::[\"i:0\",\"i:12\",true]",
+              "basic_default.load_next_level::[\"i:-1\",{\"args\":[\"s:type\",\"s:plain\",\"s:value\",\"f:2.0\"],\"type\":\"Dictionary\"}]",
+              "basic_default.remove_entity_controller::[\"i:0\"]",
+              "basic_default.quit::[\"i:-1\"]"
+            ],
+            "when false": [],
+            "when always": []
+          },
+          {
+            "v": "3",
+            "conditions": [
+              "basic_default.if_any_entity_exists::[\"i:20\",\"i:-6\",false,\"s:block\"]"
+            ],
+            "when true": [
+              "basic_default.trigger_custom_event_for_each_position::[\"i:0\",\"s:spawn_check\",\"i:20\",false]"
+            ],
+            "when false": [],
+            "when always": []
+          }
+        ],
+        "spawn_check": {
+          "v": "3",
+          "conditions": [
+            "basic_default.select_named_entity_at::[\"i:2\",\"i:4\",{\"args\":[\"s:type\",\"s:plain\",\"s:value\",\"s:check\"],\"type\":\"Dictionary\"}]",
+            "basic_default.exists::[\"i:2\"]",
+            "not",
+            "basic_default.if_any_entity_exists::[\"i:4\",\"i:-6\",false,\"s:block\"]"
+          ],
+          "when true": [
+            "basic_default.a_create_entity::[\"i:4\",\"s:check\",\"i:0\",false]"
+          ],
+          "when false": [],
+          "when always": []
+        },
+        "spawn_x": {
+          "v": "3",
+          "conditions": [
+            "basic_default.select_named_entity_at::[\"i:2\",\"i:4\",{\"args\":[\"s:type\",\"s:plain\",\"s:value\",\"s:x\"],\"type\":\"Dictionary\"}]",
+            "basic_default.exists::[\"i:2\"]",
+            "not",
+            "basic_default.if_any_entity_exists::[\"i:4\",\"i:-6\",false,\"s:block\"]"
+          ],
+          "when true": [
+            "basic_default.a_create_entity::[\"i:4\",\"s:x\",\"i:0\",false]"
+          ],
+          "when false": [],
+          "when always": []
+        },
+        "move-speed": 9,
+        "spawn_crown": {
+          "v": "3",
+          "conditions": [
+            "basic_default.select_named_entity_at::[\"i:2\",\"i:4\",{\"args\":[\"s:type\",\"s:plain\",\"s:value\",\"s:won-marker\"],\"type\":\"Dictionary\"}]",
+            "basic_default.exists::[\"i:2\"]",
+            "not",
+            "basic_default.if_any_entity_exists::[\"i:4\",\"i:-6\",false,\"s:block\"]"
+          ],
+          "when true": [
+            "basic_default.a_create_entity::[\"i:4\",\"s:won-marker\",\"i:0\",false]"
+          ],
+          "when false": [],
+          "when always": []
+        },
+        "remove_check": {
+          "v": "3",
+          "conditions": [
+            "basic_default.select_entity_at::[\"i:2\",\"i:4\",\"s:symbol\",false]",
+            "basic_default.exists::[\"i:2\"]"
+          ],
+          "when true": [
+            "basic_default.destroy_entity_immediately::[\"i:2\"]"
+          ],
+          "when false": [],
+          "when always": []
+        }
+      },
+      "controller": "InputController",
+      "controller_options": {
+        "stop_repeat_after_bonk": false,
+        "lock_for_idle_delay_after_bonk": false,
+        "auto_req_turn": true,
+        "allow_wait": false,
+        "only_rcv_when_cam": false
+      }
+    },
+    "2": {
+      "name": "block",
+      "texture": 1,
+      "tex_index": 24,
+      "properties": {
+        "move_onto": [
+          {
+            "v": "3",
+            "conditions": [
+              "basic_default.if_property_value::[\"i:1\",\"s:pushes\",true]"
+            ],
+            "when true": [],
+            "when false": [
+              "basic_default.quit::[\"i:-1\"]"
+            ],
+            "when always": []
+          },
+          {
+            "v": "3",
+            "conditions": [
+              "basic_default.c_get_pushed::[\"i:0\",{\"args\":[\"s:type\",\"s:plain\",\"s:direction\",\"i:20\"],\"type\":\"Dictionary\"},true]"
+            ],
+            "when true": [
+              "basic_default.quit::[\"i:-1\"]"
+            ],
+            "when false": [],
+            "when always": []
+          },
+          {
+            "v": "3",
+            "conditions": [
+              "basic_default.if_custom_conditional_event_result::[\"i:0\",\"s:get_squished\",\"i:1\",true]"
+            ],
+            "when true": [],
+            "when false": [],
+            "when always": []
+          }
+        ],
+        "get_squished": {
+          "v": "3",
+          "conditions": [
+            "basic_default.select_large_entity_size_in_direction::[\"i:6\",\"i:0\",{\"args\":[\"s:type\",\"s:plain\",\"s:direction\",\"i:20\"],\"type\":\"Dictionary\"}]",
+            "basic_default.compare_values::[\"i:6\",{\"args\":[\"s:type\",\"s:plain\",\"s:value\",\"f:1.0\"],\"type\":\"Dictionary\"},\"s:>\"]"
+          ],
+          "when true": [
+            "basic_default.select_math::[\"i:6\",{\"args\":[\"s:type\",\"s:slot_value\",\"s:slot_id\",\"i:6\"],\"type\":\"Dictionary\"},\"s:-\",{\"args\":[\"s:type\",\"s:plain\",\"s:value\",\"f:1.0\"],\"type\":\"Dictionary\"}]",
+            "basic_default.select_all_positions_of_entity::[\"i:20\",\"i:0\"]",
+            "basic_default.set_large_entity_size_in_direction::[\"i:0\",{\"args\":[\"s:type\",\"s:plain\",\"s:direction\",\"i:22\"],\"type\":\"Dictionary\"},{\"args\":[\"s:type\",\"s:slot_value\",\"s:slot_id\",\"i:6\"],\"type\":\"Dictionary\"}]",
+            "basic_default.select_all_positions_of_entity::[\"i:5\",\"i:0\"]",
+            "basic_default.exclude_positions::[\"i:20\",\"i:5\"]",
+            "basic_default.trigger_custom_event_for_each_position::[\"i:0\",\"s:remove_symbol\",\"i:20\",false]"
+          ],
+          "when false": [],
+          "when always": []
+        },
+        "blocks": {
+          "v": "3",
+          "conditions": [
+            "basic_default.if_property_value::[\"i:1\",\"s:pushes\",false]"
+          ],
+          "when true": [],
+          "when false": [],
+          "when always": []
+        },
+        "block": true,
+        "pushes": true,
+        "remove_symbol": {
+          "v": "3",
+          "conditions": [
+            "basic_default.select_entity_at::[\"i:2\",\"i:4\",\"s:symbol\",false]",
+            "basic_default.exists::[\"i:2\"]"
+          ],
+          "when true": [
+            "basic_default.a_die::[\"i:2\"]"
+          ],
+          "when false": [],
+          "when always": []
+        }
+      },
+      "can_be_large": true,
+      "default_size": [
+        1.0,
+        1.0
+      ]
+    },
+    "3": {
+      "name": "expand-block",
+      "texture": 3,
+      "tex_index": 28,
+      "properties": {
+        "move_onto": [
+          {
+            "v": "3",
+            "conditions": [
+              "basic_default.if_property_value::[\"i:1\",\"s:pushes\",true]"
+            ],
+            "when true": [],
+            "when false": [
+              "basic_default.quit::[\"i:-1\"]"
+            ],
+            "when always": []
+          },
+          {
+            "v": "3",
+            "conditions": [
+              "basic_default.c_get_pushed::[\"i:0\",{\"args\":[\"s:type\",\"s:plain\",\"s:direction\",\"i:20\"],\"type\":\"Dictionary\"},true]"
+            ],
+            "when true": [
+              "basic_default.quit::[\"i:-1\"]"
+            ],
+            "when false": [],
+            "when always": []
+          },
+          {
+            "v": "3",
+            "conditions": [],
+            "when true": [
+              "basic_default.trigger_custom_event_immediate::[\"i:0\",\"s:get_expanded\",false]",
+              "basic_default.false::[\"i:-1\"]"
+            ],
+            "when false": [],
+            "when always": []
+          }
+        ],
+        "get_expanded": [
+          {
+            "v": "3",
+            "conditions": [
+              "basic_default.c_can_move::[\"i:0\",false,\"i:22\"]"
+            ],
+            "when true": [],
+            "when false": [
+              "basic_default.quit::[\"i:-1\"]"
+            ],
+            "when always": []
+          },
+          {
+            "v": "3",
+            "conditions": [
+              "basic_default.select_direction::[\"i:6\",{\"args\":[\"s:type\",\"s:plain\",\"s:direction\",\"i:22\"],\"type\":\"Dictionary\"}]",
+              "basic_default.c_get_pushed::[\"i:1\",{\"args\":[\"s:type\",\"s:slot_reference\",\"s:slot_id\",\"i:6\",\"s:direction\",\"i:0\"],\"type\":\"Dictionary\"},true]"
+            ],
+            "when true": [
+              "basic_default.override_move_animation::[\"i:1\",\"s:none\"]",
+              "basic_default.select_large_entity_size_in_direction::[\"i:9\",\"i:0\",{\"args\":[\"s:type\",\"s:slot_reference\",\"s:slot_id\",\"i:6\",\"s:direction\",\"i:0\"],\"type\":\"Dictionary\"}]",
+              "basic_default.select_math::[\"i:9\",{\"args\":[\"s:type\",\"s:slot_value\",\"s:slot_id\",\"i:9\"],\"type\":\"Dictionary\"},\"s:+\",{\"args\":[\"s:type\",\"s:plain\",\"s:value\",\"f:1.0\"],\"type\":\"Dictionary\"}]",
+              "basic_default.set_large_entity_size_in_direction::[\"i:0\",{\"args\":[\"s:type\",\"s:slot_reference\",\"s:slot_id\",\"i:6\",\"s:direction\",\"i:0\"],\"type\":\"Dictionary\"},{\"args\":[\"s:type\",\"s:slot_value\",\"s:slot_id\",\"i:9\"],\"type\":\"Dictionary\"}]"
+            ],
+            "when false": [
+              "basic_default.quit::[\"i:-1\"]"
+            ],
+            "when always": []
+          }
+        ],
+        "blocks": {
+          "v": "3",
+          "conditions": [
+            "basic_default.if_property_value::[\"i:1\",\"s:player\",false]"
+          ],
+          "when true": [],
+          "when false": [],
+          "when always": []
+        },
+        "block": true
+      },
+      "can_be_large": true,
+      "default_size": [
+        1.0,
+        1.0
+      ]
+    },
+    "4": {
+      "name": "check",
+      "texture": 3,
+      "tex_index": 30,
+      "properties": {
+        "z-index": 2,
+        "post_move_off_of": {
+          "v": "3",
+          "conditions": [],
+          "when true": [
+            "basic_default.a_die::[\"i:0\"]"
+          ],
+          "when false": [],
+          "when always": []
+        },
+        "symbol": true
+      },
+      "sprite_config": {
+        "layers": [
+          {
+            "mode": "normal",
+            "texture": 2.0,
+            "tex_index": 10.0,
+            "mod_color": "#f0c2601a"
+          },
+          {
+            "mode": "normal",
+            "texture": 3.0,
+            "tex_index": 30.0,
+            "mod_color": "#f0c26058"
+          },
+          {
+            "mode": "normal",
+            "texture": 2.0,
+            "tex_index": 11.0,
+            "mod_color": "#f0c260ff",
+            "when_property": "nothing"
+          }
+        ]
+      }
+    },
+    "5": {
+      "name": "x",
+      "texture": 2,
+      "tex_index": 30,
+      "properties": {
+        "z-index": 2,
+        "post_move_off_of": {
+          "v": "3",
+          "conditions": [],
+          "when true": [
+            "basic_default.a_die::[\"i:0\"]"
+          ],
+          "when false": [],
+          "when always": []
+        },
+        "symbol": true
+      },
+      "sprite_config": {
+        "layers": [
+          {
+            "mode": "normal",
+            "texture": 2.0,
+            "tex_index": 10.0,
+            "mod_color": "#f9564a15"
+          },
+          {
+            "mode": "normal",
+            "texture": 3.0,
+            "tex_index": 30.0,
+            "mod_color": "#f9564a8a"
+          },
+          {
+            "mode": "normal",
+            "texture": 3.0,
+            "tex_index": 21.0,
+            "mod_color": "#000000ff"
+          },
+          {
+            "mode": "normal",
+            "texture": 2.0,
+            "tex_index": 30.0,
+            "mod_color": "#f9564ae7"
+          }
+        ]
+      }
+    },
+    "6": {
+      "name": "won-marker",
+      "texture": 3,
+      "tex_index": 50,
+      "properties": {
+        "z-index": 2,
+        "symbol": true
+      },
+      "sprite_config": {
+        "layers": [
+          {
+            "mode": "normal",
+            "texture": 2.0,
+            "tex_index": 10.0,
+            "mod_color": "#f0c26024"
+          },
+          {
+            "mode": "normal",
+            "texture": 3.0,
+            "tex_index": 30.0,
+            "mod_color": "#f0c2609f"
+          },
+          {
+            "mode": "normal",
+            "texture": 3.0,
+            "tex_index": 50.0,
+            "mod_color": "#f0c260ff"
+          }
+        ]
+      }
+    }
+  },
+  "tile_definitions": {
+    "1": {
+      "name": "tile",
+      "texture": 4,
+      "tex_index": 2,
+      "properties": {
+        "z-index": -1.0
+      }
+    },
+    "2": {
+      "name": "target-tile",
+      "texture": 3,
+      "tex_index": 48,
+      "properties": {
+
+      }
+    },
+    "3": {
+      "name": "negative-target",
+      "texture": 3,
+      "tex_index": 45,
+      "properties": {
+
+      }
+    }
+  },
+  "level_lists": [
+    {
+      "name": "Levels",
+      "level_names": [
+        "One",
+        "Two",
+        "Five",
+        "Less",
+        "Little",
+        "Not There",
+        "More",
+        "Trade",
+        "Another Level",
+        "Extra",
+        "Extra Extra"
+      ]
+    }
+  ]
+}

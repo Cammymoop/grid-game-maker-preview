@@ -2,34 +2,36 @@ extends ConfirmationDialog
 
 signal hidden
 
-var selected_texture
+var selected_texture: int
 
 var HEIGHT_ADD = 110
 
-func setup(texture_index, sub_index):
+func setup(texture_id, sub_index):
 	visibility_changed.connect(Callable(self, "_on_vis_changed"))
+	var tex_ids: = TextureManager.get_current_texture_ids()
 	var tex_list = TextureManager.get_current_texture_names()
 	
 	var tex_menu:PopupMenu = find_child("TextureSelector").get_popup()
 	tex_menu.clear()
-	for i in range(len(tex_list)):
-		tex_menu.add_item(tex_list[i])
+	for i in tex_ids.size():
+		tex_menu.add_item(tex_list[i], tex_ids[i])
 	
-	tex_menu.connect("index_pressed", Callable(self, "set_texture"))
+	tex_menu.id_pressed.connect(set_texture)
 	hidden.connect(queue_free)
 
 	if not is_inside_tree():
 		await ready
-	set_texture(texture_index)
+	set_texture(texture_id)
 	find_child("TilePicker").set_selected_index(sub_index)
 	
 
-func set_texture(texture_index):
-	selected_texture = texture_index
+func set_texture(texture_id: int):
+	selected_texture = texture_id
 	
-	find_child("TilePicker").set_picking_texture(texture_index)
+	find_child("TilePicker").set_picking_texture(texture_id)
 	var tex_selector = find_child("TextureSelector")
-	tex_selector.text = tex_selector.get_popup().get_item_text(texture_index)
+	var idx: int = tex_selector.get_popup().get_item_index(texture_id)
+	tex_selector.text = tex_selector.get_popup().get_item_text(idx)
 	
 	reshrink()
 

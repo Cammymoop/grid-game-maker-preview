@@ -122,6 +122,8 @@ func get_gui_focus() -> void:
     var to_focus: Control = _first_element_to_focus()
     if to_focus and to_focus.get_focus_mode_with_override() != Control.FOCUS_NONE:
         to_focus.grab_focus()
+        if to_focus is LineEdit:
+            to_focus.unedit.call_deferred()
     else:
         prints("focus node %s is unable to grab focus" % to_focus.get_path())
 

@@ -23,7 +23,7 @@ var show_value: bool = true
 var enabled: bool = true
 
 func _ready() -> void:
-    set_icon_texture(0, 0)
+    set_icon_texture(TextureManager.get_fallback_texture_id(), 0)
     refresh_ui()
 
 func updated() -> void:
