@@ -378,7 +378,6 @@ func open_new_command_for_replace(command_list: Control, command_index: int) -> 
     add_command_dialog.popup_centered()
 
 func _on_SaveButton_pressed():
-    prints("saving conditional data", get_full_conditional_data())
     save_conditional.emit(get_full_conditional_data())
     queue_free()
 

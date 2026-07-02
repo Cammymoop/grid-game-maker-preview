@@ -131,7 +131,6 @@ func on_conditional_editor_requested(prop_name: String, current_value: Variant, 
     new_conditional_editor.popup_centered()
 
 func on_save_conditional_prop(new_conditional_value: Variant, prop_name: String) -> void:
-    prints("now saving conditional")
     the_definition["properties"][prop_name] = new_conditional_value
     refresh_property_edit_list()
     on_info_changed()

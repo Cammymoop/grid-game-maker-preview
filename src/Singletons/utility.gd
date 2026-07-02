@@ -995,33 +995,46 @@ func valid_direction_or(direction: int, default_val: int = -1) -> int:
 	return default_val
 
 func double_ease_out(progress: float, ease_param: float) -> float:
-	return ease(fmod(progress, 0.5) * 2, ease_param) + roundf(progress) * 0.5
+	var half_done: float = roundf(progress)
+	var half_progress: float = fmod(progress, 0.5) * 2
+	return (half_done + ease(half_progress, ease_param)) * 0.5
 
 func apply_vec2_interpolation(interp_style: PosInterpStyle, from: Vector2, to: Vector2, progress: float, ease_param: float = DEF_INTERP_EASE) -> Vector2:
 	progress = clampf(progress, 0, 1)
-	if interp_style == PosInterpStyle.CONTINUOUS_LINEAR:
-		return from.lerp(to, progress)
-	elif interp_style == PosInterpStyle.NONE:
+	if interp_style == PosInterpStyle.NONE:
 		return to
-	elif interp_style == PosInterpStyle.LATE_DISCRETE:
+	elif interp_style == PosInterpStyle.MID_DISCRETE:
 		return from if progress < 0.5 else to
 	elif interp_style == PosInterpStyle.LATE_DISCRETE:
 		return from if progress < 1 else to
+	else:
+		var factor: float = get_interp_factor(interp_style, progress, ease_param)
+		return from.lerp(to, factor)
+
+func get_interp_factor(interp_style: PosInterpStyle, progress: float, ease_param: float = DEF_INTERP_EASE) -> float:
+	progress = clampf(progress, 0, 1)
+	if interp_style == PosInterpStyle.CONTINUOUS_LINEAR:
+		return progress
+	elif interp_style == PosInterpStyle.NONE:
+		return 1
+	elif interp_style == PosInterpStyle.MID_DISCRETE:
+		return 0 if progress < 0.5 else 1
+	elif interp_style == PosInterpStyle.LATE_DISCRETE:
+		return 0 if progress < 1 else 1
 	elif interp_style == PosInterpStyle.DOUBLE_NONE:
-		return from.lerp(to, ceilf(progress * 2) * .5)
+		return ceilf(progress * 2) * .5
 	elif interp_style == PosInterpStyle.EASE_OUT:
-		return from.lerp(to, ease(progress, ease_param))
+		return ease(progress, ease_param)
 	elif interp_style == PosInterpStyle.DOUBLE_EASE_OUT:
-		return from.lerp(to, double_ease_out(progress, ease_param))
+		return double_ease_out(progress, ease_param)
 	elif interp_style in [PosInterpStyle.JUMP_LINEAR, PosInterpStyle.JUMP_EASE_OUT]:
 		progress = remap(progress, 0, 1, JUMP_INTERP_AMOUNT, 1)
-		if interp_style == PosInterpStyle.JUMP_LINEAR:
-			return from.lerp(to, progress)
-		else: # interp_style == PosInterpStyle.JUMP_EASE_OUT:
-			return from.lerp(to, ease(progress, ease_param))
+		if interp_style == PosInterpStyle.JUMP_EASE_OUT:
+			return ease(progress, ease_param)
+		return progress
 	else:
-		push_error("Unknown move interpolation style: %s" % interp_style)
-		return to
+		push_error("Unknown pos interpolation style: %s" % interp_style)
+		return 1
 
 func is_interp_style_smooth(interp_style: PosInterpStyle) -> bool:
 	return interp_style not in NON_SMOOTH_INTERP

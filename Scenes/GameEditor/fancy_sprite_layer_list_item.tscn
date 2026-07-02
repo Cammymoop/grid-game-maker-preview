@@ -19,6 +19,7 @@
 [ext_resource type="StyleBox" uid="uid://cf4b0mxp54ien" path="res://assets/ui/button_styles/thin_button_pressed.tres" id="10_jq3ql"]
 [ext_resource type="StyleBox" uid="uid://ch63py1vky05t" path="res://assets/ui/plain_input_bg.tres" id="15_5xfb3"]
 [ext_resource type="PackedScene" uid="uid://b0nx61j31pwcv" path="res://Scenes/GameEditor/ConditionalEditor/order_comparison_input.tscn" id="17_vov2b"]
+[ext_resource type="Script" path="res://Scenes/GameEditor/remembering_color_picker_button.gd" id="18_jq3ql"]
 
 [sub_resource type="Theme" id="Theme_tghr5"]
 Button/font_sizes/font_size = 14
@@ -43,9 +44,9 @@ LineEdit/constants/minimum_character_width = 2
 atlas = ExtResource("3_jxcnp")
 region = Rect2(0, 64, 32, 32)
 
-[node name="FancySpriteLayerListItem" type="MarginContainer" unique_id=1110623540 node_paths=PackedStringArray("remove_button", "layer_image_button", "offset_type_selector", "offset_input", "mode_selector", "reorder_buttons", "rotates_option", "rotates_mode_select", "spin_speed_input", "offset_degrees_input", "z_offset_input", "digits_settings", "digits_max_digits_input", "digits_color_picker", "digits_pad_zeros_toggle", "digits_source_selector", "digits_number_input", "digits_property_input", "visibility_property_input", "vis_prop_comparison_selector", "vis_prop_compare_number_input", "vis_prop_type_selector", "mod_color_input", "cam_focus_visibility_select", "moving_visibility_select", "subsection_container", "subsection_nav_forward", "subsection_nav_back")]
-offset_right = 503.0
-offset_bottom = 75.0
+[node name="FancySpriteLayerListItem" type="MarginContainer" unique_id=1110623540 node_paths=PackedStringArray("remove_button", "layer_image_button", "offset_type_selector", "offset_input", "mode_selector", "reorder_buttons", "rotates_option", "rotates_mode_select", "spin_speed_input", "offset_degrees_input", "z_offset_input", "digits_settings", "digits_max_digits_input", "digits_color_picker", "digits_pad_zeros_toggle", "digits_source_selector", "digits_number_input", "digits_property_input", "visibility_property_input", "vis_prop_comparison_selector", "vis_prop_compare_number_input", "vis_prop_type_selector", "mod_color_input", "cam_focus_visibility_select", "moving_visibility_select", "subsection_container", "subsection_nav_forward", "subsection_nav_back", "large_scale_mode_select", "nine_patch_corner_size_input", "nine_patch_edge_repeat_select", "nine_patch_center_repeat_select", "nine_patch_corner_option", "nine_patch_repeats_option")]
+offset_right = 644.0
+offset_bottom = 89.0
 theme = ExtResource("1_pj4t0")
 theme_override_constants/margin_left = 0
 theme_override_constants/margin_top = 3
@@ -81,6 +82,12 @@ moving_visibility_select = NodePath("HBoxContainer/PanelContainer/HBoxContainer/
 subsection_container = NodePath("HBoxContainer/PanelContainer/HBoxContainer/SubsectionContainer")
 subsection_nav_forward = NodePath("HBoxContainer/PanelContainer/HBoxContainer/SectionNavButtons/NextSubsection")
 subsection_nav_back = NodePath("HBoxContainer/PanelContainer/HBoxContainer/SectionNavButtons/PrevSubsection")
+large_scale_mode_select = NodePath("HBoxContainer/PanelContainer/HBoxContainer/SubsectionContainer/VisibilitySection3/VBoxContainer/HBoxContainer3/LargeScaleModeSelect")
+nine_patch_corner_size_input = NodePath("HBoxContainer/PanelContainer/HBoxContainer/SubsectionContainer/VisibilitySection3/VBoxContainer/NinePatchCornerOption/NinePatchCornerSizeInput")
+nine_patch_edge_repeat_select = NodePath("HBoxContainer/PanelContainer/HBoxContainer/SubsectionContainer/VisibilitySection3/NinePatchRepeatsOption/HBoxContainer3/EdgeRepeatSelect")
+nine_patch_center_repeat_select = NodePath("HBoxContainer/PanelContainer/HBoxContainer/SubsectionContainer/VisibilitySection3/NinePatchRepeatsOption/HBoxContainer4/CenterRepeatSelect")
+nine_patch_corner_option = NodePath("HBoxContainer/PanelContainer/HBoxContainer/SubsectionContainer/VisibilitySection3/VBoxContainer/NinePatchCornerOption")
+nine_patch_repeats_option = NodePath("HBoxContainer/PanelContainer/HBoxContainer/SubsectionContainer/VisibilitySection3/NinePatchRepeatsOption")
 
 [node name="HBoxContainer" type="HBoxContainer" parent="." unique_id=209136135]
 layout_mode = 2
@@ -244,6 +251,7 @@ allow_lesser = true
 suffix = "°"
 
 [node name="VisibilitySection" type="HBoxContainer" parent="HBoxContainer/PanelContainer/HBoxContainer/SubsectionContainer" unique_id=1756168412]
+visible = false
 layout_mode = 2
 
 [node name="VisibilityProp" type="VBoxContainer" parent="HBoxContainer/PanelContainer/HBoxContainer/SubsectionContainer/VisibilitySection" unique_id=825182032]
@@ -346,6 +354,101 @@ custom_minimum_size = Vector2(32, 28)
 layout_mode = 2
 color = Color(1, 1, 1, 1)
 edit_intensity = false
+script = ExtResource("18_jq3ql")
+
+[node name="VisibilitySection3" type="HBoxContainer" parent="HBoxContainer/PanelContainer/HBoxContainer/SubsectionContainer" unique_id=1765321428]
+custom_minimum_size = Vector2(76, 0)
+layout_mode = 2
+theme_override_constants/separation = 12
+alignment = 1
+
+[node name="VBoxContainer" type="VBoxContainer" parent="HBoxContainer/PanelContainer/HBoxContainer/SubsectionContainer/VisibilitySection3" unique_id=914078355]
+layout_mode = 2
+alignment = 1
+
+[node name="HBoxContainer3" type="HBoxContainer" parent="HBoxContainer/PanelContainer/HBoxContainer/SubsectionContainer/VisibilitySection3/VBoxContainer" unique_id=1143774821]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="HBoxContainer/PanelContainer/HBoxContainer/SubsectionContainer/VisibilitySection3/VBoxContainer/HBoxContainer3" unique_id=684681274]
+layout_mode = 2
+theme_override_constants/line_spacing = 1
+theme_override_font_sizes/font_size = 12
+text = "LARGE scale:"
+horizontal_alignment = 1
+
+[node name="LargeScaleModeSelect" type="OptionButton" parent="HBoxContainer/PanelContainer/HBoxContainer/SubsectionContainer/VisibilitySection3/VBoxContainer/HBoxContainer3" unique_id=2097604334]
+layout_mode = 2
+tooltip_text = "How to scale when LARGE entity has auto-scaling enabled.
+9-patch stretches the center while keeping the sides and corners proportional"
+alignment = 1
+selected = 0
+item_count = 2
+popup/item_0/text = "stretch"
+popup/item_0/id = 0
+popup/item_1/text = "as 9-patch"
+popup/item_1/id = 1
+
+[node name="NinePatchCornerOption" type="HBoxContainer" parent="HBoxContainer/PanelContainer/HBoxContainer/SubsectionContainer/VisibilitySection3/VBoxContainer" unique_id=2019446299]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="HBoxContainer/PanelContainer/HBoxContainer/SubsectionContainer/VisibilitySection3/VBoxContainer/NinePatchCornerOption" unique_id=375046161]
+layout_mode = 2
+text = "9-patch corner:"
+
+[node name="NinePatchCornerSizeInput" parent="HBoxContainer/PanelContainer/HBoxContainer/SubsectionContainer/VisibilitySection3/VBoxContainer/NinePatchCornerOption" unique_id=126638737 instance=ExtResource("1_s7nl1")]
+layout_mode = 2
+
+[node name="Label2" type="Label" parent="HBoxContainer/PanelContainer/HBoxContainer/SubsectionContainer/VisibilitySection3/VBoxContainer/NinePatchCornerOption" unique_id=438993855]
+layout_mode = 2
+text = "px"
+
+[node name="NinePatchRepeatsOption" type="VBoxContainer" parent="HBoxContainer/PanelContainer/HBoxContainer/SubsectionContainer/VisibilitySection3" unique_id=2048501664]
+layout_mode = 2
+alignment = 1
+
+[node name="HBoxContainer3" type="HBoxContainer" parent="HBoxContainer/PanelContainer/HBoxContainer/SubsectionContainer/VisibilitySection3/NinePatchRepeatsOption" unique_id=1052604622]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="HBoxContainer/PanelContainer/HBoxContainer/SubsectionContainer/VisibilitySection3/NinePatchRepeatsOption/HBoxContainer3" unique_id=1697315352]
+layout_mode = 2
+theme_override_constants/line_spacing = 1
+theme_override_font_sizes/font_size = 12
+text = "Edges:"
+horizontal_alignment = 1
+
+[node name="EdgeRepeatSelect" type="OptionButton" parent="HBoxContainer/PanelContainer/HBoxContainer/SubsectionContainer/VisibilitySection3/NinePatchRepeatsOption/HBoxContainer3" unique_id=1922091959]
+layout_mode = 2
+tooltip_text = "How to scale when LARGE entity has auto-scaling enabled.
+9-patch stretches the center while keeping the sides and corners proportional"
+alignment = 1
+selected = 0
+item_count = 2
+popup/item_0/text = "stretch"
+popup/item_0/id = 0
+popup/item_1/text = "repeat"
+popup/item_1/id = 1
+
+[node name="HBoxContainer4" type="HBoxContainer" parent="HBoxContainer/PanelContainer/HBoxContainer/SubsectionContainer/VisibilitySection3/NinePatchRepeatsOption" unique_id=1562728791]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="HBoxContainer/PanelContainer/HBoxContainer/SubsectionContainer/VisibilitySection3/NinePatchRepeatsOption/HBoxContainer4" unique_id=1427006645]
+layout_mode = 2
+theme_override_constants/line_spacing = 1
+theme_override_font_sizes/font_size = 12
+text = "Center:"
+horizontal_alignment = 1
+
+[node name="CenterRepeatSelect" type="OptionButton" parent="HBoxContainer/PanelContainer/HBoxContainer/SubsectionContainer/VisibilitySection3/NinePatchRepeatsOption/HBoxContainer4" unique_id=1224021079]
+layout_mode = 2
+tooltip_text = "How to scale when LARGE entity has auto-scaling enabled.
+9-patch stretches the center while keeping the sides and corners proportional"
+alignment = 1
+selected = 0
+item_count = 2
+popup/item_0/text = "stretch"
+popup/item_0/id = 0
+popup/item_1/text = "repeat"
+popup/item_1/id = 1
 
 [node name="VSeparator" type="VSeparator" parent="HBoxContainer/PanelContainer/HBoxContainer" unique_id=71806959]
 layout_mode = 2
@@ -399,6 +502,7 @@ custom_minimum_size = Vector2(32, 28)
 layout_mode = 2
 color = Color(1, 1, 1, 1)
 edit_intensity = false
+script = ExtResource("18_jq3ql")
 
 [node name="HBoxContainer" type="HBoxContainer" parent="HBoxContainer/PanelContainer/HBoxContainer/HBoxContainer/DigitSettings" unique_id=435544444]
 layout_mode = 2
@@ -473,3 +577,4 @@ layout_mode = 2
 
 [editable path="HBoxContainer/PanelContainer/HBoxContainer/SubsectionContainer/MainSubsection/VBoxContainer/HBoxContainer/HBoxContainer/ZOffsetInput"]
 [editable path="HBoxContainer/PanelContainer/HBoxContainer/SubsectionContainer/MainSubsection/VBoxContainer2/AngleOffsetOption/OffsetDegreesInput"]
+[editable path="HBoxContainer/PanelContainer/HBoxContainer/SubsectionContainer/VisibilitySection3/VBoxContainer/NinePatchCornerOption/NinePatchCornerSizeInput"]

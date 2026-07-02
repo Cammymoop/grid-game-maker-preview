@@ -1275,7 +1275,6 @@ func cmd_if_custom_conditional_event_result(slots: Dictionary, chosen_slot: int,
 	var result: bool = false
 	if Commands.slot_is_entity(chosen_slot):
 		result = EntityManager.get_entity_prop_is_truthy(slots[chosen_slot], event_name, false, slots[blue_entity_slot])
-		prints("result of", event_name, "is", result)
 	elif Commands.slot_is_positions(chosen_slot):
 		if slots[chosen_slot]:
 			result = MapManager.conditional_tile_event(slots[chosen_slot], event_name, slots[blue_entity_slot], truthy)

@@ -105,6 +105,16 @@ const CamFocusOptions: Array[String] = [CAM_FOCUS_IGNORE, CAM_FOCUS_SHOW, CAM_FO
 @export var subsection_nav_forward: ButtonContainer
 @export var subsection_nav_back: ButtonContainer
 
+
+@export var large_scale_mode_select: OptionButton
+@export var nine_patch_corner_size_input: Vec2IInput
+
+@export var nine_patch_edge_repeat_select: OptionButton
+@export var nine_patch_center_repeat_select: OptionButton
+
+@export var nine_patch_corner_option: Control
+@export var nine_patch_repeats_option: Control
+
 var cur_offs_type: String = OFFSET_OFFSET
 
 var layer_info: Dictionary = {}
@@ -197,6 +207,13 @@ func _ready() -> void:
         moving_visibility_select.add_item(cam_focus_option)
     moving_visibility_select.selected = 0
     moving_visibility_select.item_selected.connect(on_moving_visibility_selected)
+    
+    large_scale_mode_select.item_selected.connect(on_large_scale_mode_selected)
+    
+    nine_patch_corner_size_input.value_changed.connect(on_nine_patch_corner_size_changed)
+    
+    nine_patch_edge_repeat_select.item_selected.connect(on_nine_patch_edge_repeat_selected)
+    nine_patch_center_repeat_select.item_selected.connect(on_nine_patch_center_repeat_selected)
     
     subsection_nav_forward.pressed.connect(on_navigate_subsection.bind(1))
     subsection_nav_back.pressed.connect(on_navigate_subsection.bind(-1))
@@ -338,6 +355,23 @@ func refresh_ui() -> void:
         var cur_rotates_mode: = _current_rotates_mode()
         Utility.opbtn_select_id(rotates_mode_select, cur_rotates_mode)
         refresh_spin_speed_input()
+    
+    large_scale_mode_select.visible = layer_info['mode'] == MODE_NORMAL
+    var is_nine_patch: bool = layer_info.get("scale_as_9_patch", false)
+    
+    large_scale_mode_select.selected = 1 if is_nine_patch else 0
+    
+    var corner_size_ratio: Vector2 = Utility.get_vector2_from_arr(layer_info.get("9_patch_corner_size", [0.375, 0.375]))
+    var texture_tile_size: Vector2 = Vector2.ONE * MapManager.tile_width
+    if layer_info.has("texture") and TextureManager.is_texture_id_in_use(layer_info['texture']):
+        texture_tile_size = TextureManager.get_texture_metadata(layer_info['texture']).get('tile_size', texture_tile_size)
+    nine_patch_corner_size_input.set_value((corner_size_ratio * texture_tile_size).round())
+    
+    nine_patch_edge_repeat_select.selected = 1 if layer_info.get("9_patch_edge_repeat", false) else 0
+    nine_patch_center_repeat_select.selected = 1 if layer_info.get("9_patch_center_repeat", false) else 0
+
+    nine_patch_corner_option.visible = is_nine_patch and layer_info['mode'] == MODE_NORMAL
+    nine_patch_repeats_option.visible = is_nine_patch and layer_info['mode'] == MODE_NORMAL
     
     offset_degrees_input.set_value(layer_info.get("offset_degrees", 0))
     
@@ -584,7 +618,6 @@ func _set_current_vis_prop_compare_expression() -> void:
     layer_info['when_prop_expression'] = E.e_wrap(expr)
 
 func _get_comparison_op_and_number_from_expression(expr_data: Dictionary) -> Array:
-    prints("reading expression data", expr_data)
     var default: Array = [">", 1.0]
     if not expr_data or not GGMExpressionBuilder._validate_expr_data(expr_data):
         prints("invalid or empty expression data")
@@ -642,4 +675,50 @@ func on_vis_prop_comparison_selected(_index: int) -> void:
 
 func on_vis_prop_compare_number_changed(_new_value: float) -> void:
     _set_current_vis_prop_compare_expression()
+    changed.emit()
+
+
+func _get_nine_patch_corner_size_for_save() -> Array:
+    if not layer_info.has('texture') or not TextureManager.is_texture_id_in_use(layer_info['texture']):
+        return [0.375, 0.375]
+
+    var corner_size_pixels: Vector2 = nine_patch_corner_size_input.get_value()
+    var texture_meta: Dictionary = TextureManager.get_texture_metadata(layer_info['texture'])
+    var texture_tile_size: Vector2 = texture_meta.get('tile_size', Vector2.ONE * MapManager.tile_width)
+    
+    var corner_size_ratio: Vector2 = (corner_size_pixels / texture_tile_size)
+    return Utility.vector_to_list(corner_size_ratio)
+
+func on_large_scale_mode_selected(index: int) -> void:
+    var is_nine_patch: bool = index > 0
+    
+    if is_nine_patch:
+        layer_info['scale_as_9_patch'] = true
+        layer_info['9_patch_corner_size'] = _get_nine_patch_corner_size_for_save()
+        layer_info['9_patch_edge_repeat'] = nine_patch_edge_repeat_select.selected > 0
+        layer_info['9_patch_center_repeat'] = nine_patch_center_repeat_select.selected > 0
+    else:
+        layer_info.erase('scale_as_9_patch')
+        layer_info.erase('9_patch_corner_size')
+        layer_info.erase('9_patch_edge_repeat')
+        layer_info.erase('9_patch_center_repeat')
+    changed.emit()
+    refresh_ui()
+
+func on_nine_patch_corner_size_changed(_new_value: Vector2) -> void:
+    layer_info['9_patch_corner_size'] = _get_nine_patch_corner_size_for_save()
+    changed.emit()
+
+func on_nine_patch_edge_repeat_selected(index: int) -> void:
+    if not layer_info.get("scale_as_9_patch", false):
+        layer_info.erase('9_patch_edge_repeat')
+        return
+    layer_info['9_patch_edge_repeat'] = true if index > 0 else false
+    changed.emit()
+
+func on_nine_patch_center_repeat_selected(index: int) -> void:
+    if not layer_info.get("scale_as_9_patch", false):
+        layer_info.erase('9_patch_center_repeat')
+        return
+    layer_info['9_patch_center_repeat'] = true if index > 0 else false
     changed.emit()

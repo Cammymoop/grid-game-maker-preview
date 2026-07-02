@@ -249,12 +249,28 @@
       "default_size": [
         1.0,
         1.0
-      ]
+      ],
+      "sprite_config": {
+        "layers": [
+          {
+            "mode": "normal",
+            "texture": 1.0,
+            "tex_index": 24.0,
+            "scale_as_9_patch": true,
+            "9_patch_corner_size": [
+              0.375,
+              0.375
+            ],
+            "9_patch_edge_repeat": false,
+            "9_patch_center_repeat": false
+          }
+        ]
+      }
     },
     "3": {
       "name": "expand-block",
       "texture": 3,
-      "tex_index": 28,
+      "tex_index": 29,
       "properties": {
         "move_onto": [
           {
@@ -309,7 +325,6 @@
               "basic_default.c_get_pushed::[\"i:1\",{\"args\":[\"s:type\",\"s:slot_reference\",\"s:slot_id\",\"i:6\",\"s:direction\",\"i:0\"],\"type\":\"Dictionary\"},true]"
             ],
             "when true": [
-              "basic_default.override_move_animation::[\"i:1\",\"s:none\"]",
               "basic_default.select_large_entity_size_in_direction::[\"i:9\",\"i:0\",{\"args\":[\"s:type\",\"s:slot_reference\",\"s:slot_id\",\"i:6\",\"s:direction\",\"i:0\"],\"type\":\"Dictionary\"}]",
               "basic_default.select_math::[\"i:9\",{\"args\":[\"s:type\",\"s:slot_value\",\"s:slot_id\",\"i:9\"],\"type\":\"Dictionary\"},\"s:+\",{\"args\":[\"s:type\",\"s:plain\",\"s:value\",\"f:1.0\"],\"type\":\"Dictionary\"}]",
               "basic_default.set_large_entity_size_in_direction::[\"i:0\",{\"args\":[\"s:type\",\"s:slot_reference\",\"s:slot_id\",\"i:6\",\"s:direction\",\"i:0\"],\"type\":\"Dictionary\"},{\"args\":[\"s:type\",\"s:slot_value\",\"s:slot_id\",\"i:9\"],\"type\":\"Dictionary\"}]"
@@ -335,12 +350,28 @@
       "default_size": [
         1.0,
         1.0
-      ]
+      ],
+      "sprite_config": {
+        "layers": [
+          {
+            "mode": "normal",
+            "texture": 3.0,
+            "tex_index": 29.0,
+            "scale_as_9_patch": true,
+            "9_patch_corner_size": [
+              0.3125,
+              0.3125
+            ],
+            "9_patch_edge_repeat": true,
+            "9_patch_center_repeat": false
+          }
+        ]
+      }
     },
     "4": {
       "name": "check",
       "texture": 3,
-      "tex_index": 30,
+      "tex_index": 31,
       "properties": {
         "z-index": 2,
         "post_move_off_of": {
@@ -358,14 +389,8 @@
         "layers": [
           {
             "mode": "normal",
-            "texture": 2.0,
-            "tex_index": 10.0,
-            "mod_color": "#f0c2601a"
-          },
-          {
-            "mode": "normal",
-            "texture": 3.0,
-            "tex_index": 30.0,
+            "texture": 3,
+            "tex_index": 31,
             "mod_color": "#f0c26058"
           },
           {
@@ -399,15 +424,9 @@
         "layers": [
           {
             "mode": "normal",
-            "texture": 2.0,
-            "tex_index": 10.0,
-            "mod_color": "#f9564a15"
-          },
-          {
-            "mode": "normal",
             "texture": 3.0,
             "tex_index": 30.0,
-            "mod_color": "#f9564a8a"
+            "mod_color": "#0702023c"
           },
           {
             "mode": "normal",
@@ -443,12 +462,6 @@
           {
             "mode": "normal",
             "texture": 3.0,
-            "tex_index": 30.0,
-            "mod_color": "#f0c2609f"
-          },
-          {
-            "mode": "normal",
-            "texture": 3.0,
             "tex_index": 50.0,
             "mod_color": "#f0c260ff"
           }
@@ -468,7 +481,7 @@
     "2": {
       "name": "target-tile",
       "texture": 3,
-      "tex_index": 48,
+      "tex_index": 39,
       "properties": {
 
       }

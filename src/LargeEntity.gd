@@ -36,12 +36,14 @@ func get_default_size() -> Vector2:
 func is_default_size() -> bool:
 	return entity_size == get_default_size()
 
-func update_sprite_pos_scale() -> void:
-	sprite.set_sprite_size(Vector2(MapManager.tile_width * entity_size.x, MapManager.tile_width * entity_size.y))
-	if EntityManager.get_entity_prop_with_default(self, "auto-scale", true):
-		sprite.scale = entity_size
-	else:
-		sprite.scale = Vector2.ONE
+func update_sprite_pos_scale(immediate: bool = true, tile_pos_delta: Vector2i = Vector2i.ZERO) -> void:
+	var is_auto_scale: bool = EntityManager.get_entity_prop_with_default(self, "auto-scale", true)
+	if not immediate and is_auto_scale and sprite.interpolate_size_change_enabled:
+		sprite.set_large_size_with_position_and_interpolation(entity_size, tile_pos_delta)
+		return
+
+	sprite.set_sprite_size(entity_size * MapManager.tile_width)
+	sprite.set_large_auto_scale(is_auto_scale, entity_size)
 
 func _serialize_shape_mask() -> Dictionary:
 	var serialized_shape_mask: Dictionary = {}
@@ -66,13 +68,13 @@ func serialize() -> Dictionary:
 	serialized["move_was_facing"] = _move_was_facing
 	return serialized
 
-func shrink_in_direction(in_facing_dir: int, is_relative: bool, amount: int) -> void:
-	set_size_in_direction(in_facing_dir, is_relative, -amount)
+func shrink_in_direction(in_facing_dir: int, is_relative: bool, amount: int, immediate: bool = false) -> void:
+	set_size_in_direction(in_facing_dir, is_relative, -amount, immediate)
 
-func grow_in_direction(in_facing_dir: int, is_relative: bool, amount: int) -> void:
-	set_size_in_direction(in_facing_dir, is_relative, amount)
+func grow_in_direction(in_facing_dir: int, is_relative: bool, amount: int, immediate: bool = false) -> void:
+	set_size_in_direction(in_facing_dir, is_relative, amount, immediate)
 
-func set_size_in_direction(in_facing_dir: int, is_relative: bool, amount: int) -> void:
+func set_size_in_direction(in_facing_dir: int, is_relative: bool, amount: int, immediate: bool = false) -> void:
 	var size_axis: = 1 if in_facing_dir == 0 or in_facing_dir == 2 else 0
 	var oriented_size: = get_oriented_size()
 	var old_size: = int(oriented_size[size_axis])
@@ -86,23 +88,23 @@ func set_size_in_direction(in_facing_dir: int, is_relative: bool, amount: int) -
 	
 	var current_rect: = get_pos_rect_at(get_moving_position())
 	var new_rect: = current_rect.grow_side(Utility.facing_to_rect_side(in_facing_dir), new_size - old_size)
-	update_position_and_size(new_rect.position, new_rect.size)
+	update_position_and_size(new_rect.position, new_rect.size, immediate)
 
-func update_size(new_size: Vector2i, is_oriented: bool = true) -> void:
+func update_size(new_size: Vector2i, is_oriented: bool = true, immediate: bool = true, tile_pos_delta: Vector2i = Vector2i.ZERO) -> void:
 	if is_oriented:
-		_update_oriented_size(new_size)
+		_update_oriented_size(new_size, immediate, tile_pos_delta)
 	else:
-		_update_size(new_size)
+		_update_size(new_size, immediate, tile_pos_delta)
 
-func _update_size(new_size: Vector2i) -> void:
+func _update_size(new_size: Vector2i, immediate: bool, tile_pos_delta: Vector2i) -> void:
 	entity_size = new_size
 	# TODO preserve mask more
 	use_mask = false
 	set_default_mask()
 	if sprite:
-		update_sprite_pos_scale()
+		update_sprite_pos_scale(immediate, tile_pos_delta)
 
-func _update_oriented_size(new_size: Vector2i) -> void:
+func _update_oriented_size(new_size: Vector2i, immediate: bool, tile_pos_delta: Vector2i) -> void:
 	if facing % 2 == 0:
 		entity_size = Vector2(new_size)
 	else:
@@ -111,25 +113,27 @@ func _update_oriented_size(new_size: Vector2i) -> void:
 	use_mask = false
 	set_default_mask()
 	if sprite:
-		update_sprite_pos_scale()
+		update_sprite_pos_scale(immediate, tile_pos_delta)
 	
-func update_size_by_corners(corner_a: Vector2i, corner_b: Vector2i) -> void:
+func update_size_by_corners(corner_a: Vector2i, corner_b: Vector2i, immediate: bool = true) -> void:
 	var new_size_rect: = Utility.rect2i_from_corners_inclusive(corner_a, corner_b)
 	#prints("updating size by corners, old size rect:", Rect2i(tile_position, entity_size), "new size rect:", new_size_rect)
-	update_position_and_size(new_size_rect.position, new_size_rect.size)
+	update_position_and_size(new_size_rect.position, new_size_rect.size, immediate)
 
-func update_position_and_size(new_position: Vector2i, new_size: Vector2i) -> void:
+func update_position_and_size(new_position: Vector2i, new_size: Vector2i, immediate: bool = true) -> void:
 	var delta_pos: = new_position - get_moving_position()
 	if delta_pos == Vector2i.ZERO:
-		update_size(new_size, true)
+		update_size(new_size, true, immediate)
 		return
 	if moving:
+		immediate = true
 		next_tile_pos += delta_pos
+		interpolate_pos()
 	else:
 		tile_position += delta_pos
 		next_tile_pos = tile_position
 		position = MapManager.tile_to_world_position(tile_position)
-	update_size(new_size, true)
+	update_size(new_size, true, immediate, delta_pos)
 
 
 

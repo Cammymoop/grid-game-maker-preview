@@ -18,10 +18,11 @@ var digit_display_scn: PackedScene = preload("res://Scenes/digit_display.tscn")
 var clipping_spr_scn: PackedScene = preload("res://src/Utility/sub_vp_friendly_clipping_sprite.tscn")
 
 var replace_color_mat: ShaderMaterial = preload("res://src/Effects/sprite_with_replace_color.tres")
+var replace_color_9_patch_mat: ShaderMaterial = preload("res://src/Effects/nine_patch_replace_color_spr.tres")
 
 var layers: Array[Dictionary] = []
 var current_rotation: float = 0
-var _facing_rotation: float = 0.0
+var _facing_lerp_from_rotation: float = 0.0
 var _current_facing: int = 0
 var elapsed_time: float = 0.0
 
@@ -57,10 +58,20 @@ var simple_rotate: bool = true
 
 var interpolate_facing_enabled: bool = true
 var interp_facing_timer: float = 0.0
-@export var interp_duration: float = 0.24
+@export var facing_interp_duration: float = 0.24
 @export_exp_easing() var interp_ease_param: float = 0.2
 
+var interpolate_size_change_enabled: bool = true
+var interp_size_change_mode: Utility.PosInterpStyle = Utility.PosInterpStyle.EASE_OUT
+var interp_size_change_timer: float = 0.0
+var interp_size_change_duration: float = 0.1
+
+var _size_interp_from_offset: Vector2 = Vector2.ZERO
+var _size_interp_from_scale: Vector2 = Vector2.ONE
+
 var layer_root: Node2D = null
+var large_auto_scale_enabled: bool = false
+var large_auto_scale_size: Vector2 = Vector2.ONE
 
 var _moving: bool = false
 
@@ -110,11 +121,21 @@ func sprite_process(delta_time: float) -> void:
     if interpolate_facing_enabled:
         if interp_facing_timer > 0:
             interp_facing_timer = maxf(0, interp_facing_timer - delta_time)
-            var eased_progress: float = ease(1 - (interp_facing_timer / interp_duration), interp_ease_param)
+            var eased_progress: float = ease(1 - (interp_facing_timer / facing_interp_duration), interp_ease_param)
 
             var to_angle: float = Utility.facing_rotation(parent_entity.facing)
-            var interp_angle: float = lerp_angle(_facing_rotation, to_angle, eased_progress)
+            var interp_angle: float = lerp_angle(_facing_lerp_from_rotation, to_angle, eased_progress)
             set_sprite_rotation(interp_angle)
+    if interpolate_size_change_enabled:
+        if interp_size_change_timer > 0:
+            interp_size_change_timer = maxf(0, interp_size_change_timer - delta_time)
+            var size_change_progress: float = 1 - (interp_size_change_timer / interp_size_change_duration)
+            var eased_progress: float = Utility.get_interp_factor(interp_size_change_mode, size_change_progress)
+            
+            scale = _size_interp_from_scale.lerp(large_auto_scale_size, eased_progress)
+            var new_offset: Vector2 = _size_interp_from_offset.lerp(Vector2.ZERO, eased_progress)
+            _update_oriented_position(new_offset)
+            update_all_layers_shader_scale()
     process_animated_modifiers(delta_time)
 
 func update_layers_moving_visibility() -> void:
@@ -309,11 +330,12 @@ func apply_modifier_info(modifier_info: Dictionary, is_dying_effect: bool = fals
             animated_modifiers.append(modifier_name)
         if is_dying_effect:
             _dying_with_animated_mod = modifier_name
+    _all_modifiers[modifier_name] = modifier_info.duplicate_deep()
+    refresh_layers()
+
     if modifier_name in animated_modifiers:
         _animation_timers[modifier_name] = 0.0
         apply_animated_effects_to_sprite()
-    _all_modifiers[modifier_name] = modifier_info.duplicate_deep()
-    refresh_layers()
 
 func has_applied_modifier(modifier_name: String) -> bool:
     return modifier_name in _all_modifiers
@@ -339,10 +361,14 @@ func clear_modifiers() -> void:
     _remove_all_modifier_layers()
     _remove_main_layers_mask()
     _all_modifiers.clear()
+
+    var had_animated_effects: bool = not animated_effects.is_empty()
     animated_effects.clear()
     animated_modifiers.clear()
+    if had_animated_effects:
+        apply_animated_effects_to_sprite()
+
     _animation_timers.clear()
-    apply_animated_effects_to_sprite()
     refresh_layers()
 
 func get_serialized_info() -> Dictionary:
@@ -428,6 +454,15 @@ func create_and_add_nodes_for_layer(layer_info: Dictionary, layer_index: int) ->
             layer_spr.region_rect = layer_tex_rect
             layer_spr.region_enabled = true
             main_layer_node = layer_spr
+
+            var scale_as_9_patch: bool = layer_info.get("scale_as_9_patch", false)
+            main_layer_node.set_meta("scale_as_9_patch", scale_as_9_patch)
+            if scale_as_9_patch:
+                var shader_mat: = main_layer_node.material as ShaderMaterial
+                var layer_corner_size: Vector2 = Utility.get_vector2_from_arr(layer_info.get("9_patch_corner_size", [0.375, 0.375]))
+                main_layer_node.set_meta("nine_patch_corner_size", layer_corner_size)
+                shader_mat.set_shader_parameter("patch_size", Vector2.ONE - (layer_corner_size * 2.0));
+
     elif layer_info.get("mode") == "digits":
         var digit_display: = digit_display_scn.instantiate() as DigitDisplay
         main_layer_node = digit_display
@@ -446,8 +481,37 @@ func create_and_add_nodes_for_layer(layer_info: Dictionary, layer_index: int) ->
             return
         main_layer_node = particle_types[particles_type].instantiate()
     
+    # now setup pivot indirection so the main layer node will be able to get all the meta info properly later
     var offset_degrees: float = layer_info.get("offset_degrees", 0)
     main_layer_node.set_meta("offset_degrees", offset_degrees)
+    
+    var layer_offset: Vector2 = Utility.get_vector2_from_arr(layer_info.get("offset", [0,0]))
+    var layer_pivot_offset: Vector2 = Utility.get_vector2_from_arr(layer_info.get("pivot", [0,0]))
+    
+    main_layer_node.set_meta("is_pivot_dummy", false)
+
+    if layer_pivot_offset != layer_offset:
+        var relative_offset: Vector2 = layer_offset - layer_pivot_offset
+        if is_masked:
+            main_layer_node.position = layer_pivot_offset
+            var rotated_layer_offset: = relative_offset.rotated(-deg_to_rad(offset_degrees))
+            main_layer_node.offset = rotated_layer_offset
+        else:
+            var pivot_node: Node2D = Node2D.new()
+            pivot_node.add_child(main_layer_node)
+            main_layer_node.position = relative_offset
+            main_layer_node.rotation = deg_to_rad(offset_degrees)
+            pivot_node.position = layer_pivot_offset
+            # this meta was set above, make sure to copy it over
+            if main_layer_node.has_meta("scale_as_9_patch"):
+                pivot_node.set_meta("scale_as_9_patch", main_layer_node.get_meta("scale_as_9_patch"))
+                pivot_node.set_meta("nine_patch_corner_size", main_layer_node.get_meta("nine_patch_corner_size", Vector2.ONE * 0.25))
+            main_layer_node = pivot_node
+            main_layer_node.set_meta("offset_degrees", 0)
+            main_layer_node.set_meta("is_pivot_dummy", true)
+
+    main_layer_node.name = layer_info.get("mode", "MODE") + str(layer_index)
+    main_layer_node.set_meta("unscaled_static_pos", main_layer_node.position)
     
     if layer_info.get("when_property", ""):
         var when_property_name: String = layer_info["when_property"]
@@ -469,24 +533,8 @@ func create_and_add_nodes_for_layer(layer_info: Dictionary, layer_index: int) ->
     main_layer_node.set_meta("base_mod_color", base_mod_color)
     main_layer_node.modulate = base_mod_color
     
-    var layer_offset: Vector2 = Utility.get_vector2_from_arr(layer_info.get("offset", [0,0]))
-    var layer_pivot_offset: Vector2 = Utility.get_vector2_from_arr(layer_info.get("pivot", [0,0]))
-
-    if layer_pivot_offset != layer_offset:
-        var relative_offset: Vector2 = layer_offset - layer_pivot_offset
-        if is_masked:
-            main_layer_node.position = layer_pivot_offset
-            var rotated_layer_offset: = relative_offset.rotated(-deg_to_rad(offset_degrees))
-            main_layer_node.offset = rotated_layer_offset
-        else:
-            var pivot_node: Node2D = Node2D.new()
-            pivot_node.add_child(main_layer_node)
-            main_layer_node.position = relative_offset
-            main_layer_node.rotation = deg_to_rad(offset_degrees)
-            pivot_node.position = layer_pivot_offset
-            main_layer_node = pivot_node
-            main_layer_node.set_meta("offset_degrees", 0)
-    main_layer_node.name = layer_info.get("mode", "MODE") + str(layer_index)
+    if not main_layer_node.has_meta("scale_as_9_patch"):
+        main_layer_node.set_meta("scale_as_9_patch", false)
     
     if layer_info.get("when_camera_focus", "ignore") != "ignore":
         main_layer_node.set_meta("show_when_cam_focus", layer_info["when_camera_focus"] != "hide")
@@ -500,7 +548,7 @@ func create_and_add_nodes_for_layer(layer_info: Dictionary, layer_index: int) ->
 
     layer_root.add_child(main_layer_node, true)
     var layer_scale: Vector2 = Utility.get_vector2_from_arr(layer_info.get("scale", [1,1]))
-    layer_scale *= _get_modifiers_scale()
+    main_layer_node.set_meta("static_scale", layer_scale)
     main_layer_node.scale = layer_scale
     
     main_layer_node.set_meta("modifier", layer_info.get("modifier", ""))
@@ -531,6 +579,10 @@ func create_and_add_nodes_for_layer(layer_info: Dictionary, layer_index: int) ->
     
     if layer_info.get("is_main_layer", false) or layer_info.get("receives_effects", true):
         _apply_modifier_effects_to(main_layer_node)
+    
+    if main_layer_node.get_meta("scale_as_9_patch", false):
+        var shader_mat: = get_layer_node_material(main_layer_node)
+        shader_mat.set_shader_parameter("cur_scale_for_patch", main_layer_node.scale * scale)
 
 func check_register_cam_focus_updates() -> void:
     if not GameManager.game_camera_target_changed.is_connected(refresh_cam_focus):
@@ -604,11 +656,11 @@ func _add_modifier_effect_stuff(effect_name: String, modifier_name: String, effe
     modifier_effects[effect_name][modifier_name] = effect_stuff
 
 func _remove_modifier_effect_stuff(modifier_name: String) -> void:
-    for effect_name in animated_effects:
-        if animated_effects[effect_name].has(modifier_name):
-            animated_effects[effect_name].erase(modifier_name)
-            if animated_effects[effect_name].size() == 0:
-                animated_effects.erase(effect_name)
+    for effect_name in modifier_effects:
+        if modifier_effects[effect_name].has(modifier_name):
+            modifier_effects[effect_name].erase(modifier_name)
+            if modifier_effects[effect_name].size() == 0:
+                modifier_effects.erase(effect_name)
 
 func _add_animated_modifier_effect(effect_name: String, modifier_name: String, effect_stuff: Variant) -> void:
     if not animated_effects.has(effect_name):
@@ -618,12 +670,9 @@ func _add_animated_modifier_effect(effect_name: String, modifier_name: String, e
 func _remove_animated_modifier_effects(for_modifier_name: String) -> void:
     for effect_name in animated_effects.keys():
         if animated_effects[effect_name].has(for_modifier_name):
-            prints("removing animated effect %s for modifier %s" % [effect_name, for_modifier_name])
             animated_effects[effect_name].erase(for_modifier_name)
             if animated_effects[effect_name].size() == 0:
                 animated_effects.erase(effect_name)
-        else:
-            prints("effect %s not included in modifier %s" % [effect_name, for_modifier_name])
 
 func clear_children() -> void:
     if not layer_root:
@@ -633,17 +682,17 @@ func clear_children() -> void:
 
 func set_sprite_facing(facing: int, immediate: bool = false) -> void:
     if interpolate_facing_enabled and not immediate:
-        _facing_rotation = current_rotation
+        _facing_lerp_from_rotation = current_rotation
         _current_facing = facing
-        interp_facing_timer = interp_duration
+        interp_facing_timer = facing_interp_duration
     else:
         set_sprite_rotation(Utility.facing_rotation(facing))
 
-func set_sprite_rotation(new_rotation: float, force: bool = false) -> void:
-    if _animated_spinning and not force:
-        return
-    if not _animated_spinning:
+func set_sprite_rotation(new_rotation: float, setting_anim_spin_rotation: bool = false) -> void:
+    if not setting_anim_spin_rotation:
         current_rotation = new_rotation
+    if _animated_spinning and not setting_anim_spin_rotation:
+        return
     if not layer_root:
         return
     for layer_node in layer_root.get_children():
@@ -797,16 +846,22 @@ func update_layer_visible(layer_node: Node2D) -> void:
     layer_node.visible = vis
 
 func _apply_modifier_effects_to(layer_node: Node2D) -> void:
-    layer_node.scale *= _get_modifiers_scale()
+    _update_layer_node_scale(layer_node, layer_node.scale * _get_modifiers_scale())
     _apply_modifier_transforms_to(layer_node)
     _apply_mod_replace_color_to(layer_node)
     _apply_mod_modulate_to(layer_node)
 
+    # update the base scale and unscaled static pos so it now accounts for the static transform modifier
+    layer_node.set_meta("base_scale", layer_node.scale)
+    layer_node.set_meta("unscaled_static_pos", layer_node.position / layer_node.scale)
+    # shader param for 9 patch scale is automatically set after this func for every layer
+
 func _apply_mod_replace_color_to(layer_node: Node2D) -> void:
     var active_replace_color: Dictionary = _get_static_replace_color()
-    if layer_node.material and layer_node.material is ShaderMaterial:
-        layer_node.material.set_shader_parameter("replace_color", active_replace_color["color"])
-        layer_node.material.set_shader_parameter("replace_amt", active_replace_color["amount"])
+    var shader_mat: = get_layer_node_material(layer_node)
+    if shader_mat:
+        shader_mat.set_shader_parameter("replace_color", active_replace_color["color"])
+        shader_mat.set_shader_parameter("replace_amt", active_replace_color["amount"])
 
 func _get_static_replace_color() -> Dictionary:
     var replace_color_modifiers: Array = modifier_effects.get("replace_color", {}).keys()
@@ -820,9 +875,31 @@ func _get_static_replace_color() -> Dictionary:
 
 func _set_all_layers_replace_color(color: Color, amount: float) -> void:
     for layer_node in layer_root.get_children():
-        if layer_node.material and layer_node.material is ShaderMaterial:
-            layer_node.material.set_shader_parameter("replace_color", color)
-            layer_node.material.set_shader_parameter("replace_amt", amount)
+        var shader_mat: = get_layer_node_material(layer_node)
+        if shader_mat:
+            shader_mat.set_shader_parameter("replace_color", color)
+            shader_mat.set_shader_parameter("replace_amt", amount)
+
+func _set_all_layers_anim_scale(anim_scale: Vector2) -> void:
+    for layer_node in layer_root.get_children():
+        _update_layer_node_scale(layer_node, anim_scale * _get_layer_base_scale(layer_node))
+
+func _update_layer_node_scale(layer_node: Node2D, new_scale: Vector2) -> void:
+    layer_node.scale = new_scale
+    layer_node.position = layer_node.get_meta("unscaled_static_pos", Vector2.ZERO) * layer_node.scale
+    if layer_node.get_meta("scale_as_9_patch"):
+        var shader_mat: = get_layer_node_material(layer_node)
+        if shader_mat:
+            shader_mat.set_shader_parameter("cur_scale_for_patch", layer_node.scale * scale)
+
+func update_all_layers_shader_scale() -> void:
+    if not layer_root:
+        return
+    for layer_node in layer_root.get_children():
+        if layer_node.get_meta("scale_as_9_patch"):
+            var shader_mat: = get_layer_node_material(layer_node)
+            if shader_mat:
+                shader_mat.set_shader_parameter("cur_scale_for_patch", layer_node.scale * scale)
 
 func _apply_mod_modulate_to(layer_node: Node2D) -> void:
     var modulate_effects: Dictionary = modifier_effects.get("modulate", {})
@@ -838,6 +915,9 @@ func _get_modifiers_scale() -> Vector2:
         m_scale *= Utility.get_vector2_from_arr(modifier_effects["scale"][mod_name])
     return m_scale
 
+func _get_layer_base_scale(layer_node: Node2D) -> Vector2:
+    return layer_node.get_meta("static_scale", Vector2.ONE)
+
 func _apply_modifier_transforms_to(layer_node: Node2D) -> void:
     var m_transform: Transform2D = Transform2D.IDENTITY
     for modifier_name in modifier_effects.get("transform", {}):
@@ -847,7 +927,8 @@ func _apply_modifier_transforms_to(layer_node: Node2D) -> void:
 
 func _get_new_unmasked_sprite() -> Sprite2D:
     var new_sprite: Sprite2D = Sprite2D.new()
-    new_sprite.material = replace_color_mat.duplicate()
+    #new_sprite.material = replace_color_mat.duplicate()
+    new_sprite.material = replace_color_9_patch_mat.duplicate()
     return new_sprite
 
 
@@ -888,7 +969,7 @@ func _anim___scale(effect_stack: Dictionary, _delta_time: float) -> void:
         var scale_from: = Utility.get_vector2_from_arr(effect_data.get("scale_from", [1,1]))
         var scale_to: = Utility.get_vector2_from_arr(effect_data.get("scale_to", [1,1]))
         total_scale *= scale_from.lerp(scale_to, t)
-    layer_root.scale = total_scale
+    _set_all_layers_anim_scale(total_scale)
 
 func _anim___offset(effect_stack: Dictionary, _delta_time: float) -> void:
     var accumulated_offset: = Vector2.ZERO
@@ -960,13 +1041,50 @@ func get_is_visual_moving() -> bool:
         return false
     return parent_entity.is_visual_moving()
 
-func set_sprite_size(new_unoriented_bounds: Vector2) -> void:
+func set_sprite_size(new_unoriented_bounds: Vector2, update_pos_now: bool = true) -> void:
     unoriented_bounds = new_unoriented_bounds
     unoriented_center = unoriented_bounds / 2
     simple_rotate = unoriented_bounds.x == unoriented_bounds.y
-    _update_oriented_position()
+    if update_pos_now:
+        _update_oriented_position()
 
-func _update_oriented_position() -> void:
-    if simple_rotate or _current_facing == 0:
+func _update_oriented_position(with_offset: Vector2 = Vector2.ZERO) -> void:
+    if simple_rotate or _current_facing % 2 == 0:
         position = unoriented_center
+    else:
+        position = Vector2(unoriented_center.y, unoriented_center.x)
+    position += with_offset
+
+func set_large_auto_scale(enable: bool, new_size: Vector2 = Vector2.ONE) -> void:
+    large_auto_scale_enabled = enable
+    large_auto_scale_size = new_size
+    if not large_auto_scale_enabled:
+        scale = Vector2.ONE
+    else:
+        scale = large_auto_scale_size
+    update_all_layers_shader_scale()
+
+func set_large_size_with_position_and_interpolation(new_size: Vector2, tile_pos_delta: Vector2i) -> void:
+    if not interpolate_size_change_enabled:
+        push_warning("Interpolate size change is disabled, but set_large_size_with_position_and_interpolation was called")
+        set_large_auto_scale(true, new_size)
         return
+
+    var old_center: Vector2 = large_auto_scale_size / 2
+    var new_center: Vector2 = new_size / 2
+    var center_offset: Vector2 = old_center - new_center
+
+    _size_interp_from_scale = large_auto_scale_size
+    _size_interp_from_offset = -((Vector2(tile_pos_delta) - center_offset) * MapManager.tile_width)
+    interp_size_change_timer = interp_size_change_duration
+
+    large_auto_scale_enabled = true
+    large_auto_scale_size = new_size
+    
+    # also update unoriented_bounds and unoriented_center
+    set_sprite_size(new_size * MapManager.tile_width, false)
+
+func get_layer_node_material(layer_node: Node2D) -> ShaderMaterial:
+    if layer_node.get_meta("is_pivot_dummy"):
+        return layer_node.get_child(0).material as ShaderMaterial
+    return layer_node.material as ShaderMaterial

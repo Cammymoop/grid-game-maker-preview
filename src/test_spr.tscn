@@ -1,0 +1,14 @@
+[gd_scene format=3 uid="uid://d0jj2hwroistc"]
+
+[ext_resource type="Material" uid="uid://n6x5yia2gx87" path="res://src/Effects/nine_patch_replace_color_spr.tres" id="1_0oykr"]
+[ext_resource type="Texture2D" uid="uid://d0uyc2rshryrj" path="res://assets/img/entityTiles.png" id="2_pifch"]
+
+[node name="Node2D" type="Node2D" unique_id=442268612]
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=1249095566]
+texture_filter = 1
+material = ExtResource("1_0oykr")
+scale = Vector2(4, 4)
+texture = ExtResource("2_pifch")
+region_enabled = true
+region_rect = Rect2(256, 0, 32, 32)

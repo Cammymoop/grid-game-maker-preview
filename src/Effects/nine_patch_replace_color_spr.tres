@@ -1,0 +1,14 @@
+[gd_resource type="ShaderMaterial" format=3 uid="uid://n6x5yia2gx87"]
+
+[ext_resource type="Shader" uid="uid://dioj02x6w7pd0" path="res://src/Effects/nine_patch_replace_color_spr.gdshader" id="1_fbtvo"]
+
+[resource]
+resource_local_to_scene = true
+shader = ExtResource("1_fbtvo")
+shader_parameter/replace_amt = 0.0
+shader_parameter/replace_color = Color(0, 0, 0, 1)
+shader_parameter/patch_size = Vector2(0.25, 0.25)
+shader_parameter/cur_scale_for_patch = Vector2(1, 1)
+shader_parameter/patch_sides_repeat = 1.0
+shader_parameter/patch_center_repeat = 1.0
+shader_parameter/check_slider = 0.9999999776485

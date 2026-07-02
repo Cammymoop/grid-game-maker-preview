@@ -17,14 +17,11 @@ func _ready() -> void:
     process_mode = Node.PROCESS_MODE_ALWAYS
 
 func show_toast_message(message: String, with_extra_time: float = -1) -> void:
-    prints("show msg:", message)
     if message_queue and message_queue.front()["message"] == message:
-        prints("message is already next in queue, skipping", message)
         return
     if message_queue.size() >= message_queue_max_size:
         message_queue.pop_back()
     message_queue.append({"message": message, "extra_time": with_extra_time})
-    prints("message queue", message_queue)
     
 func do_show_message(message: Dictionary) -> void:
     _extra_wait_time = message["extra_time"]
@@ -32,7 +29,6 @@ func do_show_message(message: Dictionary) -> void:
         _extra_wait_time = default_extra_time
 
     toast_message_label.text = message["message"]
-    prints("showing '%s' for %s" % [message["message"], _extra_wait_time])
     toast_animator.play("show")
 
 func start_hide_anim() -> void:
