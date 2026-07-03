@@ -27,6 +27,28 @@ func spawn_mini_text_at(mini_text_message: String, at_pos: Vector2, lifetime: fl
     mini_text_message_instance.mini_message = mini_text_message
     return _spawn_entity_layer_effect(mini_text_message_instance, at_pos, use_id)
 
+func spawn_text_effect(at_pos: Vector2, options: Dictionary, use_id: int = -1) -> int:
+    var text_content: String = options.get("text", "")
+    if not text_content:
+        return -1
+    var the_popup: = mini_text_message_scene.instantiate() as MiniTextMessage
+    the_popup.set_message_text(text_content)
+    the_popup.set_font_size(options.get("font_size", 9.0))
+    the_popup.set_color(options.get("fill_color", Color.WHITE))
+    var outline_color: Color = options.get("outline_color", Color.BLACK)
+    if outline_color.a == 0:
+        the_popup.set_outline_enabled(false)
+    else:
+        the_popup.set_outline_enabled(true)
+        the_popup.set_outline_color(outline_color)
+    
+    the_popup.lifetime = options.get("popup_time", 0)
+    the_popup.z_index = options.get("z_offset", 0)
+    
+    the_popup.set_layout_mode(options.get("h_align", HORIZONTAL_ALIGNMENT_CENTER))
+    
+    return _spawn_entity_layer_effect(the_popup, at_pos, use_id)
+
 func _fetch_effects_holder() -> void:
     if effects_holder:
         return

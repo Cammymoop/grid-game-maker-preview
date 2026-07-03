@@ -389,8 +389,8 @@
         "layers": [
           {
             "mode": "normal",
-            "texture": 3,
-            "tex_index": 31,
+            "texture": 3.0,
+            "tex_index": 31.0,
             "mod_color": "#f0c26058"
           },
           {

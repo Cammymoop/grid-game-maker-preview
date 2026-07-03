@@ -1,17 +1,15 @@
-[gd_scene load_steps=2 format=2]
+[gd_scene format=3 uid="uid://qdyrw1gls70f"]
 
-[ext_resource path="res://src/UI/EasyMenuButton.gd" type="Script" id=1]
+[ext_resource type="Script" uid="uid://8qxagem30xv6" path="res://src/UI/EasyMenuButton.gd" id="1"]
 
-[node name="EasyMenuButton" type="MenuButton"]
+[node name="EasyMenuButton" type="MenuButton" unique_id=2078036748]
 offset_left = 32.0
 offset_top = 5.0
 offset_right = 101.0
 offset_bottom = 25.0
-focus_mode = 2
 size_flags_vertical = 4
+focus_mode = 2
+theme_type_variation = &"MenuOptButton"
 text = "Absolute"
 flat = false
-script = ExtResource( 1 )
-__meta__ = {
-"_edit_use_anchors_": false
-}
+script = ExtResource("1")

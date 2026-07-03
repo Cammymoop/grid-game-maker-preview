@@ -250,7 +250,7 @@ func set_input_value_from_current_value() -> void:
                 var num_decimal_places: int = maxi(0, len(str(current_value).split(".")[1]))
                 number_input.set_step_and_arrow_step(lowest_step_size, pow(10, -num_decimal_places))
             else:
-                number_input.set_step_and_arrow_step(lowest_step_size, 1)
+                number_input.set_step_and_arrow_step(1, 1)
             number_input.set_value(current_value)
 
 func show_input_for_current_type() -> void:

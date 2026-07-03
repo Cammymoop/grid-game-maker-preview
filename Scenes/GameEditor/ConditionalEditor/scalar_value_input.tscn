@@ -2,14 +2,18 @@
 
 [ext_resource type="Script" uid="uid://cnppg2kg7idd7" path="res://src/GameEditor/ConditionalEditor/scalar_value_input.gd" id="1_8ivw8"]
 [ext_resource type="StyleBox" uid="uid://dql3g3np3anc8" path="res://assets/ui/covered_spinbox_panel_bg.tres" id="1_oofn6"]
+[ext_resource type="StyleBox" uid="uid://sbmgw7eumbe8" path="res://assets/ui/spin_box_expanded_focus_sb.tres" id="2_8o0y5"]
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_1eekn"]
 
 [sub_resource type="Theme" id="Theme_oofn6"]
 LineEdit/constants/minimum_character_width = 2
+LineEdit/styles/focus = null
 LineEdit/styles/normal = SubResource("StyleBoxEmpty_1eekn")
 LineEdit/styles/read_only = SubResource("StyleBoxEmpty_1eekn")
 PanelContainer/styles/panel = ExtResource("1_oofn6")
+SpinBoxInnerLineEdit/base_type = &"LineEdit"
+SpinBoxInnerLineEdit/styles/focus = ExtResource("2_8o0y5")
 
 [node name="ScalarValueInput" type="PanelContainer" unique_id=1458729988 node_paths=PackedStringArray("value_input")]
 offset_right = 51.78125

@@ -135,9 +135,10 @@ func on_save_conditional_prop(new_conditional_value: Variant, prop_name: String)
     refresh_property_edit_list()
     on_info_changed()
 
-func _shortcut_input(event: InputEvent) -> void:
+func _unhandled_input(event: InputEvent) -> void:
     if Utility.event_is_menu_back_just_pressed(event):
         close_window()
+        set_input_as_handled()
 
 func set_controller(list_index) -> void:
     if tile_entity_mode != "entity":

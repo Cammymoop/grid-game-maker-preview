@@ -4,7 +4,6 @@ signal entity_props_edited(entity: BaseEntity)
 signal entity_local_props_reset(entity: BaseEntity)
 signal edited_something()
 signal closing()
-signal cancel_popups()
 signal request_delete_entity(entity: BaseEntity)
 
 const ConditionalEditor = preload("res://src/GameEditor/ConditionalEditor/ConditionalEditor.gd")
@@ -42,6 +41,8 @@ var edited_entity: BaseEntity = null
 var edit_entity_pulse_period: float = 1.15
 
 var close_on_focus_lost: = true
+
+var _popup_panels: Array[Node] = []
 
 func _ready() -> void:
     large_entity_options.hide()
@@ -161,7 +162,7 @@ func on_duplicate_property_requested(property_name: String) -> void:
     show_add_property_panel(property_name)
 
 func show_add_property_panel(duplicate_prop_name: String = "") -> void:
-    cancel_popups.emit()
+    _close_panel_popups()
     if not popup_holder:
         push_error("popup_holder not set")
         return
@@ -172,8 +173,18 @@ func show_add_property_panel(duplicate_prop_name: String = "") -> void:
         new_property_panel.set_title_text("Duplicate '%s'" % duplicate_prop_name)
     else:
         new_property_panel.name_chosen.connect(on_new_property_name_chosen)
-    cancel_popups.connect(new_property_panel.close_panel)
+    new_property_panel.cancelled.connect(get_add_prop_input_focus)
+    _popup_panels.append(new_property_panel)
     popup_holder.add_child(new_property_panel)
+
+func get_add_prop_input_focus() -> void:
+    add_property_button.button.grab_focus.call_deferred()
+
+func _close_panel_popups() -> void:
+    for panel in _popup_panels:
+        if panel and panel.has_method("close_panel"):
+            panel.close_panel()
+    _popup_panels.clear()
 
 func on_new_property_name_chosen(property_name: String, as_conditional: bool) -> void:
     if property_edit_list:

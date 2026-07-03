@@ -21,6 +21,95 @@ corner_radius_bottom_right = 3
 corner_radius_bottom_left = 3
 corner_detail = 5
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_s8b20"]
+content_margin_left = 4.0
+content_margin_top = 0.0
+content_margin_right = 4.0
+content_margin_bottom = 0.0
+draw_center = false
+border_width_left = 3
+border_width_top = 2
+border_width_right = 3
+border_width_bottom = 2
+border_color = Color(0.39771163, 0.7755852, 0.77810925, 0.827451)
+corner_radius_top_left = 1
+corner_radius_top_right = 1
+corner_radius_bottom_right = 1
+corner_radius_bottom_left = 1
+expand_margin_right = 2.0
+shadow_offset = Vector2(0, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_643ps"]
+content_margin_left = 2.0
+content_margin_top = 0.0
+content_margin_right = 2.0
+content_margin_bottom = 2.0
+bg_color = Color(0.29578847, 0.20181084, 0.15985972, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 4
+border_color = Color(0.18475911, 0.045318447, 0.01277117, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+expand_margin_top = 1.0
+expand_margin_bottom = 1.0
+shadow_color = Color(0, 0, 0, 0.2901961)
+shadow_size = 2
+shadow_offset = Vector2(0, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_obe1g"]
+content_margin_left = 2.0
+content_margin_top = 0.0
+content_margin_right = 2.0
+content_margin_bottom = 2.0
+bg_color = Color(0.6259618, 0.30174232, 0.13828075, 1)
+border_width_bottom = 2
+border_color = Color(0.37887365, 0.18488193, 0.06545318, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+expand_margin_top = 1.0
+expand_margin_bottom = 1.0
+shadow_size = 2
+shadow_offset = Vector2(0, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_in4gg"]
+content_margin_left = 2.0
+content_margin_top = 0.0
+content_margin_right = 2.0
+content_margin_bottom = 2.0
+bg_color = Color(0.4809606, 0.2764243, 0.17901042, 1)
+border_width_bottom = 2
+border_color = Color(0.28666475, 0.1318351, 0.039017048, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+expand_margin_top = 1.0
+expand_margin_bottom = 1.0
+shadow_size = 2
+shadow_offset = Vector2(0, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_plvji"]
+content_margin_left = 2.0
+content_margin_top = 2.0
+content_margin_right = 2.0
+content_margin_bottom = 0.0
+bg_color = Color(0.48235294, 0.27450982, 0.18039216, 1)
+border_width_top = 2
+border_color = Color(0.28627452, 0.13333334, 0.039215688, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+expand_margin_top = 1.0
+expand_margin_bottom = 1.0
+shadow_offset = Vector2(0, 1)
+
 [resource]
 Button/font_sizes/font_size = 14
 Button/styles/disabled = ExtResource("1_io45v")
@@ -42,6 +131,11 @@ RichTextLabel/font_sizes/mono_font_size = 14
 RichTextLabel/font_sizes/normal_font_size = 14
 SpinBoxInnerLineEdit/base_type = &"LineEdit"
 SpinBoxInnerLineEdit/font_sizes/font_size = 14
+SpinBoxInnerLineEdit/styles/focus = SubResource("StyleBoxFlat_s8b20")
 TextEdit/constants/line_spacing = 0
 TextEdit/font_sizes/font_size = 14
+ThinOptButton/styles/disabled = SubResource("StyleBoxFlat_643ps")
+ThinOptButton/styles/hover = SubResource("StyleBoxFlat_obe1g")
+ThinOptButton/styles/normal = SubResource("StyleBoxFlat_in4gg")
+ThinOptButton/styles/pressed = SubResource("StyleBoxFlat_plvji")
 TooltipPanel/styles/panel = ExtResource("8_s8b20")

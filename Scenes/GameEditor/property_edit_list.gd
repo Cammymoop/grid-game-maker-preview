@@ -91,6 +91,13 @@ func _gui_input(event: InputEvent) -> void:
         show_context_menu(null)
         accept_event()
 
+func _shortcut_input(event: InputEvent) -> void:
+    if Utility.event_is_menu_back_just_pressed(event):
+        var active_list_item: ListItem = find_active_list_item()
+        if active_list_item and active_list_item.is_value_editting():
+            active_list_item.stop_value_editting()
+            accept_event()
+
 func apply_edits_to_definition(to_definition_index: int = -1) -> void:
     if to_definition_index == -1:
         to_definition_index = editing_def_index

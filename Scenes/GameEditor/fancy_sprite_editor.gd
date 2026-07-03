@@ -27,9 +27,10 @@ func _ready() -> void:
     await get_tree().process_frame
     update_scroll_container_size()
 
-func _shortcut_input(event: InputEvent) -> void:
+func _unhandled_input(event: InputEvent) -> void:
     if Utility.event_is_menu_back_just_pressed(event):
         close_sprite_editor()
+        set_input_as_handled()
 
 func setup(new_entity_def: Dictionary, the_entity_id: int = -1) -> void:
     entity_id = the_entity_id

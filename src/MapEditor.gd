@@ -988,6 +988,6 @@ func _confirmed_load_level_in_list(level_name: String, level_list_name: String) 
 		GameManager.edit_level_in_list(level_list_name, level_name)
 	
 func on_request_delete_entity(entity: BaseEntity) -> void:
-	EntityManager.delete_entity(entity)
+	EntityManager.remove_entity(entity)
 	_refresh_edited_entity_indicators()
 	something_edited()

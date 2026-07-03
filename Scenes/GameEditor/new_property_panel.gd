@@ -5,7 +5,7 @@ extends PanelContainer
 @export var allow_replacing_existing: bool = true
 @export var existing_property_list: Array[String] = []
 
-@export var property_name_input: LineEdit
+@export var property_name_input: FuzzyAutocompleteInput
 @export var add_button: Button
 @export var replace_button: Button
 @export var replace_label: Control
@@ -39,6 +39,10 @@ func _shortcut_input(event: InputEvent) -> void:
         close_panel()
         _accept_event()
     elif Utility.fixed_just_pressed_by_event("ui_accept", event):
+        if not property_name_input.has_focus():
+            return
+        elif not property_name_input.text:
+            property_name_input.show_ac_now()
         accept_name()
         _accept_event()
 

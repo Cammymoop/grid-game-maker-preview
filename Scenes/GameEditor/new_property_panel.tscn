@@ -71,6 +71,9 @@ alignment = 2
 [node name="CloseButton" type="Button" parent="VBoxContainer/PanelContainer/HBoxContainer2" unique_id=773498197]
 layout_mode = 2
 size_flags_vertical = 8
+focus_neighbor_bottom = NodePath("../../../HBoxContainer3/SpecialPropNames")
+focus_next = NodePath("../../../HBoxContainer3/EventNames")
+focus_previous = NodePath("../../../HBoxContainer/AddPropButton")
 mouse_default_cursor_shape = 2
 icon = ExtResource("2_uvdob")
 flat = true
@@ -107,6 +110,12 @@ alignment = 1
 
 [node name="EventNames" type="MenuButton" parent="VBoxContainer/HBoxContainer3" unique_id=1499340234]
 layout_mode = 2
+focus_neighbor_top = NodePath("../../PanelContainer/HBoxContainer2/CloseButton")
+focus_neighbor_right = NodePath("../SpecialPropNames")
+focus_neighbor_bottom = NodePath("../SpecialPropNames")
+focus_next = NodePath("../SpecialPropNames")
+focus_previous = NodePath("../../PanelContainer/HBoxContainer2/CloseButton")
+focus_mode = 2
 mouse_default_cursor_shape = 2
 theme_override_colors/font_color = Color(0.9026885, 0.5629965, 0.41542307, 1)
 text = "Events"
@@ -115,6 +124,12 @@ switch_on_hover = true
 
 [node name="SpecialPropNames" type="MenuButton" parent="VBoxContainer/HBoxContainer3" unique_id=1319359713]
 layout_mode = 2
+focus_neighbor_left = NodePath("../EventNames")
+focus_neighbor_top = NodePath("../../PanelContainer/HBoxContainer2/CloseButton")
+focus_neighbor_bottom = NodePath("../../HBoxContainer/PropertyNameInput")
+focus_next = NodePath("../../HBoxContainer/PropertyNameInput")
+focus_previous = NodePath("../EventNames")
+focus_mode = 2
 mouse_default_cursor_shape = 2
 theme_override_colors/font_color = Color(0.14019066, 0.7218098, 0.8524978, 1)
 text = "Special Properties"
@@ -130,6 +145,10 @@ alignment = 1
 custom_minimum_size = Vector2(180, 0)
 layout_mode = 2
 size_flags_vertical = 4
+focus_neighbor_top = NodePath("../../HBoxContainer3/EventNames")
+focus_neighbor_right = NodePath("../AddPropButton")
+focus_next = NodePath("../AddPropButton")
+focus_previous = NodePath("../../HBoxContainer3/SpecialPropNames")
 theme_override_font_sizes/font_size = 14
 placeholder_text = "property name"
 max_length = 100
@@ -142,6 +161,10 @@ highlight_unknown_color = Color(0.660753, 0.9219391, 0.48474276, 1)
 [node name="AddPropButton" type="Button" parent="VBoxContainer/HBoxContainer" unique_id=1229390824]
 layout_mode = 2
 size_flags_horizontal = 4
+focus_neighbor_left = NodePath("../PropertyNameInput")
+focus_neighbor_top = NodePath("../../HBoxContainer3/SpecialPropNames")
+focus_next = NodePath("../../PanelContainer/HBoxContainer2/CloseButton")
+focus_previous = NodePath("../PropertyNameInput")
 theme_type_variation = &"BigTextButton"
 text = "Add"
 

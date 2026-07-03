@@ -435,6 +435,9 @@ func stop_value_editting() -> void:
     _show_hide_edit_value_button()
     refresh_internal_focus_neighbors()
 
+func is_value_editting() -> bool:
+    return _value_editting
+
 func is_special_prop_name(prop_name: String) -> bool:
     return GameManager.is_special_prop_name(prop_name)
 

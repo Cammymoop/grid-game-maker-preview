@@ -52,6 +52,7 @@ alignment = 1
 
 [node name="EventNames" type="MenuButton" parent="VBoxContainer/HBoxContainer3" unique_id=1663248020]
 layout_mode = 2
+focus_mode = 2
 mouse_default_cursor_shape = 2
 theme_override_colors/font_color = Color(0.9026885, 0.5629965, 0.41542307, 1)
 text = "Events"
@@ -60,6 +61,7 @@ switch_on_hover = true
 
 [node name="SpecialPropNames" type="MenuButton" parent="VBoxContainer/HBoxContainer3" unique_id=99398741]
 layout_mode = 2
+focus_mode = 2
 mouse_default_cursor_shape = 2
 theme_override_colors/font_color = Color(0.14019066, 0.7218098, 0.8524978, 1)
 text = "Special Properties"

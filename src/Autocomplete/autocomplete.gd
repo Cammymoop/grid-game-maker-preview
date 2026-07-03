@@ -7,6 +7,9 @@ var _overlays_by_host: Dictionary = {}
 var _session_anchor: Control
 var _session_list: Panel
 
+func _ready() -> void:
+	process_mode = Node.PROCESS_MODE_ALWAYS
+
 
 func acquire_menu(anchor: Control) -> Panel:
 	var host := _resolve_host(anchor)
@@ -53,6 +56,7 @@ func _ensure_overlay_for_host(host: Node) -> Control:
 	var canvas := CanvasLayer.new()
 	canvas.name = &"AutocompleteHostCanvas"
 	canvas.layer = 200
+	canvas.process_mode = Node.PROCESS_MODE_ALWAYS
 	var overlay: Control = OVERLAY_SCRIPT.new()
 	canvas.add_child(overlay)
 	host.add_child(canvas)

@@ -980,9 +980,13 @@ func cmd_a_set_tiles(slots: Dictionary, chosen_slot: int, tile_name: String) -> 
 	prints("setting tiles to: ", tile_name, " at ", slots[chosen_slot])
 	MapManager.replace_tiles_at_array(slots[chosen_slot], MapManager.get_tile_index(tile_name))
 
-func desc_erase_tiles() -> String:
-	return "pos|Erase the tile(s) here"
-func cmd_erase_tiles(slots: Dictionary, chosen_slot: int) -> void:
+func desc_erase_tiles() -> Dictionary:
+	return {
+		"display_name": "Erase tiles",
+		"slot_type_hint": "pos",
+		"template_text": "Erase the [erase_mode:CustomStringEnum:tiles and permanent text,tiles,permanent text] at these positions"
+	}
+func cmd_erase_tiles(slots: Dictionary, chosen_slot: int, erase_mode: String) -> void:
 	MapManager.erase_tiles_and_effects_at_array(slots[chosen_slot])
 
 func desc_a_set_property() -> String:
@@ -1530,9 +1534,14 @@ func cmd_is_intended_move_direction(slots: Dictionary, chosen_slot: int, complex
 		return false
 	return intended_move_facing == resolve_complex_direction(complex_dir, slots)
 	
-func desc_show_mini_text_at() -> String:
-	return "pos,entity|Temporarily show the text [text_slot:SlotInput:string,number]\n" \
-	       + "[is_above:BoolChoice:true,above,at] this position/entity"
+func desc_show_mini_text_at() -> Dictionary:
+	return {
+		"non_condition": true,
+		"deprecated": true,
+		"slot_type_hint": "pos,entity",
+		"template_text": "Temporarily show the text [text_slot:SlotInput:string,number]\n" \
+			+ "[is_above:BoolChoice:true,above,at] this position/entity",
+	}
 func cmd_show_mini_text_at(slots: Dictionary, chosen_slot: int, text_slot: int, is_above: bool) -> void:
 	if not Commands.slot_is_positions(chosen_slot) and not Commands.slot_is_entity(chosen_slot):
 		push_error("Invalid slot to show mini text at: %s" % chosen_slot)
@@ -1545,14 +1554,111 @@ func cmd_show_mini_text_at(slots: Dictionary, chosen_slot: int, text_slot: int, 
 			EffectsHelper.spawn_mini_text_at(mini_message, message_pos, -1, 2)
 		else:
 			push_error("Entity slot %s is empty" % chosen_slot)
-	elif Commands.slot_is_positions(chosen_slot):
+	else:
 		if not slots[chosen_slot]:
 			push_error("Positions slot %s is empty" % chosen_slot)
 		for tile_pos in slots[chosen_slot]:
 			var message_pos: Vector2 = MapManager.get_world_pos_above(tile_pos) if is_above else MapManager.tile_to_world_position_centered(tile_pos)
 			EffectsHelper.spawn_mini_text_at(mini_message, message_pos, -1, 2)
+
+func desc_create_popup_text() -> Dictionary:
+	return {
+		"non_condition": true,
+		"slot_type_hint": "pos,entity",
+		"template_text": "Create a pop-up text message [is_above:BoolChoice:true,above,at] this position/entity. Text: [text:ComplexStringInput]\n" \
+			+ "font size: [font_size:ComplexScalarInput:default=9.0] fill: [fill_color:ColorInput:default=#ffffff] outline: [outline_color:ColorInput:default=#000000]" \
+			+ " seconds: [popup_time:ComplexScalarInput:default=1,step=0.1] z-offset: [z_offset:ComplexScalarInput:default=0,step=1]"
+			+ " alignment: [is_center:BoolChoice:true,centered,left-aligned]"
+	}
+func cmd_create_popup_text(
+	slots: Dictionary, chosen_slot: int,
+	is_above: bool,
+	text: Dictionary,
+	font_size: Dictionary,
+	fill_color: Dictionary,
+	outline_color: Dictionary,
+	popup_time: Dictionary,
+	z_offset: Dictionary,
+	is_center: bool
+) -> void:
+	_create_text_effect(slots, chosen_slot, is_above, {
+		"text": text,
+		"font_size": font_size,
+		"fill_color": fill_color,
+		"outline_color": outline_color,
+		"popup_time": popup_time,
+		"z_offset": z_offset,
+		"is_center": is_center,
+	})
+
+func desc_create_permanent_text() -> Dictionary:
+	return {
+		"non_condition": true,
+		"slot_type_hint": "pos,entity",
+		"template_text": "Create a pop-up text message [is_above:BoolChoice:true,above,at] this position/entity. Text: [text:ComplexStringInput]\n" \
+			+ "font size: [font_size:ComplexScalarInput:default=9.0] fill: [fill_color:ColorInput:default=#ffffff] outline: [outline_color:ColorInput:default=#000000]" \
+			+ " z-offset: [z_offset:ComplexScalarInput:default=0,step=1] alignment: [is_center:BoolChoice:true,centered,left-aligned]" \
+			+ " position offset: [offset:Vector2Input]px"
+	}
+func cmd_create_permanent_text(
+	slots: Dictionary, chosen_slot: int,
+	is_above: bool,
+	text: Dictionary,
+	font_size: Dictionary,
+	fill_color: Dictionary,
+	outline_color: Dictionary,
+	z_offset: Dictionary,
+	is_center: bool,
+	offset: Vector2
+) -> void:
+	_create_text_effect(slots, chosen_slot, is_above, {
+		"text": text,
+		"font_size": font_size,
+		"fill_color": fill_color,
+		"outline_color": outline_color,
+		"popup_time": 0,
+		"z_offset": z_offset,
+		"is_center": is_center,
+	}, offset)
+
+
+func _create_text_effect(slots: Dictionary, pos_slot: int, is_above: bool, args: Dictionary, pixel_offset: Vector2 = Vector2.ZERO) -> void:
+	if not Commands.slot_is_positions(pos_slot) and not Commands.slot_is_entity(pos_slot):
+		push_error("Invalid slot to create popup text at: %s" % pos_slot)
+		return
+
+	var message_str: String = resolve_complex_string(args["text"], slots)
+	var message_positions: Array[Vector2] = []
+	if Commands.slot_is_entity(pos_slot):
+		if slots[pos_slot]:
+			message_positions.append(EntityManager.get_pos_above(slots[pos_slot]) if is_above else slots[pos_slot].get_center_position())
+		else:
+			push_error("Entity slot %s is empty" % pos_slot)
+			return
 	else:
-		push_error("Invalid slot to show mini text at: %s" % chosen_slot)
+		if not slots[pos_slot]:
+			push_error("Positions slot %s is empty" % pos_slot)
+			return
+		for tile_pos in slots[pos_slot]:
+			message_positions.append(MapManager.get_world_pos_above(tile_pos) if is_above else MapManager.tile_to_world_position_centered(tile_pos))
+	
+	for pos in message_positions:
+		var popup_msg_options: Dictionary = {
+			"text": message_str,
+			"font_size": resolve_complex_scalar(args["font_size"], slots),
+			"fill_color": resolve_complex_color(args["fill_color"], slots),
+			"outline_color": resolve_complex_color(args["outline_color"], slots),
+			"popup_time": resolve_complex_scalar(args["popup_time"], slots),
+			"z_offset": resolve_complex_scalar(args["z_offset"], slots),
+			"h_align": HORIZONTAL_ALIGNMENT_CENTER if args["is_center"] else HORIZONTAL_ALIGNMENT_LEFT,
+		}
+		if args.get("popup_time", 1) > 0:
+			var global_pos: Vector2 = MapManager.world_to_tile_position(pos)
+			global_pos += pixel_offset
+			EffectsHelper.spawn_popup_text(global_pos, popup_msg_options)
+		else:
+			popup_msg_options["pos_offset"] = pixel_offset
+			MapManager.create_persistant_text_effect_from_info(pos, popup_msg_options)
 
 func desc_show_textbox() -> String:
 	return "string|Show a textbox with the text fom this slot"

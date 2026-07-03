@@ -19,9 +19,10 @@ edit_conditional_button = NodePath("EditConditionalButton")
 [node name="OptionButton" type="OptionButton" parent="." unique_id=153621437]
 layout_mode = 2
 tooltip_text = "Change the type of value"
+theme_type_variation = &"ThinOptButton"
 theme_override_font_sizes/font_size = 12
+alignment = 1
 selected = 0
-fit_to_longest_item = false
 item_count = 4
 popup/item_0/text = "Txt"
 popup/item_0/id = 0

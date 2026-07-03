@@ -77,26 +77,61 @@ func set_fetch_values_func(new_func: Callable) -> void:
 
 
 func _gui_input(event: InputEvent) -> void:
-	if Utility.fixed_just_pressed_by_event("ui_up", event):
-		if not _ac_list or not _ac_list.visible:
-			_typed_this_focus = true
-			_sync_autocomplete_menu()
-		_ac_list.move_current(-1)
-		accept_event()
+	if Utility.fixed_just_pressed_by_event("ui_up", event) and use_autocomplete_menu:
+		if event is InputEventJoypadButton or event is InputEventJoypadMotion:
+			pass
+		else:
+			if not _ac_list or not _ac_list.visible:
+				_typed_this_focus = true
+				_sync_autocomplete_menu()
+			_ac_list.move_current(-1)
+			accept_event()
 		return
-	if Utility.fixed_just_pressed_by_event("ui_down", event):
+	if Utility.fixed_just_pressed_by_event("ui_down", event) and use_autocomplete_menu:
 		if not _ac_list or not _ac_list.visible:
 			_typed_this_focus = true
 			_sync_autocomplete_menu()
 		else:
 			_ac_list.move_current(1)
 		accept_event()
+		return
+	if event is InputEventJoypadButton or event is InputEventJoypadMotion:
+		if Utility.fixed_just_pressed_by_event("ui_accept", event) and use_autocomplete_menu:
+			if _ac_list and _ac_list.visible:
+				text_submitted.emit(text)
+			else:
+				_typed_this_focus = true
+				_sync_autocomplete_menu()
+			accept_event()
+			return
+		elif Utility.fixed_just_pressed_by_event("ui_right", event) and use_autocomplete_menu:
+			if _ac_list and _ac_list.visible:
+				_accept_highlighted_autocomplete()
+				accept_event()
+			else:
+				prints("ui_right when autocomplete list is closed")
+			return
+
+	if Utility.fixed_just_pressed_by_event("ui_cancel", event):
+		if _ac_list and _ac_list.visible:
+			if event is InputEventJoypadButton or event is InputEventJoypadMotion:
+				unedit_and_hide_list()
+			else:
+				_hide_autocomplete()
+			accept_event()
+		elif is_editing():
+			unedit()
+			accept_event()
+		return
+
 	if not use_autocomplete_menu or _ac_list == null or not _ac_list.visible:
 		return
+
 	if Utility.fixed_just_pressed_by_event("ui_text_completion_accept", event):
 		_accept_highlighted_autocomplete()
 		accept_event()
 		return
+
 
 
 func set_arg_name(new_arg_name: String) -> void:
@@ -157,6 +192,10 @@ func _on_focus_exited() -> void:
 	_hide_autocomplete()
 	_drop_autocomplete_menu()
 
+func unedit_and_hide_list() -> void:
+	_hide_autocomplete()
+	unedit()
+
 func _drop_autocomplete_menu() -> void:
 	if _ac_list:
 		_ac_list.item_clicked.disconnect(_on_ac_item_clicked)
@@ -166,6 +205,13 @@ func _on_ac_item_clicked(_index: int, choice: String) -> void:
 	if not has_focus():
 		return
 	_apply_autocomplete_choice(choice)
+
+func show_ac_now() -> void:
+	if not has_focus():
+		return
+	if all_values.size() > 0 and _ac_list and not _ac_list.visible:
+		_typed_this_focus = true
+		_sync_autocomplete_menu()
 
 
 func _sync_autocomplete_menu() -> void:
@@ -201,6 +247,7 @@ func _set_ac_max_rows_for_viewport() -> void:
 
 
 func _hide_autocomplete() -> void:
+	_typed_this_focus = false
 	if _ac_list == null or not _ac_list.visible:
 		return
 	_ac_list.hide_list()

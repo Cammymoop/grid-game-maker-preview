@@ -270,6 +270,22 @@ func create_persistant_text_effect(effect_text: String, at_tile_pos: Vector2i, p
         "z_offset": z_offset,
     })
 
+func create_persistant_text_effect_from_info(at_tile_pos: Vector2i, effect_info: Dictionary) -> int:
+    var outline_color: Color = effect_info.get("outline_color", Color.BLACK)
+    var translated_effect_info: Dictionary = {
+        "effect_type": "text",
+        "text": effect_info.get("text", ""),
+        "size": effect_info.get("font_size", 9.0),
+        "tile_pos": Utility.get_arr_from_vector2i(at_tile_pos),
+        "z_offset": effect_info.get("z_offset", 0),
+        "color": effect_info.get("fill_color", Color.WHITE),
+        "h_align": effect_info.get("h_align", HORIZONTAL_ALIGNMENT_CENTER),
+        "pos_offset": Utility.get_arr_from_vector2(effect_info.get("pos_offset", Vector2.ZERO)),
+        "outline_color": Utility.color_string(outline_color),
+        "outline_enabled": outline_color.a > 0.0,
+    }
+    return _create_persistant_effect_info(translated_effect_info)
+
 func edit_persistant_text_size(effect_id: int, new_size: int) -> void:
     var effect_info: = _find_persistant_effect_by_id(effect_id)
     if not effect_info:

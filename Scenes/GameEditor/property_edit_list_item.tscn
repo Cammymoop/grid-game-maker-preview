@@ -120,7 +120,6 @@ selection_enabled = true
 drag_and_drop_selection_enabled = false
 
 [node name="MultiTypeInput" parent="ListItemSections/PropValueSection" unique_id=1750676706 instance=ExtResource("15_5uy45")]
-visible = false
 layout_mode = 2
 
 [node name="CondEditLabel1" type="Label" parent="ListItemSections/PropValueSection" unique_id=176443316]

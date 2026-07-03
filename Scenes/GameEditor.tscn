@@ -20,10 +20,10 @@
 [ext_resource type="Script" uid="uid://bihb1rg68jci5" path="res://src/GameEditor/SelectableTextureList.gd" id="11"]
 [ext_resource type="Script" uid="uid://cia8grkwwxcha" path="res://src/GameEditor/PopupLayer.gd" id="12"]
 [ext_resource type="PackedScene" uid="uid://ci5jvijwn0j60" path="res://Scenes/GameEditor/info_panel_config_edit.tscn" id="12_retx3"]
-[ext_resource type="StyleBox" uid="uid://bf4pw2lygxoq5" path="res://src/UI/list_background.tres" id="13"]
+[ext_resource type="StyleBox" path="res://src/UI/list_background.tres" id="13"]
 [ext_resource type="FontFile" uid="uid://cpry5rd5ecdc5" path="res://assets/font/small_font.tres" id="14"]
 [ext_resource type="Script" uid="uid://c1vkx254mpaft" path="res://src/GameEditor/FollowBySelector.gd" id="15"]
-[ext_resource type="Script" uid="uid://blesifogfyjfp" path="res://Scenes/GameEditor/background_style_editor_tab.gd" id="15_4q0gk"]
+[ext_resource type="Script" path="res://Scenes/GameEditor/background_style_editor_tab.gd" id="15_4q0gk"]
 [ext_resource type="PackedScene" uid="uid://b4fp8ldktkvcd" path="res://Scenes/bg_effect_6.tscn" id="16_iwmpq"]
 [ext_resource type="PackedScene" uid="uid://b1a6s2o32t35i" path="res://Scenes/GameEditor/bg_style_editor.tscn" id="18_umwh7"]
 [ext_resource type="PackedScene" uid="uid://cj8u25mhjg6n8" path="res://Scenes/GameEditor/SelectableTexItem.tscn" id="22_48hio"]
@@ -391,6 +391,7 @@ text = "Movement Mode:"
 [node name="MovementModeMenuButton" type="MenuButton" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/SectionContainer/GameSettingsSection/MarginContainer/HFlowContainer/HFlowContainer/HBoxContainer9" unique_id=1152217431]
 custom_minimum_size = Vector2(100, 0)
 layout_mode = 2
+theme_type_variation = &"MenuOptButton"
 text = "Real-time"
 flat = false
 
@@ -628,6 +629,7 @@ text = "Follow Entity by:"
 
 [node name="FollowBy" type="MenuButton" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/SectionContainer/DefaultCameraSection/MarginContainer/HFlowContainer/HBoxContainer6" unique_id=1920892838]
 layout_mode = 2
+theme_type_variation = &"MenuOptButton"
 text = "property"
 flat = false
 script = ExtResource("15")

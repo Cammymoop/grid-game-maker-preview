@@ -187,6 +187,13 @@ func resolve_complex_scalar(complex_scalar: Dictionary, slots: Dictionary) -> fl
 		push_error("Invalid complex scalar type: %s" % [complex_scalar["type"]])
 		return 0
 
+func resolve_complex_color(complex_color: Dictionary, _slots: Dictionary) -> Color:
+	if complex_color["type"] == "plain":
+		return Color(complex_color["value"])
+	else:
+		push_error("Invalid complex color type: %s" % [complex_color["type"]])
+		return Color.WHITE
+
 func set_tiles_to_facing(slots: Dictionary, slot_id: int, facing: int) -> void:
 	if not Commands.slot_is_positions(slot_id):
 		push_warning("set_tiles_to_facing: Slot is not a tile position: %s" % [slot_id])

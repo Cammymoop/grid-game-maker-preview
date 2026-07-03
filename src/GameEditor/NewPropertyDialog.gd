@@ -20,6 +20,11 @@ func _on_vis_changed():
 	if not visible:
 		hidden.emit()
 
+func _unhandled_input(event: InputEvent) -> void:
+	if Utility.event_is_menu_back_just_pressed(event):
+		hide()
+		set_input_as_handled()
+
 
 func use_selected_name(the_name: String) -> void:
 	find_child("SetName").text = the_name
