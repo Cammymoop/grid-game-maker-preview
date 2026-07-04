@@ -200,6 +200,12 @@ const DYING_EFFECTS: Dictionary[String, Dictionary] = {
             "scale": { "scale_from": [1,1], "scale_to": [0,0], "ease_param": 0.25 },
         },
     },
+    "Fade Out": {
+        "name": "dying-fade-out",
+        "animated_effects": {
+            "fade": { "fade_to": 1.0, "ease_param": 2.8 },
+        },
+    },
     "Burn Fade": {
         "name": "dying-burn-fade",
         "animated_effects": {
@@ -211,12 +217,21 @@ const DYING_EFFECTS: Dictionary[String, Dictionary] = {
         "name": "dying-hit-fade",
         "animated_effects": {
             "replace_color": { "color_from": "#ffffff", "color_to": "#881144", "amount_to": 0.5, "duration_factor": 0.5, "ease_param": 2.2 },
-            "fade": { "fade_to": 1.0, "time_offset": 0.6, "duration_factor": 0.4, "ease_param": 1.8 },
             "offset": { "offset_to": [0, -16], "duration_factor": 0.3, "ease_param": 0.25 },
+            "fade": { "fade_to": 1.0, "time_offset": 0.6, "duration_factor": 0.4, "ease_param": 1.8 },
         },
     },
-    "Fly Up": {
-        "name": "dying-fly-up",
+    "Hit Shrink": {
+        "name": "dying-hit-fade",
+        "animated_effects": {
+            "replace_color": { "color_from": "#ffffff", "color_to": "#881144", "amount_to": 0.5, "duration_factor": 0.5, "ease_param": 2.2 },
+            "offset": { "offset_to": [0, -16], "duration_factor": 0.3, "ease_param": 0.25 },
+            "scale": { "scale_from": [1,1], "scale_to": [0,0], "time_offset": 0.6, "duration_factor": 0.4, "ease_param": 0.25 },
+        },
+    },
+
+    "Fly Out": {
+        "name": "dying-fly-out",
         "animated_effects": {
             "offset": { "offset_to": [0, -100], "ease_param": 0.75 },
             "scale": { "scale_from": [1,1], "scale_to": [0,0], "ease_param": 0.5,
@@ -237,3 +252,34 @@ const DYING_EFFECTS: Dictionary[String, Dictionary] = {
         }],
     },
 }
+
+static func set_dying_effect_params(effect_name: String, effect_params: Dictionary, effect_info: Dictionary) -> void:
+    if not effect_name in DYING_EFFECTS:
+        return
+    var anim_eff: Dictionary = effect_info.get("animated_effects", {})
+    if effect_params.has("color"):
+        if effect_name in ["Burn Fade", "Hit Fade", "Hit Shrink"]:
+            if effect_name.begins_with("Hit") and effect_params["color"] == Color.WHITE:
+                anim_eff.erase("replace_color")
+            else:
+                var replace_color_effect: Dictionary = anim_eff.get("replace_color", {})
+                if replace_color_effect:
+                    if effect_name == "Burn Fade":
+                        replace_color_effect["color_from"] = effect_params["color"]
+                    replace_color_effect["color_to"] = effect_params["color"]
+    if effect_params.has("amount"):
+        var amt: float = effect_params["amount"]
+        if effect_name.begins_with("Hit"):
+            var offset_effect: Dictionary = anim_eff.get("offset", {})
+            if offset_effect and offset_effect.has("offset_to"):
+                offset_effect["offset_to"] = Utility.arr_vec_normal(offset_effect["offset_to"], amt)
+    
+    if effect_params.has("direction"):
+        var dir_int: int = int(effect_params["direction"])
+        #var dir_vec: Vector2 = Utility.facing_vector(dir_int)
+        var radians: float = dir_int * 0.25 * TAU
+        if effect_name.begins_with("Hit") or effect_name == "Fly Out":
+            var offset_effect: Dictionary = effect_info.get("animated_effects", {}).get("offset", {})
+            if offset_effect and offset_effect.has("offset_to"):
+                var to_vec: = Utility.get_vector2_from_arr(offset_effect["offset_to"])
+                offset_effect["offset_to"] = Utility.get_arr_from_vector2(to_vec.rotated(radians))

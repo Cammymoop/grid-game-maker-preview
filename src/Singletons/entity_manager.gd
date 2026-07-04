@@ -2385,6 +2385,21 @@ func get_entity_tailing_chain(reference_entity: BaseEntity, with_behind: bool, w
 func on_textures_remapped() -> void:
     build_sprite_previews()
 
+func get_default_dying_effect_name_for_entity_id(entity_id: int) -> String:
+    var def_eff_name: String = GameManager.get_game_setting("default_dying_effect", "")
+    if not entity_id in entity_defs:
+        push_error("Entity id not found: %s" % entity_id)
+        return def_eff_name
+    var dying_effect_prop_val: Variant = entity_defs[entity_id]["properties"].get("dying-effect", "")
+    if typeof(dying_effect_prop_val) != TYPE_STRING:
+        prints("entity dying-effect is the wrong type: %s" % type_string(typeof(dying_effect_prop_val)))
+        return def_eff_name
+    if dying_effect_prop_val.to_lower() == "none":
+        return ""
+    if not dying_effect_prop_val or not dying_effect_prop_val in SpriteEffects.DYING_EFFECTS:
+        return def_eff_name
+    return dying_effect_prop_val
+
 func get_default_dying_effect_for_entity_id(entity_id: int) -> Dictionary:
     if not entity_id in entity_defs:
         push_error("Entity id not found: %s" % entity_id)

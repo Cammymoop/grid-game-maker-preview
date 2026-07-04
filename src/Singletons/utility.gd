@@ -1306,3 +1306,54 @@ func do_positions_align_orthogonally(pos_a: Vector2i, pos_b: Vector2i) -> bool:
 func do_positions_align_diagonally(pos_a: Vector2i, pos_b: Vector2i) -> bool:
 	var abs_delta: = (pos_b - pos_a).abs()
 	return abs_delta.x == abs_delta.y
+
+func array_vector_or_scalar_length(vectorish: Variant) -> int:
+	var the_type: int = typeof(vectorish)
+	if the_type == TYPE_INT or the_type == TYPE_FLOAT:
+		return 1
+	elif the_type == TYPE_ARRAY:
+		return vectorish.size()
+	elif the_type == TYPE_VECTOR2 or the_type == TYPE_VECTOR2I:
+		return 2
+	elif the_type == TYPE_VECTOR3 or the_type == TYPE_VECTOR3I:
+		return 3
+	else:
+		push_error("Unknown vector-like type to get length: %s" % [type_string(typeof(vectorish))])
+	return 0
+
+func arr_vec_multiplied(arr_vec: Array, multiply_by: float) -> Array:
+	arr_vec = arr_vec.duplicate_deep()
+	for i in arr_vec.size():
+		if typeof(arr_vec[i]) != TYPE_FLOAT:
+			continue
+		arr_vec[i] *= multiply_by
+	return arr_vec
+
+func arr_vec_normal(arr_vec, multiply_by: float = 1) -> Array:
+	if arr_vec.size != 2:
+		push_error("arr vec normal only supports vectors of size 2. Got arr sized: %s" % [arr_vec.size()])
+		return arr_vec.duplicate_deep()
+	var vec: = get_vector2_from_arr(arr_vec)
+	return get_arr_from_vector2((vec.normalized() * multiply_by))
+
+func arr_vec_offset(arr_vec: Array, offset_by: Variant) -> Array:
+	arr_vec = arr_vec.duplicate_deep()
+	var offset_type: int = typeof(offset_by)
+	if offset_type == TYPE_ARRAY and offset_by.size() == 0:
+		return arr_vec
+
+	var ofs_length: int = array_vector_or_scalar_length(offset_by)
+	if ofs_length < 1:
+		push_error("Unsupported type to add as offset to array vector: %s" % [type_string(typeof(offset_by))])
+		return arr_vec
+
+	for i in arr_vec.size():
+		if typeof(arr_vec[i]) != TYPE_FLOAT:
+			continue
+		if offset_type == TYPE_INT or offset_type == TYPE_FLOAT:
+			arr_vec[i] += offset_by
+		elif i >= ofs_length:
+			break
+		else:
+			arr_vec[i] += offset_by[i]
+	return arr_vec

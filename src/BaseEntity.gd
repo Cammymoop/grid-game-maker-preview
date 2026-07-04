@@ -774,31 +774,37 @@ func can_i_teleport_to(from_pos: Vector2i, to_pos: Vector2i, with_move_facing: i
 	set_move_facing(old_move_facing)
 	return result
 
-func die_with_effect(effect_info: Dictionary) -> void:
-	var effect_name: String = effect_info.get("name", "")
-	if effect_name == "" or not effect_name in SpriteEffects.DYING_EFFECTS:
+func die_with_named_effect(effect_params: Dictionary) -> void:
+	var effect_name: String = effect_params.get("name", "")
+	if not effect_name or not effect_name in SpriteEffects.DYING_EFFECTS:
 		push_warning("Unknown dying effect: %s" % effect_name)
 		die()
-	else:
-		var duration: float = -1
-		if effect_info.has("duration"):
-			duration = effect_info["duration"]
-		# todo: extra modifications to effect like direction or color
-		die(SpriteEffects.DYING_EFFECTS[effect_name], duration)
+		return
+	var effect_info: Dictionary = SpriteEffects.DYING_EFFECTS[effect_name].duplicate_deep()
+	SpriteEffects.set_dying_effect_params(effect_name, effect_params, effect_info)
+	effect_info["ORIGINAL_NAME"] = effect_name
+	die(effect_info)
 
-func die(with_effect_info: Dictionary = {}, with_duration: float = -1) -> void:
+func die(effect_info: Dictionary = {}, with_duration: float = -1, extra_params: Dictionary = {}) -> void:
 	var dying_conditional = EntityManager.get_entity_property(self, "dying")
 	if dying_conditional and dying_conditional.is_conditional():
 		dying_conditional.resolve(self, null, tile_position)
 	EntityManager.post_die_actions(self)
-	if not with_effect_info:
-		with_effect_info = EntityManager.get_default_dying_effect_for_entity_id(entity_index)
+	var effect_name: String = effect_info.get("ORIGINAL_NAME", "")
+	if not effect_info:
+		effect_name = EntityManager.get_default_dying_effect_name_for_entity_id(entity_index)
+		effect_info = {"none": true}
+		if effect_name.to_lower() != "none":
+			effect_info = SpriteEffects.DYING_EFFECTS[effect_name]
 
-	if not with_effect_info or with_effect_info.get("none", false):
+	if effect_name and extra_params:
+		SpriteEffects.set_dying_effect_params(effect_name, extra_params, effect_info)
+
+	if not effect_info or effect_info.get("none", false):
 		EntityManager.remove_entity(self)
 	else:
 		dying = true
-		do_dying_effect(with_effect_info, with_duration)
+		do_dying_effect(effect_info, with_duration)
 
 func do_dying_effect(effect_info: Dictionary, with_duration: float = -1) -> void:
 	var effect_name: String = effect_info.get("name", "")

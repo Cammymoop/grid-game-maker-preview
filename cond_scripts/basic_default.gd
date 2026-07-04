@@ -928,18 +928,24 @@ func desc_a_die() -> Dictionary:
 	return {
 		"display_name": "Destroy entity (die)",
 		"slot_type_hint": "entity",
-		"template_text": "The entity dies now. (Uses the default dying efect for this entity type)",
+		"template_text": "The entity dies now. (Uses default dying efect) dying effect direcction: [dying_eff_dir:DirectionInput:1]",
 	}
-func cmd_a_die(slots: Dictionary, chosen_slot: int) -> void:
+func cmd_a_die(slots: Dictionary, chosen_slot: int, dying_eff_dir: Dictionary = {}) -> void:
 	if Commands.slot_is_entity(chosen_slot) and slots[chosen_slot]:
-		slots[chosen_slot].die()
+		if dying_eff_dir:
+			var dying_eff_dir_params: Dictionary = {"direction": resolve_complex_direction(dying_eff_dir, slots)}
+			slots[chosen_slot].die({}, -1, dying_eff_dir_params)
+		else:
+			slots[chosen_slot].die()
 
 func desc_destroy_entity_with_effect() -> String:
-	return "entity|Destroy the entity playing the effect [death_eff_info:DyingEffectInput]"
-func cmd_destroy_entity_with_effect(slots: Dictionary, chosen_slot: int, death_eff_info: Dictionary) -> void:
+	return "entity|Destroy the entity playing the efect [death_eff_info:DyingEffectInput], with this direction: [die_dir:DirectionInput:1]"
+func cmd_destroy_entity_with_effect(slots: Dictionary, chosen_slot: int, death_eff_info: Dictionary, die_dir: Dictionary = {}) -> void:
 	if Commands.slot_is_entity(chosen_slot) and slots[chosen_slot]:
+		if die_dir:
+			death_eff_info["direction"] = resolve_complex_direction(die_dir, slots)
 		if slots[chosen_slot].active or not slots[chosen_slot].dying:
-			slots[chosen_slot].die_with_effect(death_eff_info)
+			slots[chosen_slot].die_with_named_effect(death_eff_info)
 
 func desc_destroy_entity_immediately() -> String:
 	return "entity|Destroy the entity instantly, skipping it's default dying effect"
