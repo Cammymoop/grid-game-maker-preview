@@ -3,7 +3,7 @@
 [ext_resource type="Script" uid="uid://bj140a5xc87r7" path="res://src/PauseMenu.gd" id="1"]
 [ext_resource type="StyleBox" uid="uid://bwqqm7x8mbrp5" path="res://assets/ui/pause_menu_bg_panel.tres" id="1_5w4ur"]
 [ext_resource type="FontFile" uid="uid://biuf4hpin33j3" path="res://assets/font/medium_font.tres" id="2"]
-[ext_resource type="Script" path="res://Scenes/level_info_panel.gd" id="3_lptsj"]
+[ext_resource type="Script" uid="uid://2uqmln215cr8" path="res://Scenes/level_info_panel.gd" id="3_lptsj"]
 [ext_resource type="PackedScene" uid="uid://b1a6s2o32t35i" path="res://Scenes/GameEditor/bg_style_editor.tscn" id="4_ey1tb"]
 [ext_resource type="FontFile" uid="uid://ctnllh13x3iqi" path="res://assets/font/NotoSans-Bold.ttf" id="4_gqxqw"]
 [ext_resource type="FontFile" uid="uid://cxxr3l22y0327" path="res://assets/font/NotoSans-Regular.ttf" id="5_lptsj"]
@@ -77,7 +77,7 @@ corner_radius_bottom_right = 3
 corner_radius_bottom_left = 3
 corner_detail = 5
 
-[node name="PauseMenu" type="Control" unique_id=1906408289 node_paths=PackedStringArray("level_title_edit", "level_subtitle_edit", "non_editor_stuff", "editor_stuff", "level_select_button", "level_editor_controls_help_toggle", "play_mode_button", "level_edit_mode_button", "web_export_level_button", "background_editor_container", "background_editor", "darkener", "level_size_label", "start_level_paused_toggle", "level_list_picker", "copy_to_clipboard_button", "paste_from_clipboard_button", "save_as_button", "level_info_panel") groups=["PauseMenu"]]
+[node name="PauseMenu" type="Control" unique_id=1906408289 node_paths=PackedStringArray("level_title_edit", "level_subtitle_edit", "non_editor_stuff", "editor_stuff", "level_select_button", "level_editor_controls_help_toggle", "play_mode_button", "level_edit_mode_button", "web_export_level_button", "background_editor_container", "background_editor", "darkener", "level_size_label", "start_level_paused_toggle", "override_cam_limit_select", "level_list_picker", "copy_to_clipboard_button", "paste_from_clipboard_button", "save_as_button", "level_info_panel") groups=["PauseMenu"]]
 process_mode = 3
 layout_mode = 3
 anchors_preset = 15
@@ -101,6 +101,7 @@ background_editor = NodePath("HBoxContainer/BackgroundEditorContainer/PanelConta
 darkener = NodePath("MultiplyDarkenColor")
 level_size_label = NodePath("HBoxContainer/CenterContainer/VBoxContainer/MainPausePanel/MarginContainer/VBoxContainer/EditorStuff/HBoxContainer6/VBoxContainer/HBoxContainer4/LevelSize")
 start_level_paused_toggle = NodePath("HBoxContainer/CenterContainer/VBoxContainer/LevelSettingsPausePanel/MarginContainer/VBoxContainer/StartLevelPausedToggle")
+override_cam_limit_select = NodePath("HBoxContainer/CenterContainer/VBoxContainer/LevelSettingsPausePanel/MarginContainer/VBoxContainer/GridContainer/CamLimitSelector")
 level_list_picker = NodePath("HBoxContainer/CenterContainer/VBoxContainer/LevelSettingsPausePanel/MarginContainer/VBoxContainer/GridContainer/LevelListPicker")
 copy_to_clipboard_button = NodePath("HBoxContainer/CenterContainer/VBoxContainer/MainPausePanel/MarginContainer/VBoxContainer/EditorStuff/HBoxContainer6/VBoxContainer/HBoxContainer4/CopyLevelToClipboard")
 paste_from_clipboard_button = NodePath("HBoxContainer/CenterContainer/VBoxContainer/MainPausePanel/MarginContainer/VBoxContainer/EditorStuff/HBoxContainer6/VBoxContainer/PasteLevel/PasteLevelButton")
@@ -463,7 +464,6 @@ theme_override_fonts/font = ExtResource("2")
 text = "Quit to Main Menu"
 
 [node name="LevelSettingsPausePanel" type="PanelContainer" parent="HBoxContainer/CenterContainer/VBoxContainer" unique_id=686677102]
-visible = false
 layout_mode = 2
 size_flags_horizontal = 4
 theme_override_styles/panel = ExtResource("1_5w4ur")
@@ -487,10 +487,6 @@ horizontal_alignment = 1
 
 [node name="Spacer" type="Control" parent="HBoxContainer/CenterContainer/VBoxContainer/LevelSettingsPausePanel/MarginContainer/VBoxContainer" unique_id=995790038]
 layout_mode = 2
-
-[node name="StartLevelPausedToggle" type="CheckButton" parent="HBoxContainer/CenterContainer/VBoxContainer/LevelSettingsPausePanel/MarginContainer/VBoxContainer" unique_id=712369861]
-layout_mode = 2
-text = "Freeze level until first input"
 
 [node name="GridContainer" type="GridContainer" parent="HBoxContainer/CenterContainer/VBoxContainer/LevelSettingsPausePanel/MarginContainer/VBoxContainer" unique_id=1432260264]
 layout_mode = 2
@@ -522,10 +518,26 @@ text = "In Level List:"
 [node name="LevelListPicker" type="OptionButton" parent="HBoxContainer/CenterContainer/VBoxContainer/LevelSettingsPausePanel/MarginContainer/VBoxContainer/GridContainer" unique_id=2093139022]
 layout_mode = 2
 
-[node name="Label2" type="Label" parent="HBoxContainer/CenterContainer/VBoxContainer/LevelSettingsPausePanel/MarginContainer/VBoxContainer/GridContainer" unique_id=867618154]
-visible = false
+[node name="Label5" type="Label" parent="HBoxContainer/CenterContainer/VBoxContainer/LevelSettingsPausePanel/MarginContainer/VBoxContainer/GridContainer" unique_id=1258356979]
 layout_mode = 2
-text = "Set Next Level:"
+text = "Override Camera Limit:"
+
+[node name="CamLimitSelector" type="OptionButton" parent="HBoxContainer/CenterContainer/VBoxContainer/LevelSettingsPausePanel/MarginContainer/VBoxContainer/GridContainer" unique_id=1473755287]
+layout_mode = 2
+alignment = 1
+selected = 0
+fit_to_longest_item = false
+item_count = 3
+popup/item_0/text = "default"
+popup/item_0/id = 0
+popup/item_1/text = "Stop at map edge"
+popup/item_1/id = 1
+popup/item_2/text = "No Limit"
+popup/item_2/id = 2
+
+[node name="StartLevelPausedToggle" type="CheckButton" parent="HBoxContainer/CenterContainer/VBoxContainer/LevelSettingsPausePanel/MarginContainer/VBoxContainer" unique_id=712369861]
+layout_mode = 2
+text = "Freeze level until first input"
 
 [node name="Spacer2" type="Control" parent="HBoxContainer/CenterContainer/VBoxContainer/LevelSettingsPausePanel/MarginContainer/VBoxContainer" unique_id=8952199]
 layout_mode = 2

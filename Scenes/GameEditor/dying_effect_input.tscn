@@ -2,9 +2,10 @@
 
 [ext_resource type="Script" uid="uid://bjpay8vts773f" path="res://Scenes/GameEditor/dying_effect_input.gd" id="1_p5tp7"]
 [ext_resource type="Script" uid="uid://b2e3vs73ts471" path="res://Scenes/GameEditor/ConditionalEditor/generic_option_button_input.gd" id="2_y2k6b"]
-[ext_resource type="Script" uid="uid://dpuajjdauwd7f" path="res://Scenes/GameEditor/remembering_color_picker_button.gd" id="3_y2k6b"]
+[ext_resource type="Script" path="res://Scenes/GameEditor/remembering_color_picker_button.gd" id="3_y2k6b"]
+[ext_resource type="PackedScene" uid="uid://bleyoj5f36kfy" path="res://Scenes/GameEditor/ConditionalEditor/scalar_value_input.tscn" id="4_hy3n8"]
 
-[node name="DyingEffectInput" type="HBoxContainer" unique_id=790260579 node_paths=PackedStringArray("effect_picker_input")]
+[node name="DyingEffectInput" type="HBoxContainer" unique_id=790260579 node_paths=PackedStringArray("effect_picker_input", "color_picker", "amount_container", "amount_input", "amount_label")]
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -15,6 +16,10 @@ grow_vertical = 2
 theme_override_constants/separation = 10
 script = ExtResource("1_p5tp7")
 effect_picker_input = NodePath("DyingEffectPicker")
+color_picker = NodePath("ColorPickerButton")
+amount_container = NodePath("HBoxContainer")
+amount_input = NodePath("HBoxContainer/ScalarValueInput")
+amount_label = NodePath("HBoxContainer/Label")
 
 [node name="DyingEffectPicker" type="OptionButton" parent="." unique_id=583237251]
 layout_mode = 2
@@ -28,3 +33,15 @@ visible = false
 custom_minimum_size = Vector2(40, 0)
 layout_mode = 2
 script = ExtResource("3_y2k6b")
+
+[node name="HBoxContainer" type="HBoxContainer" parent="." unique_id=1322996547]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="HBoxContainer" unique_id=1293739450]
+layout_mode = 2
+text = "Amount:"
+
+[node name="ScalarValueInput" parent="HBoxContainer" unique_id=1458729988 instance=ExtResource("4_hy3n8")]
+layout_mode = 2
+custom_step = true
+custom_step_value = 0.1

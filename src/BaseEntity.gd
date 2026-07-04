@@ -84,6 +84,8 @@ var _pre_init_called: = false
 var _currently_starting_move: bool = false
 var _current_starting_move_facing: int = -1
 
+var _skip_blocked_result: = false
+
 func _ready() -> void:
 	pre_init()
 
@@ -301,8 +303,8 @@ func deserialize_sprite(data: Dictionary) -> void:
 func set_active(new_active: bool) -> void:
 	EntityManager.set_entity_active(self, new_active)
 
-func sprite_process(delta_time: float) -> void:
-	sprite.sprite_process(delta_time)
+func sprite_process(delta_time: float, is_frozen: bool = false) -> void:
+	sprite.sprite_process(delta_time, is_frozen)
 
 func entity_process_starting_actions() -> void:
 	if controller and controller.has_method("start_of_movement_phase"):
@@ -313,6 +315,10 @@ func entity_process_starting_actions() -> void:
 			var pre_fetch_move_list: Array = get_pre_fetch_move_list()
 			if pre_fetch_move_list.size() > 0:
 				max_intentions = pre_fetch_move_list.size()
+			
+			# If multiple move intentions, skip triggering a blocked event until all options are blocked, then trigger it with first intention's direction
+			if max_intentions > 1:
+				_skip_blocked_result = true
 
 			var start_v_facing: = facing
 			var start_move_facing: = move_facing
@@ -345,6 +351,9 @@ func entity_process_starting_actions() -> void:
 				if is_square_aspect():
 					set_facing(first_attempt_v_facing)
 				set_move_facing(first_attempt_move_facing)
+				if _skip_blocked_result:
+					on_move_was_blocked()
+
 	if controller and controller.has_method("end_of_movement_phase"):
 		controller.end_of_movement_phase()
 
@@ -597,10 +606,11 @@ func _start_move_common(to_tile_pos: Vector2i, is_group_move: bool, is_teleport:
 	return result
 
 func on_move_was_blocked() -> void:
-	EntityManager.resolve_entity_interaction_event("was_blocked", self, null, [tile_position])
-	blocked.emit()
-	if EntityManager.get_entity_prop_is_truthy(self, "die-when-blocked"):
-		die()
+	if not _skip_blocked_result:
+		EntityManager.resolve_entity_interaction_event("was_blocked", self, null, [tile_position])
+		blocked.emit()
+		if EntityManager.get_entity_prop_is_truthy(self, "die-when-blocked"):
+			die()
 
 func _move_bump_check() -> void:
 	if EntityManager.should_bump_move():
@@ -638,7 +648,7 @@ func actually_started_move() -> void:
 		post_move.resolve(self, null, get_moving_position())
 	
 	if entity_name == "player":
-		pass#do_named_bump_effect({"name": "Spin"})
+		pass
 
 func invalidate_cached_at_position(from_positions: Array) -> void:
 	var from_positions_v2i: Array[Vector2i] = Array(from_positions, TYPE_VECTOR2I, "", null)
@@ -795,7 +805,7 @@ func die(effect_info: Dictionary = {}, with_duration: float = -1, extra_params: 
 		effect_name = EntityManager.get_default_dying_effect_name_for_entity_id(entity_index)
 		effect_info = {"none": true}
 		if effect_name.to_lower() != "none":
-			effect_info = SpriteEffects.DYING_EFFECTS[effect_name]
+			effect_info = SpriteEffects.DYING_EFFECTS[effect_name].duplicate_deep()
 
 	if effect_name and extra_params:
 		SpriteEffects.set_dying_effect_params(effect_name, extra_params, effect_info)
@@ -804,38 +814,36 @@ func die(effect_info: Dictionary = {}, with_duration: float = -1, extra_params: 
 		EntityManager.remove_entity(self)
 	else:
 		dying = true
-		do_dying_effect(effect_info, with_duration)
-
-func do_dying_effect(effect_info: Dictionary, with_duration: float = -1) -> void:
-	var effect_name: String = effect_info.get("name", "")
-	if not effect_info or not effect_name:
-		push_warning("invalid dying effect info: " + str(effect_info))
-		EntityManager.remove_entity(self)
-		return
-	effect_info = effect_info.duplicate_deep()
-	set_active(false)
-	if with_duration < 0:
-		with_duration = effect_info.get("duration", DEF_DYING_EFFECT_DURATION)
-	for ll_effect_name in effect_info.get("animated_effects", {}):
-		var ll_effect: Dictionary = effect_info["animated_effects"][ll_effect_name]
-		var ll_effect_dur_factor: float = ll_effect.get("duration_factor", 1.0)
-		ll_effect["base_duration"] = with_duration * ll_effect_dur_factor
-		if ll_effect.has("time_offset"):
-			ll_effect["time_offset"] *= with_duration
-	effect_info["expire_time"] = with_duration
-	add_sprite_modifier(effect_info, true)
-
+		set_active(false)
+		effect_info["is_dying_effect"] = true
+		apply_sprite_effect(effect_info, with_duration)
 
 func do_named_bump_effect(effect_params: Dictionary, with_duration: float = -1) -> void:
 	var effect_name: String = effect_params.get("name", "")
+	if effect_name.to_lower() == "none":
+		return
 	if not effect_name or not effect_name in SpriteEffects.BUMP_EFFECTS:
 		push_warning("Unknown bump effect: %s" % effect_name)
 		return
 	var effect_info: Dictionary = SpriteEffects.BUMP_EFFECTS[effect_name].duplicate_deep()
 	SpriteEffects.set_bump_effect_params(effect_name, effect_params, effect_info)
-	do_bump_effect(effect_info, with_duration)
+	apply_sprite_effect(effect_info, with_duration)
 
-func do_bump_effect(effect_info: Dictionary, with_duration: float = -1) -> void:
+func do_named_spawn_effect(effect_params: Dictionary, as_unfreezable: bool, with_duration: float = -1, with_delay: float = 0.0) -> void:
+	var effect_name: String = effect_params.get("name", "")
+	if not effect_name or effect_name.to_lower() == "none":
+		return
+	if not effect_name in SpriteEffects.SPAWN_EFFECTS:
+		push_warning("Unknown spawn effect: %s" % effect_name)
+		return
+	var effect_info: Dictionary = SpriteEffects.SPAWN_EFFECTS[effect_name].duplicate_deep()
+	SpriteEffects.set_spawn_effect_params(effect_name, effect_params, effect_info)
+	if as_unfreezable:
+		effect_info["unfreezable"] = true
+	effect_info["is_spawning_effect"] = true
+	apply_sprite_effect(effect_info, with_duration, with_delay)
+
+func apply_sprite_effect(effect_info: Dictionary, with_duration: float = -1, with_delay: float = 0.0) -> void:
 	if not effect_info:
 		return
 	effect_info = effect_info.duplicate_deep()
@@ -851,7 +859,11 @@ func do_bump_effect(effect_info: Dictionary, with_duration: float = -1) -> void:
 		ll_effect["base_duration"] = with_duration * ll_effect_dur_factor
 		if ll_effect.has("time_offset"):
 			ll_effect["time_offset"] *= with_duration
-	effect_info["expire_time"] = with_duration
+		if with_delay > 0:
+			ll_effect["time_offset"] = ll_effect.get("time_offset", 0.0) + with_delay
+	effect_info["expire_time"] = with_duration + with_delay
+	if with_delay > 0:
+		prints("added effect with delay: ", snappedf(with_delay, 0.001), "expire time", snappedf(effect_info["expire_time"], 0.001))
 	var modifier_name: String = effect_info.get("name", "")
 	if modifier_name and sprite.has_applied_modifier(modifier_name):
 		remove_sprite_modifier({"name": modifier_name})
@@ -932,10 +944,10 @@ func _handle_signal(signaling_entity: BaseEntity, args: Array, signal_name: Stri
 	if handler and handler.is_conditional():
 		handler.resolve(self, signaling_entity, tile_position, args)
 
-func add_sprite_modifier(mod_info: Dictionary, is_dying_effect: bool = false) -> void:
+func add_sprite_modifier(mod_info: Dictionary) -> void:
 	if not mod_info or not mod_info.get("name", ""):
 		return
-	sprite.apply_modifier_info(mod_info, is_dying_effect)
+	sprite.apply_modifier_info(mod_info)
 
 func remove_sprite_modifier(mod_info: Dictionary) -> void:
 	if not mod_info or not mod_info.get("name", ""):

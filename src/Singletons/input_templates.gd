@@ -23,11 +23,14 @@ enum InputTypes {
 	DistanceModeInput,
 	
 	DirectionInput,
+	DefaultableDirectionInput,
 	BoolChoice,
 	InvertInput,
 	PositionInput,
 	Vector2iInput,
 	Vector2Input,
+	
+	ColorInput,
 	
 	MultiTypeInput,
 	
@@ -37,6 +40,7 @@ enum InputTypes {
 
 	ComplexPropValueInput,
 	
+	SpawnEffectInput,
 	DyingEffectInput,
 	BumpEffectInput,
 	
@@ -72,12 +76,15 @@ var templates: = {
 	InputTypes.DistanceModeInput: preload("res://Scenes/GameEditor/distance_type_input.tscn"),
 	
 	InputTypes.DirectionInput: preload("res://Scenes/GameEditor/ConditionalEditor/DirectionInput.tscn"),
+	InputTypes.DefaultableDirectionInput: preload("res://Scenes/GameEditor/defaultable_direction_input.tscn"),
 	InputTypes.BoolChoice: preload("res://Scenes/GameEditor/ConditionalEditor/bool_choice_input.tscn"),
 	InputTypes.InvertInput: preload("res://Scenes/GameEditor/ConditionalEditor/InvertInput.tscn"),
 
 	InputTypes.PositionInput: preload("res://Scenes/GameEditor/ConditionalEditor/vector2i_input.tscn"),
 	InputTypes.Vector2iInput: preload("res://Scenes/GameEditor/ConditionalEditor/vector2i_input.tscn"),
 	InputTypes.Vector2Input: preload("res://Scenes/GameEditor/ConditionalEditor/vector2f_input.tscn"),
+	
+	InputTypes.ColorInput: preload("res://Scenes/GameEditor/color_input.tscn"),
 	
 	InputTypes.MultiTypeInput: preload("res://Scenes/GameEditor/ConditionalEditor/multi_type_cmd_input.tscn"),
 
@@ -97,6 +104,7 @@ var templates: = {
 	# Empty by default, needs options to be set
 	InputTypes.CustomStringEnum: preload("res://Scenes/GameEditor/ConditionalEditor/generic_option_button_input.gd"),
 
+	InputTypes.SpawnEffectInput: preload("res://Scenes/GameEditor/spawn_effect_input.tscn"),
 	InputTypes.DyingEffectInput: preload("res://Scenes/GameEditor/dying_effect_input.tscn"),
 	InputTypes.BumpEffectInput: preload("res://Scenes/GameEditor/bump_effect_input.tscn"),
 }

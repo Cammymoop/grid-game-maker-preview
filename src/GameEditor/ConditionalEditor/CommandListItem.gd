@@ -2,7 +2,6 @@ extends PanelContainer
 
 signal request_invert()
 
-const ConditionsCommandList = preload("res://Scenes/GameEditor/ConditionalEditor/conditions_command_list.gd")
 const CommandListItem = preload("res://src/GameEditor/ConditionalEditor/CommandListItem.gd")
 
 const ConditionalEditor = preload("res://src/GameEditor/ConditionalEditor/ConditionalEditor.gd")
@@ -316,20 +315,22 @@ func set_arg_values(arg_values: Array) -> void:
         set_slot(arg_values.pop_front())
 
     var arg_names: = command_info.args as Array
-    if len(arg_names) != len(inputs):
-        push_error("Command UI has the wrong number of inputs for arguments: %d/%d for command %s" % [len(inputs), len(arg_names), qualified_command_name])
+    var max_arg_count: int = arg_names.size()
+    var min_arg_count: int = max_arg_count - command_info.default_args.size()
+
+    if len(inputs) > max_arg_count or len(inputs) < min_arg_count:
+        push_error("Command UI has the wrong number of inputs for arguments: %d/(%d-%d) for command %s" % [len(inputs), min_arg_count, max_arg_count, qualified_command_name])
         return
     if not arg_names:
         return
-    if len(arg_names) != len(arg_values):
-        push_error("Wrong number of values for required arguments for command %d/%d: %s" % [len(arg_values), len(arg_names), qualified_command_name])
-        return
+    if len(arg_values) > max_arg_count or len(arg_values) < min_arg_count:
+        push_warning("Wrong number of values for required arguments for command %d/(%d-%d): %s" % [len(arg_values), min_arg_count, max_arg_count, qualified_command_name])
     
     var input_names: Array[String] = []
     for input_item in inputs:
         input_names.append(input_item.get_arg_name())
 
-    for i in range(len(arg_names)):
+    for i in arg_values.size():
         var arg_name = arg_names[i]
         var input_item = inputs[input_names.find(arg_name)]
         input_item.set_value(arg_values[i])

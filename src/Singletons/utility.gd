@@ -622,7 +622,7 @@ func short_basis(vec: Vector2) -> Vector2:
 	dir_vec[vec.abs().max_axis_index()] = 0
 	return dir_vec
 
-func get_dict_color(from_dict: Dictionary, key: String, default_color: Color) -> Color:
+func get_dict_color(from_dict: Dictionary, key: String, default_color: Color = Color.MAGENTA) -> Color:
 	if not key in from_dict:
 		return default_color
 	var val: String = from_dict.get(key, "")
@@ -1103,8 +1103,8 @@ func count_trailing_digits_with_zeros(float_string: String) -> int:
 	return trailing.length()
 
 func force_rerender_subviewport(subviewport: SubViewport) -> void:
-	var scene_tree: = get_tree()
-	var root_viewport_rid: = scene_tree.root.get_viewport_rid()
+	#var scene_tree: = get_tree()
+	#var root_viewport_rid: = scene_tree.root.get_viewport_rid()
 	# breaks if I disable the main viewport rendering, maybe because the subviewport container fucks with the size
 	#RenderingServer.viewport_set_active(root_viewport_rid, false)
 	
@@ -1357,3 +1357,16 @@ func arr_vec_offset(arr_vec: Array, offset_by: Variant) -> Array:
 		else:
 			arr_vec[i] += offset_by[i]
 	return arr_vec
+
+func intersect_positions(pos_arr: Array, other_pos_arr: Array) -> Array[Vector2i]:
+	var intersected: Array[Vector2i] = []
+	for pos in pos_arr:
+		if pos in other_pos_arr:
+			intersected.append(pos)
+	return intersected
+
+func do_positions_intersect(pos_arr: Array, other_pos_arr: Array) -> bool:
+	for pos in pos_arr:
+		if pos in other_pos_arr:
+			return true
+	return false

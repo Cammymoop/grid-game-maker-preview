@@ -52,6 +52,8 @@ var _local_prop_updated: = false
 var _dying_with_animated_mod: String = ""
 var parent_entity: BaseEntity = null
 
+var _spawning_with_animated_mod: String = ""
+
 var unoriented_center: Vector2 = Vector2.ZERO
 var unoriented_bounds: Vector2 = Vector2(32, 32)
 var simple_rotate: bool = true
@@ -103,10 +105,11 @@ func ensure_layer_root() -> void:
 func _notify_local_prop_updated() -> void:
     _local_prop_updated = true
 
-func sprite_process(delta_time: float) -> void:
+func sprite_process(delta_time: float, is_frozen: bool = false) -> void:
     elapsed_time += delta_time
     update_spinning_layers()
-    update_head_facing_layers()
+    if not is_frozen:
+        update_head_facing_layers()
     if _local_prop_updated:
         _local_prop_updated = false
         if parent_entity:
@@ -118,25 +121,27 @@ func sprite_process(delta_time: float) -> void:
     elif not parent_entity:
         update_layers_moving_visibility()
         
-    if interpolate_facing_enabled:
-        if interp_facing_timer > 0:
-            interp_facing_timer = maxf(0, interp_facing_timer - delta_time)
-            var eased_progress: float = ease(1 - (interp_facing_timer / facing_interp_duration), interp_ease_param)
+    if not is_frozen:
+        if interpolate_facing_enabled:
+            if interp_facing_timer > 0:
+                interp_facing_timer = maxf(0, interp_facing_timer - delta_time)
+                var eased_progress: float = ease(1 - (interp_facing_timer / facing_interp_duration), interp_ease_param)
 
-            var to_angle: float = Utility.facing_rotation(parent_entity.facing)
-            var interp_angle: float = lerp_angle(_facing_lerp_from_rotation, to_angle, eased_progress)
-            set_sprite_rotation(interp_angle)
-    if interpolate_size_change_enabled:
-        if interp_size_change_timer > 0:
-            interp_size_change_timer = maxf(0, interp_size_change_timer - delta_time)
-            var size_change_progress: float = 1 - (interp_size_change_timer / interp_size_change_duration)
-            var eased_progress: float = Utility.get_interp_factor(interp_size_change_mode, size_change_progress)
-            
-            scale = _size_interp_from_scale.lerp(large_auto_scale_size, eased_progress)
-            var new_offset: Vector2 = _size_interp_from_offset.lerp(Vector2.ZERO, eased_progress)
-            _update_oriented_position(new_offset)
-            update_all_layers_shader_scale()
-    process_animated_modifiers(delta_time)
+                var to_angle: float = Utility.facing_rotation(parent_entity.facing)
+                var interp_angle: float = lerp_angle(_facing_lerp_from_rotation, to_angle, eased_progress)
+                set_sprite_rotation(interp_angle)
+        if interpolate_size_change_enabled:
+            if interp_size_change_timer > 0:
+                interp_size_change_timer = maxf(0, interp_size_change_timer - delta_time)
+                var size_change_progress: float = 1 - (interp_size_change_timer / interp_size_change_duration)
+                var eased_progress: float = Utility.get_interp_factor(interp_size_change_mode, size_change_progress)
+                
+                scale = _size_interp_from_scale.lerp(large_auto_scale_size, eased_progress)
+                var new_offset: Vector2 = _size_interp_from_offset.lerp(Vector2.ZERO, eased_progress)
+                _update_oriented_position(new_offset)
+                update_all_layers_shader_scale()
+
+    process_animated_modifiers(delta_time, is_frozen)
 
 func update_layers_moving_visibility() -> void:
     for layer_node in layer_root.get_children():
@@ -145,9 +150,18 @@ func update_layers_moving_visibility() -> void:
         layer_node.set_meta("moving_visible", _moving == layer_node.get_meta("show_when_moving"))
         update_layer_visible(layer_node)
 
-func process_animated_modifiers(delta_time: float) -> void:
-    var expired_modifiers: Array[String]
+func get_animated_modifiers_for_update(is_frozen: bool) -> Array[String]:
+    if not is_frozen:
+        return animated_modifiers
+    var unfreezable_modifiers: Array[String] = []
     for mod_name in animated_modifiers:
+        if _all_modifiers[mod_name].get("unfreezable", false):
+            unfreezable_modifiers.append(mod_name)
+    return unfreezable_modifiers
+
+func process_animated_modifiers(delta_time: float, is_frozen: bool) -> void:
+    var expired_modifiers: Array[String] = []
+    for mod_name in get_animated_modifiers_for_update(is_frozen):
         if not mod_name in _animation_timers:
             continue
         _animation_timers[mod_name] += delta_time
@@ -304,7 +318,7 @@ func _layer_sort_compare(layer_a: Dictionary, layer_b: Dictionary) -> bool:
 func resort_layers() -> void:
     layers.sort_custom(_layer_sort_compare)
 
-func apply_modifier_info(modifier_info: Dictionary, is_dying_effect: bool = false) -> void:
+func apply_modifier_info(modifier_info: Dictionary) -> void:
     modifier_info = modifier_info.duplicate_deep()
     if not modifier_info.has("name"):
         return
@@ -328,8 +342,10 @@ func apply_modifier_info(modifier_info: Dictionary, is_dying_effect: bool = fals
     if modifier_info.get("expire_time", 0) > 0:
         if not animated_modifiers.has(modifier_name):
             animated_modifiers.append(modifier_name)
-        if is_dying_effect:
+        if modifier_info.get("is_dying_effect", false):
             _dying_with_animated_mod = modifier_name
+        if modifier_info.get("is_spawning_effect", false):
+            _spawning_with_animated_mod = modifier_name
     _all_modifiers[modifier_name] = modifier_info.duplicate_deep()
     refresh_layers()
 
@@ -380,6 +396,8 @@ func get_serialized_info() -> Dictionary:
         serialized_info["animation_timers"] = _animation_timers.duplicate()
     if _dying_with_animated_mod:
         serialized_info["dying_with_animated_mod"] = _dying_with_animated_mod
+    if _spawning_with_animated_mod:
+        serialized_info["spawning_with_animated_mod"] = _spawning_with_animated_mod
     return serialized_info
 
 func deserialize_sprite_info(info: Dictionary) -> void:
@@ -393,6 +411,8 @@ func deserialize_sprite_info(info: Dictionary) -> void:
             _animation_timers[modifier_name] = animation_timers[modifier_name]
     if info.has("dying_with_animated_mod"):
         _dying_with_animated_mod = info["dying_with_animated_mod"]
+    if info.has("spawning_with_animated_mod"):
+        _spawning_with_animated_mod = info["spawning_with_animated_mod"]
 
 func _remove_all_modifier_layers() -> void:
     var new_layers: Array[Dictionary] = []
@@ -850,9 +870,11 @@ func _apply_modifier_effects_to(layer_node: Node2D) -> void:
     _apply_modifier_transforms_to(layer_node)
     _apply_mod_replace_color_to(layer_node)
     _apply_mod_modulate_to(layer_node)
+    
+    _apply_mod_z_offset_to(layer_node)
 
     # update the base scale and unscaled static pos so it now accounts for the static transform modifier
-    layer_node.set_meta("base_scale", layer_node.scale)
+    layer_node.set_meta("static_scale", layer_node.scale)
     layer_node.set_meta("unscaled_static_pos", layer_node.position / layer_node.scale)
     # shader param for 9 patch scale is automatically set after this func for every layer
 
@@ -908,6 +930,13 @@ func _apply_mod_modulate_to(layer_node: Node2D) -> void:
     var base_mod_color: Color = layer_node.get_meta("base_mod_color", Color.WHITE)
     var active_modulate: Dictionary = modulate_effects[modulate_effects.keys()[-1]]
     layer_node.modulate = Utility.get_dict_color(active_modulate, "color", Color.WHITE) * base_mod_color
+
+func _apply_mod_z_offset_to(layer_node: Node2D) -> void:
+    var z_offset_effects: Dictionary = modifier_effects.get("z_offset", {})
+    if z_offset_effects.size() < 1:
+        return
+    var active_z_offset: Dictionary = z_offset_effects[z_offset_effects.keys()[-1]]
+    layer_node.z_index += active_z_offset.get("offset", 0)
 
 func _get_modifiers_scale() -> Vector2:
     var m_scale: Vector2 = Vector2.ONE
@@ -1088,3 +1117,16 @@ func get_layer_node_material(layer_node: Node2D) -> ShaderMaterial:
     if layer_node.get_meta("is_pivot_dummy"):
         return layer_node.get_child(0).material as ShaderMaterial
     return layer_node.material as ShaderMaterial
+
+func early_end_spawning_effect() -> void:
+    if not _spawning_with_animated_mod:
+        return
+    if not _all_modifiers.has(_spawning_with_animated_mod):
+        push_error("Spawning with animated mod not found: %s" % _spawning_with_animated_mod)
+        return
+    var expire_time: float = _all_modifiers[_spawning_with_animated_mod].get("expire_time", 0.0)
+    if expire_time <= 0:
+        _all_modifiers[_spawning_with_animated_mod]["expire_time"] = 1.0
+        expire_time = 1.0
+    _animation_timers[_spawning_with_animated_mod] = expire_time + 1.0
+    process_animated_modifiers(0, false)

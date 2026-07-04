@@ -31,7 +31,6 @@ func cmd_if_entity_is_moving(slots: Dictionary, chosen_slot: int) -> bool:
 		push_error("Invalid slot or empty slot to check if entity is moving: %s" % chosen_slot)
 		return false
 	if not slots[chosen_slot]:
-		prints("moving check: no entity")
 		return false
 	return slots[chosen_slot].moving
 
@@ -928,22 +927,22 @@ func desc_a_die() -> Dictionary:
 	return {
 		"display_name": "Destroy entity (die)",
 		"slot_type_hint": "entity",
-		"template_text": "The entity dies now. (Uses default dying efect) dying effect direcction: [dying_eff_dir:DirectionInput:1]",
+		"template_text": "The entity dies now. (Uses default dying effect) [dying_eff_dir:DefaultableDirectionInput]",
 	}
 func cmd_a_die(slots: Dictionary, chosen_slot: int, dying_eff_dir: Dictionary = {}) -> void:
 	if Commands.slot_is_entity(chosen_slot) and slots[chosen_slot]:
-		if dying_eff_dir:
-			var dying_eff_dir_params: Dictionary = {"direction": resolve_complex_direction(dying_eff_dir, slots)}
-			slots[chosen_slot].die({}, -1, dying_eff_dir_params)
-		else:
+		if dying_eff_dir.get("is_default", true):
 			slots[chosen_slot].die()
+		else:
+			var dying_eff_dir_params: Dictionary = {"direction": resolve_complex_direction(dying_eff_dir["direction"], slots)}
+			slots[chosen_slot].die({}, -1, dying_eff_dir_params)
 
 func desc_destroy_entity_with_effect() -> String:
-	return "entity|Destroy the entity playing the efect [death_eff_info:DyingEffectInput], with this direction: [die_dir:DirectionInput:1]"
+	return "entity|Destroy the entity playing the effect [death_eff_info:DyingEffectInput], with [die_dir:DefaultableDirectionInput]"
 func cmd_destroy_entity_with_effect(slots: Dictionary, chosen_slot: int, death_eff_info: Dictionary, die_dir: Dictionary = {}) -> void:
 	if Commands.slot_is_entity(chosen_slot) and slots[chosen_slot]:
-		if die_dir:
-			death_eff_info["direction"] = resolve_complex_direction(die_dir, slots)
+		if not die_dir.get("is_default", true):
+			death_eff_info["direction"] = resolve_complex_direction(die_dir["direction"], slots)
 		if slots[chosen_slot].active or not slots[chosen_slot].dying:
 			slots[chosen_slot].die_with_named_effect(death_eff_info)
 
@@ -977,23 +976,27 @@ func cmd_a_swap_tiles(slots: Dictionary, chosen_slot: int, a_name: String, b_nam
 	var tile_b = MapManager.get_tile_index(b_name)
 	var positions_a = MapManager.get_all_positions_of_tile(tile_a, position_filter)
 	var positions_b = MapManager.get_all_positions_of_tile(tile_b, position_filter)
-	MapManager.replace_tiles_at_array(positions_a, tile_b)
-	MapManager.replace_tiles_at_array(positions_b, tile_a)
+	MapManager.replace_tiles_at_multiple(positions_a, tile_b)
+	MapManager.replace_tiles_at_multiple(positions_b, tile_a)
 
 func desc_a_set_tiles() -> String:
 	return "pos|Change the tile(s) here to [tile_name:TileNameInput]"
 func cmd_a_set_tiles(slots: Dictionary, chosen_slot: int, tile_name: String) -> void:
-	prints("setting tiles to: ", tile_name, " at ", slots[chosen_slot])
-	MapManager.replace_tiles_at_array(slots[chosen_slot], MapManager.get_tile_index(tile_name))
+	MapManager.replace_tiles_at_multiple(slots[chosen_slot], MapManager.get_tile_index(tile_name))
 
-func desc_erase_tiles() -> Dictionary:
+func desc_erase_tiles_or_text() -> Dictionary:
 	return {
 		"display_name": "Erase tiles",
 		"slot_type_hint": "pos",
 		"template_text": "Erase the [erase_mode:CustomStringEnum:tiles and permanent text,tiles,permanent text] at these positions"
 	}
-func cmd_erase_tiles(slots: Dictionary, chosen_slot: int, erase_mode: String) -> void:
-	MapManager.erase_tiles_and_effects_at_array(slots[chosen_slot])
+func cmd_erase_tiles_or_text(slots: Dictionary, chosen_slot: int, erase_mode: String) -> void:
+	if erase_mode == "tiles and permanent text":
+		MapManager.erase_tiles_and_effects_at_multiple(slots[chosen_slot])
+	elif erase_mode == "tiles":
+		MapManager.erase_tiles_at_multiple(slots[chosen_slot])
+	elif erase_mode == "permanent text":
+		MapManager.erase_effects_at_multiple(slots[chosen_slot])
 
 func desc_a_set_property() -> String:
 	return "entity,pos|Set the entity or tile's [property_name:PropertyInput] property to [value:ComplexPropValueInput:compat]"
@@ -1649,19 +1652,22 @@ func _create_text_effect(slots: Dictionary, pos_slot: int, is_above: bool, args:
 			message_positions.append(MapManager.get_world_pos_above(tile_pos) if is_above else MapManager.tile_to_world_position_centered(tile_pos))
 	
 	for pos in message_positions:
+		var popup_time: float = 0
+		if args.has("popup_time"):
+			popup_time = resolve_complex_scalar(args["popup_time"], slots)
 		var popup_msg_options: Dictionary = {
 			"text": message_str,
 			"font_size": resolve_complex_scalar(args["font_size"], slots),
 			"fill_color": resolve_complex_color(args["fill_color"], slots),
 			"outline_color": resolve_complex_color(args["outline_color"], slots),
-			"popup_time": resolve_complex_scalar(args["popup_time"], slots),
+			"popup_time": popup_time,
 			"z_offset": resolve_complex_scalar(args["z_offset"], slots),
 			"h_align": HORIZONTAL_ALIGNMENT_CENTER if args["is_center"] else HORIZONTAL_ALIGNMENT_LEFT,
 		}
-		if args.get("popup_time", 1) > 0:
+		if popup_time > 0:
 			var global_pos: Vector2 = MapManager.world_to_tile_position(pos)
 			global_pos += pixel_offset
-			EffectsHelper.spawn_popup_text(global_pos, popup_msg_options)
+			EffectsHelper.spawn_text_effect(global_pos, popup_msg_options)
 		else:
 			popup_msg_options["pos_offset"] = pixel_offset
 			MapManager.create_persistant_text_effect_from_info(pos, popup_msg_options)
@@ -2867,7 +2873,7 @@ func cmd_if_loop_detected(slots: Dictionary, _slot: int, max_loops: Dictionary) 
 	var max_loops_val: int = resolve_complex_scalar(max_loops, slots)
 	if max_loops_val <= 0:
 		max_loops_val = DEFAULT_MAX_LOOPS
-	return ConditionalsV3.is_loop_detected(slots, max_loops_val)
+	return ConditionalsV3.is_loop_detected(max_loops_val)
 
 func desc_if_named_loop_detected() -> String:
 	return "none|If a logic loop has been detected (counter name [loop_name:ComplexStringInput]) with a limit of [max_loops:ComplexScalarInput:int,default=%s]" % [DEFAULT_MAX_LOOPS]
@@ -2876,4 +2882,4 @@ func cmd_if_named_loop_detected(slots: Dictionary, _slot: int, loop_name: Dictio
 	if max_loops_val <= 0:
 		max_loops_val = DEFAULT_MAX_LOOPS
 	var loop_name_str: String = resolve_complex_string(loop_name, slots)
-	return ConditionalsV3.is_loop_detected(slots, max_loops_val, loop_name_str)
+	return ConditionalsV3.is_loop_detected(max_loops_val, loop_name_str)

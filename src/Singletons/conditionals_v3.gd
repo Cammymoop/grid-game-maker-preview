@@ -448,7 +448,7 @@ func add_deferred_call(callable: Callable) -> void:
         push_error("Max deferred calls queue size reached, skipping")
 
 
-func is_loop_detected(slots: Dictionary, max_loops: int, named_loop: String = "") -> bool:
+func is_loop_detected(max_loops: int, named_loop: String = "") -> bool:
     max_loops = maxi(max_loops, 1)
     var key: Variant = named_loop
     if not named_loop:

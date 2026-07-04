@@ -50,6 +50,7 @@ var loaded_is_autosave: = false
 
 var is_in_level_edit_mode: = true
 var _state_load_is_start_of_level: = false
+var _state_load_is_switched_level: = false
 
 var loaded = false
 
@@ -86,7 +87,10 @@ const SPECIAL_PROPS: Array[String] = [
 	"actions-disabled",
 	"no-rotate",
 	"teleport-duration", "move-speed",
+	"spawn-effect",
 	"dying-effect",
+	
+	"spawn-anim-delay",
 ]
 
 const SPECIAL_PROPS_DEFAULTS: Dictionary[String, Variant] = {
@@ -105,7 +109,10 @@ const SPECIAL_PROPS_DEFAULTS: Dictionary[String, Variant] = {
 	"no-rotate": true,
 	"teleport-duration": 0.5,
 	"move-speed": 6,
+	"spawn-effect": "Grow In",
 	"dying-effect": "Shrink Out",
+	
+	"spawn-anim-delay": 1.0,
 }
 
 static var SPECIAL_PROPS_HINT_TEXT: Dictionary[String, String] = {
@@ -132,8 +139,13 @@ static var SPECIAL_PROPS_HINT_TEXT: Dictionary[String, String] = {
 		'This can be overridden for a single teleport using by using the "Override Move Speed" Conditional command (duration is = 1/move speed).',
 	"move-speed": "The default speed (grid spaces per second) that this entity moves at.\nIf not set, the default from the game settings is used.\n" +
 		'This speed can be overridden for a single movement using the "Override Move Speed" Conditional command or automatically by the "Get Pushed" command.',
+	"spawn-effect": "The default effect on this entity's sprite when creating it at the start of a level, or via the \"Select Created Entity With Spawn Effect\" command.\n" +
+		"If set, overrides the game's default spawn effect.\n" +
+		"Available Effects: None, " + ", ".join(SpriteEffects.SPAWN_EFFECTS.keys()),
 	"dying-effect": "The default effect on this entity's sprite when it is destroyed. If set, overrides the game's default dying effect.\n" +
 		"Available Effects: None, " + ", ".join(SpriteEffects.DYING_EFFECTS.keys()),
+	
+	"spawn-anim-delay": "Set this between 0 and 1 to manually adjust when during the staggered level loading animation this entity will show up.\n",
 }
 
 enum OneTimeMessages {
@@ -333,7 +345,6 @@ func load_game_definition_data(definition_data: Dictionary) -> void:
 	if "window_width" in definition_data and "window_height" in definition_data:
 		var compatibility_window_size: = Vector2(definition_data['window_width'], definition_data['window_height'])
 		set_game_view(compatibility_window_size)
-		set_game_setting("window_width", definition_data['window_width'])
 		definition_data.erase('window_width')
 		definition_data.erase('window_height')
 	
@@ -460,6 +471,7 @@ func load_serialized_play_state(serialized_state: Dictionary, as_level_load: boo
 
 	bg_style_changed.emit()
 	_state_load_is_start_of_level = false
+	_state_load_is_switched_level = false
 
 func deserialize(serialized_state: Dictionary) -> void:
 	stateful_camera_settings = serialized_state.get("stateful_camera_settings", {}).duplicate_deep()
@@ -500,6 +512,11 @@ func get_gameplay_camera_position() -> Vector2:
 	if game_camera:
 		return game_camera.get_screen_center_position()
 	return Vector2.ZERO
+
+func get_gameplay_camera_following_position() -> Vector2:
+	if not game_camera:
+		return Vector2.ZERO
+	return game_camera.get_current_following_position()
 
 func activate_gameplay_camera() -> void:
 	if game_camera:
@@ -559,6 +576,7 @@ func load_edited(as_level_load: bool = true, as_start_of_level: bool = false) ->
 	if as_level_load:
 		as_start_of_level = true
 	_state_load_is_start_of_level = as_start_of_level
+	_state_load_is_switched_level = as_level_load
 	load_serialized_play_state(editor_save, as_level_load)
 	clear_checkpoint()
 	if not as_level_load:

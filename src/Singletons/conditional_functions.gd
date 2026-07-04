@@ -270,7 +270,7 @@ func do_action(action_data, owning_entity, target_entity, tile_position, argumen
 		"find_replace_tiles":
 			var tile_from = MapManager.get_tile_index(split_action[1])
 			var tile_to = MapManager.get_tile_index(split_action[2])
-			MapManager.replace_tiles_at_array(MapManager.get_all_positions_of_tile(tile_from), tile_to)
+			MapManager.replace_tiles_at_multiple(MapManager.get_all_positions_of_tile(tile_from), tile_to)
 		"find_swap_tiles":
 			var total = len(split_action) - 1
 			var tile_indexes = []
@@ -283,7 +283,7 @@ func do_action(action_data, owning_entity, target_entity, tile_position, argumen
 			
 			for i in range(len(tile_indexes)):
 				var i2 = 0 if i == len(tile_indexes) - 1 else i + 1
-				MapManager.replace_tiles_at_array(found_tiles[i], tile_indexes[i2])
+				MapManager.replace_tiles_at_multiple(found_tiles[i], tile_indexes[i2])
 		"fill_tile_rectangle", "fill_tile_rectangle_absolute", "fill_whole_level":
 			var start_x
 			var start_y

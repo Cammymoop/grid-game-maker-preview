@@ -63,8 +63,6 @@ const DEFAULT_TELEPORT_DURATION: float = 1/6.0
 var default_idle_delay: float = 1/10.0
 var idle_delay_frames: int = -1
 
-var default_dying_effect: Dictionary = {}
-
 var actions_only_for_camera_target: bool = false
 
 var default_move_interp_style: Utility.PosInterpStyle = Utility.PosInterpStyle.CONTINUOUS_LINEAR
@@ -81,13 +79,14 @@ var _cur_related_move_node: Dictionary = {}
 var _finished_related_move_node: Dictionary = {}
 
 var paused_at_start: bool = false
+var level_spawn_effect_frames_left: int = 0
 
 #var _move_resolution_stack: Array[Dictionary] = []
 #var _move_stack_metadata: Dictionary = {}
 
 func paused_visual_process(delta_time: float) -> void:
     for e in entity_list:
-        e.sprite_process(delta_time)
+        e.sprite_process(delta_time, true)
 
 func pressed_any_to_start() -> bool:
     for dir in ["up", "down", "left", "right"]:
@@ -99,11 +98,16 @@ func pressed_any_to_start() -> bool:
     return false
 
 func entity_list_process(delta_time: float) -> void:
-    if paused_at_start:
+    if paused_at_start or level_spawn_effect_frames_left > 0:
         if pressed_any_to_start():
+            if level_spawn_effect_frames_left > 0:
+                do_early_end_level_spawn_animation()
+                level_spawn_effect_frames_left = 0
             paused_at_start = false
+        elif level_spawn_effect_frames_left > 0:
+            level_spawn_effect_frames_left -= 1
 
-    if paused_at_start:
+    if paused_at_start or level_spawn_effect_frames_left > 0:
         paused_visual_process(delta_time)
         return
 
@@ -163,7 +167,7 @@ func entity_list_process(delta_time: float) -> void:
                 if e.deferred_signals.size() > 0:
                     e.process_deferred_signals()
                 idle_entities.append(e)
-        e.sprite_process(delta_time)
+        #e.sprite_process(delta_time, false)
     
     # Phase 2 - Update idle tick counter (for non-moving) and idle actions
     # also find entities that started moving after their turn to run starting actions
@@ -203,10 +207,20 @@ func entity_list_process(delta_time: float) -> void:
     for e in entities_that_finished_moving:
         if e.active:
             e.process_finish_move()
+    
+    for e in entity_list:
+        e.sprite_process(delta_time, false)
 
     handle_movement_mode_stuff()
     
     process_phase = 0
+
+func do_early_end_level_spawn_animation() -> void:
+    prints("early end of level spawn animation")
+    for e in entity_list:
+        var sprite: MaskLayerSprite = e.sprite
+        if sprite:
+            sprite.early_end_spawning_effect()
 
 func handle_turn_start_events() -> void:
     for e in entity_list:
@@ -340,6 +354,62 @@ func on_any_state_loaded() -> void:
     #if GameManager._state_load_is_start_of_level
     if MapManager.is_level_start_paused():
         paused_at_start = true
+    if GameManager._state_load_is_switched_level:
+        if not GameManager.is_in_level_edit_mode:
+            if GameManager.get_game_setting("level_start_entity_spawn_effect_enabled", false):
+                apply_level_start_entity_spawn_animation()
+
+func apply_level_start_entity_spawn_animation() -> void:
+    var anim_duration: float = GameManager.get_game_setting("level_start_entity_spawn_effect_duration", 0.5)
+    if anim_duration <= 0:
+        return
+    var frame_duration: float = maxi(1, roundi(anim_duration * GameManager.get_full_tick_rate()))
+    level_spawn_effect_frames_left = frame_duration
+
+    var individual_duration: = frame_duration / float(GameManager.get_full_tick_rate())
+    var max_delay: float = 0
+    var delay_factor: float = 1.0
+    var delay_offset_direction: Vector2 = Vector2.RIGHT.rotated(TAU / 12.)
+    var screen_center_map_pos: = MapManager.world_to_tile_position(GameManager.get_gameplay_camera_following_position())
+
+    if individual_duration > 0.04:
+        max_delay = individual_duration * .5
+        individual_duration *= 0.5
+        
+        var screen_size_tiles: Vector2 = GameManager.get_window_size_setting()
+        var screen_corner_dist: = screen_size_tiles.length() / 2.0
+        prints("screen center pos: ", screen_center_map_pos)
+        
+        var max_dist_from_center: float = 0
+        for e in entity_list:
+            #var dist_from_center: float = e.get_moving_position().distance_to(screen_center_map_pos)
+            var delta: Vector2 = Vector2(e.get_moving_position() - screen_center_map_pos)
+            var abs_dot: = absf(delta.dot(delay_offset_direction))
+            if abs_dot > screen_corner_dist:
+                continue
+            prints("pos:", e.get_moving_position(), "dist:", snappedf(delta.dot(delay_offset_direction), 0.001))
+            max_dist_from_center = maxf(max_dist_from_center, abs_dot)
+        delay_factor = (max_delay * 0.5) / max_dist_from_center
+        prints("max_dist_from_center: ", max_dist_from_center, "max_delay", max_delay, "delay_factor", delay_factor)
+
+    var def_spawn_effect: String = GameManager.get_game_setting("default_spawn_effect", "")
+    for e in entity_list:
+        var instance_spawn_effect: String = get_entity_prop_with_default(e, "spawn-effect", def_spawn_effect)
+        var effect_params: Dictionary = {
+            "name": instance_spawn_effect,
+            "direction": 2,
+        }
+        var delay: float = 0
+        if max_delay > 0:
+            var e_pos: Vector2i = e.get_moving_position()
+            var pos_delta: Vector2 = Vector2(e_pos - screen_center_map_pos)
+            delay = pos_delta.dot(delay_offset_direction) * delay_factor
+            delay = clampf(delay + max_delay * 0.5, 0, max_delay)
+        if entity_has_property(e, "spawn-anim-delay"):
+            var instance_spawn_manual_offset: float = get_entity_prop_with_default(e, "spawn-anim-delay", 0.0)
+            if instance_spawn_manual_offset >= 0:
+                delay = clampf(instance_spawn_manual_offset, 0, 1) * max_delay
+        e.do_named_spawn_effect(effect_params, true, individual_duration, delay)
 
 func setup():
     fix_string_keys()
@@ -403,17 +473,6 @@ func refresh_definition():
     create_defined_custom_signals()
     
     actions_only_for_camera_target = GameManager.get_game_setting("action_signal_sent_to", "all_entities") != "camera_target"
-    update_default_dying_effect()
-    
-func update_default_dying_effect():
-    var default_dying_effect_name: String = GameManager.get_game_setting("default_dying_effect", "")
-    if not default_dying_effect_name or default_dying_effect_name.to_lower() == "none":
-        default_dying_effect = {}
-    elif default_dying_effect_name in SpriteEffects.DYING_EFFECTS:
-        default_dying_effect = SpriteEffects.DYING_EFFECTS[default_dying_effect_name].duplicate_deep()
-    else:
-        push_warning("Unknown default dying effect (game setting): %s" % default_dying_effect_name)
-        default_dying_effect = {}
 
 func convert_legacy_format_stuff():
     for entity_id in entity_defs:
@@ -427,7 +486,6 @@ func convert_legacy_format_stuff():
 
 func on_game_settings_changed():
     update_movement_mode()
-    update_default_dying_effect()
 
 func update_movement_mode():
     movement_mode = GameManager.get_game_setting("movement_mode", GameManager.MovementMode.MOVEMENT_CONTINUOUS)
@@ -795,14 +853,22 @@ func get_default_size_for_entity(entity_id: int) -> Vector2:
 func post_activated_actions(entity: BaseEntity) -> void:
     if not entity.active:
         return
-    var at_pos: = entity.get_stationary_position()
-    var sitting_on_entities: Array = get_entities_at(at_pos, entity)
+    var at_positions: Array[Vector2i] = get_all_positions_of_entity(entity)
+    var sitting_on_entities: Array = get_entities_at_multiple(at_positions, entity)
     for e in sitting_on_entities:
-        resolve_entity_interaction_old("i_finish_move_onto", entity, e, at_pos)
+        if at_positions.size() < 2:
+            resolve_entity_interaction_event("i_finish_move_onto", entity, e, at_positions)
+        else:
+            var e_pos: = get_all_positions_of_entity(e)
+            resolve_entity_interaction_event("i_finish_move_onto", entity, e, Utility.intersect_positions(e_pos, at_positions))
     if not entity.active:
         return
     for e in sitting_on_entities:
-        resolve_entity_interaction_old("finish_move_onto", e, entity, at_pos)
+        if at_positions.size() < 2:
+            resolve_entity_interaction_event("finish_move_onto", e, entity, at_positions)
+        else:
+            var e_pos: = get_all_positions_of_entity(e)
+            resolve_entity_interaction_event("finish_move_onto", e, entity, Utility.intersect_positions(e_pos, at_positions))
 
 func entity_id_has_controller(entity_id: int) -> bool:
     var controller_name: String = entity_defs[entity_id].get("controller", "")
@@ -1391,25 +1457,31 @@ func preload_controller_templates() -> void:
         var controller_name = fname.get_basename()
         controller_templates[controller_name] = load(controllers_path + fname)
 
-func finish_move(moving_entity, onto_positions: Array) -> void:
+func finish_move(moving_entity: BaseEntity, onto_positions: Array) -> void:
     if not moving_entity.active:
         return
     moving_entity.process_deferred_signals()
-
-    var entities_here: Array = []
-    var entities_overlapped_at: Array = []
-    for onto_position in onto_positions:
-        for entity_here in get_entities_at(onto_position, moving_entity):
-            if not entity_here in entities_here:
-                entities_here.append(entity_here)
-                entities_overlapped_at.append(onto_position)
-
-    for i in entities_here.size():
-        resolve_entity_interaction_old("i_finish_move_onto", moving_entity, entities_here[i], entities_overlapped_at[i])
     if not moving_entity.active:
         return
-    for i in entities_here.size():
-        resolve_entity_interaction_old("finish_move_onto", entities_here[i], moving_entity, entities_overlapped_at[i])
+
+    var entities_moved_onto: Array = []
+    var entities_onto_at: Array = []
+
+    var all_entities_here: Array = get_entities_at_multiple(onto_positions, moving_entity)
+    for e in all_entities_here:
+        var e_pos: = get_all_positions_of_entity(e)
+        entities_moved_onto.append(e)
+        entities_onto_at.append(Utility.intersect_positions(e_pos, onto_positions))
+    
+    var ifmot: = get_entity_property(moving_entity, "i_finish_move_onto")
+    if ifmot and ifmot.is_conditional():
+        for i in entities_moved_onto.size():
+            ifmot.resolve(moving_entity, entities_moved_onto[i], entities_onto_at[i])
+    if not moving_entity.active:
+        return
+
+    for i in entities_moved_onto.size():
+        resolve_entity_interaction_event("finish_move_onto", entities_moved_onto[i], moving_entity, entities_onto_at[i])
     
     if not moving_entity.active:
         return
@@ -1570,19 +1642,19 @@ func half_moved_entering_at(at_position: Vector2i, entering_entities: Array, oth
         for other_entity: BaseEntity in interacted:
             resolve_entity_interaction_old("half_moved_onto", other_entity, entity, at_position)
 
-func post_move_actions(moving_entity, from_position, to_position, exclude_group: Array = []) -> void:
+func post_move_actions(moving_entity: BaseEntity, from_position: Vector2i, to_position: Vector2i) -> void:
     if not moving_entity.active:
         return
 
-    var entities_at_start_pos = get_entities_at(from_position, moving_entity, exclude_group)
+    var entities_at_start_pos: = get_entities_at(from_position, moving_entity)
     for e in entities_at_start_pos:
-        resolve_entity_interaction_old("post_move_off_of", e, moving_entity, from_position)
+        resolve_entity_interaction_event("post_move_off_of", e, moving_entity, [from_position])
     if not moving_entity.active:
         return
     
-    var entities_destination = get_entities_at(to_position, moving_entity, exclude_group)
+    var entities_destination: = get_entities_at(to_position, moving_entity)
     for e in entities_destination:
-        resolve_entity_interaction_old("post_move_onto", e, moving_entity, to_position)
+        resolve_entity_interaction_event("post_move_onto", e, moving_entity, [to_position])
     if not moving_entity.active:
         return
     
@@ -1590,33 +1662,53 @@ func post_move_actions(moving_entity, from_position, to_position, exclude_group:
 
 func post_die_actions(dying_entity: BaseEntity) -> void:
     if not dying_entity.moving:
-        var at_pos: = dying_entity.get_stationary_position()
-        var sitting_on_entities: Array = get_entities_at(at_pos, dying_entity)
+        var at_positions: Array[Vector2i] = get_all_positions_of_entity(dying_entity)
+        var sitting_on_entities: Array = get_entities_at_multiple(at_positions, dying_entity)
         for e in sitting_on_entities:
-            resolve_entity_interaction_old("post_move_off_of", e, dying_entity, at_pos)
+            if at_positions.size() < 2:
+                resolve_entity_interaction_event("post_move_off_of", e, dying_entity, at_positions)
+            else:
+                var e_pos: = get_all_positions_of_entity(e)
+                resolve_entity_interaction_event("post_move_off_of", e, dying_entity, Utility.intersect_positions(e_pos, at_positions))
 
-func post_move_multi_pos(moving_entity, moved_off_positions: Array, moved_onto_positions: Array, exclude_group: Array = []) -> void:
+func post_move_multi_pos(moving_entity, moved_off_positions: Array, moved_onto_positions: Array) -> void:
     var entities_moved_off: Array = []
     var entities_moved_off_at: Array = []
-    for moved_off_position in moved_off_positions:
-        for entity_here in get_entities_at(moved_off_position, moving_entity, exclude_group):
-            if not entity_here in entities_moved_off:
-                entities_moved_off.append(entity_here)
-                entities_moved_off_at.append(moved_off_position)
-    for i in entities_moved_off.size():
-        var e = entities_moved_off[i]
-        resolve_entity_interaction_old("post_move_off_of", e, moving_entity, entities_moved_off_at[i])
-    
     var entities_moved_onto: Array = []
     var entities_moved_onto_at: Array = []
-    for moved_onto_position in moved_onto_positions:
-        for entity_there in get_entities_at(moved_onto_position, moving_entity, exclude_group):
-            if not entity_there in entities_moved_onto:
-                entities_moved_onto.append(entity_there)
-                entities_moved_onto_at.append(moved_onto_position)
+    
+    var exclude_instances: Array[int] = []
+
+    var unchanged_positions: Array[Vector2i] = []
+    unchanged_positions.append_array(get_all_positions_of_entity(moving_entity))
+    var old_positions: Array[Vector2i] = unchanged_positions.duplicate()
+    for pos in moved_onto_positions:
+        unchanged_positions.erase(pos)
+    var new_positions: Array[Vector2i] = unchanged_positions.duplicate()
+    new_positions.append_array(moved_onto_positions)
+
+    var all_entities_at_left_pos: = get_entities_at_multiple(moved_off_positions, moving_entity)
+    for e in all_entities_at_left_pos:
+        var e_pos: = get_all_positions_of_entity(e)
+        if not Utility.do_positions_intersect(old_positions, e_pos):
+            exclude_instances.append(e.instance_id)
+            entities_moved_off.append(e)
+            entities_moved_off_at.append(Utility.intersect_positions(e_pos, moved_onto_positions))
+
+    for i in entities_moved_off.size():
+        var e = entities_moved_off[i]
+        resolve_entity_interaction_event("post_move_off_of", e, moving_entity, entities_moved_off_at[i])
+    
+    var all_entities_at_entered_pos: = get_entities_at_multiple(moved_onto_positions, moving_entity, exclude_instances)
+    for e in all_entities_at_entered_pos:
+        var e_pos: = get_all_positions_of_entity(e)
+        if not Utility.do_positions_intersect(new_positions, e_pos):
+            entities_moved_onto.append(e)
+            entities_moved_onto_at.append(Utility.intersect_positions(e_pos, moved_onto_positions))
+
     for i in entities_moved_onto.size():
         var e = entities_moved_onto[i]
-        resolve_entity_interaction_old("post_move_onto", e, moving_entity, entities_moved_onto_at[i])
+        resolve_entity_interaction_event("post_move_onto", e, moving_entity, entities_moved_onto_at[i])
 
 func can_move_to(moving_entity: BaseEntity, tile_position: Vector2i) -> bool:
     var entities_here = get_entities_at(tile_position, moving_entity)
@@ -2385,6 +2477,21 @@ func get_entity_tailing_chain(reference_entity: BaseEntity, with_behind: bool, w
 func on_textures_remapped() -> void:
     build_sprite_previews()
 
+func get_default_spawn_effect_name_for_entity_id(entity_id: int) -> String:
+    var def_eff_name: String = GameManager.get_game_setting("default_spawn_effect", "")
+    if not entity_id in entity_defs:
+        push_error("Entity id not found: %s" % entity_id)
+        return def_eff_name
+    var spawn_effect_prop_val: Variant = entity_defs[entity_id]["properties"].get("spawn-effect", "")
+    if typeof(spawn_effect_prop_val) != TYPE_STRING:
+        prints("entity spawn-effect is the wrong type: %s" % type_string(typeof(spawn_effect_prop_val)))
+        return def_eff_name
+    if spawn_effect_prop_val.to_lower() == "none":
+        return ""
+    if not spawn_effect_prop_val or not spawn_effect_prop_val in SpriteEffects.SPAWN_EFFECTS:
+        return def_eff_name
+    return spawn_effect_prop_val
+
 func get_default_dying_effect_name_for_entity_id(entity_id: int) -> String:
     var def_eff_name: String = GameManager.get_game_setting("default_dying_effect", "")
     if not entity_id in entity_defs:
@@ -2399,20 +2506,6 @@ func get_default_dying_effect_name_for_entity_id(entity_id: int) -> String:
     if not dying_effect_prop_val or not dying_effect_prop_val in SpriteEffects.DYING_EFFECTS:
         return def_eff_name
     return dying_effect_prop_val
-
-func get_default_dying_effect_for_entity_id(entity_id: int) -> Dictionary:
-    if not entity_id in entity_defs:
-        push_error("Entity id not found: %s" % entity_id)
-        return {}
-    var dying_effect_prop_val: Variant = entity_defs[entity_id]["properties"].get("dying-effect", "")
-    if typeof(dying_effect_prop_val) != TYPE_STRING:
-        prints("entity dying-effect is the wrong type: %s" % type_string(typeof(dying_effect_prop_val)))
-        return default_dying_effect
-    if dying_effect_prop_val.to_lower() == "none":
-        return {}
-    if not dying_effect_prop_val or not dying_effect_prop_val in SpriteEffects.DYING_EFFECTS:
-        return default_dying_effect
-    return SpriteEffects.DYING_EFFECTS[dying_effect_prop_val]
 
 func track_move_starting(moving_entity: BaseEntity, is_group_move: bool = false, is_revertable: bool = false) -> Dictionary:
     if not moving_entity:

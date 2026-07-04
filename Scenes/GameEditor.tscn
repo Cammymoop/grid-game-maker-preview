@@ -107,7 +107,7 @@ theme = ExtResource("3_qrjoe")
 current_tab = 0
 tab_0/title = "Game"
 
-[node name="GameDefinition" type="VBoxContainer" parent="MarginContainer/UIRoot/TabContainer" unique_id=1146228055 node_paths=PackedStringArray("show_level_title_option_picker", "name_input", "edit_game_dir_button", "move_interp_option_picker", "tele_interp_option_picker", "action_signal_sent_to_option_picker", "turn_animation_option_picker", "def_dying_eff_picker", "default_move_speed_input", "default_teleport_duration_input", "auto_reload_checkpoint_for_no_cam_focus_toggle", "follow_by_controller_picker", "auto_undo_option", "auto_undo_toggle", "action_1_is_undo_toggle", "start_paused_option", "start_level_paused_toggle")]
+[node name="GameDefinition" type="VBoxContainer" parent="MarginContainer/UIRoot/TabContainer" unique_id=1146228055 node_paths=PackedStringArray("show_level_title_option_picker", "name_input", "edit_game_dir_button", "move_interp_option_picker", "tele_interp_option_picker", "action_signal_sent_to_option_picker", "turn_animation_option_picker", "def_dying_eff_picker", "def_spawn_eff_picker", "use_spawn_effect_at_level_start_toggle", "level_start_anim_duration_option", "level_start_animation_duration_input", "default_move_speed_input", "default_teleport_duration_input", "auto_reload_checkpoint_for_no_cam_focus_toggle", "follow_by_controller_picker", "auto_undo_option", "auto_undo_toggle", "action_1_is_undo_toggle", "start_paused_option", "start_level_paused_toggle")]
 layout_mode = 2
 script = ExtResource("6")
 show_level_title_option_picker = NodePath("ScrollContainer/SectionContainer/GameSettingsSection/MarginContainer/HFlowContainer/HFlowContainer/HBoxContainer11/OptionButton")
@@ -118,6 +118,10 @@ tele_interp_option_picker = NodePath("ScrollContainer/SectionContainer/GameSetti
 action_signal_sent_to_option_picker = NodePath("ScrollContainer/SectionContainer/GameSettingsSection/MarginContainer/HFlowContainer/HFlowContainer/HBoxContainer12/ActionSentToSelect")
 turn_animation_option_picker = NodePath("ScrollContainer/SectionContainer/GameSettingsSection/MarginContainer/HFlowContainer/VBoxContainer/HBoxContainer/HBoxContainer13/TurnAnimSelect")
 def_dying_eff_picker = NodePath("ScrollContainer/SectionContainer/GameSettingsSection/MarginContainer/HFlowContainer/VBoxContainer/HBoxContainer11/DyingEffectPicker")
+def_spawn_eff_picker = NodePath("ScrollContainer/SectionContainer/GameSettingsSection/MarginContainer/HFlowContainer/VBoxContainer/HBoxContainer13/SpawnEffectPicker")
+use_spawn_effect_at_level_start_toggle = NodePath("ScrollContainer/SectionContainer/GameSettingsSection/MarginContainer/HFlowContainer/HFlowContainer/HBoxContainer3/DoLevelLoadAnimToggle")
+level_start_anim_duration_option = NodePath("ScrollContainer/SectionContainer/GameSettingsSection/MarginContainer/HFlowContainer/HFlowContainer/SpawnAnimDurationOption")
+level_start_animation_duration_input = NodePath("ScrollContainer/SectionContainer/GameSettingsSection/MarginContainer/HFlowContainer/HFlowContainer/SpawnAnimDurationOption/SpawnAnimDurationInput")
 default_move_speed_input = NodePath("ScrollContainer/SectionContainer/GameSettingsSection/MarginContainer/HFlowContainer/HFlowContainer/HBoxContainer10/DefMoveSpeedInput")
 default_teleport_duration_input = NodePath("ScrollContainer/SectionContainer/GameSettingsSection/MarginContainer/HFlowContainer/HFlowContainer/HBoxContainer14/DefTeleDurationInput")
 auto_reload_checkpoint_for_no_cam_focus_toggle = NodePath("ScrollContainer/SectionContainer/DefaultCameraSection/MarginContainer/HFlowContainer/HBoxContainer8/AutoCheckpointCamFocusToggle")
@@ -356,9 +360,33 @@ alignment = 2
 
 [node name="Label2" type="Label" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/SectionContainer/GameSettingsSection/MarginContainer/HFlowContainer/VBoxContainer/HBoxContainer11" unique_id=818267902]
 layout_mode = 2
-text = "Destroyed Etntites:"
+text = "Destroyed Entites:"
 
 [node name="DyingEffectPicker" type="OptionButton" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/SectionContainer/GameSettingsSection/MarginContainer/HFlowContainer/VBoxContainer/HBoxContainer11" unique_id=1160322751]
+layout_mode = 2
+alignment = 1
+selected = 1
+item_count = 5
+popup/item_0/text = "none"
+popup/item_0/id = 0
+popup/item_1/text = "smooth"
+popup/item_1/id = 1
+popup/item_2/text = "stepped"
+popup/item_2/id = 2
+popup/item_3/text = "jerky"
+popup/item_3/id = 3
+popup/item_4/text = "jerky-stepped"
+popup/item_4/id = 4
+
+[node name="HBoxContainer13" type="HBoxContainer" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/SectionContainer/GameSettingsSection/MarginContainer/HFlowContainer/VBoxContainer" unique_id=85061374]
+layout_mode = 2
+alignment = 2
+
+[node name="Label2" type="Label" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/SectionContainer/GameSettingsSection/MarginContainer/HFlowContainer/VBoxContainer/HBoxContainer13" unique_id=224881744]
+layout_mode = 2
+text = "Spawning Entities:"
+
+[node name="SpawnEffectPicker" type="OptionButton" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/SectionContainer/GameSettingsSection/MarginContainer/HFlowContainer/VBoxContainer/HBoxContainer13" unique_id=607650553]
 layout_mode = 2
 alignment = 1
 selected = 1
@@ -417,7 +445,30 @@ alignment = 2
 
 [node name="LevelStartPausedToggle" type="CheckButton" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/SectionContainer/GameSettingsSection/MarginContainer/HFlowContainer/HFlowContainer/HBoxContainer2" unique_id=1326189486]
 layout_mode = 2
-text = "Freeze Levels until first input:"
+text = "Freeze Levels Until First Input:"
+
+[node name="HBoxContainer3" type="HBoxContainer" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/SectionContainer/GameSettingsSection/MarginContainer/HFlowContainer/HFlowContainer" unique_id=680079105]
+layout_mode = 2
+alignment = 2
+
+[node name="DoLevelLoadAnimToggle" type="CheckButton" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/SectionContainer/GameSettingsSection/MarginContainer/HFlowContainer/HFlowContainer/HBoxContainer3" unique_id=1593983233]
+layout_mode = 2
+text = "Level Load Animation"
+
+[node name="SpawnAnimDurationOption" type="HBoxContainer" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/SectionContainer/GameSettingsSection/MarginContainer/HFlowContainer/HFlowContainer" unique_id=655491681]
+layout_mode = 2
+alignment = 2
+
+[node name="Label" type="Label" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/SectionContainer/GameSettingsSection/MarginContainer/HFlowContainer/HFlowContainer/SpawnAnimDurationOption" unique_id=1439509849]
+layout_mode = 2
+text = "Start Animation Duration:"
+
+[node name="SpawnAnimDurationInput" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/SectionContainer/GameSettingsSection/MarginContainer/HFlowContainer/HFlowContainer/SpawnAnimDurationOption" unique_id=1458729988 instance=ExtResource("5_ixkgg")]
+layout_mode = 2
+default_value = 0.25
+max_value = 10.0
+custom_step = true
+custom_step_value = 0.01
 
 [node name="HBoxContainer10" type="HBoxContainer" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/SectionContainer/GameSettingsSection/MarginContainer/HFlowContainer/HFlowContainer" unique_id=96940792]
 layout_mode = 2
@@ -427,7 +478,7 @@ alignment = 2
 layout_mode = 2
 text = "Default Move Speed:"
 
-[node name="DefMoveSpeedInput" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/SectionContainer/GameSettingsSection/MarginContainer/HFlowContainer/HFlowContainer/HBoxContainer10" unique_id=1458729988 instance=ExtResource("5_ixkgg")]
+[node name="DefMoveSpeedInput" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/SectionContainer/GameSettingsSection/MarginContainer/HFlowContainer/HFlowContainer/HBoxContainer10" unique_id=117587450 instance=ExtResource("5_ixkgg")]
 layout_mode = 2
 default_value = 6.0
 min_value = 0.5

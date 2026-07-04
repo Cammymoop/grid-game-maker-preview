@@ -131,11 +131,11 @@ func do_action(command_code: int, selected_slot: int, slots: Dictionary, command
 			var tid_1 = MapManager.get_tile_index(command_options[1])
 			var tile_positions_a = MapManager.get_all_positions_of_tile(tid_0, selected)
 			var tile_positions_b = MapManager.get_all_positions_of_tile(tid_1, selected)
-			MapManager.replace_tiles_at_array(tile_positions_a, tid_1)
-			MapManager.replace_tiles_at_array(tile_positions_b, tid_0)
+			MapManager.replace_tiles_at_multiple(tile_positions_a, tid_1)
+			MapManager.replace_tiles_at_multiple(tile_positions_b, tid_0)
 		CommandCodes.A_SET_TILES:
 			var tid = MapManager.get_tile_index(command_options[0])
-			MapManager.replace_tiles_at_array(selected, tid)
+			MapManager.replace_tiles_at_multiple(selected, tid)
 		
 		CommandCodes.A_SET_PROPERTY:
 			var value = command_options[1]

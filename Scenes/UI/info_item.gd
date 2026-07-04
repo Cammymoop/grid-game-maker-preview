@@ -7,7 +7,7 @@ signal info_updated()
 @export var separator_label: Label
 @export var value_label: Label
 
-@export var relative_icon_scale: float = 0.5
+@export var relative_icon_scale: float = 1
 
 var item_id: int = -1
 

@@ -332,7 +332,7 @@ func _start_move_common(to_pos: Vector2i, is_group_move: bool, is_teleport: bool
 		_this_move_steps = steps_remaining
 		_this_move_is_teleport = is_teleport
 		if not bond_group:
-			EntityManager.post_move_multi_pos(self, frontier.from, frontier.to, bond_group)
+			EntityManager.post_move_multi_pos(self, frontier.from, frontier.to)
 			actually_started_move()
 		_move_bump_check()
 	else:

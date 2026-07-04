@@ -23,6 +23,11 @@ var invalid_field_color = Color(0.7, 0.4, 0.4)
 @export var turn_animation_option_picker: OptionButton
 
 @export var def_dying_eff_picker: OptionButton
+@export var def_spawn_eff_picker: OptionButton
+
+@export var use_spawn_effect_at_level_start_toggle: CheckButton
+@export var level_start_anim_duration_option: Control
+@export var level_start_animation_duration_input: ScalarValueInput
 
 @export var default_move_speed_input: ScalarValueInput
 @export var default_teleport_duration_input: ScalarValueInput
@@ -163,15 +168,37 @@ func _ready():
 	def_dying_eff_picker.add_item("None")
 	for effect_name in SpriteEffects.DYING_EFFECTS:
 		def_dying_eff_picker.add_item(effect_name)
-	
-	var auto_reload_no_cam_focus: bool = GameManager.get_game_setting("auto_reload_checkpoint_for_no_cam_focus", false)
-	auto_reload_checkpoint_for_no_cam_focus_toggle.set_pressed_no_signal(auto_reload_no_cam_focus)
-	auto_reload_checkpoint_for_no_cam_focus_toggle.toggled.connect(on_auto_reload_checkpoint_for_no_cam_focus_toggled)
 
 	if cur_dying_eff:
 		Utility.opbtn_select_text(def_dying_eff_picker, cur_dying_eff)
 	else:
 		def_dying_eff_picker.selected = 0
+	
+	def_spawn_eff_picker.item_selected.connect(on_default_spawn_eff_option_picked)
+	var cur_spawn_eff: String = GameManager.get_game_setting("default_spawn_effect", "")
+	def_spawn_eff_picker.clear()
+	def_spawn_eff_picker.add_item("None")
+	for effect_name in SpriteEffects.SPAWN_EFFECTS:
+		def_spawn_eff_picker.add_item(effect_name)
+	
+	if cur_spawn_eff:
+		Utility.opbtn_select_text(def_spawn_eff_picker, cur_spawn_eff)
+	else:
+		def_spawn_eff_picker.selected = 0
+	
+	var is_level_start_anim: bool = GameManager.get_game_setting("level_start_entity_spawn_effect_enabled", false)
+	use_spawn_effect_at_level_start_toggle.set_pressed_no_signal(is_level_start_anim)
+	use_spawn_effect_at_level_start_toggle.toggled.connect(on_use_spawn_effect_at_level_start_toggled)
+	
+	level_start_anim_duration_option.visible = is_level_start_anim
+	
+	var level_start_anim_duration: float = GameManager.get_game_setting("level_start_entity_spawn_effect_duration", 0.5)
+	level_start_animation_duration_input.set_value(level_start_anim_duration)
+	level_start_animation_duration_input.value_changed.connect(on_level_start_animation_duration_changed)
+	
+	var auto_reload_no_cam_focus: bool = GameManager.get_game_setting("auto_reload_checkpoint_for_no_cam_focus", false)
+	auto_reload_checkpoint_for_no_cam_focus_toggle.set_pressed_no_signal(auto_reload_no_cam_focus)
+	auto_reload_checkpoint_for_no_cam_focus_toggle.toggled.connect(on_auto_reload_checkpoint_for_no_cam_focus_toggled)
 
 func is_continuous_movement_mode() -> bool:
 	return GameManager.get_game_setting("movement_mode", GameManager.MovementMode.MOVEMENT_CONTINUOUS) == GameManager.MovementMode.MOVEMENT_CONTINUOUS
@@ -440,6 +467,17 @@ func on_default_dying_eff_option_picked(index: int) -> void:
 	GameManager.set_game_setting("default_dying_effect", item_text)
 	GameManager.game_settings_changed.emit()
 
+func on_default_spawn_eff_option_picked(index: int) -> void:
+	var item_text: = def_spawn_eff_picker.get_item_text(index)
+	GameManager.set_game_setting("default_spawn_effect", item_text)
+	GameManager.game_settings_changed.emit()
+
+func on_use_spawn_effect_at_level_start_toggled(button_pressed: bool) -> void:
+	prints("on_use_spawn_effect_at_level_start_toggled: ", button_pressed)
+	level_start_anim_duration_option.visible = button_pressed
+	GameManager.set_game_setting("level_start_entity_spawn_effect_enabled", button_pressed)
+	GameManager.game_settings_changed.emit()
+
 func on_auto_reload_checkpoint_for_no_cam_focus_toggled(button_pressed: bool) -> void:
 	GameManager.set_game_setting("auto_reload_checkpoint_for_no_cam_focus", button_pressed)
 	GameManager.game_settings_changed.emit()
@@ -457,4 +495,8 @@ func on_action_1_is_undo_toggled(button_pressed: bool) -> void:
 
 func on_start_level_paused_toggle_toggled(button_pressed: bool) -> void:
 	GameManager.set_game_setting("start_level_paused", button_pressed)
+	GameManager.game_settings_changed.emit()
+
+func on_level_start_animation_duration_changed(value: float) -> void:
+	GameManager.set_game_setting("level_start_entity_spawn_effect_duration", value)
 	GameManager.game_settings_changed.emit()

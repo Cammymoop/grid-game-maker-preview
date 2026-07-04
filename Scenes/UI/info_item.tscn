@@ -16,7 +16,8 @@ separator_label = NodePath("InfoSeparator")
 value_label = NodePath("Label2")
 
 [node name="InfoIcon" type="TextureRect" parent="." unique_id=1787515167]
-custom_minimum_size = Vector2(16, 16)
+texture_filter = 1
+custom_minimum_size = Vector2(32, 32)
 layout_mode = 2
 size_flags_horizontal = 4
 size_flags_vertical = 4
@@ -26,17 +27,21 @@ expand_mode = 3
 [node name="Label" type="Label" parent="." unique_id=572402729]
 layout_mode = 2
 theme_override_fonts/font = ExtResource("3_v4fhb")
-theme_override_font_sizes/font_size = 14
+theme_override_font_sizes/font_size = 20
 text = "ji"
 
 [node name="InfoSeparator" type="Label" parent="." unique_id=1206440753]
 layout_mode = 2
 theme_override_fonts/font = ExtResource("3_v4fhb")
-theme_override_font_sizes/font_size = 14
+theme_override_font_sizes/font_size = 20
 text = "-"
 
 [node name="Label2" type="Label" parent="." unique_id=1476744202]
 layout_mode = 2
 theme_override_fonts/font = ExtResource("3_v4fhb")
-theme_override_font_sizes/font_size = 14
+theme_override_font_sizes/font_size = 20
 text = "24"
+
+[node name="Spacer" type="Control" parent="." unique_id=207060104]
+custom_minimum_size = Vector2(6, 0)
+layout_mode = 2

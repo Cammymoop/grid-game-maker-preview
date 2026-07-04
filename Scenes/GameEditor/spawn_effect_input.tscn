@@ -1,0 +1,47 @@
+[gd_scene format=3 uid="uid://dj1wlb8sf7ik1"]
+
+[ext_resource type="Script" uid="uid://b0awb6hf1g0q6" path="res://Scenes/GameEditor/spawn_effect_input.gd" id="1_3v1ne"]
+[ext_resource type="Script" uid="uid://b2e3vs73ts471" path="res://Scenes/GameEditor/ConditionalEditor/generic_option_button_input.gd" id="2_3v1ne"]
+[ext_resource type="Script" path="res://Scenes/GameEditor/remembering_color_picker_button.gd" id="3_mjao0"]
+[ext_resource type="PackedScene" uid="uid://bleyoj5f36kfy" path="res://Scenes/GameEditor/ConditionalEditor/scalar_value_input.tscn" id="4_mjao0"]
+
+[node name="SpawnEffectInput" type="HBoxContainer" unique_id=790260579 node_paths=PackedStringArray("effect_picker_input", "color_picker", "amount_container", "amount_input", "amount_label")]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_right = -565.0
+offset_bottom = -741.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 10
+script = ExtResource("1_3v1ne")
+effect_picker_input = NodePath("SpawnEffectPicker")
+color_picker = NodePath("ColorPickerButton")
+amount_container = NodePath("HBoxContainer")
+amount_input = NodePath("HBoxContainer/ScalarValueInput")
+amount_label = NodePath("HBoxContainer/Label")
+
+[node name="SpawnEffectPicker" type="OptionButton" parent="." unique_id=583237251]
+layout_mode = 2
+size_flags_vertical = 4
+alignment = 1
+fit_to_longest_item = false
+script = ExtResource("2_3v1ne")
+
+[node name="ColorPickerButton" type="ColorPickerButton" parent="." unique_id=627619670]
+visible = false
+custom_minimum_size = Vector2(40, 0)
+layout_mode = 2
+script = ExtResource("3_mjao0")
+
+[node name="HBoxContainer" type="HBoxContainer" parent="." unique_id=1052579092]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="HBoxContainer" unique_id=1335948243]
+layout_mode = 2
+text = "Amount:"
+
+[node name="ScalarValueInput" parent="HBoxContainer" unique_id=1458729988 instance=ExtResource("4_mjao0")]
+layout_mode = 2
+custom_step = true
+custom_step_value = 0.1

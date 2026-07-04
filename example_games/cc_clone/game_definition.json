@@ -9,8 +9,8 @@
     "title": "Chip Challonge",
     "show_level_title": "At Level Start",
     "game_view_size": [
-      19.0,
-      14.0
+      22.0,
+      15.5
     ],
     "window_width": 19.0,
     "auto_reload_checkpoint_for_no_cam_focus": true,
@@ -78,7 +78,10 @@
       }
     },
     "start_level_paused": false,
-    "default_dying_effect": "Shrink Out"
+    "default_dying_effect": "Shrink Out",
+    "level_start_entity_spawn_effect_enabled": true,
+    "default_spawn_effect": "Slide In",
+    "level_start_entity_spawn_effect_duration": 0.6
   },
   "textures": [
     {
@@ -235,7 +238,9 @@
           "when always": []
         },
         "blocking-clones": true,
-        "pulls": true
+        "pulls": true,
+        "spawn-effect": "Shrink In",
+        "spawn-anim-delay": 1
       },
       "groups": [
         "Player"
@@ -354,7 +359,7 @@
               "basic_default.if_all_tiles_property_value::[\"i:4\",\"s:wet\",true]"
             ],
             "when true": [
-              "basic_default.a_die::[\"i:0\"]",
+              "basic_default.destroy_entity_immediately::[\"i:0\"]",
               "basic_default.a_set_tiles::[\"i:4\",\"s:greenery\"]",
               "basic_default.play_named_sfx::[\"i:-1\",{\"args\":[\"s:type\",\"s:plain\",\"s:value\",\"s:Heavy Splash\"],\"type\":\"Dictionary\"},true]",
               "basic_default.quit::[\"i:-1\"]"
@@ -403,8 +408,8 @@
         1.0
       ],
       "preview_variant": {
-        "texture": 1,
-        "tex_index": 58
+        "texture": 1.0,
+        "tex_index": 58.0
       }
     },
     "2": {
@@ -467,7 +472,8 @@
             "basic_default.a_swap_tiles::[\"i:5\",\"s:toggle_wall\",\"s:toggle_floor\"]",
             "basic_default.play_named_sfx::[\"i:-1\",{\"args\":[\"s:type\",\"s:plain\",\"s:value\",\"s:Button\"],\"type\":\"Dictionary\"},true]"
           ]
-        }
+        },
+        "spawn-effect": "none"
       }
     },
     "9": {
@@ -706,7 +712,8 @@
           "when always": []
         },
         "z-index": 2,
-        "edit-place-multiple": true
+        "edit-place-multiple": true,
+        "spawn-effect": "none"
       }
     },
     "17": {
@@ -736,7 +743,8 @@
           "when always": []
         },
         "z-index": -1,
-        "solid": true
+        "solid": true,
+        "spawn-effect": "Grow In"
       }
     },
     "18": {
@@ -747,7 +755,8 @@
         "blocks": true,
         "z-index": -1,
         "solid": true,
-        "blocking-clones": true
+        "blocking-clones": true,
+        "spawn-effect": "Grow In"
       }
     },
     "19": {
@@ -873,7 +882,8 @@
       "properties": {
         "move_off_of": false,
         "z-index": 6,
-        "cage": true
+        "cage": true,
+        "spawn-effect": "none"
       }
     },
     "24": {
@@ -1056,7 +1066,8 @@
           ],
           "when false": [],
           "when always": []
-        }
+        },
+        "spawn-effect": "none"
       }
     },
     "25": {
@@ -1142,7 +1153,8 @@
           "when true": [],
           "when false": [],
           "when always": []
-        }
+        },
+        "spawn-effect": "none"
       }
     },
     "28": {
@@ -1162,7 +1174,8 @@
           ],
           "when false": [],
           "when always": []
-        }
+        },
+        "spawn-effect": "none"
       }
     },
     "29": {
@@ -1329,7 +1342,8 @@
           "when false": [],
           "when always": []
         },
-        "blocking-clones": true
+        "blocking-clones": true,
+        "spawn-effect": "Grow In"
       },
       "sprite_config": {
         "layers": [
@@ -1383,7 +1397,8 @@
           ],
           "when false": [],
           "when always": []
-        }
+        },
+        "spawn-effect": "none"
       }
     },
     "36": {
@@ -1431,7 +1446,8 @@
           }
         ],
         "solid": true,
-        "blocking-clones": true
+        "blocking-clones": true,
+        "spawn-effect": "none"
       },
       "sprite_config": {
         "layers": [
@@ -1546,7 +1562,8 @@
           "when false": [],
           "when always": []
         },
-        "blocking-clones": true
+        "blocking-clones": true,
+        "spawn-effect": "Grow In"
       }
     },
     "38": {
@@ -1595,7 +1612,8 @@
           ],
           "when false": [],
           "when always": []
-        }
+        },
+        "spawn-effect": "none"
       }
     },
     "39": {
@@ -1686,7 +1704,8 @@
         ],
         "created-preview": false,
         "solid": true,
-        "blocking-clones": true
+        "blocking-clones": true,
+        "spawn-effect": "Grow In"
       }
     },
     "41": {
@@ -1806,7 +1825,7 @@
               "basic_default.if_all_tiles_property_value::[\"i:4\",\"s:wet\",true]"
             ],
             "when true": [
-              "basic_default.a_die::[\"i:0\"]",
+              "basic_default.destroy_entity_immediately::[\"i:0\"]",
               "basic_default.a_set_tiles::[\"i:4\",\"s:ice\"]",
               "basic_default.play_named_sfx::[\"i:-1\",{\"args\":[\"s:type\",\"s:plain\",\"s:value\",\"s:Heavy Splash\"],\"type\":\"Dictionary\"},true]",
               "basic_default.quit::[\"i:-1\"]"
@@ -1920,7 +1939,7 @@
               "basic_default.if_all_tiles_property_value::[\"i:4\",\"s:wet\",true]"
             ],
             "when true": [
-              "basic_default.a_die::[\"i:0\"]",
+              "basic_default.destroy_entity_immediately::[\"i:0\"]",
               "basic_default.a_set_tiles::[\"i:4\",\"s:floor2\"]",
               "basic_default.play_named_sfx::[\"i:-1\",{\"args\":[\"s:type\",\"s:plain\",\"s:value\",\"s:Heavy Splash\"],\"type\":\"Dictionary\"},true]",
               "basic_default.quit::[\"i:-1\"]"
@@ -2460,6 +2479,7 @@
             "basic_default.c_has_property::[\"i:1\",false,\"s:player\"]"
           ],
           "when true": [
+            "basic_default.create_popup_text::[\"i:1\",true,{\"args\":[\"s:type\",\"s:plain\",\"s:value\",\"s:Wowzer!\"],\"type\":\"Dictionary\"},{\"args\":[\"s:type\",\"s:plain\",\"s:value\",\"f:9.0\"],\"type\":\"Dictionary\"},{\"args\":[\"s:type\",\"s:plain\",\"s:color\",{\"args\":[1.0,1.0,1.0,1.0],\"type\":\"Color\"}],\"type\":\"Dictionary\"},{\"args\":[\"s:type\",\"s:plain\",\"s:color\",{\"args\":[0.0,0.0,0.0,1.0],\"type\":\"Color\"}],\"type\":\"Dictionary\"},{\"args\":[\"s:type\",\"s:plain\",\"s:value\",\"f:1.0\"],\"type\":\"Dictionary\"},{\"args\":[\"s:type\",\"s:plain\",\"s:value\",\"f:0.0\"],\"type\":\"Dictionary\"},true]",
             "basic_default.load_next_level::[\"i:-1\",{\"args\":[\"s:type\",\"s:plain\",\"s:value\",\"f:1.0\"],\"type\":\"Dictionary\"}]",
             "basic_default.play_named_sfx::[\"i:-1\",{\"args\":[\"s:type\",\"s:plain\",\"s:value\",\"s:Win\"],\"type\":\"Dictionary\"},true]"
           ],
@@ -2983,7 +3003,8 @@
         "trap_test",
         "teletest",
         "so",
-        "ghost test"
+        "ghost test",
+        "ignore"
       ]
     },
     {

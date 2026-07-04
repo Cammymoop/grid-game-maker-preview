@@ -233,7 +233,7 @@ const DYING_EFFECTS: Dictionary[String, Dictionary] = {
     "Fly Out": {
         "name": "dying-fly-out",
         "animated_effects": {
-            "offset": { "offset_to": [0, -100], "ease_param": 0.75 },
+            "offset": { "offset_to": [0, -100], "ease_param": 1.6 },
             "scale": { "scale_from": [1,1], "scale_to": [0,0], "ease_param": 0.5,
                         "duration_factor": 0.5, "time_offset": 0.5 },
         },
@@ -283,3 +283,93 @@ static func set_dying_effect_params(effect_name: String, effect_params: Dictiona
             if offset_effect and offset_effect.has("offset_to"):
                 var to_vec: = Utility.get_vector2_from_arr(offset_effect["offset_to"])
                 offset_effect["offset_to"] = Utility.get_arr_from_vector2(to_vec.rotated(radians))
+
+
+
+const SPAWN_EFFECTS: Dictionary[String, Dictionary] = {
+    "Spin In": {
+        "name": "spawn-spin-in",
+        "animated_effects": {
+            "spin": { "total_rotation": 1, "ease_param": 0.5 },
+            "scale": { "scale_to": [1,1], "scale_from": [0,0], "ease_param": 0.25 },
+        },
+    },
+    "Grow In": {
+        "name": "spawn-grow-in",
+        "animated_effects": {
+            "scale": { "scale_to": [1,1], "scale_from": [0,0], "ease_param": 0.25 },
+        },
+    },
+    "Shrink In": {
+        "name": "spawn-shrink-in",
+        "animated_effects": {
+            "scale": { "scale_to": [1,1], "scale_from": [5,5], "ease_param": 0.25 },
+            "fade": { "fade_to": 0.0, "fade_from": 1.0, "duration_factor": 0.1 },
+        },
+        "effects": {
+            "z_offset": { "offset": 30 },
+        },
+    },
+    "Fade In": {
+        "name": "spawn-fade-in",
+        "animated_effects": {
+            "fade": { "fade_to": 0.0, "fade_from": 1.0, "ease_param": 0.5 },
+        },
+    },
+    "Color In": {
+        "name": "spawn-color-in",
+        "animated_effects": {
+            "replace_color": { "color_from": "#000000", "color_to": "#000000", "amount_from": 1.0, "amount_to": 0.0, "time_offset": 0.33, "duration_factor": 0.66 },
+            "fade": { "fade_to": 0.0, "fade_from": 1.0, "duration_factor": 0.33, "ease_param": 0.5 },
+        },
+    },
+    "Slide In": {
+        "name": "spawn-slide-in",
+        "animated_effects": {
+            "offset": { "offset_from": [0, 16], "offset_to": [0, 0], "ease_param": 0.25 },
+            "fade": { "fade_to": 0.0, "fade_from": 1.0, "duration_factor": 0.2, "ease_param": 0.5 },
+        },
+    },
+
+    "Fly In": {
+        "name": "spawn-fly-in",
+        "animated_effects": {
+            "offset": { "offset_from": [0, 100], "offset_to": [0, 0], "ease_param": 0.5 },
+            "scale": { "scale_to": [1,1], "scale_from": [0,0], "ease_param": 0.5, "duration_factor": 0.1 },
+        },
+    },
+
+    "Fall In": {
+        "name": "spawn-fall-in",
+        "animated_effects": {
+            "offset": { "offset_from": [0, -200], "offset_to": [0, 0], "ease_param": 1.8 },
+            "fade": { "fade_to": 0.0, "fade_from": 1.0, "duration_factor": 0.1 },
+        },
+    },
+}
+
+static func set_spawn_effect_params(effect_name: String, effect_params: Dictionary, effect_info: Dictionary) -> void:
+    if not effect_name in SPAWN_EFFECTS:
+        return
+    var anim_eff: Dictionary = effect_info.get("animated_effects", {})
+    if effect_params.has("color"):
+        if effect_name in ["Color In"]:
+            var replace_color_effect: Dictionary = anim_eff.get("replace_color", {})
+            if replace_color_effect:
+                replace_color_effect["color_from"] = effect_params["color"]
+                replace_color_effect["color_to"] = effect_params["color"]
+    if effect_params.has("amount"):
+        var amt: float = effect_params["amount"]
+        if effect_name in ["Slide In", "Fly In"]:
+            var offset_effect: Dictionary = anim_eff.get("offset", {})
+            if offset_effect and offset_effect.has("offset_from"):
+                offset_effect["offset_from"] = Utility.arr_vec_normal(offset_effect["offset_from"], amt)
+    
+    if effect_params.has("direction"):
+        var dir_int: int = int(effect_params["direction"])
+        var dir_vec: Vector2 = Utility.facing_vector(dir_int)
+        if effect_name in ["Fly In", "Fall In", "Slide In"]:
+            var offset_effect: Dictionary = anim_eff.get("offset", {})
+            if offset_effect and offset_effect.has("offset_from"):
+                var from_length: = Utility.get_vector2_from_arr(offset_effect["offset_from"]).length()
+                offset_effect["offset_from"] = Utility.get_arr_from_vector2(dir_vec * -1 * from_length)

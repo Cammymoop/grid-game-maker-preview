@@ -36,6 +36,8 @@ var active = false
 
 @export var start_level_paused_toggle: CheckButton
 
+@export var override_cam_limit_select: OptionButton
+
 @export var level_list_picker: OptionButton
 
 @export var copy_to_clipboard_button: Button
@@ -71,6 +73,14 @@ func _ready():
 	start_level_paused_toggle.toggled.connect(on_start_level_paused_toggle_toggled)
 	if GameManager.is_in_level_edit_mode:
 		start_level_paused_toggle.set_pressed_no_signal(MapManager.is_level_start_paused())
+	
+
+	if MapManager.has_metadata_value("override_enable_camera_limits"):
+		var is_limit: bool = MapManager.get_metadata_value("override_enable_camera_limits", false)
+		override_cam_limit_select.selected = 1 if is_limit else 2
+	else:
+		override_cam_limit_select.selected = 0
+	override_cam_limit_select.item_selected.connect(on_override_cam_limit_select_item_selected)
 	
 	level_list_picker.item_selected.connect(level_list_picked)
 
@@ -187,6 +197,12 @@ func on_show() -> void:
 		paste_from_clipboard_button.disabled = not has_clipboard_level
 		
 		start_level_paused_toggle.set_pressed_no_signal(MapManager.is_level_start_paused())
+		
+		if MapManager.has_metadata_value("override_enable_camera_limits"):
+			var is_limit: bool = MapManager.get_metadata_value("override_enable_camera_limits", false)
+			override_cam_limit_select.selected = 1 if is_limit else 2
+		else:
+			override_cam_limit_select.selected = 0
 		
 		var map_editor_overlay: Node = Utility.get_map_editor_overlay()
 		if map_editor_overlay:
@@ -404,3 +420,11 @@ func on_level_editor_controls_help_toggle_pressed(toggled_on: bool) -> void:
 func on_start_level_paused_toggle_toggled(toggled_on: bool) -> void:
 	if GameManager.is_in_level_edit_mode:
 		MapManager.set_level_start_paused(toggled_on)
+
+func on_override_cam_limit_select_item_selected(index: int) -> void:
+	if index == 0:
+		MapManager.erase_metadata_value("override_enable_camera_limits")
+	elif index == 1:
+		MapManager.set_metadata_value("override_enable_camera_limits", true)
+	else:
+		MapManager.set_metadata_value("override_enable_camera_limits", false)

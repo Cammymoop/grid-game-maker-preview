@@ -36,9 +36,6 @@ var _tile_ids_of_positioned_props: Dictionary[String, Array] = {}
 
 var _check_moving_away: = false
 
-var _move_blocking_positions: Array[Vector2i] = []
-var _move_blocking_instances: Array[int] = []
-
 func setup() -> void:
     fix_string_keys()
     if not TextureManager.im_ready:
@@ -666,7 +663,7 @@ func clear_all_at(tile_position) -> void:
     for l in layers:
         l.set_cell_s(tile_position, -1)
 
-func clear_all_at_array(position_list: Array) -> void:
+func erase_tiles_at_multiple(position_list: Array) -> void:
     for pos in position_list:
         for l in layers:
             l.set_cell_s(pos, -1)
@@ -679,7 +676,7 @@ func replace_tiles_in_rect(rect: Rect2, new_tile, checker_tile=false):
                 ti = checker_tile
             replace_tiles_at(Vector2(x, y), ti)
 
-func replace_tiles_at_array(position_list, new_tile):
+func replace_tiles_at_multiple(position_list, new_tile):
     for pos in position_list:
         replace_tiles_at(pos, new_tile)
 
@@ -702,8 +699,12 @@ func erase_tiles_and_effects_at(tile_position: Vector2i) -> void:
     clear_all_at(tile_position)
     _remove_effects_at(tile_position)
 
-func erase_tiles_and_effects_at_array(position_list: Array) -> void:
-    clear_all_at_array(position_list)
+func erase_tiles_and_effects_at_multiple(position_list: Array) -> void:
+    erase_tiles_at_multiple(position_list)
+    for pos in position_list:
+        _remove_effects_at(pos)
+
+func erase_effects_at_multiple(position_list: Array) -> void:
     for pos in position_list:
         _remove_effects_at(pos)
 
@@ -984,7 +985,7 @@ func set_tile_facing_at(tile_position: Vector2i, facing: int) -> void:
         if l.get_cell_s(tile_position) != -1:
             l.set_cell_facing(tile_position, facing)
 
-func finish_move(moving_entity, onto_positions: Array) -> void:
+func finish_move(moving_entity: BaseEntity, onto_positions: Array) -> void:
     EntityManager.finish_move(moving_entity, onto_positions)
     
     if not moving_entity.active:

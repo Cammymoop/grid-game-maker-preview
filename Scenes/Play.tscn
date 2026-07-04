@@ -11,6 +11,7 @@
 [ext_resource type="PackedScene" uid="uid://bnomndi6o3mmb" path="res://Scenes/credits_ui.tscn" id="6_4cgsu"]
 [ext_resource type="Script" uid="uid://bpb7t48ncq7im" path="res://Scenes/level_select_root.gd" id="7_hagi3"]
 [ext_resource type="PackedScene" uid="uid://68i3a0ubiwjf" path="res://Scenes/UI/info_item.tscn" id="7_ijdo8"]
+[ext_resource type="StyleBox" uid="uid://dfm4tycpr2sly" path="res://assets/ui/info_hud_bg_panel.tres" id="7_lcjex"]
 [ext_resource type="Script" uid="uid://c3bms4d5nxkgw" path="res://Scenes/UI/info_panel.gd" id="7_me4dj"]
 [ext_resource type="Script" uid="uid://c2808f1t1qlra" path="res://Scenes/info_list.gd" id="8_lcjex"]
 [ext_resource type="PackedScene" uid="uid://cfhftqjjfjyv" path="res://Scenes/level_select_ui.tscn" id="9_t3can"]
@@ -131,17 +132,6 @@ _data = {
 &"hide": SubResource("Animation_i0j1v"),
 &"show": SubResource("Animation_p1k4u")
 }
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_vpmux"]
-content_margin_left = 4.0
-content_margin_top = 4.0
-content_margin_right = 4.0
-content_margin_bottom = 4.0
-bg_color = Color(0.096811466, 0.09681145, 0.09681145, 0.49803922)
-corner_radius_top_left = 6
-corner_radius_top_right = 6
-corner_radius_bottom_right = 6
-corner_radius_bottom_left = 6
 
 [sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_4cgsu"]
 blend_mode = 3
@@ -359,7 +349,7 @@ offset_top = -8.0
 offset_bottom = 8.0
 grow_horizontal = 0
 grow_vertical = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_vpmux")
+theme_override_styles/panel = ExtResource("7_lcjex")
 script = ExtResource("7_me4dj")
 info_list = NodePath("InfoList")
 

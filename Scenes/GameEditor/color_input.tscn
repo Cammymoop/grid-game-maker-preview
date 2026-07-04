@@ -1,0 +1,21 @@
+[gd_scene format=3 uid="uid://b3smlb1e6osis"]
+
+[ext_resource type="Script" uid="uid://c5f8ydcfov1d3" path="res://Scenes/GameEditor/color_input.gd" id="1_1744w"]
+[ext_resource type="Script" path="res://Scenes/GameEditor/remembering_color_picker_button.gd" id="2_8t852"]
+
+[node name="ColorInput" type="HBoxContainer" unique_id=790260579 node_paths=PackedStringArray("color_picker_button")]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_right = -565.0
+offset_bottom = -741.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 10
+script = ExtResource("1_1744w")
+color_picker_button = NodePath("ColorPickerButton")
+
+[node name="ColorPickerButton" type="ColorPickerButton" parent="." unique_id=2098159127]
+custom_minimum_size = Vector2(32, 0)
+layout_mode = 2
+script = ExtResource("2_8t852")

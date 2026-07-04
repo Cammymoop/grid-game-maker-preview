@@ -24,6 +24,7 @@ func list_commands() -> Array[Dictionary]:
 			var meta_info: Dictionary = {
 				"name": cmd_name,
 				"args": get_command_arg_list(cmd_name, method_info),
+				"default_args": get_command_def_arg_list(cmd_name, method_info),
 				"template_text": "",
 				"slot_type_hint": "all",
 			}
@@ -82,6 +83,20 @@ func get_command_arg_list(cmd: String, method_info: Dictionary) -> Array[String]
 	for arg in raw_args:
 		arg_names.append(arg.name)
 	return arg_names
+
+func get_command_def_arg_list(cmd: String, method_info: Dictionary) -> Array:
+	if not has_method(CMD_FUNC_PREFIX + cmd):
+		return []
+	var num_args: int = method_info.args.size()
+	var num_def_args: int = method_info.default_args.size()
+	if num_args < 3 or num_def_args < 1:
+		return []
+	var default_args: Array = []
+	default_args.assign(method_info.default_args.duplicate())
+	while num_def_args > num_args - 2:
+		default_args.pop_front()
+		num_def_args -= 1
+	return default_args
 
 func set_cond_resolver(cond: CondResolver) -> void:
 	cond_resolver = cond
@@ -189,10 +204,10 @@ func resolve_complex_scalar(complex_scalar: Dictionary, slots: Dictionary) -> fl
 
 func resolve_complex_color(complex_color: Dictionary, _slots: Dictionary) -> Color:
 	if complex_color["type"] == "plain":
-		return Color(complex_color["value"])
+		return Color(complex_color.get("color", Color.MAGENTA))
 	else:
 		push_error("Invalid complex color type: %s" % [complex_color["type"]])
-		return Color.WHITE
+		return Color.MAGENTA
 
 func set_tiles_to_facing(slots: Dictionary, slot_id: int, facing: int) -> void:
 	if not Commands.slot_is_positions(slot_id):

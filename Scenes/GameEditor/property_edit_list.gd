@@ -7,6 +7,7 @@ signal properties_changed()
 signal entity_instance_props_edited(entity: BaseEntity)
 
 signal request_conditional_editor(property_name: String, current_value: Variant, editable: bool)
+@warning_ignore("unused_signal")
 signal request_new_property()
 signal request_duplicate_property(property_name: String)
 

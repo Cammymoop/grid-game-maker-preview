@@ -28,12 +28,12 @@
     }
   ],
   "game_settings": {
-    "pixel_scale": 2.4,
+    "pixel_scale": 2.0,
     "window_width": 18.0,
     "window_height": 14.0,
     "game_view_size": [
-      18.0,
-      12.0
+      22.0,
+      15.5
     ],
     "title": "Squishy Blocks",
     "camera_settings": {

@@ -41,7 +41,12 @@ func _ready():
 
 func update_bounds() -> void:
 	if not respect_level_bounds:
+		limit_enabled = false
 		return
+	extend_level_bounds = int(Utility.get_camera_setting("extend_limits", 0))
+	if MapManager.has_metadata_value("override_extend_camera_limits"):
+		extend_level_bounds = int(MapManager.get_metadata_value("override_extend_camera_limits", 0))
+
 	var level_bounds = MapManager.get_level_bounds().grow(extend_level_bounds)
 	limit_left = level_bounds.position.x
 	limit_top = level_bounds.position.y
@@ -57,6 +62,7 @@ func update_bounds() -> void:
 		var center_y = level_bounds.position.y + level_bounds.size.y/2
 		limit_top = center_y - vp_size.y/2
 		limit_bottom = center_y + vp_size.y/2
+	limit_enabled = true
 
 func activate():
 	if active and is_current():
@@ -256,6 +262,13 @@ func teleport(pos: Vector2) -> void:
 func on_state_loaded() -> void:
 	if not active:
 		return
+	if MapManager.has_metadata_value("override_enable_camera_limits"):
+		var override_enable_camera_limits: bool = MapManager.get_metadata_value("override_enable_camera_limits", false)
+		respect_level_bounds = override_enable_camera_limits
+	else:
+		respect_level_bounds = Utility.get_camera_setting("enable_limits", false)
+	update_bounds()
+
 	if target_entity and is_instance_valid(target_entity):
 		teleport(get_target_iterpolated_pos())
 	else:
@@ -285,3 +298,10 @@ func do_screen_shake(intensity: float, duration: float) -> void:
 func stop_screen_shake() -> void:
 	is_shaking = false
 	shake_timer = 0
+
+func get_current_following_position() -> Vector2:
+	if not target_entity or not is_instance_valid(target_entity):
+		find_entity_to_follow()
+	if not target_entity:
+		return position
+	return get_target_iterpolated_pos()
