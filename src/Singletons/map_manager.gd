@@ -600,7 +600,7 @@ func get_metadata_value(key: String, default_value: Variant = null) -> Variant:
 
 func get_all_tile_indexes() -> Array:
     var keys = tile_defs.keys()
-    keys.sort()
+    #keys.sort()
     return keys
  
 

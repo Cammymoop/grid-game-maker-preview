@@ -16,6 +16,8 @@ var when_lists: Dictionary = {}
 @export var event_name_label: Label
 @export var event_name: String = ""
 
+@export var save_button: Button
+
 @export var editable: bool = true
 
 @onready var add_command_dialog = find_child("AddCommandDialog")
@@ -59,6 +61,9 @@ func _ready():
         var window_size: = get_tree().root.size
         size.y = maxf(size.y, window_size.y * 0.8)
         size.x = maxf(size.x, window_size.x * 0.7)
+    
+    if not editable:
+        save_button.text = "Override and Save"
 
     if not event_name:
         event_name_label.hide()

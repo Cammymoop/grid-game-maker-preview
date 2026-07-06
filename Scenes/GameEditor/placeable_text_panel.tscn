@@ -4,6 +4,7 @@
 [ext_resource type="Texture2D" uid="uid://cbrbu8bh02ug" path="res://assets/ui/vector_x.tres" id="2_wtxur"]
 [ext_resource type="PackedScene" uid="uid://bleyoj5f36kfy" path="res://Scenes/GameEditor/ConditionalEditor/scalar_value_input.tscn" id="3_ws2r7"]
 [ext_resource type="PackedScene" uid="uid://dvimib4iq4sje" path="res://Scenes/GameEditor/adaptive_multi_line_edit.tscn" id="3_wtxur"]
+[ext_resource type="Script" uid="uid://dpuajjdauwd7f" path="res://Scenes/GameEditor/remembering_color_picker_button.gd" id="4_ws2r7"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_6hdl4"]
 content_margin_left = 8.0
@@ -145,6 +146,7 @@ custom_minimum_size = Vector2(30, 0)
 layout_mode = 2
 color = Color(1, 1, 1, 1)
 edit_intensity = false
+script = ExtResource("4_ws2r7")
 
 [node name="EnableBorder" type="CheckButton" parent="VBoxContainer/CustomizationOptions/HBoxContainer2" unique_id=1736944412]
 layout_mode = 2
@@ -162,6 +164,7 @@ text = "Border Color:"
 custom_minimum_size = Vector2(30, 0)
 layout_mode = 2
 edit_intensity = false
+script = ExtResource("4_ws2r7")
 
 [node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer" unique_id=1944317131]
 layout_mode = 2

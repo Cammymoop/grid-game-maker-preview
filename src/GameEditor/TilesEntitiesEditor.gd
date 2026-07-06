@@ -31,6 +31,13 @@ const CONTEXT_MENU_PASTE_ITEM_PROP_NO_OVERRIDE = 20
 const CONTEXT_MENU_PASTE_ENTITY_SPRITE = 21
 const CTX_PASTE_END = 20
 
+const CTX_REORDER_START = 51
+const CONTEXT_MENU_REORDER_BACK = 51
+const CONTEXT_MENU_REORDER_FORWARD = 52
+const CONTEXT_MENU_REORDER_TO_TOP = 53
+const CONTEXT_MENU_REORDER_TO_BOTTOM = 54
+const CTX_REORDER_END = 54
+
 func _ready():
 	assert(tile_grid and entity_grid, "TilesEntitiesEditor must have tile_grid and entity_grid")
 	visibility_changed.connect(_on_vis_changed)
@@ -192,6 +199,12 @@ func do_context_menu_for_item(the_item: TileEntityButton) -> void:
 		if CurrentClipboard.has_properties():
 			context_menu.add_item("Paste Entity/Tile Properties (Overwrite existing)", CONTEXT_MENU_PASTE_ITEM_PROPERTIES)
 			context_menu.add_item("Paste Entity/Tile Properties (Only unset properties)", CONTEXT_MENU_PASTE_ITEM_PROP_NO_OVERRIDE)
+	
+	context_menu.add_separator("Reorder " + item_text)
+	context_menu.add_item("Move Back", CONTEXT_MENU_REORDER_BACK)
+	context_menu.add_item("Move Forward", CONTEXT_MENU_REORDER_FORWARD)
+	context_menu.add_item("Move to Top", CONTEXT_MENU_REORDER_TO_TOP)
+	context_menu.add_item("Move to Bottom", CONTEXT_MENU_REORDER_TO_BOTTOM)
 
 	context_menu.add_separator("Delete")
 	context_menu.add_item("Delete", CONTEXT_MENU_DELETE)
@@ -236,6 +249,8 @@ func on_context_menu_id_pressed(context_menu_id: int, is_clicked_item: bool, is_
 		handle_ctx_copy(context_menu_id, is_clicked_item, is_entity, item_id)
 	elif context_menu_id >= CTX_PASTE_START and context_menu_id <= CTX_PASTE_END:
 		handle_ctx_paste(context_menu_id, is_clicked_item, is_entity, item_id)
+	elif context_menu_id >= CTX_REORDER_START and context_menu_id <= CTX_REORDER_END:
+		handle_ctx_reorder(context_menu_id, is_clicked_item, is_entity, item_id)
 
 func get_renumbered_name(is_entity: bool, old_name: String) -> String:
 	var check_name: Callable = EntityManager.entity_name_exists if is_entity else MapManager.tile_name_exists
@@ -301,3 +316,55 @@ func handle_ctx_copy(context_menu_id: int, is_clicked_item: bool, clicked_is_ent
 			return
 		var entity_def: Dictionary = get_existing_item_definition(true, clicked_item_id)
 		CurrentClipboard.copy_sprite_config(entity_def.get("sprite_config", {}))
+
+func handle_ctx_reorder(context_menu_id: int, is_clicked_item: bool, clicked_is_entity: bool, clicked_item_id: int) -> void:
+	if not is_clicked_item:
+		return
+	prints("reorder item", context_menu_id, clicked_is_entity, clicked_item_id)
+	if context_menu_id == CONTEXT_MENU_REORDER_BACK:
+		reorder_item_relative(clicked_is_entity, clicked_item_id, -1)
+	elif context_menu_id == CONTEXT_MENU_REORDER_FORWARD:
+		reorder_item_relative(clicked_is_entity, clicked_item_id, 1)
+	elif context_menu_id == CONTEXT_MENU_REORDER_TO_TOP:
+		reorder_item(clicked_is_entity, clicked_item_id, 0)
+	elif context_menu_id == CONTEXT_MENU_REORDER_TO_BOTTOM:
+		reorder_item(clicked_is_entity, clicked_item_id, 10000000)
+
+
+func reorder_item(is_entity: bool, item_id: int, to_order_index: int) -> void:
+	var old_definitions: Dictionary = {}
+	if is_entity:
+		old_definitions = EntityManager.entity_defs
+	else:
+		old_definitions = MapManager.tile_defs
+	to_order_index = clampi(to_order_index, 0, old_definitions.size() - 1)
+	
+	var new_ids: = old_definitions.keys()
+	new_ids.erase(item_id)
+	new_ids.insert(to_order_index, item_id)
+	
+	var new_definitions: Dictionary = {}
+	for new_key in new_ids:
+		new_definitions[new_key] = old_definitions[new_key]
+	
+	if is_entity:
+		EntityManager.entity_defs = new_definitions
+		EntityManager.refresh_definition()
+	else:
+		MapManager.tile_defs = new_definitions
+		MapManager.refresh_definition()
+	update_all_grids()
+
+func reorder_item_relative(is_entity: bool, item_id: int, delta: int) -> void:
+	var old_keys: = []
+	if is_entity:
+		old_keys = EntityManager.entity_defs.keys()
+	else:
+		old_keys = MapManager.tile_defs.keys()
+	
+	var old_index: int = old_keys.find(item_id)
+	if old_index == -1:
+		return
+	
+	reorder_item(is_entity, item_id, clampi(old_index + delta, 0, old_keys.size() - 1))
+	

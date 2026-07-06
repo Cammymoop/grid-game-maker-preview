@@ -1008,3 +1008,11 @@ func set_prop_conditional_value(property_name: String, new_value: Variant) -> vo
     prop_changed(property_name)
     resort_list_items()
     properties_changed.emit()
+
+func is_prop_overridden(property_name: String) -> bool:
+    var p_index: int = index_map.get(property_name, -1)
+    if p_index == -1:
+        push_error("Property not found in list: %s" % property_name)
+        return false
+    var info: Dictionary[String, Variant] = properties_info[p_index]
+    return info["is_overridden"] or info["is_removed"]

@@ -13,7 +13,7 @@ func _ready() -> void:
 
 func _gui_input(event: InputEvent) -> void:
     if forward_to:
-        forward_to.forwarded_gui_input(event)
+        forward_to.forwarded_gui_input(event, get_viewport())
 
 func _shortcut_input(event: InputEvent) -> void:
     if forward_to:

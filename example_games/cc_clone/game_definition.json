@@ -507,28 +507,6 @@
         ]
       }
     },
-    "10": {
-      "name": "props",
-      "texture": 2,
-      "tex_index": 11,
-      "properties": {
-        "ice-skater": true,
-        "fire-resistant": true,
-        "purple-keys": true,
-        "unforcable": true,
-        "override-move": true,
-        "forced-move": true,
-        "orange-keys": true,
-        "blue-keys": true,
-        "green-keys": true,
-        "no-museum": true,
-        "teleported": true,
-        "target-x": true,
-        "target-y": true,
-        "slapped-dir": true,
-        "ghost": true
-      }
-    },
     "11": {
       "name": "fireball",
       "texture": 1,
@@ -854,10 +832,10 @@
         "blocking-clones": true
       }
     },
-    "22": {
-      "name": "purple-key",
+    "30": {
+      "name": "suc-boots",
       "texture": 1,
-      "tex_index": 28,
+      "tex_index": 39,
       "properties": {
         "finish_move_onto": {
           "v": "3",
@@ -865,14 +843,24 @@
             "basic_default.c_has_property::[\"i:1\",false,\"s:player\"]"
           ],
           "when true": [
-            "basic_default.a_property_add::[\"i:1\",\"s:purple-keys\",{\"args\":[\"s:type\",\"s:plain\",\"s:value\",\"f:1.0\"],\"type\":\"Dictionary\"}]",
+            "basic_default.a_set_property::[\"i:1\",\"s:unforcable\",\"s:true\"]",
             "basic_default.a_die::[\"i:0\"]",
             "basic_default.play_named_sfx::[\"i:-1\",{\"args\":[\"s:type\",\"s:plain\",\"s:value\",\"s:Pickups\"],\"type\":\"Dictionary\"},true]"
           ],
           "when false": [],
           "when always": []
         },
-        "z-index": -1
+        "z-index": -1,
+        "blocks": {
+          "v": "3",
+          "conditions": [
+            "basic_default.c_has_property::[\"i:1\",false,\"s:creature\"]"
+          ],
+          "when true": [],
+          "when false": [],
+          "when always": []
+        },
+        "blocking-clones": true
       }
     },
     "23": {
@@ -1219,10 +1207,10 @@
         "num_directions": 1.0
       }
     },
-    "30": {
-      "name": "suc-boots",
+    "22": {
+      "name": "purple-key",
       "texture": 1,
-      "tex_index": 39,
+      "tex_index": 28,
       "properties": {
         "finish_move_onto": {
           "v": "3",
@@ -1230,24 +1218,14 @@
             "basic_default.c_has_property::[\"i:1\",false,\"s:player\"]"
           ],
           "when true": [
-            "basic_default.a_set_property::[\"i:1\",\"s:unforcable\",\"s:true\"]",
+            "basic_default.a_property_add::[\"i:1\",\"s:purple-keys\",{\"args\":[\"s:type\",\"s:plain\",\"s:value\",\"f:1.0\"],\"type\":\"Dictionary\"}]",
             "basic_default.a_die::[\"i:0\"]",
             "basic_default.play_named_sfx::[\"i:-1\",{\"args\":[\"s:type\",\"s:plain\",\"s:value\",\"s:Pickups\"],\"type\":\"Dictionary\"},true]"
           ],
           "when false": [],
           "when always": []
         },
-        "z-index": -1,
-        "blocks": {
-          "v": "3",
-          "conditions": [
-            "basic_default.c_has_property::[\"i:1\",false,\"s:creature\"]"
-          ],
-          "when true": [],
-          "when false": [],
-          "when always": []
-        },
-        "blocking-clones": true
+        "z-index": -1
       }
     },
     "31": {
@@ -2025,6 +2003,28 @@
         ],
         "pulls": true
       }
+    },
+    "10": {
+      "name": "props",
+      "texture": 2,
+      "tex_index": 11,
+      "properties": {
+        "ice-skater": true,
+        "fire-resistant": true,
+        "purple-keys": true,
+        "unforcable": true,
+        "override-move": true,
+        "forced-move": true,
+        "orange-keys": true,
+        "blue-keys": true,
+        "green-keys": true,
+        "no-museum": true,
+        "teleported": true,
+        "target-x": true,
+        "target-y": true,
+        "slapped-dir": true,
+        "ghost": true
+      }
     }
   },
   "tile_definitions": {
@@ -2051,6 +2051,14 @@
       "tex_index": 22,
       "properties": {
         "f2": true,
+        "z-index": -1.0
+      }
+    },
+    "16": {
+      "name": "open-chip-gate",
+      "texture": 0,
+      "tex_index": 30,
+      "properties": {
         "z-index": -1.0
       }
     },
@@ -2171,6 +2179,27 @@
       "tex_index": 13,
       "properties": {
 
+      }
+    },
+    "20": {
+      "name": "trap-active",
+      "texture": 0,
+      "tex_index": 14,
+      "properties": {
+        "idle_update": {
+          "v": "3",
+          "conditions": [
+            "basic_default.select_named_entity_at::[\"i:2\",\"i:4\",{\"args\":[\"s:type\",\"s:plain\",\"s:value\",\"s:trap-cage\"],\"type\":\"Dictionary\"}]",
+            "basic_default.exists::[\"i:2\"]",
+            "not"
+          ],
+          "when true": [
+            "basic_default.a_create_entity::[\"i:4\",\"s:trap-cage\",\"i:0\",false]"
+          ],
+          "when false": [],
+          "when always": []
+        },
+        "move_off_of": false
       }
     },
     "7": {
@@ -2451,12 +2480,20 @@
         }
       }
     },
-    "16": {
-      "name": "open-chip-gate",
-      "texture": 0,
-      "tex_index": 30,
+    "30": {
+      "name": "alt-gravel",
+      "texture": 5,
+      "tex_index": 3,
       "properties": {
-        "z-index": -1.0
+        "blocks": {
+          "v": "3",
+          "conditions": [
+            "basic_default.c_has_property::[\"i:1\",true,\"s:can-cross-gravel\"]"
+          ],
+          "when true": [],
+          "when false": [],
+          "when always": []
+        }
       }
     },
     "17": {
@@ -2486,68 +2523,6 @@
           "when false": [],
           "when always": []
         }
-      }
-    },
-    "18": {
-      "name": "purple-door",
-      "texture": 0,
-      "tex_index": 3,
-      "properties": {
-        "blocks": {
-          "v": "3",
-          "conditions": [
-            "basic_default.c_has_property::[\"i:1\",true,\"s:purple-keys\"]"
-          ],
-          "when true": [],
-          "when false": [
-            "basic_default.a_set_tiles::[\"i:4\",\"s:open-door\"]",
-            "basic_default.a_property_subtract::[\"i:1\",\"s:purple-keys\",{\"args\":[\"s:type\",\"s:plain\",\"s:value\",\"f:1.0\"],\"type\":\"Dictionary\"},true]",
-            "basic_default.play_named_sfx::[\"i:-1\",{\"args\":[\"s:type\",\"s:plain\",\"s:value\",\"s:Unlock\"],\"type\":\"Dictionary\"},true]"
-          ],
-          "when always": []
-        },
-        "move_onto": {
-          "v": "3",
-          "conditions": [
-            "basic_default.if_property_value::[\"i:1\",\"s:purple-keys\",true]"
-          ],
-          "when true": [
-            "basic_default.a_set_tiles::[\"i:4\",\"s:open-door\"]",
-            "basic_default.a_property_subtract::[\"i:1\",\"s:purple-keys\",{\"args\":[\"s:type\",\"s:plain\",\"s:value\",\"f:1.0\"],\"type\":\"Dictionary\"},true]",
-            "basic_default.play_named_sfx::[\"i:-1\",{\"args\":[\"s:type\",\"s:plain\",\"s:value\",\"s:Unlock\"],\"type\":\"Dictionary\"},true]"
-          ],
-          "when false": [],
-          "when always": []
-        }
-      }
-    },
-    "19": {
-      "name": "open-door",
-      "texture": 0,
-      "tex_index": 1,
-      "properties": {
-        "z-index": -1.0
-      }
-    },
-    "20": {
-      "name": "trap-active",
-      "texture": 0,
-      "tex_index": 14,
-      "properties": {
-        "idle_update": {
-          "v": "3",
-          "conditions": [
-            "basic_default.select_named_entity_at::[\"i:2\",\"i:4\",{\"args\":[\"s:type\",\"s:plain\",\"s:value\",\"s:trap-cage\"],\"type\":\"Dictionary\"}]",
-            "basic_default.exists::[\"i:2\"]",
-            "not"
-          ],
-          "when true": [
-            "basic_default.a_create_entity::[\"i:4\",\"s:trap-cage\",\"i:0\",false]"
-          ],
-          "when false": [],
-          "when always": []
-        },
-        "move_off_of": false
       }
     },
     "21": {
@@ -2700,92 +2675,6 @@
         "can-force": true
       }
     },
-    "24": {
-      "name": "orange-door",
-      "texture": 0,
-      "tex_index": 2,
-      "properties": {
-        "blocks": {
-          "v": "3",
-          "conditions": [
-            "basic_default.c_has_property::[\"i:1\",true,\"s:orange-keys\"]"
-          ],
-          "when true": [],
-          "when false": [],
-          "when always": []
-        },
-        "move_onto": {
-          "v": "3",
-          "conditions": [
-            "basic_default.if_property_value::[\"i:1\",\"s:orange-keys\",true]"
-          ],
-          "when true": [
-            "basic_default.a_set_tiles::[\"i:4\",\"s:open-door\"]",
-            "basic_default.a_property_subtract::[\"i:1\",\"s:orange-keys\",{\"args\":[\"s:type\",\"s:plain\",\"s:value\",\"f:1.0\"],\"type\":\"Dictionary\"},true]",
-            "basic_default.play_named_sfx::[\"i:-1\",{\"args\":[\"s:type\",\"s:plain\",\"s:value\",\"s:Unlock\"],\"type\":\"Dictionary\"},true]"
-          ],
-          "when false": [],
-          "when always": []
-        }
-      }
-    },
-    "25": {
-      "name": "blue-door",
-      "texture": 0,
-      "tex_index": 5,
-      "properties": {
-        "blocks": {
-          "v": "3",
-          "conditions": [
-            "basic_default.c_has_property::[\"i:1\",true,\"s:blue-keys\"]"
-          ],
-          "when true": [],
-          "when false": [],
-          "when always": []
-        },
-        "move_onto": {
-          "v": "3",
-          "conditions": [
-            "basic_default.if_property_value::[\"i:1\",\"s:blue-keys\",true]"
-          ],
-          "when true": [
-            "basic_default.a_set_tiles::[\"i:4\",\"s:open-door\"]",
-            "basic_default.a_property_subtract::[\"i:1\",\"s:blue-keys\",{\"args\":[\"s:type\",\"s:plain\",\"s:value\",\"f:1.0\"],\"type\":\"Dictionary\"},true]",
-            "basic_default.play_named_sfx::[\"i:-1\",{\"args\":[\"s:type\",\"s:plain\",\"s:value\",\"s:Unlock\"],\"type\":\"Dictionary\"},true]"
-          ],
-          "when false": [],
-          "when always": []
-        }
-      }
-    },
-    "26": {
-      "name": "green-door",
-      "texture": 0,
-      "tex_index": 4,
-      "properties": {
-        "blocks": {
-          "v": "3",
-          "conditions": [
-            "basic_default.c_has_property::[\"i:1\",true,\"s:green-keys\"]"
-          ],
-          "when true": [],
-          "when false": [],
-          "when always": []
-        },
-        "move_onto": {
-          "v": "3",
-          "conditions": [
-            "basic_default.if_property_value::[\"i:1\",\"s:green-keys\",true]"
-          ],
-          "when true": [
-            "basic_default.a_set_tiles::[\"i:4\",\"s:open-door\"]",
-            "basic_default.play_named_sfx::[\"i:-1\",{\"args\":[\"s:type\",\"s:plain\",\"s:value\",\"s:Unlock\"],\"type\":\"Dictionary\"},true]"
-          ],
-          "when false": [],
-          "when always": []
-        }
-      }
-    },
     "27": {
       "name": "random-force-floor",
       "texture": 0,
@@ -2905,6 +2794,133 @@
         "can-force": true
       }
     },
+    "18": {
+      "name": "purple-door",
+      "texture": 0,
+      "tex_index": 3,
+      "properties": {
+        "blocks": {
+          "v": "3",
+          "conditions": [
+            "basic_default.c_has_property::[\"i:1\",true,\"s:purple-keys\"]"
+          ],
+          "when true": [],
+          "when false": [
+            "basic_default.a_set_tiles::[\"i:4\",\"s:open-door\"]",
+            "basic_default.a_property_subtract::[\"i:1\",\"s:purple-keys\",{\"args\":[\"s:type\",\"s:plain\",\"s:value\",\"f:1.0\"],\"type\":\"Dictionary\"},true]",
+            "basic_default.play_named_sfx::[\"i:-1\",{\"args\":[\"s:type\",\"s:plain\",\"s:value\",\"s:Unlock\"],\"type\":\"Dictionary\"},true]"
+          ],
+          "when always": []
+        },
+        "move_onto": {
+          "v": "3",
+          "conditions": [
+            "basic_default.if_property_value::[\"i:1\",\"s:purple-keys\",true]"
+          ],
+          "when true": [
+            "basic_default.a_set_tiles::[\"i:4\",\"s:open-door\"]",
+            "basic_default.a_property_subtract::[\"i:1\",\"s:purple-keys\",{\"args\":[\"s:type\",\"s:plain\",\"s:value\",\"f:1.0\"],\"type\":\"Dictionary\"},true]",
+            "basic_default.play_named_sfx::[\"i:-1\",{\"args\":[\"s:type\",\"s:plain\",\"s:value\",\"s:Unlock\"],\"type\":\"Dictionary\"},true]"
+          ],
+          "when false": [],
+          "when always": []
+        }
+      }
+    },
+    "24": {
+      "name": "orange-door",
+      "texture": 0,
+      "tex_index": 2,
+      "properties": {
+        "blocks": {
+          "v": "3",
+          "conditions": [
+            "basic_default.c_has_property::[\"i:1\",true,\"s:orange-keys\"]"
+          ],
+          "when true": [],
+          "when false": [],
+          "when always": []
+        },
+        "move_onto": {
+          "v": "3",
+          "conditions": [
+            "basic_default.if_property_value::[\"i:1\",\"s:orange-keys\",true]"
+          ],
+          "when true": [
+            "basic_default.a_set_tiles::[\"i:4\",\"s:open-door\"]",
+            "basic_default.a_property_subtract::[\"i:1\",\"s:orange-keys\",{\"args\":[\"s:type\",\"s:plain\",\"s:value\",\"f:1.0\"],\"type\":\"Dictionary\"},true]",
+            "basic_default.play_named_sfx::[\"i:-1\",{\"args\":[\"s:type\",\"s:plain\",\"s:value\",\"s:Unlock\"],\"type\":\"Dictionary\"},true]"
+          ],
+          "when false": [],
+          "when always": []
+        }
+      }
+    },
+    "25": {
+      "name": "blue-door",
+      "texture": 0,
+      "tex_index": 5,
+      "properties": {
+        "blocks": {
+          "v": "3",
+          "conditions": [
+            "basic_default.c_has_property::[\"i:1\",true,\"s:blue-keys\"]"
+          ],
+          "when true": [],
+          "when false": [],
+          "when always": []
+        },
+        "move_onto": {
+          "v": "3",
+          "conditions": [
+            "basic_default.if_property_value::[\"i:1\",\"s:blue-keys\",true]"
+          ],
+          "when true": [
+            "basic_default.a_set_tiles::[\"i:4\",\"s:open-door\"]",
+            "basic_default.a_property_subtract::[\"i:1\",\"s:blue-keys\",{\"args\":[\"s:type\",\"s:plain\",\"s:value\",\"f:1.0\"],\"type\":\"Dictionary\"},true]",
+            "basic_default.play_named_sfx::[\"i:-1\",{\"args\":[\"s:type\",\"s:plain\",\"s:value\",\"s:Unlock\"],\"type\":\"Dictionary\"},true]"
+          ],
+          "when false": [],
+          "when always": []
+        }
+      }
+    },
+    "26": {
+      "name": "green-door",
+      "texture": 0,
+      "tex_index": 4,
+      "properties": {
+        "blocks": {
+          "v": "3",
+          "conditions": [
+            "basic_default.c_has_property::[\"i:1\",true,\"s:green-keys\"]"
+          ],
+          "when true": [],
+          "when false": [],
+          "when always": []
+        },
+        "move_onto": {
+          "v": "3",
+          "conditions": [
+            "basic_default.if_property_value::[\"i:1\",\"s:green-keys\",true]"
+          ],
+          "when true": [
+            "basic_default.a_set_tiles::[\"i:4\",\"s:open-door\"]",
+            "basic_default.play_named_sfx::[\"i:-1\",{\"args\":[\"s:type\",\"s:plain\",\"s:value\",\"s:Unlock\"],\"type\":\"Dictionary\"},true]"
+          ],
+          "when false": [],
+          "when always": []
+        }
+      }
+    },
+    "19": {
+      "name": "open-door",
+      "texture": 0,
+      "tex_index": 1,
+      "properties": {
+        "z-index": -1.0
+      }
+    },
     "28": {
       "name": "checkpoint",
       "texture": 0,
@@ -2935,22 +2951,6 @@
       "tex_index": 33,
       "properties": {
 
-      }
-    },
-    "30": {
-      "name": "alt-gravel",
-      "texture": 5,
-      "tex_index": 3,
-      "properties": {
-        "blocks": {
-          "v": "3",
-          "conditions": [
-            "basic_default.c_has_property::[\"i:1\",true,\"s:can-cross-gravel\"]"
-          ],
-          "when true": [],
-          "when false": [],
-          "when always": []
-        }
       }
     }
   },

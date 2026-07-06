@@ -182,6 +182,7 @@ texture = ExtResource("5_eo7xe")
 
 [node name="Star" type="Sprite2D" parent="Cursor" unique_id=1878490946]
 visible = false
+modulate = Color(1, 1, 1, 0.6431373)
 texture = ExtResource("6_id73f")
 
 [node name="EditorCam" type="Camera2D" parent="." unique_id=268862736]

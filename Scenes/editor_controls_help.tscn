@@ -4,19 +4,21 @@
 [ext_resource type="Theme" uid="uid://c1enbl4niyp1f" path="res://assets/ui/controls_help_light_mode.tres" id="1_tbtak"]
 [ext_resource type="Script" uid="uid://c5rkf205k3nuv" path="res://Scenes/editor_controls_help.gd" id="2_8wsuq"]
 [ext_resource type="Texture2D" uid="uid://cbrbu8bh02ug" path="res://assets/ui/vector_x.tres" id="3_1158l"]
+[ext_resource type="Texture2D" uid="uid://burp035suxsck" path="res://assets/img/button_icons/keyboard.png" id="4_jqfrk"]
+[ext_resource type="Texture2D" uid="uid://b7lhmkmpsy7yp" path="res://assets/img/button_icons/gamepad.png" id="5_70xnf"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_n5m2s"]
 content_margin_left = 2.0
 content_margin_top = 2.0
 content_margin_right = 2.0
 content_margin_bottom = 2.0
-bg_color = Color(0.9325083, 0.9325084, 0.93250835, 0.5254902)
+bg_color = Color(0.9325083, 0.9325084, 0.93250835, 0.85490197)
 corner_radius_top_left = 2
 corner_radius_top_right = 2
 corner_radius_bottom_right = 2
 corner_radius_bottom_left = 2
 
-[node name="EditorControlsHelp" type="PanelContainer" unique_id=1779930358 node_paths=PackedStringArray("close_texture_button", "keyboard_controls", "controller_controls")]
+[node name="EditorControlsHelp" type="PanelContainer" unique_id=1779930358 node_paths=PackedStringArray("close_texture_button", "keyboard_controls", "controller_controls", "show_gamepad_controls_toggle")]
 size_flags_horizontal = 0
 size_flags_vertical = 0
 theme = ExtResource("1_tbtak")
@@ -25,6 +27,7 @@ script = ExtResource("2_8wsuq")
 close_texture_button = NodePath("TextureRect")
 keyboard_controls = NodePath("VBoxContainer/KeyboardControls")
 controller_controls = NodePath("VBoxContainer/ControllerControls")
+show_gamepad_controls_toggle = NodePath("VBoxContainer/HBoxContainer/ShowGamepadControlsToggle")
 
 [node name="VBoxContainer" type="VBoxContainer" parent="." unique_id=749708766]
 layout_mode = 2
@@ -36,10 +39,33 @@ theme_override_font_sizes/font_size = 14
 text = "Editor Controls:"
 horizontal_alignment = 1
 
+[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer" unique_id=1207876997]
+layout_mode = 2
+size_flags_horizontal = 4
+mouse_behavior_recursive = 2
+alignment = 1
+
+[node name="TextureRect" type="TextureRect" parent="VBoxContainer/HBoxContainer" unique_id=1384766139]
+layout_mode = 2
+texture = ExtResource("4_jqfrk")
+
+[node name="ShowGamepadControlsToggle" type="CheckButton" parent="VBoxContainer/HBoxContainer" unique_id=173169924]
+layout_mode = 2
+size_flags_horizontal = 4
+focus_mode = 0
+
+[node name="TextureRect2" type="TextureRect" parent="VBoxContainer/HBoxContainer" unique_id=1649425014]
+layout_mode = 2
+texture = ExtResource("5_70xnf")
+
+[node name="MarginContainer" type="MarginContainer" parent="VBoxContainer" unique_id=1101479928]
+layout_mode = 2
+
 [node name="Control" type="Control" parent="VBoxContainer" unique_id=1637900961]
 layout_mode = 2
 
 [node name="KeyboardControls" type="GridContainer" parent="VBoxContainer" unique_id=605651217]
+visible = false
 layout_mode = 2
 columns = 2
 
@@ -232,7 +258,6 @@ layout_mode = 2
 text = "Ctr+N"
 
 [node name="ControllerControls" type="GridContainer" parent="VBoxContainer" unique_id=355923955]
-visible = false
 layout_mode = 2
 columns = 2
 
@@ -246,6 +271,16 @@ horizontal_alignment = 2
 layout_mode = 2
 text = "Back"
 
+[node name="Label10" type="Label" parent="VBoxContainer/ControllerControls" unique_id=1786541961]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("1_rr3k7")
+text = "Cancel/Close Dialog"
+horizontal_alignment = 2
+
+[node name="Label11" type="Label" parent="VBoxContainer/ControllerControls" unique_id=46067227]
+layout_mode = 2
+text = "B"
+
 [node name="Label2" type="Label" parent="VBoxContainer/ControllerControls" unique_id=1996091519]
 layout_mode = 2
 theme_override_fonts/font = ExtResource("1_rr3k7")
@@ -255,6 +290,16 @@ horizontal_alignment = 2
 [node name="Label3" type="Label" parent="VBoxContainer/ControllerControls" unique_id=1965821659]
 layout_mode = 2
 text = "A"
+
+[node name="Label12" type="Label" parent="VBoxContainer/ControllerControls" unique_id=1206201685]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("1_rr3k7")
+text = "Delete At Cursor"
+horizontal_alignment = 2
+
+[node name="Label13" type="Label" parent="VBoxContainer/ControllerControls" unique_id=1621966092]
+layout_mode = 2
+text = "B"
 
 [node name="Label4" type="Label" parent="VBoxContainer/ControllerControls" unique_id=1394384511]
 layout_mode = 2
@@ -296,26 +341,6 @@ horizontal_alignment = 2
 layout_mode = 2
 text = "X"
 
-[node name="Label10" type="Label" parent="VBoxContainer/ControllerControls" unique_id=1788319398]
-layout_mode = 2
-theme_override_fonts/font = ExtResource("1_rr3k7")
-text = "Delete Mode"
-horizontal_alignment = 2
-
-[node name="Label11" type="Label" parent="VBoxContainer/ControllerControls" unique_id=447209953]
-layout_mode = 2
-text = "Backspace / Q"
-
-[node name="Label12" type="Label" parent="VBoxContainer/ControllerControls" unique_id=1206201685]
-layout_mode = 2
-theme_override_fonts/font = ExtResource("1_rr3k7")
-text = "Delete At Cursor"
-horizontal_alignment = 2
-
-[node name="Label13" type="Label" parent="VBoxContainer/ControllerControls" unique_id=1621966092]
-layout_mode = 2
-text = "Delete"
-
 [node name="Label18" type="Label" parent="VBoxContainer/ControllerControls" unique_id=461480635]
 visible = false
 layout_mode = 2
@@ -350,6 +375,26 @@ horizontal_alignment = 2
 layout_mode = 2
 text = "LB / RB"
 
+[node name="Label34" type="Label" parent="VBoxContainer/ControllerControls" unique_id=377089454]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("1_rr3k7")
+text = "Switch to Tiles"
+horizontal_alignment = 2
+
+[node name="Label35" type="Label" parent="VBoxContainer/ControllerControls" unique_id=513887611]
+layout_mode = 2
+text = "LB (hold)"
+
+[node name="Label36" type="Label" parent="VBoxContainer/ControllerControls" unique_id=1826797307]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("1_rr3k7")
+text = "Switch to Entities"
+horizontal_alignment = 2
+
+[node name="Label37" type="Label" parent="VBoxContainer/ControllerControls" unique_id=1956026635]
+layout_mode = 2
+text = "RB (hold)"
+
 [node name="Label22" type="Label" parent="VBoxContainer/ControllerControls" unique_id=1242602261]
 layout_mode = 2
 theme_override_fonts/font = ExtResource("1_rr3k7")
@@ -359,6 +404,16 @@ horizontal_alignment = 2
 [node name="Label23" type="Label" parent="VBoxContainer/ControllerControls" unique_id=439055794]
 layout_mode = 2
 text = "RT"
+
+[node name="Label38" type="Label" parent="VBoxContainer/ControllerControls" unique_id=63678367]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("1_rr3k7")
+text = "Add Text"
+horizontal_alignment = 2
+
+[node name="Label39" type="Label" parent="VBoxContainer/ControllerControls" unique_id=1664757941]
+layout_mode = 2
+text = "RT (hold)"
 
 [node name="Label24" type="Label" parent="VBoxContainer/ControllerControls" unique_id=1771075380]
 visible = false
@@ -407,6 +462,7 @@ layout_mode = 2
 text = "Ctr+N"
 
 [node name="TextureRect" type="TextureRect" parent="." unique_id=2085722576]
+modulate = Color(0, 0, 0, 1)
 layout_mode = 2
 size_flags_horizontal = 8
 size_flags_vertical = 0

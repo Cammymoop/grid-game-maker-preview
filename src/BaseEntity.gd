@@ -862,8 +862,6 @@ func apply_sprite_effect(effect_info: Dictionary, with_duration: float = -1, wit
 		if with_delay > 0:
 			ll_effect["time_offset"] = ll_effect.get("time_offset", 0.0) + with_delay
 	effect_info["expire_time"] = with_duration + with_delay
-	if with_delay > 0:
-		prints("added effect with delay: ", snappedf(with_delay, 0.001), "expire time", snappedf(effect_info["expire_time"], 0.001))
 	var modifier_name: String = effect_info.get("name", "")
 	if modifier_name and sprite.has_applied_modifier(modifier_name):
 		remove_sprite_modifier({"name": modifier_name})

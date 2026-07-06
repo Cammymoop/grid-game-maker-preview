@@ -42,6 +42,8 @@ var edit_entity_pulse_period: float = 1.15
 
 var close_on_focus_lost: = true
 
+var conditional_editor_open: bool = false
+
 var _popup_panels: Array[Node] = []
 
 func _ready() -> void:
@@ -228,12 +230,21 @@ func show_conditional_editor(property_name: String, current_value: Variant, edit
     add_child(new_conditional_editor)
     new_conditional_editor.load_conditional_data(current_value)
     new_conditional_editor.save_conditional.connect(on_save_conditional_prop.bind(property_name))
+    new_conditional_editor.cancelled.connect(on_conditional_editor_cancelled)
     new_conditional_editor.transient = true
 
     new_conditional_editor.popup_centered()
+    conditional_editor_open = true
 
 func on_save_conditional_prop(new_conditional_value: Variant, prop_name: String) -> void:
-    property_edit_list.set_prop_conditional_value(prop_name, new_conditional_value)
+    if not property_edit_list.is_prop_overridden(prop_name):
+        property_edit_list.set_prop_name_override_value(prop_name, new_conditional_value)
+    else:
+        property_edit_list.set_prop_conditional_value(prop_name, new_conditional_value)
+    conditional_editor_open = false
+
+func on_conditional_editor_cancelled() -> void:
+    conditional_editor_open = false
 
 func on_entity_size_input_changed(new_size: Vector2i) -> void:
     if not edited_entity or not edited_entity is LargeEntity:
@@ -247,3 +258,6 @@ func on_delete_entity_button_pressed() -> void:
     if edited_entity:
         request_delete_entity.emit(edited_entity)
     close_instance_editor()
+
+func is_conditional_editor_open() -> bool:
+    return conditional_editor_open

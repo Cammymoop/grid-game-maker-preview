@@ -7,6 +7,8 @@ signal released
 @export var initial_delay: float = -1
 @export var repeat_delay: float = 0.05
 @export var auto_check_hold: bool = true
+
+@export var delay_only: bool = false
 var _check_hold_callable: Callable = Callable()
 
 var _check_changed_callable: Callable = Callable()
@@ -15,10 +17,14 @@ var _last_value: Variant = null
 var _is_held: = false
 
 func _init() -> void:
-    one_shot = false
+    one_shot = delay_only
     wait_time = get_initial_delay()
     timeout.connect(on_timeout)
     _update_processing()
+
+func set_delay_only(new_delay_only: bool) -> void:
+    delay_only = new_delay_only
+    one_shot = delay_only
 
 func on_timeout() -> void:
     activated.emit()
@@ -33,7 +39,8 @@ func get_initial_delay() -> float:
 func start_hold() -> void:
     _is_held = true
     start(get_initial_delay())
-    activated.emit()
+    if not delay_only:
+        activated.emit()
 
 func hold() -> void:
     if not _is_held:

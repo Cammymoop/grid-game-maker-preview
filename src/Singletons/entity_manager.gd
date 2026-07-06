@@ -84,6 +84,8 @@ var level_spawn_effect_frames_left: int = 0
 #var _move_resolution_stack: Array[Dictionary] = []
 #var _move_stack_metadata: Dictionary = {}
 
+var entity_id_sort_order: PackedInt32Array = []
+
 func paused_visual_process(delta_time: float) -> void:
     for e in entity_list:
         e.sprite_process(delta_time, true)
@@ -378,7 +380,6 @@ func apply_level_start_entity_spawn_animation() -> void:
         
         var screen_size_tiles: Vector2 = GameManager.get_window_size_setting()
         var screen_corner_dist: = screen_size_tiles.length() / 2.0
-        prints("screen center pos: ", screen_center_map_pos)
         
         var max_dist_from_center: float = 0
         for e in entity_list:
@@ -387,10 +388,8 @@ func apply_level_start_entity_spawn_animation() -> void:
             var abs_dot: = absf(delta.dot(delay_offset_direction))
             if abs_dot > screen_corner_dist:
                 continue
-            prints("pos:", e.get_moving_position(), "dist:", snappedf(delta.dot(delay_offset_direction), 0.001))
             max_dist_from_center = maxf(max_dist_from_center, abs_dot)
         delay_factor = (max_delay * 0.5) / max_dist_from_center
-        prints("max_dist_from_center: ", max_dist_from_center, "max_delay", max_delay, "delay_factor", delay_factor)
 
     var def_spawn_effect: String = GameManager.get_game_setting("default_spawn_effect", "")
     for e in entity_list:
@@ -471,8 +470,23 @@ func refresh_definition():
     fix_int_property_vals()
     create_index_map()
     create_defined_custom_signals()
+    update_entity_id_sort_order()
     
     actions_only_for_camera_target = GameManager.get_game_setting("action_signal_sent_to", "all_entities") != "camera_target"
+    
+    if GameManager.cur_scene == "Play":
+        resort_entity_list()
+
+func update_entity_id_sort_order() -> void:
+    var max_entity_id: int = 0
+    for entity_id in entity_defs.keys():
+        max_entity_id = maxi(max_entity_id, int(entity_id))
+    entity_id_sort_order.resize(max_entity_id + 1)
+    entity_id_sort_order.fill(0)
+    var order_index: int = 0
+    for entity_id in entity_defs.keys():
+        entity_id_sort_order[entity_id] = order_index
+        order_index += 1
 
 func convert_legacy_format_stuff():
     for entity_id in entity_defs:
@@ -530,9 +544,11 @@ func fix_int_property_vals():
                 entity_props[prop_name] = int(entity_props[prop_name])
 
 func entity_order(a, b) -> bool:
-    if a.entity_index == b.entity_index:
+    var a_sort_order: int = entity_id_sort_order[a.entity_index]
+    var b_sort_order: int = entity_id_sort_order[b.entity_index]
+    if a_sort_order == b_sort_order:
         return a.instance_id < b.instance_id
-    return a.entity_index < b.entity_index
+    return a_sort_order < b_sort_order
 
 func refresh_entity_list():
     entity_instance_map = {}
@@ -1904,7 +1920,7 @@ func _remove_entities(to_remove_entities: Array[BaseEntity], do_emit: bool = tru
 
 func get_all_entity_indexes() -> Array:
     var keys = entity_defs.keys()
-    keys.sort()
+    #keys.sort()
     return keys
 
 func get_entity_index(entity_name: String) -> int:

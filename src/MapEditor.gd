@@ -90,8 +90,15 @@ var _placing_text_string: = ""
 var _placeable_text_style_info: = {}
 var _placing_text_offset: Vector2 = Vector2.ZERO
 
+var _holding_non_pointer_delete: = false
+
 var autosave_delay: float = 5
 var autosave_delay_timer: Timer = null
+
+var swap_to_entity_mode_timer: Timer = null
+var swap_to_tile_mode_timer: Timer = null
+
+var do_text_hold_timer: Timer = null
 
 func _ready() -> void:
 	autosave_delay_timer = Timer.new()
@@ -114,6 +121,14 @@ func _ready() -> void:
 	cursor_move_timer.set_check_changed_callable(get_cursor_hold_vector)
 	lost_input_priority.connect(cursor_move_timer.release)
 	
+	swap_to_entity_mode_timer = Utility.create_auto_repeat_delay_timer(self, 0.6, -1, is_holding_next_either, set_cursor_mode.bind("entity"))
+	swap_to_entity_mode_timer.set_delay_only(true)
+	swap_to_tile_mode_timer = Utility.create_auto_repeat_delay_timer(self, 0.6, -1, is_holding_prev_either, set_cursor_mode.bind("tile"))
+	swap_to_tile_mode_timer.set_delay_only(true)
+	
+	do_text_hold_timer = Utility.create_auto_repeat_delay_timer(self, 0.6, -1, is_holding_do_text, hold_show_add_placeable_text_panel)
+	do_text_hold_timer.set_delay_only(true)
+
 	entity_instance_editor.closing.connect(entity_instance_editor_closed)
 	entity_instance_editor.entity_props_edited.connect(on_entity_props_edited)
 	entity_instance_editor.entity_local_props_reset.connect(on_entity_local_props_reset)
@@ -131,6 +146,8 @@ func _ready() -> void:
 	var pause_menu: Control = Utility.get_pause_menu()
 	if pause_menu:
 		pause_menu.pause_menu_closed.connect(pause_menu_closed)
+	
+	set_cursor_mode("tile")
 
 func something_edited() -> void:
 	has_edited_something = true
@@ -164,6 +181,21 @@ func is_holding_cursor_move() -> bool:
 		return false
 	return Utility.input_vector_by_prefix("editor_cursor").length_squared() > 0.01
 
+func is_holding_next_either() -> bool:
+	if not edit_mode or not _input_priority:
+		return false
+	return Input.is_action_pressed("editor_next_either")
+
+func is_holding_prev_either() -> bool:
+	if not edit_mode or not _input_priority:
+		return false
+	return Input.is_action_pressed("editor_prev_either")
+
+func is_holding_do_text() -> bool:
+	if not edit_mode or not _input_priority:
+		return false
+	return Input.is_action_pressed("editor_do_text_hold")
+
 func get_cursor_hold_vector() -> Vector2:
 	var input_vector: = Utility.input_vector_by_prefix("editor_cursor")
 	return input_vector.snapped(Vector2.ONE)
@@ -171,7 +203,15 @@ func get_cursor_hold_vector() -> Vector2:
 func on_cursor_move_activated() -> void:
 	_cursor_moved_from_directional_input = true
 	var move_vec: = Utility.input_vector_by_prefix("editor_cursor")
-	move_cursor(cursor_tile_pos + Vector2i(move_vec.snapped(Vector2.ONE)))
+	var new_cursor_pos: = cursor_tile_pos + Vector2i(move_vec.snapped(Vector2.ONE))
+	var cursor_world_pos: = MapManager.tile_to_world_position_centered(new_cursor_pos)
+	var world_view_rect: = get_world_view_rect()
+	if not world_view_rect.grow(10).has_point(cursor_world_pos):
+		var center_pos: = MapManager.world_to_tile_position(world_view_rect.get_center())
+		move_cursor(center_pos)
+	else:
+		move_cursor(cursor_tile_pos + Vector2i(move_vec.snapped(Vector2.ONE)))
+
 	if cursor_mode == "text":
 		if _placing_text_offset != Vector2.ZERO:
 			set_placing_text_offset(Vector2.ZERO)
@@ -540,21 +580,48 @@ func _standard_delete_at_cursor(force_everything: bool = false, force_only_entit
 		_refresh_edited_entity_indicators()
 		$DustParticles.emit_at(MapManager.tile_to_world_position_centered(cursor_tile_pos))
 
+func delete_specific_entity(entity: BaseEntity) -> void:
+	var entity_pos: = entity.get_moving_position()
+	EntityManager.remove_entity(entity)
+	something_edited()
+	_refresh_edited_entity_indicators()
+	$DustParticles.emit_at(MapManager.tile_to_world_position_centered(entity_pos))
+
 func inspect_at_cursor() -> void:
-	var entities_here = get_sorted_entities_at(cursor_tile_pos)
+	_inspect_at(cursor_tile_pos)
+
+func _inspect_at(at_tile_pos: Vector2i) -> void:
+	var entities_here = get_sorted_entities_at(at_tile_pos)
 	if entities_here.size() > 0:
 		var found_last_picked: int = entities_here.find(_last_picked_entity)
 		if found_last_picked == -1:
 			found_last_picked = 0
 		entity_instance_editor.open_instance_editor(entities_here[found_last_picked])
-		var ui_vp_size: Vector2 = Vector2(entity_instance_editor.get_viewport().size)
-		var instance_editor_width: float = entity_instance_editor.size.x / ui_vp_size.x
-		var disp_width: = get_display_world_size().x
-		var offset: = (1 - instance_editor_width) * disp_width - (disp_width / 2.0)
-		set_enable_camera_limits(false)
-		scroll_editor_camera_to_pos(MapManager.tile_to_world_position_centered(cursor_tile_pos) + Vector2.RIGHT * offset)
+		_scroll_to_inspected(at_tile_pos)
 	elif entity_instance_editor and entity_instance_editor.visible:
 		entity_instance_editor.close_instance_editor()
+
+func _inspect_next_at(at_tile_pos: Vector2i, next_after_entity: BaseEntity) -> void:
+	var entities_here = get_sorted_entities_at(at_tile_pos)
+	if entities_here.size() > 0:
+		var found_current_inspected: int = entities_here.find(next_after_entity)
+		if found_current_inspected == -1:
+			found_current_inspected = 0
+		elif entities_here.size() == 1:
+			return
+		var next_index: = posmod(found_current_inspected + 1, entities_here.size())
+		pick_entity(entities_here[next_index])
+		_last_picked_entity = entities_here[next_index]
+		entity_instance_editor.open_instance_editor(entities_here[next_index])
+		_scroll_to_inspected(at_tile_pos)
+
+func _scroll_to_inspected(inspected_at_pos: Vector2i) -> void:
+	var ui_vp_size: Vector2 = Vector2(entity_instance_editor.get_viewport().size)
+	var instance_editor_width: float = entity_instance_editor.size.x / ui_vp_size.x
+	var disp_width: = get_display_world_size().x
+	var offset: = (1 - instance_editor_width) * disp_width - (disp_width / 2.0)
+	set_enable_camera_limits(false)
+	scroll_editor_camera_to_pos(MapManager.tile_to_world_position_centered(inspected_at_pos) + Vector2.RIGHT * offset)
 
 func set_enable_camera_limits(is_enabled: bool) -> void:
 	editor_cam.set_enable_limits(is_enabled)
@@ -584,6 +651,9 @@ func drop_input_priority() -> void:
 
 func _process(delta: float) -> void:
 	update_input_priority()
+	if _holding_non_pointer_delete:
+		if not Input.is_action_pressed("editor_non_pointer_delete"):
+			_holding_non_pointer_delete = false
 	if not edit_mode or is_other_paused():
 		return
 	
@@ -598,7 +668,10 @@ func _process(delta: float) -> void:
 	
 	# camera scroll that doesn't interact with GUI can scroll regardless of input priority
 	var dedicated_scroll_input: = Utility.input_vector_by_prefix("editor_camera_dedicated")
-	_scroll_editor_camera(dedicated_scroll_input * delta * camera_move_speed)
+	var no_dedicated_scroll: bool = entity_instance_editor.is_conditional_editor_open()
+	no_dedicated_scroll = no_dedicated_scroll or placeable_text_input_panel.visible
+	if not no_dedicated_scroll:
+		_scroll_editor_camera(dedicated_scroll_input * delta * camera_move_speed)
 
 	if _input_priority:
 		var scroll_input: = Utility.input_vector_by_prefix("editor_camera")
@@ -642,6 +715,11 @@ func move_cursor(new_position: Vector2i) -> void:
 	if _cursor_moved_from_directional_input:
 		if Input.is_action_pressed("editor_non_pointer_primary"):
 			_primary_action_at_cursor(true)
+		elif Input.is_action_pressed("editor_non_pointer_delete") and _holding_non_pointer_delete:
+			var force_everything: = not delete_held_on_entity
+			var force_only_entities: = delete_held_on_entity
+			_standard_delete_at_cursor(force_everything, force_only_entities)
+
 		cursor_drag_camera()
 	else:
 		if Input.is_action_pressed("editor_pointer_primary"):
@@ -655,7 +733,7 @@ func cursor_drag_camera() -> void:
 		var delta_to_clamped: = cursor_world_pos - Utility.clamp_point_in_rect2(cursor_world_pos, drag_within_rect)
 		_scroll_editor_camera(delta_to_clamped)
 
-func forwarded_gui_input(event: InputEvent) -> void:
+func forwarded_gui_input(event: InputEvent, viewport: Viewport) -> void:
 	if not edit_mode or GameManager.get_pause("pause_menu"):
 		return
 	
@@ -718,16 +796,20 @@ func forwarded_gui_input(event: InputEvent) -> void:
 	
 	if Utility.fixed_just_pressed_by_event("editor_non_pointer_primary", event, true):
 		_primary_action_at_cursor()
+		viewport.set_input_as_handled()
 		return
 	if Utility.fixed_just_pressed_by_event("editor_pointer_primary", event, false):
 		_primary_action_at_cursor()
+		viewport.set_input_as_handled()
 		return
 	
 	if Utility.fixed_just_pressed_by_event("editor_pointer_inspect", event, true):
 		inspect_at_cursor()
+		viewport.set_input_as_handled()
 		return
 	if Utility.fixed_just_pressed_by_event("editor_non_pointer_secondary", event, true):
 		inspect_at_cursor()
+		viewport.set_input_as_handled()
 		return
 
 	var is_pointer_pick: = Utility.fixed_just_pressed_by_event("editor_pointer_pick", event, true)
@@ -757,8 +839,22 @@ func forwarded_gui_input(event: InputEvent) -> void:
 		return
 	
 	if Utility.fixed_just_pressed_by_event("editor_delete_at_cursor", event):
-		_standard_delete_at_cursor()
+		var entities_here: = get_all_entities_at_tile_pos(cursor_tile_pos)
+		if cursor_mode == "entity" and _last_picked_entity and _last_picked_entity in entities_here:
+			delete_specific_entity(_last_picked_entity)
+		else:
+			_standard_delete_at_cursor()
 		return
+	if Utility.fixed_just_pressed_by_event("editor_non_pointer_delete", event, true):
+		_holding_non_pointer_delete = true
+		var entities_here: = get_all_entities_at_tile_pos(cursor_tile_pos)
+		delete_held_on_entity = entities_here.size() > 0
+		if cursor_mode == "entity" and _last_picked_entity and _last_picked_entity in entities_here:
+			delete_specific_entity(_last_picked_entity)
+		else:
+			_standard_delete_at_cursor()
+			if not is_in_placing_mode():
+				set_cursor_mode(_last_tile_entity_mode)
 	
 	if Utility.fixed_just_pressed_by_event("editor_toggle_delete", event):
 		if cursor_mode != "delete":
@@ -770,12 +866,23 @@ func forwarded_shortcut_input(event: InputEvent) -> void:
 		return
 	if Utility.fixed_just_pressed_by_event("editor_start", event, true):
 		switch_edit_mode(not edit_mode)
+	elif Utility.fixed_just_pressed_by_event("editor_start_no_kb", event, true):
+		switch_edit_mode(not edit_mode)
 	elif Utility.fixed_just_pressed_by_event("editor_save_level", event, true) and edit_mode:
 		if edit_mode:
 			GameManager.save_edited()
 		save_current_or_save_as()
 	elif Utility.fixed_just_pressed_by_event("editor_new_map", event, true):
 		GameManager.new_empty_level()
+	
+	if entity_instance_editor.visible and entity_instance_editor.edited_entity:
+		if event.pressed:
+			if Utility.fixed_just_pressed_by_event("editor_pointer_inspect", event, true):
+				var mouse_pos: Vector2 = get_viewport().get_scaled_mouse_position() + editor_cam.get_tl_position()
+				var tile_pos: = MapManager.world_to_tile_position(mouse_pos)
+				_inspect_next_at(tile_pos, entity_instance_editor.edited_entity)
+			elif Utility.fixed_just_pressed_by_event("editor_non_pointer_secondary", event, true):
+				_inspect_next_at(cursor_tile_pos, entity_instance_editor.edited_entity)
 
 func save_current_or_save_as() -> bool:
 	if GameManager.loaded_level_name:
@@ -870,9 +977,12 @@ func cleanup() -> void:
 	MapManager.switch_tiles_preview_mode(false)
 
 func get_reduced_world_view_rect() -> Rect2:
-	var world_view_rect: = Rect2(editor_cam.get_tl_position(), get_display_world_size())
+	var world_view_rect: = get_world_view_rect()
 	var reduce_ratio: = 0.6
 	return Utility.grow_rect2_by_ratio(world_view_rect, reduce_ratio)
+
+func get_world_view_rect() -> Rect2:
+	return Rect2(editor_cam.get_tl_position(), get_display_world_size())
 
 func get_display_world_size() -> Vector2:
 	var vp: = get_viewport()
@@ -911,6 +1021,12 @@ func on_placeable_text_input_panel_text_picked(text: String) -> void:
 	_placeable_text_style_info = placeable_text_input_panel.get_style_info()
 	update_text_preview_style()
 	switch_to_text_cursor()
+
+func hold_show_add_placeable_text_panel() -> void:
+	var use_text: = ""
+	if Input.is_action_pressed("editor_alt_mode_hold"):
+		use_text = _placing_text_string
+	show_add_placeable_text_panel(use_text)
 
 func show_add_placeable_text_panel(with_text: String) -> void:
 	placeable_text_input_panel.set_input_text(with_text)
@@ -988,6 +1104,4 @@ func _confirmed_load_level_in_list(level_name: String, level_list_name: String) 
 		GameManager.edit_level_in_list(level_list_name, level_name)
 	
 func on_request_delete_entity(entity: BaseEntity) -> void:
-	EntityManager.remove_entity(entity)
-	_refresh_edited_entity_indicators()
-	something_edited()
+	delete_specific_entity(entity)

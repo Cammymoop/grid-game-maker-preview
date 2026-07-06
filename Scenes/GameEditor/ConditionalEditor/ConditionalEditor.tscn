@@ -58,7 +58,7 @@ bg_color = Color(0.2810776, 0.11291369, 0.095122315, 1)
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ph6tk"]
 bg_color = Color(0.24280351, 0.20645195, 0.07433311, 1)
 
-[node name="ConditionalEditor" type="Window" unique_id=557924117 node_paths=PackedStringArray("when_list_container", "event_name_label")]
+[node name="ConditionalEditor" type="Window" unique_id=557924117 node_paths=PackedStringArray("when_list_container", "event_name_label", "save_button")]
 transparent_bg = true
 oversampling_override = 1.0
 title = "Conditional Editor"
@@ -69,6 +69,7 @@ transparent = true
 script = ExtResource("6")
 when_list_container = NodePath("PanelContainer/MarginContainer/VBoxContainer2/VBoxContainer/VSplitContainer/HBoxContainer2/VBoxContainer/ActionsTabs")
 event_name_label = NodePath("PanelContainer/MarginContainer/VBoxContainer2/ConditionalNameLabel")
+save_button = NodePath("PanelContainer/MarginContainer/VBoxContainer2/VBoxContainer/HBoxContainer3/SaveButton")
 
 [node name="PanelContainer" type="PanelContainer" parent="." unique_id=643923339]
 anchors_preset = 15
@@ -387,7 +388,7 @@ size_flags_horizontal = 3
 
 [node name="CancelButton" type="Button" parent="PanelContainer/MarginContainer/VBoxContainer2/VBoxContainer/HBoxContainer3" unique_id=1456315739]
 layout_mode = 2
-text = "Cancel"
+text = "Close without saving"
 
 [node name="Control3" type="Control" parent="PanelContainer/MarginContainer/VBoxContainer2/VBoxContainer/HBoxContainer3" unique_id=1212957850]
 layout_mode = 2

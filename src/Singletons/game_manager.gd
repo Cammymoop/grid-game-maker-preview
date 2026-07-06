@@ -1820,7 +1820,6 @@ func ensure_basic_player_profile() -> PlayerProfile:
 
 func get_game_save_data(data_key: String, default_value: Variant = null) -> Variant:
 	if not player_profile:
-		EngineDebugger.debug()
 		push_error("No player profile loaded")
 		return default_value
 	if not get_game_name():
@@ -1830,7 +1829,6 @@ func get_game_save_data(data_key: String, default_value: Variant = null) -> Vari
 
 func set_game_save_data(data_key: String, value: Variant, flush: bool = true) -> void:
 	if not player_profile:
-		EngineDebugger.debug()
 		push_error("No player profile loaded")
 		return
 	if not get_game_name():

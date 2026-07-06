@@ -10,3 +10,6 @@ func set_show_controls_help(is_showing: bool) -> void:
 
 func is_showing_controls_help() -> bool:
     return controls_help.visible
+
+func switch_controls_overlay_to_gamepad() -> void:
+    controls_help.show_controller_controls()

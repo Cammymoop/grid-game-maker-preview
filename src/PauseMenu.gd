@@ -34,6 +34,8 @@ var active = false
 @onready var main_panel: PanelContainer = find_child("MainPausePanel")
 @onready var level_settings_panel: PanelContainer = find_child("LevelSettingsPausePanel")
 
+@export var user_settings_panel: PanelContainer
+
 @export var start_level_paused_toggle: CheckButton
 
 @export var override_cam_limit_select: OptionButton
@@ -47,8 +49,15 @@ var active = false
 
 @export var level_info_panel: Control
 
+@export var goto_user_settings_button: Button
+
 func _ready():
+	user_settings_panel.back_to_main_panel.connect(switch_panel.bind("main"))
+	
+	level_editor_controls_help_toggle.gui_input.connect(on_level_editor_controls_help_toggle_gui_input)
 	level_editor_controls_help_toggle.toggled.connect(on_level_editor_controls_help_toggle_pressed)
+	
+	goto_user_settings_button.pressed.connect(switch_panel.bind("user_settings"))
 
 	copy_to_clipboard_button.pressed.connect(on_copy_to_clipboard_button_pressed)
 	paste_from_clipboard_button.pressed.connect(on_paste_from_clipboard_button_pressed)
@@ -122,14 +131,20 @@ func _get_first_visible_button() -> Control:
 func switch_panel(to_panel: String) -> void:
 	var is_main_panel: = to_panel == "main"
 	main_panel.visible = is_main_panel
-	level_settings_panel.visible = not is_main_panel
-	if level_settings_panel.visible:
+	var is_level_settings_panel: = to_panel == "level_settings"
+	level_settings_panel.visible = is_level_settings_panel
+	if is_level_settings_panel:
 		level_info_panel.force_show_level_info()
 		show_background_editor()
 		refresh_level_settings()
 	else:
 		level_info_panel.refresh_ui()
 		hide_background_editor()
+	
+	var is_user_settings_panel: = to_panel == "user_settings"
+	user_settings_panel.visible = is_user_settings_panel
+	if is_user_settings_panel:
+		user_settings_panel.refresh_ui()
 
 func toggle():
 	active = not active
@@ -428,3 +443,11 @@ func on_override_cam_limit_select_item_selected(index: int) -> void:
 		MapManager.set_metadata_value("override_enable_camera_limits", true)
 	else:
 		MapManager.set_metadata_value("override_enable_camera_limits", false)
+
+func on_level_editor_controls_help_toggle_gui_input(event: InputEvent) -> void:
+	if not Input.is_action_just_pressed_by_event("ui_accept", event):
+		return
+	if event is InputEventJoypadButton or event is InputEventJoypadMotion:
+		var map_editor_overlay: = Utility.get_map_editor_overlay()
+		if map_editor_overlay:
+			map_editor_overlay.switch_controls_overlay_to_gamepad()

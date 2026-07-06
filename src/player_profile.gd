@@ -69,9 +69,16 @@ func write_settings() -> void:
     FilesManager.save_profile_settings(player_id, serialized_data)
 
 
+func erase_game_save_progress(game_name: String) -> void:
+    _make_new_game_save(game_name)
+    write_game_save(game_name)
+
 func ensure_game_save_exists(game_name: String) -> void:
     if game_name in game_saves:
         return
+    _make_new_game_save(game_name)
+
+func _make_new_game_save(game_name: String) -> void:
     game_saves[game_name] = {
         "what_is_this": "GGM game save file",
         "format_version": FORMAT_VERSION,
