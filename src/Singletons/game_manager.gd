@@ -65,6 +65,8 @@ var file_access_web: RefCounted = null
 
 var default_bg_style: Dictionary = {}
 
+var non_bundled_level_lists: Array[Dictionary] = []
+
 var scenes: = {
 	"Menu": "res://Scenes/Menu.tscn",
 	"Loading": "res://Scenes/Loading.tscn",
@@ -317,6 +319,30 @@ func put_all_existing_levels_into_single_level_list() -> void:
 		"level_names": all_levels,
 	}]
 
+func update_bundled_level_list_order(new_list_names: Array) -> void:
+	new_list_names = Utility.list_to_unique_set(new_list_names)
+	var old_list_order: = get_list_of_level_lists(true)
+	
+	# Dont add new names or remove existing
+	for new_list_name in new_list_names.duplicate():
+		if not new_list_name in old_list_order:
+			new_list_names.erase(new_list_name)
+	for old_list_name in old_list_order:
+		if not old_list_name in new_list_names:
+			new_list_names.append(old_list_name)
+
+	var old_list_data: Array = game_definition.get("level_lists", [])
+	var keyed_list_data: Dictionary = {}
+	for list_data in old_list_data:
+		if list_data.get("name", "") == "":
+			continue
+		keyed_list_data[list_data["name"]] = list_data
+	var new_list_data: Array = []
+	for new_list_name in new_list_names:
+		new_list_data.append(keyed_list_data[new_list_name])
+	
+	game_definition["level_lists"] = new_list_data
+
 func load_game_definition_from_file(game_name) -> void:
 	var definition = FilesManager.get_game_definition(game_name)
 	load_game_definition_data(definition)
@@ -332,8 +358,8 @@ func load_game_definition_data(definition_data: Dictionary) -> void:
 	_set_game_name(definition_data['game_name'], false)
 	loaded_from_game_name = cur_game_name
 	
-	if not definition_data.has("level_lists"):
-		put_all_existing_levels_into_single_level_list()
+	#if not definition_data.has("level_lists"):
+		#put_all_existing_levels_into_single_level_list()
 	
 	editor_save = {}
 	loaded_level = {}
@@ -1334,7 +1360,25 @@ func get_used_sfx_names() -> Array[String]:
 	return used_sfx_names
 
 
+func non_bundled_lists_updated() -> void:
+	pass
+
+
 func _get_level_list(level_list_name: String) -> Dictionary:
+	var level_list_info: = _get_bundled_level_list(level_list_name)
+	if not level_list_info:
+		level_list_info = _get_non_bundled_level_list(level_list_name)
+	if not level_list_info:
+		return {}
+	return level_list_info
+
+func _get_bundled_level_list(level_list_name: String) -> Dictionary:
+	for level_list_info in game_definition.get("level_lists", []):
+		if level_list_info.get("name", "") == level_list_name:
+			return level_list_info
+	return {}
+
+func _get_non_bundled_level_list(level_list_name: String) -> Dictionary:
 	for level_list_info in game_definition.get("level_lists", []):
 		if level_list_info.get("name", "") == level_list_name:
 			return level_list_info
@@ -1343,37 +1387,141 @@ func _get_level_list(level_list_name: String) -> Dictionary:
 func _remove_level_from_all_lists(level_name: String) -> void:
 	for level_list_info in game_definition.get("level_lists", []):
 		level_list_info["level_names"].erase(level_name)
+	for non_bundled_info in non_bundled_level_lists:
+		non_bundled_info["level_names"].erase(level_name)
 
 func _get_level_list_index(level_list_name: String) -> int:
-	for i in game_definition.get("level_lists", []).size():
-		if game_definition.get("level_lists", [])[i].get("name", "") == level_list_name:
+	var all_lists: = get_list_of_level_lists()
+	for i in all_lists.size():
+		if all_lists[i] == level_list_name:
 			return i
 	return -1
 
+func is_level_list_bundled(level_list_name: String) -> bool:
+	for i in game_definition.get("level_lists", []).size():
+		if game_definition.get("level_lists", [])[i].get("name", "") == level_list_name:
+			return true
+	return false
+
+func change_level_list_is_bundled(level_list_name: String, new_is_bundled: bool) -> void:
+	var exists_in_bundled: bool = is_level_list_bundled(level_list_name)
+	var exists_in_non_bundled: bool = false
+	for non_bundled_info in non_bundled_level_lists:
+		if non_bundled_info.get("name", "") == level_list_name:
+			exists_in_non_bundled = true
+			break
+	
+	if new_is_bundled and not exists_in_non_bundled:
+		return
+	if not new_is_bundled and not exists_in_bundled:
+		return
+	
+	var info: Dictionary = {}
+	if new_is_bundled:
+		info = _get_non_bundled_level_list(level_list_name)
+		_remove_non_bundled_level_list(level_list_name)
+	else:
+		info = _get_bundled_level_list(level_list_name)
+		_remove_bundled_level_list(level_list_name)
+	add_level_list_with_info(level_list_name, info, new_is_bundled)
+
 func remove_level_list(level_list_name: String) -> void:
-	if not game_definition.get("level_lists", []):
-		return
-	var level_list_index: = _get_level_list_index(level_list_name)
-	if level_list_index < 0:
-		return
-	game_definition["level_lists"].remove_at(level_list_index)
+	_remove_bundled_level_list(level_list_name)
+	_remove_non_bundled_level_list(level_list_name)
 
-func add_level_list(level_list_name: String) -> void:
-	if not game_definition.get("level_lists", []):
-		game_definition["level_lists"] = []
-	game_definition["level_lists"].append({
-		"name": level_list_name,
-		"level_names": [],
-	})
+func _remove_bundled_level_list(level_list_name: String) -> void:
+	var found_at_indices: Array[int] = []
+	for i in game_definition.get("level_lists", []).size():
+		if game_definition.get("level_lists", [])[i].get("name", "") == level_list_name:
+			found_at_indices.append(i)
+	found_at_indices.reverse()
+	for index in found_at_indices:
+		game_definition["level_lists"].remove_at(index)
 
-func add_level_list_with_info(level_list_name: String, level_list_info: Dictionary) -> void:
+func _remove_non_bundled_level_list(level_list_name: String) -> void:
+	var found_at_indices: Array[int] = []
+	for i in non_bundled_level_lists.size():
+		if non_bundled_level_lists[i].get("name", "") == level_list_name:
+			found_at_indices.append(i)
+	found_at_indices.reverse()
+	for index in found_at_indices:
+		non_bundled_level_lists.remove_at(index)
+	non_bundled_lists_updated()
+
+func add_empty_level_list(level_list_name: String, is_bundled: bool) -> void:
+	level_list_name = make_new_list_name_unique(level_list_name)
+	if is_bundled:
+		if not game_definition.get("level_lists", []):
+			game_definition["level_lists"] = []
+		game_definition["level_lists"].append({
+			"name": level_list_name,
+			"level_names": [],
+		})
+	else:
+		non_bundled_level_lists.append({
+			"name": level_list_name,
+			"level_names": [],
+		})
+
+func set_level_list_data(level_list_name: String, setting_name: String, setting_value: Variant) -> void:
+	var list_info: = _get_level_list(level_list_name)
+	if not list_info:
+		return
+	
+	if is_level_list_bundled(level_list_name):
+		list_info[setting_name] = setting_value
+	else:
+		list_info[setting_name] = setting_value
+		non_bundled_lists_updated()
+
+func remove_level_list_data(level_list_name: String, setting_name: String) -> void:
+	var list_info: = _get_level_list(level_list_name)
+	if not list_info:
+		return
+
+	if is_level_list_bundled(level_list_name):
+		list_info.erase(setting_name)
+	else:
+		list_info.erase(setting_name)
+		non_bundled_lists_updated()
+
+func level_list_name_exists(level_list_name: String) -> bool:
+	return level_list_name in get_list_of_level_lists()
+
+func make_new_list_name_unique(level_list_name: String) -> String:
+	var existing_lists: = get_list_of_level_lists()
+	if not level_list_name or not level_list_name in existing_lists:
+		return level_list_name
+	for i in 100000:
+		var new_name: = level_list_name + ("[%d]" % i)
+		if not new_name in existing_lists:
+			return new_name
+	return ""
+
+func rename_level_list(old_name: String, new_name: String) -> bool:
+	var old_list_info: = _get_level_list(old_name)
+	if not old_list_info or new_name == old_name:
+		return false
+	if is_level_list_bundled(old_name):
+		old_list_info["name"] = new_name
+	else:
+		old_list_info["name"] = new_name
+		non_bundled_lists_updated()
+	return true
+
+func add_level_list_with_info(level_list_name: String, level_list_info: Dictionary, is_bundled: bool = true) -> void:
+	level_list_name = make_new_list_name_unique(level_list_name)
 	if not level_list_name:
 		return
-	if not game_definition.get("level_lists", []):
-		game_definition["level_lists"] = []
-	if not level_list_info.get("name", "") == level_list_name:
-		level_list_info["name"] = level_list_name
-	game_definition["level_lists"].append(level_list_info.duplicate_deep())
+	level_list_info["name"] = level_list_name
+	if is_bundled:
+		if not game_definition.get("level_lists", []):
+			game_definition["level_lists"] = []
+		game_definition["level_lists"].append(level_list_info.duplicate_deep())
+	else:
+		non_bundled_level_lists.append(level_list_info.duplicate_deep())
+		non_bundled_lists_updated()
+
 
 func has_any_unlocked_levels() -> bool:
 	var total_unlocked_levels: int = 0
@@ -1381,13 +1529,29 @@ func has_any_unlocked_levels() -> bool:
 		total_unlocked_levels += get_unlocked_levels_in_level_list(level_list_name).size()
 	return total_unlocked_levels > 0
 
-func get_list_of_level_lists() -> Array:
+func get_list_of_level_lists(only_bundled: bool = false) -> Array:
 	var ll_names: Array[String] = []
 	for level_list_info in game_definition.get("level_lists", []):
 		if not level_list_info.get("name", ""):
 			continue
 		ll_names.append(level_list_info["name"])
+	for non_bundled_info in non_bundled_level_lists:
+		if not non_bundled_info.get("name", ""):
+			continue
+		ll_names.append(non_bundled_info["name"])
 	return ll_names
+
+func get_all_level_list_infos() -> Array[Dictionary]:
+	var level_list_infos: Array[Dictionary] = []
+	for level_list_info in game_definition.get("level_lists", []):
+		if not level_list_info.get("name", ""):
+			continue
+		level_list_infos.append(level_list_info)
+	for non_bundled_info in non_bundled_level_lists:
+		if not non_bundled_info.get("name", ""):
+			continue
+		level_list_infos.append(non_bundled_info)
+	return level_list_infos
 
 func get_levels_in_level_list(level_list_name: String) -> Array:
 	var level_list_info: = _get_level_list(level_list_name)
@@ -1401,7 +1565,9 @@ func is_level_list_unlocked(level_list_name: String) -> bool:
 	var level_list_index: = _get_level_list_index(level_list_name)
 	if level_list_index < 0:
 		return false
-	if level_list_index == 0:
+	elif not is_level_list_bundled(level_list_name):
+		return true
+	elif level_list_index == 0:
 		return true
 	else:
 		var list_info: = _get_level_list(level_list_name)
@@ -1426,6 +1592,8 @@ func unlock_level_in_list(level_list_name: String, level_name: String) -> void:
 	_unlock_level_code(_level_code(level_list_name, level_name))
 
 func _unlock_level_list(level_list_name: String) -> void:
+	if not is_level_list_bundled(level_list_name):
+		return
 	var unlocked_lists: Array = get_game_save_data("unlocked_lists", [])
 	if level_list_name in unlocked_lists:
 		return
@@ -1471,19 +1639,41 @@ func _is_level_code_unlocked_in_save(level_code: String) -> bool:
 	var unlocked_codes: Array = get_game_save_data("unlocked_level_codes", [])
 	return level_code in unlocked_codes
 
-func get_list_of_unlisted_levels() -> Array:
-	var all_level_lists: Array = get_list_of_level_lists()
-	var all_listed_levels: Array = []
-	for level_list_name in all_level_lists:
-		all_listed_levels.append_array(get_levels_in_level_list(level_list_name))
-	
-	var all_levels: Array = FilesManager.get_level_list(get_game_name())
-	var unlisted_levels: Array = []
-	for level_name in all_levels:
-		if not level_name in all_listed_levels:
-			unlisted_levels.append(level_name)
-	return unlisted_levels
+func get_list_of_all_bundled_levels() -> Array[String]:
+	var level_names: Array[String] = []
+	for level_list_info in game_definition.get("level_lists", []):
+		for level_name in level_list_info.get("level_names", []):
+			if not level_name in level_names:
+				level_names.append(level_name)
+	return level_names
 
+func get_list_of_all_non_bundled_levels() -> Array[String]:
+	var bundled_level_names: = get_list_of_all_bundled_levels()
+	var non_bundled_level_names: Array[String] = []
+	for level_name in FilesManager.get_level_list(get_game_name()):
+		if not level_name in bundled_level_names and not level_name in non_bundled_level_names:
+			non_bundled_level_names.append(level_name)
+	return non_bundled_level_names
+
+func get_list_of_non_bundled_levels_in_lists() -> Array[String]:
+	var non_bundled_level_names: Array[String] = []
+	for level_list_info in non_bundled_level_lists:
+		for level_name in level_list_info.get("level_names", []):
+			if not level_name in non_bundled_level_names:
+				non_bundled_level_names.append(level_name)
+	return non_bundled_level_names
+
+func get_list_of_all_levels_in_lists() -> Array[String]:
+	var all_listed: Array[String] = get_list_of_all_bundled_levels()
+	return Utility.arr_set_union(all_listed, get_list_of_non_bundled_levels_in_lists())
+
+func get_list_of_unlisted_levels() -> Array[String]:
+	var all_listed_levels: = get_list_of_all_levels_in_lists()
+	var all_unlisted_levels: Array[String] = []
+	for level_name in FilesManager.get_level_list(get_game_name()):
+		if not level_name in all_listed_levels and not level_name in all_unlisted_levels:
+			all_unlisted_levels.append(level_name)
+	return all_unlisted_levels
 
 func get_first_existing_level_from_list(level_list_name: String) -> String:
 	var level_list_info: = _get_level_list(level_list_name)
@@ -1493,20 +1683,29 @@ func get_first_existing_level_from_list(level_list_name: String) -> String:
 	return ""
 
 func get_starting_level_name() -> String:
-	var lists: Array = get_list_of_level_lists()
-	if lists.size() < 1:
-		return ""
-	return get_first_existing_level_from_list(lists[0])
+	for level_list_info in get_all_level_list_infos():
+		var first_level_name: = get_first_existing_level_from_list(level_list_info["name"])
+		if first_level_name:
+			return first_level_name
+
+	# Fallback
+	var unlisted_levels: = get_list_of_unlisted_levels()
+	if unlisted_levels.size() > 0:
+		return unlisted_levels[0]
+	return ""
 
 func get_starting_level_and_list() -> Array:
-	var first_level_name: String = get_starting_level_name()
-	var l_lists: = get_list_of_level_lists()
-	if not l_lists:
-		return []
-	var first_level_list: String = l_lists[0]
-	if not first_level_name or not first_level_list:
-		return []
-	return [first_level_list, first_level_name]
+	for level_list_info in get_all_level_list_infos():
+		var first_level_name: = get_first_existing_level_from_list(level_list_info["name"])
+		if first_level_name:
+			return [level_list_info["name"], first_level_name]
+
+
+	# Fallback
+	var unlisted_levels: = get_list_of_unlisted_levels()
+	if unlisted_levels.size() > 0:
+		return ["", unlisted_levels[0]]
+	return []
 
 
 func add_level_to_level_list(level_name: String, level_list_name: String) -> void:
@@ -1514,32 +1713,49 @@ func add_level_to_level_list(level_name: String, level_list_name: String) -> voi
 	if not level_list_info:
 		return
 	
+	var is_bundled: bool = is_level_list_bundled(level_list_name)
 	if not level_name in level_list_info.get("level_names", []):
 		if not level_list_info.has("level_names"):
 			level_list_info["level_names"] = []
 		level_list_info["level_names"].append(level_name)
+	if not is_bundled:
+		non_bundled_lists_updated()
 
-func move_level_to_level_list(level_name: String, level_list_name: String) -> void:
-	_remove_level_from_all_lists(level_name)
+func move_level_to_level_list(level_name: String, level_list_name: String, from_list_name: String = "") -> void:
+	if not from_list_name:
+		_remove_level_from_all_lists(level_name)
+	else:
+		_remove_level_from_list(level_name, from_list_name)
 	add_level_to_level_list(level_name, level_list_name)
+	non_bundled_lists_updated()
 
-func is_level_in_any_list(level_name: String) -> bool:
+func is_level_in_any_bundled_list(level_name: String) -> bool:
 	for level_list_info in game_definition.get("level_lists", []):
 		if level_name in level_list_info.get("level_names", []):
 			return true
 	return false
 
+func is_level_in_any_list(level_name: String) -> bool:
+	for level_list_info in get_all_level_list_infos():
+		if level_name in level_list_info.get("level_names", []):
+			return true
+	return false
+
 func get_list_containing_level(level_name: String) -> String:
-	for level_list_info in game_definition.get("level_lists", []):
+	for level_list_info in get_all_level_list_infos():
 		if level_name in level_list_info.get("level_names", []):
 			return level_list_info["name"]
 	return ""
 
-
-func remove_level_from_list(level_name: String, level_list_name: String) -> void:
+func _remove_level_from_list(level_name: String, level_list_name: String) -> void:
 	var level_list_info: = _get_level_list(level_list_name)
 	if level_list_info:
 		level_list_info["level_names"].erase(level_name)
+
+func remove_level_from_list(level_name: String, level_list_name: String) -> void:
+	_remove_level_from_list(level_name, level_list_name)
+	if not is_level_list_bundled(level_list_name):
+		non_bundled_lists_updated()
 
 
 func get_next_level_in_list(level_list_name: String, after_level: String = "") -> String:
@@ -1559,9 +1775,15 @@ func get_auto_load_list_after_list(level_list_name: String, current_level_as_com
 	var level_list_info: = _get_level_list(level_list_name)
 	if not level_list_info:
 		return ""
+	var is_bundled: bool = is_level_list_bundled(level_list_name)
+	if not is_bundled:
+		return ""
 
 	if level_list_info.get("auto_next_list", ""):
-		return level_list_info["auto_next_list"]
+		if _get_bundled_level_list(level_list_info["auto_next_list"]):
+			return level_list_info["auto_next_list"]
+		else:
+			return ""
 	elif level_list_info.get("list_complete_to_lvlselect", false):
 		return ""
 	var unlocked_lists: Array = get_all_unlocked_level_lists(current_level_as_complete)
@@ -1577,12 +1799,17 @@ func get_auto_load_list_after_list(level_list_name: String, current_level_as_com
 		return ""
 	return unlocked_lists_names[index_of + 1]
 
-func get_all_unlocked_level_lists(_current_level_as_complete: bool = false) -> Array:
-	var lists: Array = []
+func get_all_unlocked_level_lists(_current_level_as_complete: bool = false, only_bundled: bool = true) -> Array[Dictionary]:
+	var lists: Array[Dictionary] = []
 	for level_list_info in game_definition.get("level_lists", []):
 		if not level_list_info.get("name", "") or not level_list_info.get("level_names", []):
 			continue
 		if is_level_list_unlocked(level_list_info["name"]):
+			lists.append(level_list_info)
+	if not only_bundled:
+		for level_list_info in non_bundled_level_lists:
+			if not level_list_info.get("name", "") or not level_list_info.get("level_names", []):
+				continue
 			lists.append(level_list_info)
 	return lists
 
@@ -1595,22 +1822,22 @@ func level_list_has_previous(level_list_name: String) -> bool:
 	var level_list_index: = _get_level_list_index(level_list_name)
 	return level_list_index > 0
 
-func move_level_to_relative_list(level_name: String, level_list_name: String, delta: int) -> void:
-	var list_index: = _get_level_list_index(level_list_name)
-	if list_index < 0:
+func move_level_to_relative_list(level_name: String, from_list_name: String, delta: int) -> void:
+	var list_info: = _get_level_list(from_list_name)
+	if not list_info or not level_name in list_info.get("level_names", []):
 		return
-	var total_lists: int = game_definition.get("level_lists", []).size()
-	var to_index: = clampi(list_index + delta, 0, total_lists - 1)
-	if to_index == list_index:
+	var all_level_lists: = get_list_of_level_lists()
+	var from_index: = all_level_lists.find(from_list_name)
+	var to_index: = clampi(from_index + delta, 0, all_level_lists.size() - 1)
+	if to_index == from_index:
 		return
-	remove_level_from_list(level_name, level_list_name)
-	add_level_to_level_list(level_name, game_definition.get("level_lists", [])[to_index]["name"])
+	move_level_to_level_list(level_name, all_level_lists[to_index], from_list_name)
 
 func add_level_to_list_index(level_name: String, to_index: int) -> void:
-	var all_level_lists: Array = get_list_of_level_lists()
-	if to_index < 0 or to_index >= all_level_lists.size():
+	var all_level_infos: = get_all_level_list_infos()
+	if to_index < 0 or to_index >= all_level_infos.size():
 		return
-	add_level_to_level_list(level_name, _get_level_list(all_level_lists[to_index])["name"])
+	add_level_to_level_list(level_name, all_level_infos[to_index]["name"])
 
 
 func get_next_level_to_auto_load(after_level: String = "", current_level_as_complete: bool = false) -> Array:
@@ -2341,7 +2568,7 @@ func load_level_from_clipboard_string(clipboard_data: String) -> bool:
 func add_imported_level_data(level_data: Dictionary) -> String:
 	var existing_lists: = get_list_of_level_lists()
 	if not "Imported Levels" in existing_lists:
-		add_level_list("Imported Levels")
+		add_empty_level_list("Imported Levels", false)
 	
 	var existing_levels: = FilesManager.get_level_list(get_game_name())
 	var level_name: String = level_data.get("name", "")

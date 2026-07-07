@@ -14,7 +14,6 @@ const ScalarValueInput = preload("res://src/GameEditor/ConditionalEditor/scalar_
 @export var show_locked_levels_toggle: CheckButton
 
 var editing_list_name: String = ""
-var editing_list_index: int = -1
 
 
 func _ready() -> void:
@@ -27,60 +26,50 @@ func _ready() -> void:
         refresh_ui()
 
 func load_list_info(list_name: String) -> void:
-    editing_list_index = -1
     editing_list_name = list_name
     var list_info: = _get_list_info()
     if not list_info:
         push_error("Editing unknown level list: %s" % list_name)
         return
-    editing_list_index = GameManager._get_level_list_index(list_name)
     refresh_ui()
 
 func _get_list_info() -> Dictionary:
     if not editing_list_name:
         return {}
-    if editing_list_index != -1:
-        return GameManager.game_definition.get("level_lists", [])[editing_list_index]
-    else:
-        return GameManager._get_level_list(editing_list_name)
+    return GameManager._get_level_list(editing_list_name)
 
 func on_do_progressive_unlock_toggled(toggled_on: bool) -> void:
     progressive_unlock_num_container.visible = toggled_on
     if toggled_on:
         set_prog_unlock_num()
     else:
-        var list_info: = _get_list_info()
-        if not list_info:
-            return
-        list_info.erase("progressive_locked_levels")
+        GameManager.remove_level_list_data(editing_list_name, "progressive_locked_levels")
 
 func on_show_locked_levels_toggled(toggled_on: bool) -> void:
-    var list_info: = _get_list_info()
-    if not list_info:
-        return
-    list_info["show_locked_levels"] = toggled_on
+    GameManager.set_level_list_data(editing_list_name, "show_locked_levels", toggled_on)
 
 func prop_unlock_num_changed(_new_value: float) -> void:
     set_prog_unlock_num()
 
 func set_prog_unlock_num() -> void:
-    var list_info: = _get_list_info()
-    if not list_info:
-        return
     var num_input_number: = int(progressive_unlock_num_input.get_value())
-    list_info["progressive_locked_levels"] = num_input_number
+    GameManager.set_level_list_data(editing_list_name, "progressive_locked_levels", num_input_number)
 
 
 func on_name_input_text_changed(new_text: String) -> void:
-    var list_info: = _get_list_info()
-    editing_list_name = new_text
-    if not list_info:
+    if new_text == editing_list_name:
         return
-    list_info["name"] = new_text
+    if GameManager.level_list_name_exists(new_text):
+        name_input.add_theme_color_override("font_color", Color.RED)
+        return
 
+    if GameManager.rename_level_list(editing_list_name, new_text):
+        name_input.remove_theme_color_override("font_color")
+        editing_list_name = new_text
 
 func refresh_ui() -> void:
     name_input.text = editing_list_name
+    name_input.remove_theme_color_override("font_color")
     var list_info: = _get_list_info()
     if not list_info:
         return

@@ -1370,3 +1370,10 @@ func do_positions_intersect(pos_arr: Array, other_pos_arr: Array) -> bool:
 		if pos in other_pos_arr:
 			return true
 	return false
+
+func list_to_unique_set(list: Array) -> Array:
+	var unique_set: Array = []
+	for item in list:
+		if item not in unique_set:
+			unique_set.append(item)
+	return unique_set

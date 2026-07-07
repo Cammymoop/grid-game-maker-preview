@@ -320,7 +320,6 @@ func handle_ctx_copy(context_menu_id: int, is_clicked_item: bool, clicked_is_ent
 func handle_ctx_reorder(context_menu_id: int, is_clicked_item: bool, clicked_is_entity: bool, clicked_item_id: int) -> void:
 	if not is_clicked_item:
 		return
-	prints("reorder item", context_menu_id, clicked_is_entity, clicked_item_id)
 	if context_menu_id == CONTEXT_MENU_REORDER_BACK:
 		reorder_item_relative(clicked_is_entity, clicked_item_id, -1)
 	elif context_menu_id == CONTEXT_MENU_REORDER_FORWARD:

@@ -213,18 +213,8 @@ func save_list_order() -> void:
     var new_order: Array = []
     for list_item in level_list_container.get_children():
         new_order.append(list_item.get_list_name())
-
-    var old_order: Array = GameManager.get_list_of_level_lists()
-    var old_lists: Array = GameManager.game_definition.get("level_lists", []).duplicate_deep()
-    var list_item_infos: Dictionary = {}
-    for i in old_order.size():
-        list_item_infos[old_order[i]] = old_lists[i]
-    var new_data: Array = []
-    for list_name in new_order:
-        new_data.append(list_item_infos[list_name])
-    GameManager.game_definition["level_lists"] = new_data
+    GameManager.update_bundled_level_list_order(new_order)
     any_edited = true
-    
 
 func on_add_new_list_button_pressed() -> void:
     level_select_root.show_add_new_list_panel()
