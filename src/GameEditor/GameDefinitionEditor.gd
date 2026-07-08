@@ -14,6 +14,9 @@ var invalid_field_color = Color(0.7, 0.4, 0.4)
 
 @export var show_level_title_option_picker: OptionButton
 
+@export var game_identifier_label: Label
+@export var game_identifier_panel: Control
+
 @export var name_input: LineEdit
 @export var edit_game_dir_button: Button
 
@@ -310,7 +313,7 @@ func _on_LoadButton_pressed():
 
 
 func _on_SetDefault_pressed():
-	FilesManager.save_default_game(GameManager.cur_game_name)
+	FilesManager.save_default_game(GameManager.get_identified_game_name())
 	GlobalToaster.show_toast_message("Default Game Set")
 
 func _on_UpdateWindow_pressed():
@@ -344,7 +347,7 @@ func _on_new_empty_pressed() -> void:
 	GameManager.save_current_game_definition()
 	var default_game: = FilesManager.get_default_game()
 	if not default_game or not FilesManager.game_exists(default_game):
-		FilesManager.save_default_game(GameManager.get_game_name())
+		FilesManager.save_default_game(GameManager.get_identified_game_name())
 
 func on_move_interp_option_picked(index: int) -> void:
 	var interp_style: = move_interp_option_picker.get_item_id(index) as Utility.PosInterpStyle
@@ -390,17 +393,18 @@ func renaming_game_dir() -> void:
 	if new_game_dir_name == GameManager.get_game_name():
 		_disable_name_input()
 		return
-	if not GameManager.is_current_game_saved() or FilesManager.is_game_name_equivalent(new_game_dir_name, GameManager.get_game_name()):
+	var new_identified_game_name: = GameManager.get_game_identifier() + "/" + new_game_dir_name
+	if not GameManager.is_current_game_saved() or FilesManager.is_game_name_equivalent(new_identified_game_name, GameManager.get_identified_game_name()):
 		GameManager._set_game_name(new_game_dir_name)
 		_disable_name_input()
 		return
 	
-	if GameManager.is_name_overwriting(new_game_dir_name):
-		_open_save_as_dialog(FilesManager.get_unique_game_name(new_game_dir_name))
+	if GameManager.is_name_overwriting(new_identified_game_name):
+		_open_save_as_dialog(FilesManager.get_unique_game_name(new_identified_game_name))
 	else:
-		var old_game_name: = GameManager.get_game_name()
-		if GameManager.rename_and_save_current_game_definition(new_game_dir_name):
-			GlobalToaster.show_toast_message("Moved %s Game Definition to %s" % [old_game_name, GameManager.get_game_name()])
+		var old_game_name: = GameManager.get_identified_game_name()
+		if GameManager.rename_and_save_current_game_definition(new_identified_game_name):
+			GlobalToaster.show_toast_message("Moved %s Game Definition to %s" % [old_game_name, GameManager.get_identified_game_name()])
 	_disable_name_input()
 	
 func _open_save_as_dialog(new_game_dir_name: String = "") -> void:
@@ -462,14 +466,14 @@ func on_bundle_dialog_custom_action(action: String) -> void:
 		_on_export_zip_pressed(true)
 
 func export_web_mode() -> void:
-	var zip_path: String = ImporterExporter.export_game_zip(GameManager.get_game_name(), "")
+	var zip_path: String = ImporterExporter.export_game_zip(GameManager.get_identified_game_name(), "")
 	var zip_byte_array: = FileAccess.get_file_as_bytes(zip_path)
 	JavaScriptBridge.download_buffer(zip_byte_array, zip_path.get_file(), "application/zip")
 
 func _export_destination_picked(path: String, file_dialog: FileDialog) -> void:
 	prints("export destination picked: ", path)
 	file_dialog.queue_free()
-	var zip_path: String = ImporterExporter.export_game_zip(GameManager.get_game_name(), path)
+	var zip_path: String = ImporterExporter.export_game_zip(GameManager.get_identified_game_name(), path)
 	if zip_path:
 		GlobalToaster.show_toast_message("Exported Game .zip to\n%s" % [zip_path])
 	else:

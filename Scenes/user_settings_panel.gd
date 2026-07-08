@@ -43,7 +43,7 @@ func on_erase_game_save_progress_button_pressed() -> void:
     if confirm_dialog_open:
         return
 
-    var game_name: String = GameManager.get_game_name()
+    var game_name: String = GameManager.get_identified_game_name()
     var game_title: String = GameManager.get_game_title()
     var confirm_dialog: = ConfirmationDialog.new()
     confirm_dialog.process_mode = Node.PROCESS_MODE_ALWAYS

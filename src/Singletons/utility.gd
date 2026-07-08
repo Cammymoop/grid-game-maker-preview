@@ -586,6 +586,8 @@ func sanitize_for_filename(the_str: String, allow_uppercase: bool = false, allow
 		the_str = the_str.substr(1)
 	if not the_str:
 		return "OOPS"
+	while the_str.contains("__"):
+		the_str = the_str.replace("__", "_")
 	return the_str
 	
 func get_vector2_from_arr(arr: Array) -> Vector2:

@@ -70,8 +70,8 @@ func adding_new_list(list_name: String) -> void:
         level_select_ui.refresh_level_list()
 
 func on_open_levels_folder_button_pressed() -> void:
-    if not FilesManager.game_exists(GameManager.get_game_name()):
+    if not FilesManager.game_exists(GameManager.get_identified_game_name()):
         GlobalToaster.show_toast_message("Game not saved")
         return
-    var levels_folder: = FilesManager.get_game_levels_dir(GameManager.get_game_name())
+    var levels_folder: = FilesManager.get_game_levels_dir(GameManager.get_identified_game_name())
     OS.shell_open(ProjectSettings.globalize_path(levels_folder))

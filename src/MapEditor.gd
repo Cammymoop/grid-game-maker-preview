@@ -151,14 +151,13 @@ func _ready() -> void:
 
 func something_edited() -> void:
 	has_edited_something = true
-	if do_autosave:
+	if do_autosave and not GameManager.current_level_is_museum:
 		autosave_delay_timer.start()
 
 func on_autosave_delay_timeout() -> void:
-	if not do_autosave or not edit_mode:
+	if not do_autosave or not edit_mode or GameManager.current_level_is_museum:
 		return
 	await get_tree().process_frame
-	print_debug("autosaving now")
 	_auto_save(GameManager.get_serialized_play_state())
 
 
@@ -915,7 +914,7 @@ func _auto_save(level_state: Dictionary) -> void:
 		"name": level_name,
 		"state": level_state,
 	}
-	FilesManager.save_level_to_name(GameManager.cur_game_name, level_data, autosave_filename)
+	FilesManager.save_level_to_name(GameManager.get_identified_game_name(), level_data, autosave_filename)
 
 func get_current_facing() -> int:
 	if cursor_mode == "entity":
@@ -1107,33 +1106,38 @@ func _closed_save_confirm_dialog(dialog: ConfirmationDialog) -> void:
 
 
 func quit_to_main_menu_with_confirm() -> void:
+	if has_edited_something:
+		# Save current state to temporary edited state
+		GameManager.save_edited()
 	_confirm_save_changes_then(GameManager.change_scene.bind("Menu"), false)
 
 func quit_to_game_edit_with_confirm() -> void:
+	if has_edited_something:
+		# Save current state to temporary edited state
+		GameManager.save_edited()
 	_confirm_save_changes_then(GameManager.change_scene.bind("GameEditor"), false)
 
 func switch_to_non_level_edit_mode() -> void:
 	save_current_or_save_as(_switch_to_non_level_edit_mode_confirmed)
 
 func _switch_to_non_level_edit_mode_confirmed() -> void:
+	if not GameManager.loaded_level_name:
+		push_warning("Trying to switch to play mode but the level name is not set")
+		return
 	GameManager.close_pause_menu()
 	if edit_mode:
 		switch_edit_mode(false)
 	GameManager.is_in_level_edit_mode = false
 	GameManager.level_edit_mode_changed.emit()
 	GameManager.set_live_edit_mode_enabled(false)
-	var list_of_current_level: String = ""
-	for level_list_name in GameManager.get_list_of_level_lists():
-		for level_name in GameManager.get_levels_in_level_list(level_list_name):
-			if level_name == GameManager.loaded_level_name:
-				list_of_current_level = level_list_name
-				break
-		if list_of_current_level:
-			break
-	if list_of_current_level:
-		GameManager.goto_level_in_level_list(list_of_current_level, GameManager.loaded_level_name)
-	else:
-		GameManager.play_first_level()
+	
+	if not GameManager.is_level_in_any_list(GameManager.loaded_level_name):
+		GameManager.goto_level_in_level_list("", GameManager.loaded_level_name)
+
+	if GameManager.current_level_list:
+		if not GameManager.is_level_in_list(GameManager.loaded_level_name, GameManager.current_level_list):
+			GameManager.current_level_list = ""
+	GameManager.goto_level_in_level_list(GameManager.current_level_list, GameManager.loaded_level_name)
 
 func edit_new_level(is_museum: bool = false) -> void:
 	_confirm_save_changes_then(_confirmed_edit_new_level.bind(is_museum), true)

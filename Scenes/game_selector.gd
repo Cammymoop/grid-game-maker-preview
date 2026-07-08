@@ -6,6 +6,8 @@ signal changed_game(game_name: String)
 
 @export var game_title_label: Label
 
+@export var game_identifier_label: Label
+
 @export var prev_tex_button: TextureRect
 @export var next_tex_button: TextureRect
 
@@ -16,6 +18,8 @@ signal changed_game(game_name: String)
 @export var flash_color: Color = Color(1.2, 1.2, 1.2, 1.0)
 @export var flash_base_amt: = 0.9
 @export var flash_delta: = 0.28
+
+@export var edited_title_outline_color: Color = Color.ORANGE
 
 var game_list: Array[String] = []
 var game_titles: Dictionary[String, String] = {}
@@ -51,10 +55,16 @@ func update_title_text() -> void:
     refresh_game_list()
     game_title_label.text_overrun_behavior = TextServer.OVERRUN_NO_TRIMMING
     game_title_label.size_flags_horizontal = Control.SIZE_FILL
-    if not GameManager.cur_game_name:
+    if not GameManager.get_identified_game_name():
         game_title_label.text = "..."
     else:
-        game_title_label.text = get_display_title(GameManager.cur_game_name)
+        game_title_label.text = get_display_title(GameManager.get_identified_game_name())
+        if not GameManager.current_game_is_release_locked:
+            game_title_label.add_theme_constant_override("outline_size", 6)
+            game_title_label.add_theme_color_override("font_outline_color", edited_title_outline_color)
+        else:
+            game_title_label.remove_theme_constant_override("outline_size")
+            game_title_label.remove_theme_color_override("font_outline_color")
     
     await get_tree().process_frame
     var root_container_width: = _root_container.size.x
@@ -67,11 +77,15 @@ func update_title_text() -> void:
     else:
         custom_minimum_size.x = 0
 
+func get_unqualified_game_name(game_name: String) -> String:
+    if game_name.contains("/"):
+        return game_name.split("/", true, 1)[1].strip_edges()
+    return game_name
 
 func get_display_title(game_name: String) -> String:
-    var title: String = game_titles.get(game_name, game_name)
+    var title: String = game_titles.get(game_name, get_unqualified_game_name(game_name))
     if title in non_unique_titles:
-        return "%s (%s)" % [title, game_name]
+        return "%s (%s)" % [title, get_unqualified_game_name(game_name)]
     return title
 
 func refresh_game_list() -> void:
@@ -95,7 +109,7 @@ func change_game(dir: int) -> void:
     refresh_game_list()
     if game_list.size() < 2:
         return
-    var game_index: = game_list.find(GameManager.get_game_name())
+    var game_index: = game_list.find(GameManager.get_identified_game_name())
     if game_index == -1:
         game_index = 0
     game_index = posmod(game_index + dir, game_list.size())
@@ -107,7 +121,7 @@ func change_game(dir: int) -> void:
 
 func updated_game() -> void:
     update_title_text()
-    changed_game.emit(GameManager.cur_game_name)
+    changed_game.emit(GameManager.get_identified_game_name())
 
 func _process(delta: float) -> void:
     if not has_focus():

@@ -174,7 +174,7 @@ func get_default_game() -> String:
 		return f.get_as_text().strip_edges()
 	return ""
 
-func save_default_game(game_name) -> void:
+func save_default_game(game_name: String) -> void:
 	var f = FileAccess.open(_data_path("default_game"), FileAccess.WRITE)
 	if f:
 		f.store_string(game_name)
@@ -185,12 +185,17 @@ func save_game_info(game_info: Dictionary) -> void:
 	if not game_info.get('game_name', ''):
 		push_error("Game info does not contain a game name")
 		return
-	create_game_directory_if_not_exists(game_info['game_name'])
-	var game_dir: = get_game_base_dir(game_info['game_name'])
+	var saving_as_game_name: String = game_info.get('game_name', "")
+	var game_identifier: String = game_info.get('game_identifier', "")
+	if game_identifier:
+		saving_as_game_name = game_identifier + "/" + saving_as_game_name
+
+	create_game_directory_if_not_exists(saving_as_game_name)
+	var game_dir: = get_game_base_dir(saving_as_game_name)
 	return serialize_and_save_data_to_json(game_info, game_dir, GAME_DEF_FILENAME, FORMAT_GAME_JSON)
 
-func create_game_directory_if_not_exists(game_name: String) -> void:
-	var game_data_path: = get_game_base_dir(game_name)
+func create_game_directory_if_not_exists(identified_game_name: String) -> void:
+	var game_data_path: = get_game_base_dir(identified_game_name)
 	if not ensure_dir_exists_absolute(game_data_path):
 		return
 	_create_directories_recursively(game_data_path, game_dir_default_structure)
@@ -205,7 +210,13 @@ func _create_directories_recursively(base_path: String, directory_structure: Dic
 			_create_directories_recursively(dir_path, directory_structure[key])
 
 func get_game_dir_from_name(game_name: String) -> String:
-	return Utility.sanitize_for_filename(game_name)
+	if game_name.contains("/"):
+		var just_name: = game_name.split("/", true, 1)[1].strip_edges()
+		var identifier: = game_name.split("/", true, 1)[0].strip_edges()
+		var sanitized_just_name: = Utility.sanitize_for_filename(just_name)
+		return Utility.sanitize_for_filename(identifier) + "__" + sanitized_just_name
+	else:
+		return Utility.sanitize_for_filename(game_name)
 
 func game_exists(game_name: String) -> bool:
 	if not game_name:
@@ -290,14 +301,22 @@ func _iter_directory_flat_filtered(directory_path: String, ext_filters: Array[St
 func get_games_list() -> Array:
 	var games_list: Array = []
 	for game_definition in _get_all_game_definitions():
-		games_list.append(game_definition['game_name'])
+		games_list.append(get_identified_game_name_from_data(game_definition))
 	return games_list
+
+func get_identified_game_name_from_data(game_data: Dictionary) -> String:
+	var game_name: String = game_data.get('game_name', "")
+	var game_identifier: String = game_data.get('game_identifier', "")
+	if game_identifier:
+		game_name = game_identifier + "/" + game_name
+	return game_name
 
 func get_game_list_with_titles() -> Array:
 	var games_list: Array[Dictionary] = []
 	for game_definition in _get_all_game_definitions():
+		var identified_game_name: String = get_identified_game_name_from_data(game_definition)
 		games_list.append({
-			'game_name': game_definition['game_name'],
+			'game_name': identified_game_name,
 			'game_title': game_definition.get('game_settings', {}).get('title', game_definition['game_name']),
 		})
 	return games_list
@@ -305,10 +324,11 @@ func get_game_list_with_titles() -> Array:
 func get_game_definitions_by_name() -> Dictionary[String, Dictionary]:
 	var game_defs_by_name: Dictionary[String, Dictionary] = {}
 	for game_definition in _get_all_game_definitions():
-		if game_definition['game_name'] in game_defs_by_name:
-			push_warning("Game name %s is duplicated" % [game_definition['game_name']])
+		var identified_game_name: String = get_identified_game_name_from_data(game_definition)
+		if identified_game_name in game_defs_by_name:
+			push_warning("Game name %s is duplicated" % [identified_game_name])
 			continue
-		game_defs_by_name[game_definition['game_name']] = game_definition
+		game_defs_by_name[identified_game_name] = game_definition
 	return game_defs_by_name
 
 func _get_all_game_definitions() -> Array[Dictionary]:
@@ -581,7 +601,7 @@ func get_example_games_list() -> Array:
 			continue
 		var example_game_definition: = _get_dict_from_json_file(EXAMPLE_GAMES_DIR + "/" + ex_dir + "/" + GAME_DEF_FILENAME)
 		if example_game_definition:
-			example_games_list.append(example_game_definition['game_name'])
+			example_games_list.append(get_identified_game_name_from_data(example_game_definition))
 	return example_games_list
 
 func get_unique_game_name(base_name: String) -> String:
@@ -617,7 +637,11 @@ func import_example_game(example_game_name: String, ensure_unique: bool = true) 
 	if not ex_game_info:
 		push_error("Error parsing example game definition at file: " + example_game_dir_path.path_join(GAME_DEF_FILENAME))
 		return {}
-	ex_game_info['game_name'] = target_game_name
+	if target_game_name.contains("/"):
+		ex_game_info['game_identifier'] = target_game_name.split("/", true, 1)[0]
+		ex_game_info['game_name'] = target_game_name.split("/", true, 1)[1]
+	else:
+		ex_game_info['game_name'] = target_game_name
 	save_game_info(ex_game_info)
 	
 	var warnings: = import_example_game_levels_and_assets(example_game_dir_path, target_game_dir)
@@ -672,28 +696,33 @@ func copy_assets_and_levels_to(from_game_name: String, to_game_name: String) -> 
 func is_game_name_equivalent(game_name_1: String, game_name_2: String) -> bool:
 	return get_game_dir_from_name(game_name_1) == get_game_dir_from_name(game_name_2)
 
-func rename_game(old_game_name: String, new_game_name: String) -> bool:
-	if not game_exists(old_game_name):
-		push_error("Game %s does not exist" % [old_game_name])
+func rename_game(old_identified_game_name: String, new_identified_game_name: String) -> bool:
+	if not game_exists(old_identified_game_name):
+		push_error("Game %s does not exist" % [old_identified_game_name])
 		return false
-	if game_exists(new_game_name):
-		push_error("Game directory %s already exists, cannot rename %s to it" % [new_game_name, old_game_name])
+	if game_exists(new_identified_game_name):
+		push_error("Game directory %s already exists, cannot rename %s to it" % [new_identified_game_name, old_identified_game_name])
 		return false
-	var rename_dir: = not is_game_name_equivalent(old_game_name, new_game_name)
+	var rename_dir: = not is_game_name_equivalent(old_identified_game_name, new_identified_game_name)
 	
-	var def_path: = get_game_definition_path(old_game_name)
+	var def_path: = get_game_definition_path(old_identified_game_name)
 	var game_definition_data: = _get_dict_from_json_file(def_path)
 	if not game_definition_data:
 		push_error("Error parsing game definition at file: " + def_path)
 		return false
-	game_definition_data['game_name'] = new_game_name.strip_edges()
+	if new_identified_game_name.contains("/"):
+		game_definition_data['game_name'] = new_identified_game_name.split("/", true, 1)[1].strip_edges()
+		game_definition_data['game_identifier'] = new_identified_game_name.split("/", true, 1)[0].strip_edges()
+	else:
+		game_definition_data['game_name'] = new_identified_game_name.strip_edges()
+		game_definition_data['game_identifier'] = ""
 	if not serialize_and_save_data_to_json(game_definition_data, def_path.get_base_dir(), GAME_DEF_FILENAME, FORMAT_GAME_JSON):
 		push_error("Error saving renamed game definition at file: " + def_path)
 		return false
 
 	if rename_dir:
-		var old_game_dir_abs: = ProjectSettings.globalize_path(get_game_base_dir(old_game_name))
-		var new_game_dir_abs: = ProjectSettings.globalize_path(get_game_base_dir(new_game_name))
+		var old_game_dir_abs: = ProjectSettings.globalize_path(get_game_base_dir(old_identified_game_name))
+		var new_game_dir_abs: = ProjectSettings.globalize_path(get_game_base_dir(new_identified_game_name))
 		var error: = DirAccess.rename_absolute(old_game_dir_abs, new_game_dir_abs)
 		if error != OK:
 			push_error("Error renaming game directory from %s to %s: %s" % [old_game_dir_abs, new_game_dir_abs, error_string(error)])

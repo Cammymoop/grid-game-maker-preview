@@ -20,15 +20,32 @@
 [ext_resource type="Script" uid="uid://bihb1rg68jci5" path="res://src/GameEditor/SelectableTextureList.gd" id="11"]
 [ext_resource type="Script" uid="uid://cia8grkwwxcha" path="res://src/GameEditor/PopupLayer.gd" id="12"]
 [ext_resource type="PackedScene" uid="uid://ci5jvijwn0j60" path="res://Scenes/GameEditor/info_panel_config_edit.tscn" id="12_retx3"]
-[ext_resource type="StyleBox" uid="uid://bf4pw2lygxoq5" path="res://src/UI/list_background.tres" id="13"]
+[ext_resource type="StyleBox" path="res://src/UI/list_background.tres" id="13"]
 [ext_resource type="FontFile" uid="uid://cpry5rd5ecdc5" path="res://assets/font/small_font.tres" id="14"]
 [ext_resource type="Script" uid="uid://c1vkx254mpaft" path="res://src/GameEditor/FollowBySelector.gd" id="15"]
-[ext_resource type="Script" uid="uid://blesifogfyjfp" path="res://Scenes/GameEditor/background_style_editor_tab.gd" id="15_4q0gk"]
+[ext_resource type="Script" path="res://Scenes/GameEditor/background_style_editor_tab.gd" id="15_4q0gk"]
 [ext_resource type="PackedScene" uid="uid://b4fp8ldktkvcd" path="res://Scenes/bg_effect_6.tscn" id="16_iwmpq"]
 [ext_resource type="PackedScene" uid="uid://b1a6s2o32t35i" path="res://Scenes/GameEditor/bg_style_editor.tscn" id="18_umwh7"]
 [ext_resource type="PackedScene" uid="uid://cj8u25mhjg6n8" path="res://Scenes/GameEditor/SelectableTexItem.tscn" id="22_48hio"]
 
 [sub_resource type="StyleBoxEmpty" id="4"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_retx3"]
+content_margin_left = 8.0
+content_margin_top = 1.0
+content_margin_right = 8.0
+content_margin_bottom = 1.0
+bg_color = Color(0.151927, 0.19807908, 0.25876707, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.334955, 0.31812483, 0.44406027, 1)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+corner_detail = 7
 
 [sub_resource type="Theme" id="Theme_qrjoe"]
 CheckButton/font_sizes/font_size = 12
@@ -143,7 +160,7 @@ size_flags_horizontal = 3
 layout_mode = 2
 
 [node name="Label" type="Label" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/HBoxContainer/VBoxContainer2" unique_id=1061104694]
-custom_minimum_size = Vector2(0, 28)
+custom_minimum_size = Vector2(0, 31)
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_stretch_ratio = 0.5
@@ -152,11 +169,11 @@ horizontal_alignment = 2
 vertical_alignment = 1
 
 [node name="Label2" type="Label" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/HBoxContainer/VBoxContainer2" unique_id=651129406]
-custom_minimum_size = Vector2(0, 28)
+custom_minimum_size = Vector2(0, 31)
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_stretch_ratio = 0.5
-text = "Game Directory Name:"
+text = "Game ID:"
 horizontal_alignment = 2
 vertical_alignment = 1
 
@@ -171,6 +188,32 @@ size_flags_horizontal = 3
 [node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/HBoxContainer/VBoxContainer" unique_id=135185799]
 layout_mode = 2
 
+[node name="IdentifierPanel" type="PanelContainer" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/HBoxContainer/VBoxContainer/HBoxContainer" unique_id=1683411069]
+layout_mode = 2
+tooltip_text = "Edit Identifier"
+mouse_default_cursor_shape = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_retx3")
+
+[node name="IdentifierLabel" type="Label" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/HBoxContainer/VBoxContainer/HBoxContainer/IdentifierPanel" unique_id=455771992]
+layout_mode = 2
+text = "GGM/"
+
+[node name="Anchor" type="Control" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/HBoxContainer/VBoxContainer/HBoxContainer/IdentifierPanel" unique_id=233802604]
+layout_mode = 2
+mouse_filter = 2
+
+[node name="IdentifierEditPanel" type="PanelContainer" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/HBoxContainer/VBoxContainer/HBoxContainer/IdentifierPanel/Anchor" unique_id=1379757995]
+layout_mode = 1
+anchors_preset = -1
+anchor_top = 0.5
+anchor_bottom = 0.5
+offset_left = -8.0
+grow_vertical = 2
+
+[node name="IdentifierEdit" type="LineEdit" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/HBoxContainer/VBoxContainer/HBoxContainer/IdentifierPanel/Anchor/IdentifierEditPanel" unique_id=1990065707]
+layout_mode = 2
+expand_to_text_length = true
+
 [node name="NameInput" type="LineEdit" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/HBoxContainer/VBoxContainer/HBoxContainer" unique_id=1146516637]
 layout_mode = 2
 size_flags_horizontal = 3
@@ -179,7 +222,7 @@ select_all_on_focus = true
 
 [node name="EditGameDirButton" type="Button" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/HBoxContainer/VBoxContainer/HBoxContainer" unique_id=844035251]
 layout_mode = 2
-text = "Change Game Directory"
+text = "Change Game ID"
 
 [node name="HBoxContainer10" type="HBoxContainer" parent="MarginContainer/UIRoot/TabContainer/GameDefinition" unique_id=2137570543]
 layout_mode = 2
@@ -777,18 +820,22 @@ alignment = 1
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="SpaceHolder" type="Control" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/HBoxContainer6" unique_id=97795727]
+[node name="HBoxContainer4" type="HBoxContainer" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/HBoxContainer6" unique_id=1525824274]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="SetDefault" type="Button" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/HBoxContainer6" unique_id=129913275]
+[node name="SetDefault" type="Button" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/HBoxContainer6/HBoxContainer4" unique_id=129913275]
 visible = false
 custom_minimum_size = Vector2(160, 0)
 layout_mode = 2
 size_flags_vertical = 4
 text = "Set As Default Game"
 
-[node name="OpenGameDir" type="Button" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/HBoxContainer6" unique_id=1310730974]
+[node name="HBoxContainer3" type="HBoxContainer" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/HBoxContainer6" unique_id=1069763244]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="OpenGameDir" type="Button" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/HBoxContainer6/HBoxContainer3" unique_id=1310730974]
 custom_minimum_size = Vector2(160, 0)
 layout_mode = 2
 size_flags_vertical = 4
@@ -1148,8 +1195,8 @@ max_brightness = 0.3
 [connection signal="text_changed" from="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/SectionContainer/DefaultCameraSection/MarginContainer/HFlowContainer/HBoxContainer6/FollowEntity" to="MarginContainer/UIRoot/TabContainer/GameDefinition" method="_on_FollowEntity_text_changed"]
 [connection signal="toggled" from="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/SectionContainer/DefaultCameraSection/MarginContainer/HFlowContainer/HBoxContainer7/EnableLimitsToggle" to="MarginContainer/UIRoot/TabContainer/GameDefinition" method="_on_EnableLimitsToggle_toggled"]
 [connection signal="value_changed" from="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/SectionContainer/DefaultCameraSection/MarginContainer/HFlowContainer/HBoxContainer7/ExtendCamLimits" to="MarginContainer/UIRoot/TabContainer/GameDefinition" method="_on_ExtendCamLimits_value_changed"]
-[connection signal="pressed" from="MarginContainer/UIRoot/TabContainer/GameDefinition/HBoxContainer6/SetDefault" to="MarginContainer/UIRoot/TabContainer/GameDefinition" method="_on_SetDefault_pressed"]
-[connection signal="pressed" from="MarginContainer/UIRoot/TabContainer/GameDefinition/HBoxContainer6/OpenGameDir" to="MarginContainer/UIRoot" method="_on_OpenGameDir_pressed"]
+[connection signal="pressed" from="MarginContainer/UIRoot/TabContainer/GameDefinition/HBoxContainer6/HBoxContainer4/SetDefault" to="MarginContainer/UIRoot/TabContainer/GameDefinition" method="_on_SetDefault_pressed"]
+[connection signal="pressed" from="MarginContainer/UIRoot/TabContainer/GameDefinition/HBoxContainer6/HBoxContainer3/OpenGameDir" to="MarginContainer/UIRoot" method="_on_OpenGameDir_pressed"]
 [connection signal="pressed" from="MarginContainer/UIRoot/TabContainer/GameDefinition/HBoxContainer6/HBoxContainer2/ImportLevelsBtn" to="MarginContainer/UIRoot/TabContainer/GameDefinition" method="_on_import_levels_btn_pressed"]
 [connection signal="pressed" from="MarginContainer/UIRoot/TabContainer/GameDefinition/HBoxContainer5/HBoxContainer/ExportZip" to="MarginContainer/UIRoot/TabContainer/GameDefinition" method="_on_export_zip_pressed"]
 [connection signal="pressed" from="MarginContainer/UIRoot/TabContainer/GameDefinition/HBoxContainer5/SaveButton" to="MarginContainer/UIRoot/TabContainer/GameDefinition" method="_on_SaveButton_pressed"]

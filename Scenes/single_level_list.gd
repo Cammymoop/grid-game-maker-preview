@@ -103,7 +103,7 @@ func setup_levels(level_list_info: Dictionary) -> void:
         unlocked_levels = GameManager.get_unlocked_levels_in_level_list(level_list_name)
 
     for level_name in existing_levels:
-        var level_title: = FilesManager.get_level_title(GameManager.cur_game_name, level_name)
+        var level_title: = FilesManager.get_level_title(GameManager.get_identified_game_name(), level_name)
         var list_item: LevelListItem
         if is_list_of_unlisted_levels:
             list_item = _add_level_item(level_name, level_title, false, false)

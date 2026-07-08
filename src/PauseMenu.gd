@@ -85,6 +85,7 @@ func _ready():
 	background_editor_container.hide()
 	play_mode_button.pressed.connect(switch_to_non_level_edit_mode)
 	level_edit_mode_button.pressed.connect(switch_to_level_edit_mode)
+	go_to_edit_game_button.pressed.connect(switch_to_edit_game)
 
 	switch_panel("main")
 	visible = false
@@ -184,7 +185,7 @@ func on_show() -> void:
 	
 	regen_museum_button.visible = GameManager.current_level_is_museum
 	
-	#var has_saved_levels: bool = FilesManager.get_level_list(GameManager.cur_game_name).size() > 0
+	#var has_saved_levels: bool = FilesManager.get_level_list(GameManager.get_identified_game_name()).size() > 0
 	
 	#level_select_button.visible = not GameManager.is_in_level_edit_mode
 	
@@ -257,7 +258,12 @@ func pause_and_open() -> void:
 		toggle()
 
 func _on_QuitToMenu_pressed():
-	GameManager.change_scene("Menu")
+	if GameManager.is_in_level_edit_mode:
+		var map_editor: = Utility.get_map_editor()
+		if map_editor:
+			map_editor.quit_to_main_menu_with_confirm()
+	else:
+		GameManager.change_scene("Menu")
 
 func _on_SaveLevelButton_pressed():
 	do_save_or_save_as()
@@ -310,11 +316,6 @@ func _on_new_level_button_pressed() -> void:
 	var map_editor: = Utility.get_map_editor()
 	if map_editor:
 		map_editor.edit_new_level()
-
-func _on_LoadLevelButton_pressed():
-	var popup: Window = load_dialog.instantiate()
-	add_child(popup)
-	popup.popup_centered()
 
 func _on_RestartLevel_pressed():
 	GameManager.load_edited(false)
@@ -418,13 +419,20 @@ func switch_to_level_edit_mode() -> void:
 func switch_to_non_level_edit_mode() -> void:
 	if not GameManager.is_in_level_edit_mode:
 		return
-	if not do_save_or_save_as_if_edited():
-		return
 	if active:
 		toggle()
 	var map_editor = Utility.get_map_editor()
 	if map_editor:
 		map_editor.switch_to_non_level_edit_mode()
+
+func switch_to_edit_game() -> void:
+	if not GameManager.is_in_level_edit_mode:
+		return
+	if active:
+		toggle()
+	var map_editor: = Utility.get_map_editor()
+	if map_editor:
+		map_editor.quit_to_game_edit_with_confirm()
 
 func show_background_editor() -> void:
 	if not GameManager.is_in_level_edit_mode:
@@ -462,7 +470,7 @@ func set_current_level_list_to(list_name: String, show_toast: bool) -> void:
 func on_web_export_level_button_pressed() -> void:
 	if not GameManager.is_in_level_edit_mode:
 		return
-	if not FilesManager.level_exists(GameManager.get_game_name(), GameManager.loaded_level_name):
+	if not FilesManager.level_exists(GameManager.get_identified_game_name(), GameManager.loaded_level_name):
 		GlobalToaster.show_toast_message("Saved level not found")
 		return
 	GameManager.web_export_level_json(GameManager.loaded_level_name)

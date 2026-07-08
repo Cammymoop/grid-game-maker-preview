@@ -76,4 +76,5 @@ size_flags_horizontal = 4
 text = "Import Levels"
 
 [node name="LevelListSettings" parent="." unique_id=631932331 instance=ExtResource("2_4w31l")]
+visible = false
 layout_mode = 2

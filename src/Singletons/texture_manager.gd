@@ -164,7 +164,7 @@ func load_texture(tex: Dictionary):
     if tex['type'] == 'local_file':
         texture_name = tex['image_name']
         var is_shared: bool = tex.get("is_shared", true)
-        var for_game_name: String = "" if is_shared else GameManager.get_game_name()
+        var for_game_name: String = "" if is_shared else GameManager.get_identified_game_name()
         texture = FilesManager.load_local_image_as_texture(texture_name, for_game_name)
         if texture:
             # Should have already prompted the user to make the texture metadata first but in case we get here make a basic default texture metadata
@@ -220,8 +220,8 @@ func get_all_local_textures() -> Dictionary:
 func get_all_bundled_textures() -> Dictionary:
     var texs: = {}
     
-    for bundled_image_name in FilesManager.get_all_bundled_image_names(GameManager.get_game_name()):
-        var loaded_tex: = FilesManager.load_local_image_as_texture(bundled_image_name, GameManager.get_game_name())
+    for bundled_image_name in FilesManager.get_all_bundled_image_names(GameManager.get_identified_game_name()):
+        var loaded_tex: = FilesManager.load_local_image_as_texture(bundled_image_name, GameManager.get_identified_game_name())
         if loaded_tex:
             texs[bundled_image_name] = loaded_tex
         else:
@@ -367,7 +367,7 @@ func unloaded_texture_has_metadata(texture_name: String, is_builtin: bool = fals
         if not builtin_meta:
             grab_builtin_metadata()
         return builtin_meta.has(texture_name)
-    var for_game_name: String = "" if is_shared else GameManager.get_game_name()
+    var for_game_name: String = "" if is_shared else GameManager.get_identified_game_name()
     return FilesManager.has_local_image_metadata(texture_name, for_game_name)
 
 func get_unloaded_texture_meta(texture_name: String, is_builtin: bool = false, is_shared: bool = true) -> Dictionary:
@@ -375,7 +375,7 @@ func get_unloaded_texture_meta(texture_name: String, is_builtin: bool = false, i
         if not builtin_meta:
             grab_builtin_metadata()
         return builtin_meta[texture_name]
-    var for_game_name: String = "" if is_shared else GameManager.get_game_name()
+    var for_game_name: String = "" if is_shared else GameManager.get_identified_game_name()
     var raw_meta: = FilesManager.get_local_image_metadata(texture_name, for_game_name)
     return fix_vecs_texture_meta(raw_meta)
 
@@ -390,7 +390,7 @@ func save_loaded_texture_metadata(texture_id: int, is_builtin: bool = false, is_
     if is_builtin:
         push_error("Can't change builtin texture metadata")
         return
-    var for_game_name: String = "" if is_shared else GameManager.get_game_name()
+    var for_game_name: String = "" if is_shared else GameManager.get_identified_game_name()
     var texture_name: = get_texture_name(texture_id)
     var local_meta: = get_texture_metadata(texture_id)
     FilesManager.update_local_image_metadata(texture_name, _convert_texture_meta_for_saving(local_meta), for_game_name)
@@ -405,7 +405,7 @@ func set_texture_meta_by_name(texture_name: String, is_builtin: bool, is_shared:
         texture_meta[texture_id] = new_meta
         save_loaded_texture_metadata(texture_id, is_builtin, is_shared)
         refresh_textures()
-    var for_game_name: String = "" if is_shared else GameManager.get_game_name()
+    var for_game_name: String = "" if is_shared else GameManager.get_identified_game_name()
     FilesManager.update_local_image_metadata(texture_name, _convert_texture_meta_for_saving(new_meta), for_game_name)
 
 func has_loaded_texture_id(texture_id: int) -> bool:
@@ -427,10 +427,10 @@ func _unique_bundled_image_name(image_base_name: String) -> String:
     return _unique_image_name(image_base_name, true)
 
 func _unique_image_name(image_base_name: String, bundled_image: bool = true) -> String:
-    if not image_base_name or bundled_image and not GameManager.get_game_name():
+    if not image_base_name or bundled_image and not GameManager.get_identified_game_name():
         return ""
     var bundled_image_name: String = image_base_name
-    var for_game_name: String = GameManager.get_game_name() if bundled_image else ""
+    var for_game_name: String = GameManager.get_identified_game_name() if bundled_image else ""
     for i in 1001:
         if not FilesManager.local_image_file_exists(bundled_image_name, for_game_name):
             break
@@ -458,7 +458,7 @@ func bundle_all_used_shared_images() -> bool:
         if not bundled_image_name:
             success = false
             break
-        if not FilesManager.copy_shared_image_into_game(tex_spec_item['image_name'], bundled_image_name, GameManager.get_game_name()):
+        if not FilesManager.copy_shared_image_into_game(tex_spec_item['image_name'], bundled_image_name, GameManager.get_identified_game_name()):
             success = false
             break
         copied_files.append(bundled_image_name)
@@ -466,11 +466,11 @@ func bundle_all_used_shared_images() -> bool:
         # update to be a bundled image
         tex_spec_item['image_name'] = bundled_image_name
         tex_spec_item['is_shared'] = false
-        FilesManager.update_local_image_metadata(bundled_image_name, _convert_texture_meta_for_saving(tex_meta), GameManager.get_game_name())
+        FilesManager.update_local_image_metadata(bundled_image_name, _convert_texture_meta_for_saving(tex_meta), GameManager.get_identified_game_name())
     
     if not success:
         for copied_file in copied_files:
-            FilesManager.delete_local_image(copied_file, GameManager.get_game_name())
+            FilesManager.delete_local_image(copied_file, GameManager.get_identified_game_name())
         texture_spec = old_spec
         return false
     
@@ -489,7 +489,7 @@ func make_texture_id_bundled(texture_id: int) -> bool:
     return true
 
 func make_shared_image_bundled(shared_texture_name: String) -> bool:
-    var game_name: String = GameManager.get_game_name()
+    var game_name: String = GameManager.get_identified_game_name()
     if not game_name:
         return false
 
@@ -516,11 +516,11 @@ func make_shared_image_bundled(shared_texture_name: String) -> bool:
     return true
 
 func save_local_copy_of_local_image(from_name: String, from_shared: bool, to_name: String, to_shared: bool) -> bool:
-    if (not from_shared or not to_shared) and not GameManager.get_game_name():
+    if (not from_shared or not to_shared) and not GameManager.get_identified_game_name():
         return false
     to_name = _unique_image_name(Utility.sanitize_for_filename(to_name, true, true), not to_shared)
     
-    var gname: String = GameManager.get_game_name()
+    var gname: String = GameManager.get_identified_game_name()
     var success: = FilesManager.copy_local_image_to_local(from_name, "" if from_shared else gname, to_name, "" if to_shared else gname)
     if not success:
         return false
@@ -548,7 +548,7 @@ func save_builtin_copy_to_local(builtin_image_name: String, to_game_name: String
     set_texture_meta_by_name(local_image_name, false, to_game_name != "", tex_meta)
     
     # convert the usage of that builtin image in the current game to use the local copy
-    if convert_texture_id and to_game_name == GameManager.get_game_name():
+    if convert_texture_id and to_game_name == GameManager.get_identified_game_name():
         for tex_spec_item in texture_spec:
             if tex_spec_item['type'] != 'builtin' or tex_spec_item['name'] != builtin_image_name:
                 continue
@@ -562,9 +562,9 @@ func save_builtin_copy_to_local(builtin_image_name: String, to_game_name: String
 
 # Duplicate the builtin image into the game bundle location and remap the old usage to the copy
 func make_builtin_image_bundled(builtin_image_name: String) -> bool:
-    if not GameManager.get_game_name():
+    if not GameManager.get_identified_game_name():
         return false
-    return save_builtin_copy_to_local(builtin_image_name, GameManager.get_game_name(), true) != ""
+    return save_builtin_copy_to_local(builtin_image_name, GameManager.get_identified_game_name(), true) != ""
 
 func remap_texture_id_to_image(texture_id: int, to_image_name: String, to_builtin: bool, to_shared: bool) -> bool:
     if not texture_id in textures:
@@ -574,7 +574,7 @@ func remap_texture_id_to_image(texture_id: int, to_image_name: String, to_builti
         if to_image_name not in builtin_textures:
             return false
     else:
-        var for_game_name: String = "" if to_shared else GameManager.get_game_name()
+        var for_game_name: String = "" if to_shared else GameManager.get_identified_game_name()
         if not FilesManager.local_image_file_exists(to_image_name, for_game_name):
             return false
     
@@ -658,10 +658,10 @@ func is_texture_id_in_use(texture_id: int) -> bool:
     return EntityManager.is_texture_id_in_use(texture_id) or MapManager.is_texture_id_in_use(texture_id)
 
 func make_duplicate_of_image(copy_to_shared: bool, from_name: String, from_builtin: bool, from_shared: bool) -> bool:
-    if not copy_to_shared and not GameManager.get_game_name():
+    if not copy_to_shared and not GameManager.get_identified_game_name():
         return false
     if from_builtin:
-        var for_game_name: String = "" if copy_to_shared else GameManager.get_game_name()
+        var for_game_name: String = "" if copy_to_shared else GameManager.get_identified_game_name()
         return save_builtin_copy_to_local(from_name, for_game_name, false) != ""
     else:
         return save_local_copy_of_local_image(from_name, from_shared, from_name, copy_to_shared)

@@ -10,6 +10,8 @@ const UserSettingsPanel = preload("res://Scenes/user_settings_panel.gd")
 @export var game_selector: GameSelector
 @export var bg_entity_effect: MainMenuEffects
 
+@export var edit_game_button: Button
+
 @export var profile_picker: Control
 
 @export var settings_panel_layer: CanvasLayer
@@ -27,6 +29,11 @@ func _ready():
 		game_selector.changed_game.connect(on_game_changed)
 	
 	EntityManager.initial_sprite_previews_finished.connect(on_initial_sprite_previews_finished)
+	
+	refresh_edit_button()
+
+func refresh_edit_button() -> void:
+	pass
 
 func _on_PlayButton_pressed():
 	if GameManager.is_in_level_edit_mode:

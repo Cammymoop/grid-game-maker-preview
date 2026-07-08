@@ -63,7 +63,7 @@ func _on_cancel_button_pressed() -> void:
 
 func _saved() -> void:
 	close_dialog()
-	GlobalToaster.show_toast_message("Saved %s Game Definition" % [GameManager.get_game_name()])
+	GlobalToaster.show_toast_message("Saved %s Game Definition" % [GameManager.get_identified_game_name()])
 
 func close_dialog() -> void:
 	if visible:

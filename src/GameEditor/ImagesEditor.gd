@@ -196,7 +196,7 @@ func enable_texture_item(item: SelectableTexture) -> void:
 		TextureManager.add_builtin_texture(item.get_texture_name())
 		images_updated()
 	else:
-		var for_game_name: = "" if item.get_is_shared() else GameManager.get_game_name()
+		var for_game_name: = "" if item.get_is_shared() else GameManager.get_identified_game_name()
 		if not FilesManager.has_local_image_metadata(item.get_texture_name(), for_game_name):
 			item.set_enabled(false)
 			var meta_dialog: = metadata_dialog.instantiate() as TextureMetaDialog
@@ -249,7 +249,7 @@ func got_web_import_image(file_name: String, _file_type: String, b64_data: Strin
 		GlobalToaster.show_toast_message(unable_to_import_msg)
 		return
 
-	var to_game_name: = "" if as_shared else GameManager.get_game_name()
+	var to_game_name: = "" if as_shared else GameManager.get_identified_game_name()
 	var saved_successfully: = FilesManager.save_local_image(image, file_name, to_game_name)
 	if not saved_successfully:
 		GlobalToaster.show_toast_message(unable_to_import_msg)

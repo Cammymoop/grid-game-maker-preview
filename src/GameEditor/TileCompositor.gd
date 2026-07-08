@@ -623,10 +623,10 @@ func _on_SaveAsFileButton_pressed():
 		set_filename(Utility.random_animal() + ".png")
 	var default_dest_dir: = FilesManager.get_shared_images_dir()
 	if edited_is_bundled:
-		default_dest_dir = FilesManager.get_game_images_dir(GameManager.get_game_name())
+		default_dest_dir = FilesManager.get_game_images_dir(GameManager.get_identified_game_name())
 	FileDialog.set_favorite_list(PackedStringArray([
 		FilesManager.get_shared_images_dir(),
-		FilesManager.get_game_images_dir(GameManager.get_game_name()),
+		FilesManager.get_game_images_dir(GameManager.get_identified_game_name()),
 	]))
 	$SaveAsDialog.current_path = default_dest_dir.path_join(save_as_name)
 	$SaveAsDialog.popup_centered()
@@ -640,9 +640,9 @@ func _on_SaveAsDialog_file_selected(path: String):
 	if base_path == FilesManager.get_shared_images_dir():
 		saved_to_shared = true
 		FilesManager.save_local_image(edited_image, path.get_file(), "")
-	elif base_path == FilesManager.get_game_images_dir(GameManager.get_game_name()):
+	elif base_path == FilesManager.get_game_images_dir(GameManager.get_identified_game_name()):
 		saved_to_bundled = true
-		FilesManager.save_local_image(edited_image, path.get_file(), GameManager.get_game_name())
+		FilesManager.save_local_image(edited_image, path.get_file(), GameManager.get_identified_game_name())
 	else:
 		local_toaster.show_toast_message("Please save to shared or bundled images directory")
 		return
@@ -652,7 +652,7 @@ func _on_SaveAsDialog_file_selected(path: String):
 		FilesManager.update_local_image_metadata(save_as_name, image_meta, "")
 		edited_is_bundled = false
 	elif saved_to_bundled:
-		var to_game_name: = GameManager.get_game_name()
+		var to_game_name: = GameManager.get_identified_game_name()
 		FilesManager.update_local_image_metadata(save_as_name, image_meta, to_game_name)
 		edited_is_bundled = true
 
@@ -665,7 +665,7 @@ func _on_BrushColorPicker_color_changed(color):
 func _on_SaveFileButton_pressed():
 	if save_as_name == "":
 		return
-	var to_game_name: = GameManager.get_game_name() if edited_is_bundled else ""
+	var to_game_name: = GameManager.get_identified_game_name() if edited_is_bundled else ""
 	FilesManager.save_local_image(edited_image, save_as_name, to_game_name)
 	FilesManager.update_local_image_metadata(save_as_name, image_meta, to_game_name)
 	local_toaster.show_toast_message("Saved Image")

@@ -29,8 +29,9 @@ func _ready() -> void:
 
 func fetch_level_titles() -> void:
 	level_titles.clear()
-	for level_name in FilesManager.get_level_list(GameManager.cur_game_name):
-		level_titles[level_name] = FilesManager.get_level_title(GameManager.cur_game_name, level_name)
+	var identified_game_name: String = GameManager.get_identified_game_name()
+	for level_name in FilesManager.get_level_list(identified_game_name):
+		level_titles[level_name] = FilesManager.get_level_title(identified_game_name, level_name)
 
 func update_tooltip(new_text: String) -> void:
 	if new_text in level_titles:
@@ -40,7 +41,7 @@ func update_tooltip(new_text: String) -> void:
 
 func fetch_level_autocomplete() -> Array[String]:
 	var all_level_names: Array[String] = []
-	all_level_names.assign(FilesManager.get_level_list(GameManager.cur_game_name))
+	all_level_names.assign(FilesManager.get_level_list(GameManager.get_identified_game_name()))
 	if not filter_by_level_list or not has_level_list_filter():
 		return all_level_names
 

@@ -562,7 +562,7 @@ func is_prop_static(prop_name: String, only_for_tile_id: int = -1) -> bool:
 
 func has_next_level() -> bool:
     var next_level_name: = map_metadata.get("next_level", "") as String
-    return next_level_name != "" and FilesManager.level_exists(GameManager.cur_game_name, next_level_name)
+    return next_level_name != "" and FilesManager.level_exists(GameManager.get_identified_game_name(), next_level_name)
 
 func get_level_title() -> String:
     var title: = map_metadata.get("title", "") as String

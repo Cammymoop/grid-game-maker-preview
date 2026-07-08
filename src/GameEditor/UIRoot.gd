@@ -49,8 +49,8 @@ func _on_test_play_button_pressed() -> void:
 
 
 func _on_OpenGameDir_pressed():
-	if false:#GameManager.cur_game_name:
-		var game_base_dir: = FilesManager.get_game_base_dir(GameManager.cur_game_name)
+	if false:#GameManager.get_identified_game_name():
+		var game_base_dir: = FilesManager.get_game_base_dir(GameManager.get_identified_game_name())
 		OS.shell_open(ProjectSettings.globalize_path(game_base_dir))
 	else:
 		OS.shell_open(ProjectSettings.globalize_path(FilesManager.get_games_dir()))
@@ -63,9 +63,9 @@ func _shortcut_input(event: InputEvent) -> void:
 	if Utility.fixed_just_pressed_by_event("save_file_shortcut", event):
 		if not GameManager.is_save_current_overwriting():
 			GameManager.save_current_game_definition()
-			GlobalToaster.show_toast_message("Saved %s Game Definition" % [GameManager.get_game_name()])
+			GlobalToaster.show_toast_message("Saved %s Game Definition" % [GameManager.get_identified_game_name()])
 		else:
-			_open_save_as_dialog(FilesManager.get_unique_game_name(GameManager.get_game_name()))
+			_open_save_as_dialog(FilesManager.get_unique_game_name(GameManager.get_identified_game_name()))
 	elif Utility.fixed_just_pressed_by_event("save_file_as_shortcut", event):
 		_open_save_as_dialog()
 	elif Utility.fixed_just_pressed_by_event("editor_start_no_kb", event):

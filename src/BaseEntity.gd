@@ -118,10 +118,25 @@ func initialize() -> void:
 	
 	update_cached_special_props()
 	
-func update_cached_special_props() -> void:
-	update_z()
-	update_cached_spt()
-	update_cached_tele_steps()
+func update_cached_special_props(prop_name: String = "") -> void:
+	if not prop_name or prop_name == "z-index":
+		update_z()
+	if not prop_name or prop_name == "move-speed":
+		update_cached_spt()
+	if not prop_name or prop_name == "teleport-duration":
+		update_cached_tele_steps()
+	if not prop_name or prop_name == "turn-animation":
+		update_sprite_rotate_interpolate_enabled()
+
+func update_sprite_rotate_interpolate_enabled() -> void:
+	var turn_anim: String = "quick"
+	if not EntityManager.entity_has_property(self, "turn-animation"):
+		turn_anim = GameManager.get_game_setting("default_turn_animation", "quick")
+	else:
+		turn_anim = EntityManager.get_entity_prop_with_default(self, "turn-animation", "")
+		if not turn_anim:
+			turn_anim = GameManager.get_game_setting("default_turn_animation", "quick")
+	sprite.interpolate_facing_enabled = turn_anim != "none"
 
 func update_z():
 	var z = EntityManager.get_entity_property(self, "z-index")

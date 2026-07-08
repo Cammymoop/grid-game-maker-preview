@@ -172,7 +172,7 @@ func show_context_menu(for_item: SelectableTexture) -> void:
 func on_context_menu_id_pressed(id: int, img_item: SelectableTexture) -> void:
 	if not img_item or not is_ancestor_of(img_item):
 		return
-	var for_game_name: = "" if img_item.get_is_shared() else GameManager.get_game_name()
+	var for_game_name: = "" if img_item.get_is_shared() else GameManager.get_identified_game_name()
 	if not img_item.get_is_builtin() and not img_item.get_is_shared() and not for_game_name:
 		push_error("context menu for bundled image but no game name available")
 		return
@@ -217,7 +217,7 @@ func export_image_on_web(img_item: SelectableTexture) -> void:
 	if is_builtin:
 		image_data_buffer = FilesManager.get_image_data_as_bytes(TextureManager.get_builtin_texture_as_image(save_to_name))
 	else:
-		var for_game_name: = "" if img_item.get_is_shared() else GameManager.get_game_name()
+		var for_game_name: = "" if img_item.get_is_shared() else GameManager.get_identified_game_name()
 		var img_file_path: String = FilesManager.get_local_image_path(save_to_name, for_game_name)
 		if not img_file_path or not FilesManager.smarter_file_exists(img_file_path):
 			push_error("Image file not found at path: %s" % [img_file_path])

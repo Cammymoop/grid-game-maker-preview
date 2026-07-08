@@ -100,7 +100,7 @@ func set_game_save_data(for_game_name: String, data_key: String, value: Variant,
         write_game_save(for_game_name)
 
 func write_current_game_save() -> void:
-    var current_game: String = GameManager.get_game_name()
+    var current_game: String = GameManager.get_identified_game_name()
     write_game_save(current_game)
 
 func write_game_save(game_name: String) -> void:

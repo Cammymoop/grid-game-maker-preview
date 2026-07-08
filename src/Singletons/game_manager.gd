@@ -27,10 +27,14 @@ var cur_scene = null
 
 var is_muted: bool = false
 
+
 var _cur_profile_id: String = ""
 var player_profile: PlayerProfile = null
 
 var cur_game_name: = ""
+var cur_game_identifier: String = ""
+var current_game_is_release_locked: bool = false
+
 var loaded_from_game_name: = ""
 
 var current_level_list: String = ""
@@ -278,6 +282,18 @@ func setup_default_bg_style() -> void:
 	remove_child(customizable_bg)
 	customizable_bg.queue_free()
 
+# only alphabetical characters and -, spaces and _ are converted to -
+func sanitize_identifier(raw_identifier: String) -> String:
+	raw_identifier = raw_identifier.strip_edges()
+	var sanitized_identifier: = ""
+	for i in sanitized_identifier.length():
+		var character: = sanitized_identifier[i]
+		if character == "_" or character == " ":
+			character = "-"
+		elif character == "-" or character.is_valid_ascii_identifier():
+			sanitized_identifier += character
+	return sanitized_identifier
+
 func bake_scene_transition_curve() -> void:
 	scene_transition_curve.bake()
 
@@ -296,6 +312,9 @@ func describe_movement_mode(mode: int) -> String:
 			return "Discrete+ (wait for all moves to stop)"
 	return ""
 
+func get_profile_identifier() -> String:
+	return player_profile.get_profile_setting("default_identifier", "")
+
 func new_empty_game_definition(with_name: String = "") -> void:
 	if not with_name:
 		var safety: int = 10000
@@ -308,11 +327,11 @@ func new_empty_game_definition(with_name: String = "") -> void:
 				break
 	var empty_game: = {
 		"game_name": with_name,
+		"game_identifier": get_profile_identifier(),
 		"textures": TextureManager.get_default_texture_spec(),
 		"game_settings": {
 			"pixel_scale": 2,
-			"window_width": 18,
-			"window_height": 14,
+			"game_view_size": [22.0, 15.5],
 		},
 		"entity_definitions": {},
 		"tile_definitions": {},
@@ -365,6 +384,7 @@ func load_game_definition_data(definition_data: Dictionary) -> void:
 	loaded_level_is_saved = false
 	
 	_set_game_name(definition_data['game_name'], false)
+	_set_game_identifier(definition_data['game_identifier'])
 	loaded_from_game_name = cur_game_name
 	
 	#if not definition_data.has("level_lists"):
@@ -409,6 +429,7 @@ func load_game_definition_data(definition_data: Dictionary) -> void:
 func get_serialized_game_definition() -> Dictionary:
 	var serialized_def: = game_definition.duplicate_deep()
 	serialized_def["game_name"] = get_game_name()
+	serialized_def["game_identifier"] = get_game_identifier()
 	serialized_def["textures"] = TextureManager.get_texture_spec()
 	serialized_def["entity_definitions"] = EntityManager.entity_defs.duplicate_deep()
 	serialized_def["tile_definitions"] = MapManager.tile_defs.duplicate_deep()
@@ -440,6 +461,12 @@ func get_default_pixel_scale() -> float:
 func get_game_name() -> String:
 	return cur_game_name
 
+func get_game_identifier() -> String:
+	return cur_game_identifier
+
+func get_identified_game_name() -> String:
+	return cur_game_identifier + "/" + cur_game_name
+
 func get_game_implicit_title() -> String:
 	if "[" not in cur_game_name:
 		return cur_game_name
@@ -454,6 +481,9 @@ func _set_game_name(new_name: String, do_emit: bool = true) -> void:
 	cur_game_name = new_name.strip_edges()
 	if do_emit:
 		game_dir_name_changed.emit(cur_game_name)
+
+func _set_game_identifier(new_identifier: String) -> void:
+	cur_game_identifier = new_identifier.strip_edges()
 
 func get_credits_info() -> Dictionary:
 	return game_definition.get("game_metadata", {}).get("credits", {})
@@ -843,8 +873,11 @@ func change_scene(new_scene: String):
 	if cur_scene != "Loading":
 		show_scene_transition()
 		if new_scene != "Menu" and is_current_game_saved():
-			if FilesManager.get_default_game() != get_game_name():
-				FilesManager.save_default_game(get_game_name())
+			var default_game: String = FilesManager.get_default_game()
+			var matches: = default_game == get_identified_game_name()
+			matches = matches or (not default_game.contains("/") and default_game == get_game_name())
+			if not matches:
+				FilesManager.save_default_game(get_identified_game_name())
 	
 	if not new_scene in scenes:
 		print("I dont know about scene " + new_scene)
@@ -1157,7 +1190,7 @@ func save_current_game_definition(copy_from_loaded_game: bool = true) -> void:
 	if copy_from_loaded_game and loaded_from_game_name and loaded_from_game_name != get_game_name():
 		copy_from_game = loaded_from_game_name
 	FilesManager.save_game_info(definition_data)
-	loaded_from_game_name = get_game_name()
+	loaded_from_game_name = get_identified_game_name()
 
 	if copy_from_game:
 		FilesManager.copy_assets_and_levels_to(copy_from_game, get_game_name())
@@ -1204,7 +1237,7 @@ func rename_and_save_current_game_definition(new_game_name: String, delete_on_ov
 	var old_game_name: = get_game_name()
 	if FilesManager.rename_game(old_game_name, new_game_name):
 		_set_game_name(new_game_name)
-		loaded_from_game_name = get_game_name()
+		loaded_from_game_name = get_identified_game_name()
 		if FilesManager.get_default_game() == old_game_name:
 			FilesManager.save_default_game(new_game_name)
 	else:
@@ -1213,7 +1246,7 @@ func rename_and_save_current_game_definition(new_game_name: String, delete_on_ov
 	return true
 
 func is_current_game_resavable() -> bool:
-	return loaded_from_game_name == get_game_name()
+	return loaded_from_game_name == get_identified_game_name()
 
 func is_save_current_overwriting() -> bool:
 	if is_current_game_resavable():
@@ -1221,9 +1254,10 @@ func is_save_current_overwriting() -> bool:
 	return FilesManager.game_exists(get_game_name())
 
 func is_name_overwriting(new_game_name: String) -> bool:
-	if new_game_name == loaded_from_game_name:
+	var new_identified_game_name: String = cur_game_identifier + "/" + new_game_name
+	if new_identified_game_name == loaded_from_game_name:
 		return false
-	return FilesManager.game_exists(new_game_name)
+	return FilesManager.game_exists(new_identified_game_name)
 
 func is_current_game_saved() -> bool:
 	return loaded_from_game_name != ""
@@ -1399,6 +1433,19 @@ func _remove_level_from_all_lists(level_name: String) -> void:
 	for non_bundled_info in non_bundled_level_lists:
 		non_bundled_info["level_names"].erase(level_name)
 
+func _get_next_bundled_level_list(level_list_name: String) -> String:
+	var all_bundled_lists: = get_list_of_level_lists(true)
+	var non_empty_lists: Array[String] = []
+	for bundled_list_name in all_bundled_lists:
+		if get_levels_in_level_list(bundled_list_name).size() > 0:
+			non_empty_lists.append(bundled_list_name)
+
+	if not level_list_name in non_empty_lists:
+		return ""
+	elif non_empty_lists.find(level_list_name) == non_empty_lists.size() - 1:
+		return ""
+	return non_empty_lists[non_empty_lists.find(level_list_name) + 1]
+
 func _get_level_list_index(level_list_name: String) -> int:
 	var all_lists: = get_list_of_level_lists()
 	for i in all_lists.size():
@@ -1472,6 +1519,12 @@ func add_empty_level_list(level_list_name: String, is_bundled: bool) -> void:
 		game_definition["level_lists"].append(new_list_info)
 	else:
 		non_bundled_level_lists.append(new_list_info)
+
+func is_level_in_list(level_name: String, level_list_name: String) -> bool:
+	var level_list_info: = _get_level_list(level_list_name)
+	if not level_list_info:
+		return false
+	return level_name in level_list_info.get("level_names", [])
 
 func set_level_list_data(level_list_name: String, setting_name: String, setting_value: Variant) -> void:
 	var list_info: = _get_level_list(level_list_name)
@@ -1584,10 +1637,13 @@ func is_level_list_unlocked(level_list_name: String, current_level_as_complete: 
 		return true
 	elif level_list_index == 0:
 		return true
+	elif _is_level_list_unlocked_in_save(level_list_name):
+		return true
 	else:
 		var list_info: = _get_level_list(level_list_name)
 		if not list_info.get("default_locked", false):
 			return true
+		_recheck_level_list_unlocks()
 		if _is_level_list_unlocked_in_save(level_list_name):
 			return true
 		if current_level_as_complete and _is_current_level_unlocking_level_list(level_list_name):
@@ -1650,8 +1706,47 @@ func _check_level_list_completion(level_list_name: String, with_level_name_compl
 	
 	return 0
 
-func will_list_unlock_list(level_list_name: String, unlocking_list_name: String) -> bool:
-	return false
+func will_list_unlock_list(level_list_name: String, check_unlocking_list_name: String) -> bool:
+	var list_will_unlock_list: String = _get_list_unlocked_by_list(level_list_name)
+	return list_will_unlock_list == check_unlocking_list_name
+
+func _get_list_unlocked_by_list(level_list_name: String) -> String:
+	if not is_level_list_bundled(level_list_name):
+		return ""
+
+	var level_list_info: = _get_level_list(level_list_name)
+	if not level_list_info or level_list_info.get("no_list_unlock", false):
+		return ""
+	var next_list_name: String = level_list_info.get("auto_next_list", "")
+	if not next_list_name:
+		next_list_name = _get_next_bundled_level_list(level_list_name)
+		if not next_list_name:
+			return ""
+	if not is_level_list_bundled(next_list_name):
+		return ""
+	return next_list_name
+
+func _recheck_level_list_unlocks() -> void:
+	var check_all: bool = _is_unlock_all_levels_and_lists()
+
+	for level_list_name in get_list_of_level_lists(true):
+		var list_will_unlock_list: String = _get_list_unlocked_by_list(level_list_name)
+		if list_will_unlock_list and (check_all or not is_level_list_unlocked(list_will_unlock_list)):
+			if is_level_list_complete(level_list_name):
+				unlock_list_as_next(list_will_unlock_list)
+
+func unlock_list_as_next(next_level_list_name: String) -> void:
+	if not is_level_list_bundled(next_level_list_name):
+		return
+	_unlock_level_list(next_level_list_name)
+	
+	# If all levels are locked by default, unlock the first level in the list
+	var level_list_info: = _get_level_list(next_level_list_name)
+	if level_list_info.get("default_individual_locked", false):
+		var levels_in_list: = get_levels_in_level_list(next_level_list_name)
+		if levels_in_list.size() > 0:
+			unlock_level_in_list(next_level_list_name, levels_in_list[0])
+
 
 func unlock_level_in_list(level_list_name: String, level_name: String) -> void:
 	if not level_list_name:
@@ -1664,7 +1759,7 @@ func unlock_level_in_list(level_list_name: String, level_name: String) -> void:
 		return
 	if not level_name in level_list_info.get("level_names", []):
 		return
-	if level_list_info.get("default_locked", false):
+	if not is_level_list_unlocked(level_list_name):
 		_unlock_level_list(level_list_name)
 	_unlock_level_code(_level_code(level_list_name, level_name))
 
@@ -1715,7 +1810,7 @@ func get_unlocked_levels_in_level_list(level_list_name: String) -> Array:
 		max_completed_idx = _max_completed_idx_in_level_list(level_list_name)
 
 	for idx in existing_levels.size():
-		if all_unlocked or max_completed_idx + prog_unlock_num >= idx:
+		if all_unlocked or (prog_unlock_num > 0 and max_completed_idx + prog_unlock_num >= idx):
 			unlocked_levels.append(existing_levels[idx])
 		elif _is_level_code_unlocked_in_save(_level_code(level_list_name, existing_levels[idx])):
 			unlocked_levels.append(existing_levels[idx])
@@ -2014,6 +2109,7 @@ func _complete_level(level_list_name: String, level_name: String) -> void:
 	if not level_code in completed_levels:
 		completed_levels.append(level_code)
 		set_game_save_data("completed_levels", completed_levels)
+	_recheck_level_list_unlocks()
 
 # Complete the current level in the current list and persist any pending dependant save file values
 func complete_current_level() -> void:
