@@ -27,7 +27,7 @@ var rearrangable_level_list_scn: = preload("res://Scenes/rearrangable_list_item.
 var max_height_ratio: float = 0.82
 var min_max_height: float = 100
 
-var editing_level_list: String = ""
+var editing_settings_of_list: String = ""
 var is_rearranging_lists: bool = false
 var level_select_root: LevelSelectUIRoot
 
@@ -40,24 +40,59 @@ const CTX_MOVE_TO_BOTTOM = 6
 
 const CTX_REMOVE_LIST = 14
 
+
+const SHOW_COMP_HIDE = "Hide"
+const SHOW_COMP_COMP_REQ_TOTAL = "Completed/Required/Total"
+const SHOW_COMP_COMP_REQ = "Completed/Required"
+const SHOW_COMP_COMP_TOTAL = "Completed/Total"
+const SHOW_COMP_COMP_REQ_VIS_TOTAL = "Completed/Required/Visible Total"
+const SHOW_COMP_VIS_TOTAL = "Completed/Visible Total"
+
+const ShowCompletionOptions: Array[String] = [
+    SHOW_COMP_HIDE, SHOW_COMP_COMP_REQ_TOTAL, SHOW_COMP_COMP_REQ, SHOW_COMP_COMP_TOTAL, SHOW_COMP_COMP_REQ_VIS_TOTAL, SHOW_COMP_VIS_TOTAL,
+]
+
 func _ready() -> void:
     import_levels_button.pressed.connect(on_import_levels_button_pressed)
     level_list_settings.request_close.connect(back_to_select_from_list_settings)
+    level_list_settings.list_settings_edited.connect(on_list_settings_edited)
     
     add_new_list_button.pressed.connect(on_add_new_list_button_pressed)
     rearrange_lists_button.pressed.connect(on_rearrange_lists_button_pressed)
     
     rearrange_lists_back_button.pressed.connect(on_rearrange_lists_back_button_pressed)
-    refresh_level_list()
+    refresh()
     back_to_select_from_list_settings()
+
+func is_in_list_settings_mode() -> bool:
+    return editing_settings_of_list != ""
 
 func refresh() -> void:
     edit_lists_button_container.visible = GameManager.is_in_level_edit_mode
-    refresh_level_list()
+    if is_in_list_settings_mode():
+        refresh_list_settings()
+    elif is_rearranging_lists:
+        refresh_rearrangable_lists()
+    else:
+        refresh_level_lists()
 
-func refresh_level_list() -> void:
-    is_rearranging_lists = false
+func refresh_list_settings() -> void:
+    rearrange_lists_button.hide()
+    list_scroll_container.hide()
+    edit_lists_button_container.hide()
+    rearrange_lists_back_container.hide()
+
+    level_list_settings.show()
+    if level_list_settings.editing_list_name != editing_settings_of_list:
+        level_list_settings.load_list_info(editing_settings_of_list)
+    return
+
+func refresh_level_lists() -> void:
+    list_scroll_container.show()
     rearrange_lists_button.show()
+    edit_lists_button_container.show()
+    rearrange_lists_back_container.hide()
+
     clear_level_lists()
     if GameManager.is_in_level_edit_mode:
         for level_list_name in GameManager.get_list_of_level_lists():
@@ -83,18 +118,26 @@ func _setup_level_list(lev_list: SingleLevelList) -> void:
     lev_list.request_edit_list_settings.connect(on_req_edit_list_settings)
 
 func refresh_rearrangable_lists() -> void:
-    if editing_level_list:
-        return
-    is_rearranging_lists = true
+    list_scroll_container.show()
     rearrange_lists_button.hide()
+    edit_lists_button_container.hide()
+    rearrange_lists_back_container.show()
+
     clear_level_lists()
-    rearrange_lists_back_container.visible = true
     for list_name in GameManager.get_list_of_level_lists():
         var rearr_list: = rearrangable_level_list_scn.instantiate() as RearrangableListItem
         rearr_list.request_move_relative.connect(on_rearrangable_list_move_relative)
         rearr_list.request_context_menu.connect(on_rearrangable_list_request_context_menu)
         rearr_list.request_remove.connect(on_rearrangable_list_request_remove)
         rearr_list.set_list_name(list_name)
+
+        var levels_in_list: = GameManager.get_levels_in_level_list(list_name)
+        if levels_in_list.size() > 0:
+            rearr_list.tooltip_text = "\n".join(levels_in_list)
+            rearr_list.tooltip_text += "\nTotal: %d" % levels_in_list.size()
+        else:
+            rearr_list.tooltip_text = "Total: 0"
+
         level_list_container.add_child(rearr_list)
     for rearr_list in level_list_container.get_children():
         rearr_list.update_buttons_enable()
@@ -109,7 +152,8 @@ func add_unlisted_levels() -> void:
 
 func on_level_list_membership_changed() -> void:
     any_edited = true
-    refresh_level_list()
+    if not is_rearranging_lists:
+        refresh()
 
 func on_req_edit_list_settings(list_name: String) -> void:
     do_edit_settings_for_list(list_name)
@@ -121,6 +165,9 @@ func clear_level_lists() -> void:
         child.queue_free()
 
 func on_level_list_edited() -> void:
+    any_edited = true
+
+func on_list_settings_edited() -> void:
     any_edited = true
 
 func on_level_list_play_level(level_list_name: String, level_name: String) -> void:
@@ -138,11 +185,21 @@ func close() -> void:
     close_level_select.emit()
 
 func try_grab_focus() -> void:
-    for single_level_list in level_list_container.get_children():
-        var first_focusable_control: Control = single_level_list.get_first_focusable_control()
-        if first_focusable_control:
-            first_focusable_control.grab_focus.call_deferred()
-            break
+    if is_in_list_settings_mode():
+        level_list_settings.name_input.grab_focus.call_deferred()
+    elif is_rearranging_lists:
+        if level_list_container.get_child_count() > 1:
+            for child in level_list_container.get_children():
+                if child is RearrangableListItem:
+                    child.down_button.grab_focus.call_deferred()
+        else:
+            rearrange_lists_back_button.grab_focus.call_deferred()
+    else:
+        for single_level_list in level_list_container.get_children():
+            var first_focusable_control: Control = single_level_list.get_first_focusable_control()
+            if first_focusable_control:
+                first_focusable_control.grab_focus.call_deferred()
+                break
 
 func is_active() -> bool:
     return is_visible_in_tree() and not GameManager.get_pause("pause_menu")
@@ -153,8 +210,9 @@ func _shortcut_input(event: InputEvent) -> void:
     if Utility.event_is_menu_back_just_pressed(event):
         accept_event()
         if is_rearranging_lists:
-            refresh_level_list()
-        elif editing_level_list and level_list_settings.visible:
+            is_rearranging_lists = false
+            refresh()
+        elif is_in_list_settings_mode():
             back_to_select_from_list_settings()
         else:
             close()
@@ -180,11 +238,16 @@ func disable_background_editor() -> void:
         level_select_root.hide_background_editor()
 
 
+func return_to_level_select_mode() -> void:
+    editing_settings_of_list = ""
+    is_rearranging_lists = false
+    refresh()
+
 func do_edit_settings_for_list(list_name: String) -> void:
     if level_list_settings.visible:
         return
     any_edited = true
-    editing_level_list = list_name
+    editing_settings_of_list = list_name
     level_list_settings.load_list_info(list_name)
     level_list_settings.show()
     list_scroll_container.hide()
@@ -195,18 +258,18 @@ func do_edit_settings_for_list(list_name: String) -> void:
 func back_to_select_from_list_settings() -> void:
     if not level_list_settings.visible:
         return
-    is_rearranging_lists = false
-    editing_level_list = ""
+    editing_settings_of_list = ""
     level_list_settings.hide()
     list_scroll_container.show()
     edit_lists_button_container.show()
     if level_select_root:
         level_select_root.hide_background_editor()
-    refresh_level_list()
+    is_rearranging_lists = false
+    refresh()
 
 
 func save_list_order() -> void:
-    if editing_level_list or not level_list_container.get_child_count() > 0:
+    if editing_settings_of_list or not level_list_container.get_child_count() > 0:
         return
     if level_list_container.get_child(0) is SingleLevelList:
         return
@@ -222,7 +285,8 @@ func on_add_new_list_button_pressed() -> void:
 func on_rearrange_lists_button_pressed() -> void:
     if is_rearranging_lists:
         return
-    refresh_rearrangable_lists()
+    is_rearranging_lists = true
+    refresh()
 
 func on_rearrangable_list_move_relative(list_item: RearrangableListItem, relative_index: int) -> void:
     var cur_index: = list_item.get_index()
@@ -253,7 +317,7 @@ func on_rearrangable_list_context_menu_id_pressed(context_menu_id: int, list_ite
     if context_menu_id == CTX_REMOVE_LIST:
         GameManager.remove_level_list(list_item.get_list_name())
         any_edited = true
-        refresh_rearrangable_lists()
+        refresh()
     elif context_menu_id in [CTX_MOVE_UP, CTX_MOVE_DOWN]:
         var rel_index: = 1 if context_menu_id == CTX_MOVE_DOWN else -1
         move_rearrangable_list_item_to(list_item, list_item.get_index() + rel_index)
@@ -266,12 +330,13 @@ func on_rearrangable_list_context_menu_id_pressed(context_menu_id: int, list_ite
 func on_rearrange_lists_back_button_pressed() -> void:
     if not is_rearranging_lists:
         return
-    refresh_level_list()
+    is_rearranging_lists = false
+    refresh()
 
 func on_rearrangable_list_request_remove(list_item: RearrangableListItem) -> void:
     GameManager.remove_level_list(list_item.get_list_name())
     any_edited = true
-    refresh_rearrangable_lists()
+    refresh()
 
 
 func set_level_list_container_min_height() -> void:

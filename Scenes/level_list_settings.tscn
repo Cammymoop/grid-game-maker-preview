@@ -1,0 +1,205 @@
+[gd_scene format=3 uid="uid://dhd632goyrqhq"]
+
+[ext_resource type="Script" uid="uid://cfrnaqldrr8lr" path="res://Scenes/level_list_settings.gd" id="1_8f1op"]
+[ext_resource type="PackedScene" uid="uid://bleyoj5f36kfy" path="res://Scenes/GameEditor/ConditionalEditor/scalar_value_input.tscn" id="2_xli71"]
+
+[node name="LevelListSettings" type="VBoxContainer" unique_id=631932331 node_paths=PackedStringArray("back_button", "name_input", "total_levels_label", "do_progressive_unlock_toggle", "progressive_unlock_num_container", "progressive_unlock_num_input", "default_is_unlocked_container", "default_is_unlocked_toggle", "show_locked_levels_toggle", "completion_mode_selector", "completion_number_container", "completion_number_input")]
+custom_minimum_size = Vector2(400, 0)
+script = ExtResource("1_8f1op")
+back_button = NodePath("MarginContainer/BackButton")
+name_input = NodePath("HBoxContainer/NameInput")
+total_levels_label = NodePath("TotalLevelsLabel")
+do_progressive_unlock_toggle = NodePath("HBoxContainer2/ProgUnlockEnable")
+progressive_unlock_num_container = NodePath("ProgressUnlockAmount")
+progressive_unlock_num_input = NodePath("ProgressUnlockAmount/ProgUnlockAmountInput")
+default_is_unlocked_container = NodePath("DefaultUnlockedOption")
+default_is_unlocked_toggle = NodePath("DefaultUnlockedOption/DefaultAllUnlockedToggle")
+show_locked_levels_toggle = NodePath("HBoxContainer3/ListIsLockedToggle")
+completion_mode_selector = NodePath("CompletionCriteriaOption/HBoxContainer/CompletionCriteriaSelector")
+completion_number_container = NodePath("CompletionCriteriaOption/CompletionCriteriaNumberContainer")
+completion_number_input = NodePath("CompletionCriteriaOption/CompletionCriteriaNumberContainer/CompletionCriteriaScalarInput")
+
+[node name="MarginContainer" type="MarginContainer" parent="." unique_id=1979548354]
+layout_mode = 2
+theme_override_constants/margin_top = 2
+
+[node name="Label" type="Label" parent="MarginContainer" unique_id=1782900518]
+layout_mode = 2
+text = "List Settings"
+horizontal_alignment = 1
+
+[node name="BackButton" type="Button" parent="MarginContainer" unique_id=51823196]
+layout_mode = 2
+size_flags_horizontal = 8
+text = "Back"
+
+[node name="Spacer" type="Control" parent="." unique_id=997704056]
+custom_minimum_size = Vector2(0, 6)
+layout_mode = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="." unique_id=1581585889]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="HBoxContainer" unique_id=959331989]
+layout_mode = 2
+text = "List Name:"
+
+[node name="NameInput" type="LineEdit" parent="HBoxContainer" unique_id=401723496]
+layout_mode = 2
+size_flags_horizontal = 3
+expand_to_text_length = true
+
+[node name="TotalLevelsLabel" type="Label" parent="." unique_id=2069333837]
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_colors/font_color = Color(0.7666196, 0.76661956, 0.76661956, 1)
+theme_override_font_sizes/font_size = 14
+text = "Total Levels: "
+
+[node name="HBoxContainer3" type="HBoxContainer" parent="." unique_id=2126382715]
+layout_mode = 2
+alignment = 2
+
+[node name="ListIsLockedToggle" type="CheckButton" parent="HBoxContainer3" unique_id=1975699604]
+layout_mode = 2
+tooltip_text = "A locked level list is unlocked as soon as any level in it is unlocked"
+button_pressed = true
+text = "List Starts Locked"
+
+[node name="HBoxContainer4" type="HBoxContainer" parent="." unique_id=1918289216]
+layout_mode = 2
+alignment = 2
+
+[node name="ShowLockedEnable" type="CheckButton" parent="HBoxContainer4" unique_id=1472903478]
+layout_mode = 2
+button_pressed = true
+text = "Show Locked Levels"
+
+[node name="ShowLockedLevelTitlesOption" type="HBoxContainer" parent="." unique_id=1281522735]
+layout_mode = 2
+alignment = 2
+
+[node name="ShowLockedLevelTitlesToggle" type="CheckButton" parent="ShowLockedLevelTitlesOption" unique_id=1454314798]
+layout_mode = 2
+button_pressed = true
+text = "Show Names of Locked Levels"
+
+[node name="HSeparator" type="HSeparator" parent="." unique_id=1676262796]
+layout_mode = 2
+
+[node name="HBoxContainer2" type="HBoxContainer" parent="." unique_id=736844243]
+layout_mode = 2
+alignment = 2
+
+[node name="ProgUnlockEnable" type="CheckButton" parent="HBoxContainer2" unique_id=1853847298]
+layout_mode = 2
+tooltip_text = "Levels unlock as you complete earlier levels in the list"
+text = "Progressively Unlock Levels"
+
+[node name="DefaultUnlockedOption" type="HBoxContainer" parent="." unique_id=170060060]
+layout_mode = 2
+alignment = 2
+
+[node name="DefaultAllUnlockedToggle" type="CheckButton" parent="DefaultUnlockedOption" unique_id=1510437156]
+layout_mode = 2
+button_pressed = true
+text = "All Levels In List Start Unlocked"
+
+[node name="ProgressUnlockAmount" type="HBoxContainer" parent="." unique_id=1961184265]
+layout_mode = 2
+alignment = 2
+
+[node name="Label" type="Label" parent="ProgressUnlockAmount" unique_id=1343583928]
+layout_mode = 2
+tooltip_text = "How many levels ahead of the furthest completed level should be unlocked?"
+mouse_filter = 1
+text = "Levels Ahead Unlocked:"
+
+[node name="ProgUnlockAmountInput" parent="ProgressUnlockAmount" unique_id=1458729988 instance=ExtResource("2_xli71")]
+layout_mode = 2
+tooltip_text = "How many levels ahead of the furthest completed level should be unlocked?"
+is_int_type = true
+default_value = 1.0
+min_value = 1.0
+custom_step = true
+
+[node name="HSeparator2" type="HSeparator" parent="." unique_id=1861232697]
+layout_mode = 2
+
+[node name="CompletionCriteriaOption" type="HBoxContainer" parent="." unique_id=1620792048]
+layout_mode = 2
+theme_override_constants/separation = 12
+alignment = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="CompletionCriteriaOption" unique_id=23450478]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="CompletionCriteriaOption/HBoxContainer" unique_id=1310662065]
+layout_mode = 2
+tooltip_text = "How many levels ahead of the furthest completed level should be unlocked?"
+mouse_filter = 1
+theme_override_font_sizes/font_size = 14
+text = "Completion Criteria:"
+
+[node name="CompletionCriteriaSelector" type="OptionButton" parent="CompletionCriteriaOption/HBoxContainer" unique_id=567195168]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+alignment = 1
+selected = 3
+fit_to_longest_item = false
+item_count = 4
+popup/item_0/text = "All Levels Complete"
+popup/item_0/id = 0
+popup/item_1/text = "(X) Levels Complete"
+popup/item_1/id = 1
+popup/item_2/text = "All But (X) Levels Complete"
+popup/item_2/id = 2
+popup/item_3/text = "X% of Levels Complete"
+popup/item_3/id = 3
+
+[node name="CompletionCriteriaNumberContainer" type="HBoxContainer" parent="CompletionCriteriaOption" unique_id=2546719]
+layout_mode = 2
+
+[node name="Label2" type="Label" parent="CompletionCriteriaOption/CompletionCriteriaNumberContainer" unique_id=1218320909]
+layout_mode = 2
+text = "X:"
+
+[node name="CompletionCriteriaScalarInput" parent="CompletionCriteriaOption/CompletionCriteriaNumberContainer" unique_id=1655371800 instance=ExtResource("2_xli71")]
+layout_mode = 2
+tooltip_text = "How many levels ahead of the furthest completed level should be unlocked?"
+is_int_type = true
+default_value = 1.0
+min_value = 1.0
+custom_step = true
+
+[node name="HBoxContainer5" type="HBoxContainer" parent="." unique_id=13282175]
+layout_mode = 2
+alignment = 2
+
+[node name="Label" type="Label" parent="HBoxContainer5" unique_id=1606734158]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "Show Completion Counter:"
+
+[node name="OptionButton" type="OptionButton" parent="HBoxContainer5" unique_id=620687529]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+alignment = 1
+selected = 1
+fit_to_longest_item = false
+item_count = 6
+popup/item_0/text = "Hide"
+popup/item_0/id = 3
+popup/item_1/text = "Completed/Required/Total"
+popup/item_1/id = 0
+popup/item_2/text = "Completed/Required"
+popup/item_2/id = 1
+popup/item_3/text = "Completed/Total"
+popup/item_3/id = 2
+popup/item_4/text = "Completed/Required/Visible Total"
+popup/item_4/id = 5
+popup/item_5/text = "Completed/Visible Total"
+popup/item_5/id = 4
+
+[node name="VBoxContainer" type="VBoxContainer" parent="HBoxContainer5" unique_id=68205301]
+layout_mode = 2

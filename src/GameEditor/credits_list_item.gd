@@ -1,6 +1,8 @@
 extends HBoxContainer
 
 signal changed
+signal type_changed
+signal request_remove
 
 @export var type_picker: OptionButton
 @export var input_1: LineEdit
@@ -72,24 +74,28 @@ func refresh_ui() -> void:
     Utility.opbtn_select_id(type_picker, type_int_id)
     
     var cur_type: String = cur_selected_type_str()
-    if cur_type == TYPE_ROLE_NAME:
-        input_1.text = entry.get("role", "")
-        input_2.text = entry.get("name", "")
-        input_2.visible = true
-    elif cur_type == TYPE_JUST_NAME:
-        input_1.text = entry.get("name", "")
-        input_2.visible = false
-    elif cur_type == TYPE_SECTION:
+    if cur_type == TYPE_SECTION:
         input_1.text = entry.get("text", "")
+        input_1.placeholder_text = "Section Title"
         input_2.visible = false
+        
+        input_1.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+        input_1.custom_minimum_size.x = 200
+    else:
+        input_1.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+        input_1.custom_minimum_size.x = 0
+        if cur_type == TYPE_ROLE_NAME:
+            input_1.text = entry.get("role", "")
+            input_1.placeholder_text = "Role"
+            input_2.text = entry.get("name", "")
+            input_2.visible = true
+        elif cur_type == TYPE_JUST_NAME:
+            input_1.text = entry.get("name", "")
+            input_1.placeholder_text = "Name"
+            input_2.visible = false
 
 func remove_this_credit() -> void:
-    if get_parent().num_input_lines() == 1:
-        clear()
-    else:
-        get_parent().remove_child(self)
-        queue_free()
-    changed.emit()
+    request_remove.emit()
 
 func clear() -> void:
     input_1.text = ""
@@ -106,3 +112,4 @@ func on_type_selected(index: int) -> void:
     var type_str: String = TYPE_STRINGS.keys()[type_picker.get_item_id(index)]
     entry["type"] = type_str
     refresh_ui()
+    type_changed.emit()

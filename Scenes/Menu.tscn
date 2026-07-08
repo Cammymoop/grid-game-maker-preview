@@ -6,10 +6,13 @@
 [ext_resource type="Theme" uid="uid://cqgddn3sedqqw" path="res://src/UI/MainMenuTheme.tres" id="3"]
 [ext_resource type="FontFile" uid="uid://cxxr3l22y0327" path="res://assets/font/NotoSans-Regular.ttf" id="3_idohh"]
 [ext_resource type="Texture2D" uid="uid://dqnmn0kgpkmm5" path="res://assets/cammy_birb_tiny.svg" id="3_ma218"]
+[ext_resource type="PackedScene" uid="uid://teuuvlq5n85m" path="res://Scenes/player_profile_picker.tscn" id="5_sjh0l"]
 [ext_resource type="Texture2D" uid="uid://dbewldhewludm" path="res://assets/img/button_icons/prev_small.png" id="6_3jcrr"]
 [ext_resource type="Script" uid="uid://dir0jkugrnyfi" path="res://Scenes/game_selector.gd" id="6_ab40c"]
 [ext_resource type="Texture2D" uid="uid://c8uoricgpavvk" path="res://assets/img/button_icons/next_small.png" id="6_wfhf6"]
 [ext_resource type="Texture2D" uid="uid://rj1klhsd1xaj" path="res://assets/img/button_icons/game_list.png" id="9_sjh0l"]
+[ext_resource type="Texture2D" uid="uid://b4q7u3xbkyj45" path="res://assets/img/button_icons/gear_small.png" id="11_qki4b"]
+[ext_resource type="PackedScene" uid="uid://4a4bn5o1go4a" path="res://Scenes/user_settings_panel.tscn" id="12_byewe"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_syfuq"]
 content_margin_left = 16.0
@@ -136,8 +139,22 @@ flip_h = true
 layout_mode = 2
 size_flags_vertical = 3
 size_flags_stretch_ratio = 8.0
+mouse_filter = 2
 
-[node name="MainMenu" type="PanelContainer" parent="MarginContainer" unique_id=1211793288 node_paths=PackedStringArray("quit_button", "game_selector", "bg_entity_effect")]
+[node name="VBoxContainer2" type="VBoxContainer" parent="MarginContainer" unique_id=868200819]
+layout_mode = 2
+mouse_filter = 2
+
+[node name="PlayerProfilePicker" parent="MarginContainer/VBoxContainer2" unique_id=1193148223 instance=ExtResource("5_sjh0l")]
+layout_mode = 2
+
+[node name="Spacer2" type="Control" parent="MarginContainer/VBoxContainer2" unique_id=1621695347]
+layout_mode = 2
+size_flags_vertical = 3
+size_flags_stretch_ratio = 8.0
+mouse_filter = 2
+
+[node name="MainMenu" type="PanelContainer" parent="MarginContainer" unique_id=1211793288 node_paths=PackedStringArray("quit_button", "game_selector", "bg_entity_effect", "profile_picker", "settings_panel_layer", "user_settings_panel")]
 custom_minimum_size = Vector2(450, 160)
 layout_mode = 2
 size_flags_horizontal = 4
@@ -146,6 +163,9 @@ script = ExtResource("1")
 quit_button = NodePath("MarginContainer/VBoxContainer/QuitButton")
 game_selector = NodePath("MarginContainer/VBoxContainer/GameSelector")
 bg_entity_effect = NodePath("../../FallingEntities/CanvasLayer2/Effects")
+profile_picker = NodePath("../VBoxContainer2/PlayerProfilePicker")
+settings_panel_layer = NodePath("SettingsPanelLayer")
+user_settings_panel = NodePath("SettingsPanelLayer/CenterContainer/UserSettingsPanel")
 
 [node name="MarginContainer" type="MarginContainer" parent="MarginContainer/MainMenu" unique_id=1377947446]
 layout_mode = 2
@@ -259,6 +279,13 @@ layout_mode = 2
 theme_type_variation = &"BigTextButton"
 text = "Edit Game"
 
+[node name="SettingsButton" type="Button" parent="MarginContainer/MainMenu/MarginContainer/VBoxContainer" unique_id=916998221]
+layout_mode = 2
+size_flags_horizontal = 4
+text = "Settings"
+icon = ExtResource("11_qki4b")
+icon_alignment = 2
+
 [node name="HBoxContainer2" type="VBoxContainer" parent="MarginContainer/MainMenu/MarginContainer/VBoxContainer" unique_id=1795824773]
 layout_mode = 2
 size_flags_horizontal = 4
@@ -280,10 +307,24 @@ size_flags_horizontal = 4
 theme_type_variation = &"BigTextButton"
 text = "Quit"
 
+[node name="SettingsPanelLayer" type="CanvasLayer" parent="MarginContainer/MainMenu" unique_id=76735397]
+visible = false
+
+[node name="CenterContainer" type="CenterContainer" parent="MarginContainer/MainMenu/SettingsPanelLayer" unique_id=173547606]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="UserSettingsPanel" parent="MarginContainer/MainMenu/SettingsPanelLayer/CenterContainer" unique_id=1234442601 instance=ExtResource("12_byewe")]
+layout_mode = 2
+
 [node name="FallingEntities" parent="." unique_id=1839494414 instance=ExtResource("2")]
 
 [connection signal="pressed" from="MarginContainer/MainMenu/MarginContainer/VBoxContainer/HBoxContainer/PlayButton" to="MarginContainer/MainMenu" method="_on_PlayButton_pressed"]
 [connection signal="pressed" from="MarginContainer/MainMenu/MarginContainer/VBoxContainer/HBoxContainer/EditButton" to="MarginContainer/MainMenu" method="_on_EditButton_pressed"]
+[connection signal="pressed" from="MarginContainer/MainMenu/MarginContainer/VBoxContainer/SettingsButton" to="MarginContainer/MainMenu" method="show_user_settings_panel"]
 [connection signal="pressed" from="MarginContainer/MainMenu/MarginContainer/VBoxContainer/HBoxContainer2/ImportNewGameButton" to="MarginContainer/MainMenu" method="_on_import_new_game_button_pressed"]
 [connection signal="pressed" from="MarginContainer/MainMenu/MarginContainer/VBoxContainer/HBoxContainer2/ImportLevelsButton" to="MarginContainer/MainMenu" method="_on_import_levels_button_pressed"]
 

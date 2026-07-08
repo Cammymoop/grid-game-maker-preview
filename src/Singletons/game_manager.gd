@@ -19,9 +19,15 @@ const FULL_TICK_RATE: int = 60
 
 const MAX_LEVEL_TEXT_SIZE: int = 1000000
 
+const DEFAULT_LIST_COMPLETION_MODE: String = "percentage"
+const DEFAULT_LIST_COMPLETION_PERCENT: float = 80
+
 var started = false
 var cur_scene = null
 
+var is_muted: bool = false
+
+var _cur_profile_id: String = ""
 var player_profile: PlayerProfile = null
 
 var cur_game_name: = ""
@@ -181,7 +187,7 @@ enum MovementMode {
 
 func _ready():
 	#PuzzleScriptRNG.test_example()
-	player_profile = ensure_basic_player_profile()
+	load_last_loaded_or_new_player_profile()
 	# Automatically use the display scaling from the OS if it's detected, because of how the gameplay display auto scales this mainly affects UI
 	var cur_screen_scale: float = DisplayServer.screen_get_scale()
 	if cur_screen_scale != get_window().content_scale_factor:
@@ -190,6 +196,9 @@ func _ready():
 	process_mode = PROCESS_MODE_ALWAYS
 	cur_scene = get_tree().current_scene.name
 	FilesManager.init_folders()
+	
+	if OS.has_feature("web"):
+		adjust_web_pssfx_volume()
 	
 	setup_default_bg_style()
 	
@@ -1450,18 +1459,19 @@ func _remove_non_bundled_level_list(level_list_name: String) -> void:
 
 func add_empty_level_list(level_list_name: String, is_bundled: bool) -> void:
 	level_list_name = make_new_list_name_unique(level_list_name)
+	var new_list_info: Dictionary = {
+		"name": level_list_name,
+		"level_names": [],
+		"completion_mode": DEFAULT_LIST_COMPLETION_MODE,
+	}
+	if DEFAULT_LIST_COMPLETION_MODE == "percentage":
+		new_list_info["required_percentage"] = DEFAULT_LIST_COMPLETION_PERCENT
 	if is_bundled:
 		if not game_definition.get("level_lists", []):
 			game_definition["level_lists"] = []
-		game_definition["level_lists"].append({
-			"name": level_list_name,
-			"level_names": [],
-		})
+		game_definition["level_lists"].append(new_list_info)
 	else:
-		non_bundled_level_lists.append({
-			"name": level_list_name,
-			"level_names": [],
-		})
+		non_bundled_level_lists.append(new_list_info)
 
 func set_level_list_data(level_list_name: String, setting_name: String, setting_value: Variant) -> void:
 	var list_info: = _get_level_list(level_list_name)
@@ -1535,22 +1545,24 @@ func get_list_of_level_lists(only_bundled: bool = false) -> Array:
 		if not level_list_info.get("name", ""):
 			continue
 		ll_names.append(level_list_info["name"])
-	for non_bundled_info in non_bundled_level_lists:
-		if not non_bundled_info.get("name", ""):
-			continue
-		ll_names.append(non_bundled_info["name"])
+	if not only_bundled:
+		for non_bundled_info in non_bundled_level_lists:
+			if not non_bundled_info.get("name", ""):
+				continue
+			ll_names.append(non_bundled_info["name"])
 	return ll_names
 
-func get_all_level_list_infos() -> Array[Dictionary]:
+func get_all_level_list_infos(only_bundled: bool = false) -> Array[Dictionary]:
 	var level_list_infos: Array[Dictionary] = []
 	for level_list_info in game_definition.get("level_lists", []):
 		if not level_list_info.get("name", ""):
 			continue
 		level_list_infos.append(level_list_info)
-	for non_bundled_info in non_bundled_level_lists:
-		if not non_bundled_info.get("name", ""):
-			continue
-		level_list_infos.append(non_bundled_info)
+	if not only_bundled:
+		for non_bundled_info in non_bundled_level_lists:
+			if not non_bundled_info.get("name", ""):
+				continue
+			level_list_infos.append(non_bundled_info)
 	return level_list_infos
 
 func get_levels_in_level_list(level_list_name: String) -> Array:
@@ -1561,20 +1573,85 @@ func get_levels_in_level_list(level_list_name: String) -> Array:
 			actual_level_names.append(level_name)
 	return actual_level_names
 
-func is_level_list_unlocked(level_list_name: String) -> bool:
+func is_level_list_unlocked(level_list_name: String, current_level_as_complete: bool = false) -> bool:
 	var level_list_index: = _get_level_list_index(level_list_name)
 	if level_list_index < 0:
 		return false
+
+	if _is_unlock_all_levels_and_lists():
+		return true
 	elif not is_level_list_bundled(level_list_name):
 		return true
 	elif level_list_index == 0:
 		return true
 	else:
 		var list_info: = _get_level_list(level_list_name)
-		if list_info.get("default_locked", false):
-			return _is_level_list_unlocked_in_save(level_list_name)
-		else:
+		if not list_info.get("default_locked", false):
 			return true
+		if _is_level_list_unlocked_in_save(level_list_name):
+			return true
+		if current_level_as_complete and _is_current_level_unlocking_level_list(level_list_name):
+			return true
+	return false
+
+func _is_current_level_unlocking_level_list(level_list_name: String) -> bool:
+	if not loaded_level_name:
+		return false
+	if not is_level_in_any_list(loaded_level_name):
+		return false
+	
+	var completing_in_list: String = current_level_list
+	if not completing_in_list:
+		completing_in_list = get_list_containing_level(loaded_level_name)
+		if not completing_in_list:
+			push_error("Unable to determine which list the level %s is in" % loaded_level_name)
+			return false
+	
+	if not will_level_complete_list(loaded_level_name, completing_in_list):
+		return false
+	if not will_list_unlock_list(completing_in_list, level_list_name):
+		return false
+	
+	return true
+
+func is_level_list_complete(level_list_name: String) -> bool:
+	return _check_level_list_completion(level_list_name, "") > 0
+
+func will_level_complete_list(level_name: String, level_list_name: String) -> bool:
+	return _check_level_list_completion(level_list_name, level_name) == 2
+
+func _check_level_list_completion(level_list_name: String, with_level_name_completed: String) -> int:
+	var level_list_info: = _get_level_list(level_list_name)
+	if not level_list_info:
+		return 0
+	var comletion_mode: String = level_list_info.get("completion_mode", "all")
+	var with_another_completed: bool = false
+	if with_level_name_completed:
+		if level_list_info.get("level_names", []).contains(with_level_name_completed):
+			if not _is_level_completed_in_save(level_list_name, with_level_name_completed):
+				with_another_completed = true
+	var completed_count: int = 0
+	var total_count: int = level_list_info.get("level_names", []).size()
+	for level_name in level_list_info.get("level_names", []):
+		if _is_level_completed_in_save(level_list_name, level_name):
+			completed_count += 1
+	var required_count: int = total_count
+	if comletion_mode == "count" or comletion_mode == "inverse_count":
+		required_count = int(level_list_info.get("required_to_complete", 0))
+		if comletion_mode == "inverse_count":
+			required_count = total_count - required_count
+		if completed_count >= required_count:
+			return 1
+		elif with_another_completed and completed_count + 1 >= required_count:
+			return 2
+	elif comletion_mode == "percentage":
+		var required_ratio: float = clampf(level_list_info.get("required_percentage", 0.), 0, 100) / 100
+		required_count = maxi(1, floori(total_count * required_ratio))
+	
+	return 0
+
+func will_list_unlock_list(level_list_name: String, unlocking_list_name: String) -> bool:
+	return false
 
 func unlock_level_in_list(level_list_name: String, level_name: String) -> void:
 	if not level_list_name:
@@ -1607,6 +1684,13 @@ func _unlock_level_code(level_code: String) -> void:
 	unlocked_codes.append(level_code)
 	set_game_save_data("unlocked_level_codes", unlocked_codes)
 
+func _unlock_all_levels_in_list(level_list_name: String) -> void:
+	var level_list_info: = _get_level_list(level_list_name)
+	if not level_list_info:
+		return
+	var lists_with_all_unlocked: Array = get_game_save_data("lists_with_all_unlocked", [])
+	lists_with_all_unlocked.append(level_list_name)
+
 func _is_level_list_unlocked_in_save(level_list_name: String) -> bool:
 	var unlocked_lists: Array = get_game_save_data("unlocked_lists", [])
 	return level_list_name in unlocked_lists
@@ -1619,25 +1703,60 @@ func get_unlocked_levels_in_level_list(level_list_name: String) -> Array:
 	var prog_unlock_num: int = level_list_info.get("progressive_locked_levels", 0)
 	
 	var default_locked: bool = level_list_info.get("default_individual_locked", false)
+	
+	var everything_is_unlocked: bool = _is_unlock_all_levels_and_lists()
+	var all_in_list_unlocked: bool = _is_all_in_list_unlocked_in_save(level_list_name)
 
-	var all_completed_levels: Array = get_game_save_data("completed_levels", [])
+	var all_unlocked: bool = everything_is_unlocked or all_in_list_unlocked or (prog_unlock_num == 0 and not default_locked)
+
 	var unlocked_levels: Array = []
 	var max_completed_idx: int = -1
-	for idx in existing_levels.size():
-		if not _level_code(level_list_name, existing_levels[idx]) in all_completed_levels:
-			continue
-		max_completed_idx = idx
+	if not all_unlocked:
+		max_completed_idx = _max_completed_idx_in_level_list(level_list_name)
 
 	for idx in existing_levels.size():
-		if prog_unlock_num > 0 and max_completed_idx + prog_unlock_num >= idx:
+		if all_unlocked or max_completed_idx + prog_unlock_num >= idx:
 			unlocked_levels.append(existing_levels[idx])
-		elif not default_locked or _is_level_code_unlocked_in_save(_level_code(level_list_name, existing_levels[idx])):
+		elif _is_level_code_unlocked_in_save(_level_code(level_list_name, existing_levels[idx])):
 			unlocked_levels.append(existing_levels[idx])
 	return unlocked_levels
+
+func _max_completed_idx_in_level_list(level_list_name: String) -> int:
+	var existing_levels: = get_levels_in_level_list(level_list_name)
+	var max_completed_idx: int = -1
+	for idx in existing_levels.size():
+		if not _is_level_completed_in_save(level_list_name, existing_levels[idx]):
+			continue
+		max_completed_idx = idx
+	return max_completed_idx
+
+func _is_unlock_all_levels_and_lists() -> bool:
+	return get_game_save_data("unlock_all_levels_and_lists", false)
+
+func _is_all_in_list_unlocked_in_save(level_list_name: String) -> bool:
+	var level_list_info: = _get_level_list(level_list_name)
+	if not level_list_info:
+		return false
+	var lists_with_all_unlocked: Array = get_game_save_data("lists_with_all_unlocked", [])
+	return level_list_name in lists_with_all_unlocked
 
 func _is_level_code_unlocked_in_save(level_code: String) -> bool:
 	var unlocked_codes: Array = get_game_save_data("unlocked_level_codes", [])
 	return level_code in unlocked_codes
+
+func _is_level_completed_in_save(level_list_name: String, level_name: String) -> bool:
+	return _is_level_code_completed_in_save(_level_code(level_list_name, level_name))
+
+func _is_level_code_completed_in_save(level_code: String) -> bool:
+	var levels_complete_in_any_list: bool = get_game_setting("levels_complete_in_any_list", true)
+	var completed_levels: Array = get_game_save_data("completed_levels", [])
+	var level_name: String = _level_name_from_code(level_code)
+	for completed_level in completed_levels:
+		if levels_complete_in_any_list and _level_name_from_code(completed_level) == level_name:
+			return true
+		elif completed_level == level_code:
+			return true
+	return false
 
 func get_list_of_all_bundled_levels() -> Array[String]:
 	var level_names: Array[String] = []
@@ -1793,9 +1912,7 @@ func get_auto_load_list_after_list(level_list_name: String, current_level_as_com
 	if unlocked_lists_names.size() <= 1:
 		return ""
 	var index_of: = unlocked_lists_names.find(level_list_name)
-	if index_of == -1:
-		return unlocked_lists_names[0]
-	elif index_of == unlocked_lists_names.size() - 1:
+	if index_of == -1 or index_of == unlocked_lists_names.size() - 1:
 		return ""
 	return unlocked_lists_names[index_of + 1]
 
@@ -1812,15 +1929,6 @@ func get_all_unlocked_level_lists(_current_level_as_complete: bool = false, only
 				continue
 			lists.append(level_list_info)
 	return lists
-
-func level_list_has_next(level_list_name: String) -> bool:
-	var total_lists: int = game_definition.get("level_lists", []).size()
-	var level_list_index: = _get_level_list_index(level_list_name)
-	return level_list_index < total_lists - 1
-
-func level_list_has_previous(level_list_name: String) -> bool:
-	var level_list_index: = _get_level_list_index(level_list_name)
-	return level_list_index > 0
 
 func move_level_to_relative_list(level_name: String, from_list_name: String, delta: int) -> void:
 	var list_info: = _get_level_list(from_list_name)
@@ -1854,7 +1962,7 @@ func get_next_level_to_auto_load(after_level: String = "", current_level_as_comp
 		return [current_level_list, next_level_in_list]
 
 	var next_list_name: = get_auto_load_list_after_list(current_level_list, current_level_as_complete)
-	if not next_list_name or not is_level_list_unlocked(next_list_name):
+	if not next_list_name or not is_level_list_unlocked(next_list_name, current_level_as_complete):
 		return []
 	return [next_list_name, get_first_existing_level_from_list(next_list_name)]
 
@@ -2033,17 +2141,53 @@ func play_current_save_level() -> void:
 	goto_level_in_level_list(_level_list_from_code(cur_save_level), _level_name_from_code(cur_save_level))
 
 
-func get_new_player_profile() -> PlayerProfile:
-	return FilesManager.create_player_profile(FilesManager.get_available_player_id())
+func get_new_player_profile(with_id: String = "") -> PlayerProfile:
+	var new_profile_name: = Utility.random_animal()
 
-func load_player_profile(player_id: String) -> PlayerProfile:
-	return FilesManager.get_player_profile(player_id)
+	if not with_id:
+		with_id = FilesManager.get_available_player_id()
+	new_profile_name += " %s" % [with_id]
+	var new_profile: = FilesManager.create_player_profile(with_id)
+	new_profile.set_profile_setting("profile_name", new_profile_name)
+	return new_profile
 
-func ensure_basic_player_profile() -> PlayerProfile:
-	var profile_list: Array = FilesManager.get_player_profile_list()
-	if profile_list.size() < 1:
-		return get_new_player_profile()
-	return load_player_profile(profile_list[0])
+func switch_to_new_player_profile() -> void:
+	var new_profile_id: String = FilesManager.get_available_player_id()
+	var _new_profile: = get_new_player_profile(new_profile_id)
+	load_player_profile(new_profile_id)
+
+func load_player_profile(player_id: String) -> void:
+	if not FilesManager.player_profile_exists(player_id):
+		push_error("Player profile %s does not exist" % [player_id])
+		return
+	_cur_profile_id = player_id
+	FilesManager.set_last_profile_id(player_id)
+	player_profile = FilesManager.get_player_profile(player_id)
+	after_profile_changed()
+
+func after_profile_changed() -> void:
+	update_mute()
+
+func get_last_loaded_or_new_player_profile_id() -> String:
+	var last_profile_id: String = FilesManager.get_last_profile_id()
+
+	if not last_profile_id or not FilesManager.player_profile_exists(last_profile_id):
+		var profile_list: Array = FilesManager.get_player_profile_list()
+		if profile_list.size() < 1:
+			var new_profile_id: = FilesManager.get_available_player_id()
+			var _new_profile: = get_new_player_profile(new_profile_id)
+			return new_profile_id
+		else:
+			return profile_list[0]
+	else:
+		return last_profile_id
+
+func load_last_loaded_or_new_player_profile() -> void:
+	var profile_id: String = get_last_loaded_or_new_player_profile_id()
+	load_player_profile(profile_id)
+
+func get_profile_names() -> Dictionary:
+	return FilesManager.get_player_profile_name_dict()
 
 func get_game_save_data(data_key: String, default_value: Variant = null) -> Variant:
 	if not player_profile:
@@ -2062,6 +2206,20 @@ func set_game_save_data(data_key: String, value: Variant, flush: bool = true) ->
 		push_warning("Trying to set game save data but no current game")
 		return
 	player_profile.set_game_save_data(get_game_name(), data_key, value, flush)
+
+func get_profile_name() -> String:
+	if not player_profile:
+		push_error("No player profile loaded")
+		return ""
+	return player_profile.get_profile_setting("profile_name", "UNNAMED")
+
+func set_profile_name(new_profile_name: String) -> void:
+	if not new_profile_name:
+		return
+	if not player_profile:
+		push_error("No player profile loaded")
+		return
+	player_profile.set_profile_setting("profile_name", new_profile_name)
 
 
 func get_game_bg_info() -> Dictionary:
@@ -2691,3 +2849,13 @@ func get_default_value_for_prop_name(prop_name: String) -> Variant:
 	elif prop_name in SPECIAL_PROPS:
 		return true
 	return true
+
+func adjust_web_pssfx_volume() -> void:
+	var pssfx_bus_idx: int = AudioServer.get_bus_index("LowPassSfx")
+	AudioServer.set_bus_volume_linear(pssfx_bus_idx, 0.3)
+
+func update_mute() -> void:
+	is_muted = player_profile.get_profile_setting("mute_all_audio", false)
+	
+	var bus_idx: int = AudioServer.get_bus_index("Master")
+	AudioServer.set_bus_mute(bus_idx, is_muted)

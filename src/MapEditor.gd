@@ -490,7 +490,14 @@ func is_in_placing_mode() -> bool:
 func get_item_name() -> String:
 	if not is_in_placing_mode():
 		return ""
-	return MapManager.get_tile_name(current_tile_index) if cursor_mode == "tile" else EntityManager.get_entity_name(current_entity_index)
+	if cursor_mode == "tile":
+		if not MapManager.tile_name_exists(current_tile_index):
+			return ""
+		return MapManager.get_tile_name(current_tile_index)
+	else:
+		if not EntityManager.entity_index_exists(current_entity_index):
+			return ""
+		return EntityManager.get_entity_name(current_entity_index)
 
 func show_item_name() -> void:
 	item_name_text.text = get_item_name()
@@ -884,35 +891,18 @@ func forwarded_shortcut_input(event: InputEvent) -> void:
 			elif Utility.fixed_just_pressed_by_event("editor_non_pointer_secondary", event, true):
 				_inspect_next_at(cursor_tile_pos, entity_instance_editor.edited_entity)
 
-func save_current_or_save_as() -> bool:
+func save_current_or_save_as(after_save_callable: Callable = Callable()) -> bool:
 	if GameManager.loaded_level_name:
 		GameManager.save_edited_level_as(GameManager.loaded_level_name)
+		has_edited_something = false
+		after_save_callable.call()
 		return true
 	else:
 		var pause_menu: = Utility.get_pause_menu()
 		if pause_menu:
 			pause_menu.pause_and_open()
-			pause_menu.on_save_as_button_pressed()
+			pause_menu.on_save_as_button_pressed(after_save_callable)
 		return false
-
-func switch_to_non_level_edit_mode() -> void:
-	if edit_mode:
-		switch_edit_mode(false)
-	GameManager.is_in_level_edit_mode = false
-	GameManager.level_edit_mode_changed.emit()
-	GameManager.set_live_edit_mode_enabled(false)
-	var list_of_current_level: String = ""
-	for level_list_name in GameManager.get_list_of_level_lists():
-		for level_name in GameManager.get_levels_in_level_list(level_list_name):
-			if level_name == GameManager.loaded_level_name:
-				list_of_current_level = level_list_name
-				break
-		if list_of_current_level:
-			break
-	if list_of_current_level:
-		GameManager.goto_level_in_level_list(list_of_current_level, GameManager.loaded_level_name)
-	else:
-		GameManager.play_first_level()
 
 func _auto_save(level_state: Dictionary) -> void:
 	var autosave_filename: = "editor_autosave"
@@ -1047,44 +1037,60 @@ func set_placing_text_offset(new_offset: Vector2) -> void:
 
 func on_instance_editor_edited_something() -> void:
 	something_edited()
+	
+func on_request_delete_entity(entity: BaseEntity) -> void:
+	delete_specific_entity(entity)
 
 func on_level_edit_mode_changed() -> void:
 	ui_layer.visible = GameManager.is_in_level_edit_mode
 
 
-func load_level_in_list(level_name: String, level_list_name: String) -> void:
+func _confirm_save_changes_then(then_callable: Callable, is_discard: bool) -> void:
 	if not has_edited_something:
-		_confirmed_load_level_in_list(level_name, level_list_name)
+		then_callable.call()
+		return
+	
+	if not is_discard and GameManager.player_profile.get_profile_setting("skip_non_critical_save_dialogs", false):
+		then_callable.call()
+		return
+	elif is_discard and GameManager.player_profile.get_profile_setting("skip_critical_save_dialogs", false):
+		then_callable.call()
 		return
 
 	var confirm_text: = ""
-	#if GameManager.loaded_is_autosave:
-		#confirm_text = ""
-
 	if not GameManager.loaded_level_is_saved:
-		confirm_text = "Changes have not been saved. Load anyway?"
+		if is_discard:
+			confirm_text = "Unsaved changes to this level will be lost. Save changes now?"
+		else:
+			confirm_text = "Changes to this level may be lost if not saved. Save now?"
 	
 	if confirm_text:
-		_show_save_confirm_dialog(confirm_text, level_name, level_list_name)
+		_show_save_confirm_dialog(then_callable, confirm_text, is_discard)
 		return
 	
-	_confirmed_load_level_in_list(level_name, level_list_name)
+	then_callable.call()
 
-func _show_save_confirm_dialog(confirm_text: String, load_level_name: String, load_level_list_name: String) -> void:
+func _show_save_confirm_dialog(then_callable: Callable, confirm_text: String, is_discard: bool) -> void:
 	var confirm_dialog: = ConfirmationDialog.new()
-	confirm_dialog.title = "Unsaved changes"
+	confirm_dialog.process_mode = Node.PROCESS_MODE_ALWAYS
+	confirm_dialog.title = "Save Changes?"
+	if is_discard:
+		confirm_dialog.title = "Save or Discard Changes?"
 	confirm_dialog.dialog_text = confirm_text
-	confirm_dialog.ok_button_text = "Discard changes and continue"
-	confirm_dialog.confirmed.connect(_confirmed_load_level_in_list.bind(load_level_name, load_level_list_name))
+	confirm_dialog.ok_button_text = "Save Level and Continue"
+	confirm_dialog.confirmed.connect(save_current_or_save_as.bind(then_callable))
 	
 	GameManager.set_pause("editor_confirm_dialog", true)
 	
-	confirm_dialog.add_button("Save changes", false, "save_changes")
+	var continue_button_text: = "Continue Without Saving"
+	if is_discard:
+		continue_button_text = "Discard Changes and Continue"
+	
+	confirm_dialog.add_button(continue_button_text, false, "no_save_continue")
 	confirm_dialog.custom_action.connect(
 		func(action: String):
-			if action == "save_changes":
-				if save_current_or_save_as():
-					_confirmed_load_level_in_list(load_level_name, load_level_list_name)
+			if action == "no_save_continue":
+				then_callable.call()
 	)
 	confirm_dialog.visibility_changed.connect(_closed_save_confirm_dialog.bind(confirm_dialog))
 	add_child(confirm_dialog)
@@ -1094,14 +1100,57 @@ func _closed_save_confirm_dialog(dialog: ConfirmationDialog) -> void:
 	if not dialog.visible:
 		dialog.queue_free()
 		GameManager.set_pause("editor_confirm_dialog", false)
+	if not is_inside_tree():
+		return
 	if edit_mode:
 		request_grab_gui_focus.emit()
+
+
+func quit_to_main_menu_with_confirm() -> void:
+	_confirm_save_changes_then(GameManager.change_scene.bind("Menu"), false)
+
+func quit_to_game_edit_with_confirm() -> void:
+	_confirm_save_changes_then(GameManager.change_scene.bind("GameEditor"), false)
+
+func switch_to_non_level_edit_mode() -> void:
+	save_current_or_save_as(_switch_to_non_level_edit_mode_confirmed)
+
+func _switch_to_non_level_edit_mode_confirmed() -> void:
+	GameManager.close_pause_menu()
+	if edit_mode:
+		switch_edit_mode(false)
+	GameManager.is_in_level_edit_mode = false
+	GameManager.level_edit_mode_changed.emit()
+	GameManager.set_live_edit_mode_enabled(false)
+	var list_of_current_level: String = ""
+	for level_list_name in GameManager.get_list_of_level_lists():
+		for level_name in GameManager.get_levels_in_level_list(level_list_name):
+			if level_name == GameManager.loaded_level_name:
+				list_of_current_level = level_list_name
+				break
+		if list_of_current_level:
+			break
+	if list_of_current_level:
+		GameManager.goto_level_in_level_list(list_of_current_level, GameManager.loaded_level_name)
+	else:
+		GameManager.play_first_level()
+
+func edit_new_level(is_museum: bool = false) -> void:
+	_confirm_save_changes_then(_confirmed_edit_new_level.bind(is_museum), true)
+
+func _confirmed_edit_new_level(edit_museum: bool) -> void:
+	if edit_museum:
+		GameManager.new_museum_level()
+	else:
+		GameManager.new_empty_level()
+	GameManager.close_pause_menu()
+
+func load_level_in_list(level_name: String, level_list_name: String) -> void:
+	var then_callable: = _confirmed_load_level_in_list.bind(level_name, level_list_name)
+	_confirm_save_changes_then(then_callable, true)
 
 func _confirmed_load_level_in_list(level_name: String, level_list_name: String) -> void:
 	if not level_list_name:
 		GameManager.edit_level_named(level_name)
 	else:
 		GameManager.edit_level_in_list(level_list_name, level_name)
-	
-func on_request_delete_entity(entity: BaseEntity) -> void:
-	delete_specific_entity(entity)

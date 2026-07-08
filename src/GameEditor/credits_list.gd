@@ -1,6 +1,12 @@
 extends VBoxContainer
 
+const CreditsListItem = preload("res://src/GameEditor/credits_list_item.gd")
 var credits_list_item_scene = preload("res://Scenes/GameEditor/credits_list_item.tscn")
+
+const AddCreditItemButtonRow = preload("res://Scenes/GameEditor/add_credit_item_button_row.gd")
+var add_credit_item_button_row_scene = preload("res://Scenes/GameEditor/add_credit_item_button_row.tscn")
+
+var default_type: String = CreditsListItem.TYPE_ROLE_NAME
 
 func _ready() -> void:
     load_credits_list()
@@ -37,23 +43,56 @@ func load_credits_list() -> void:
     else:
         for entry in credits_list:
             append_new_credit_item(entry)
+    refresh_add_new_item_buttons()
 
-func _on_new_credit_item_pressed() -> void:
-    append_new_credit_item({})
+func refresh_add_new_item_buttons() -> void:
+    for child in get_children():
+        if child is AddCreditItemButtonRow:
+            remove_child(child)
+            child.queue_free()
+    var insert_at_indices: Array[int] = []
+    for child_idx in range(2, get_child_count() - 1):
+        var credit_item: = get_child(child_idx) as CreditsListItem
+        if credit_item and credit_item.get_entry().get("type", "") == CreditsListItem.TYPE_SECTION:
+            insert_at_indices.append(child_idx)
+    insert_at_indices.reverse()
+    for idx in insert_at_indices:
+        var add_credit_item_button_row: AddCreditItemButtonRow = add_credit_item_button_row_scene.instantiate()
+        add_credit_item_button_row.add_pressed.connect(_on_new_credit_item_pressed)
+        add_child(add_credit_item_button_row)
+        move_child(add_credit_item_button_row, idx)
+
+func _on_new_credit_item_pressed(add_before_node: Node = null) -> void:
+    var add_before_idx: int = -1
+    if add_before_node and add_before_node.get_parent() == self:
+        add_before_idx = add_before_node.get_index()
+    append_new_credit_item({}, add_before_idx)
     
-func append_new_credit_item(with_entry: Dictionary) -> void:
+func append_new_credit_item(with_entry: Dictionary, add_before_idx: int = -1) -> void:
     var new_credit_item = credits_list_item_scene.instantiate()
     add_child(new_credit_item)
     if with_entry:
         new_credit_item.set_entry(with_entry)
-    move_child(new_credit_item, get_child_count() - 2)
+    else:
+        new_credit_item.set_entry({"type": default_type})
+    if add_before_idx == -1:
+        move_child(new_credit_item, get_child_count() - 2)
+    else:
+        move_child(new_credit_item, maxi(1, add_before_idx))
     new_credit_item.changed.connect(on_credit_changed)
+    new_credit_item.type_changed.connect(on_credit_item_type_changed.bind(new_credit_item))
+    new_credit_item.request_remove.connect(remove_credit_item.bind(new_credit_item))
 
-func num_input_lines() -> int:
-    return get_child_count() - 2
+func num_credit_items() -> int:
+    var count: int = 0
+    for child in get_children():
+        if child is CreditsListItem:
+            count += 1
+    return count
 
 func on_credit_changed() -> void:
     update_credits_list()
+    refresh_add_new_item_buttons()
 
 func update_credits_list() -> void:
     var credits_list: Array = get_credits_list()
@@ -61,3 +100,18 @@ func update_credits_list() -> void:
 
 func goto_view_credits() -> void:
     GameManager.show_credits()
+
+func on_credit_item_type_changed(credit_item: CreditsListItem) -> void:
+    var type: String = credit_item.cur_selected_type_str()
+    if type in [CreditsListItem.TYPE_ROLE_NAME, CreditsListItem.TYPE_JUST_NAME]:
+        default_type = type
+    update_credits_list()
+    refresh_add_new_item_buttons()
+
+func remove_credit_item(credit_item: CreditsListItem) -> void:
+    if not credit_item or not credit_item.is_inside_tree() or not credit_item.get_parent() == self:
+        return
+    remove_child(credit_item)
+    credit_item.queue_free()
+    update_credits_list()
+    refresh_add_new_item_buttons()

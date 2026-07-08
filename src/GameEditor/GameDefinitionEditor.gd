@@ -44,9 +44,14 @@ var invalid_field_color = Color(0.7, 0.4, 0.4)
 @export var start_paused_option: Control
 @export var start_level_paused_toggle: CheckButton
 
+@export var section_container: Control
+
 var _save_as_dialog_open: bool = false
 
+static var expanded_sections: Array[String] = []
+
 func _ready():
+	refresh_expanded_sections()
 	if OS.has_feature("web"):
 		find_child("OpenGameDir").disabled = true
 	GameManager.game_dir_name_changed.connect(on_game_dir_name_changed)
@@ -199,6 +204,31 @@ func _ready():
 	var auto_reload_no_cam_focus: bool = GameManager.get_game_setting("auto_reload_checkpoint_for_no_cam_focus", false)
 	auto_reload_checkpoint_for_no_cam_focus_toggle.set_pressed_no_signal(auto_reload_no_cam_focus)
 	auto_reload_checkpoint_for_no_cam_focus_toggle.toggled.connect(on_auto_reload_checkpoint_for_no_cam_focus_toggled)
+
+
+func refresh_expanded_sections() -> void:
+	var all_sections: Array[FoldableContainer] = []
+	for section_child in section_container.get_children():
+		if section_child is FoldableContainer:
+			all_sections.append(section_child)
+	if expanded_sections.size() == 0:
+		for section in all_sections:
+			if not section.folded:
+				expanded_sections.append(section.name)
+	else:
+		for section in all_sections:
+			section.folded = section.name not in expanded_sections
+
+	for section in all_sections:
+		section.folding_changed.connect(on_section_folding_changed.bind(section))
+
+func on_section_folding_changed(is_folded: bool, section: FoldableContainer) -> void:
+	if not is_folded:
+		if section.name not in expanded_sections:
+			expanded_sections.append(section.name)
+	else:
+		expanded_sections.erase(section.name)
+
 
 func is_continuous_movement_mode() -> bool:
 	return GameManager.get_game_setting("movement_mode", GameManager.MovementMode.MOVEMENT_CONTINUOUS) == GameManager.MovementMode.MOVEMENT_CONTINUOUS

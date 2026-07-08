@@ -1,0 +1,104 @@
+[gd_scene format=3 uid="uid://teuuvlq5n85m"]
+
+[ext_resource type="Script" uid="uid://cnf6xu7bpagoy" path="res://Scenes/player_profile_picker.gd" id="1_g7ib3"]
+[ext_resource type="FontFile" uid="uid://ctnllh13x3iqi" path="res://assets/font/NotoSans-Bold.ttf" id="2_n6ebl"]
+[ext_resource type="Texture2D" uid="uid://bo4frkvshv8li" path="res://assets/img/property_list/edit_value.png" id="3_phib5"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_syfuq"]
+content_margin_left = 16.0
+content_margin_top = 0.0
+content_margin_right = 16.0
+content_margin_bottom = 12.0
+bg_color = Color(0, 0, 0, 0.6431373)
+border_width_left = 4
+border_width_top = 4
+border_width_right = 4
+border_width_bottom = 4
+border_color = Color(0, 0, 0, 0)
+border_blend = true
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_phib5"]
+content_margin_left = 4.0
+content_margin_top = 4.0
+content_margin_right = 4.0
+content_margin_bottom = 6.0
+bg_color = Color(0.151927, 0.19807908, 0.25876707, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.334955, 0.31812483, 0.44406027, 1)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+corner_detail = 7
+
+[node name="PlayerProfilePicker" type="PanelContainer" unique_id=1193148223 node_paths=PackedStringArray("profile_label", "edit_name_tex_button", "switch_profile_menu_button", "profile_name_input", "show_profile_name_container", "edit_profile_name_container")]
+size_flags_horizontal = 8
+theme_override_styles/panel = SubResource("StyleBoxFlat_syfuq")
+script = ExtResource("1_g7ib3")
+profile_label = NodePath("VBoxContainer/HBoxContainer/ShowName/ProfileNameLabel")
+edit_name_tex_button = NodePath("VBoxContainer/HBoxContainer/ShowName/EditNameTexButton")
+switch_profile_menu_button = NodePath("VBoxContainer/PickProfileMenuButton")
+profile_name_input = NodePath("VBoxContainer/HBoxContainer/EditName/PanelContainer/MarginContainer/ProfileNameInput")
+show_profile_name_container = NodePath("VBoxContainer/HBoxContainer/ShowName")
+edit_profile_name_container = NodePath("VBoxContainer/HBoxContainer/EditName")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="." unique_id=172829949]
+layout_mode = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer" unique_id=1808382342]
+custom_minimum_size = Vector2(0, 38)
+layout_mode = 2
+
+[node name="Label" type="Label" parent="VBoxContainer/HBoxContainer" unique_id=39384580]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "Profile:"
+
+[node name="ShowName" type="HBoxContainer" parent="VBoxContainer/HBoxContainer" unique_id=756269626]
+layout_mode = 2
+
+[node name="ProfileNameLabel" type="Label" parent="VBoxContainer/HBoxContainer/ShowName" unique_id=1122026068]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("2_n6ebl")
+theme_override_font_sizes/font_size = 14
+text = "Armadillo 1"
+
+[node name="EditNameTexButton" type="TextureRect" parent="VBoxContainer/HBoxContainer/ShowName" unique_id=1413182822]
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+texture = ExtResource("3_phib5")
+stretch_mode = 2
+
+[node name="EditName" type="HBoxContainer" parent="VBoxContainer/HBoxContainer" unique_id=348594569]
+visible = false
+layout_mode = 2
+size_flags_vertical = 4
+
+[node name="PanelContainer" type="PanelContainer" parent="VBoxContainer/HBoxContainer/EditName" unique_id=1456771289]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_phib5")
+
+[node name="MarginContainer" type="MarginContainer" parent="VBoxContainer/HBoxContainer/EditName/PanelContainer" unique_id=1372952398]
+layout_mode = 2
+
+[node name="ProfileNameInput" type="LineEdit" parent="VBoxContainer/HBoxContainer/EditName/PanelContainer/MarginContainer" unique_id=1376509334]
+custom_minimum_size = Vector2(120, 0)
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+expand_to_text_length = true
+
+[node name="PickProfileMenuButton" type="MenuButton" parent="VBoxContainer" unique_id=911665173]
+layout_mode = 2
+size_flags_horizontal = 4
+theme_type_variation = &"MenuOptButton"
+theme_override_font_sizes/font_size = 12
+text = "Switch"
+flat = false

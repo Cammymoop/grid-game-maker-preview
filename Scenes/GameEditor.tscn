@@ -20,10 +20,10 @@
 [ext_resource type="Script" uid="uid://bihb1rg68jci5" path="res://src/GameEditor/SelectableTextureList.gd" id="11"]
 [ext_resource type="Script" uid="uid://cia8grkwwxcha" path="res://src/GameEditor/PopupLayer.gd" id="12"]
 [ext_resource type="PackedScene" uid="uid://ci5jvijwn0j60" path="res://Scenes/GameEditor/info_panel_config_edit.tscn" id="12_retx3"]
-[ext_resource type="StyleBox" path="res://src/UI/list_background.tres" id="13"]
+[ext_resource type="StyleBox" uid="uid://bf4pw2lygxoq5" path="res://src/UI/list_background.tres" id="13"]
 [ext_resource type="FontFile" uid="uid://cpry5rd5ecdc5" path="res://assets/font/small_font.tres" id="14"]
 [ext_resource type="Script" uid="uid://c1vkx254mpaft" path="res://src/GameEditor/FollowBySelector.gd" id="15"]
-[ext_resource type="Script" path="res://Scenes/GameEditor/background_style_editor_tab.gd" id="15_4q0gk"]
+[ext_resource type="Script" uid="uid://blesifogfyjfp" path="res://Scenes/GameEditor/background_style_editor_tab.gd" id="15_4q0gk"]
 [ext_resource type="PackedScene" uid="uid://b4fp8ldktkvcd" path="res://Scenes/bg_effect_6.tscn" id="16_iwmpq"]
 [ext_resource type="PackedScene" uid="uid://b1a6s2o32t35i" path="res://Scenes/GameEditor/bg_style_editor.tscn" id="18_umwh7"]
 [ext_resource type="PackedScene" uid="uid://cj8u25mhjg6n8" path="res://Scenes/GameEditor/SelectableTexItem.tscn" id="22_48hio"]
@@ -107,7 +107,7 @@ theme = ExtResource("3_qrjoe")
 current_tab = 0
 tab_0/title = "Game"
 
-[node name="GameDefinition" type="VBoxContainer" parent="MarginContainer/UIRoot/TabContainer" unique_id=1146228055 node_paths=PackedStringArray("show_level_title_option_picker", "name_input", "edit_game_dir_button", "move_interp_option_picker", "tele_interp_option_picker", "action_signal_sent_to_option_picker", "turn_animation_option_picker", "def_dying_eff_picker", "def_spawn_eff_picker", "use_spawn_effect_at_level_start_toggle", "level_start_anim_duration_option", "level_start_animation_duration_input", "default_move_speed_input", "default_teleport_duration_input", "auto_reload_checkpoint_for_no_cam_focus_toggle", "follow_by_controller_picker", "auto_undo_option", "auto_undo_toggle", "action_1_is_undo_toggle", "start_paused_option", "start_level_paused_toggle")]
+[node name="GameDefinition" type="VBoxContainer" parent="MarginContainer/UIRoot/TabContainer" unique_id=1146228055 node_paths=PackedStringArray("show_level_title_option_picker", "name_input", "edit_game_dir_button", "move_interp_option_picker", "tele_interp_option_picker", "action_signal_sent_to_option_picker", "turn_animation_option_picker", "def_dying_eff_picker", "def_spawn_eff_picker", "use_spawn_effect_at_level_start_toggle", "level_start_anim_duration_option", "level_start_animation_duration_input", "default_move_speed_input", "default_teleport_duration_input", "auto_reload_checkpoint_for_no_cam_focus_toggle", "follow_by_controller_picker", "auto_undo_option", "auto_undo_toggle", "action_1_is_undo_toggle", "start_paused_option", "start_level_paused_toggle", "section_container")]
 layout_mode = 2
 script = ExtResource("6")
 show_level_title_option_picker = NodePath("ScrollContainer/SectionContainer/GameSettingsSection/MarginContainer/HFlowContainer/HFlowContainer/HBoxContainer11/OptionButton")
@@ -131,6 +131,7 @@ auto_undo_toggle = NodePath("ScrollContainer/SectionContainer/GameSettingsSectio
 action_1_is_undo_toggle = NodePath("ScrollContainer/SectionContainer/GameSettingsSection/MarginContainer/HFlowContainer/HFlowContainer/HBoxContainer/Action1IsUndoToggle")
 start_paused_option = NodePath("ScrollContainer/SectionContainer/GameSettingsSection/MarginContainer/HFlowContainer/HFlowContainer/HBoxContainer2")
 start_level_paused_toggle = NodePath("ScrollContainer/SectionContainer/GameSettingsSection/MarginContainer/HFlowContainer/HFlowContainer/HBoxContainer2/LevelStartPausedToggle")
+section_container = NodePath("ScrollContainer/SectionContainer")
 metadata/_tab_index = 0
 metadata/_tab_name = "Game"
 

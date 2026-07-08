@@ -1,18 +1,24 @@
 extends PanelContainer
 
-signal back_to_main_panel()
+signal request_back()
 
 @export var mute_audio_toggle: CheckButton
 @export var erase_game_save_progress_button: Button
+
+@export var skip_non_critical_confirm_toggle: CheckButton
+
+@export var profile_name_label: Label
 
 @export var back_button: Button
 
 var confirm_dialog_open: bool = false
 
 func _ready() -> void:
-    back_button.pressed.connect(back_to_main_panel.emit)
+    back_button.pressed.connect(request_back.emit)
 
     mute_audio_toggle.toggled.connect(on_mute_audio_toggle_toggled)
+    
+    skip_non_critical_confirm_toggle.toggled.connect(on_skip_non_critical_confirm_toggle_toggled)
     
     erase_game_save_progress_button.pressed.connect(on_erase_game_save_progress_button_pressed)
 
@@ -21,10 +27,16 @@ func _ready() -> void:
 func refresh_ui() -> void:
     var is_muted: bool = GameManager.player_profile.get_profile_setting("mute_all_audio", false)
     mute_audio_toggle.set_pressed_no_signal(is_muted)
+    
+    var is_skip_non_critical: bool = GameManager.player_profile.get_profile_setting("skip_non_critical_save_dialogs", false)
+    skip_non_critical_confirm_toggle.set_pressed_no_signal(is_skip_non_critical)
+    
+    profile_name_label.text = "Profile: %s" % [GameManager.get_profile_name()]
 
 
 func on_mute_audio_toggle_toggled(is_muted: bool) -> void:
     GameManager.player_profile.set_profile_setting("mute_all_audio", is_muted)
+    GameManager.update_mute()
 
 
 func on_erase_game_save_progress_button_pressed() -> void:
@@ -55,3 +67,6 @@ func erase_progress_confirmed(dialog: ConfirmationDialog, game_name: String) -> 
     
     GameManager.player_profile.erase_game_save_progress(game_name)
     GameManager.change_scene("Menu")
+
+func on_skip_non_critical_confirm_toggle_toggled(is_skipping: bool) -> void:
+    GameManager.player_profile.set_profile_setting("skip_non_critical_save_dialogs", is_skipping)

@@ -9,6 +9,8 @@ var TEMPORARY_FILE_PREFIX: = "_tmp_"
 
 var PLAYER_SETTINGS_FILENAME: = "player_settings.json"
 
+var LAST_PROFILE_ID_FILE: = "last_profile_id.txt"
+
 var SHARED_IMAGES_METADATA_FILENAME: = "local_image_meta.json"
 var BUNDLED_IMAGE_METADATA_FILENAME: = "image_metadata.json"
 
@@ -49,6 +51,23 @@ func init_folders():
 		if games_list:
 			var new_default_game: String = "Basic" if "Basic" in games_list else games_list[0]
 			save_default_game(new_default_game)
+
+func set_last_profile_id(profile_id: String) -> void:
+	var file_path: = _data_path(local_data_subdir, LAST_PROFILE_ID_FILE)
+	var f = FileAccess.open(file_path, FileAccess.WRITE)
+	if f:
+		f.store_string(profile_id)
+	else:
+		push_error("Error saving last profile id. file path: %s" % [file_path])
+
+func get_last_profile_id() -> String:
+	var file_path: = _data_path(local_data_subdir, LAST_PROFILE_ID_FILE)
+	if not FileAccess.file_exists(file_path):
+		return ""
+	var f = FileAccess.open(file_path, FileAccess.READ)
+	if f:
+		return f.get_as_text().strip_edges()
+	return ""
 
 func ___clear_local_data() -> void:
 	var recursive_delete: = func(dir_path: String, recurse: Callable) -> void:
@@ -783,6 +802,14 @@ func get_player_profile_list() -> Array:
 		if player_profile_exists(player_id):
 			player_profile_list.append(player_id)
 	return player_profile_list
+
+func get_player_profile_name_dict() -> Dictionary:
+	var profile_name_dict: Dictionary = {}
+	for profile_id in get_player_profile_list():
+		var profile: PlayerProfile = get_player_profile(profile_id)
+		if profile:
+			profile_name_dict[profile_id] = profile.get_profile_setting("profile_name", "UNNAMED")
+	return profile_name_dict
 
 func create_player_profile(player_id: String) -> PlayerProfile:
 	if player_profile_exists(player_id):

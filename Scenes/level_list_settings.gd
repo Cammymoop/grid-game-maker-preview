@@ -1,5 +1,6 @@
 extends VBoxContainer
 
+signal list_settings_edited()
 signal request_close()
 
 const ScalarValueInput = preload("res://src/GameEditor/ConditionalEditor/scalar_value_input.gd")
@@ -7,16 +8,57 @@ const ScalarValueInput = preload("res://src/GameEditor/ConditionalEditor/scalar_
 @export var back_button: Button
 
 @export var name_input: LineEdit
+@export var total_levels_label: Label
+
 @export var do_progressive_unlock_toggle: CheckButton
 @export var progressive_unlock_num_container: Control
 @export var progressive_unlock_num_input: ScalarValueInput
 
+@export var default_is_unlocked_container: Control
+@export var default_is_unlocked_toggle: CheckButton
+
 @export var show_locked_levels_toggle: CheckButton
 
+@export var completion_mode_selector: OptionButton
+@export var completion_number_container: ScalarValueInput
+@export var completion_number_input: ScalarValueInput
+
 var editing_list_name: String = ""
+var total_levels: int = 0
+
+var last_completion_percentage: int = GameManager.DEFAULT_LIST_COMPLETION_PERCENT
+var last_completion_count: int = 1
+
+const COMPLETION_MODE_ALL: String = "all"
+const COMPLETION_MODE_COUNT: String = "count"
+const COMPLETION_MODE_INVERSE_COUNT: String = "inverse_count"
+const COMPLETION_MODE_PERCENTAGE: String = "percentage"
+
+const CompletionModes: Array[String] = [
+    COMPLETION_MODE_ALL,
+    COMPLETION_MODE_COUNT,
+    COMPLETION_MODE_INVERSE_COUNT,
+    COMPLETION_MODE_PERCENTAGE,
+]
+const CompletionModeDisplayTexts: Dictionary = {
+    COMPLETION_MODE_ALL: "All Levels Complete",
+    COMPLETION_MODE_COUNT: "(X) Levels Complete",
+    COMPLETION_MODE_INVERSE_COUNT: "All But (X) Levels Complete",
+    COMPLETION_MODE_PERCENTAGE: "(X)% of Levels Complete",
+}
 
 
 func _ready() -> void:
+    completion_mode_selector.clear()
+    for completion_mode_id in CompletionModes.size():
+        var completion_mode: String = CompletionModes[completion_mode_id]
+        completion_mode_selector.add_item(CompletionModeDisplayTexts[completion_mode], completion_mode_id)
+    completion_mode_selector.item_selected.connect(on_completion_mode_selected)
+    
+    completion_number_input.value_changed.connect(on_completion_number_input_value_changed)
+    
+    default_is_unlocked_toggle.toggled.connect(on_default_is_unlocked_toggled)
+
     back_button.pressed.connect(request_close.emit)
     name_input.text_changed.connect(on_name_input_text_changed)
     do_progressive_unlock_toggle.toggled.connect(on_do_progressive_unlock_toggled)
@@ -31,6 +73,7 @@ func load_list_info(list_name: String) -> void:
     if not list_info:
         push_error("Editing unknown level list: %s" % list_name)
         return
+    total_levels = GameManager.get_levels_in_level_list(editing_list_name).size()
     refresh_ui()
 
 func _get_list_info() -> Dictionary:
@@ -42,14 +85,19 @@ func on_do_progressive_unlock_toggled(toggled_on: bool) -> void:
     progressive_unlock_num_container.visible = toggled_on
     if toggled_on:
         set_prog_unlock_num()
+        GameManager.remove_level_list_data(editing_list_name, "default_individual_locked")
     else:
         GameManager.remove_level_list_data(editing_list_name, "progressive_locked_levels")
+        GameManager.set_level_list_data(editing_list_name, "default_individual_locked", not default_is_unlocked_toggle.button_pressed)
+    refresh_ui()
+    list_settings_edited.emit()
 
 func on_show_locked_levels_toggled(toggled_on: bool) -> void:
     GameManager.set_level_list_data(editing_list_name, "show_locked_levels", toggled_on)
 
 func prop_unlock_num_changed(_new_value: float) -> void:
     set_prog_unlock_num()
+    list_settings_edited.emit()
 
 func set_prog_unlock_num() -> void:
     var num_input_number: = int(progressive_unlock_num_input.get_value())
@@ -66,14 +114,92 @@ func on_name_input_text_changed(new_text: String) -> void:
     if GameManager.rename_level_list(editing_list_name, new_text):
         name_input.remove_theme_color_override("font_color")
         editing_list_name = new_text
+        refresh_ui()
+        list_settings_edited.emit()
 
 func refresh_ui() -> void:
+    total_levels_label.text = "Total Levels: %d" % total_levels
+
     name_input.text = editing_list_name
     name_input.remove_theme_color_override("font_color")
     var list_info: = _get_list_info()
     if not list_info:
+        push_warning("Unable to get list info for %s" % editing_list_name)
+        request_close.emit()
         return
     var prog_unlock_num: = int(list_info.get("progressive_locked_levels", 0))
     do_progressive_unlock_toggle.button_pressed = prog_unlock_num > 0
     progressive_unlock_num_container.visible = prog_unlock_num > 0
     progressive_unlock_num_input.set_value(maxi(1, prog_unlock_num))
+    
+    var completion_mode: String = _get_completion_mode(list_info)
+    completion_mode_selector.selected = CompletionModes.find(completion_mode)
+
+    if completion_mode == COMPLETION_MODE_PERCENTAGE:
+        completion_mode_selector.tooltip_text = "Rounded down to the nearest level, minimum of 1"
+    else:
+        completion_mode_selector.tooltip_text = ""
+    
+    completion_number_container.visible = completion_mode != COMPLETION_MODE_ALL
+    if completion_number_container.visible:
+        var completion_number: int = _get_completion_number(list_info, completion_mode)
+        completion_number_input.set_value(completion_number)
+        _update_last_completion_number(completion_mode, completion_number)
+    
+    default_is_unlocked_container.visible = prog_unlock_num == 0
+
+func _get_completion_mode(list_info: Dictionary) -> String:
+    var completion_mode: String = list_info.get("completion_mode", "all")
+    if not completion_mode in CompletionModes:
+        completion_mode = GameManager.DEFAULT_LIST_COMPLETION_MODE
+    return completion_mode
+
+func _get_completion_number(list_info: Dictionary, completion_mode: String) -> int:
+    if completion_mode == COMPLETION_MODE_PERCENTAGE:
+        return int(list_info.get("required_percentage", 0))
+    elif completion_mode == COMPLETION_MODE_COUNT or completion_mode == COMPLETION_MODE_INVERSE_COUNT:
+        return int(list_info.get("required_to_complete", 0))
+    return 0
+
+func _update_last_completion_number(completion_mode: String, completion_number: int) -> void:
+    if completion_mode == COMPLETION_MODE_PERCENTAGE:
+        last_completion_percentage = completion_number
+    elif completion_mode == COMPLETION_MODE_COUNT or completion_mode == COMPLETION_MODE_INVERSE_COUNT:
+        last_completion_count = completion_number
+
+func on_completion_mode_selected(idx: int) -> void:
+    var completion_mode: String = CompletionModes[completion_mode_selector.get_item_id(idx)]
+    GameManager.set_level_list_data(editing_list_name, "completion_mode", completion_mode)
+
+    if completion_mode == COMPLETION_MODE_PERCENTAGE:
+        GameManager.remove_level_list_data(editing_list_name, "required_to_complete")
+        GameManager.set_level_list_data(editing_list_name, "required_percentage", last_completion_percentage)
+    if completion_mode == COMPLETION_MODE_COUNT or completion_mode == COMPLETION_MODE_INVERSE_COUNT:
+        GameManager.remove_level_list_data(editing_list_name, "required_percentage")
+        GameManager.set_level_list_data(editing_list_name, "required_to_complete", maxi(last_completion_count, total_levels))
+    else:
+        GameManager.remove_level_list_data(editing_list_name, "required_percentage")
+        GameManager.remove_level_list_data(editing_list_name, "required_to_complete")
+
+    refresh_ui()
+    list_settings_edited.emit()
+    
+func on_completion_number_input_value_changed(new_value: float) -> void:
+    var completion_mode: String = _get_completion_mode(_get_list_info())
+    var write_key: String = ""
+    var max_value: int = 100
+    if completion_mode == COMPLETION_MODE_PERCENTAGE:
+        write_key = "required_percentage"
+    elif completion_mode == COMPLETION_MODE_COUNT or completion_mode == COMPLETION_MODE_INVERSE_COUNT:
+        write_key = "required_to_complete"
+        max_value = total_levels
+
+    var new_value_int: int = clampi(int(new_value), 1, max_value)
+    GameManager.set_level_list_data(editing_list_name, write_key, new_value_int)
+    _update_last_completion_number(completion_mode, new_value_int)
+    list_settings_edited.emit()
+
+func on_default_is_unlocked_toggled(toggled_on: bool) -> void:
+    var default_is_locked: bool = not toggled_on
+    GameManager.set_level_list_data(editing_list_name, "default_individual_locked", default_is_locked)
+    list_settings_edited.emit()

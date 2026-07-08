@@ -78,11 +78,7 @@ func set_edit_mode(is_edit: bool) -> void:
     move_up_down_buttons.visible = is_edit
     refresh_move_buttons()
     update_current_level_indicator()
-    if level_name:
-        if level_name.to_lower() != level_title.to_lower():
-            title_label.text = "%s (%s)" % [level_title, level_name]
-        else:
-            title_label.text = level_title
+    set_level_name_and_title(level_name, level_title)
 
 func set_level_name_and_title(new_name: String, new_title: String) -> void:
     level_name = new_name

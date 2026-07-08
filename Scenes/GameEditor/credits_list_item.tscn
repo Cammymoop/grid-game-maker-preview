@@ -7,12 +7,18 @@
 offset_right = 178.0
 offset_bottom = 31.0
 script = ExtResource("1_2c1en")
-type_picker = NodePath("OptionButton")
-input_1 = NodePath("RoleInput")
-input_2 = NodePath("NameInput")
+type_picker = NodePath("HBoxContainer/OptionButton")
+input_1 = NodePath("HBoxContainer/RoleInput")
+input_2 = NodePath("HBoxContainer/NameInput")
 
-[node name="OptionButton" type="OptionButton" parent="." unique_id=169733448]
+[node name="HBoxContainer" type="HBoxContainer" parent="." unique_id=992293189]
 layout_mode = 2
+size_flags_horizontal = 3
+alignment = 1
+
+[node name="OptionButton" type="OptionButton" parent="HBoxContainer" unique_id=169733448]
+layout_mode = 2
+alignment = 1
 selected = 0
 item_count = 3
 popup/item_0/text = "Role & Name"
@@ -22,13 +28,13 @@ popup/item_1/id = 1
 popup/item_2/text = "Section"
 popup/item_2/id = 2
 
-[node name="RoleInput" type="LineEdit" parent="." unique_id=1597938675]
+[node name="RoleInput" type="LineEdit" parent="HBoxContainer" unique_id=1597938675]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 4
 placeholder_text = "Role"
 
-[node name="NameInput" type="LineEdit" parent="." unique_id=1378843724]
+[node name="NameInput" type="LineEdit" parent="HBoxContainer" unique_id=1378843724]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 4

@@ -3,12 +3,21 @@ extends PanelContainer
 const GameSelector = preload("res://Scenes/game_selector.gd")
 const MainMenuEffects = preload("res://src/MainMenuEffects.gd")
 
+const UserSettingsPanel = preload("res://Scenes/user_settings_panel.gd")
+
 @export var quit_button: Button
 
 @export var game_selector: GameSelector
 @export var bg_entity_effect: MainMenuEffects
 
+@export var profile_picker: Control
+
+@export var settings_panel_layer: CanvasLayer
+@export var user_settings_panel: UserSettingsPanel
+
 func _ready():
+	user_settings_panel.request_back.connect(on_user_settings_panel_request_back)
+
 	if OS.has_feature("web"):
 		quit_button.hide()
 	quit_button.pressed.connect(get_tree().quit)
@@ -54,3 +63,13 @@ func on_game_changed(_game_name: String) -> void:
 func on_initial_sprite_previews_finished() -> void:
 	await get_tree().process_frame
 	bg_entity_effect.restart()
+
+func on_user_settings_panel_request_back() -> void:
+	show()
+	profile_picker.show()
+	settings_panel_layer.hide()
+
+func show_user_settings_panel() -> void:
+	hide()
+	profile_picker.hide()
+	settings_panel_layer.show()

@@ -60,7 +60,7 @@ layout_mode = 2
 theme_override_font_sizes/font_size = 12
 text = "view credits"
 
-[node name="Control" type="Control" parent="HBoxContainer2" unique_id=1854739564]
+[node name="Spacer" type="Control" parent="HBoxContainer2" unique_id=1854739564]
 custom_minimum_size = Vector2(26, 26)
 layout_mode = 2
 

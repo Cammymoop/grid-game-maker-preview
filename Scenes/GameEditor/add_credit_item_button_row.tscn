@@ -1,0 +1,25 @@
+[gd_scene format=3 uid="uid://cxv4ol3j0obfu"]
+
+[ext_resource type="Texture2D" uid="uid://c71dfd3j0223d" path="res://assets/img/button_icons/plus_small.png" id="1_00a8j"]
+[ext_resource type="Script" uid="uid://jaqs6lnvq71d" path="res://Scenes/GameEditor/add_credit_item_button_row.gd" id="1_inuc8"]
+
+[node name="AddCreditItemButtonRow" type="HBoxContainer" unique_id=263542425 node_paths=PackedStringArray("button")]
+alignment = 1
+script = ExtResource("1_inuc8")
+button = NodePath("HBoxContainer/NewCreditItemButton")
+
+[node name="HBoxContainer" type="HBoxContainer" parent="." unique_id=433261595]
+layout_mode = 2
+size_flags_horizontal = 3
+alignment = 1
+
+[node name="NewCreditItemButton" type="Button" parent="HBoxContainer" unique_id=2089289462]
+layout_mode = 2
+size_flags_vertical = 4
+text = "Add Credit"
+icon = ExtResource("1_00a8j")
+icon_alignment = 2
+
+[node name="Spacer" type="Control" parent="." unique_id=600151234]
+custom_minimum_size = Vector2(26, 26)
+layout_mode = 2

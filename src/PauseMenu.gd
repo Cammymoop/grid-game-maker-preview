@@ -11,6 +11,12 @@ var load_dialog = preload("res://Scenes/LoadLevelDialog.tscn")
 
 var active = false
 
+@export var resume_button: Button
+@export var restart_level_button: Button
+@export var reload_checkpoint_button: Button
+
+@export var regen_museum_button: Button
+
 @export var level_title_edit: LineEdit
 @export var level_subtitle_edit: LineEdit
 
@@ -20,7 +26,8 @@ var active = false
 
 @export var level_editor_controls_help_toggle: CheckButton
 
-@export var play_mode_button: Button
+@export var play_mode_button: ButtonContainer
+@export var go_to_edit_game_button: ButtonContainer
 @export var level_edit_mode_button: Button
 
 @export var web_export_level_button: Button
@@ -40,6 +47,8 @@ var active = false
 
 @export var override_cam_limit_select: OptionButton
 
+@export var level_notes_text_edit: TextEdit
+
 @export var level_list_picker: OptionButton
 
 @export var copy_to_clipboard_button: Button
@@ -51,11 +60,17 @@ var active = false
 
 @export var goto_user_settings_button: Button
 
+@onready var level_notes_min_height: int = level_notes_text_edit.custom_minimum_size.y
+
 func _ready():
-	user_settings_panel.back_to_main_panel.connect(switch_panel.bind("main"))
+	user_settings_panel.request_back.connect(switch_panel.bind("main"))
+	
+	regen_museum_button.pressed.connect(_on_museum_button_pressed)
 	
 	level_editor_controls_help_toggle.gui_input.connect(on_level_editor_controls_help_toggle_gui_input)
 	level_editor_controls_help_toggle.toggled.connect(on_level_editor_controls_help_toggle_pressed)
+	
+	level_notes_text_edit.text_changed.connect(on_level_notes_text_edited)
 	
 	goto_user_settings_button.pressed.connect(switch_panel.bind("user_settings"))
 
@@ -159,13 +174,17 @@ func toggle():
 		pause_menu_closed.emit()
 
 func on_show() -> void:
-	var restart_button = find_child("RestartLevel")
-	restart_button.visible = GameManager.loaded_level_name != ""
+	if GameManager.is_in_level_edit_mode:
+		resume_button.text = "Resume Editor"
+	else:
+		resume_button.text = "Resume"
+
+	restart_level_button.visible = not GameManager.is_in_level_edit_mode
+	reload_checkpoint_button.visible = not GameManager.is_in_level_edit_mode
 	
-	var has_saved_levels: bool = FilesManager.get_level_list(GameManager.cur_game_name).size() > 0
+	regen_museum_button.visible = GameManager.current_level_is_museum
 	
-	var load_button: BaseButton = find_child("LoadLevelButton")
-	load_button.disabled = not has_saved_levels
+	#var has_saved_levels: bool = FilesManager.get_level_list(GameManager.cur_game_name).size() > 0
 	
 	#level_select_button.visible = not GameManager.is_in_level_edit_mode
 	
@@ -222,6 +241,10 @@ func on_show() -> void:
 		var map_editor_overlay: Node = Utility.get_map_editor_overlay()
 		if map_editor_overlay:
 			level_editor_controls_help_toggle.set_pressed_no_signal(map_editor_overlay.is_showing_controls_help())
+		
+		var level_notes: String = MapManager.get_metadata_value("level_notes", "")
+		level_notes_text_edit.text = level_notes
+		adjust_level_notes_edit_height()
 	
 	refresh_level_settings()
 
@@ -237,21 +260,39 @@ func _on_QuitToMenu_pressed():
 	GameManager.change_scene("Menu")
 
 func _on_SaveLevelButton_pressed():
+	do_save_or_save_as()
+
+func do_save_or_save_as_if_edited() -> bool:
 	if not GameManager.is_in_level_edit_mode:
-		return
+		return true
+	var map_editor: = Utility.get_map_editor()
+	if not map_editor:
+		push_warning("No map editor found")
+		return true
+	if not map_editor.has_edited_something:
+		return true
+	return do_save_or_save_as()
+
+func do_save_or_save_as() -> bool:
+	if not GameManager.is_in_level_edit_mode:
+		return true
 
 	if not GameManager.loaded_level_name or not GameManager.loaded_level_is_saved:
 		on_save_as_button_pressed()
+		return false
 	else:
 		var map_editor: = Utility.get_map_editor()
 		if map_editor and map_editor.edit_mode:
 			GameManager.save_edited()
 		GameManager.save_edited_level_as(GameManager.loaded_level_name)
+		return true
 
-func on_save_as_button_pressed() -> void:
+func on_save_as_button_pressed(after_save_as_callable: Callable = Callable()) -> void:
 	var popup: Window = save_dialog.instantiate()
 	add_child(popup)
 	popup.saved_level.connect(level_was_saved.bind(GameManager.loaded_level_name))
+	if after_save_as_callable.is_valid():
+		popup.saved_level.connect(after_save_as_callable.call_deferred)
 	popup.popup_centered()
 	popup.hidden.connect(refresh_level_settings)
 
@@ -264,8 +305,11 @@ func level_was_saved(level_name: String, old_level_name: String) -> void:
 		set_current_level_list_to(current_selected_list, false)
 
 func _on_new_level_button_pressed() -> void:
-	GameManager.new_empty_level()
-	close_pause_menu()
+	if not GameManager.is_in_level_edit_mode:
+		return
+	var map_editor: = Utility.get_map_editor()
+	if map_editor:
+		map_editor.edit_new_level()
 
 func _on_LoadLevelButton_pressed():
 	var popup: Window = load_dialog.instantiate()
@@ -335,10 +379,15 @@ func refresh_level_list_picker(list_of_current_level: String) -> void:
 func _on_back_button_pressed() -> void:
 	switch_panel("main")
 
-
 func _on_museum_button_pressed() -> void:
-	GameManager.new_museum_level()
-	close_pause_menu()
+	if GameManager.is_in_level_edit_mode:
+		var map_editor: = Utility.get_map_editor()
+		if map_editor:
+			map_editor.edit_new_level(true)
+		return
+	else:
+		GameManager.new_museum_level()
+		close_pause_menu()
 
 
 func _on_credits_button_pressed() -> void:
@@ -346,6 +395,9 @@ func _on_credits_button_pressed() -> void:
 	toggle()
 
 func go_to_level_select() -> void:
+	if GameManager.is_in_level_edit_mode:
+		if not do_save_or_save_as_if_edited():
+			return
 	if active:
 		toggle()
 	var level_select_root = Utility.get_level_select_root()
@@ -365,6 +417,8 @@ func switch_to_level_edit_mode() -> void:
 
 func switch_to_non_level_edit_mode() -> void:
 	if not GameManager.is_in_level_edit_mode:
+		return
+	if not do_save_or_save_as_if_edited():
 		return
 	if active:
 		toggle()
@@ -435,14 +489,19 @@ func on_level_editor_controls_help_toggle_pressed(toggled_on: bool) -> void:
 func on_start_level_paused_toggle_toggled(toggled_on: bool) -> void:
 	if GameManager.is_in_level_edit_mode:
 		MapManager.set_level_start_paused(toggled_on)
+		level_metadata_changed.emit()
+
 
 func on_override_cam_limit_select_item_selected(index: int) -> void:
+	if not GameManager.is_in_level_edit_mode:
+		return
 	if index == 0:
 		MapManager.erase_metadata_value("override_enable_camera_limits")
 	elif index == 1:
 		MapManager.set_metadata_value("override_enable_camera_limits", true)
 	else:
 		MapManager.set_metadata_value("override_enable_camera_limits", false)
+	level_metadata_changed.emit()
 
 func on_level_editor_controls_help_toggle_gui_input(event: InputEvent) -> void:
 	if not Input.is_action_just_pressed_by_event("ui_accept", event):
@@ -451,3 +510,19 @@ func on_level_editor_controls_help_toggle_gui_input(event: InputEvent) -> void:
 		var map_editor_overlay: = Utility.get_map_editor_overlay()
 		if map_editor_overlay:
 			map_editor_overlay.switch_controls_overlay_to_gamepad()
+
+func on_level_notes_text_edited(new_notes_text: String) -> void:
+	if not GameManager.is_in_level_edit_mode:
+		return
+	MapManager.set_metadata_value("level_notes", new_notes_text)
+	level_metadata_changed.emit()
+	adjust_level_notes_edit_height()
+
+func adjust_level_notes_edit_height() -> void:
+	var num_lines: int = level_notes_text_edit.get_line_count()
+	if num_lines > 5:
+		level_notes_text_edit.custom_minimum_size.y = 24 * 5
+		level_notes_text_edit.scroll_fit_content_height = false
+	else:
+		level_notes_text_edit.custom_minimum_size.y = level_notes_min_height
+		level_notes_text_edit.scroll_fit_content_height = true

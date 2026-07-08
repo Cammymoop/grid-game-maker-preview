@@ -21,6 +21,9 @@ var level_item_scene: = preload("res://Scenes/level_list_item.tscn")
 
 var level_list_name: String = ""
 
+var has_list_below: bool = false
+var has_list_above: bool = false
+
 const CTX_MOVE_UP = 3
 const CTX_MOVE_DOWN = 4
 const CTX_MOVE_TO_TOP = 5
@@ -29,6 +32,7 @@ const CTX_MOVE_TO_BOTTOM = 6
 const CTX_MOVE_TO_LIST_ABOVE = 12 
 const CTX_MOVE_TO_LIST_BELOW = 13 
 const CTX_REMOVE_FROM_LIST = 14 
+const CTX_REMOVE_FROM_ALL_LISTS = 15 
 
 
 func _ready() -> void:
@@ -172,21 +176,30 @@ func on_level_item_request_context_menu(level_item: LevelListItem) -> void:
         Utility.popupmenu_set_enabled_for_id(context_menu, CTX_MOVE_DOWN, false)
         Utility.popupmenu_set_enabled_for_id(context_menu, CTX_MOVE_TO_BOTTOM, false)
     
-    var has_next_list: bool = GameManager.level_list_has_next(level_list_name)
-    var has_previous_list: bool = GameManager.level_list_has_previous(level_list_name)
     var total_lists: int = GameManager.get_list_of_level_lists().size()
 
     context_menu.add_separator()
-    if is_list_of_unlisted_levels:
-        if total_lists >= 1:
-            context_menu.add_item("Move to first list", CTX_MOVE_TO_LIST_ABOVE)
-            context_menu.add_item("Move to last list", CTX_MOVE_TO_LIST_BELOW)
-    else:
-        if has_next_list:
-            context_menu.add_item("Move to next list", CTX_MOVE_TO_LIST_BELOW)
-        if has_previous_list:
-            context_menu.add_item("Move to previous list", CTX_MOVE_TO_LIST_ABOVE)
+    if not is_list_of_unlisted_levels:
+        context_menu.add_item("Move to next list", CTX_MOVE_TO_LIST_BELOW)
+        if not has_list_below:
+            context_menu.set_item_disabled(context_menu.item_count - 1, true)
+        context_menu.add_item("Move to previous list", CTX_MOVE_TO_LIST_ABOVE)
+        if not has_list_above:
+            context_menu.set_item_disabled(context_menu.item_count - 1, true)
+
+    if total_lists >= 1:
+        context_menu.add_item("Move to first list", CTX_MOVE_TO_LIST_ABOVE)
+        if not has_list_above:
+            context_menu.set_item_disabled(context_menu.item_count - 1, true)
+        context_menu.add_item("Move to last list", CTX_MOVE_TO_LIST_BELOW)
+        if not has_list_above:
+            context_menu.set_item_disabled(context_menu.item_count - 1, true)
+
+    if not is_list_of_unlisted_levels:
         context_menu.add_item("Remove from this list", CTX_REMOVE_FROM_LIST)
+    
+    if GameManager.is_level_in_any_list(level_item.level_name):
+        context_menu.add_item("Remove level from all lists", CTX_REMOVE_FROM_ALL_LISTS)
 
     context_menu.id_pressed.connect(on_context_menu_id_pressed.bind(level_item))
     add_child(context_menu)
@@ -226,8 +239,10 @@ func on_context_menu_id_pressed(context_menu_id: int, for_list_item: LevelListIt
     elif context_menu_id == CTX_REMOVE_FROM_LIST:
         if not is_list_of_unlisted_levels:
             GameManager.remove_level_from_list(for_list_item.level_name, level_list_name)
-            edited.emit()
-            reload_list_info()
+            list_membership_changed.emit()
+    elif context_menu_id == CTX_REMOVE_FROM_ALL_LISTS:
+        GameManager.remove_level_from_all_lists(for_list_item.level_name)
+        list_membership_changed.emit()
     elif context_menu_id in [CTX_MOVE_TO_LIST_ABOVE, CTX_MOVE_TO_LIST_BELOW]:
         if is_list_of_unlisted_levels:
             var total_lists: int = GameManager.get_list_of_level_lists().size()
