@@ -31,8 +31,13 @@ signal request_edit_level(level_name: String)
 
 @export var highlight_rect: ColorRect
 
+var is_editing_locked: bool = false
+
 var level_name: String = ""
 var level_title: String = ""
+
+var level_list_name: String = ""
+var is_in_bundled_list: bool = false
 
 var _not_in_a_list: bool = false
 
@@ -94,10 +99,15 @@ func update_current_level_indicator() -> void:
         return
     if GameManager.cur_scene == "Play" and GameManager.loaded_level_name:
         if GameManager.loaded_level_name == level_name:
-            _is_current_level = true
-            current_level_icon.show()
-            highlight_rect.show()
-            refresh_icons_and_text()
+            _is_current_level = false
+            if not GameManager.current_level_list and _not_in_a_list:
+                _is_current_level = true
+            elif GameManager.current_level_list == level_list_name:
+                _is_current_level = true
+            if _is_current_level:
+                current_level_icon.show()
+                highlight_rect.show()
+                refresh_icons_and_text()
 
 func set_is_completed_is_played(new_is_completed: bool, new_is_played: bool) -> void:
     is_completed = new_is_completed
@@ -125,6 +135,10 @@ func refresh_icons_and_text() -> void:
     if _is_current_level:
         title_label.add_theme_font_override("font", current_level_font)
         title_label.add_theme_font_size_override("font_size", current_level_font_size)
+    
+    if is_editing_locked and is_in_bundled_list:
+        edit_level_button.disabled = true
+        edit_level_button.tooltip_text = "Editing locked in released version, go to Edit Game to unlock"
 
 func set_is_unlocked(new_is_unlocked: bool) -> void:
     is_unlocked = new_is_unlocked

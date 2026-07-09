@@ -79,6 +79,11 @@ func update_title_text() -> void:
     
     game_identifier_label.text = GameManager.get_identified_game_name()
 
+func get_name_with_identifier_or_question_mark(game_name: String) -> String:
+    if not game_name.contains("/"):
+        return "?/" + game_name
+    return game_name
+
 func get_unqualified_game_name(game_name: String) -> String:
     if game_name.contains("/"):
         return game_name.split("/", true, 1)[1].strip_edges()
@@ -87,7 +92,7 @@ func get_unqualified_game_name(game_name: String) -> String:
 func get_display_title(game_name: String, non_unique_with_id: bool) -> String:
     var title: String = game_titles.get(game_name, get_unqualified_game_name(game_name))
     if non_unique_with_id and title in non_unique_titles:
-        return "%s (%s)" % [title, game_name]
+        return "%s (%s)" % [title, get_name_with_identifier_or_question_mark(game_name)]
     return title
 
 func refresh_game_list() -> void:

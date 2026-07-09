@@ -441,6 +441,12 @@ func _unique_image_name(image_base_name: String, bundled_image: bool = true) -> 
             return ""
     return bundled_image_name
 
+func is_using_any_shared_images() -> bool:
+    for tex_spec_item in texture_spec:
+        if tex_spec_item['type'] == 'local_file' and tex_spec_item.get('is_shared', true):
+            return true
+    return false
+
 func bundle_all_used_shared_images() -> bool:
     # keep copy to revert to if any operations fail
     var old_spec: = texture_spec
@@ -681,3 +687,19 @@ func has_enabled_shared_images() -> bool:
         if tex_spec['type'] == 'local_file' and tex_spec.get('is_shared', true):
             return true
     return false
+
+func get_all_used_bundled_texture_ids() -> Array[int]:
+    var bundled_texture_ids: Array[int] = []
+    for tex_spec in texture_spec:
+        if tex_spec['type'] == 'local_file' and not tex_spec.get('is_shared', true):
+            bundled_texture_ids.append(int(tex_spec['texture_id']))
+    return bundled_texture_ids
+
+func get_bundled_texture_image_name(texture_id: int) -> String:
+    for tex_spec_item in texture_spec:
+        if tex_spec_item['texture_id'] != texture_id:
+            return ""
+        if not tex_spec_item['type'] == 'local_file' or tex_spec_item.get('is_shared', true):
+            return ""
+        return tex_spec_item['image_name']
+    return ""

@@ -215,6 +215,12 @@ func on_cursor_move_activated() -> void:
 		if _placing_text_offset != Vector2.ZERO:
 			set_placing_text_offset(Vector2.ZERO)
 
+func hot_start_edit_mode() -> void:
+	if GameManager.current_game_is_release_locked and not GameManager.is_live_edit():
+		if GameManager.loaded_level_name in GameManager.get_list_of_all_bundled_levels():
+			GameManager.set_live_edit_mode_enabled(true)
+	switch_edit_mode(true)
+
 func switch_edit_mode(edit_enabled: bool, do_save_state: bool = true) -> void:
 	edit_mode = edit_enabled
 	visible = edit_enabled

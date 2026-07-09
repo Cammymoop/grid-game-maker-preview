@@ -259,12 +259,15 @@ func get_level_file_bytes(game_name: String, level_name: String) -> PackedByteAr
 	return bytes
 
 
-func get_game_definition(game_name: String) -> Dictionary:
+func get_game_definition(game_name: String, skip_fixes: bool = false) -> Dictionary:
 	if not game_exists(game_name):
 		push_error("Game %s does not exist" % [game_name])
 		return {}
 	var file_name = get_game_definition_path(game_name)
-	return _get_dict_from_json_file(file_name)
+	var definition_data: = _get_dict_from_json_file(file_name)
+	if not skip_fixes:
+		_fix_name_in_game_definition(definition_data, game_name)
+	return definition_data
 
 func iterate_directory_flat_dirlist(directory_path: String) -> Array:
 	return _iter_directory_flat_filtered(directory_path, [], false, true)
@@ -497,6 +500,25 @@ func load_local_image_as_texture(image_name: String, for_game_name: String = "")
 			return null
 		var bundled_image_path: = get_game_images_dir(for_game_name).path_join(image_name)
 		return load_file_as_texture(bundled_image_path)
+
+func get_local_image_as_bytes(image_name: String, for_game_name: String = "") -> PackedByteArray:
+	image_name = _sanitize_image_filename(image_name)
+	if for_game_name and not game_exists(for_game_name):
+		push_error("Game %s does not exist" % [for_game_name])
+		return []
+	var image_path: = ""
+	if for_game_name:
+		image_path = get_game_images_dir(for_game_name).path_join(image_name)
+	else:
+		image_path = get_shared_images_dir().path_join(image_name)
+	if not smarter_file_exists(image_path):
+		push_error("Image %s does not exist" % [image_path])
+		return []
+	var file_bytes: = FileAccess.get_file_as_bytes(image_path)
+	if not file_bytes:
+		push_error("Error getting image bytes from %s" % [image_path])
+		return []
+	return file_bytes
 
 func local_image_file_exists(image_filename: String, for_game_name: String = "") -> bool:
 	var file_path: String = get_shared_images_dir().path_join(image_filename)
@@ -752,7 +774,20 @@ func fix_game_name(game_name: String) -> void:
 	if not game_definition:
 		push_error("Error parsing game definition at file: " + game_def_path)
 		return
-	game_definition['game_name'] = game_name.strip_edges()
+	_fix_name_in_game_definition(game_definition, game_name)
+
+func _fix_name_in_game_definition(game_definition: Dictionary, correct_name: String) -> void:
+	var internal_game_name: = get_identified_game_name_from_data(game_definition)
+	if internal_game_name == correct_name:
+		return
+
+	if not correct_name.contains("/"):
+		game_definition["identifier"] = ""
+		game_definition["game_name"] = correct_name
+	else:
+		game_definition["identifier"] = correct_name.split("/", true, 1)[0].strip_edges()
+		game_definition["game_name"] = correct_name.split("/", true, 1)[1].strip_edges()
+	var game_def_path: = get_game_definition_path(correct_name)
 	if not serialize_and_save_data_to_json(game_definition, game_def_path.get_base_dir(), GAME_DEF_FILENAME, FORMAT_GAME_JSON):
 		push_error("Error saving fixed game definition at file: " + game_def_path)
 		return
@@ -896,3 +931,6 @@ func save_game_save_for_player(player_id: String, game_name: String, game_save_d
 	var game_dir_name: = get_game_dir_from_name(game_name)
 	var profile_game_saves_dir: = _data_path(local_data_subdir, player_id, game_saves_local_subdir)
 	return serialize_and_save_data_to_json(game_save_data, profile_game_saves_dir, game_dir_name + ".json", FORMAT_GAME_JSON)
+
+func save_released_version_zip(game_name: String) -> String:
+	return ""

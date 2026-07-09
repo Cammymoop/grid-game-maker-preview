@@ -94,6 +94,19 @@ thickness = 12
 HSeparator/constants/separation = 24
 HSeparator/styles/separator = SubResource("StyleBoxLine_retx3")
 
+[sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_retx3"]
+blend_mode = 3
+
+[sub_resource type="Gradient" id="Gradient_xh6ve"]
+offsets = PackedFloat32Array(0.0015873016, 0.26825398, 0.36031747, 0.5222222, 0.89047617)
+colors = PackedColorArray(0.45452422, 0.45452428, 0.45452422, 1, 0.6365314, 0.6365314, 0.63653135, 1, 0.8217887, 0.82178867, 0.82178867, 1, 0.7205548, 0.72055507, 0.7205548, 1, 0.6296744, 0.6296749, 0.62967443, 1)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_42d0a"]
+gradient = SubResource("Gradient_xh6ve")
+fill_from = Vector2(0.104700856, 0.8440171)
+fill_to = Vector2(0.23717949, 0.73717946)
+repeat = 2
+
 [node name="GameEditor" type="Control" unique_id=1534913968]
 layout_mode = 3
 anchors_preset = 15
@@ -1209,6 +1222,81 @@ metadata/_edit_lock_ = true
 [node name="Effects" parent="FallingEntities/CanvasLayer2" parent_id_path=PackedInt32Array(1697529902, 1037858481) index="0" unique_id=477139096]
 size_factor = 0.5
 max_brightness = 0.3
+
+[node name="LockedOverlay" type="CanvasLayer" parent="." unique_id=1223156426]
+layer = 3
+visible = false
+
+[node name="TextureRect" type="TextureRect" parent="LockedOverlay" unique_id=725389542]
+material = SubResource("CanvasItemMaterial_retx3")
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 0
+texture = SubResource("GradientTexture2D_42d0a")
+
+[node name="CenterContainer" type="CenterContainer" parent="LockedOverlay" unique_id=828924042]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="PanelContainer" type="PanelContainer" parent="LockedOverlay/CenterContainer" unique_id=1009138923]
+custom_minimum_size = Vector2(240, 240)
+layout_mode = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="LockedOverlay/CenterContainer/PanelContainer" unique_id=1572143955]
+layout_mode = 2
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 12
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 12
+
+[node name="CenterContainer" type="CenterContainer" parent="LockedOverlay/CenterContainer/PanelContainer/MarginContainer" unique_id=770486301]
+layout_mode = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="LockedOverlay/CenterContainer/PanelContainer/MarginContainer/CenterContainer" unique_id=478289297]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="LockedOverlay/CenterContainer/PanelContainer/MarginContainer/CenterContainer/VBoxContainer" unique_id=1409621091]
+layout_mode = 2
+theme_override_font_sizes/font_size = 34
+text = "Released Version"
+horizontal_alignment = 1
+
+[node name="Label2" type="Label" parent="LockedOverlay/CenterContainer/PanelContainer/MarginContainer/CenterContainer/VBoxContainer" unique_id=1589489321]
+layout_mode = 2
+text = "Editing will change to an edited version
+Choose an option to unlock for editing:"
+horizontal_alignment = 1
+
+[node name="Spacer" type="Control" parent="LockedOverlay/CenterContainer/PanelContainer/MarginContainer/CenterContainer/VBoxContainer" unique_id=649009204]
+custom_minimum_size = Vector2(0, 22)
+layout_mode = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="LockedOverlay/CenterContainer/PanelContainer/MarginContainer/CenterContainer/VBoxContainer" unique_id=536516361]
+layout_mode = 2
+theme_override_constants/separation = 20
+alignment = 1
+
+[node name="Button" type="Button" parent="LockedOverlay/CenterContainer/PanelContainer/MarginContainer/CenterContainer/VBoxContainer/HBoxContainer" unique_id=98077554]
+layout_mode = 2
+theme_type_variation = &"BigTextButton"
+text = "Edit As"
+
+[node name="Button2" type="Button" parent="LockedOverlay/CenterContainer/PanelContainer/MarginContainer/CenterContainer/VBoxContainer/HBoxContainer" unique_id=1096518228]
+layout_mode = 2
+theme_type_variation = &"BigTextButton"
+text = "Edit Copy As"
+
+[node name="Button3" type="Button" parent="LockedOverlay/CenterContainer/PanelContainer/MarginContainer/CenterContainer/VBoxContainer/HBoxContainer" unique_id=1503447333]
+layout_mode = 2
+size_flags_vertical = 4
+text = "Change Identifier
+for Current Profile"
 
 [connection signal="text_changed" from="MarginContainer/UIRoot/TabContainer/GameDefinition/HBoxContainer/VBoxContainer/TitleInput" to="MarginContainer/UIRoot/TabContainer/GameDefinition" method="_on_title_input_text_changed"]
 [connection signal="editing_toggled" from="MarginContainer/UIRoot/TabContainer/GameDefinition/HBoxContainer/VBoxContainer/MarginContainer/HBoxContainer/NameInput" to="MarginContainer/UIRoot/TabContainer/GameDefinition" method="_on_name_input_editing_toggled"]

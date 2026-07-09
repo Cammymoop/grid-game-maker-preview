@@ -33,6 +33,8 @@ var level_select_root: LevelSelectUIRoot
 
 var any_edited: bool = false
 
+var is_editing_locked: bool = false
+
 const CTX_MOVE_UP = 3
 const CTX_MOVE_DOWN = 4
 const CTX_MOVE_TO_TOP = 5
@@ -68,13 +70,21 @@ func is_in_list_settings_mode() -> bool:
     return editing_settings_of_list != ""
 
 func refresh() -> void:
-    edit_lists_button_container.visible = GameManager.is_in_level_edit_mode
-    if is_in_list_settings_mode():
+    is_editing_locked = not GameManager.is_in_level_edit_mode or GameManager.current_game_is_release_locked
+    refresh_editing_locked()
+
+    if is_editing_locked or (editing_settings_of_list == "" and not is_rearranging_lists):
+        editing_settings_of_list = ""
+        is_rearranging_lists = false
+        refresh_level_lists()
+    elif is_in_list_settings_mode():
         refresh_list_settings()
     elif is_rearranging_lists:
         refresh_rearrangable_lists()
-    else:
-        refresh_level_lists()
+
+func refresh_editing_locked() -> void:
+    rearrange_lists_button.disabled = is_editing_locked
+    add_new_list_button.disabled = is_editing_locked
 
 func refresh_list_settings() -> void:
     rearrange_lists_button.hide()
@@ -90,8 +100,9 @@ func refresh_list_settings() -> void:
 func refresh_level_lists() -> void:
     list_scroll_container.show()
     rearrange_lists_button.show()
-    edit_lists_button_container.show()
     rearrange_lists_back_container.hide()
+
+    edit_lists_button_container.visible = GameManager.is_in_level_edit_mode
 
     clear_level_lists()
     if GameManager.is_in_level_edit_mode:
@@ -116,6 +127,8 @@ func _setup_level_list(lev_list: SingleLevelList) -> void:
     lev_list.edited.connect(on_level_list_edited)
     lev_list.list_membership_changed.connect(on_level_list_membership_changed)
     lev_list.request_edit_list_settings.connect(on_req_edit_list_settings)
+    if is_editing_locked:
+        lev_list.lock_editing()
 
 func refresh_rearrangable_lists() -> void:
     list_scroll_container.show()
@@ -269,6 +282,8 @@ func back_to_select_from_list_settings() -> void:
 
 
 func save_list_order() -> void:
+    if is_editing_locked:
+        return
     if editing_settings_of_list or not level_list_container.get_child_count() > 0:
         return
     if level_list_container.get_child(0) is SingleLevelList:
@@ -311,9 +326,14 @@ func on_rearrangable_list_request_context_menu(list_item: RearrangableListItem) 
     context_menu.add_separator()
     context_menu.add_item("Remove List", CTX_REMOVE_LIST)
     context_menu.id_pressed.connect(on_rearrangable_list_context_menu_id_pressed.bind(list_item))
+    if is_editing_locked:
+        for idx in context_menu.get_item_count():
+            context_menu.set_item_disabled(idx, true)
     Utility.popup_context_menu_at_mouse(context_menu)
 
 func on_rearrangable_list_context_menu_id_pressed(context_menu_id: int, list_item: RearrangableListItem) -> void:
+    if is_editing_locked:
+        return
     if context_menu_id == CTX_REMOVE_LIST:
         GameManager.remove_level_list(list_item.get_list_name())
         any_edited = true
@@ -334,6 +354,8 @@ func on_rearrange_lists_back_button_pressed() -> void:
     refresh()
 
 func on_rearrangable_list_request_remove(list_item: RearrangableListItem) -> void:
+    if is_editing_locked:
+        return
     GameManager.remove_level_list(list_item.get_list_name())
     any_edited = true
     refresh()

@@ -57,6 +57,12 @@ func _on_LoadFileButton_pressed():
 		GameManager.load_editor_autosave()
 		close_dialog()
 		return
+	
+	if GameManager.current_game_is_release_locked:
+		var all_bundled_levels: = GameManager.get_list_of_all_bundled_levels()
+		if selected_level in all_bundled_levels:
+			GlobalToaster.show_toast_message("Cannot edit bundled level, locked in released version", 2.0)
+			return
 
 	if not GameManager.is_in_level_edit_mode:
 		push_error("Trying to load a level from load level dialog while not in level edit mode")

@@ -38,6 +38,17 @@ func _on_SaveFileButton_pressed():
 	if map_editor and map_editor.edit_mode:
 		GameManager.save_edited()
 	var level_name: String = find_child("LevelNameInput").text.strip_edges()
+	if GameManager.current_game_is_release_locked:
+		var sanitized_bundled_level_names: Array[String] = []
+		for bundled_level_name in GameManager.get_list_of_all_bundled_levels():
+			sanitized_bundled_level_names.append(FilesManager.sanitize_level_filename(bundled_level_name))
+		var sanitized_save_as_name: String = FilesManager.sanitize_level_filename(level_name)
+		if sanitized_save_as_name in sanitized_bundled_level_names:
+			GlobalToaster.show_toast_message("Cannot overwrite bundled level, locked in released version")
+			close_dialog()
+			return
+		if GameManager.current_level_list and GameManager.current_level_list in GameManager.get_list_of_level_lists(true):
+			GameManager.current_level_list = ""
 	GameManager.save_edited_level_as(level_name)
 	saved_level.emit(level_name)
 	close_dialog()

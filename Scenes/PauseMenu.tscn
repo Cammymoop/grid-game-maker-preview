@@ -81,7 +81,7 @@ corner_radius_bottom_right = 3
 corner_radius_bottom_left = 3
 corner_detail = 5
 
-[node name="PauseMenu" type="Control" unique_id=1906408289 node_paths=PackedStringArray("resume_button", "restart_level_button", "reload_checkpoint_button", "regen_museum_button", "level_title_edit", "level_subtitle_edit", "non_editor_stuff", "editor_stuff", "level_select_button", "level_editor_controls_help_toggle", "play_mode_button", "go_to_edit_game_button", "level_edit_mode_button", "web_export_level_button", "background_editor_container", "background_editor", "darkener", "level_size_label", "user_settings_panel", "start_level_paused_toggle", "override_cam_limit_select", "level_notes_text_edit", "level_list_picker", "copy_to_clipboard_button", "paste_from_clipboard_button", "save_as_button", "level_info_panel", "goto_user_settings_button") groups=["PauseMenu"]]
+[node name="PauseMenu" type="Control" unique_id=1906408289 node_paths=PackedStringArray("resume_button", "restart_level_button", "reload_checkpoint_button", "regen_museum_button", "level_title_edit", "level_subtitle_edit", "non_editor_stuff", "editor_stuff", "level_select_button", "level_editor_controls_help_toggle", "play_mode_button", "go_to_edit_game_button", "level_edit_mode_button", "web_export_level_button", "background_editor_container", "background_editor", "darkener", "level_size_label", "user_settings_panel", "start_level_paused_toggle", "override_cam_limit_select", "level_notes_text_edit", "level_list_picker", "copy_to_clipboard_button", "paste_from_clipboard_button", "save_button", "save_as_button", "level_info_panel", "goto_user_settings_button") groups=["PauseMenu"]]
 process_mode = 3
 layout_mode = 3
 anchors_preset = 15
@@ -116,6 +116,7 @@ level_notes_text_edit = NodePath("HBoxContainer/CenterContainer/VBoxContainer/Le
 level_list_picker = NodePath("HBoxContainer/CenterContainer/VBoxContainer/LevelSettingsPausePanel/MarginContainer/VBoxContainer/GridContainer/LevelListPicker")
 copy_to_clipboard_button = NodePath("HBoxContainer/CenterContainer/VBoxContainer/MainPausePanel/MarginContainer/VBoxContainer/EditorStuff/HBoxContainer6/VBoxContainer/HBoxContainer4/CopyLevelToClipboard")
 paste_from_clipboard_button = NodePath("HBoxContainer/CenterContainer/VBoxContainer/MainPausePanel/MarginContainer/VBoxContainer/EditorStuff/HBoxContainer6/VBoxContainer/PasteLevel/PasteLevelButton")
+save_button = NodePath("HBoxContainer/CenterContainer/VBoxContainer/MainPausePanel/MarginContainer/VBoxContainer/EditorStuff/HBoxContainer3/HBoxContainer5/LevelFileActionButtons/VBoxContainer/SaveLevelButton")
 save_as_button = NodePath("HBoxContainer/CenterContainer/VBoxContainer/MainPausePanel/MarginContainer/VBoxContainer/EditorStuff/HBoxContainer3/HBoxContainer5/LevelFileActionButtons/VBoxContainer/SaveAsButton")
 level_info_panel = NodePath("HBoxContainer/CenterContainer/VBoxContainer/LevelInfoPanel")
 goto_user_settings_button = NodePath("HBoxContainer/CenterContainer/VBoxContainer/MainPausePanel/MarginContainer/VBoxContainer/NonEditorStuff/UserSettingsButton")

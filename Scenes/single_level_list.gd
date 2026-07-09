@@ -7,11 +7,12 @@ signal edited()
 signal request_edit_list_settings(list_name: String)
 signal list_membership_changed()
 
+var is_editing_locked: bool = false
+
 var level_item_scene: = preload("res://Scenes/level_list_item.tscn")
 
 @export var list_name_label: Label
 @export var level_item_container: Container
-@export var edit_list_settings_button: Button
 @export var edit_settings_icon_button: ButtonContainer
 @export var export_list_button: Button
 
@@ -20,6 +21,7 @@ var level_item_scene: = preload("res://Scenes/level_list_item.tscn")
 @export var is_list_of_unlisted_levels: bool = false
 
 var level_list_name: String = ""
+var is_bundled_list: bool = false
 
 var has_list_below: bool = false
 var has_list_above: bool = false
@@ -42,15 +44,17 @@ func _ready() -> void:
     export_list_button.pressed.connect(on_export_list_button_pressed)
     remove_list_button.pressed.connect(on_remove_list_button_pressed)
 
-    edit_list_settings_button.pressed.connect(on_edit_list_settings_button_pressed)
     edit_settings_icon_button.pressed.connect(on_edit_list_settings_button_pressed)
-    #edit_list_settings_button.visible = _is_in_edit_mode()
     edit_settings_icon_button.visible = _is_in_edit_mode()
     export_list_button.visible = _is_in_edit_mode()
     if is_list_of_unlisted_levels:
-        #edit_list_settings_button.visible = false
         edit_settings_icon_button.visible = false
         export_list_button.visible = false
+
+func lock_editing() -> void:
+    is_editing_locked = true
+    edit_settings_icon_button.disabled = true
+    remove_list_button.disabled = true
 
 func on_edit_list_settings_button_pressed() -> void:
     request_edit_list_settings.emit(level_list_name)
@@ -79,11 +83,13 @@ func load_unlisted_levels() -> void:
     level_list_name = "NONE"
     is_list_of_unlisted_levels = true
     list_name_label.text = "NO LIST"
+    is_bundled_list = false
     setup_levels({})
 
 func set_level_list_name(new_level_list_name: String) -> void:
     level_list_name = new_level_list_name
     list_name_label.text = level_list_name
+    is_bundled_list = GameManager.is_level_list_bundled(level_list_name)
 
 func setup_levels(level_list_info: Dictionary) -> void:
     clear_level_items()
@@ -121,11 +127,15 @@ func _add_level_item(with_level_name: String, with_level_title: String, as_playe
     var this_is_unlocked: bool = with_level_name in unlocked_levels
 
     var level_item: Control = level_item_scene.instantiate()
+    level_item.is_editing_locked = is_editing_locked
+    level_item.is_in_bundled_list = is_bundled_list
     level_item.set_level_name_and_title(with_level_name, with_level_title)
-    var is_edit: = _is_in_edit_mode()
-    level_item.set_edit_mode(is_edit)
     if is_list_of_unlisted_levels:
         level_item.not_in_a_list()
+    else:
+        level_item.level_list_name = level_list_name
+    var is_edit: = _is_in_edit_mode()
+    level_item.set_edit_mode(is_edit)
     if not is_edit:
         level_item.set_is_completed_is_played(as_completed, as_played)
         level_item.set_is_unlocked(this_is_unlocked)

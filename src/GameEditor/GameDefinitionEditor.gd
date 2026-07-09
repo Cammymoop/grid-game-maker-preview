@@ -459,7 +459,10 @@ func renaming_game_dir(is_changing_identifier: bool = false) -> void:
 	update_identifier_label()
 
 func update_identifier_label() -> void:
-	game_identifier_label.text = GameManager.get_game_identifier() + "/"
+	var identifier: = GameManager.get_game_identifier()
+	if not identifier:
+		identifier = "?"
+	game_identifier_label.text = identifier + "/"
 	
 #func _open_save_as_dialog(new_game_dir_name: String = "") -> void:
 	#var save_as_dialog: = save_as_dialog_scn.instantiate() as Window

@@ -54,6 +54,7 @@ var active = false
 @export var copy_to_clipboard_button: Button
 @export var paste_from_clipboard_button: Button
 
+@export var save_button: Button
 @export var save_as_button: Button
 
 @export var level_info_panel: Control
@@ -205,6 +206,18 @@ func on_show() -> void:
 	non_editor_stuff.visible = not GameManager.is_in_level_edit_mode
 	
 	if GameManager.is_in_level_edit_mode:
+		save_button.disabled = false
+		if GameManager.current_game_is_release_locked:
+			if GameManager.loaded_level_name in GameManager.get_list_of_all_bundled_levels():
+				if not GameManager.is_live_edit():
+					GameManager.set_live_edit_mode_enabled(true)
+					live_edit_mode_toggle.set_pressed_no_signal(true)
+				live_edit_mode_toggle.disabled = true
+				live_edit_mode_toggle.tooltip_text = "Live edit only for bundled levels in released version"
+				live_edit_mode_toggle.tooltip_text += "\nGo to Game Edit to unlock editing"
+				
+				save_button.disabled = true
+
 		var current_level_list: String = GameManager.current_level_list
 		if not current_level_list:
 			current_level_list = GameManager.get_list_containing_level(GameManager.loaded_level_name)
@@ -308,6 +321,8 @@ func level_was_saved(level_name: String, old_level_name: String) -> void:
 		var current_selected_list: String = Utility.opbtn_get_selected_text(level_list_picker)
 		if current_selected_list == "[No List]":
 			current_selected_list = ""
+		if GameManager.current_game_is_release_locked:
+			current_selected_list = ""
 		set_current_level_list_to(current_selected_list, false)
 
 func _on_new_level_button_pressed() -> void:
@@ -329,6 +344,9 @@ func _on_resume_button_pressed() -> void:
 	close_pause_menu()
 
 func _on_live_edit_mode_toggle_toggled(toggled_on: bool) -> void:
+	if GameManager.current_game_is_release_locked:
+		if GameManager.loaded_level_name in GameManager.get_list_of_all_bundled_levels():
+			return
 	GameManager.set_live_edit_mode_enabled(toggled_on)
 
 func on_level_title_edited(new_title: String) -> void:
@@ -369,6 +387,8 @@ func refresh_level_settings() -> void:
 func refresh_level_list_picker(list_of_current_level: String) -> void:
 	level_list_picker.clear()
 	level_list_picker.add_item("[No List]")
+	if GameManager.current_game_is_release_locked:
+		return
 	for list_name in GameManager.get_list_of_level_lists():
 		level_list_picker.add_item(list_name)
 
@@ -414,7 +434,7 @@ func switch_to_level_edit_mode() -> void:
 	GameManager.set_live_edit_mode_enabled(false)
 	var map_editor = Utility.get_map_editor()
 	if map_editor:
-		map_editor.switch_edit_mode(true)
+		map_editor.hot_start_edit_mode()
 
 func switch_to_non_level_edit_mode() -> void:
 	if not GameManager.is_in_level_edit_mode:
@@ -456,6 +476,8 @@ func level_list_picked(index: int) -> void:
 	set_current_level_list_to(list_name, true)
 
 func set_current_level_list_to(list_name: String, show_toast: bool) -> void:
+	if GameManager.current_game_is_release_locked:
+		return
 	if not list_name:
 		GameManager._remove_level_from_all_lists(GameManager.loaded_level_name)
 		GameManager.current_level_list = ""

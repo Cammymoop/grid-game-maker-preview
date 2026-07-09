@@ -77,6 +77,13 @@ var default_bg_style: Dictionary = {}
 
 var non_bundled_level_lists: Array[Dictionary] = []
 
+var default_empty_release_info: Dictionary = {
+	"edited": true,
+	"base_version": [0, 0],
+	"next_version": [0, 1],
+	"release_hash": "",
+}
+
 var scenes: = {
 	"Menu": "res://Scenes/Menu.tscn",
 	"Loading": "res://Scenes/Loading.tscn",
@@ -234,7 +241,7 @@ func _ready():
 	if not loaded_default_game:
 		if builtin_default_game_file:
 			builtin_default_game_definition = FilesManager._get_dict_from_json_file(builtin_default_game_file)
-			load_game_definition_data(builtin_default_game_definition)
+			load_game_definition_data(builtin_default_game_definition, false)
 			start_managers()
 		else:
 			new_empty_game_definition(FilesManager.get_unique_game_name(Utility.random_animal() + " Game"))
@@ -318,7 +325,12 @@ func describe_movement_mode(mode: int) -> String:
 	return ""
 
 func get_profile_identifier() -> String:
-	return player_profile.get_profile_setting("default_identifier", "")
+	var raw_identifier: String = player_profile.get_profile_setting("default_identifier", "")
+	return sanitize_identifier(raw_identifier)
+
+func set_profile_identifier(new_identifier: String) -> void:
+	var sanitized_identifier: = sanitize_identifier(new_identifier)
+	player_profile.set_profile_setting("default_identifier", sanitized_identifier)
 
 func new_empty_game_definition(with_name: String = "") -> void:
 	if not with_name:
@@ -333,6 +345,7 @@ func new_empty_game_definition(with_name: String = "") -> void:
 	var empty_game: = {
 		"game_name": with_name,
 		"game_identifier": get_profile_identifier(),
+		"release_info": default_empty_release_info.duplicate_deep(),
 		"textures": TextureManager.get_default_texture_spec(),
 		"game_settings": {
 			"pixel_scale": 2,
@@ -342,7 +355,7 @@ func new_empty_game_definition(with_name: String = "") -> void:
 		"tile_definitions": {},
 		"level_lists": [],
 	}
-	load_game_definition_data(empty_game)
+	load_game_definition_data(empty_game, false)
 
 func put_all_existing_levels_into_single_level_list() -> void:
 	var all_levels: = FilesManager.get_level_list(get_identified_game_name())
@@ -378,9 +391,9 @@ func update_bundled_level_list_order(new_list_names: Array) -> void:
 
 func load_game_definition_from_file(game_name) -> void:
 	var definition = FilesManager.get_game_definition(game_name)
-	load_game_definition_data(definition)
+	load_game_definition_data(definition, true)
 
-func load_game_definition_data(definition_data: Dictionary) -> void:
+func load_game_definition_data(definition_data: Dictionary, from_file: bool) -> void:
 	game_definition = definition_data.duplicate_deep()
 	_unmodified_game_definition = definition_data.duplicate_deep()
 	is_in_level_edit_mode = false
@@ -390,7 +403,11 @@ func load_game_definition_data(definition_data: Dictionary) -> void:
 	
 	_set_game_name(definition_data['game_name'], false)
 	_set_game_identifier(definition_data.get("game_identifier", ""))
-	loaded_from_game_name = get_identified_game_name()
+	
+	if from_file:
+		loaded_from_game_name = get_identified_game_name()
+	else:
+		loaded_from_game_name = ""
 	
 	#if not definition_data.has("level_lists"):
 		#put_all_existing_levels_into_single_level_list()
@@ -425,11 +442,111 @@ func load_game_definition_data(definition_data: Dictionary) -> void:
 		EntityManager.refresh_definition()
 		EntityManager.build_sprite_previews()
 	
+	current_game_is_release_locked = false
+	if not game_definition.has("release_info"):
+		game_definition["release_info"] = default_empty_release_info.duplicate_deep()
+	elif is_current_game_resavable():
+		release_info_validation_checks()
+	
 	if cur_scene != "Loading" and cur_scene != "Menu":
 		change_scene(cur_scene)
 		
 		if cur_scene == "GameEditor":
 			loaded = true
+
+func release_info_validation_checks() -> void:
+	if not game_definition.has("release_info") or typeof(game_definition["release_info"]) != TYPE_DICTIONARY:
+		game_definition["release_info"] = default_empty_release_info.duplicate_deep()
+		return
+	var release_info: Dictionary = game_definition.get("release_info", {})
+	var is_edited: bool = release_info.get_or_add("edited", true)
+	
+	for version_key in ["base_version", "next_version"]:
+		if not release_info.has(version_key) or not typeof(release_info[version_key]) == TYPE_ARRAY:
+			release_info["base_version"] = [0, 1 if version_key == "next_version" else 0]
+			break
+		var base_version: Array = release_info["base_version"]
+		if not base_version.size() == 2:
+			base_version.resize(2)
+		for i in 2:
+			var val: Variant = release_info[version_key][i]
+			if typeof(val) == TYPE_FLOAT:
+				release_info[version_key][i] = int(val)
+			if typeof(val) != TYPE_INT:
+				release_info[version_key][i] = 0
+		if version_key == "next_version" and release_info[version_key][0] == 0 and release_info[version_key][1] == 0:
+			release_info[version_key][1] = 1
+
+	game_definition["release_info"] = release_info
+	
+	if is_edited:
+		return
+	
+	var release_hash: String = release_info.get("release_hash", "")
+	if not release_hash:
+		_update_saved_game_as_edited()
+		return
+	
+	var current_hash: String = calculate_game_release_hash()
+	if not current_hash or release_hash != current_hash:
+		_update_saved_game_as_edited()
+		return
+	
+	# Release is verified against hash, show as a released version until bundled levels or any definition context is edited
+	current_game_is_release_locked = true
+
+func increment_game_version(from_version: Vector2i) -> Vector2i:
+	return Vector2i(from_version.x, from_version.y + 1)
+
+func _update_saved_game_as_edited() -> void:
+	game_definition["release_info"]["edited"] = true
+	game_definition["release_info"]["release_hash"] = ""
+	var base_version: Vector2i = Utility.get_vector2i_from_arr(game_definition["release_info"]["base_version"])
+	game_definition["release_info"]["next_version"] = Utility.vector_to_list(increment_game_version(base_version))
+	save_current_game_definition()
+
+func create_released_version() -> String:
+	if current_game_is_release_locked:
+		return ""
+	if cur_scene == "Play":
+		return ""
+	
+	editor_save = {}
+	loaded_level = {}
+	clear_checkpoint()
+	clear_quicksave()
+	clear_undo_stack()
+	
+	if TextureManager.is_using_any_shared_images():
+		if not TextureManager.bundle_all_used_shared_images():
+			GlobalToaster.show_toast_message("Failed to bundle shared images", 2.0)
+			return ""
+	
+	var old_release_info: Dictionary = game_definition["release_info"].duplicate_deep()
+	
+	game_definition["release_info"]["edited"] = false
+	game_definition["release_info"]["release_hash"] = ""
+	
+	var new_version: Vector2i = Utility.get_vector2i_from_arr(game_definition["release_info"]["next_version"])
+	var old_version: Vector2i = Utility.get_vector2i_from_arr(game_definition["release_info"]["base_version"])
+	if new_version == old_version or new_version == Vector2i.ZERO:
+		new_version = increment_game_version(old_version)
+
+	game_definition["release_info"]["base_version"] = Utility.vector_to_list(new_version)
+	game_definition["release_info"]["next_version"] = Utility.vector_to_list(increment_game_version(new_version))
+	
+	save_current_game_definition()
+	game_definition["release_info"]["release_hash"] = calculate_game_release_hash()
+	if not game_definition["release_info"]["release_hash"]:
+		game_definition["release_info"] = old_release_info
+		GlobalToaster.show_toast_message("Failed to calculate game release hash", 2.0)
+		return ""
+
+	current_game_is_release_locked = true
+	var zip_path: = FilesManager.save_released_version_zip(get_identified_game_name())
+	
+	return zip_path
+
 
 func get_serialized_game_definition() -> Dictionary:
 	prints("getting serialized game def, current identifier", get_game_identifier())
@@ -527,7 +644,7 @@ func get_serialized_play_state() -> Dictionary:
 	
 	var s_map = MapManager.serialize()
 	var s_ent = EntityManager.serialize()
-	return {"game_name": get_identified_game_name(), "map": s_map, "entities": s_ent, "game_state": serialize()}
+	return {"game_name": get_identified_game_name(), "version": get_version_for_data(), "map": s_map, "entities": s_ent, "game_state": serialize()}
 
 func serialize() -> Dictionary:
 	return {
@@ -854,6 +971,7 @@ func cleanup_new_level() -> void:
 	clear_checkpoint()
 	clear_undo_stack()
 
+
 func new_empty_level():
 	loaded_level_name = ""
 	loaded_level_is_saved = false
@@ -897,6 +1015,9 @@ func new_museum_level():
 	new_level_edited_state_and_emit()
 
 func change_scene(new_scene: String):
+	if new_scene == "Play" && not loaded_from_game_name and not FilesManager.game_exists(get_identified_game_name()):
+		save_current_game_definition()
+		
 	if cur_scene != "Loading":
 		show_scene_transition()
 		if new_scene != "Menu" and is_current_game_saved():
@@ -974,18 +1095,24 @@ func post_scene_change() -> void:
 		EffectsHelper._fetch_effects_holder()
 		if is_in_level_edit_mode:
 			if loaded_level:
-				load_serialized_play_state(loaded_level)
-			elif has_editor_autosave():
-				if FilesManager.get_editor_autosave_is_newer(get_identified_game_name()):
-					GlobalToaster.show_toast_message("Loaded level autosave", 1.2)
-					load_editor_autosave()
+				if current_game_is_release_locked and loaded_level_name in get_list_of_all_bundled_levels():
+					new_empty_level()
 				else:
-					var autosave_level_name: String = FilesManager.get_editor_autosave_level_name(get_identified_game_name())
-					if autosave_level_name:
-						load_level_data(FilesManager.get_level_data(get_identified_game_name(), autosave_level_name))
-					else:
-						GlobalToaster.show_toast_message("Loading level autosave", 1.2)
+					load_serialized_play_state(loaded_level)
+			elif has_editor_autosave():
+				var autosave_level_name: String = FilesManager.get_editor_autosave_level_name(get_identified_game_name())
+				if current_game_is_release_locked and autosave_level_name in get_list_of_all_bundled_levels():
+					new_empty_level()
+				else:
+					if FilesManager.get_editor_autosave_is_newer(get_identified_game_name()):
+						GlobalToaster.show_toast_message("Loaded level autosave", 1.2)
 						load_editor_autosave()
+					else:
+						if autosave_level_name:
+							load_level_data(FilesManager.get_level_data(get_identified_game_name(), autosave_level_name))
+						else:
+							GlobalToaster.show_toast_message("Loading level autosave", 1.2)
+							load_editor_autosave()
 			else:
 				new_empty_level()
 		else:
@@ -1282,6 +1409,8 @@ func rename_and_save_current_game_definition(new_identified_game_name: String, d
 func is_current_game_resavable() -> bool:
 	if not get_identified_game_name():
 		return false
+	if not loaded_from_game_name and not FilesManager.game_exists(get_identified_game_name()):
+		return true
 	return loaded_from_game_name == get_identified_game_name()
 
 func is_save_current_overwriting() -> bool:
@@ -1889,11 +2018,13 @@ func _is_level_code_completed_in_save(level_code: String) -> bool:
 			return true
 	return false
 
+# Do not change order of returned names, it is used for hash calculation
 func get_list_of_all_bundled_levels() -> Array[String]:
+	var game_name: = get_identified_game_name()
 	var level_names: Array[String] = []
 	for level_list_info in game_definition.get("level_lists", []):
 		for level_name in level_list_info.get("level_names", []):
-			if not level_name in level_names:
+			if not level_name in level_names and FilesManager.level_exists(game_name, level_name):
 				level_names.append(level_name)
 	return level_names
 
@@ -2595,6 +2726,7 @@ func make_level_list_bundle_data(level_list_info: Dictionary) -> Dictionary:
 	var bundle_data: Dictionary = {
 		"what_is_this": "GGM bundled level list",
 		"for_game": get_identified_game_name(),
+		"for_version": get_version_for_data(),
 		"list_name": level_list_info["name"],
 		"level_filenames": [],
 		"level_titles": {},
@@ -3001,3 +3133,73 @@ func get_all_levels_included_in_list_data(list_infos: Array) -> Array[String]:
 			if not level_name in all_level_names:
 				all_level_names.append(level_name)
 	return all_level_names
+
+
+
+func calculate_game_release_hash() -> String:
+	var hash_context: = HashingContext.new()
+	hash_context.start(HashingContext.HASH_SHA256)
+	
+	var game_def_without_hash: = get_serialized_game_definition()
+	game_def_without_hash["release_info"]["release_hash"] = ""
+	game_def_without_hash["release_info"]["next_version"] = []
+	hash_context.update(JSON.stringify(game_def_without_hash, "", false).to_utf8_buffer())
+	
+	var bundled_levels: = get_list_of_all_bundled_levels()
+	for level_name in bundled_levels:
+		hash_context.update(level_name.to_utf8_buffer())
+		var level_data: Dictionary = FilesManager.get_level_data(get_identified_game_name(), level_name)
+		hash_context.update(JSON.stringify(level_data, "", false).to_utf8_buffer())
+	
+	var bundled_texture_ids: = TextureManager.get_all_used_bundled_texture_ids()
+	var game_name: = get_identified_game_name()
+	for texture_id in bundled_texture_ids:
+		var image_name: = TextureManager.get_bundled_texture_image_name(texture_id)
+		if not image_name:
+			return ""
+		
+		var image_bytes: PackedByteArray = []
+		image_bytes.resize(4)
+		image_bytes.encode_s32(0, texture_id)
+		image_bytes.append_array(FilesManager.get_local_image_as_bytes(image_name, game_name))
+		if not image_bytes.size() > 4:
+			return ""
+		hash_context.update(image_bytes)
+	
+	return hash_context.finish().hex_encode()
+
+func get_current_game_base_version() -> Vector2i:
+	return Utility.get_vector2i_from_arr(game_definition["release_info"]["base_version"])
+
+func get_current_game_current_version() -> Vector2i:
+	if current_game_is_release_locked:
+		return get_current_game_base_version()
+	return Utility.get_vector2i_from_arr(game_definition["release_info"]["next_version"])
+
+
+func get_full_version_string() -> String:
+	var ver_str: = ""
+	if not get_game_identifier():
+		ver_str = "?/" + get_game_name() + " "
+	else:
+		ver_str = get_game_identifier() + " "
+
+	var base_version: Vector2i = get_current_game_base_version()
+
+	if current_game_is_release_locked:
+		ver_str += str(base_version.x) + "." + str(base_version.y)
+	else:
+		var current_version: Vector2i = get_current_game_current_version()
+		ver_str += str(current_version.x) + "." + str(current_version.y)
+		ver_str += "(edited from " + str(base_version.x) + "." + str(base_version.y) + ")"
+	return ver_str
+
+func get_version_for_data() -> String:
+	var base_version: Vector2i = get_current_game_base_version()
+	if current_game_is_release_locked:
+		return str(base_version.x) + "." + str(base_version.y)
+	else:
+		var current_version: Vector2i = get_current_game_current_version()
+		var ver_str: = str(current_version.x) + "." + str(current_version.y)
+		ver_str += "-edited-from-" + str(base_version.x) + "." + str(base_version.y)
+		return ver_str

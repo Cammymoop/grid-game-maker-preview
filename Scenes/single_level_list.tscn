@@ -5,14 +5,13 @@
 [ext_resource type="FontFile" uid="uid://ctnllh13x3iqi" path="res://assets/font/NotoSans-Bold.ttf" id="2_8vw25"]
 [ext_resource type="Texture2D" uid="uid://b4q7u3xbkyj45" path="res://assets/img/button_icons/gear_small.png" id="3_8vw25"]
 
-[node name="LevelList" type="VBoxContainer" unique_id=407189420 node_paths=PackedStringArray("list_name_label", "level_item_container", "edit_list_settings_button", "edit_settings_icon_button", "export_list_button", "remove_list_button")]
+[node name="LevelList" type="VBoxContainer" unique_id=407189420 node_paths=PackedStringArray("list_name_label", "level_item_container", "edit_settings_icon_button", "export_list_button", "remove_list_button")]
 offset_right = 295.0
 offset_bottom = 51.0
 theme_override_constants/separation = 10
 script = ExtResource("1_kb61r")
 list_name_label = NodePath("HBoxContainer/Label")
 level_item_container = NodePath("MarginContainer/LevelItems")
-edit_list_settings_button = NodePath("HBoxContainer/ListOptionsButton")
 edit_settings_icon_button = NodePath("HBoxContainer/SettingsIconButton")
 export_list_button = NodePath("HBoxContainer/ExportListButton")
 remove_list_button = NodePath("HBoxContainer/HBoxContainer/RemoveListButton")
