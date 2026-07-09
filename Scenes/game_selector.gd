@@ -58,7 +58,7 @@ func update_title_text() -> void:
     if not GameManager.get_identified_game_name():
         game_title_label.text = "..."
     else:
-        game_title_label.text = get_display_title(GameManager.get_identified_game_name())
+        game_title_label.text = get_display_title(GameManager.get_identified_game_name(), false)
         if not GameManager.current_game_is_release_locked:
             game_title_label.add_theme_constant_override("outline_size", 6)
             game_title_label.add_theme_color_override("font_outline_color", edited_title_outline_color)
@@ -76,16 +76,18 @@ func update_title_text() -> void:
         custom_minimum_size.x = vp.size.x - _width_extra
     else:
         custom_minimum_size.x = 0
+    
+    game_identifier_label.text = GameManager.get_identified_game_name()
 
 func get_unqualified_game_name(game_name: String) -> String:
     if game_name.contains("/"):
         return game_name.split("/", true, 1)[1].strip_edges()
     return game_name
 
-func get_display_title(game_name: String) -> String:
+func get_display_title(game_name: String, non_unique_with_id: bool) -> String:
     var title: String = game_titles.get(game_name, get_unqualified_game_name(game_name))
-    if title in non_unique_titles:
-        return "%s (%s)" % [title, get_unqualified_game_name(game_name)]
+    if non_unique_with_id and title in non_unique_titles:
+        return "%s (%s)" % [title, game_name]
     return title
 
 func refresh_game_list() -> void:
@@ -103,7 +105,7 @@ func refresh_game_list() -> void:
 
     game_list_menu.clear()
     for game_name in game_list:
-        game_list_menu.add_item(get_display_title(game_name))
+        game_list_menu.add_item(get_display_title(game_name, true))
 
 func change_game(dir: int) -> void:
     refresh_game_list()

@@ -17,6 +17,11 @@ var invalid_field_color = Color(0.7, 0.4, 0.4)
 @export var game_identifier_label: Label
 @export var game_identifier_panel: Control
 
+@export var game_identifier_input: LineEdit
+@export var game_identifier_input_panel: Control
+@export var game_identifier_set_button: Button
+@export var game_identifier_cancel_button: Button
+
 @export var name_input: LineEdit
 @export var edit_game_dir_button: Button
 
@@ -58,15 +63,24 @@ func _ready():
 	if OS.has_feature("web"):
 		find_child("OpenGameDir").disabled = true
 	GameManager.game_dir_name_changed.connect(on_game_dir_name_changed)
-	var game_name = GameManager.get_game_name()
-	name_input.text = game_name
+	name_input.text = GameManager.get_game_name()
 	init_movement_modes()
+	
+	update_identifier_label()
 	
 	game_settings = GameManager.game_definition["game_settings"]
 	
 	var title_input: LineEdit = find_child("TitleInput")
 	title_input.text = GameManager.get_game_setting("title", "")
-	title_input.placeholder_text = game_name
+	title_input.placeholder_text = GameManager.get_game_implicit_title()
+	
+	game_identifier_panel.gui_input.connect(on_game_identifier_panel_gui_input)
+	game_identifier_input.text_submitted.connect(on_game_identifier_input_text_submitted)
+	game_identifier_input.editing_toggled.connect(on_game_identifier_input_editing_toggled)
+	game_identifier_input_panel.hide()
+	
+	game_identifier_set_button.pressed.connect(on_game_identifier_set_button_pressed)
+	game_identifier_cancel_button.pressed.connect(on_game_identifier_cancel_button_pressed)
 	
 	if "pixel_scale" in game_settings:
 		find_child("PixelScaleInput").value = game_settings["pixel_scale"]
@@ -285,7 +299,8 @@ func _on_SaveButton_pressed() -> void:
 	if not GameManager.is_save_current_overwriting():
 		_real_save()
 	else:
-		_open_save_as_dialog()
+		#_open_save_as_dialog()
+		GlobalToaster.show_toast_message("Cannot save game with this ID, please change the Game ID", 2)
 
 func _real_save() -> void:
 	GameManager.save_current_game_definition()
@@ -388,33 +403,72 @@ func _on_name_input_text_submitted(_new_text: String) -> void:
 		return
 	renaming_game_dir()
 
-func renaming_game_dir() -> void:
-	var new_game_dir_name: = name_input.text
-	if new_game_dir_name == GameManager.get_game_name():
-		_disable_name_input()
+func on_game_identifier_panel_gui_input(event: InputEvent) -> void:
+	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and not event.pressed:
+		game_identifier_input_panel.show()
+		game_identifier_input.text = GameManager.get_game_identifier()
+		game_identifier_input.grab_focus()
+
+func on_game_identifier_input_text_submitted(_new_text: String) -> void:
+	do_update_identifier()
+
+func on_game_identifier_set_button_pressed() -> void:
+	do_update_identifier()
+
+func on_game_identifier_cancel_button_pressed() -> void:
+	game_identifier_input_panel.hide()
+
+func do_update_identifier() -> void:
+	if _save_as_dialog_open:
 		return
-	var new_identified_game_name: = GameManager.get_game_identifier() + "/" + new_game_dir_name
+	game_identifier_input_panel.hide()
+	renaming_game_dir(true)
+
+func on_game_identifier_input_editing_toggled(toggled_on: bool) -> void:
+	if not toggled_on:
+		game_identifier_input_panel.hide()
+
+func renaming_game_dir(is_changing_identifier: bool = false) -> void:
+	_disable_name_input()
+	var new_identifier: = GameManager.get_game_identifier()
+	var new_game_dir_name: = GameManager.get_game_name()
+	if is_changing_identifier:
+		new_identifier = game_identifier_input.text
+	else:
+		new_game_dir_name = name_input.text
+
+	var new_identified_game_name: = new_identifier + "/" + new_game_dir_name
+	if is_changing_identifier:
+		prints("updating identifier, new identified name: ", new_identified_game_name)
+	if new_identified_game_name == GameManager.get_identified_game_name():
+		return
 	if not GameManager.is_current_game_saved() or FilesManager.is_game_name_equivalent(new_identified_game_name, GameManager.get_identified_game_name()):
-		GameManager._set_game_name(new_game_dir_name)
-		_disable_name_input()
+		GameManager._set_identified_game_name(new_identified_game_name)
 		return
 	
 	if GameManager.is_name_overwriting(new_identified_game_name):
-		_open_save_as_dialog(FilesManager.get_unique_game_name(new_identified_game_name))
+		GlobalToaster.show_toast_message("Another game with this Game ID already exists", 2)
 	else:
 		var old_game_name: = GameManager.get_identified_game_name()
-		if GameManager.rename_and_save_current_game_definition(new_identified_game_name):
-			GlobalToaster.show_toast_message("Moved %s Game Definition to %s" % [old_game_name, GameManager.get_identified_game_name()])
-	_disable_name_input()
+		if is_changing_identifier:
+			if GameManager.save_current_game_definition_as(new_identified_game_name):
+				GlobalToaster.show_toast_message("Created %s as a copy of %s" % [GameManager.get_identified_game_name(), old_game_name])
+		else:
+			if GameManager.rename_and_save_current_game_definition(new_identified_game_name):
+				GlobalToaster.show_toast_message("Moved Game Definition from %s to %s" % [old_game_name, GameManager.get_identified_game_name()])
+	update_identifier_label()
+
+func update_identifier_label() -> void:
+	game_identifier_label.text = GameManager.get_game_identifier() + "/"
 	
-func _open_save_as_dialog(new_game_dir_name: String = "") -> void:
-	var save_as_dialog: = save_as_dialog_scn.instantiate() as Window
-	save_as_dialog.use_game_name = new_game_dir_name
-	save_as_dialog.hidden.connect(set.bind("_save_as_dialog_open", false))
-	add_child(save_as_dialog)
-	save_as_dialog.move_to_center()
-	_save_as_dialog_open = true
-	prints("opening save as dialog with game name: ", new_game_dir_name)
+#func _open_save_as_dialog(new_game_dir_name: String = "") -> void:
+	#var save_as_dialog: = save_as_dialog_scn.instantiate() as Window
+	#save_as_dialog.use_game_name = new_game_dir_name
+	#save_as_dialog.hidden.connect(set.bind("_save_as_dialog_open", false))
+	#add_child(save_as_dialog)
+	#save_as_dialog.move_to_center()
+	#_save_as_dialog_open = true
+	#prints("opening save as dialog with game name: ", new_game_dir_name)
 
 func _on_edit_game_dir_button_pressed() -> void:
 	if _save_as_dialog_open:

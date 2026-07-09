@@ -57,14 +57,16 @@ func import_game_zip(zip_file: Variant, as_new_game: bool, new_game_name: String
     
     FilesManager.create_game_directory_if_not_exists(importing_game_name)
     
-    var result: = ImportZipExtractor.import_game_zip_with_backup(zip_file, importing_game_name)
+    var destination_dir_name: = FilesManager.get_game_dir_from_name(importing_game_name)
+    
+    var result: = ImportZipExtractor.import_game_zip_with_backup(zip_file, destination_dir_name)
     if not result.get("ok", false):
         return ""
     FilesManager.fix_game_name(importing_game_name)
 
     return importing_game_name
 
-func export_game_zip(game_name: String, save_to_directory: String = "") -> String:
+func export_game_zip(game_name: String, save_to_directory: String = "", include_unbundled_levels: bool = false) -> String:
     if not FilesManager.game_exists(game_name):
         return ""
     if save_to_directory:
@@ -76,9 +78,20 @@ func export_game_zip(game_name: String, save_to_directory: String = "") -> Strin
             save_to_directory = ProjectSettings.globalize_path(save_to_directory)
         if not DirAccess.dir_exists_absolute(save_to_directory):
             return ""
+    
+    var all_bundled_level_names: Array[String] = []
+    if not include_unbundled_levels:
+        all_bundled_level_names.assign(GameManager.get_list_of_all_bundled_levels())
+        all_bundled_level_names.append_array(GameManager.get_list_of_unlisted_levels())
+    
+    var whitelisted_level_filenames: Array[String] = []
+    for level_name in all_bundled_level_names:
+        var level_filename: = FilesManager._level_filename(level_name)
+        if not level_filename in whitelisted_level_filenames:
+            whitelisted_level_filenames.append(level_filename)
 
     var game_dir: = FilesManager.get_game_base_dir(game_name)
-    var result: = ArchiveCopier.copy_and_zip_directory(game_dir, game_name)
+    var result: = ArchiveCopier.copy_and_zip_directory(game_dir, game_name, include_unbundled_levels, whitelisted_level_filenames)
     if not result.get("ok", false):
         return ""
     var zip_path: String = result.get("zip_path", "")

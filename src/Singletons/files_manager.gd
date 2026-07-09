@@ -5,6 +5,8 @@ var SORT_JSON_KEYS: = false
 
 var GAME_DEF_FILENAME: = "game_definition.json"
 
+var UNBUNDLED_LEVEL_INFO_FILE: = "unbundled_level_info.json"
+
 var TEMPORARY_FILE_PREFIX: = "_tmp_"
 
 var PLAYER_SETTINGS_FILENAME: = "player_settings.json"
@@ -68,6 +70,9 @@ func get_last_profile_id() -> String:
 	if f:
 		return f.get_as_text().strip_edges()
 	return ""
+
+func get_unbundled_level_info_path(game_name: String) -> String:
+	return get_game_gamedata_dir(game_name).path_join(UNBUNDLED_LEVEL_INFO_FILE)
 
 func ___clear_local_data() -> void:
 	var recursive_delete: = func(dir_path: String, recurse: Callable) -> void:
@@ -187,11 +192,13 @@ func save_game_info(game_info: Dictionary) -> void:
 		return
 	var saving_as_game_name: String = game_info.get('game_name', "")
 	var game_identifier: String = game_info.get('game_identifier', "")
+	prints("saving game info, found name: %s, identifier: %s" % [saving_as_game_name, game_identifier])
 	if game_identifier:
 		saving_as_game_name = game_identifier + "/" + saving_as_game_name
 
 	create_game_directory_if_not_exists(saving_as_game_name)
 	var game_dir: = get_game_base_dir(saving_as_game_name)
+	prints("saving game info using dir name:", game_dir)
 	return serialize_and_save_data_to_json(game_info, game_dir, GAME_DEF_FILENAME, FORMAT_GAME_JSON)
 
 func create_game_directory_if_not_exists(identified_game_name: String) -> void:
@@ -692,6 +699,13 @@ func copy_assets_and_levels_to(from_game_name: String, to_game_name: String) -> 
 			var error: = DirAccess.copy_absolute(abs_from_dir.path_join(asset_file), abs_to_dir.path_join(asset_file))
 			if error != OK:
 				push_warning("Error copying game data file %s from %s to %s: %s" % [asset_file, abs_from_dir, abs_to_dir, error_string(error)])
+	
+	var unbundled_level_info_path: = get_unbundled_level_info_path(from_game_name)
+	if smarter_file_exists(unbundled_level_info_path):
+		var to_path: = get_unbundled_level_info_path(to_game_name)
+		var error: = DirAccess.copy_absolute(unbundled_level_info_path, to_path)
+		if error != OK:
+			push_warning("Error copying unbundled level info file from %s to %s: %s" % [unbundled_level_info_path, to_path, error_string(error)])
 
 func is_game_name_equivalent(game_name_1: String, game_name_2: String) -> bool:
 	return get_game_dir_from_name(game_name_1) == get_game_dir_from_name(game_name_2)
@@ -879,6 +893,6 @@ func save_game_save_for_player(player_id: String, game_name: String, game_save_d
 	if not player_profile_exists(player_id):
 		push_error("Player profile %s does not exist" % [player_id])
 		return
-	var game_name_sanitized: = get_game_dir_from_name(game_name)
+	var game_dir_name: = get_game_dir_from_name(game_name)
 	var profile_game_saves_dir: = _data_path(local_data_subdir, player_id, game_saves_local_subdir)
-	return serialize_and_save_data_to_json(game_save_data, profile_game_saves_dir, game_name_sanitized + ".json", FORMAT_GAME_JSON)
+	return serialize_and_save_data_to_json(game_save_data, profile_game_saves_dir, game_dir_name + ".json", FORMAT_GAME_JSON)

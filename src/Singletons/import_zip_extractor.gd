@@ -3,7 +3,7 @@ extends Node
 
 func extract_zip_to_games(
 	zip_file_path: String,
-	game_dir_name: String
+	cleaned_dest_name: String
 ) -> Dictionary:
 	var normalized_zip_path := _normalize_input_file_path(zip_file_path)
 	if normalized_zip_path.is_empty():
@@ -19,7 +19,6 @@ func extract_zip_to_games(
 			"error": "Zip file does not exist: %s" % normalized_zip_path,
 		}
 
-	var cleaned_dest_name := Utility.sanitize_for_filename(game_dir_name)
 	if not cleaned_dest_name or cleaned_dest_name == "OOPS":
 		push_error("Game directory name is invalid.")
 		return {
@@ -62,10 +61,9 @@ func extract_zip_to_games(
 
 func import_game_zip_with_backup(
 	zip_file: Variant,
-	game_dir_name: String,
+	cleaned_dest_name: String,
 	backup_name: String = ""
 ) -> Dictionary:
-	var cleaned_dest_name := Utility.sanitize_for_filename(game_dir_name)
 	if not cleaned_dest_name or cleaned_dest_name == "OOPS":
 		push_error("Game directory name is invalid.")
 		return {
@@ -90,7 +88,9 @@ func import_game_zip_with_backup(
 
 			backup_result = ArchiveCopier.copy_and_zip_directory(
 				dest_dir_abs,
-				resolved_backup_name
+				resolved_backup_name,
+				true,
+				[]
 			)
 
 			if not backup_result.get("ok", false):
@@ -300,9 +300,6 @@ func _sanitize_name(value: String) -> String:
 
 	result = result.replace(" ", "_")
 
-	while result.contains("__"):
-		result = result.replace("__", "_")
-
 	result = result.strip_edges()
 	result = result.trim_prefix(".")
 	result = result.trim_suffix(".")
@@ -316,7 +313,12 @@ func _ensure_dir_exists(path: String) -> int:
 	return DirAccess.make_dir_recursive_absolute(path)
 
 func get_game_name_from_zip(zip_file_path: String) -> String:
-	return get_game_info_from_zip(zip_file_path).get("game_name", "")
+	var game_info: = get_game_info_from_zip(zip_file_path)
+	var game_identifier: String = game_info.get("identifier", "")
+	var game_name: String = game_info.get("game_name", "")
+	if game_identifier:
+		game_name = game_identifier + "/" + game_name
+	return game_name
 
 func get_game_name_from_zip_buffer(zip_buffer: PackedByteArray) -> String:
 	var temp_file_path: = FilesManager.save_temporary_data_as_file(zip_buffer, ".zip")

@@ -5,7 +5,9 @@ const OUTPUT_SUBDIR := "other_versions"
 
 func copy_and_zip_directory(
 	source_dir_path: String,
-	dest_name: String
+	dest_name: String,
+	include_unbundled_levels: bool = false,
+	level_whitelist: Array[String] = []
 ) -> Dictionary:
 	if source_dir_path.begins_with("res://"):
 		push_error("ArchiveCopier does not support res:// paths: %s" % source_dir_path)
@@ -61,7 +63,10 @@ func copy_and_zip_directory(
 	var copy_err := _copy_dir_recursive(
 		normalized_source,
 		copied_dir,
-		excluded_names
+		excluded_names,
+		not include_unbundled_levels,
+		[] if include_unbundled_levels else level_whitelist,
+		false
 	)
 	if copy_err != OK:
 		return {
@@ -97,7 +102,10 @@ func _normalize_input_dir(path: String) -> String:
 func _copy_dir_recursive(
 	source_dir: String,
 	dest_dir: String,
-	excluded_names: Array[String]
+	excluded_names: Array[String],
+	exclude_unbundled_levels: bool,
+	level_whitelist: Array[String],
+	is_levels_dir: bool
 ) -> int:
 	var ensure_err := _ensure_dir_exists(dest_dir)
 	if ensure_err != OK:
@@ -120,6 +128,12 @@ func _copy_dir_recursive(
 
 		if entry in excluded_names:
 			continue
+		
+		if exclude_unbundled_levels:
+			if entry == FilesManager.UNBUNDLED_LEVEL_INFO_FILE:
+				continue
+			if is_levels_dir and entry not in level_whitelist:
+				continue
 
 		var source_path := source_dir.path_join(entry)
 		var dest_path := dest_dir.path_join(entry)
@@ -128,7 +142,10 @@ func _copy_dir_recursive(
 			var sub_err := _copy_dir_recursive(
 				source_path,
 				dest_path,
-				excluded_names
+				excluded_names,
+				exclude_unbundled_levels,
+				level_whitelist,
+				entry == "levels"
 			)
 			if sub_err != OK:
 				dir.list_dir_end()
@@ -317,9 +334,6 @@ func _sanitize_name(value: String) -> String:
 		result = result.replace(ch, "_")
 
 	result = result.replace(" ", "_")
-
-	while result.contains("__"):
-		result = result.replace("__", "_")
 
 	result = result.strip_edges()
 	result = result.trim_prefix(".")

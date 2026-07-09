@@ -236,10 +236,10 @@ func _ready():
 			load_game_definition_data(builtin_default_game_definition)
 			start_managers()
 		else:
-			new_empty_game_definition(FilesManager.get_unique_game_name("Empty Game"))
+			new_empty_game_definition(FilesManager.get_unique_game_name(Utility.random_animal() + " Game"))
 			start_managers()
 			save_current_game_definition()
-			FilesManager.save_default_game(get_game_name())
+			FilesManager.save_default_game(get_identified_game_name())
 	
 	MapManager.refresh_definition()
 	EntityManager.refresh_definition()
@@ -286,12 +286,16 @@ func setup_default_bg_style() -> void:
 func sanitize_identifier(raw_identifier: String) -> String:
 	raw_identifier = raw_identifier.strip_edges()
 	var sanitized_identifier: = ""
-	for i in sanitized_identifier.length():
-		var character: = sanitized_identifier[i]
+	for i in raw_identifier.length():
+		var character: = raw_identifier[i]
+		prints("sanitizing character: %s" % [character])
 		if character == "_" or character == " ":
 			character = "-"
-		elif character == "-" or character.is_valid_ascii_identifier():
+		if character == "-" or character.is_valid_ascii_identifier():
+			prints("valid character: %s" % [character])
 			sanitized_identifier += character
+		else:
+			prints("invalid character: %s" % [character])
 	return sanitized_identifier
 
 func bake_scene_transition_curve() -> void:
@@ -340,7 +344,7 @@ func new_empty_game_definition(with_name: String = "") -> void:
 	load_game_definition_data(empty_game)
 
 func put_all_existing_levels_into_single_level_list() -> void:
-	var all_levels: = FilesManager.get_level_list(get_game_name())
+	var all_levels: = FilesManager.get_level_list(get_identified_game_name())
 	all_levels.erase("editor_autosave")
 	game_definition["level_lists"] = [{
 		"name": "Levels",
@@ -384,8 +388,8 @@ func load_game_definition_data(definition_data: Dictionary) -> void:
 	loaded_level_is_saved = false
 	
 	_set_game_name(definition_data['game_name'], false)
-	_set_game_identifier(definition_data['game_identifier'])
-	loaded_from_game_name = cur_game_name
+	_set_game_identifier(definition_data.get("game_identifier", ""))
+	loaded_from_game_name = get_identified_game_name()
 	
 	#if not definition_data.has("level_lists"):
 		#put_all_existing_levels_into_single_level_list()
@@ -427,6 +431,7 @@ func load_game_definition_data(definition_data: Dictionary) -> void:
 			loaded = true
 
 func get_serialized_game_definition() -> Dictionary:
+	prints("getting serialized game def, current identifier", get_game_identifier())
 	var serialized_def: = game_definition.duplicate_deep()
 	serialized_def["game_name"] = get_game_name()
 	serialized_def["game_identifier"] = get_game_identifier()
@@ -465,6 +470,8 @@ func get_game_identifier() -> String:
 	return cur_game_identifier
 
 func get_identified_game_name() -> String:
+	if not cur_game_identifier:
+		return cur_game_name
 	return cur_game_identifier + "/" + cur_game_name
 
 func get_game_implicit_title() -> String:
@@ -485,6 +492,25 @@ func _set_game_name(new_name: String, do_emit: bool = true) -> void:
 func _set_game_identifier(new_identifier: String) -> void:
 	cur_game_identifier = new_identifier.strip_edges()
 
+func _game_identifier_part(identified_name: String) -> String:
+	return identified_name.split("/", true, 1)[0]
+
+func _game_name_part(identified_name: String) -> String:
+	return identified_name.split("/", true, 1)[1]
+
+func _set_identified_game_name(new_identified_name: String) -> void:
+	prints("setting identified game name: %s" % [new_identified_name])
+	if not new_identified_name.contains("/"):
+		prints("no identifier part in new identified name: %s" % [new_identified_name])
+		_set_game_identifier("")
+		_set_game_name(new_identified_name)
+	else:
+		var new_identifier: = sanitize_identifier(_game_identifier_part(new_identified_name))
+		prints("unsanitized identifier: %s, sanitized identifier: %s" % [_game_identifier_part(new_identified_name), new_identifier])
+		_set_game_identifier(new_identifier)
+		_set_game_name(_game_name_part(new_identified_name))
+	prints("set identifier to ", get_game_identifier())
+
 func get_credits_info() -> Dictionary:
 	return game_definition.get("game_metadata", {}).get("credits", {})
 
@@ -500,7 +526,7 @@ func get_serialized_play_state() -> Dictionary:
 	
 	var s_map = MapManager.serialize()
 	var s_ent = EntityManager.serialize()
-	return {"game_name": cur_game_name, "map": s_map, "entities": s_ent, "game_state": serialize()}
+	return {"game_name": get_identified_game_name(), "map": s_map, "entities": s_ent, "game_state": serialize()}
 
 func serialize() -> Dictionary:
 	return {
@@ -671,9 +697,9 @@ func load_quicksave() -> void:
 	current_level_list = quicksave_level_list
 	load_serialized_play_state(quicksave_state["level_state"], changing_levels)
 	if changing_levels:
-		if FilesManager.level_exists(cur_game_name, quicksave_level_name):
+		if FilesManager.level_exists(get_identified_game_name(), quicksave_level_name):
 			loaded_level_is_saved = true
-			var level_data: = FilesManager.get_level_data(cur_game_name, quicksave_level_name)
+			var level_data: = FilesManager.get_level_data(get_identified_game_name(), quicksave_level_name)
 			if level_data:
 				editor_save = level_data["state"]
 			else:
@@ -713,12 +739,12 @@ func erase_edited_level_metadata_value(meta_key: String) -> void:
 
 
 func has_editor_autosave() -> bool:
-	return FilesManager.level_exists(cur_game_name, "editor_autosave")
+	return FilesManager.level_exists(get_identified_game_name(), "editor_autosave")
 
 func load_editor_autosave() -> void:
 	if queued_level_load:
 		return
-	var autosave_data: Dictionary = FilesManager.get_level_data(cur_game_name, "editor_autosave")
+	var autosave_data: Dictionary = FilesManager.get_level_data(get_identified_game_name(), "editor_autosave")
 	load_level_data(autosave_data)
 	loaded_level_is_saved = false
 	loaded_is_autosave = true
@@ -742,7 +768,7 @@ func try_load_next_level(with_delay: float = 0.5):
 		return
 	
 	var next_level_name: String = MapManager.get_metadata_value("next_level")
-	var next_level_data: = FilesManager.get_level_data(cur_game_name, next_level_name)
+	var next_level_data: = FilesManager.get_level_data(get_identified_game_name(), next_level_name)
 	queued_level_load = true
 
 	queued_level_load_timer = Timer.new()
@@ -789,22 +815,22 @@ func cancel_queued_level_load() -> void:
 		queued_level_load_timer = null
 
 func try_load_level(level_name: String, as_queued_load: bool = false):
-	if not FilesManager.level_exists(cur_game_name, level_name) or (not as_queued_load and queued_level_load):
+	if not FilesManager.level_exists(get_identified_game_name(), level_name) or (not as_queued_load and queued_level_load):
 		return
 	if level_name == "editor_autosave":
 		load_editor_autosave()
 		return
 
-	var the_level_data: = FilesManager.get_level_data(cur_game_name, level_name)
+	var the_level_data: = FilesManager.get_level_data(get_identified_game_name(), level_name)
 	if not the_level_data["name"] == level_name:
 		the_level_data["name"] = level_name
 	load_level_data(the_level_data, as_queued_load)
 
 func edit_level_named(level_name: String, auto_list: bool = false) -> bool:
-	if not FilesManager.level_exists(cur_game_name, level_name):
+	if not FilesManager.level_exists(get_identified_game_name(), level_name):
 		push_error("Level %s does not exist" % [level_name])
 		return false
-	var the_level_data: = FilesManager.get_level_data(cur_game_name, level_name)
+	var the_level_data: = FilesManager.get_level_data(get_identified_game_name(), level_name)
 	if not the_level_data["name"] == level_name:
 		the_level_data["name"] = level_name
 	if auto_list:
@@ -952,13 +978,13 @@ func post_scene_change() -> void:
 			if loaded_level:
 				load_serialized_play_state(loaded_level)
 			elif has_editor_autosave():
-				if FilesManager.get_editor_autosave_is_newer(cur_game_name):
+				if FilesManager.get_editor_autosave_is_newer(get_identified_game_name()):
 					GlobalToaster.show_toast_message("Loaded level autosave", 1.2)
 					load_editor_autosave()
 				else:
-					var autosave_level_name: String = FilesManager.get_editor_autosave_level_name(cur_game_name)
+					var autosave_level_name: String = FilesManager.get_editor_autosave_level_name(get_identified_game_name())
 					if autosave_level_name:
-						load_level_data(FilesManager.get_level_data(cur_game_name, autosave_level_name))
+						load_level_data(FilesManager.get_level_data(get_identified_game_name(), autosave_level_name))
 					else:
 						GlobalToaster.show_toast_message("Loading level autosave", 1.2)
 						load_editor_autosave()
@@ -1138,7 +1164,7 @@ func save_edited_level_as(as_level_filename: String) -> void:
 	if not level_data:
 		return
 	
-	var saved_successfully: = FilesManager.save_level(GameManager.cur_game_name, level_data)
+	var saved_successfully: = FilesManager.save_level(get_identified_game_name(), level_data)
 	if saved_successfully:
 		GlobalToaster.show_toast_message("Level Saved")
 	else:
@@ -1187,71 +1213,83 @@ func is_entity_followed_by_camera(entity: BaseEntity) -> bool:
 func save_current_game_definition(copy_from_loaded_game: bool = true) -> void:
 	var definition_data: = get_serialized_game_definition()
 	var copy_from_game: = ""
-	if copy_from_loaded_game and loaded_from_game_name and loaded_from_game_name != get_game_name():
+	if copy_from_loaded_game and loaded_from_game_name and loaded_from_game_name != get_identified_game_name():
 		copy_from_game = loaded_from_game_name
 	FilesManager.save_game_info(definition_data)
 	loaded_from_game_name = get_identified_game_name()
 
 	if copy_from_game:
-		FilesManager.copy_assets_and_levels_to(copy_from_game, get_game_name())
+		FilesManager.copy_assets_and_levels_to(copy_from_game, get_identified_game_name())
 
-func save_current_game_definition_as(as_game_name: String, delete_on_overwrite: bool = false) -> void:
-	if as_game_name == get_game_name() and is_current_game_resavable():
+func save_current_game_definition_as(as_identified_game_name: String, delete_on_overwrite: bool = false) -> bool:
+	prints("saving as %s, current identified game name: %s" % [as_identified_game_name, get_identified_game_name()])
+	if as_identified_game_name == get_identified_game_name() and is_current_game_resavable():
 		save_current_game_definition(false)
-		return
+		return false
+	
+	var is_renaming: = false
+	if not as_identified_game_name.contains("/") or _game_name_part(as_identified_game_name) != get_game_name():
+		is_renaming = true
+	prints("is renaming: %s" % [is_renaming])
 
-	if delete_on_overwrite and is_name_overwriting(as_game_name):
-		if not FilesManager.delete_game(as_game_name):
-			GlobalToaster.show_toast_message("Failed to overwrite game directory %s" % [FilesManager.get_game_dir_from_name(as_game_name)])
-			return
+	if is_name_overwriting(as_identified_game_name):
+		if not delete_on_overwrite:
+			return false
+		else:
+			if not FilesManager.delete_game(as_identified_game_name):
+				GlobalToaster.show_toast_message("Failed to overwrite game directory %s" % [FilesManager.get_game_dir_from_name(as_identified_game_name)])
+				return false
 
 	var copy_assets_and_levels_from: = ""
-	if loaded_from_game_name and loaded_from_game_name != as_game_name:
+	if loaded_from_game_name and loaded_from_game_name != as_identified_game_name:
 		copy_assets_and_levels_from = loaded_from_game_name
 
-	if not get_game_setting("title", ""):
-		set_game_setting("title", get_game_implicit_title() + " (copy)")
-	elif not get_game_setting("title", "").ends_with(" (copy)"):
-		set_game_setting("title", get_game_setting("title", "") + " (copy)")
-	save_current_game_definition()
-	cur_game_name = as_game_name
+	if is_renaming:
+		if not get_game_setting("title", ""):
+			set_game_setting("title", get_game_implicit_title() + " (copy)")
+		elif not get_game_setting("title", "").ends_with(" (copy)"):
+			set_game_setting("title", get_game_setting("title", "") + " (copy)")
+	_set_identified_game_name(as_identified_game_name)
+	save_current_game_definition(false)
 	
 	if copy_assets_and_levels_from:
-		FilesManager.copy_assets_and_levels_to(copy_assets_and_levels_from, as_game_name)
-	game_dir_name_changed.emit(cur_game_name)
+		FilesManager.copy_assets_and_levels_to(copy_assets_and_levels_from, as_identified_game_name)
+	return true
 
-func rename_and_save_current_game_definition(new_game_name: String, delete_on_overwrite: bool = false) -> bool:
+func rename_and_save_current_game_definition(new_identified_game_name: String, delete_on_overwrite: bool = false) -> bool:
 	if not is_current_game_saved():
-		_set_game_name(new_game_name)
+		_set_identified_game_name(new_identified_game_name)
 		return false
-	if FilesManager.is_game_name_equivalent(new_game_name, get_game_name()):
-		_set_game_name(new_game_name)
+	if FilesManager.is_game_name_equivalent(new_identified_game_name, get_identified_game_name()):
+		_set_identified_game_name(new_identified_game_name)
 		save_current_game_definition()
 		return true
 	
-	if delete_on_overwrite and is_name_overwriting(new_game_name):
-		if not FilesManager.delete_game(new_game_name):
-			GlobalToaster.show_toast_message("Failed to overwrite game directory %s" % [FilesManager.get_game_dir_from_name(new_game_name)])
+	if delete_on_overwrite and is_name_overwriting(new_identified_game_name):
+		if not FilesManager.delete_game(new_identified_game_name):
+			GlobalToaster.show_toast_message("Failed to overwrite game directory %s" % [FilesManager.get_game_dir_from_name(new_identified_game_name)])
 			return false
 
-	var old_game_name: = get_game_name()
-	if FilesManager.rename_game(old_game_name, new_game_name):
-		_set_game_name(new_game_name)
+	var old_game_name: = get_identified_game_name()
+	if FilesManager.rename_game(old_game_name, new_identified_game_name):
+		_set_game_name(new_identified_game_name)
 		loaded_from_game_name = get_identified_game_name()
 		if FilesManager.get_default_game() == old_game_name:
-			FilesManager.save_default_game(new_game_name)
+			FilesManager.save_default_game(new_identified_game_name)
 	else:
 		GlobalToaster.show_toast_message("Failed to move game directory")
 		return false
 	return true
 
 func is_current_game_resavable() -> bool:
+	if not get_identified_game_name():
+		return false
 	return loaded_from_game_name == get_identified_game_name()
 
 func is_save_current_overwriting() -> bool:
 	if is_current_game_resavable():
 		return false
-	return FilesManager.game_exists(get_game_name())
+	return FilesManager.game_exists(get_identified_game_name())
 
 func is_name_overwriting(new_game_name: String) -> bool:
 	var new_identified_game_name: String = cur_game_identifier + "/" + new_game_name
@@ -1282,7 +1320,7 @@ func _import_and_load_game_zip(zip_file_path: String, w_images_confirmed: bool, 
 
 func after_import_game_zip_message(success: bool) -> void:
 	if success:
-		GlobalToaster.show_toast_message("Imported %s" % [get_game_name()])
+		GlobalToaster.show_toast_message("Imported %s" % [get_identified_game_name()])
 	else:
 		GlobalToaster.show_toast_message("Failed to import game")
 
@@ -1622,7 +1660,7 @@ func get_levels_in_level_list(level_list_name: String) -> Array:
 	var level_list_info: = _get_level_list(level_list_name)
 	var actual_level_names: = []
 	for level_name in level_list_info.get("level_names", []):
-		if FilesManager.level_exists(get_game_name(), level_name):
+		if FilesManager.level_exists(get_identified_game_name(), level_name):
 			actual_level_names.append(level_name)
 	return actual_level_names
 
@@ -1864,7 +1902,7 @@ func get_list_of_all_bundled_levels() -> Array[String]:
 func get_list_of_all_non_bundled_levels() -> Array[String]:
 	var bundled_level_names: = get_list_of_all_bundled_levels()
 	var non_bundled_level_names: Array[String] = []
-	for level_name in FilesManager.get_level_list(get_game_name()):
+	for level_name in FilesManager.get_level_list(get_identified_game_name()):
 		if not level_name in bundled_level_names and not level_name in non_bundled_level_names:
 			non_bundled_level_names.append(level_name)
 	return non_bundled_level_names
@@ -1884,7 +1922,7 @@ func get_list_of_all_levels_in_lists() -> Array[String]:
 func get_list_of_unlisted_levels() -> Array[String]:
 	var all_listed_levels: = get_list_of_all_levels_in_lists()
 	var all_unlisted_levels: Array[String] = []
-	for level_name in FilesManager.get_level_list(get_game_name()):
+	for level_name in FilesManager.get_level_list(get_identified_game_name()):
 		if not level_name in all_listed_levels and not level_name in all_unlisted_levels:
 			all_unlisted_levels.append(level_name)
 	return all_unlisted_levels
@@ -1892,7 +1930,7 @@ func get_list_of_unlisted_levels() -> Array[String]:
 func get_first_existing_level_from_list(level_list_name: String) -> String:
 	var level_list_info: = _get_level_list(level_list_name)
 	for level_name in level_list_info.get("level_names", []):
-		if FilesManager.level_exists(get_game_name(), level_name):
+		if FilesManager.level_exists(get_identified_game_name(), level_name):
 			return level_name
 	return ""
 
@@ -2289,19 +2327,19 @@ func get_game_save_data(data_key: String, default_value: Variant = null) -> Vari
 	if not player_profile:
 		push_error("No player profile loaded")
 		return default_value
-	if not get_game_name():
+	if not get_identified_game_name():
 		push_warning("Trying to get game save data but no current game")
 		return default_value
-	return player_profile.get_game_save_data(get_game_name(), data_key, default_value)
+	return player_profile.get_game_save_data(get_identified_game_name(), data_key, default_value)
 
 func set_game_save_data(data_key: String, value: Variant, flush: bool = true) -> void:
 	if not player_profile:
 		push_error("No player profile loaded")
 		return
-	if not get_game_name():
+	if not get_identified_game_name():
 		push_warning("Trying to set game save data but no current game")
 		return
-	player_profile.set_game_save_data(get_game_name(), data_key, value, flush)
+	player_profile.set_game_save_data(get_identified_game_name(), data_key, value, flush)
 
 func get_profile_name() -> String:
 	if not player_profile:
@@ -2478,11 +2516,11 @@ func confirmed_import_with_images(finish_import_callback: Callable, disclaimer_d
 
 
 func web_export_level_json(level_name: String) -> void:
-	if not OS.has_feature("web") or not get_game_name():
+	if not OS.has_feature("web") or not get_identified_game_name():
 		return
-	if not FilesManager.level_exists(get_game_name(), level_name):
+	if not FilesManager.level_exists(get_identified_game_name(), level_name):
 		return
-	var level_bytes: PackedByteArray = FilesManager.get_level_file_bytes(get_game_name(), level_name)
+	var level_bytes: PackedByteArray = FilesManager.get_level_file_bytes(get_identified_game_name(), level_name)
 	var level_filename: = FilesManager.sanitize_level_filename(level_name) + ".json"
 	JavaScriptBridge.download_buffer(level_bytes, level_filename, "application/json")
 
@@ -2515,7 +2553,7 @@ func import_levels_local_picked(file_path: String) -> void:
 
 
 func start_web_import_levels() -> void:
-	if not OS.has_feature("web") or not get_game_name():
+	if not OS.has_feature("web") or not get_identified_game_name():
 		return
 	file_access_web = FileAccessWeb.new()
 	file_access_web.loaded.connect(GameManager.got_web_import_levels)
@@ -2558,7 +2596,7 @@ func make_level_list_bundle_data(level_list_info: Dictionary) -> Dictionary:
 		return {}
 	var bundle_data: Dictionary = {
 		"what_is_this": "GGM bundled level list",
-		"for_game": get_game_name(),
+		"for_game": get_identified_game_name(),
 		"list_name": level_list_info["name"],
 		"level_filenames": [],
 		"level_titles": {},
@@ -2566,7 +2604,7 @@ func make_level_list_bundle_data(level_list_info: Dictionary) -> Dictionary:
 	}
 	var included_levels: Array = []
 	for level_name in level_list_info.get("level_names", []):
-		if level_name in included_levels or not FilesManager.level_exists(get_game_name(), level_name):
+		if level_name in included_levels or not FilesManager.level_exists(get_identified_game_name(), level_name):
 			continue
 		included_levels.append(level_name)
 	
@@ -2575,9 +2613,9 @@ func make_level_list_bundle_data(level_list_info: Dictionary) -> Dictionary:
 			bundle_data["level_filenames"].append(FilesManager.sanitize_level_filename(level_name))
 	
 	for level_name in included_levels:
-		var level_data: = FilesManager.get_level_data(get_game_name(), level_name)
+		var level_data: = FilesManager.get_level_data(get_identified_game_name(), level_name)
 		bundle_data["level_data"][level_name] = level_data
-		bundle_data["level_titles"][level_name] = FilesManager.get_level_title(get_game_name(), level_name)
+		bundle_data["level_titles"][level_name] = FilesManager.get_level_title(get_identified_game_name(), level_name)
 	
 	return bundle_data
 
@@ -2633,7 +2671,7 @@ func _export_level_list_destination_picked(save_path: String, list_name: String,
 	GlobalToaster.show_toast_message("Exported Level list to %s" % [save_path.get_file()])
 
 func web_export_level_list(list_name: String) -> void:
-	if not OS.has_feature("web") or not get_game_name():
+	if not OS.has_feature("web") or not get_identified_game_name():
 		return
 	var level_list_info: = _get_level_list(list_name)
 	var bundle_data: Dictionary = make_level_list_bundle_data(level_list_info)
@@ -2670,11 +2708,11 @@ func get_unique_import_level_name(current_levels_list: Array, level_filename: St
 
 func import_level_list_data(list_data: Dictionary, game_name_confirmed: bool = false) -> void:
 	var for_game_name: String = list_data.get("for_game", "")
-	if not game_name_confirmed and for_game_name != get_game_name():
+	if not game_name_confirmed and for_game_name != get_identified_game_name():
 		var confirm_dialog: = ConfirmationDialog.new()
 		confirm_dialog.title = "Import Level List"
 		confirm_dialog.dialog_text = ("This level list is for a game named '%s'. The current game is '%s'.\n" \
-									+ "Do you still want to import the levels?") % [for_game_name, get_game_name()]
+									+ "Do you still want to import the levels?") % [for_game_name, get_identified_game_name()]
 		
 		confirm_dialog.confirmed.connect(import_level_list_data.bind(list_data, true))
 		confirm_dialog.canceled.connect(confirm_dialog.queue_free)
@@ -2712,7 +2750,7 @@ func import_level_list_data(list_data: Dictionary, game_name_confirmed: bool = f
 	
 	var level_datas: Dictionary = list_data.get("level_data", {})
 	var level_titles: Dictionary = list_data.get("level_titles", {})
-	var existing_levels: = FilesManager.get_level_list(get_game_name())
+	var existing_levels: = FilesManager.get_level_list(get_identified_game_name())
 	
 	var remapped_names: Dictionary[String, String] = {}
 	for level_filename in level_datas.keys():
@@ -2728,7 +2766,7 @@ func import_level_list_data(list_data: Dictionary, game_name_confirmed: bool = f
 	
 	for old_level_name in remapped_names.keys():
 		var data: Dictionary = level_datas[old_level_name]
-		if not FilesManager.save_level_to_name(get_game_name(), data, remapped_names[old_level_name]):
+		if not FilesManager.save_level_to_name(get_identified_game_name(), data, remapped_names[old_level_name]):
 			push_error("Failed to save level %s" % [old_level_name])
 			remapped_names.erase(old_level_name)
 	
@@ -2824,14 +2862,14 @@ func add_imported_level_data(level_data: Dictionary) -> String:
 	if not "Imported Levels" in existing_lists:
 		add_empty_level_list("Imported Levels", false)
 	
-	var existing_levels: = FilesManager.get_level_list(get_game_name())
+	var existing_levels: = FilesManager.get_level_list(get_identified_game_name())
 	var level_name: String = level_data.get("name", "")
 	var unique_level_name: = get_unique_import_level_name(existing_levels, level_name, level_data_get_title(level_data, ""))
 	if not unique_level_name:
 		push_error("Failed to find a unique name for the imported level")
 		return ""
 	
-	if not FilesManager.save_level_to_name(get_game_name(), level_data, unique_level_name):
+	if not FilesManager.save_level_to_name(get_identified_game_name(), level_data, unique_level_name):
 		push_error("Failed to save level %s" % [unique_level_name])
 		return ""
 	
@@ -2955,3 +2993,13 @@ func update_mute() -> void:
 	
 	var bus_idx: int = AudioServer.get_bus_index("Master")
 	AudioServer.set_bus_mute(bus_idx, is_muted)
+
+func get_all_levels_included_in_list_data(list_infos: Array) -> Array[String]:
+	var all_level_names: = []
+	for list_info in list_infos:
+		if not typeof(list_info) == TYPE_DICTIONARY:
+			continue
+		for level_name in list_info.get("level_names", []):
+			if not level_name in all_level_names:
+				all_level_names.append(level_name)
+	return all_level_names
