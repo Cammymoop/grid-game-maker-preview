@@ -199,7 +199,8 @@ layout_mode = 2
 
 [node name="IdentifierPanel" type="PanelContainer" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/HBoxContainer/VBoxContainer/MarginContainer/HBoxContainer" unique_id=1683411069]
 layout_mode = 2
-tooltip_text = "Edit Identifier"
+tooltip_text = "Edit Identifier (Creates a copy with the new ID)
+Old save data will not be carried over if the game ID changes"
 mouse_default_cursor_shape = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_retx3")
 
@@ -215,6 +216,7 @@ select_all_on_focus = true
 
 [node name="EditGameDirButton" type="Button" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/HBoxContainer/VBoxContainer/MarginContainer/HBoxContainer" unique_id=844035251]
 layout_mode = 2
+tooltip_text = "Old save data will not be carried over if the game ID changes"
 text = "Change Game ID"
 
 [node name="Anchor" type="Control" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/HBoxContainer/VBoxContainer/MarginContainer" unique_id=233802604]
@@ -222,6 +224,7 @@ layout_mode = 2
 mouse_filter = 2
 
 [node name="IdentifierEditPanel" type="PanelContainer" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/HBoxContainer/VBoxContainer/MarginContainer/Anchor" unique_id=1379757995]
+visible = false
 layout_mode = 1
 anchors_preset = -1
 anchor_top = 0.5

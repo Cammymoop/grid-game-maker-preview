@@ -218,6 +218,7 @@ func _ready():
 	var loaded_default_game: = false
 	if default_game: 
 		if FilesManager.game_exists(default_game):
+			prints("loading default game: %s" % [default_game])
 			load_game_definition_from_file(default_game)
 			start_managers()
 			loaded_default_game = true
@@ -899,10 +900,7 @@ func change_scene(new_scene: String):
 	if cur_scene != "Loading":
 		show_scene_transition()
 		if new_scene != "Menu" and is_current_game_saved():
-			var default_game: String = FilesManager.get_default_game()
-			var matches: = default_game == get_identified_game_name()
-			matches = matches or (not default_game.contains("/") and default_game == get_game_name())
-			if not matches:
+			if FilesManager.get_default_game() != get_identified_game_name():
 				FilesManager.save_default_game(get_identified_game_name())
 	
 	if not new_scene in scenes:
