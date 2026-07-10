@@ -18,6 +18,7 @@
 [ext_resource type="Texture2D" uid="uid://3xo0n45j2h8g" path="res://assets/ui/vsplit_grabber_vector_icon.tres" id="13_5mvo3"]
 [ext_resource type="StyleBox" uid="uid://cxvxqxp3xm0qw" path="res://assets/ui/button_styles/opt_btn_normal.tres" id="13_fqq3a"]
 [ext_resource type="StyleBox" uid="uid://coefq6pxxxy3i" path="res://assets/ui/button_styles/opt_btn_pressed.tres" id="14_rihkf"]
+[ext_resource type="FontFile" uid="uid://ctnllh13x3iqi" path="res://assets/font/NotoSans-Bold.ttf" id="16_fqq3a"]
 [ext_resource type="StyleBox" uid="uid://sbmgw7eumbe8" path="res://assets/ui/spin_box_expanded_focus_sb.tres" id="16_gyapa"]
 
 [sub_resource type="StyleBoxEmpty" id="9"]
@@ -298,6 +299,7 @@ OptionButton/styles/hover = ExtResource("12_gyapa")
 OptionButton/styles/normal = ExtResource("13_fqq3a")
 OptionButton/styles/pressed = ExtResource("14_rihkf")
 PanelContainer/styles/panel = ExtResource("5_8mgp1")
+RichTextLabel/fonts/bold_font = ExtResource("16_fqq3a")
 SpinBoxInnerLineEdit/base_type = &"LineEdit"
 SpinBoxInnerLineEdit/styles/focus = ExtResource("16_gyapa")
 SplitContainer/constants/autohide = 0

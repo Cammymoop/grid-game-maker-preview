@@ -9,6 +9,8 @@ signal request_back()
 
 @export var profile_name_label: Label
 
+@export var profile_identifier_input: LineEdit
+
 @export var back_button: Button
 
 var confirm_dialog_open: bool = false
@@ -21,6 +23,8 @@ func _ready() -> void:
     skip_non_critical_confirm_toggle.toggled.connect(on_skip_non_critical_confirm_toggle_toggled)
     
     erase_game_save_progress_button.pressed.connect(on_erase_game_save_progress_button_pressed)
+    
+    profile_identifier_input.text_changed.connect(on_profile_identifier_text_changed)
 
     refresh_ui()
 
@@ -31,7 +35,7 @@ func refresh_ui() -> void:
     var is_skip_non_critical: bool = GameManager.player_profile.get_profile_setting("skip_non_critical_save_dialogs", false)
     skip_non_critical_confirm_toggle.set_pressed_no_signal(is_skip_non_critical)
     
-    profile_name_label.text = "Profile: %s" % [GameManager.get_profile_name()]
+    profile_name_label.text = "For Profile: %s" % [GameManager.get_profile_name()]
 
 
 func on_mute_audio_toggle_toggled(is_muted: bool) -> void:
@@ -70,3 +74,10 @@ func erase_progress_confirmed(dialog: ConfirmationDialog, game_name: String) -> 
 
 func on_skip_non_critical_confirm_toggle_toggled(is_skipping: bool) -> void:
     GameManager.player_profile.set_profile_setting("skip_non_critical_save_dialogs", is_skipping)
+
+func on_profile_identifier_text_changed(text: String) -> void:
+    var sanitized_identifier: String = GameManager.sanitize_identifier(text)
+    GameManager.set_profile_identifier(sanitized_identifier)
+    if sanitized_identifier != profile_identifier_input.text:
+        profile_identifier_input.text = sanitized_identifier
+        profile_identifier_input.caret_column = sanitized_identifier.length()

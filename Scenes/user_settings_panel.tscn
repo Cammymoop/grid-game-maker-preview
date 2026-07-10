@@ -2,16 +2,27 @@
 
 [ext_resource type="StyleBox" uid="uid://bwqqm7x8mbrp5" path="res://assets/ui/pause_menu_bg_panel.tres" id="1_e7sck"]
 [ext_resource type="Script" uid="uid://bg2o0u1kdq6ub" path="res://Scenes/user_settings_panel.gd" id="2_2hlat"]
+[ext_resource type="StyleBox" uid="uid://ch63py1vky05t" path="res://assets/ui/plain_input_bg.tres" id="3_2hlat"]
 [ext_resource type="FontFile" uid="uid://biuf4hpin33j3" path="res://assets/font/medium_font.tres" id="3_ao4nr"]
 
-[node name="UserSettingsPanel" type="PanelContainer" unique_id=1234442601 node_paths=PackedStringArray("mute_audio_toggle", "erase_game_save_progress_button", "skip_non_critical_confirm_toggle", "profile_name_label", "back_button")]
+[sub_resource type="StyleBoxLine" id="StyleBoxLine_2hlat"]
+content_margin_left = 4.0
+content_margin_top = 0.0
+content_margin_right = 4.0
+content_margin_bottom = 0.0
+color = Color(0.33333334, 0.31764707, 0.44313726, 1)
+grow_begin = 18.0
+grow_end = 18.0
+
+[node name="UserSettingsPanel" type="PanelContainer" unique_id=1234442601 node_paths=PackedStringArray("mute_audio_toggle", "erase_game_save_progress_button", "skip_non_critical_confirm_toggle", "profile_name_label", "profile_identifier_input", "back_button")]
 size_flags_horizontal = 4
 theme_override_styles/panel = ExtResource("1_e7sck")
 script = ExtResource("2_2hlat")
 mute_audio_toggle = NodePath("MarginContainer/VBoxContainer/VBoxContainer/MuteAudioToggle")
-erase_game_save_progress_button = NodePath("MarginContainer/VBoxContainer/VBoxContainer/EraseProgressButton")
+erase_game_save_progress_button = NodePath("MarginContainer/VBoxContainer/VBoxContainer/FoldableContainer/MarginContainer/VBoxContainer/EraseProgressButton")
 skip_non_critical_confirm_toggle = NodePath("MarginContainer/VBoxContainer/VBoxContainer/SkipNonCriticalSaveConfirm")
 profile_name_label = NodePath("MarginContainer/VBoxContainer/VBoxContainer2/ProfileNameLabel")
+profile_identifier_input = NodePath("MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer/IdentifierInput")
 back_button = NodePath("MarginContainer/VBoxContainer/BackButton")
 
 [node name="MarginContainer" type="MarginContainer" parent="." unique_id=660470230]
@@ -40,8 +51,9 @@ layout_mode = 2
 theme_override_font_sizes/font_size = 14
 text = "Profile: "
 
-[node name="Spacer" type="Control" parent="MarginContainer/VBoxContainer" unique_id=1490270433]
+[node name="HSeparator" type="HSeparator" parent="MarginContainer/VBoxContainer" unique_id=1436638212]
 layout_mode = 2
+theme_override_styles/separator = SubResource("StyleBoxLine_2hlat")
 
 [node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/VBoxContainer" unique_id=937392484]
 layout_mode = 2
@@ -53,15 +65,61 @@ alignment = 2
 
 [node name="SkipNonCriticalSaveConfirm" type="CheckButton" parent="MarginContainer/VBoxContainer/VBoxContainer" unique_id=1903765536]
 layout_mode = 2
-tooltip_text = "When switching from the level editor to Main Menu or Game Edit. Changes will not be lost immediately but will be if switching to another game."
+tooltip_text = "When switching from the level editor to Main Menu or Game Edit.
+Changes will not be lost immediately but will be if switching to another game."
 text = "Skip non-critical save confirm"
 alignment = 2
 
-[node name="Spacer2" type="Control" parent="MarginContainer/VBoxContainer/VBoxContainer" unique_id=1066994936]
-custom_minimum_size = Vector2(0, 6)
+[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer/VBoxContainer" unique_id=1876958425]
 layout_mode = 2
 
-[node name="EraseProgressButton" type="Button" parent="MarginContainer/VBoxContainer/VBoxContainer" unique_id=3323692]
+[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer" unique_id=1819933290]
+layout_mode = 2
+theme_override_constants/separation = 0
+
+[node name="Label" type="Label" parent="MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer/HBoxContainer" unique_id=90230491]
+layout_mode = 2
+text = "Default game "
+
+[node name="Label2" type="Label" parent="MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer/HBoxContainer" unique_id=387870301]
+layout_mode = 2
+tooltip_text = "Used when creating new games or modded copies. Shows up before the \"/\" in the Game ID.
+It's recommended to choose a relatively unique identifier if you want to share your games or mods with others.
+
+Only A-Z and a dash character \"-\". Max 32 characters."
+mouse_filter = 1
+mouse_default_cursor_shape = 16
+theme_override_colors/font_color = Color(0.44313726, 0.84313726, 1, 1)
+text = "identifier"
+
+[node name="IdentifierInput" type="LineEdit" parent="MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer" unique_id=190385304]
+custom_minimum_size = Vector2(120, 0)
+layout_mode = 2
+theme_override_styles/normal = ExtResource("3_2hlat")
+placeholder_text = "?"
+select_all_on_focus = true
+
+[node name="Spacer2" type="Control" parent="MarginContainer/VBoxContainer/VBoxContainer" unique_id=1066994936]
+custom_minimum_size = Vector2(0, 12)
+layout_mode = 2
+
+[node name="FoldableContainer" type="FoldableContainer" parent="MarginContainer/VBoxContainer/VBoxContainer" unique_id=1660682328]
+layout_mode = 2
+folded = true
+title = "Danger Zone"
+title_alignment = 1
+
+[node name="MarginContainer" type="MarginContainer" parent="MarginContainer/VBoxContainer/VBoxContainer/FoldableContainer" unique_id=649142655]
+visible = false
+layout_mode = 2
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 8
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/VBoxContainer/VBoxContainer/FoldableContainer/MarginContainer" unique_id=150811496]
+layout_mode = 2
+
+[node name="EraseProgressButton" type="Button" parent="MarginContainer/VBoxContainer/VBoxContainer/FoldableContainer/MarginContainer/VBoxContainer" unique_id=3323692]
 layout_mode = 2
 text = "Erase All Progress (curent game)"
 

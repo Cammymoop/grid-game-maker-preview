@@ -29,7 +29,6 @@ func open_edit_profile_name() -> void:
     edit_profile_name_container.show()
     show_profile_name_container.hide()
     profile_name_input.text = profile_name
-    profile_name_input.select_all_on_focus = true
     profile_name_input.grab_focus.call_deferred()
 
 func refresh() -> void:

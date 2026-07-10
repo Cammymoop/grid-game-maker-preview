@@ -9,8 +9,11 @@ signal scene_changed(new_scene: String)
 signal bg_style_changed
 @warning_ignore("unused_signal")
 signal level_edit_mode_changed()
+signal profile_switched()
 
 const CreditsUI = preload("res://Scenes/credits_ui.gd")
+
+const IDENTIFIER_MAX_LENGTH: int = 32
 
 var MAX_UNDO_LIMIT: int = 1000
 
@@ -225,7 +228,6 @@ func _ready():
 	var loaded_default_game: = false
 	if default_game: 
 		if FilesManager.game_exists(default_game):
-			prints("loading default game: %s" % [default_game])
 			load_game_definition_from_file(default_game)
 			start_managers()
 			loaded_default_game = true
@@ -296,14 +298,13 @@ func sanitize_identifier(raw_identifier: String) -> String:
 	var sanitized_identifier: = ""
 	for i in raw_identifier.length():
 		var character: = raw_identifier[i]
-		prints("sanitizing character: %s" % [character])
 		if character == "_" or character == " ":
 			character = "-"
 		if character == "-" or character.is_valid_ascii_identifier():
-			prints("valid character: %s" % [character])
 			sanitized_identifier += character
-		else:
-			prints("invalid character: %s" % [character])
+	if sanitized_identifier.length() > IDENTIFIER_MAX_LENGTH:
+		sanitized_identifier = sanitized_identifier.left(IDENTIFIER_MAX_LENGTH)
+
 	return sanitized_identifier
 
 func bake_scene_transition_curve() -> void:
@@ -547,9 +548,29 @@ func create_released_version() -> String:
 	
 	return zip_path
 
+func get_release_info() -> Dictionary:
+	return game_definition.get("release_info", {}).duplicate_deep()
+
+func unrelease_lock() -> void:
+	if not current_game_is_release_locked:
+		return
+	current_game_is_release_locked = false
+	_update_saved_game_as_edited()
+	change_scene("GameEditor")
+
+func unrelease_as_copy_with_identifier(new_identifier: String) -> void:
+	if not current_game_is_release_locked:
+		return
+	if new_identifier == get_game_identifier():
+		unrelease_lock()
+		return
+	_set_game_identifier(new_identifier)
+	save_current_game_definition_as(get_identified_game_name())
+	_update_saved_game_as_edited()
+	change_scene("GameEditor")
+
 
 func get_serialized_game_definition() -> Dictionary:
-	prints("getting serialized game def, current identifier", get_game_identifier())
 	var serialized_def: = game_definition.duplicate_deep()
 	serialized_def["game_name"] = get_game_name()
 	serialized_def["game_identifier"] = get_game_identifier()
@@ -587,9 +608,12 @@ func get_game_name() -> String:
 func get_game_identifier() -> String:
 	return cur_game_identifier
 
-func get_identified_game_name() -> String:
+func get_identified_game_name(visual_version: bool = false) -> String:
 	if not cur_game_identifier:
-		return cur_game_name
+		if visual_version:
+			return "?/" + cur_game_name
+		else:
+			return cur_game_name
 	return cur_game_identifier + "/" + cur_game_name
 
 func get_game_implicit_title() -> String:
@@ -617,17 +641,13 @@ func _game_name_part(identified_name: String) -> String:
 	return identified_name.split("/", true, 1)[1]
 
 func _set_identified_game_name(new_identified_name: String) -> void:
-	prints("setting identified game name: %s" % [new_identified_name])
 	if not new_identified_name.contains("/"):
-		prints("no identifier part in new identified name: %s" % [new_identified_name])
 		_set_game_identifier("")
 		_set_game_name(new_identified_name)
 	else:
 		var new_identifier: = sanitize_identifier(_game_identifier_part(new_identified_name))
-		prints("unsanitized identifier: %s, sanitized identifier: %s" % [_game_identifier_part(new_identified_name), new_identifier])
 		_set_game_identifier(new_identifier)
 		_set_game_name(_game_name_part(new_identified_name))
-	prints("set identifier to ", get_game_identifier())
 
 func get_credits_info() -> Dictionary:
 	return game_definition.get("game_metadata", {}).get("credits", {})
@@ -1347,7 +1367,6 @@ func save_current_game_definition(copy_from_loaded_game: bool = true) -> void:
 		FilesManager.copy_assets_and_levels_to(copy_from_game, get_identified_game_name())
 
 func save_current_game_definition_as(as_identified_game_name: String, delete_on_overwrite: bool = false) -> bool:
-	prints("saving as %s, current identified game name: %s" % [as_identified_game_name, get_identified_game_name()])
 	if as_identified_game_name == get_identified_game_name() and is_current_game_resavable():
 		save_current_game_definition(false)
 		return false
@@ -1355,7 +1374,6 @@ func save_current_game_definition_as(as_identified_game_name: String, delete_on_
 	var is_renaming: = false
 	if not as_identified_game_name.contains("/") or _game_name_part(as_identified_game_name) != get_game_name():
 		is_renaming = true
-	prints("is renaming: %s" % [is_renaming])
 
 	if is_name_overwriting(as_identified_game_name):
 		if not delete_on_overwrite:
@@ -2420,6 +2438,7 @@ func switch_to_new_player_profile() -> void:
 	load_player_profile(new_profile_id)
 
 func load_player_profile(player_id: String) -> void:
+	var first_load: bool = player_profile == null
 	if not FilesManager.player_profile_exists(player_id):
 		push_error("Player profile %s does not exist" % [player_id])
 		return
@@ -2427,6 +2446,8 @@ func load_player_profile(player_id: String) -> void:
 	FilesManager.set_last_profile_id(player_id)
 	player_profile = FilesManager.get_player_profile(player_id)
 	after_profile_changed()
+	if not first_load:
+		profile_switched.emit()
 
 func after_profile_changed() -> void:
 	update_mute()
@@ -3178,11 +3199,7 @@ func get_current_game_current_version() -> Vector2i:
 
 
 func get_full_version_string() -> String:
-	var ver_str: = ""
-	if not get_game_identifier():
-		ver_str = "?/" + get_game_name() + " "
-	else:
-		ver_str = get_game_identifier() + " "
+	var ver_str: = get_identified_game_name(true) + " "
 
 	var base_version: Vector2i = get_current_game_base_version()
 
@@ -3191,7 +3208,10 @@ func get_full_version_string() -> String:
 	else:
 		var current_version: Vector2i = get_current_game_current_version()
 		ver_str += str(current_version.x) + "." + str(current_version.y)
-		ver_str += "(edited from " + str(base_version.x) + "." + str(base_version.y) + ")"
+		if base_version == Vector2i.ZERO:
+			ver_str += "(edited)"
+		else:
+			ver_str += "(edited from " + str(base_version.x) + "." + str(base_version.y) + ")"
 	return ver_str
 
 func get_version_for_data() -> String:

@@ -60,6 +60,9 @@ func _ready() -> void:
 	if tooltip_text and not button.tooltip_text:
 		button.tooltip_text = tooltip_text
 
+func set_button_tooltip(new_tooltip_text: String) -> void:
+	button.tooltip_text = new_tooltip_text
+
 func set_disabled(new_disabled: bool) -> void:
 	button.disabled = new_disabled
 

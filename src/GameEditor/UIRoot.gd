@@ -11,7 +11,11 @@ var save_as_dialog_scn: = preload("res://Scenes/GameEditor/save_game_as_dialog.t
 @onready var popup_layer = get_node("PopupLayerLayer/PopupLayer")
 @onready var message_layer = get_node("MessageLayer")
 
+@export var release_lock_layer: CanvasLayer
+
 func _ready():
+	release_lock_layer.visible = true#GameManager.current_game_is_release_locked
+
 	var first_beside_tabs_button: Control = beside_tabs_buttons.get_child(0)
 	var tab_bar: = tab_container.get_tab_bar()
 	tab_bar.focus_neighbor_right = first_beside_tabs_button.get_path()
@@ -20,6 +24,13 @@ func _ready():
 	first_beside_tabs_button.focus_previous = first_beside_tabs_button.focus_neighbor_left
 
 func _unhandled_input(event: InputEvent) -> void:
+	if Utility.event_is_menu_back_just_pressed(event):
+		if tab_container.current_tab != 0 and not release_lock_layer.visible:
+			tab_container.current_tab = 0
+		else:
+			GameManager.change_scene("Menu")
+	if release_lock_layer.visible:
+		return
 	var current_focus_owner: = get_viewport().gui_get_focus_owner()
 	if current_focus_owner and is_ancestor_of(current_focus_owner):
 		return
@@ -27,11 +38,6 @@ func _unhandled_input(event: InputEvent) -> void:
 		if Utility.fixed_just_pressed_by_event(focus_dir_action, event):
 			tab_container.get_tab_bar().grab_focus.call_deferred()
 			break
-	if Utility.event_is_menu_back_just_pressed(event):
-		if tab_container.current_tab != 0:
-			tab_container.current_tab = 0
-		else:
-			GameManager.change_scene("Menu")
 
 #func show_message(message_text) -> void:
 #	var qm = quick_msg.instantiate()
@@ -60,6 +66,8 @@ func _on_OpenImagesFolder_pressed():
 	OS.shell_open(ProjectSettings.globalize_path(shared_images_dir))
 
 func _shortcut_input(event: InputEvent) -> void:
+	if release_lock_layer.visible:
+		return
 	if Utility.fixed_just_pressed_by_event("save_file_shortcut", event):
 		if not GameManager.is_save_current_overwriting():
 			GameManager.save_current_game_definition()

@@ -496,11 +496,11 @@ func get_item_name() -> String:
 	if not is_in_placing_mode():
 		return ""
 	if cursor_mode == "tile":
-		if not MapManager.tile_name_exists(current_tile_index):
+		if not MapManager.tile_defs.has(current_tile_index):
 			return ""
 		return MapManager.get_tile_name(current_tile_index)
 	else:
-		if not EntityManager.entity_index_exists(current_entity_index):
+		if not EntityManager.entity_defs.has(current_entity_index):
 			return ""
 		return EntityManager.get_entity_name(current_entity_index)
 
