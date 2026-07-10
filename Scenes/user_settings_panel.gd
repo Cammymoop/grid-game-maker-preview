@@ -6,6 +6,7 @@ signal request_back()
 @export var erase_game_save_progress_button: Button
 
 @export var skip_non_critical_confirm_toggle: CheckButton
+@export var show_version_switcher_toggle: CheckButton
 
 @export var profile_name_label: Label
 
@@ -21,6 +22,7 @@ func _ready() -> void:
     mute_audio_toggle.toggled.connect(on_mute_audio_toggle_toggled)
     
     skip_non_critical_confirm_toggle.toggled.connect(on_skip_non_critical_confirm_toggle_toggled)
+    show_version_switcher_toggle.toggled.connect(on_show_version_switcher_toggle_toggled)
     
     erase_game_save_progress_button.pressed.connect(on_erase_game_save_progress_button_pressed)
     
@@ -34,6 +36,9 @@ func refresh_ui() -> void:
     
     var is_skip_non_critical: bool = GameManager.player_profile.get_profile_setting("skip_non_critical_save_dialogs", false)
     skip_non_critical_confirm_toggle.set_pressed_no_signal(is_skip_non_critical)
+    
+    var is_show_version_switcher: bool = GameManager.player_profile.get_profile_setting("main_menu_version_switcher", false)
+    show_version_switcher_toggle.set_pressed_no_signal(is_show_version_switcher)
     
     profile_name_label.text = "For Profile: %s" % [GameManager.get_profile_name()]
 
@@ -81,3 +86,6 @@ func on_profile_identifier_text_changed(text: String) -> void:
     if sanitized_identifier != profile_identifier_input.text:
         profile_identifier_input.text = sanitized_identifier
         profile_identifier_input.caret_column = sanitized_identifier.length()
+
+func on_show_version_switcher_toggle_toggled(is_showing: bool) -> void:
+    GameManager.player_profile.set_profile_setting("main_menu_version_switcher", is_showing)

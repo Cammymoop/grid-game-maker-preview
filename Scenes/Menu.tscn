@@ -10,9 +10,11 @@
 [ext_resource type="Texture2D" uid="uid://dbewldhewludm" path="res://assets/img/button_icons/prev_small.png" id="6_3jcrr"]
 [ext_resource type="Script" uid="uid://dir0jkugrnyfi" path="res://Scenes/game_selector.gd" id="6_ab40c"]
 [ext_resource type="Texture2D" uid="uid://c8uoricgpavvk" path="res://assets/img/button_icons/next_small.png" id="6_wfhf6"]
+[ext_resource type="Script" uid="uid://ddo0ls2dlbc30" path="res://Scenes/UI/version_switcher_panel.gd" id="7_a8aa6"]
 [ext_resource type="Texture2D" uid="uid://rj1klhsd1xaj" path="res://assets/img/button_icons/game_list.png" id="9_sjh0l"]
 [ext_resource type="Texture2D" uid="uid://b4q7u3xbkyj45" path="res://assets/img/button_icons/gear_small.png" id="11_qki4b"]
 [ext_resource type="PackedScene" uid="uid://4a4bn5o1go4a" path="res://Scenes/user_settings_panel.tscn" id="12_byewe"]
+[ext_resource type="PackedScene" uid="uid://cbpf7ehql8tby" path="res://Scenes/UI/version_chooser_panel.tscn" id="14_x0ao6"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_syfuq"]
 content_margin_left = 16.0
@@ -154,7 +156,7 @@ size_flags_vertical = 3
 size_flags_stretch_ratio = 8.0
 mouse_filter = 2
 
-[node name="MainMenu" type="PanelContainer" parent="MarginContainer" unique_id=1211793288 node_paths=PackedStringArray("quit_button", "game_selector", "bg_entity_effect", "edit_game_button", "profile_picker", "settings_panel_layer", "user_settings_panel")]
+[node name="MainMenu" type="PanelContainer" parent="MarginContainer" unique_id=1211793288 node_paths=PackedStringArray("quit_button", "game_selector", "bg_entity_effect", "edit_game_button", "profile_picker", "settings_panel_layer", "user_settings_panel", "version_chooser_panel_layer", "version_chooser_panel", "version_switcher_panel", "version_label")]
 custom_minimum_size = Vector2(450, 160)
 layout_mode = 2
 size_flags_horizontal = 4
@@ -167,6 +169,49 @@ edit_game_button = NodePath("MarginContainer/VBoxContainer/HBoxContainer/EditBut
 profile_picker = NodePath("../VBoxContainer2/PlayerProfilePicker")
 settings_panel_layer = NodePath("SettingsPanelLayer")
 user_settings_panel = NodePath("SettingsPanelLayer/CenterContainer/UserSettingsPanel")
+version_chooser_panel_layer = NodePath("VersionChooserLayer")
+version_chooser_panel = NodePath("VersionChooserLayer/CenterContainer/VersionChooserPanel")
+version_switcher_panel = NodePath("Anchor/CenterContainer/VersionSwitcherPanel")
+version_label = NodePath("MarginContainer/VBoxContainer/GameSelector/VBoxContainer/GameIdentifierLabel")
+
+[node name="Anchor" type="Control" parent="MarginContainer/MainMenu" unique_id=1418169266]
+layout_mode = 2
+mouse_filter = 2
+
+[node name="CenterContainer" type="CenterContainer" parent="MarginContainer/MainMenu/Anchor" unique_id=252170177]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_top = 20.0
+offset_bottom = 80.0
+grow_horizontal = 2
+grow_vertical = 0
+
+[node name="VersionSwitcherPanel" type="PanelContainer" parent="MarginContainer/MainMenu/Anchor/CenterContainer" unique_id=592929116 node_paths=PackedStringArray("version_label", "switch_version_button")]
+layout_mode = 2
+size_flags_horizontal = 4
+script = ExtResource("7_a8aa6")
+version_label = NodePath("HBoxContainer/VersionLabel")
+switch_version_button = NodePath("HBoxContainer/SwitchVersionsButton")
+
+[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/MainMenu/Anchor/CenterContainer/VersionSwitcherPanel" unique_id=513318608]
+layout_mode = 2
+theme_override_constants/separation = 8
+alignment = 1
+
+[node name="VersionLabel" type="Label" parent="MarginContainer/MainMenu/Anchor/CenterContainer/VersionSwitcherPanel/HBoxContainer" unique_id=1794910036]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.5568628, 0.5568628, 0.5568628, 1)
+theme_override_font_sizes/font_size = 12
+text = "GGM/Basic 1.0"
+
+[node name="SwitchVersionsButton" type="Button" parent="MarginContainer/MainMenu/Anchor/CenterContainer/VersionSwitcherPanel/HBoxContainer" unique_id=1562950801]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "Change Version"
 
 [node name="MarginContainer" type="MarginContainer" parent="MarginContainer/MainMenu" unique_id=1377947446]
 layout_mode = 2
@@ -333,6 +378,19 @@ grow_horizontal = 2
 grow_vertical = 2
 
 [node name="UserSettingsPanel" parent="MarginContainer/MainMenu/SettingsPanelLayer/CenterContainer" unique_id=1234442601 instance=ExtResource("12_byewe")]
+layout_mode = 2
+
+[node name="VersionChooserLayer" type="CanvasLayer" parent="MarginContainer/MainMenu" unique_id=117092507]
+visible = false
+
+[node name="CenterContainer" type="CenterContainer" parent="MarginContainer/MainMenu/VersionChooserLayer" unique_id=1939970860]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="VersionChooserPanel" parent="MarginContainer/MainMenu/VersionChooserLayer/CenterContainer" unique_id=189189383 instance=ExtResource("14_x0ao6")]
 layout_mode = 2
 
 [node name="FallingEntities" parent="." unique_id=1839494414 instance=ExtResource("2")]

@@ -25,10 +25,16 @@ func _ready():
 
 func _unhandled_input(event: InputEvent) -> void:
 	if Utility.event_is_menu_back_just_pressed(event):
+		if not GameManager.current_game_is_release_locked:
+			GameManager.create_released_version()
+			GameManager.change_scene("Menu")
+			return
+
 		if tab_container.current_tab != 0 and not release_lock_layer.visible:
 			tab_container.current_tab = 0
 		else:
 			GameManager.change_scene("Menu")
+			return
 	if release_lock_layer.visible:
 		return
 	var current_focus_owner: = get_viewport().gui_get_focus_owner()

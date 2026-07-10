@@ -5,9 +5,11 @@ const OUTPUT_SUBDIR := "other_versions"
 
 func copy_and_zip_directory(
 	source_dir_path: String,
+	dest_dir_path: String,
 	dest_name: String,
 	include_unbundled_levels: bool = false,
-	level_whitelist: Array[String] = []
+	level_whitelist: Array[String] = [],
+	use_exact_name_if_available: bool = false
 ) -> Dictionary:
 	if source_dir_path.begins_with("res://"):
 		push_error("ArchiveCopier does not support res:// paths: %s" % source_dir_path)
@@ -17,6 +19,11 @@ func copy_and_zip_directory(
 		}
 
 	var normalized_source := _normalize_input_dir(source_dir_path)
+	var normalized_dest := ""
+	if not dest_dir_path:
+		normalized_dest = _normalize_input_dir(normalized_source.path_join(OUTPUT_SUBDIR))
+	else:
+		normalized_dest = _normalize_input_dir(dest_dir_path)
 
 	if not DirAccess.dir_exists_absolute(normalized_source):
 		push_error("Source directory does not exist: %s" % normalized_source)
@@ -33,7 +40,7 @@ func copy_and_zip_directory(
 			"error": "Destination name is invalid.",
 		}
 
-	var output_root := normalized_source.path_join(OUTPUT_SUBDIR).simplify_path()
+	var output_root := normalized_dest.simplify_path()
 
 	var mk_root_err := _ensure_dir_exists(output_root)
 	if mk_root_err != OK:
@@ -46,7 +53,8 @@ func copy_and_zip_directory(
 
 	var archive_base_name := _find_available_output_name(
 		output_root,
-		cleaned_dest_name
+		cleaned_dest_name,
+		use_exact_name_if_available
 	)
 	if archive_base_name.is_empty():
 		push_error("Failed to determine an available destination name.")
@@ -292,9 +300,15 @@ func _make_date_stamp() -> String:
 	]
 
 
-func _find_available_output_name(output_root: String, dest_name: String) -> String:
+func _find_available_output_name(output_root: String, dest_name: String, use_exact_name_if_available: bool = false) -> String:
 	var date_stamp := _make_date_stamp()
 	var base_name := "%s_%s" % [dest_name, date_stamp]
+	
+	if use_exact_name_if_available and DirAccess.dir_exists_absolute(output_root):
+		var copied_dir := output_root.path_join(dest_name).simplify_path()
+		var zip_path := output_root.path_join("%s.zip" % dest_name).simplify_path()
+		if not DirAccess.dir_exists_absolute(copied_dir) and not FileAccess.file_exists(zip_path):
+			return dest_name
 
 	var candidate := base_name
 	var suffix := 0

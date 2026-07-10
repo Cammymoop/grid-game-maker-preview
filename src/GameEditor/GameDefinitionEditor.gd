@@ -486,7 +486,7 @@ func _on_edit_game_dir_button_pressed() -> void:
 	name_input.grab_focus.call_deferred()
 
 
-func _on_export_zip_pressed(no_bundle_pls: bool = false) -> void:
+func _on_export_zip_pressed(no_bundle_pls: bool = false, is_release_export: bool = false) -> void:
 	if not no_bundle_pls and Input.is_action_pressed(&"editor_alt_mode_hold"):
 		no_bundle_pls = true
 
@@ -504,15 +504,19 @@ func _on_export_zip_pressed(no_bundle_pls: bool = false) -> void:
 		bundle_shared_images_dialog.confirm_with_callbacks("Bundle Images Before Export?", message_text, do_bundle_first)
 		return
 	GameManager.save_current_game_definition()
+	
+	var export_location: String = ""
+	if is_release_export:
+		export_location = FilesManager.get_game_release_zip_directory(GameManager.get_identified_game_name())
 
 	if OS.has_feature("web"):
-		export_web_mode()
+		export_web_mode(export_location)
 		return
 	var file_dialog: FileDialog = FileDialog.new()
 	file_dialog.title = "Export Game .zip To Folder..."
 	file_dialog.file_mode = FileDialog.FILE_MODE_OPEN_DIR
 	file_dialog.access = FileDialog.ACCESS_FILESYSTEM
-	file_dialog.dir_selected.connect(_export_destination_picked.bind(file_dialog))
+	file_dialog.dir_selected.connect(_export_destination_picked.bind(export_location, file_dialog))
 	file_dialog.close_requested.connect(file_dialog.queue_free)
 	file_dialog.canceled.connect(file_dialog.queue_free)
 	add_child(file_dialog)
@@ -528,19 +532,26 @@ func on_bundle_dialog_custom_action(action: String) -> void:
 	if action == "no_bundle_pls":
 		_on_export_zip_pressed(true)
 
-func export_web_mode() -> void:
-	var zip_path: String = ImporterExporter.export_game_zip(GameManager.get_identified_game_name(), "")
+func export_web_mode(export_location: String = "") -> void:
+	var prefer_skip_date_stamp: bool = export_location != ""
+	var zip_path: String = ImporterExporter.export_game_zip(GameManager.get_identified_game_name(), export_location, "export", prefer_skip_date_stamp)
 	var zip_byte_array: = FileAccess.get_file_as_bytes(zip_path)
 	JavaScriptBridge.download_buffer(zip_byte_array, zip_path.get_file(), "application/zip")
 
-func _export_destination_picked(path: String, file_dialog: FileDialog) -> void:
-	prints("export destination picked: ", path)
+func _export_destination_picked(path: String, export_location: String, file_dialog: FileDialog) -> void:
 	file_dialog.queue_free()
-	var zip_path: String = ImporterExporter.export_game_zip(GameManager.get_identified_game_name(), path)
+	var prefer_skip_date_stamp: bool = export_location != ""
+	var zip_path: String = ImporterExporter.export_game_zip(GameManager.get_identified_game_name(), export_location, "export", prefer_skip_date_stamp)
 	if zip_path:
-		GlobalToaster.show_toast_message("Exported Game .zip to\n%s" % [zip_path])
+		var error: = DirAccess.rename_absolute(zip_path, path.path_join(zip_path.get_file()))
+		if error != OK:
+			push_error("Failed to rename zip file to %s: %s" % [path, error_string(error)])
+			GlobalToaster.show_toast_message("Failed to copy exported Game .zip to destination folder", 2.0)
+			return
+		else:
+			GlobalToaster.show_toast_message("Exported Game .zip to\n%s" % [zip_path], 1.5)
 	else:
-		GlobalToaster.show_toast_message("Failed to export Game .zip")
+		GlobalToaster.show_toast_message("Failed to export Game .zip", 2.0)
 
 func on_default_move_speed_changed(value: float) -> void:
 	GameManager.set_game_setting("entity_move_speed", value)

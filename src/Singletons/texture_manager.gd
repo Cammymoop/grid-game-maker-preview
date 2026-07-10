@@ -688,15 +688,22 @@ func has_enabled_shared_images() -> bool:
             return true
     return false
 
+# Do not change logic or order, used by hash calculation
 func get_all_used_bundled_texture_ids() -> Array[int]:
+    return get_all_used_bundled_texture_ids_from_spec(texture_spec)
+func get_all_used_bundled_texture_ids_from_spec(from_texture_spec: Array) -> Array[int]:
     var bundled_texture_ids: Array[int] = []
-    for tex_spec in texture_spec:
+    for tex_spec in from_texture_spec:
         if tex_spec['type'] == 'local_file' and not tex_spec.get('is_shared', true):
             bundled_texture_ids.append(int(tex_spec['texture_id']))
+    bundled_texture_ids.sort()
     return bundled_texture_ids
 
+# Do not change logic used by hash calculation
 func get_bundled_texture_image_name(texture_id: int) -> String:
-    for tex_spec_item in texture_spec:
+    return get_bundled_texture_image_name_from_spec(texture_spec, texture_id)
+func get_bundled_texture_image_name_from_spec(from_texture_spec: Array, texture_id: int) -> String:
+    for tex_spec_item in from_texture_spec:
         if tex_spec_item['texture_id'] != texture_id:
             return ""
         if not tex_spec_item['type'] == 'local_file' or tex_spec_item.get('is_shared', true):

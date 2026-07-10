@@ -37,7 +37,9 @@ var game_dir_default_structure: = {
 		"levels": {},
 		"worlds": {},
 	},
-	"other_versions": {},
+	"other_versions": {
+		"releases": {},
+	},
 }
 
 func init_folders():
@@ -192,14 +194,15 @@ func save_game_info(game_info: Dictionary) -> void:
 		return
 	var saving_as_game_name: String = game_info.get('game_name', "")
 	var game_identifier: String = game_info.get('game_identifier', "")
-	prints("saving game info, found name: %s, identifier: %s" % [saving_as_game_name, game_identifier])
 	if game_identifier:
 		saving_as_game_name = game_identifier + "/" + saving_as_game_name
 
 	create_game_directory_if_not_exists(saving_as_game_name)
 	var game_dir: = get_game_base_dir(saving_as_game_name)
-	prints("saving game info using dir name:", game_dir)
 	return serialize_and_save_data_to_json(game_info, game_dir, GAME_DEF_FILENAME, FORMAT_GAME_JSON)
+
+func get_save_formatted_game_info(game_info: Dictionary) -> String:
+	return _serialize_dict_to_json_string(game_info, FORMAT_GAME_JSON)
 
 func create_game_directory_if_not_exists(identified_game_name: String) -> void:
 	var game_data_path: = get_game_base_dir(identified_game_name)
@@ -231,6 +234,12 @@ func game_exists(game_name: String) -> bool:
 	if not smarter_dir_exists(get_game_base_dir(game_name)):
 		return false
 	return FileAccess.file_exists(get_game_definition_path(game_name))
+
+func game_has_release_hash(game_name: String) -> bool:
+	if not game_exists(game_name):
+		return false
+	var game_definition: = get_game_definition(game_name)
+	return game_definition.get("release_info", {}).get("release_hash", "") != ""
 
 func _get_dict_from_json_file(file_path: String) -> Dictionary:
 	var f = FileAccess.open(file_path, FileAccess.READ)
@@ -286,6 +295,9 @@ func _iter_directory_flat_filtered(directory_path: String, ext_filters: Array[St
 		push_error("Error opening directory: " + directory_path)
 		return []
 	
+	for i in ext_filters.size():
+		ext_filters[i] = ext_filters[i].trim_prefix(".").to_lower()
+	
 	var filename_list: Array = []
 	directory.list_dir_begin()
 	var cur_filename: String = "-"
@@ -301,7 +313,8 @@ func _iter_directory_flat_filtered(directory_path: String, ext_filters: Array[St
 		elif not include_files:
 			continue
 		if ext_filters:
-			if not cur_filename.get_extension() or cur_filename.get_extension() not in ext_filters:
+			var ext: String = cur_filename.get_extension().to_lower()
+			if ext not in ext_filters:
 				continue
 
 		filename_list.append(cur_filename)
@@ -329,6 +342,7 @@ func get_game_list_with_titles() -> Array:
 			'game_name': identified_game_name,
 			'game_title': game_definition.get('game_settings', {}).get('title', game_definition['game_name']),
 		})
+	games_list.sort_custom(func(a, b): return a['game_title'] < b['game_title'])
 	return games_list
 
 func get_game_definitions_by_name() -> Dictionary[String, Dictionary]:
@@ -932,5 +946,101 @@ func save_game_save_for_player(player_id: String, game_name: String, game_save_d
 	var profile_game_saves_dir: = _data_path(local_data_subdir, player_id, game_saves_local_subdir)
 	return serialize_and_save_data_to_json(game_save_data, profile_game_saves_dir, game_dir_name + ".json", FORMAT_GAME_JSON)
 
+
+func get_game_release_zip_directory(game_name: String) -> String:
+	if not game_exists(game_name):
+		push_error("Game %s does not exist" % [game_name])
+		return ""
+	var game_dir: = get_game_base_dir(game_name)
+	var releases_dir: = game_dir.path_join("other_versions").path_join("releases")
+	# this dir was added later so it may not exist yet
+	ensure_data_dir_exists(releases_dir)
+	return releases_dir
+
 func save_released_version_zip(game_name: String) -> String:
-	return ""
+	if not game_exists(game_name):
+		push_error("Game %s does not exist" % [game_name])
+		return ""
+	var releases_dir: = get_game_release_zip_directory(game_name)
+	
+	var version_number_arr: Array = GameManager.game_definition["release_info"]["base_version"]
+	var version_number_string: = Utility.version_vec_to_string(Utility.get_vector2i_from_arr(version_number_arr))
+	
+	var created_zip_path: = ImporterExporter.export_game_zip(game_name, releases_dir, "release_" + version_number_string, true, false)
+
+	return created_zip_path
+
+
+func _safe_read_version_from_dict(dict: Dictionary, key: String) -> Vector2i:
+	var raw_version: Variant = dict.get(key, [])
+	if not typeof(raw_version) == TYPE_ARRAY or raw_version.size() < 2:
+		return Vector2i.ZERO
+	elif typeof(raw_version[0]) not in [TYPE_INT, TYPE_FLOAT] or typeof(raw_version[1]) not in [TYPE_INT, TYPE_FLOAT]:
+		return Vector2i.ZERO
+	return Utility.get_vector2i_from_arr(raw_version)
+
+
+func enumerate_and_fetch_data_for_all_versions_of_game(game_name: String) -> Dictionary:
+	var versions_info: Dictionary = {
+		"release_versions": {},
+		"other_versions": {},
+	}
+	if not game_exists(game_name):
+		return versions_info
+	
+	for type_key in ["release_versions", "other_versions"]:
+		var zips_dir: = ""
+		if type_key == "release_versions":
+			zips_dir = get_game_release_zip_directory(game_name)
+		elif type_key == "other_versions":
+			zips_dir = get_game_base_dir(game_name).path_join("other_versions")
+		var use_version_key: = "base_version" if type_key == "release_versions" else "next_version"
+
+		if not smarter_dir_exists(zips_dir):
+			continue
+
+		for zip_filename in iterate_directory_flat_filelist(zips_dir, "zip"):
+			var zip_path: = zips_dir.path_join(zip_filename)
+			var game_info: Dictionary = ImportZipExtractor.get_game_info_from_zip(zip_path)
+			var game_info_name: = get_identified_game_name_from_data(game_info)
+			var base_version: Vector2i = _safe_read_version_from_dict(game_info.get("release_info", {}), "base_version")
+			var next_version: Vector2i = _safe_read_version_from_dict(game_info.get("release_info", {}), "next_version")
+			var ver_info: Dictionary = {
+				"game_definition": game_info,
+				"intrinsic_game_name": game_info_name,
+				"name_matches": game_name == game_info_name,
+				"has_hash": game_info.get("release_info", {}).get("release_hash", "") != "",
+				"release_created_utc": game_info.get("release_info", {}).get("release_created_utc", ""),
+				"release_created_local_date": game_info.get("release_info", {}).get("release_created_local_date", ""),
+				"base_version": base_version,
+				"next_version": next_version,
+				"full_zip_path": zip_path,
+			}
+			ver_info["game_version"] = ver_info[use_version_key]
+			if ver_info["release_created_utc"] != "":
+				ver_info["release_created_unix"] = Time.get_unix_time_from_datetime_string(ver_info["release_created_utc"])
+			ver_info["file_edit_time_unix"] = FileAccess.get_modified_time(zip_path)
+
+			versions_info[type_key][zip_filename] = ver_info
+	
+	return versions_info
+
+func display_name_from_version_info(version_info: Dictionary) -> String:
+	var game_info: Dictionary = version_info.get("game_definition", {})
+	var info_name: String = game_info.get("game_name", "????")
+	var info_identifier: String = game_info.get("game_identifier", "")
+	return GameManager.display_format_game_name_and_identifier(info_identifier, info_name)
+
+func friendly_version_string_from_version_info(version_info: Dictionary, with_name: bool) -> String:
+	var version_string: = ""
+	if with_name:
+		version_string = display_name_from_version_info(version_info) + " "
+	
+	version_string += Utility.version_vec_to_string(version_info["game_version"])
+	if not version_info["has_hash"]:
+		version_string += " (edited"
+		if version_info["base_version"] == Vector2i.ZERO:
+			version_string += ")"
+		else:
+			version_string += " from " + Utility.version_vec_to_string(version_info["base_version"]) + ")"
+	return version_string

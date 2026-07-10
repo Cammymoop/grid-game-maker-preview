@@ -77,7 +77,7 @@ func update_title_text() -> void:
     else:
         custom_minimum_size.x = 0
     
-    game_identifier_label.text = GameManager.get_identified_game_name()
+    game_identifier_label.text = GameManager.get_identified_game_name(true)
 
 func get_name_with_identifier_or_question_mark(game_name: String) -> String:
     if not game_name.contains("/"):

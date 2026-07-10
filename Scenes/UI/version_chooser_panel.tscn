@@ -1,0 +1,139 @@
+[gd_scene format=3 uid="uid://cbpf7ehql8tby"]
+
+[ext_resource type="StyleBox" uid="uid://bwqqm7x8mbrp5" path="res://assets/ui/pause_menu_bg_panel.tres" id="1_286e4"]
+[ext_resource type="Script" uid="uid://b0lfci2a6sdsm" path="res://Scenes/UI/version_chooser_panel.gd" id="2_y1w2u"]
+[ext_resource type="FontFile" uid="uid://ctnllh13x3iqi" path="res://assets/font/NotoSans-Bold.ttf" id="3_fvnaj"]
+[ext_resource type="FontFile" uid="uid://biuf4hpin33j3" path="res://assets/font/medium_font.tres" id="4_636xh"]
+
+[sub_resource type="StyleBoxLine" id="StyleBoxLine_2hlat"]
+content_margin_left = 4.0
+content_margin_top = 0.0
+content_margin_right = 4.0
+content_margin_bottom = 0.0
+color = Color(0.33333334, 0.31764707, 0.44313726, 1)
+grow_begin = 18.0
+grow_end = 18.0
+
+[node name="VersionChooserPanel" type="PanelContainer" unique_id=189189383 node_paths=PackedStringArray("current_version_label", "save_current_backup_toggle", "release_versions_container", "other_versions_container", "release_versions_list", "other_versions_list", "use_release_version_button", "use_other_version_button", "back_button")]
+size_flags_horizontal = 4
+theme_override_styles/panel = ExtResource("1_286e4")
+script = ExtResource("2_y1w2u")
+current_version_label = NodePath("MarginContainer/VBoxContainer/VBoxContainer2/HBoxContainer/CurrentVersionLabel")
+save_current_backup_toggle = NodePath("MarginContainer/VBoxContainer/VBoxContainer3/SaveCurrentBackupToggle")
+release_versions_container = NodePath("MarginContainer/VBoxContainer/VBoxContainer3/HBoxContainer/VBoxContainer")
+other_versions_container = NodePath("MarginContainer/VBoxContainer/VBoxContainer3/HBoxContainer/VBoxContainer2")
+release_versions_list = NodePath("MarginContainer/VBoxContainer/VBoxContainer3/HBoxContainer/VBoxContainer/ReleaseVerList")
+other_versions_list = NodePath("MarginContainer/VBoxContainer/VBoxContainer3/HBoxContainer/VBoxContainer2/OtherVerList")
+use_release_version_button = NodePath("MarginContainer/VBoxContainer/VBoxContainer3/HBoxContainer/VBoxContainer/UseReleaseVersionButton")
+use_other_version_button = NodePath("MarginContainer/VBoxContainer/VBoxContainer3/HBoxContainer/VBoxContainer2/UseOtherVersionButton")
+back_button = NodePath("MarginContainer/VBoxContainer/BackButton")
+
+[node name="MarginContainer" type="MarginContainer" parent="." unique_id=806046012]
+layout_mode = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 5
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 5
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer" unique_id=1247355401]
+custom_minimum_size = Vector2(240, 0)
+layout_mode = 2
+
+[node name="VBoxContainer2" type="VBoxContainer" parent="MarginContainer/VBoxContainer" unique_id=1768822456]
+layout_mode = 2
+
+[node name="Label4" type="Label" parent="MarginContainer/VBoxContainer/VBoxContainer2" unique_id=843514692]
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "Choose Version"
+horizontal_alignment = 1
+
+[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer/VBoxContainer2" unique_id=231838404]
+layout_mode = 2
+alignment = 1
+
+[node name="Label" type="Label" parent="MarginContainer/VBoxContainer/VBoxContainer2/HBoxContainer" unique_id=422835321]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "Current Version:"
+
+[node name="CurrentVersionLabel" type="Label" parent="MarginContainer/VBoxContainer/VBoxContainer2/HBoxContainer" unique_id=1533839841]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.5568628, 0.5568628, 0.5568628, 1)
+theme_override_fonts/font = ExtResource("3_fvnaj")
+theme_override_font_sizes/font_size = 14
+text = "GGM/Basic 1.0"
+
+[node name="HSeparator" type="HSeparator" parent="MarginContainer/VBoxContainer" unique_id=1826155492]
+layout_mode = 2
+theme_override_styles/separator = SubResource("StyleBoxLine_2hlat")
+
+[node name="VBoxContainer3" type="VBoxContainer" parent="MarginContainer/VBoxContainer" unique_id=1753946636]
+layout_mode = 2
+
+[node name="SaveCurrentBackupToggle" type="CheckButton" parent="MarginContainer/VBoxContainer/VBoxContainer3" unique_id=1241071518]
+layout_mode = 2
+size_flags_horizontal = 4
+text = "Save New Backup of Current Version"
+alignment = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer/VBoxContainer3" unique_id=490583680]
+layout_mode = 2
+theme_override_constants/separation = 20
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/VBoxContainer/VBoxContainer3/HBoxContainer" unique_id=1674865493]
+custom_minimum_size = Vector2(240, 320)
+layout_mode = 2
+alignment = 1
+
+[node name="Label" type="Label" parent="MarginContainer/VBoxContainer/VBoxContainer3/HBoxContainer/VBoxContainer" unique_id=456651677]
+layout_mode = 2
+text = "Release Versions:"
+
+[node name="ReleaseVerList" type="ItemList" parent="MarginContainer/VBoxContainer/VBoxContainer3/HBoxContainer/VBoxContainer" unique_id=1187188706]
+layout_mode = 2
+auto_height = true
+scroll_hint_mode = 1
+item_count = 3
+item_0/text = "A"
+item_1/text = "B"
+item_2/text = "C"
+
+[node name="UseReleaseVersionButton" type="Button" parent="MarginContainer/VBoxContainer/VBoxContainer3/HBoxContainer/VBoxContainer" unique_id=54278581]
+layout_mode = 2
+size_flags_horizontal = 4
+text = "Use This Version"
+
+[node name="VBoxContainer2" type="VBoxContainer" parent="MarginContainer/VBoxContainer/VBoxContainer3/HBoxContainer" unique_id=1528672737]
+custom_minimum_size = Vector2(240, 320)
+layout_mode = 2
+alignment = 1
+
+[node name="Label" type="Label" parent="MarginContainer/VBoxContainer/VBoxContainer3/HBoxContainer/VBoxContainer2" unique_id=1763065861]
+layout_mode = 2
+text = "Backups Etc:"
+
+[node name="OtherVerList" type="ItemList" parent="MarginContainer/VBoxContainer/VBoxContainer3/HBoxContainer/VBoxContainer2" unique_id=333739110]
+layout_mode = 2
+auto_height = true
+scroll_hint_mode = 1
+item_count = 3
+item_0/text = "A"
+item_1/text = "B"
+item_2/text = "C"
+
+[node name="UseOtherVersionButton" type="Button" parent="MarginContainer/VBoxContainer/VBoxContainer3/HBoxContainer/VBoxContainer2" unique_id=1409271746]
+layout_mode = 2
+size_flags_horizontal = 4
+text = "Use This Version"
+
+[node name="Spacer3" type="Control" parent="MarginContainer/VBoxContainer" unique_id=1855114828]
+custom_minimum_size = Vector2(0, 28)
+layout_mode = 2
+
+[node name="BackButton" type="Button" parent="MarginContainer/VBoxContainer" unique_id=1955008023]
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_fonts/font = ExtResource("4_636xh")
+text = "Back
+"

@@ -1379,3 +1379,6 @@ func list_to_unique_set(list: Array) -> Array:
 		if item not in unique_set:
 			unique_set.append(item)
 	return unique_set
+
+func version_vec_to_string(version_vec: Vector2i) -> String:
+	return str(version_vec.x) + "." + str(version_vec.y)

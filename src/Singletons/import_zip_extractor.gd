@@ -3,7 +3,7 @@ extends Node
 
 func extract_zip_to_games(
 	zip_file_path: String,
-	cleaned_dest_name: String
+	dest_game_dir: String
 ) -> Dictionary:
 	var normalized_zip_path := _normalize_input_file_path(zip_file_path)
 	if normalized_zip_path.is_empty():
@@ -19,7 +19,7 @@ func extract_zip_to_games(
 			"error": "Zip file does not exist: %s" % normalized_zip_path,
 		}
 
-	if not cleaned_dest_name or cleaned_dest_name == "OOPS":
+	if not dest_game_dir or dest_game_dir == "OOPS":
 		push_error("Game directory name is invalid.")
 		return {
 			"ok": false,
@@ -36,7 +36,7 @@ func extract_zip_to_games(
 			"code": ensure_root_err,
 		}
 
-	var dest_dir_abs := import_root_abs.path_join(cleaned_dest_name).simplify_path()
+	var dest_dir_abs := import_root_abs.path_join(dest_game_dir).simplify_path()
 	var excluded_names := _build_excluded_names()
 
 	var extract_err := _extract_zip_into_dir(
@@ -59,12 +59,12 @@ func extract_zip_to_games(
 	}
 
 
-func import_game_zip_with_backup(
+func import_game_from_zip(
 	zip_file: Variant,
-	cleaned_dest_name: String,
-	backup_name: String = ""
+	dest_game_name: String,
+	make_backup_if_exists: bool = true,
 ) -> Dictionary:
-	if not cleaned_dest_name or cleaned_dest_name == "OOPS":
+	if not dest_game_name or dest_game_name == "OOPS":
 		push_error("Game directory name is invalid.")
 		return {
 			"ok": false,
@@ -72,28 +72,20 @@ func import_game_zip_with_backup(
 		}
 
 	var import_root_abs := ProjectSettings.globalize_path(FilesManager.get_games_dir()).simplify_path()
-	var dest_dir_abs := import_root_abs.path_join(cleaned_dest_name).simplify_path()
+	var dest_game_dir: = FilesManager.get_game_dir_from_name(dest_game_name)
+	var dest_dir_abs := import_root_abs.path_join(dest_game_dir).simplify_path()
 
 	var backup_result: Dictionary = {
 		"ok": true,
 		"skipped": true,
 	}
 
-	if DirAccess.dir_exists_absolute(dest_dir_abs):
+	if make_backup_if_exists and DirAccess.dir_exists_absolute(dest_dir_abs):
 		var marker_file := dest_dir_abs.path_join(FilesManager.GAME_DEF_FILENAME)
 		if FileAccess.file_exists(marker_file):
-			var resolved_backup_name := backup_name
-			if resolved_backup_name.strip_edges().is_empty():
-				resolved_backup_name = cleaned_dest_name
-
-			backup_result = ArchiveCopier.copy_and_zip_directory(
-				dest_dir_abs,
-				resolved_backup_name,
-				true,
-				[]
-			)
-
-			if not backup_result.get("ok", false):
+			if not ImporterExporter.make_backup_of_game(dest_game_name):
+				backup_result["ok"] = false
+				backup_result["error"] = "Failed to make backup of game."
 				push_error("Backup failed, extraction aborted.")
 				return {
 					"ok": false,
@@ -105,7 +97,7 @@ func import_game_zip_with_backup(
 
 	var extract_result: Dictionary = {}
 	if zip_file is String:
-		extract_result = extract_zip_to_games(zip_file, cleaned_dest_name)
+		extract_result = extract_zip_to_games(zip_file, dest_game_dir)
 	elif zip_file is PackedByteArray:
 		var temp_file_path: = FilesManager.save_temporary_data_as_file(zip_file, ".zip")
 		if not temp_file_path:
@@ -113,7 +105,7 @@ func import_game_zip_with_backup(
 				"ok": false,
 				"error": "Failed to save temporary zip file.",
 			}
-		extract_result = extract_zip_to_games(temp_file_path, cleaned_dest_name)
+		extract_result = extract_zip_to_games(temp_file_path, dest_game_dir)
 		FilesManager.delete_temporary_file(temp_file_path)
 	extract_result["backup_result"] = backup_result
 	return extract_result
@@ -390,7 +382,6 @@ func _read_game_definition_from_zip(zip_file_path: String) -> Dictionary:
 	var candidate_paths: Array[String] = [
 		FilesManager.GAME_DEF_FILENAME,
 	]
-
 	if not root_prefix.is_empty():
 		candidate_paths.append(root_prefix + FilesManager.GAME_DEF_FILENAME)
 

@@ -14,13 +14,14 @@ color = Color(0.33333334, 0.31764707, 0.44313726, 1)
 grow_begin = 18.0
 grow_end = 18.0
 
-[node name="UserSettingsPanel" type="PanelContainer" unique_id=1234442601 node_paths=PackedStringArray("mute_audio_toggle", "erase_game_save_progress_button", "skip_non_critical_confirm_toggle", "profile_name_label", "profile_identifier_input", "back_button")]
+[node name="UserSettingsPanel" type="PanelContainer" unique_id=1234442601 node_paths=PackedStringArray("mute_audio_toggle", "erase_game_save_progress_button", "skip_non_critical_confirm_toggle", "show_version_switcher_toggle", "profile_name_label", "profile_identifier_input", "back_button")]
 size_flags_horizontal = 4
 theme_override_styles/panel = ExtResource("1_e7sck")
 script = ExtResource("2_2hlat")
 mute_audio_toggle = NodePath("MarginContainer/VBoxContainer/VBoxContainer/MuteAudioToggle")
 erase_game_save_progress_button = NodePath("MarginContainer/VBoxContainer/VBoxContainer/FoldableContainer/MarginContainer/VBoxContainer/EraseProgressButton")
 skip_non_critical_confirm_toggle = NodePath("MarginContainer/VBoxContainer/VBoxContainer/SkipNonCriticalSaveConfirm")
+show_version_switcher_toggle = NodePath("MarginContainer/VBoxContainer/VBoxContainer/VersionSwitcherToggle")
 profile_name_label = NodePath("MarginContainer/VBoxContainer/VBoxContainer2/ProfileNameLabel")
 profile_identifier_input = NodePath("MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer/IdentifierInput")
 back_button = NodePath("MarginContainer/VBoxContainer/BackButton")
@@ -70,8 +71,16 @@ Changes will not be lost immediately but will be if switching to another game."
 text = "Skip non-critical save confirm"
 alignment = 2
 
+[node name="VersionSwitcherToggle" type="CheckButton" parent="MarginContainer/VBoxContainer/VBoxContainer" unique_id=366635556]
+layout_mode = 2
+tooltip_text = "When switching from the level editor to Main Menu or Game Edit.
+Changes will not be lost immediately but will be if switching to another game."
+text = "Show Version Switcher on Main Menu"
+alignment = 2
+
 [node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer/VBoxContainer" unique_id=1876958425]
 layout_mode = 2
+alignment = 2
 
 [node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer" unique_id=1819933290]
 layout_mode = 2

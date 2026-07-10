@@ -3,6 +3,9 @@ extends PanelContainer
 const GameSelector = preload("res://Scenes/game_selector.gd")
 const MainMenuEffects = preload("res://src/MainMenuEffects.gd")
 
+const VersionSwitcherPanel = preload("res://Scenes/UI/version_switcher_panel.gd")
+const VersionChooserPanel = preload("res://Scenes/UI/version_chooser_panel.gd")
+
 const UserSettingsPanel = preload("res://Scenes/user_settings_panel.gd")
 
 @export var quit_button: Button
@@ -17,8 +20,17 @@ const UserSettingsPanel = preload("res://Scenes/user_settings_panel.gd")
 @export var settings_panel_layer: CanvasLayer
 @export var user_settings_panel: UserSettingsPanel
 
+@export var version_chooser_panel_layer: CanvasLayer
+@export var version_chooser_panel: VersionChooserPanel
+
+@export var version_switcher_panel: VersionSwitcherPanel
+@export var version_label: Label
+
 func _ready():
 	user_settings_panel.request_back.connect(on_user_settings_panel_request_back)
+	version_chooser_panel.request_back.connect(on_version_chooser_panel_request_back)
+	
+	version_switcher_panel.open_version_chooser.connect(show_version_chooser_panel)
 
 	if OS.has_feature("web"):
 		quit_button.hide()
@@ -30,10 +42,15 @@ func _ready():
 	
 	EntityManager.initial_sprite_previews_finished.connect(on_initial_sprite_previews_finished)
 	
-	refresh_edit_button()
+	refresh_show_version_switcher()
 
-func refresh_edit_button() -> void:
-	pass
+func refresh_show_version_switcher() -> void:
+	var is_show_version_switcher: bool = GameManager.player_profile.get_profile_setting("main_menu_version_switcher", false)
+	version_switcher_panel.visible = is_show_version_switcher
+	version_label.visible = not is_show_version_switcher
+	
+	if version_switcher_panel.visible:
+		version_switcher_panel.refresh_ui()
 
 func _on_PlayButton_pressed():
 	if GameManager.is_in_level_edit_mode:
@@ -66,6 +83,9 @@ func _on_import_levels_button_pressed() -> void:
 
 func on_game_changed(_game_name: String) -> void:
 	bg_entity_effect.pause_drops()
+	
+	if version_switcher_panel.visible:
+		version_switcher_panel.refresh_ui()
 
 func on_initial_sprite_previews_finished() -> void:
 	await get_tree().process_frame
@@ -75,8 +95,18 @@ func on_user_settings_panel_request_back() -> void:
 	show()
 	profile_picker.show()
 	settings_panel_layer.hide()
+	refresh_show_version_switcher()
 
 func show_user_settings_panel() -> void:
 	hide()
 	profile_picker.hide()
 	settings_panel_layer.show()
+
+func on_version_chooser_panel_request_back() -> void:
+	show()
+	version_chooser_panel_layer.hide()
+
+func show_version_chooser_panel() -> void:
+	hide()
+	version_chooser_panel_layer.show()
+	version_chooser_panel.show_and_load_version_infos()

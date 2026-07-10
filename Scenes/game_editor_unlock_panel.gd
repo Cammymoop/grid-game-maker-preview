@@ -44,15 +44,14 @@ func _version_number_to_string(version: Vector2i) -> String:
 func refresh_current_identifier() -> void:
     var my_identifier: String = GameManager.get_profile_identifier()
     
-    var my_version_string: = ""
     if not my_identifier:
         edit_my_identifier_button.disabled = true
         edit_my_identifier_button.set_button_tooltip("Please set an identifier for this profile using the button to the right.")
-        my_version_string = "?/" + GameManager.get_game_name()
     else:
         edit_my_identifier_button.disabled = false
         edit_my_identifier_button.set_button_tooltip("")
-        my_version_string = my_identifier + "/" + GameManager.get_game_name()
+
+    var my_version_string: = GameManager.display_format_game_name_and_identifier(my_identifier, GameManager.get_game_name())
     my_version_string += " " + next_version_number
     
     if my_identifier and my_identifier == GameManager.get_game_identifier():
@@ -62,7 +61,6 @@ func refresh_current_identifier() -> void:
 
 
 func on_edit_identifier_button_pressed() -> void:
-    prints("edit identifier button pressed")
     switch_to_set_identifier()
 
 
