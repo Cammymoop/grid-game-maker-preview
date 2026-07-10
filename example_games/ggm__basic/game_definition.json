@@ -39,7 +39,7 @@
     },
     "game_view_size": [
       22.0,
-      15.5
+      16.0
     ],
     "bg_style": {
       "bg_gradient_above": "above",
@@ -1470,5 +1470,18 @@
       "pitch": 1.19217332647245,
       "ps_seed": 905203.0
     }
-  ]
+  ],
+  "release_info": {
+    "edited": true,
+    "base_version": [
+      0,
+      0
+    ],
+    "next_version": [
+      0,
+      1
+    ],
+    "release_hash": ""
+  },
+  "game_identifier": "GGM"
 }

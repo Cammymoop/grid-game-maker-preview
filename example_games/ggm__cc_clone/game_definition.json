@@ -3188,5 +3188,18 @@
       "pitch": 0.590176344026113,
       "sample_name": "pop"
     }
-  ]
+  ],
+  "release_info": {
+    "edited": true,
+    "base_version": [
+      0,
+      0
+    ],
+    "next_version": [
+      0,
+      1
+    ],
+    "release_hash": ""
+  },
+  "game_identifier": "GGM"
 }

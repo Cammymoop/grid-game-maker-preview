@@ -1,0 +1,318 @@
+[gd_scene format=3 uid="uid://dgvtr1ghjlqi5"]
+
+[ext_resource type="Script" uid="uid://chx54doj8sk2q" path="res://Scenes/game_editor_unlock_panel.gd" id="1_rdmne"]
+[ext_resource type="FontFile" uid="uid://ctnllh13x3iqi" path="res://assets/font/NotoSans-Bold.ttf" id="2_ybeui"]
+[ext_resource type="PackedScene" uid="uid://cfehp8ycqn0du" path="res://Scenes/UI/ButtonContainer.tscn" id="3_hlit4"]
+[ext_resource type="Script" uid="uid://dt3cqxvok27ct" path="res://Scenes/GameEditor/set_profile_identifier_ui.gd" id="4_y5jrq"]
+[ext_resource type="PackedScene" uid="uid://teuuvlq5n85m" path="res://Scenes/player_profile_picker.tscn" id="5_n65gn"]
+[ext_resource type="StyleBox" uid="uid://ch63py1vky05t" path="res://assets/ui/plain_input_bg.tres" id="6_30rp1"]
+
+[sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_retx3"]
+blend_mode = 3
+
+[sub_resource type="Gradient" id="Gradient_xh6ve"]
+offsets = PackedFloat32Array(0.0015873016, 0.26825398, 0.36031747, 0.5222222, 0.89047617)
+colors = PackedColorArray(0.45452422, 0.45452428, 0.45452422, 1, 0.6365314, 0.6365314, 0.63653135, 1, 0.8217887, 0.82178867, 0.82178867, 1, 0.7205548, 0.72055507, 0.7205548, 1, 0.6296744, 0.6296749, 0.62967443, 1)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_42d0a"]
+gradient = SubResource("Gradient_xh6ve")
+fill_from = Vector2(0.104700856, 0.8440171)
+fill_to = Vector2(0.23717949, 0.73717946)
+repeat = 2
+
+[node name="LockedOverlay" type="CanvasLayer" unique_id=193858524]
+layer = 3
+
+[node name="TextureRect" type="TextureRect" parent="." unique_id=1743171554]
+modulate = Color(0.72464263, 0.7246426, 0.7246426, 1)
+material = SubResource("CanvasItemMaterial_retx3")
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 0
+texture = SubResource("GradientTexture2D_42d0a")
+
+[node name="CenterContainer" type="CenterContainer" parent="." unique_id=1249224174]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="GameEditorUnlockPanel" type="PanelContainer" parent="CenterContainer" unique_id=648956124 node_paths=PackedStringArray("set_profile_identifier_ui", "edit_in_place_button", "edit_my_identifier_button", "current_version_label", "edit_in_place_version_label", "edit_with_my_identifier_version_label", "edit_identifier_button")]
+custom_minimum_size = Vector2(240, 240)
+layout_mode = 2
+script = ExtResource("1_rdmne")
+set_profile_identifier_ui = NodePath("../SetProfileIdentifierUI")
+edit_in_place_button = NodePath("MarginContainer/CenterContainer/VBoxContainer/HBoxContainer/VBoxContainer/InPlaceButton")
+edit_my_identifier_button = NodePath("MarginContainer/CenterContainer/VBoxContainer/HBoxContainer/EditMyVersionButtonContainer/MyVersionButton")
+current_version_label = NodePath("MarginContainer/CenterContainer/VBoxContainer/HBoxContainer2/CurrentVersionLabel")
+edit_in_place_version_label = NodePath("MarginContainer/CenterContainer/VBoxContainer/HBoxContainer/VBoxContainer/InPlaceButton/MarginContainer/VBoxContainer/EditInPlaceVersionLabel")
+edit_with_my_identifier_version_label = NodePath("MarginContainer/CenterContainer/VBoxContainer/HBoxContainer/EditMyVersionButtonContainer/MyVersionButton/MarginContainer/VBoxContainer/EditMyVersionLabel")
+edit_identifier_button = NodePath("MarginContainer/CenterContainer/VBoxContainer/HBoxContainer/VBoxContainer3/EditProfileIdentifierButton")
+
+[node name="MarginContainer" type="MarginContainer" parent="CenterContainer/GameEditorUnlockPanel" unique_id=956324077]
+layout_mode = 2
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 12
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 12
+
+[node name="CenterContainer" type="CenterContainer" parent="CenterContainer/GameEditorUnlockPanel/MarginContainer" unique_id=974420818]
+layout_mode = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="CenterContainer/GameEditorUnlockPanel/MarginContainer/CenterContainer" unique_id=1306411712]
+layout_mode = 2
+
+[node name="Label3" type="Label" parent="CenterContainer/GameEditorUnlockPanel/MarginContainer/CenterContainer/VBoxContainer" unique_id=1376906057]
+layout_mode = 2
+text = "This is a"
+horizontal_alignment = 1
+
+[node name="HBoxContainer2" type="HBoxContainer" parent="CenterContainer/GameEditorUnlockPanel/MarginContainer/CenterContainer/VBoxContainer" unique_id=611784961]
+layout_mode = 2
+theme_override_constants/separation = 8
+alignment = 1
+
+[node name="Label" type="Label" parent="CenterContainer/GameEditorUnlockPanel/MarginContainer/CenterContainer/VBoxContainer/HBoxContainer2" unique_id=749751068]
+layout_mode = 2
+theme_override_font_sizes/font_size = 34
+text = "Released Version"
+horizontal_alignment = 1
+
+[node name="CurrentVersionLabel" type="Label" parent="CenterContainer/GameEditorUnlockPanel/MarginContainer/CenterContainer/VBoxContainer/HBoxContainer2" unique_id=532129197]
+custom_minimum_size = Vector2(0, 28)
+layout_mode = 2
+size_flags_vertical = 8
+theme_override_colors/font_color = Color(0.6666667, 0.6666667, 0.6666667, 1)
+theme_override_fonts/font = ExtResource("2_ybeui")
+text = "GGM/Basic 1.0"
+horizontal_alignment = 1
+
+[node name="Spacer" type="Control" parent="CenterContainer/GameEditorUnlockPanel/MarginContainer/CenterContainer/VBoxContainer" unique_id=10586728]
+custom_minimum_size = Vector2(0, 22)
+layout_mode = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="CenterContainer/GameEditorUnlockPanel/MarginContainer/CenterContainer/VBoxContainer" unique_id=1011965232]
+layout_mode = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="CenterContainer/GameEditorUnlockPanel/MarginContainer/CenterContainer/VBoxContainer/VBoxContainer" unique_id=160473937]
+layout_mode = 2
+theme_override_constants/separation = 0
+alignment = 1
+
+[node name="Label2" type="Label" parent="CenterContainer/GameEditorUnlockPanel/MarginContainer/CenterContainer/VBoxContainer/VBoxContainer/HBoxContainer" unique_id=1749076164]
+layout_mode = 2
+text = "Editing this game will change it to an "
+horizontal_alignment = 1
+
+[node name="Label3" type="Label" parent="CenterContainer/GameEditorUnlockPanel/MarginContainer/CenterContainer/VBoxContainer/VBoxContainer/HBoxContainer" unique_id=1315531497]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.87215966, 0.43810865, 0.3100562, 1)
+theme_override_fonts/font = ExtResource("2_ybeui")
+text = "edited"
+horizontal_alignment = 1
+
+[node name="Label4" type="Label" parent="CenterContainer/GameEditorUnlockPanel/MarginContainer/CenterContainer/VBoxContainer/VBoxContainer/HBoxContainer" unique_id=2020451996]
+layout_mode = 2
+text = " version"
+horizontal_alignment = 1
+
+[node name="Label4" type="RichTextLabel" parent="CenterContainer/GameEditorUnlockPanel/MarginContainer/CenterContainer/VBoxContainer/VBoxContainer" unique_id=482403178]
+layout_mode = 2
+bbcode_enabled = true
+text = "Choose an option to [b]unlock[/b] for editing:"
+fit_content = true
+horizontal_alignment = 1
+
+[node name="Spacer2" type="Control" parent="CenterContainer/GameEditorUnlockPanel/MarginContainer/CenterContainer/VBoxContainer" unique_id=1605079199]
+custom_minimum_size = Vector2(0, 22)
+layout_mode = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="CenterContainer/GameEditorUnlockPanel/MarginContainer/CenterContainer/VBoxContainer" unique_id=1805097036]
+layout_mode = 2
+theme_override_constants/separation = 20
+alignment = 1
+
+[node name="VBoxContainer" type="VBoxContainer" parent="CenterContainer/GameEditorUnlockPanel/MarginContainer/CenterContainer/VBoxContainer/HBoxContainer" unique_id=163120455]
+layout_mode = 2
+
+[node name="Label3" type="Label" parent="CenterContainer/GameEditorUnlockPanel/MarginContainer/CenterContainer/VBoxContainer/HBoxContainer/VBoxContainer" unique_id=846446853]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "Edit In-Place"
+horizontal_alignment = 1
+
+[node name="InPlaceButton" parent="CenterContainer/GameEditorUnlockPanel/MarginContainer/CenterContainer/VBoxContainer/HBoxContainer/VBoxContainer" unique_id=853914025 instance=ExtResource("3_hlit4")]
+custom_minimum_size = Vector2(100, 0)
+layout_mode = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="CenterContainer/GameEditorUnlockPanel/MarginContainer/CenterContainer/VBoxContainer/HBoxContainer/VBoxContainer/InPlaceButton" unique_id=190401286]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/margin_left = 4
+theme_override_constants/margin_top = 4
+theme_override_constants/margin_right = 4
+theme_override_constants/margin_bottom = 4
+
+[node name="VBoxContainer" type="VBoxContainer" parent="CenterContainer/GameEditorUnlockPanel/MarginContainer/CenterContainer/VBoxContainer/HBoxContainer/VBoxContainer/InPlaceButton/MarginContainer" unique_id=1537897476]
+layout_mode = 2
+mouse_filter = 2
+
+[node name="Label" type="Label" parent="CenterContainer/GameEditorUnlockPanel/MarginContainer/CenterContainer/VBoxContainer/HBoxContainer/VBoxContainer/InPlaceButton/MarginContainer/VBoxContainer" unique_id=730541345]
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "Edit As"
+horizontal_alignment = 1
+
+[node name="EditInPlaceVersionLabel" type="Label" parent="CenterContainer/GameEditorUnlockPanel/MarginContainer/CenterContainer/VBoxContainer/HBoxContainer/VBoxContainer/InPlaceButton/MarginContainer/VBoxContainer" unique_id=48191237]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.66656893, 0.66656864, 0.6665687, 1)
+theme_override_fonts/font = ExtResource("2_ybeui")
+theme_override_font_sizes/font_size = 14
+text = "GGM/Basic 1.1"
+horizontal_alignment = 1
+
+[node name="VBoxContainer4" type="VBoxContainer" parent="CenterContainer/GameEditorUnlockPanel/MarginContainer/CenterContainer/VBoxContainer/HBoxContainer" unique_id=1525229347]
+layout_mode = 2
+alignment = 1
+
+[node name="Label" type="Label" parent="CenterContainer/GameEditorUnlockPanel/MarginContainer/CenterContainer/VBoxContainer/HBoxContainer/VBoxContainer4" unique_id=1715320293]
+layout_mode = 2
+text = "-or-"
+
+[node name="EditMyVersionButtonContainer" type="VBoxContainer" parent="CenterContainer/GameEditorUnlockPanel/MarginContainer/CenterContainer/VBoxContainer/HBoxContainer" unique_id=452892601]
+layout_mode = 2
+
+[node name="Label3" type="Label" parent="CenterContainer/GameEditorUnlockPanel/MarginContainer/CenterContainer/VBoxContainer/HBoxContainer/EditMyVersionButtonContainer" unique_id=745196580]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "Separate Version/Mod/Fork"
+horizontal_alignment = 1
+
+[node name="MyVersionButton" parent="CenterContainer/GameEditorUnlockPanel/MarginContainer/CenterContainer/VBoxContainer/HBoxContainer/EditMyVersionButtonContainer" unique_id=1798104688 instance=ExtResource("3_hlit4")]
+custom_minimum_size = Vector2(100, 0)
+layout_mode = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="CenterContainer/GameEditorUnlockPanel/MarginContainer/CenterContainer/VBoxContainer/HBoxContainer/EditMyVersionButtonContainer/MyVersionButton" unique_id=1901465258]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/margin_left = 4
+theme_override_constants/margin_top = 4
+theme_override_constants/margin_right = 4
+theme_override_constants/margin_bottom = 4
+
+[node name="VBoxContainer" type="VBoxContainer" parent="CenterContainer/GameEditorUnlockPanel/MarginContainer/CenterContainer/VBoxContainer/HBoxContainer/EditMyVersionButtonContainer/MyVersionButton/MarginContainer" unique_id=1368458225]
+layout_mode = 2
+mouse_filter = 2
+
+[node name="Label" type="Label" parent="CenterContainer/GameEditorUnlockPanel/MarginContainer/CenterContainer/VBoxContainer/HBoxContainer/EditMyVersionButtonContainer/MyVersionButton/MarginContainer/VBoxContainer" unique_id=756391034]
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "Edit Copy As"
+horizontal_alignment = 1
+
+[node name="EditMyVersionLabel" type="Label" parent="CenterContainer/GameEditorUnlockPanel/MarginContainer/CenterContainer/VBoxContainer/HBoxContainer/EditMyVersionButtonContainer/MyVersionButton/MarginContainer/VBoxContainer" unique_id=1611248388]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.66656893, 0.66656864, 0.6665687, 1)
+theme_override_fonts/font = ExtResource("2_ybeui")
+theme_override_font_sizes/font_size = 14
+text = "Cammymoop/Basic 1.1"
+horizontal_alignment = 1
+
+[node name="VBoxContainer3" type="VBoxContainer" parent="CenterContainer/GameEditorUnlockPanel/MarginContainer/CenterContainer/VBoxContainer/HBoxContainer" unique_id=1823132151]
+layout_mode = 2
+alignment = 1
+
+[node name="EditProfileIdentifierButton" type="Button" parent="CenterContainer/GameEditorUnlockPanel/MarginContainer/CenterContainer/VBoxContainer/HBoxContainer/VBoxContainer3" unique_id=236590615]
+layout_mode = 2
+size_flags_vertical = 4
+theme_override_font_sizes/font_size = 14
+text = "Set Identifier
+for Current Profile"
+
+[node name="SetProfileIdentifierUI" type="VBoxContainer" parent="CenterContainer" unique_id=825277192 node_paths=PackedStringArray("ok_button", "profile_identifier_input")]
+visible = false
+layout_mode = 2
+script = ExtResource("4_y5jrq")
+ok_button = NodePath("SetProfileIdentifierPanel/MarginContainer2/CenterContainer/VBoxContainer/HBoxContainer/VBoxContainer3/OkButton")
+profile_identifier_input = NodePath("SetProfileIdentifierPanel/MarginContainer2/CenterContainer/VBoxContainer/ProfileIdentifierInput")
+
+[node name="PlayerProfilePicker" parent="CenterContainer/SetProfileIdentifierUI" unique_id=1193148223 instance=ExtResource("5_n65gn")]
+layout_mode = 2
+size_flags_horizontal = 4
+
+[node name="SetProfileIdentifierPanel" type="PanelContainer" parent="CenterContainer/SetProfileIdentifierUI" unique_id=374206998]
+layout_mode = 2
+
+[node name="MarginContainer2" type="MarginContainer" parent="CenterContainer/SetProfileIdentifierUI/SetProfileIdentifierPanel" unique_id=440564431]
+layout_mode = 2
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 12
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 12
+
+[node name="CenterContainer" type="CenterContainer" parent="CenterContainer/SetProfileIdentifierUI/SetProfileIdentifierPanel/MarginContainer2" unique_id=1428192164]
+layout_mode = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="CenterContainer/SetProfileIdentifierUI/SetProfileIdentifierPanel/MarginContainer2/CenterContainer" unique_id=1059686485]
+layout_mode = 2
+
+[node name="HBoxContainer2" type="HBoxContainer" parent="CenterContainer/SetProfileIdentifierUI/SetProfileIdentifierPanel/MarginContainer2/CenterContainer/VBoxContainer" unique_id=1554859989]
+layout_mode = 2
+theme_override_constants/separation = 0
+
+[node name="Label3" type="Label" parent="CenterContainer/SetProfileIdentifierUI/SetProfileIdentifierPanel/MarginContainer2/CenterContainer/VBoxContainer/HBoxContainer2" unique_id=503251173]
+layout_mode = 2
+text = "Set Default "
+horizontal_alignment = 1
+
+[node name="Label4" type="Label" parent="CenterContainer/SetProfileIdentifierUI/SetProfileIdentifierPanel/MarginContainer2/CenterContainer/VBoxContainer/HBoxContainer2" unique_id=1662912860]
+layout_mode = 2
+tooltip_text = "Used when creating new games or modded copies. Shows up before the \"/\" in the Game ID.
+It's recommended to choose a relatively unique identifier if you want to share your games or mods with others.
+
+Only A-Z and a dash character \"-\". Max 32 characters."
+mouse_filter = 1
+mouse_default_cursor_shape = 16
+theme_override_colors/font_color = Color(0.44313726, 0.84313726, 1, 1)
+text = "Identifier"
+horizontal_alignment = 1
+
+[node name="Label5" type="Label" parent="CenterContainer/SetProfileIdentifierUI/SetProfileIdentifierPanel/MarginContainer2/CenterContainer/VBoxContainer/HBoxContainer2" unique_id=1005199018]
+layout_mode = 2
+text = " for New or Modified Games"
+horizontal_alignment = 1
+
+[node name="Spacer2" type="Control" parent="CenterContainer/SetProfileIdentifierUI/SetProfileIdentifierPanel/MarginContainer2/CenterContainer/VBoxContainer" unique_id=225117825]
+custom_minimum_size = Vector2(0, 22)
+layout_mode = 2
+
+[node name="ProfileIdentifierInput" type="LineEdit" parent="CenterContainer/SetProfileIdentifierUI/SetProfileIdentifierPanel/MarginContainer2/CenterContainer/VBoxContainer" unique_id=620042338]
+custom_minimum_size = Vector2(200, 0)
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_font_sizes/font_size = 20
+theme_override_styles/normal = ExtResource("6_30rp1")
+placeholder_text = "?"
+
+[node name="Spacer3" type="Control" parent="CenterContainer/SetProfileIdentifierUI/SetProfileIdentifierPanel/MarginContainer2/CenterContainer/VBoxContainer" unique_id=1285990719]
+custom_minimum_size = Vector2(0, 22)
+layout_mode = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="CenterContainer/SetProfileIdentifierUI/SetProfileIdentifierPanel/MarginContainer2/CenterContainer/VBoxContainer" unique_id=2120106654]
+layout_mode = 2
+theme_override_constants/separation = 20
+alignment = 1
+
+[node name="VBoxContainer3" type="VBoxContainer" parent="CenterContainer/SetProfileIdentifierUI/SetProfileIdentifierPanel/MarginContainer2/CenterContainer/VBoxContainer/HBoxContainer" unique_id=1333767732]
+layout_mode = 2
+alignment = 1
+
+[node name="OkButton" type="Button" parent="CenterContainer/SetProfileIdentifierUI/SetProfileIdentifierPanel/MarginContainer2/CenterContainer/VBoxContainer/HBoxContainer/VBoxContainer3" unique_id=1053512726]
+layout_mode = 2
+size_flags_vertical = 4
+theme_type_variation = &"BigTextButton"
+text = "Ok"

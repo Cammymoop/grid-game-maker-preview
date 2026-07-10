@@ -405,17 +405,21 @@ func _on_name_input_text_submitted(_new_text: String) -> void:
 
 func on_game_identifier_panel_gui_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and not event.pressed:
-		game_identifier_input_panel.show()
-		game_identifier_input.text = GameManager.get_game_identifier()
-		game_identifier_input.grab_focus()
+		if not game_identifier_input_panel.visible:
+			game_identifier_input_panel.show()
+			game_identifier_input.text = GameManager.get_game_identifier()
+			game_identifier_input.grab_focus()
+			accept_event()
 
 func on_game_identifier_input_text_submitted(_new_text: String) -> void:
 	do_update_identifier()
 
 func on_game_identifier_set_button_pressed() -> void:
+	prints("on_game_identifier_set_button_pressed")
 	do_update_identifier()
 
 func on_game_identifier_cancel_button_pressed() -> void:
+	prints("game identifier cancel button pressed")
 	game_identifier_input_panel.hide()
 
 func do_update_identifier() -> void:
@@ -426,7 +430,9 @@ func do_update_identifier() -> void:
 
 func on_game_identifier_input_editing_toggled(toggled_on: bool) -> void:
 	if not toggled_on:
-		game_identifier_input_panel.hide()
+		await get_tree().process_frame
+		if game_identifier_input_panel.visible:
+			game_identifier_input_panel.hide()
 
 func renaming_game_dir(is_changing_identifier: bool = false) -> void:
 	_disable_name_input()

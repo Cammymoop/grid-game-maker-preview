@@ -14,7 +14,7 @@ var save_as_dialog_scn: = preload("res://Scenes/GameEditor/save_game_as_dialog.t
 @export var release_lock_layer: CanvasLayer
 
 func _ready():
-	release_lock_layer.visible = true#GameManager.current_game_is_release_locked
+	release_lock_layer.visible = GameManager.current_game_is_release_locked
 
 	var first_beside_tabs_button: Control = beside_tabs_buttons.get_child(0)
 	var tab_bar: = tab_container.get_tab_bar()
