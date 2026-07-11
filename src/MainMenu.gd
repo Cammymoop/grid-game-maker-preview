@@ -17,6 +17,12 @@ const UserSettingsPanel = preload("res://Scenes/user_settings_panel.gd")
 
 @export var profile_picker: Control
 
+@export var show_more_buttons_button: Button
+
+@export var more_buttons_container: Control
+
+@export var create_new_game_button: Button
+
 @export var settings_panel_layer: CanvasLayer
 @export var user_settings_panel: UserSettingsPanel
 
@@ -31,6 +37,10 @@ func _ready():
 	version_chooser_panel.request_back.connect(on_version_chooser_panel_request_back)
 	
 	version_switcher_panel.open_version_chooser.connect(show_version_chooser_panel)
+	
+	show_more_buttons_button.pressed.connect(show_more_buttons)
+	
+	create_new_game_button.pressed.connect(create_new_game)
 
 	if OS.has_feature("web"):
 		quit_button.hide()
@@ -94,6 +104,7 @@ func on_initial_sprite_previews_finished() -> void:
 func on_user_settings_panel_request_back() -> void:
 	show()
 	profile_picker.show()
+	profile_picker.refresh()
 	settings_panel_layer.hide()
 	refresh_show_version_switcher()
 
@@ -101,6 +112,7 @@ func show_user_settings_panel() -> void:
 	hide()
 	profile_picker.hide()
 	settings_panel_layer.show()
+	user_settings_panel.show_and_refresh()
 
 func on_version_chooser_panel_request_back() -> void:
 	show()
@@ -110,3 +122,12 @@ func show_version_chooser_panel() -> void:
 	hide()
 	version_chooser_panel_layer.show()
 	version_chooser_panel.show_and_load_version_infos()
+
+func show_more_buttons() -> void:
+	show_more_buttons_button.hide()
+	more_buttons_container.show()
+	
+	create_new_game_button.grab_focus.call_deferred()
+
+func create_new_game() -> void:
+	GameManager.create_and_edit_new_empty_game()

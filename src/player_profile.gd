@@ -9,6 +9,8 @@ var player_settings: Dictionary = {}
 
 var game_saves: Dictionary = {}
 
+const GAME_SAVE_DEFAULT_KEYS: = ["what_is_this", "format_version", "game_name"]
+
 func serialize_settings() -> Dictionary:
     return JSON.from_native(player_settings)
 
@@ -86,6 +88,13 @@ func _make_new_game_save(game_name: String) -> void:
     }
     write_game_save(game_name)
 
+func is_empty_game_save(game_name: String) -> bool:
+    if not game_name or not game_saves.has(game_name):
+        return true
+    if game_saves[game_name].size() > GAME_SAVE_DEFAULT_KEYS.size():
+        return false
+    return true
+
 
 func get_game_save_data(for_game_name: String, data_key: String, default_value: Variant = null) -> Variant:
     if not for_game_name or not game_saves.has(for_game_name):
@@ -93,6 +102,9 @@ func get_game_save_data(for_game_name: String, data_key: String, default_value: 
     return game_saves[for_game_name].get(data_key, default_value)
 
 func set_game_save_data(for_game_name: String, data_key: String, value: Variant, flush: bool = true) -> void:
+    if data_key in GAME_SAVE_DEFAULT_KEYS:
+        return
+
     if not for_game_name or not game_saves.has(for_game_name):
         ensure_game_save_exists(for_game_name)
     game_saves[for_game_name][data_key] = value

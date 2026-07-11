@@ -4,6 +4,7 @@
 [ext_resource type="Script" uid="uid://bg2o0u1kdq6ub" path="res://Scenes/user_settings_panel.gd" id="2_2hlat"]
 [ext_resource type="StyleBox" uid="uid://ch63py1vky05t" path="res://assets/ui/plain_input_bg.tres" id="3_2hlat"]
 [ext_resource type="FontFile" uid="uid://biuf4hpin33j3" path="res://assets/font/medium_font.tres" id="3_ao4nr"]
+[ext_resource type="PackedScene" uid="uid://cfehp8ycqn0du" path="res://Scenes/UI/ButtonContainer.tscn" id="4_ao4nr"]
 
 [sub_resource type="StyleBoxLine" id="StyleBoxLine_2hlat"]
 content_margin_left = 4.0
@@ -14,16 +15,19 @@ color = Color(0.33333334, 0.31764707, 0.44313726, 1)
 grow_begin = 18.0
 grow_end = 18.0
 
-[node name="UserSettingsPanel" type="PanelContainer" unique_id=1234442601 node_paths=PackedStringArray("mute_audio_toggle", "erase_game_save_progress_button", "skip_non_critical_confirm_toggle", "show_version_switcher_toggle", "profile_name_label", "profile_identifier_input", "back_button")]
+[node name="UserSettingsPanel" type="PanelContainer" unique_id=1234442601 node_paths=PackedStringArray("mute_audio_toggle", "erase_game_save_progress_button", "erase_profile_button", "auto_save_definition_toggle", "skip_non_critical_confirm_toggle", "show_version_switcher_toggle", "profile_name_label", "profile_identifier_input", "danger_zone_container", "back_button")]
 size_flags_horizontal = 4
 theme_override_styles/panel = ExtResource("1_e7sck")
 script = ExtResource("2_2hlat")
-mute_audio_toggle = NodePath("MarginContainer/VBoxContainer/VBoxContainer/MuteAudioToggle")
-erase_game_save_progress_button = NodePath("MarginContainer/VBoxContainer/VBoxContainer/FoldableContainer/MarginContainer/VBoxContainer/EraseProgressButton")
-skip_non_critical_confirm_toggle = NodePath("MarginContainer/VBoxContainer/VBoxContainer/SkipNonCriticalSaveConfirm")
-show_version_switcher_toggle = NodePath("MarginContainer/VBoxContainer/VBoxContainer/VersionSwitcherToggle")
+mute_audio_toggle = NodePath("MarginContainer/VBoxContainer/ScrollContainer/MarginContainer/VBoxContainer/MuteAudioToggle")
+erase_game_save_progress_button = NodePath("MarginContainer/VBoxContainer/ScrollContainer/MarginContainer/VBoxContainer/DangerZoneContainer/MarginContainer/VBoxContainer/ResetProgressButton")
+erase_profile_button = NodePath("MarginContainer/VBoxContainer/ScrollContainer/MarginContainer/VBoxContainer/DangerZoneContainer/MarginContainer/VBoxContainer/EraseProfileButton")
+auto_save_definition_toggle = NodePath("MarginContainer/VBoxContainer/ScrollContainer/MarginContainer/VBoxContainer/AutoSaveDefinitionToggle")
+skip_non_critical_confirm_toggle = NodePath("MarginContainer/VBoxContainer/ScrollContainer/MarginContainer/VBoxContainer/SkipNonCriticalSaveConfirm")
+show_version_switcher_toggle = NodePath("MarginContainer/VBoxContainer/ScrollContainer/MarginContainer/VBoxContainer/VersionSwitcherToggle")
 profile_name_label = NodePath("MarginContainer/VBoxContainer/VBoxContainer2/ProfileNameLabel")
-profile_identifier_input = NodePath("MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer/IdentifierInput")
+profile_identifier_input = NodePath("MarginContainer/VBoxContainer/ScrollContainer/MarginContainer/VBoxContainer/HBoxContainer/IdentifierInput")
+danger_zone_container = NodePath("MarginContainer/VBoxContainer/ScrollContainer/MarginContainer/VBoxContainer/DangerZoneContainer")
 back_button = NodePath("MarginContainer/VBoxContainer/BackButton")
 
 [node name="MarginContainer" type="MarginContainer" parent="." unique_id=660470230]
@@ -56,41 +60,61 @@ text = "Profile: "
 layout_mode = 2
 theme_override_styles/separator = SubResource("StyleBoxLine_2hlat")
 
-[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/VBoxContainer" unique_id=937392484]
+[node name="ScrollContainer" type="ScrollContainer" parent="MarginContainer/VBoxContainer" unique_id=1687279791]
+custom_minimum_size = Vector2(0, 320)
+layout_mode = 2
+horizontal_scroll_mode = 0
+vertical_scroll_mode = 4
+
+[node name="MarginContainer" type="MarginContainer" parent="MarginContainer/VBoxContainer/ScrollContainer" unique_id=193816532]
+layout_mode = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_right = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/VBoxContainer/ScrollContainer/MarginContainer" unique_id=937392484]
 layout_mode = 2
 
-[node name="MuteAudioToggle" type="CheckButton" parent="MarginContainer/VBoxContainer/VBoxContainer" unique_id=1524712014]
+[node name="MuteAudioToggle" type="CheckButton" parent="MarginContainer/VBoxContainer/ScrollContainer/MarginContainer/VBoxContainer" unique_id=1524712014]
 layout_mode = 2
 text = "Mute:"
 alignment = 2
 
-[node name="SkipNonCriticalSaveConfirm" type="CheckButton" parent="MarginContainer/VBoxContainer/VBoxContainer" unique_id=1903765536]
+[node name="AutoSaveDefinitionToggle" type="CheckButton" parent="MarginContainer/VBoxContainer/ScrollContainer/MarginContainer/VBoxContainer" unique_id=518658855]
+layout_mode = 2
+tooltip_text = "When moving from Game Editor to the Main Menu or the level editor, automatically save edits.
+It is highly recommended to keep this enabled outside of debugging use-cases."
+theme_override_font_sizes/font_size = 14
+button_pressed = true
+text = "Save Game Definition When Leaving Game Editor"
+alignment = 2
+
+[node name="SkipNonCriticalSaveConfirm" type="CheckButton" parent="MarginContainer/VBoxContainer/ScrollContainer/MarginContainer/VBoxContainer" unique_id=1903765536]
 layout_mode = 2
 tooltip_text = "When switching from the level editor to Main Menu or Game Edit.
 Changes will not be lost immediately but will be if switching to another game."
 text = "Skip non-critical save confirm"
 alignment = 2
 
-[node name="VersionSwitcherToggle" type="CheckButton" parent="MarginContainer/VBoxContainer/VBoxContainer" unique_id=366635556]
+[node name="VersionSwitcherToggle" type="CheckButton" parent="MarginContainer/VBoxContainer/ScrollContainer/MarginContainer/VBoxContainer" unique_id=366635556]
 layout_mode = 2
 tooltip_text = "When switching from the level editor to Main Menu or Game Edit.
 Changes will not be lost immediately but will be if switching to another game."
 text = "Show Version Switcher on Main Menu"
 alignment = 2
 
-[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer/VBoxContainer" unique_id=1876958425]
+[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer/ScrollContainer/MarginContainer/VBoxContainer" unique_id=1876958425]
 layout_mode = 2
 alignment = 2
 
-[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer" unique_id=1819933290]
+[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer/ScrollContainer/MarginContainer/VBoxContainer/HBoxContainer" unique_id=1819933290]
 layout_mode = 2
 theme_override_constants/separation = 0
 
-[node name="Label" type="Label" parent="MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer/HBoxContainer" unique_id=90230491]
+[node name="Label" type="Label" parent="MarginContainer/VBoxContainer/ScrollContainer/MarginContainer/VBoxContainer/HBoxContainer/HBoxContainer" unique_id=90230491]
 layout_mode = 2
 text = "Default game "
 
-[node name="Label2" type="Label" parent="MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer/HBoxContainer" unique_id=387870301]
+[node name="Label2" type="Label" parent="MarginContainer/VBoxContainer/ScrollContainer/MarginContainer/VBoxContainer/HBoxContainer/HBoxContainer" unique_id=387870301]
 layout_mode = 2
 tooltip_text = "Used when creating new games or modded copies. Shows up before the \"/\" in the Game ID.
 It's recommended to choose a relatively unique identifier if you want to share your games or mods with others.
@@ -101,36 +125,87 @@ mouse_default_cursor_shape = 16
 theme_override_colors/font_color = Color(0.44313726, 0.84313726, 1, 1)
 text = "identifier"
 
-[node name="IdentifierInput" type="LineEdit" parent="MarginContainer/VBoxContainer/VBoxContainer/HBoxContainer" unique_id=190385304]
+[node name="IdentifierInput" type="LineEdit" parent="MarginContainer/VBoxContainer/ScrollContainer/MarginContainer/VBoxContainer/HBoxContainer" unique_id=190385304]
 custom_minimum_size = Vector2(120, 0)
 layout_mode = 2
 theme_override_styles/normal = ExtResource("3_2hlat")
 placeholder_text = "?"
 select_all_on_focus = true
 
-[node name="Spacer2" type="Control" parent="MarginContainer/VBoxContainer/VBoxContainer" unique_id=1066994936]
+[node name="Spacer2" type="Control" parent="MarginContainer/VBoxContainer/ScrollContainer/MarginContainer/VBoxContainer" unique_id=1066994936]
 custom_minimum_size = Vector2(0, 12)
 layout_mode = 2
 
-[node name="FoldableContainer" type="FoldableContainer" parent="MarginContainer/VBoxContainer/VBoxContainer" unique_id=1660682328]
+[node name="DangerZoneContainer" type="FoldableContainer" parent="MarginContainer/VBoxContainer/ScrollContainer/MarginContainer/VBoxContainer" unique_id=1660682328]
 layout_mode = 2
 folded = true
 title = "Danger Zone"
 title_alignment = 1
 
-[node name="MarginContainer" type="MarginContainer" parent="MarginContainer/VBoxContainer/VBoxContainer/FoldableContainer" unique_id=649142655]
+[node name="MarginContainer" type="MarginContainer" parent="MarginContainer/VBoxContainer/ScrollContainer/MarginContainer/VBoxContainer/DangerZoneContainer" unique_id=649142655]
 visible = false
 layout_mode = 2
 theme_override_constants/margin_top = 8
 theme_override_constants/margin_right = 8
 theme_override_constants/margin_bottom = 8
 
-[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/VBoxContainer/VBoxContainer/FoldableContainer/MarginContainer" unique_id=150811496]
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/VBoxContainer/ScrollContainer/MarginContainer/VBoxContainer/DangerZoneContainer/MarginContainer" unique_id=150811496]
 layout_mode = 2
+theme_override_constants/separation = 12
 
-[node name="EraseProgressButton" type="Button" parent="MarginContainer/VBoxContainer/VBoxContainer/FoldableContainer/MarginContainer/VBoxContainer" unique_id=3323692]
+[node name="ResetProgressButton" parent="MarginContainer/VBoxContainer/ScrollContainer/MarginContainer/VBoxContainer/DangerZoneContainer/MarginContainer/VBoxContainer" unique_id=853914025 instance=ExtResource("4_ao4nr")]
 layout_mode = 2
-text = "Erase All Progress (curent game)"
+size_flags_horizontal = 4
+
+[node name="MarginContainer" type="MarginContainer" parent="MarginContainer/VBoxContainer/ScrollContainer/MarginContainer/VBoxContainer/DangerZoneContainer/MarginContainer/VBoxContainer/ResetProgressButton" unique_id=535865552]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/margin_left = 6
+theme_override_constants/margin_top = 6
+theme_override_constants/margin_right = 6
+theme_override_constants/margin_bottom = 6
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/VBoxContainer/ScrollContainer/MarginContainer/VBoxContainer/DangerZoneContainer/MarginContainer/VBoxContainer/ResetProgressButton/MarginContainer" unique_id=1465786726]
+layout_mode = 2
+mouse_filter = 2
+
+[node name="Label" type="Label" parent="MarginContainer/VBoxContainer/ScrollContainer/MarginContainer/VBoxContainer/DangerZoneContainer/MarginContainer/VBoxContainer/ResetProgressButton/MarginContainer/VBoxContainer" unique_id=2082975836]
+layout_mode = 2
+text = "Reset Game Progress"
+horizontal_alignment = 1
+
+[node name="Label2" type="Label" parent="MarginContainer/VBoxContainer/ScrollContainer/MarginContainer/VBoxContainer/DangerZoneContainer/MarginContainer/VBoxContainer/ResetProgressButton/MarginContainer/VBoxContainer" unique_id=743908520]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "(this game only)"
+horizontal_alignment = 1
+
+[node name="EraseProfileButton" parent="MarginContainer/VBoxContainer/ScrollContainer/MarginContainer/VBoxContainer/DangerZoneContainer/MarginContainer/VBoxContainer" unique_id=1511474096 instance=ExtResource("4_ao4nr")]
+layout_mode = 2
+size_flags_horizontal = 4
+
+[node name="MarginContainer" type="MarginContainer" parent="MarginContainer/VBoxContainer/ScrollContainer/MarginContainer/VBoxContainer/DangerZoneContainer/MarginContainer/VBoxContainer/EraseProfileButton" unique_id=390448737]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/margin_left = 6
+theme_override_constants/margin_top = 6
+theme_override_constants/margin_right = 6
+theme_override_constants/margin_bottom = 6
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/VBoxContainer/ScrollContainer/MarginContainer/VBoxContainer/DangerZoneContainer/MarginContainer/VBoxContainer/EraseProfileButton/MarginContainer" unique_id=1218576938]
+layout_mode = 2
+mouse_filter = 2
+
+[node name="Label" type="Label" parent="MarginContainer/VBoxContainer/ScrollContainer/MarginContainer/VBoxContainer/DangerZoneContainer/MarginContainer/VBoxContainer/EraseProfileButton/MarginContainer/VBoxContainer" unique_id=580645303]
+layout_mode = 2
+text = "Erase This Profile"
+horizontal_alignment = 1
+
+[node name="Label2" type="Label" parent="MarginContainer/VBoxContainer/ScrollContainer/MarginContainer/VBoxContainer/DangerZoneContainer/MarginContainer/VBoxContainer/EraseProfileButton/MarginContainer/VBoxContainer" unique_id=918685369]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "(includes progress in all games)"
+horizontal_alignment = 1
 
 [node name="Spacer3" type="Control" parent="MarginContainer/VBoxContainer" unique_id=372805043]
 layout_mode = 2

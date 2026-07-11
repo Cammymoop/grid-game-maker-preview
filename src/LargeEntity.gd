@@ -401,6 +401,7 @@ func process_finish_move() -> void:
 func is_large() -> bool:
 	return entity_size.x > 1 or entity_size.y > 1
 
+# WIP
 func apply_teleport_facing_change(to_pos: Vector2i, new_facing: int, immediate: bool) -> void:
 	if new_facing == facing or is_square_aspect() or not sprite.interpolate_facing_enabled:
 		set_facing(new_facing, immediate)
@@ -409,7 +410,7 @@ func apply_teleport_facing_change(to_pos: Vector2i, new_facing: int, immediate: 
 	if no_rotate != null and no_rotate.get_value():
 		return
 	
-	var is_smooth_move_interp: = Utility.is_interp_style_smooth(get_teleport_interp_style(_is_diagonal_adj(tile_position, to_pos)))
+	#var is_smooth_move_interp: = Utility.is_interp_style_smooth(get_teleport_interp_style(_is_diagonal_adj(tile_position, to_pos)))
 	
 	# fixed point is relative to new position
 	var fixed_point: = _find_teleport_fixed_point(facing, new_facing, to_pos) * MapManager.tile_width

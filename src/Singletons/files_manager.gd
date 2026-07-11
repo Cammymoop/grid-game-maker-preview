@@ -70,7 +70,7 @@ func get_last_profile_id() -> String:
 		return ""
 	var f = FileAccess.open(file_path, FileAccess.READ)
 	if f:
-		return f.get_as_text().strip_edges()
+		return Utility.sanitize_for_filename(f.get_as_text().strip_edges())
 	return ""
 
 func get_unbundled_level_info_path(game_name: String) -> String:
@@ -945,6 +945,41 @@ func save_game_save_for_player(player_id: String, game_name: String, game_save_d
 	var game_dir_name: = get_game_dir_from_name(game_name)
 	var profile_game_saves_dir: = _data_path(local_data_subdir, player_id, game_saves_local_subdir)
 	return serialize_and_save_data_to_json(game_save_data, profile_game_saves_dir, game_dir_name + ".json", FORMAT_GAME_JSON)
+
+func delete_player_profile(player_id: String) -> void:
+	if not player_profile_exists(player_id):
+		push_error("Player profile %s does not exist" % [player_id])
+		return
+
+	var subdir_delete_error: = OK
+	var profile_game_saves_dir: = _data_path(local_data_subdir, player_id, game_saves_local_subdir)
+	if smarter_dir_exists(profile_game_saves_dir):
+		var saves_delete_error: = false
+		for game_save_file in iterate_directory_flat_filelist(profile_game_saves_dir, "json"):
+			var error: = DirAccess.remove_absolute(profile_game_saves_dir.path_join(game_save_file))
+			if error != OK:
+				saves_delete_error = true
+
+		if not saves_delete_error:
+			subdir_delete_error = DirAccess.remove_absolute(profile_game_saves_dir)
+		else:
+			push_error("Not all game saves were able to be deleted for profile %s" % [player_id])
+		if subdir_delete_error != OK:
+			push_error("Error while trying to remove profile game saves subdirectory %s: %s" % [profile_game_saves_dir, error_string(subdir_delete_error)])
+
+	var main_file_delete_error: = OK
+	var profile_settings_file: = _data_path(local_data_subdir, player_id, PLAYER_SETTINGS_FILENAME)
+	if smarter_file_exists(profile_settings_file):
+		main_file_delete_error = DirAccess.remove_absolute(profile_settings_file)
+	
+	if main_file_delete_error != OK:
+		push_error("Error while trying to remove profile settings file %s: %s" % [profile_settings_file, error_string(main_file_delete_error)])
+	
+	if subdir_delete_error == OK and main_file_delete_error == OK:
+		var err: = DirAccess.remove_absolute(_data_path(local_data_subdir, player_id))
+		if err != OK:
+			push_error("Error while trying to remove profile root directory %s: %s" % [player_id, error_string(err)])
+
 
 
 func get_game_release_zip_directory(game_name: String) -> String:

@@ -13,7 +13,7 @@ var cutoff_timers: Array[Timer] = []
 var current_playing_sfx: Array[String] = []
 var priorities: Array[float] = []
 
-var _next_force: int = 0
+#var _next_force: int = 0
 
 var default_looping_cutoff_time: float = 2.0
 

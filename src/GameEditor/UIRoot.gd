@@ -15,6 +15,9 @@ var save_as_dialog_scn: = preload("res://Scenes/GameEditor/save_game_as_dialog.t
 
 func _ready():
 	release_lock_layer.visible = GameManager.current_game_is_release_locked
+	
+	if GameManager.current_game_is_release_locked:
+		tab_container.focus_behavior_recursive = Control.FOCUS_BEHAVIOR_DISABLED
 
 	var first_beside_tabs_button: Control = beside_tabs_buttons.get_child(0)
 	var tab_bar: = tab_container.get_tab_bar()
@@ -25,11 +28,6 @@ func _ready():
 
 func _unhandled_input(event: InputEvent) -> void:
 	if Utility.event_is_menu_back_just_pressed(event):
-		if not GameManager.current_game_is_release_locked:
-			GameManager.create_released_version()
-			GameManager.change_scene("Menu")
-			return
-
 		if tab_container.current_tab != 0 and not release_lock_layer.visible:
 			tab_container.current_tab = 0
 		else:

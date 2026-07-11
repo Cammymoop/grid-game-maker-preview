@@ -38,16 +38,26 @@ func refresh_ui() -> void:
 
 
 func on_use_release_version_button_pressed() -> void:
-    pass
+    _chose_index_from_list(release_versions_list)
 
 func on_use_other_version_button_pressed() -> void:
-    pass
+    _chose_index_from_list(release_versions_list)
 
 func on_release_versions_list_item_activated(index: int) -> void:
-    pass
+    load_chosen_version(release_versions_list.get_item_metadata(index))
 
 func on_other_versions_list_item_activated(index: int) -> void:
-    pass
+    load_chosen_version(other_versions_list.get_item_metadata(index))
+
+func _chose_index_from_list(list: ItemList) -> void:
+    var selection: = list.get_selected_items()
+    if selection.size() == 0:
+        return
+    var version_zip_path: String = release_versions_list.get_item_metadata(selection[0])
+    load_chosen_version(version_zip_path)
+
+func load_chosen_version(version_zip_path: String) -> void:
+    GameManager.load_game_version_from_zip_file(version_zip_path)
 
 
 func show_and_load_version_infos() -> void:

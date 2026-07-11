@@ -36,6 +36,8 @@ func _on_import_examples_button_pressed() -> void:
 	if GameManager.get_identified_game_name() in FilesManager.get_example_games_list():
 		if GameManager.get_identified_game_name() not in failed_games:
 			GameManager.load_game_definition_from_file(GameManager.get_identified_game_name())
+			await get_tree().process_frame
+			GameManager.change_scene("GameEditor", true)
 
 func _on_import_game_zip_button_pressed() -> void:
 	if OS.has_feature("web"):

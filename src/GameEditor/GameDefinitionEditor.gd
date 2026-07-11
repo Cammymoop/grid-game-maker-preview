@@ -3,6 +3,10 @@ extends VBoxContainer
 const PropOrEntityNameInput = preload("res://src/GameEditor/ConditionalEditor/prop_or_entity_name_input.gd")
 const ScalarValueInput = preload("res://src/GameEditor/ConditionalEditor/scalar_value_input.gd")
 
+const ExportReleaseDialog = preload("res://Scenes/GameEditor/export_release_dialog.gd")
+
+var export_release_dialog_scn: = preload("res://Scenes/GameEditor/export_release_dialog.tscn")
+
 var save_as_dialog_scn: = preload("res://Scenes/GameEditor/save_game_as_dialog.tscn")
 
 var generic_confirm = preload("res://Scenes/GameEditor/GenericConfirm.tscn")
@@ -52,6 +56,8 @@ var invalid_field_color = Color(0.7, 0.4, 0.4)
 @export var start_paused_option: Control
 @export var start_level_paused_toggle: CheckButton
 
+@export var export_release_button: Button
+
 @export var section_container: Control
 
 var _save_as_dialog_open: bool = false
@@ -69,6 +75,8 @@ func _ready():
 	update_identifier_label()
 	
 	game_settings = GameManager.game_definition["game_settings"]
+	
+	export_release_button.pressed.connect(open_export_release_dialog)
 	
 	var title_input: LineEdit = find_child("TitleInput")
 	title_input.text = GameManager.get_game_setting("title", "")
@@ -315,7 +323,9 @@ func on_game_dir_name_changed(new_game_name: String) -> void:
 func load_game_file(dialog) -> void:
 	var game_name = dialog.get_selected_game()
 	if game_name:
-		GameManager.load_game_definition_from_file.call_deferred(game_name)
+		GameManager.load_game_definition_from_file(game_name)
+		await get_tree().process_frame
+		GameManager.change_scene("GameEditor", true)
 	else:
 		dialog.close_dialog()
 
@@ -358,11 +368,7 @@ func on_show_level_title_option_picked(index: int) -> void:
 	GameManager.set_game_setting("show_level_title", item_text)
 
 func _on_new_empty_pressed() -> void:
-	GameManager.new_empty_game_definition()
-	GameManager.save_current_game_definition()
-	var default_game: = FilesManager.get_default_game()
-	if not default_game or not FilesManager.game_exists(default_game):
-		FilesManager.save_default_game(GameManager.get_identified_game_name())
+	GameManager.create_and_edit_new_empty_game()
 
 func on_move_interp_option_picked(index: int) -> void:
 	var interp_style: = move_interp_option_picker.get_item_id(index) as Utility.PosInterpStyle
@@ -486,7 +492,15 @@ func _on_edit_game_dir_button_pressed() -> void:
 	name_input.grab_focus.call_deferred()
 
 
-func _on_export_zip_pressed(no_bundle_pls: bool = false, is_release_export: bool = false) -> void:
+
+func open_export_release_dialog() -> void:
+	var export_release_dialog: = export_release_dialog_scn.instantiate() as ExportReleaseDialog
+	export_release_dialog.exclusive = true
+	export_release_dialog.request_edited_export.connect(do_export_zip)
+	add_child(export_release_dialog)
+	export_release_dialog.popup_centered()
+
+func do_export_zip(no_bundle_pls: bool = false, is_release_export: bool = false) -> void:
 	if not no_bundle_pls and Input.is_action_pressed(&"editor_alt_mode_hold"):
 		no_bundle_pls = true
 
@@ -495,13 +509,13 @@ func _on_export_zip_pressed(no_bundle_pls: bool = false, is_release_export: bool
 		bundle_shared_images_dialog.free_on_close = true
 		add_child(bundle_shared_images_dialog)
 		bundle_shared_images_dialog.add_button("Export Without Bundling", true, "no_bundle_pls")
-		bundle_shared_images_dialog.custom_action.connect(on_bundle_dialog_custom_action)
+		bundle_shared_images_dialog.custom_action.connect(on_bundle_dialog_custom_action.bind(is_release_export))
 
 		var message_text: = "The current game is using some shared (non-bundled) images. The exported copy will not include those images."
 		message_text += "\nIt can still be exported, but will require those images to be in the shared images folder when imported in order to work properly."
 		message_text += "\n\nYou can bundle a copy of each shared image now so they are all included in the export, or export without bundling shared images."
 		bundle_shared_images_dialog.ok_button_text = "Bundle Images and Export"
-		bundle_shared_images_dialog.confirm_with_callbacks("Bundle Images Before Export?", message_text, do_bundle_first)
+		bundle_shared_images_dialog.confirm_with_callbacks("Bundle Images Before Export?", message_text, do_bundle_first.bind(is_release_export))
 		return
 	GameManager.save_current_game_definition()
 	
@@ -522,15 +536,15 @@ func _on_export_zip_pressed(no_bundle_pls: bool = false, is_release_export: bool
 	add_child(file_dialog)
 	file_dialog.popup_file_dialog()
 
-func do_bundle_first() -> void:
+func do_bundle_first(is_release_export: bool) -> void:
 	if not TextureManager.bundle_all_used_shared_images():
 		GlobalToaster.show_toast_message("Oops! Failed to bundle shared images")
 	else:
-		_on_export_zip_pressed()
+		do_export_zip(false, is_release_export)
 
-func on_bundle_dialog_custom_action(action: String) -> void:
+func on_bundle_dialog_custom_action(action: String, is_release_export: bool) -> void:
 	if action == "no_bundle_pls":
-		_on_export_zip_pressed(true)
+		do_export_zip(true, is_release_export)
 
 func export_web_mode(export_location: String = "") -> void:
 	var prefer_skip_date_stamp: bool = export_location != ""

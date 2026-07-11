@@ -65,8 +65,6 @@ var is_in_level_edit_mode: = true
 var _state_load_is_start_of_level: = false
 var _state_load_is_switched_level: = false
 
-var loaded = false
-
 var editor_live_edit_mode: = false
 var current_level_is_museum: = false
 
@@ -455,11 +453,8 @@ func load_game_definition_data(definition_data: Dictionary, from_file: bool) -> 
 		else:
 			release_info_validation_checks()
 	
-	if cur_scene != "Loading" and cur_scene != "Menu":
-		change_scene(cur_scene)
-		
-		if cur_scene == "GameEditor":
-			loaded = true
+	#if cur_scene != "Loading" and cur_scene != "Menu":
+		#change_scene(cur_scene)
 
 func do_release_info_validation_once_everyone_is_ready() -> void:
 	while true:
@@ -521,8 +516,6 @@ func increment_game_version(from_version: Vector2i) -> Vector2i:
 func _update_saved_game_as_edited() -> void:
 	game_definition["release_info"]["edited"] = true
 	game_definition["release_info"]["release_hash"] = ""
-	var base_version: Vector2i = Utility.get_vector2i_from_arr(game_definition["release_info"]["base_version"])
-	game_definition["release_info"]["next_version"] = Utility.vector_to_list(increment_game_version(base_version))
 	save_current_game_definition()
 
 func create_released_version() -> String:
@@ -571,9 +564,14 @@ func create_released_version() -> String:
 	save_current_game_definition()
 
 	current_game_is_release_locked = true
-	var zip_path: = FilesManager.save_released_version_zip(get_identified_game_name())
+	var zip_path: = export_current_release_mode()
 	
 	return zip_path
+
+func export_current_release_mode() -> String:
+	if not current_game_is_release_locked:
+		return ""
+	return FilesManager.save_released_version_zip(get_identified_game_name())
 
 func get_release_info() -> Dictionary:
 	return game_definition.get("release_info", {}).duplicate_deep()
@@ -582,6 +580,9 @@ func unrelease_lock() -> void:
 	if not current_game_is_release_locked:
 		return
 	current_game_is_release_locked = false
+	var base_version: Vector2i = Utility.get_vector2i_from_arr(game_definition["release_info"]["base_version"])
+	var new_version: Vector2i = increment_game_version(base_version)
+	game_definition["release_info"]["next_version"] = Utility.vector_to_list(new_version)
 	_update_saved_game_as_edited()
 	change_scene("GameEditor")
 
@@ -1065,7 +1066,7 @@ func new_museum_level():
 	
 	new_level_edited_state_and_emit()
 
-func change_scene(new_scene: String):
+func change_scene(new_scene: String, skip_autosave: bool = false):
 	if new_scene == "Play" && not loaded_from_game_name and not FilesManager.game_exists(get_identified_game_name()):
 		save_current_game_definition()
 		
@@ -1089,6 +1090,10 @@ func change_scene(new_scene: String):
 		game_camera = null
 		_unpause()
 	elif cur_scene == "GameEditor":
+		if not current_game_is_release_locked:
+			if player_profile.get_profile_setting("auto_save_definition", true) and not skip_autosave:
+				if is_current_game_resavable():
+					save_current_game_definition()
 		transition_left = false
 		EntityManager.refresh_definition()
 		MapManager.refresh_definition()
@@ -1499,6 +1504,15 @@ func after_import_game_zip_message(success: bool) -> void:
 		GlobalToaster.show_toast_message("Imported %s" % [get_identified_game_name()])
 	else:
 		GlobalToaster.show_toast_message("Failed to import game")
+
+
+func load_game_version_from_zip_file(version_zip_path: String, force_backup: bool = false) -> void:
+	var imported_name: String = ImporterExporter.import_game_zip(version_zip_path, false, "", false, force_backup)
+	if not imported_name:
+		GlobalToaster.show_toast_message("Failed to load version")
+		return
+	load_game_definition_from_file(imported_name)
+
 
 func got_web_import_zip(_file_name: String, _file_type: String, b64_data: String) -> void:
 	var zip_byte_array: = Marshalls.base64_to_raw(b64_data)
@@ -3305,3 +3319,74 @@ func validate_game_release(for_game_name: String) -> bool:
 		return false
 	
 	return hash_from_info == calculated_hash
+
+
+func is_current_game_save_empty() -> bool:
+	return player_profile.is_empty_game_save(get_identified_game_name())
+
+
+func delete_current_profile() -> void:
+	var all_profile_ids: = FilesManager.get_player_profile_list()
+	var next_profile_id: = ""
+	for profile_id in all_profile_ids:
+		if profile_id and profile_id != GameManager._cur_profile_id:
+			next_profile_id = profile_id
+			break
+	if not next_profile_id:
+		return
+	
+	FilesManager.delete_player_profile(GameManager._cur_profile_id)
+	load_player_profile(next_profile_id)
+
+func create_and_edit_new_empty_game() -> void:
+	if cur_scene == "GameEditor":
+		if player_profile.get_profile_setting("auto_save_definition", true) and is_current_game_resavable():
+			save_current_game_definition()
+
+	new_empty_game_definition()
+	save_current_game_definition()
+	var default_game: = FilesManager.get_default_game()
+	if not default_game or not FilesManager.game_exists(default_game):
+		FilesManager.save_default_game(GameManager.get_identified_game_name())
+	
+	await get_tree().process_frame
+	change_scene("GameEditor", true)
+
+
+func show_save_game_zip_dialog(zip_file_path: String) -> void:
+	if OS.has_feature("web"):
+		_show_save_game_zip_web(zip_file_path)
+		return
+	
+	var file_dialog: FileDialog = FileDialog.new()
+	file_dialog.title = "Save Exported Game .zip to..."
+	file_dialog.file_mode = FileDialog.FILE_MODE_SAVE_FILE
+	file_dialog.access = FileDialog.ACCESS_FILESYSTEM
+	file_dialog.filters = ["*.zip"]
+	file_dialog.file_selected.connect(_save_game_zip_destination_picked.bind(zip_file_path, file_dialog))
+	file_dialog.close_requested.connect(file_dialog.queue_free)
+	file_dialog.canceled.connect(file_dialog.queue_free)
+	
+	file_dialog.current_dir = OS.get_system_dir(OS.SYSTEM_DIR_DESKTOP)
+	file_dialog.current_file = zip_file_path.get_file()
+	add_child(file_dialog)
+	file_dialog.popup_file_dialog()
+
+func _save_game_zip_destination_picked(save_path: String, zip_file_path: String, file_dialog: FileDialog) -> void:
+	file_dialog.queue_free()
+	var error: = DirAccess.copy_absolute(zip_file_path, save_path)
+	if error != OK:
+		push_error("Failed to copy zip file to %s: %s" % [save_path, error_string(error)])
+		GlobalToaster.show_toast_message("Failed to copy .zip to the selected destination", 2.0)
+		return
+	else:
+		GlobalToaster.show_toast_message("Saved .zip")
+
+func _show_save_game_zip_web(zip_file_path: String) -> void:
+	var zip_file_bytes: = FileAccess.get_file_as_bytes(zip_file_path)
+	if not zip_file_bytes:
+		push_error("Failed to get bytes from zip file %s" % [zip_file_path])
+		GlobalToaster.show_toast_message("Unable to download exported .zip, please report to Cammymoop", 2.0)
+		return
+	var save_filename: = zip_file_path.get_file()
+	JavaScriptBridge.download_buffer(zip_file_bytes, save_filename, "application/zip")

@@ -39,7 +39,7 @@ func reimport_all_example_games() -> Array[String]:
             failed_games.append(example_game_name)
     return failed_games
 
-func import_game_zip(zip_file: Variant, as_new_game: bool, as_new_game_name: String = "", enable_bundled_images: bool = false) -> String:
+func import_game_zip(zip_file: Variant, as_new_game: bool, as_new_game_name: String = "", enable_bundled_images: bool = false, force_backup: bool = false) -> String:
     var importing_game_name: = ""
     if not enable_bundled_images:
         if ImportZipExtractor.zip_or_buffer_has_bundled_images(zip_file):
@@ -75,6 +75,9 @@ func import_game_zip(zip_file: Variant, as_new_game: bool, as_new_game_name: Str
         
         if game_is_unedited:
             make_backup_if_exists = false
+    
+    if force_backup:
+        make_backup_if_exists = true
     
     FilesManager.create_game_directory_if_not_exists(importing_game_name)
     

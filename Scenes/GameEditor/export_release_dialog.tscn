@@ -1,0 +1,208 @@
+[gd_scene format=3 uid="uid://cjtye825illjb"]
+
+[ext_resource type="Script" uid="uid://csspkwy1vsy7e" path="res://Scenes/GameEditor/export_release_dialog.gd" id="1_h8rce"]
+[ext_resource type="PackedScene" uid="uid://yskjico8qrbl" path="res://Scenes/GameEditor/ConditionalEditor/vector2i_input.tscn" id="2_0h71r"]
+[ext_resource type="StyleBox" path="res://src/UI/ConditionalEditorBGFlat.tres" id="2_xy062"]
+[ext_resource type="FontFile" uid="uid://ctnllh13x3iqi" path="res://assets/font/NotoSans-Bold.ttf" id="3_xy062"]
+[ext_resource type="FontFile" uid="uid://ctl1lahtrlfks" path="res://assets/font/default_mono_font.tres" id="5_xy062"]
+[ext_resource type="StyleBox" uid="uid://ch63py1vky05t" path="res://assets/ui/plain_input_bg.tres" id="6_vhoki"]
+
+[node name="ExportReleaseDialog" type="Window" unique_id=2039071301 node_paths=PackedStringArray("exisiting_releases_list", "re_export_release_version_button", "show_when_locked_container", "show_when_unlocked_container", "export_current_locked_button", "release_version_input", "create_release_button", "inlcude_non_bundled_levels_toggle", "export_as_edited_button", "create_release_version_label", "locked_version_label", "pre_export_container", "save_export_container", "new_zip_path_label", "save_download_zip_button", "cancel_button", "close_button")]
+oversampling_override = 1.0
+title = "Export / Release Game"
+position = Vector2i(0, 25)
+size = Vector2i(635, 450)
+script = ExtResource("1_h8rce")
+exisiting_releases_list = NodePath("PanelContainer/PreExportUI/HBoxContainer/VBoxContainer/ExistingReleasesList")
+re_export_release_version_button = NodePath("PanelContainer/PreExportUI/HBoxContainer/VBoxContainer/ReExportReleaseButton")
+show_when_locked_container = NodePath("PanelContainer/PreExportUI/HBoxContainer/VBoxContainer2/ShowWhenLocked")
+show_when_unlocked_container = NodePath("PanelContainer/PreExportUI/HBoxContainer/VBoxContainer2/ShowWhenEdited")
+export_current_locked_button = NodePath("PanelContainer/PreExportUI/HBoxContainer/VBoxContainer2/ShowWhenLocked/ExportLockedReleaseButton")
+release_version_input = NodePath("PanelContainer/PreExportUI/HBoxContainer/VBoxContainer2/ShowWhenEdited/VBoxContainer2/ReleaseVersionInput")
+create_release_button = NodePath("PanelContainer/PreExportUI/HBoxContainer/VBoxContainer2/ShowWhenEdited/VBoxContainer2/CreateReleaseButton")
+inlcude_non_bundled_levels_toggle = NodePath("PanelContainer/PreExportUI/HBoxContainer/VBoxContainer2/ShowWhenEdited/VBoxContainer/IncludeCustomLevelsToggle")
+export_as_edited_button = NodePath("PanelContainer/PreExportUI/HBoxContainer/VBoxContainer2/ShowWhenEdited/VBoxContainer/ExportAsEditedButton")
+create_release_version_label = NodePath("PanelContainer/PreExportUI/HBoxContainer/VBoxContainer2/ShowWhenEdited/VBoxContainer2/CreateReleaseVersionLabel")
+locked_version_label = NodePath("PanelContainer/PreExportUI/HBoxContainer/VBoxContainer2/ShowWhenLocked/LockedVersionLabel")
+pre_export_container = NodePath("PanelContainer/PreExportUI")
+save_export_container = NodePath("PanelContainer/SaveExportUI")
+new_zip_path_label = NodePath("PanelContainer/SaveExportUI/VBoxContainer/VBoxContainer/NewZipPathLabel")
+save_download_zip_button = NodePath("PanelContainer/SaveExportUI/VBoxContainer/VBoxContainer/HBoxContainer/SaveDownloadZipButton")
+cancel_button = NodePath("PanelContainer/PreExportUI/HBoxContainer/VBoxContainer2/CancelButton")
+close_button = NodePath("PanelContainer/SaveExportUI/VBoxContainer/CloseButton")
+
+[node name="PanelContainer" type="PanelContainer" parent="." unique_id=886071118]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = ExtResource("2_xy062")
+
+[node name="PreExportUI" type="MarginContainer" parent="PanelContainer" unique_id=908953824]
+visible = false
+layout_mode = 2
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 6
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 12
+
+[node name="HBoxContainer" type="HBoxContainer" parent="PanelContainer/PreExportUI" unique_id=810277099]
+layout_mode = 2
+theme_override_constants/separation = 14
+
+[node name="VBoxContainer" type="VBoxContainer" parent="PanelContainer/PreExportUI/HBoxContainer" unique_id=1982379268]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Label" type="Label" parent="PanelContainer/PreExportUI/HBoxContainer/VBoxContainer" unique_id=1882357838]
+layout_mode = 2
+text = "Existing Release Versions:"
+horizontal_alignment = 1
+
+[node name="ExistingReleasesList" type="ItemList" parent="PanelContainer/PreExportUI/HBoxContainer/VBoxContainer" unique_id=1658591457]
+layout_mode = 2
+size_flags_vertical = 3
+auto_width = true
+auto_height = true
+
+[node name="ReExportReleaseButton" type="Button" parent="PanelContainer/PreExportUI/HBoxContainer/VBoxContainer" unique_id=60522467]
+layout_mode = 2
+size_flags_horizontal = 4
+disabled = true
+text = "Export selected version"
+
+[node name="VBoxContainer2" type="VBoxContainer" parent="PanelContainer/PreExportUI/HBoxContainer" unique_id=1696661555]
+layout_mode = 2
+theme_override_constants/separation = 8
+alignment = 1
+
+[node name="ShowWhenEdited" type="VBoxContainer" parent="PanelContainer/PreExportUI/HBoxContainer/VBoxContainer2" unique_id=1176450630]
+visible = false
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 16
+alignment = 1
+
+[node name="VBoxContainer2" type="VBoxContainer" parent="PanelContainer/PreExportUI/HBoxContainer/VBoxContainer2/ShowWhenEdited" unique_id=1175802572]
+layout_mode = 2
+
+[node name="CreateReleaseVersionLabel" type="Label" parent="PanelContainer/PreExportUI/HBoxContainer/VBoxContainer2/ShowWhenEdited/VBoxContainer2" unique_id=2083306892]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.6715141, 0.67151415, 0.6715141, 1)
+theme_override_fonts/font = ExtResource("3_xy062")
+theme_override_font_sizes/font_size = 14
+text = "GGM/Game 1.0"
+horizontal_alignment = 1
+
+[node name="ReleaseVersionInput" parent="PanelContainer/PreExportUI/HBoxContainer/VBoxContainer2/ShowWhenEdited/VBoxContainer2" unique_id=2047234622 instance=ExtResource("2_0h71r")]
+layout_mode = 2
+size_flags_horizontal = 4
+
+[node name="Label" parent="PanelContainer/PreExportUI/HBoxContainer/VBoxContainer2/ShowWhenEdited/VBoxContainer2/ReleaseVersionInput/HBoxContainer" parent_id_path=PackedInt32Array(2047234622, 96841244) index="0" unique_id=2095592117]
+visible = false
+
+[node name="Label2" parent="PanelContainer/PreExportUI/HBoxContainer/VBoxContainer2/ShowWhenEdited/VBoxContainer2/ReleaseVersionInput/HBoxContainer" parent_id_path=PackedInt32Array(2047234622, 96841244) index="4" unique_id=683053561]
+theme_override_fonts/font = ExtResource("3_xy062")
+text = "."
+
+[node name="CreateReleaseButton" type="Button" parent="PanelContainer/PreExportUI/HBoxContainer/VBoxContainer2/ShowWhenEdited/VBoxContainer2" unique_id=1363060689]
+layout_mode = 2
+size_flags_horizontal = 4
+theme_type_variation = &"BigTextButton"
+text = "Create New Release"
+
+[node name="Label" type="Label" parent="PanelContainer/PreExportUI/HBoxContainer/VBoxContainer2/ShowWhenEdited" unique_id=371264503]
+layout_mode = 2
+theme_override_font_sizes/font_size = 22
+text = "- or -"
+horizontal_alignment = 1
+
+[node name="VBoxContainer" type="VBoxContainer" parent="PanelContainer/PreExportUI/HBoxContainer/VBoxContainer2/ShowWhenEdited" unique_id=1160985705]
+layout_mode = 2
+
+[node name="IncludeCustomLevelsToggle" type="CheckButton" parent="PanelContainer/PreExportUI/HBoxContainer/VBoxContainer2/ShowWhenEdited/VBoxContainer" unique_id=70809382]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "Also Include All Custom Levels"
+
+[node name="ExportAsEditedButton" type="Button" parent="PanelContainer/PreExportUI/HBoxContainer/VBoxContainer2/ShowWhenEdited/VBoxContainer" unique_id=479415806]
+layout_mode = 2
+size_flags_horizontal = 4
+text = "Export Edited
+(non-release version)"
+
+[node name="ShowWhenLocked" type="VBoxContainer" parent="PanelContainer/PreExportUI/HBoxContainer/VBoxContainer2" unique_id=1034349561]
+layout_mode = 2
+size_flags_vertical = 3
+alignment = 1
+
+[node name="LockedVersionLabel" type="Label" parent="PanelContainer/PreExportUI/HBoxContainer/VBoxContainer2/ShowWhenLocked" unique_id=2083957014]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.6715141, 0.67151415, 0.6715141, 1)
+theme_override_fonts/font = ExtResource("3_xy062")
+theme_override_font_sizes/font_size = 14
+text = "GGM/Game 1.0"
+horizontal_alignment = 1
+
+[node name="ExportLockedReleaseButton" type="Button" parent="PanelContainer/PreExportUI/HBoxContainer/VBoxContainer2/ShowWhenLocked" unique_id=1699970002]
+layout_mode = 2
+size_flags_horizontal = 4
+theme_type_variation = &"BigTextButton"
+text = "Export This Release"
+
+[node name="CancelButton" type="Button" parent="PanelContainer/PreExportUI/HBoxContainer/VBoxContainer2" unique_id=1546612746]
+layout_mode = 2
+size_flags_horizontal = 4
+theme_type_variation = &"BigTextButton"
+text = "Cancel"
+
+[node name="SaveExportUI" type="MarginContainer" parent="PanelContainer" unique_id=231357989]
+layout_mode = 2
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 6
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 12
+
+[node name="VBoxContainer" type="VBoxContainer" parent="PanelContainer/SaveExportUI" unique_id=1657645638]
+layout_mode = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="PanelContainer/SaveExportUI/VBoxContainer" unique_id=1081913945]
+layout_mode = 2
+size_flags_vertical = 3
+alignment = 1
+
+[node name="Label" type="Label" parent="PanelContainer/SaveExportUI/VBoxContainer/VBoxContainer" unique_id=765125706]
+layout_mode = 2
+size_flags_horizontal = 4
+text = "Release Version saved to:"
+
+[node name="NewZipPathLabel" type="Label" parent="PanelContainer/SaveExportUI/VBoxContainer/VBoxContainer" unique_id=767474019]
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_fonts/font = ExtResource("5_xy062")
+theme_override_font_sizes/font_size = 14
+theme_override_styles/normal = ExtResource("6_vhoki")
+text = "<game folder>/other_versions/releases/abcd.zip"
+
+[node name="Spacer" type="Control" parent="PanelContainer/SaveExportUI/VBoxContainer/VBoxContainer" unique_id=375055631]
+custom_minimum_size = Vector2(0, 20)
+layout_mode = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="PanelContainer/SaveExportUI/VBoxContainer/VBoxContainer" unique_id=1795259166]
+layout_mode = 2
+alignment = 1
+
+[node name="SaveDownloadZipButton" type="Button" parent="PanelContainer/SaveExportUI/VBoxContainer/VBoxContainer/HBoxContainer" unique_id=702063858]
+custom_minimum_size = Vector2(170, 0)
+layout_mode = 2
+theme_type_variation = &"BigTextButton"
+text = "Save .zip to ..."
+
+[node name="CloseButton" type="Button" parent="PanelContainer/SaveExportUI/VBoxContainer" unique_id=37707895]
+layout_mode = 2
+size_flags_horizontal = 4
+theme_type_variation = &"BigTextButton"
+text = "Close"
+
+[editable path="PanelContainer/PreExportUI/HBoxContainer/VBoxContainer2/ShowWhenEdited/VBoxContainer2/ReleaseVersionInput"]

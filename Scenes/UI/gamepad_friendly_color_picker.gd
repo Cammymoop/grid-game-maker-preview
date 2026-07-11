@@ -92,5 +92,5 @@ func _update_hsv_rect(delta: float, left_stick: Vector2, right_stick: Vector2) -
     last_saturation_value = sv_coordinate.x
     color = Color.from_hsv(hue, sv_coordinate.x, 1 - sv_coordinate.y, alpha)
 
-func _update_okhsl_circle(delta: float, left_stick: Vector2, right_stick: Vector2) -> void:
+func _update_okhsl_circle(_delta: float, _left_stick: Vector2, _right_stick: Vector2) -> void:
     pass

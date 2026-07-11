@@ -156,7 +156,7 @@ size_flags_vertical = 3
 size_flags_stretch_ratio = 8.0
 mouse_filter = 2
 
-[node name="MainMenu" type="PanelContainer" parent="MarginContainer" unique_id=1211793288 node_paths=PackedStringArray("quit_button", "game_selector", "bg_entity_effect", "edit_game_button", "profile_picker", "settings_panel_layer", "user_settings_panel", "version_chooser_panel_layer", "version_chooser_panel", "version_switcher_panel", "version_label")]
+[node name="MainMenu" type="PanelContainer" parent="MarginContainer" unique_id=1211793288 node_paths=PackedStringArray("quit_button", "game_selector", "bg_entity_effect", "edit_game_button", "profile_picker", "show_more_buttons_button", "more_buttons_container", "create_new_game_button", "settings_panel_layer", "user_settings_panel", "version_chooser_panel_layer", "version_chooser_panel", "version_switcher_panel", "version_label")]
 custom_minimum_size = Vector2(450, 160)
 layout_mode = 2
 size_flags_horizontal = 4
@@ -167,6 +167,9 @@ game_selector = NodePath("MarginContainer/VBoxContainer/GameSelector")
 bg_entity_effect = NodePath("../../FallingEntities/CanvasLayer2/Effects")
 edit_game_button = NodePath("MarginContainer/VBoxContainer/HBoxContainer/EditButton")
 profile_picker = NodePath("../VBoxContainer2/PlayerProfilePicker")
+show_more_buttons_button = NodePath("MarginContainer/VBoxContainer/VBoxContainer/ShowMoreButtonsButton")
+more_buttons_container = NodePath("MarginContainer/VBoxContainer/MoreMenuButtons")
+create_new_game_button = NodePath("MarginContainer/VBoxContainer/MoreMenuButtons/CreateNewGameButton")
 settings_panel_layer = NodePath("SettingsPanelLayer")
 user_settings_panel = NodePath("SettingsPanelLayer/CenterContainer/UserSettingsPanel")
 version_chooser_panel_layer = NodePath("VersionChooserLayer")
@@ -328,38 +331,65 @@ theme_override_constants/separation = 12
 alignment = 1
 
 [node name="PlayButton" type="Button" parent="MarginContainer/MainMenu/MarginContainer/VBoxContainer/HBoxContainer" unique_id=1539786938]
-custom_minimum_size = Vector2(150, 0)
+custom_minimum_size = Vector2(164, 62)
 layout_mode = 2
 theme_type_variation = &"BigTextButton"
+theme_override_font_sizes/font_size = 30
 text = "Play"
+icon_alignment = 2
 
 [node name="EditButton" type="Button" parent="MarginContainer/MainMenu/MarginContainer/VBoxContainer/HBoxContainer" unique_id=284899672]
-custom_minimum_size = Vector2(150, 0)
+custom_minimum_size = Vector2(164, 62)
 layout_mode = 2
 theme_type_variation = &"BigTextButton"
+theme_override_font_sizes/font_size = 24
 text = "Edit Game"
+icon_alignment = 2
 
-[node name="SettingsButton" type="Button" parent="MarginContainer/MainMenu/MarginContainer/VBoxContainer" unique_id=916998221]
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/MainMenu/MarginContainer/VBoxContainer" unique_id=1793785358]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="SettingsButton" type="Button" parent="MarginContainer/MainMenu/MarginContainer/VBoxContainer/VBoxContainer" unique_id=916998221]
 layout_mode = 2
 size_flags_horizontal = 4
 text = "Settings"
 icon = ExtResource("11_qki4b")
 icon_alignment = 2
 
-[node name="HBoxContainer2" type="VBoxContainer" parent="MarginContainer/MainMenu/MarginContainer/VBoxContainer" unique_id=1795824773]
+[node name="ShowMoreButtonsButton" type="Button" parent="MarginContainer/MainMenu/MarginContainer/VBoxContainer/VBoxContainer" unique_id=719891676]
+layout_mode = 2
+size_flags_horizontal = 4
+text = "Create or Import"
+icon_alignment = 2
+
+[node name="Spacer" type="Control" parent="MarginContainer/MainMenu/MarginContainer/VBoxContainer" unique_id=1191951721]
+layout_mode = 2
+
+[node name="MoreMenuButtons" type="VBoxContainer" parent="MarginContainer/MainMenu/MarginContainer/VBoxContainer" unique_id=1795824773]
+visible = false
 layout_mode = 2
 size_flags_horizontal = 4
 size_flags_vertical = 4
 theme_override_constants/separation = 12
 alignment = 1
 
-[node name="ImportNewGameButton" type="Button" parent="MarginContainer/MainMenu/MarginContainer/VBoxContainer/HBoxContainer2" unique_id=1756290664]
+[node name="CreateNewGameButton" type="Button" parent="MarginContainer/MainMenu/MarginContainer/VBoxContainer/MoreMenuButtons" unique_id=1804754194]
+custom_minimum_size = Vector2(0, 27)
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "Create New Empty Game"
+
+[node name="ImportNewGameButton" type="Button" parent="MarginContainer/MainMenu/MarginContainer/VBoxContainer/MoreMenuButtons" unique_id=1756290664]
 layout_mode = 2
 text = "Import Game .zip"
 
-[node name="ImportLevelsButton" type="Button" parent="MarginContainer/MainMenu/MarginContainer/VBoxContainer/HBoxContainer2" unique_id=1753228737]
+[node name="ImportLevelsButton" type="Button" parent="MarginContainer/MainMenu/MarginContainer/VBoxContainer/MoreMenuButtons" unique_id=1753228737]
 layout_mode = 2
 text = "Import Levels"
+
+[node name="Spacer2" type="Control" parent="MarginContainer/MainMenu/MarginContainer/VBoxContainer/MoreMenuButtons" unique_id=1817573619]
+layout_mode = 2
 
 [node name="QuitButton" type="Button" parent="MarginContainer/MainMenu/MarginContainer/VBoxContainer" unique_id=1411082331]
 layout_mode = 2
@@ -403,8 +433,8 @@ metadata/_edit_lock_ = true
 
 [connection signal="pressed" from="MarginContainer/MainMenu/MarginContainer/VBoxContainer/HBoxContainer/PlayButton" to="MarginContainer/MainMenu" method="_on_PlayButton_pressed"]
 [connection signal="pressed" from="MarginContainer/MainMenu/MarginContainer/VBoxContainer/HBoxContainer/EditButton" to="MarginContainer/MainMenu" method="_on_EditButton_pressed"]
-[connection signal="pressed" from="MarginContainer/MainMenu/MarginContainer/VBoxContainer/SettingsButton" to="MarginContainer/MainMenu" method="show_user_settings_panel"]
-[connection signal="pressed" from="MarginContainer/MainMenu/MarginContainer/VBoxContainer/HBoxContainer2/ImportNewGameButton" to="MarginContainer/MainMenu" method="_on_import_new_game_button_pressed"]
-[connection signal="pressed" from="MarginContainer/MainMenu/MarginContainer/VBoxContainer/HBoxContainer2/ImportLevelsButton" to="MarginContainer/MainMenu" method="_on_import_levels_button_pressed"]
+[connection signal="pressed" from="MarginContainer/MainMenu/MarginContainer/VBoxContainer/VBoxContainer/SettingsButton" to="MarginContainer/MainMenu" method="show_user_settings_panel"]
+[connection signal="pressed" from="MarginContainer/MainMenu/MarginContainer/VBoxContainer/MoreMenuButtons/ImportNewGameButton" to="MarginContainer/MainMenu" method="_on_import_new_game_button_pressed"]
+[connection signal="pressed" from="MarginContainer/MainMenu/MarginContainer/VBoxContainer/MoreMenuButtons/ImportLevelsButton" to="MarginContainer/MainMenu" method="_on_import_levels_button_pressed"]
 
 [editable path="FallingEntities"]
