@@ -213,6 +213,9 @@ func _basic_expression_build_recursive(sub_expression: Dictionary, vars: Array[S
 
         var list_items_built: Array[String] = []
         for item in list_items:
+            if typeof(item) != TYPE_DICTIONARY:
+                return ""
+
             var item_built: String = _basic_expression_build_recursive(item, vars)
             if not item_built:
                 return ""
@@ -315,8 +318,6 @@ func e_raw_listv(items: Array) -> Dictionary:
         return e_empty_list()
     var converted_items: Array[Dictionary] = []
     for raw_item in items:
-        if typeof(raw_item) == TYPE_NIL:
-            converted_items.append(e_null())
         converted_items.append(e_val(raw_item))
     return { "node": "list", "items": converted_items, }
 
