@@ -12,7 +12,7 @@ config_version=5
 
 config/name="Grid Game Maker"
 config/description="A powerful almost-all-in-one tool for quickly making all sorts of grid-based games."
-config/version="preview"
+config/version="0.9"
 run/main_scene="res://Scenes/Loading.tscn"
 config/features=PackedStringArray("4.6")
 config/icon="res://assets/img/falling_items_icon.png"

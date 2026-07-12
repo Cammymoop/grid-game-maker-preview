@@ -40,7 +40,6 @@ grow_vertical = 2
 theme_override_styles/panel = ExtResource("2_xy062")
 
 [node name="PreExportUI" type="MarginContainer" parent="PanelContainer" unique_id=908953824]
-visible = false
 layout_mode = 2
 theme_override_constants/margin_left = 12
 theme_override_constants/margin_top = 6
@@ -158,6 +157,7 @@ theme_type_variation = &"BigTextButton"
 text = "Cancel"
 
 [node name="SaveExportUI" type="MarginContainer" parent="PanelContainer" unique_id=231357989]
+visible = false
 layout_mode = 2
 theme_override_constants/margin_left = 12
 theme_override_constants/margin_top = 6

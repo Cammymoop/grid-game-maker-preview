@@ -107,6 +107,7 @@ func load_releases_list() -> void:
     
     var released_version_count: int = versions_info.get("release_versions", {}).size()
     exisiting_releases_list.clear()
+    re_export_release_version_button.disabled = released_version_count < 1
     
     if released_version_count < 1:
         return
