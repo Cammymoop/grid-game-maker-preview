@@ -28,6 +28,7 @@
 [ext_resource type="PackedScene" uid="uid://b1a6s2o32t35i" path="res://Scenes/GameEditor/bg_style_editor.tscn" id="18_umwh7"]
 [ext_resource type="PackedScene" uid="uid://cj8u25mhjg6n8" path="res://Scenes/GameEditor/SelectableTexItem.tscn" id="22_48hio"]
 [ext_resource type="PackedScene" uid="uid://dgvtr1ghjlqi5" path="res://Scenes/GameEditor/locked_overlay.tscn" id="28_xh6ve"]
+[ext_resource type="FontFile" uid="uid://ctnllh13x3iqi" path="res://assets/font/NotoSans-Bold.ttf" id="29_beh5u"]
 
 [sub_resource type="StyleBoxEmpty" id="4"]
 
@@ -126,7 +127,7 @@ theme = ExtResource("3_qrjoe")
 current_tab = 0
 tab_0/title = "Game"
 
-[node name="GameDefinition" type="VBoxContainer" parent="MarginContainer/UIRoot/TabContainer" unique_id=1146228055 node_paths=PackedStringArray("show_level_title_option_picker", "game_identifier_label", "game_identifier_panel", "game_identifier_input", "game_identifier_input_panel", "game_identifier_set_button", "game_identifier_cancel_button", "name_input", "edit_game_dir_button", "move_interp_option_picker", "tele_interp_option_picker", "action_signal_sent_to_option_picker", "turn_animation_option_picker", "def_dying_eff_picker", "def_spawn_eff_picker", "use_spawn_effect_at_level_start_toggle", "level_start_anim_duration_option", "level_start_animation_duration_input", "default_move_speed_input", "default_teleport_duration_input", "auto_reload_checkpoint_for_no_cam_focus_toggle", "follow_by_controller_picker", "auto_undo_option", "auto_undo_toggle", "action_1_is_undo_toggle", "start_paused_option", "start_level_paused_toggle", "export_release_button", "section_container")]
+[node name="GameDefinition" type="VBoxContainer" parent="MarginContainer/UIRoot/TabContainer" unique_id=1146228055 node_paths=PackedStringArray("show_level_title_option_picker", "game_identifier_label", "game_identifier_panel", "game_identifier_input", "game_identifier_input_panel", "game_identifier_set_button", "game_identifier_cancel_button", "name_input", "edit_game_dir_button", "last_release_version_label", "next_release_version_input", "move_interp_option_picker", "tele_interp_option_picker", "action_signal_sent_to_option_picker", "turn_animation_option_picker", "def_dying_eff_picker", "def_spawn_eff_picker", "use_spawn_effect_at_level_start_toggle", "level_start_anim_duration_option", "level_start_animation_duration_input", "default_move_speed_input", "default_teleport_duration_input", "auto_reload_checkpoint_for_no_cam_focus_toggle", "follow_by_controller_picker", "auto_undo_option", "auto_undo_toggle", "action_1_is_undo_toggle", "start_paused_option", "start_level_paused_toggle", "export_release_button", "section_container")]
 layout_mode = 2
 script = ExtResource("6")
 show_level_title_option_picker = NodePath("ScrollContainer/SectionContainer/GameSettingsSection/MarginContainer/HFlowContainer/HFlowContainer/HBoxContainer11/OptionButton")
@@ -138,6 +139,8 @@ game_identifier_set_button = NodePath("HBoxContainer/VBoxContainer/MarginContain
 game_identifier_cancel_button = NodePath("HBoxContainer/VBoxContainer/MarginContainer/Anchor/IdentifierEditPanel/HBoxContainer/IdentifierCancelButton")
 name_input = NodePath("HBoxContainer/VBoxContainer/MarginContainer/HBoxContainer/NameInput")
 edit_game_dir_button = NodePath("HBoxContainer/VBoxContainer/MarginContainer/HBoxContainer/EditGameDirButton")
+last_release_version_label = NodePath("ScrollContainer/SectionContainer/VersionSettingsSection/MarginContainer/HFlowContainer/HBoxContainer/LastReleaseLabel")
+next_release_version_input = NodePath("ScrollContainer/SectionContainer/VersionSettingsSection/MarginContainer/HFlowContainer/HBoxContainer2/NextVersionInput")
 move_interp_option_picker = NodePath("ScrollContainer/SectionContainer/GameSettingsSection/MarginContainer/HFlowContainer/VBoxContainer/HBoxContainer/HBoxContainer10/MoveInterpSelect")
 tele_interp_option_picker = NodePath("ScrollContainer/SectionContainer/GameSettingsSection/MarginContainer/HFlowContainer/VBoxContainer/HBoxContainer12/TeleInterpSelect")
 action_signal_sent_to_option_picker = NodePath("ScrollContainer/SectionContainer/GameSettingsSection/MarginContainer/HFlowContainer/HFlowContainer/HBoxContainer12/ActionSentToSelect")
@@ -655,6 +658,55 @@ mouse_filter = 2
 value = 32.0
 editable = false
 suffix = "px"
+
+[node name="VersionSettingsSection" type="FoldableContainer" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/SectionContainer" unique_id=1694859046]
+layout_mode = 2
+folded = true
+title = "Version:"
+title_alignment = 1
+
+[node name="MarginContainer" type="MarginContainer" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/SectionContainer/VersionSettingsSection" unique_id=873368686]
+visible = false
+layout_mode = 2
+theme_override_constants/margin_bottom = 4
+
+[node name="HFlowContainer" type="HFlowContainer" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/SectionContainer/VersionSettingsSection/MarginContainer" unique_id=54378279]
+layout_mode = 2
+theme_override_constants/h_separation = 10
+alignment = 1
+
+[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/SectionContainer/VersionSettingsSection/MarginContainer/HFlowContainer" unique_id=861444258]
+layout_mode = 2
+alignment = 2
+
+[node name="Label2" type="Label" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/SectionContainer/VersionSettingsSection/MarginContainer/HFlowContainer/HBoxContainer" unique_id=1211417693]
+layout_mode = 2
+text = "Last Released Version:"
+
+[node name="LastReleaseLabel" type="Label" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/SectionContainer/VersionSettingsSection/MarginContainer/HFlowContainer/HBoxContainer" unique_id=222790046]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.65012825, 0.6501283, 0.6501282, 1)
+theme_override_fonts/font = ExtResource("29_beh5u")
+theme_override_font_sizes/font_size = 14
+text = "1.0"
+
+[node name="HBoxContainer2" type="HBoxContainer" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/SectionContainer/VersionSettingsSection/MarginContainer/HFlowContainer" unique_id=418502988]
+layout_mode = 2
+alignment = 2
+
+[node name="Label2" type="Label" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/SectionContainer/VersionSettingsSection/MarginContainer/HFlowContainer/HBoxContainer2" unique_id=468089524]
+layout_mode = 2
+text = "Editing Version:"
+
+[node name="NextVersionInput" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/SectionContainer/VersionSettingsSection/MarginContainer/HFlowContainer/HBoxContainer2" unique_id=853663148 instance=ExtResource("6_ybheo")]
+layout_mode = 2
+
+[node name="Label" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/SectionContainer/VersionSettingsSection/MarginContainer/HFlowContainer/HBoxContainer2/NextVersionInput/HBoxContainer" parent_id_path=PackedInt32Array(853663148, 96841244) index="0" unique_id=2095592117]
+visible = false
+
+[node name="Label2" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/SectionContainer/VersionSettingsSection/MarginContainer/HFlowContainer/HBoxContainer2/NextVersionInput/HBoxContainer" parent_id_path=PackedInt32Array(853663148, 96841244) index="4" unique_id=683053561]
+theme_override_fonts/font = ExtResource("29_beh5u")
+text = "."
 
 [node name="WindowSection" type="FoldableContainer" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/SectionContainer" unique_id=740921175 node_paths=PackedStringArray("expand_crop_option_picker", "window_size_vec_input")]
 layout_mode = 2
@@ -1245,4 +1297,5 @@ visible = false
 [connection signal="pressed" from="MarginContainer/UIRoot/HBoxContainer/BackButton" to="MarginContainer/UIRoot" method="_on_BackButton_pressed"]
 
 [editable path="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/SectionContainer/GameSettingsSection/MarginContainer/HFlowContainer/HFlowContainer/HBoxContainer13/VecInput"]
+[editable path="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/SectionContainer/VersionSettingsSection/MarginContainer/HFlowContainer/HBoxContainer2/NextVersionInput"]
 [editable path="FallingEntities"]

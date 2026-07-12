@@ -3,6 +3,7 @@ extends VBoxContainer
 const PropOrEntityNameInput = preload("res://src/GameEditor/ConditionalEditor/prop_or_entity_name_input.gd")
 const ScalarValueInput = preload("res://src/GameEditor/ConditionalEditor/scalar_value_input.gd")
 
+const Vector2iInput = preload("res://src/GameEditor/ConditionalEditor/vector2i_input.gd")
 const ExportReleaseDialog = preload("res://Scenes/GameEditor/export_release_dialog.gd")
 
 var export_release_dialog_scn: = preload("res://Scenes/GameEditor/export_release_dialog.tscn")
@@ -28,6 +29,9 @@ var invalid_field_color = Color(0.7, 0.4, 0.4)
 
 @export var name_input: LineEdit
 @export var edit_game_dir_button: Button
+
+@export var last_release_version_label: Label
+@export var next_release_version_input: Vector2iInput
 
 @export var move_interp_option_picker: OptionButton
 @export var tele_interp_option_picker: OptionButton
@@ -89,6 +93,13 @@ func _ready():
 	
 	game_identifier_set_button.pressed.connect(on_game_identifier_set_button_pressed)
 	game_identifier_cancel_button.pressed.connect(on_game_identifier_cancel_button_pressed)
+	
+	var last_release_version: Vector2i = Utility.get_vector2i_from_arr(GameManager.game_definition["release_info"]["base_version"])
+	last_release_version_label.text = Utility.version_vec_to_string(last_release_version)
+	
+	var next_release_version: Vector2i = Utility.get_vector2i_from_arr(GameManager.game_definition["release_info"]["next_version"])
+	next_release_version_input.set_value(next_release_version)
+	next_release_version_input.value_changed.connect(on_next_release_version_input_value_changed)
 	
 	if "pixel_scale" in game_settings:
 		find_child("PixelScaleInput").value = game_settings["pixel_scale"]
@@ -622,3 +633,7 @@ func on_start_level_paused_toggle_toggled(button_pressed: bool) -> void:
 func on_level_start_animation_duration_changed(value: float) -> void:
 	GameManager.set_game_setting("level_start_entity_spawn_effect_duration", value)
 	GameManager.game_settings_changed.emit()
+
+
+func on_next_release_version_input_value_changed(value: Vector2i) -> void:
+	GameManager.game_definition["release_info"]["next_version"] = Utility.get_arr_from_vector2i(value)
