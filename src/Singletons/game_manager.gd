@@ -1,5 +1,6 @@
 extends Node
 
+
 signal level_state_loaded
 signal any_state_loaded
 signal game_camera_target_changed(entity: BaseEntity)
@@ -12,6 +13,7 @@ signal level_edit_mode_changed()
 signal profile_switched()
 
 const CreditsUI = preload("res://Scenes/credits_ui.gd")
+const BGTileHolder = preload("res://Scenes/bg_tile_holder.gd")
 
 const IDENTIFIER_MAX_LENGTH: int = 32
 
@@ -261,11 +263,26 @@ func _ready():
 func setup_default_bg_style() -> void:
 	var customizable_bg: Node = preload("res://Scenes/bg_effect_6.tscn").instantiate()
 	add_child(customizable_bg)
+	var fallback_texture_id: = TextureManager.get_fallback_texture_id()
 	default_bg_style = {
 		"background_color": Utility.color_string_no_alpha(customizable_bg.default_bg_color),
 		"bg_gradient_on": true,
 		"bg_gradient_color": Utility.color_string(customizable_bg.default_bg_gradient_color, true),
 		"bg_gradient_above": "below",
+		
+		"bg_gradient_rotation": 0.5,
+		
+		"bg_tile_on": false,
+		"bg_tile_color": Utility.color_string(BGTileHolder.DEFAULT_TILE_COLOR, true),
+		"bg_tile_camera_scroll_factor": 0.5,
+		"bg_tile_angle": 0.0,
+		"bg_tile_texture_id": float(fallback_texture_id),
+		"bg_tile_texture_index": 0.0,
+		"bg_tile_scale": 1.0,
+		"bg_tile_smooth_scale": false,
+		"bg_tile_above": "below",
+		"bg_tile_below_gradient": true,
+		"bg_tile_spacing": [0.0, 0.0],
 
 		"dusty_particles_on": true,
 		"dusty_particles_amount": 1.0,
@@ -288,6 +305,10 @@ func setup_default_bg_style() -> void:
 		"lines_warp_strength": customizable_bg.lines_warp_strength,
 		"lines_warp_scroll_speed": customizable_bg.lines_warp_scroll_speed,
 		"lines_warp_scroll_angle": rad_to_deg(customizable_bg.lines_warp_scroll_angle * TAU),
+		
+		"lines_camera_scroll_factor": 0.0,
+		"lines_solid_camera_scroll_factor": 0.0,
+
 		"lines_above": "below",
 	}
 	remove_child(customizable_bg)
@@ -624,8 +645,26 @@ func get_window_size_setting() -> Vector2:
 func get_base_window_size() -> Vector2:
 	return get_window_size_setting() * MapManager.tile_width
 
+func get_base_window_size_with_override() -> Vector2:
+	if not cur_scene == "Play":
+		return get_base_window_size()
+	return MapManager.get_view_size_with_override() * MapManager.tile_width
+
 func set_game_view(new_game_view_size: Vector2) -> void:
 	set_game_setting("game_view_size", Utility.vector_to_list(new_game_view_size))
+
+func refresh_game_view_size() -> void:
+	if not cur_scene == "Play":
+		return
+	update_game_viewport()
+
+func refresh_view_limit() -> void:
+	if not cur_scene == "Play":
+		return
+	if game_camera:
+		game_camera.update_bounds()
+	MapManager.level_size_changed.emit()
+
 
 func get_default_pixel_scale() -> float:
 	return get_game_setting("pixel_scale", 1)
@@ -718,6 +757,8 @@ func load_serialized_play_state(serialized_state: Dictionary, as_level_load: boo
 	MapManager.deserialize(serialized_state['map'])
 	EntityManager.deserialize(serialized_state['entities'])
 	
+	update_game_viewport()
+	
 	if game_camera:
 		var map_editor: = Utility.get_map_editor()
 		if map_editor and not map_editor.edit_mode:
@@ -743,7 +784,9 @@ func deserialize(serialized_state: Dictionary) -> void:
 
 func create_game_camera() -> void:
 	var cam = cameras["SimpleCamera"].instantiate()
-	Utility.get_world().add_child(cam)
+	var world = Utility.get_world()
+	cam.game_view = world
+	world.add_child(cam)
 	game_camera = cam
 	game_camera.camera_target_changed.connect(on_game_camera_target_changed)
 	game_camera.no_more_targets.connect(on_no_more_camera_targets)
@@ -1181,7 +1224,7 @@ func post_scene_change() -> void:
 func update_game_viewport() -> void:
 	var vp = Utility.get_world().get_viewport()
 	vp.aspect_expand = get_game_setting("auto_aspect", true)
-	vp.set_resolution(get_base_window_size())
+	vp.set_resolution(get_base_window_size_with_override())
 
 func rescale_window() -> void:
 	if Engine.is_embedded_in_editor():

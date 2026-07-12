@@ -206,13 +206,14 @@ size = Vector2i(1536, 1536)
 render_target_update_mode = 3
 script = ExtResource("5")
 
-[node name="MapEditor" parent="Display/GameView" unique_id=1447771592 node_paths=PackedStringArray("ui_layer", "map_editor_overlay", "entity_instance_editor", "placeable_text_input_panel") instance=ExtResource("1")]
+[node name="MapEditor" parent="Display/GameView" unique_id=1447771592 node_paths=PackedStringArray("ui_layer", "map_editor_overlay", "entity_instance_editor", "placeable_text_input_panel", "game_view") instance=ExtResource("1")]
 visible = false
 z_index = 20
 ui_layer = NodePath("../../../MapEditorUILayer")
 map_editor_overlay = NodePath("../../../MapEditorUILayer/MapEditorOverlay")
 entity_instance_editor = NodePath("../../../MapEditorUILayer/MapEditorOverlay/HBoxContainer/MarginContainer/VBoxContainer/EntityInstanceEditor")
 placeable_text_input_panel = NodePath("../../../MapEditorUILayer/MapEditorOverlay/ColorRect/CenterContainer/PlaceableTextPanel")
+game_view = NodePath("..")
 
 [node name="Entities" type="Node2D" parent="Display/GameView" unique_id=896339554]
 z_index = 5
@@ -592,5 +593,6 @@ visible = false
 [node name="BGLayer" type="CanvasLayer" parent="." unique_id=905908639]
 layer = -4
 
-[node name="BGEffects" parent="BGLayer" unique_id=1203754819 instance=ExtResource("12_hagi3")]
+[node name="BGEffects" parent="BGLayer" unique_id=1203754819 node_paths=PackedStringArray("game_view") instance=ExtResource("12_hagi3")]
+game_view = NodePath("../../Display/GameView")
 metadata/_edit_lock_ = true

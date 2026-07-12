@@ -836,7 +836,9 @@ text = "Extend Camera Limits:"
 
 [node name="ExtendCamLimits" type="SpinBox" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/SectionContainer/DefaultCameraSection/MarginContainer/HFlowContainer/HBoxContainer7" unique_id=1741488458]
 layout_mode = 2
-max_value = 300.0
+min_value = -256.0
+max_value = 1000.0
+rounded = true
 suffix = "px"
 
 [node name="HBoxContainer8" type="HBoxContainer" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/SectionContainer/DefaultCameraSection/MarginContainer/HFlowContainer" unique_id=557712138]

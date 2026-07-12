@@ -1,7 +1,12 @@
 extends SubViewport
 
+signal camera_displacement_changed(camera_displacement: Vector2)
+
 # render to an oversized subviewport and scale the resulting texture to the actual screen res for good looking but still soft interpolation
 var overscale_factor: int = 2
+var small_overscale_factor: int = 4
+
+var small_overscale_limit: int = 1024
 
 var resolution = Vector2(384, 384)
 var intended_resolution = Vector2(384, 384)
@@ -40,8 +45,12 @@ func set_resolution(new_resolution: Vector2) -> void:
 	#get_window().min_size = Vector2i(new_resolution / 2)
 	intended_resolution = new_resolution
 	resolution = fit_resolution_into_aspect(aspect_expand)
-	if maxf(resolution.x, resolution.y) > 2048:
+	var max_side: float = maxf(resolution.x, resolution.y)
+	if max_side > 2048:
 		size = resolution
+		size_2d_override = resolution
+	elif max_side < small_overscale_limit:
+		size = resolution * small_overscale_factor
 		size_2d_override = resolution
 	else:
 		size = resolution * overscale_factor
@@ -75,9 +84,14 @@ func get_resolution() -> Vector2:
 func get_current_pixel_scale() -> float:
 	#if cached_pixel_scale:
 		#return cached_pixel_scale
-	#var window: = get_window()
-	#var window_size = window.size
 	return get_window().size.y / resolution.y
+	#var window_size = get_window().size
+	#var v_size = window_size.y / intended_resolution.y
+	#var h_size = window_size.x / intended_resolution.x
+	#if aspect_expand:
+		#return minf(v_size, h_size)
+	#else:
+		#return maxf(v_size, h_size)
 
 func get_viewport_tl_offset() -> Vector2:
 	#if cached_tl_offset:
@@ -99,3 +113,9 @@ func get_scaled_mouse_position():
 	#var stretch_transform = get_window().get_stretch_transform()
 	#prints("stretch transform pos:", stretch_transform.origin, "scale:", stretch_transform.x.length(), " -- ", stretch_transform)
 	return mouse_pos / get_current_pixel_scale()
+
+
+func update_screen_space_camera_displacement(camera_world_pos: Vector2) -> void:
+	var scaled_pos = camera_world_pos * get_current_pixel_scale()
+	RenderingServer.global_shader_parameter_set("camera_displacement", scaled_pos)
+	camera_displacement_changed.emit(scaled_pos)

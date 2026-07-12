@@ -25,7 +25,7 @@ func _ready():
         x_label.text = "W"
         y_label.text = "H"
     if not _set_value:
-        set_value(starting_value)
+        _apply_starting()
     x_input.value_changed.connect(on_input_changed.unbind(1))
     y_input.value_changed.connect(on_input_changed.unbind(1))
     
@@ -35,6 +35,11 @@ func _ready():
     var y_line_edit: LineEdit = y_input.get_line_edit()
     y_line_edit.editing_toggled.connect(on_input_text_editing_change.bind(y_input))
     #y_line_edit.expand_to_text_length = true
+
+func set_tooltip(new_tooltip_text: String) -> void:
+    tooltip_text = new_tooltip_text
+    x_input.tooltip_text = new_tooltip_text
+    y_input.tooltip_text = new_tooltip_text
 
 func _apply_starting() -> void:
     set_value(starting_value)
@@ -77,14 +82,16 @@ func get_arg_name() -> String:
 func get_value() -> Vector2:
     return Vector2(x_input.value, y_input.value)
 
-func set_value(new_val: Vector2) -> void:
+func set_value(new_val: Vector2, no_change_precision: bool = false) -> void:
     _set_value = true
-    change_precision_of_input(x_input, smallest_step)
-    change_precision_of_input(y_input, smallest_step)
+    if not no_change_precision:
+        change_precision_of_input(x_input, smallest_step)
+        change_precision_of_input(y_input, smallest_step)
     x_input.set_value_no_signal(new_val.x)
     y_input.set_value_no_signal(new_val.y)
-    _set_input_precision_from_float(x_input, new_val.x)
-    _set_input_precision_from_float(y_input, new_val.y)
+    if not no_change_precision:
+        _set_input_precision_from_float(x_input, new_val.x)
+        _set_input_precision_from_float(y_input, new_val.y)
 
 func on_input_changed() -> void:
     if _ignore_value_changed:

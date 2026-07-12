@@ -819,7 +819,7 @@ func die(effect_info: Dictionary = {}, with_duration: float = -1, extra_params: 
 	if not effect_info:
 		effect_name = EntityManager.get_default_dying_effect_name_for_entity_id(entity_index)
 		effect_info = {"none": true}
-		if effect_name.to_lower() != "none":
+		if effect_name and effect_name.to_lower() != "none":
 			effect_info = SpriteEffects.DYING_EFFECTS[effect_name].duplicate_deep()
 
 	if effect_name and extra_params:

@@ -363,7 +363,7 @@ func refresh_ui() -> void:
     
     var corner_size_ratio: Vector2 = Utility.get_vector2_from_arr(layer_info.get("9_patch_corner_size", [0.375, 0.375]))
     var texture_tile_size: Vector2 = Vector2.ONE * MapManager.tile_width
-    if layer_info.has("texture") and TextureManager.is_texture_id_in_use(layer_info['texture']):
+    if layer_info.has("texture") and TextureManager.has_texture_id(layer_info['texture']):
         texture_tile_size = TextureManager.get_texture_metadata(layer_info['texture']).get('tile_size', texture_tile_size)
     nine_patch_corner_size_input.set_value((corner_size_ratio * texture_tile_size).round())
     
@@ -679,7 +679,7 @@ func on_vis_prop_compare_number_changed(_new_value: float) -> void:
 
 
 func _get_nine_patch_corner_size_for_save() -> Array:
-    if not layer_info.has('texture') or not TextureManager.is_texture_id_in_use(layer_info['texture']):
+    if not layer_info.has('texture') or not TextureManager.has_texture_id(layer_info['texture']):
         return [0.375, 0.375]
 
     var corner_size_pixels: Vector2 = nine_patch_corner_size_input.get_value()

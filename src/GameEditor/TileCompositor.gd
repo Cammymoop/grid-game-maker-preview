@@ -526,7 +526,7 @@ func brush_picked(dialog) -> void:
 
 func _on_PickBrushButton_pressed():
 	var dialog = texture_dialog.instantiate()
-	if not TextureManager.is_texture_id_in_use(picked_texture_index):
+	if not TextureManager.has_texture_id(picked_texture_index):
 		picked_texture_index = TextureManager.get_fallback_texture_id()
 	dialog.setup(picked_texture_index, picked_texture_sub_index)
 	

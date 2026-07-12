@@ -1,6 +1,7 @@
 extends ConfirmationDialog
 
 signal hidden
+signal picked_texture(texture_id: int, texture_index: int)
 
 var selected_texture: int
 
@@ -23,6 +24,8 @@ func setup(texture_id, sub_index):
 		await ready
 	set_texture(texture_id)
 	find_child("TilePicker").set_selected_index(sub_index)
+	
+	confirmed.connect(emit_picked_texture)
 	
 
 func set_texture(texture_id: int):
@@ -53,6 +56,9 @@ func _on_TilePicker_resized():
 func _on_vis_changed():
 	if not visible:
 		hidden.emit()
+
+func emit_picked_texture() -> void:
+	picked_texture.emit(get_selected_texture(), get_selected_sub_index())
 
 func _on_tile_picker_confirmed() -> void:
 	confirmed.emit()

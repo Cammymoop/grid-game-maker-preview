@@ -26,11 +26,14 @@ var is_shaking: = false
 var shake_intensity: float = 0.0
 var shake_timer: float = 0.0
 
+@export var game_view: Node = null
+
 func _ready():
+	process_mode = Node.PROCESS_MODE_ALWAYS
 	EntityManager.entity_list_updated.connect(on_entity_list_updated)
 	EntityManager.entity_became_active.connect(on_entity_became_active)
 	
-	respect_level_bounds = Utility.get_camera_setting("enable_limits", false)
+	respect_level_bounds = MapManager.get_enable_camera_limits_with_override()
 	MapManager.level_size_changed.connect(update_bounds)
 	
 	var ext = Utility.get_camera_setting("extend_limits", 0)
@@ -40,6 +43,7 @@ func _ready():
 	GameManager.any_state_loaded.connect(on_state_loaded)
 
 func update_bounds() -> void:
+	respect_level_bounds = MapManager.get_enable_camera_limits_with_override()
 	if not respect_level_bounds:
 		limit_enabled = false
 		return
@@ -116,6 +120,10 @@ func _process(delta):
 		offset = Vector2(randf() * 2 - 1, randf() * 2 - 1) * shake_intensity
 	elif offset != Vector2.ZERO:
 		offset = Vector2.ZERO
+	
+	if is_current():
+		game_view.update_screen_space_camera_displacement(get_screen_center_position())
+
 
 func get_targeted_position() -> Vector2:
 	var potential_target: BaseEntity = null
@@ -262,11 +270,6 @@ func teleport(pos: Vector2) -> void:
 func on_state_loaded() -> void:
 	if not active:
 		return
-	if MapManager.has_metadata_value("override_enable_camera_limits"):
-		var override_enable_camera_limits: bool = MapManager.get_metadata_value("override_enable_camera_limits", false)
-		respect_level_bounds = override_enable_camera_limits
-	else:
-		respect_level_bounds = Utility.get_camera_setting("enable_limits", false)
 	update_bounds()
 
 	if target_entity and is_instance_valid(target_entity):

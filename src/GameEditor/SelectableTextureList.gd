@@ -60,7 +60,7 @@ func on_texture_item_enabled_toggled(item: SelectableTexture, new_is_enabled: bo
 
 func remove_used_item(item: SelectableTexture) -> void:
 	var loaded_texture_id: = _get_loaded_texture_id_from_item(item)
-	if loaded_texture_id != -1 and TextureManager.is_texture_id_in_use(loaded_texture_id):
+	if loaded_texture_id != -1 and TextureManager.has_texture_id(loaded_texture_id):
 		# TODO
 		# confirmation dialog perhap
 		# choose an image to remap to or to clear all usage?

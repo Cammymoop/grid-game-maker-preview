@@ -598,6 +598,29 @@ func has_metadata_value(key: String) -> bool:
 func get_metadata_value(key: String, default_value: Variant = null) -> Variant:
     return map_metadata.get(key, default_value)
 
+func get_override_view_size() -> Vector2:
+    var override_view_size_raw: Variant = get_metadata_value("override_view_size", [0., 0.])
+    if typeof(override_view_size_raw) != TYPE_ARRAY:
+        return Vector2.ZERO
+    return Utility.get_vector2_from_arr(override_view_size_raw)
+func set_override_view_size(override_view_size: Vector2, update_edited_metadata: bool = true) -> void:
+    if override_view_size == Vector2.ZERO:
+        erase_metadata_value("override_view_size")
+    else:
+        var converted: Array = Utility.get_arr_from_vector2(override_view_size)
+        set_metadata_value("override_view_size", converted, update_edited_metadata)
+
+func get_view_size_with_override() -> Vector2:
+    var override_view_size: Vector2 = get_override_view_size()
+    if override_view_size == Vector2.ZERO:
+        return GameManager.get_window_size_setting()
+    return override_view_size
+
+func get_enable_camera_limits_with_override() -> bool:
+    if has_metadata_value("override_enable_camera_limits"):
+        return get_metadata_value("override_enable_camera_limits", false)
+    return Utility.get_camera_setting("enable_limits", false)
+
 func get_all_tile_indexes() -> Array:
     var keys = tile_defs.keys()
     #keys.sort()

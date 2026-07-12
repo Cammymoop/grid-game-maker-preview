@@ -658,6 +658,12 @@ func remove_loaded_texture_by_id(texture_id: int) -> void:
     refresh_textures()
     textures_remapped.emit()
 
+func has_texture_id(texture_id: int) -> bool:
+    for tex_spec in texture_spec:
+        if tex_spec['texture_id'] == texture_id:
+            return true
+    return false
+
 func is_texture_id_in_use(texture_id: int) -> bool:
     if not texture_id in textures:
         return false

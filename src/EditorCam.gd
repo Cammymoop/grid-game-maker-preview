@@ -4,6 +4,8 @@ extends Camera2D
 var extend_limits = 0
 @onready var vp = get_viewport()
 
+@export var game_view: Node = null
+
 var _cached_center_limits: Rect2 = Rect2()
 
 var _enable_limits: = true
@@ -12,6 +14,10 @@ func _ready():
 	MapManager.connect("level_size_changed", Callable(self, "update_bounds"))
 	
 	update_bounds()
+
+func _process(_delta: float) -> void:
+	if is_current():
+		game_view.update_screen_space_camera_displacement(get_screen_center_position())
 
 func set_position_immediate(pos: Vector2) -> void:
 	position_smoothing_enabled = false

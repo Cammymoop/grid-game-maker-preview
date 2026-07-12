@@ -17,6 +17,11 @@ func _ready():
     x_input.value_changed.connect(on_input_changed.unbind(1))
     y_input.value_changed.connect(on_input_changed.unbind(1))
 
+func set_tooltip(new_tooltip_text: String) -> void:
+    tooltip_text = new_tooltip_text
+    x_input.tooltip_text = new_tooltip_text
+    y_input.tooltip_text = new_tooltip_text
+
 func set_arg_name(new_arg_name: String) -> void:
     arg_name = new_arg_name
 

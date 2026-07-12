@@ -378,7 +378,7 @@ func apply_level_start_entity_spawn_animation() -> void:
         max_delay = individual_duration * .5
         individual_duration *= 0.5
         
-        var screen_size_tiles: Vector2 = GameManager.get_window_size_setting()
+        var screen_size_tiles: Vector2 = MapManager.get_view_size_with_override()
         var screen_corner_dist: = screen_size_tiles.length() / 2.0
         
         var max_dist_from_center: float = 0

@@ -1,12 +1,23 @@
 extends Node
 
+const BGTileHolder: = preload("res://Scenes/bg_tile_holder.gd")
+
+@export var game_view: Node = null
+
+@export var effect_subviewport: SubViewport
+@export var effect_fixed_in_viewport: Node2D
+
 @export var bg_color_rect: ColorRect
 @export var dusty_particles: GPUParticles2D
 @export var pointy_particles: GPUParticles2D
 @export var bg_gradient: TextureRect
 
+@export var bg_tile_holder: BGTileHolder
+
 @export var lines: Sprite2D
 @export var lines_solid: Sprite2D
+
+@export var gradient_texture: GradientTexture2D
 
 var default_bg_color: Color = Color.BLACK
 var default_bg_gradient_color: Color = Color.BLACK
@@ -32,7 +43,15 @@ var lines_warp_strength: float = 1.0
 var lines_warp_scroll_speed: float = 0.05
 var lines_warp_scroll_angle: float = 0.4
 
+var lines_camera_scroll_factor: float = 0.0
+var lines_solid_camera_scroll_factor: float = 0.0
+
 func _ready() -> void:
+    if game_view:
+        game_view.camera_displacement_changed.connect(on_camera_displacement_changed)
+    
+    bg_gradient.texture = gradient_texture
+
     GameManager.bg_style_changed.connect(on_bg_style_changed)
     default_bg_color = bg_color_rect.color
     default_bg_gradient_color = bg_gradient.modulate
@@ -100,15 +119,23 @@ func refresh_bg_style() -> void:
     bg_gradient.visible = level_bg_info.get("bg_gradient_on", true)
     bg_gradient.modulate = Utility.get_dict_color(level_bg_info, "bg_gradient_color", default_bg_gradient_color)
     
+    rotate_gradient(level_bg_info.get("bg_gradient_rotation", 0.5))
+    
+    refresh_lines_style()
+    var between_z_index: int = 0
+    if lines.z_index >= 3:
+        between_z_index = 2
+    
     var bg_gradient_above: String = level_bg_info.get("bg_gradient_above", "below")
     if bg_gradient_above == "below":
         bg_gradient.z_index = -6
     elif bg_gradient_above == "between":
-        bg_gradient.z_index = 0
+        bg_gradient.z_index = between_z_index
     elif bg_gradient_above == "above":
         bg_gradient.z_index = 6
     
-    refresh_lines_style()
+    if bg_tile_holder:
+        bg_tile_holder.update_bg_tile_info(level_bg_info, between_z_index)
 
 
 func refresh_lines_style() -> void:
@@ -121,6 +148,9 @@ func refresh_lines_style() -> void:
     lines_solid.modulate = Utility.get_dict_color(level_bg_info, "lines_solid_color", lines_solid_color)
     var lines_shader: ShaderMaterial = lines.material
     var lines_solid_shader: ShaderMaterial = lines_solid.material
+    
+    lines_shader.set_shader_parameter("camera_displacement_scale", level_bg_info.get("lines_camera_scroll_factor", lines_camera_scroll_factor))
+    lines_solid_shader.set_shader_parameter("camera_displacement_scale", level_bg_info.get("lines_solid_camera_scroll_factor", lines_solid_camera_scroll_factor))
     
     var scroll_speed: float = level_bg_info.get("lines_scroll_speed", lines_scroll_speed)
     var scroll_angle: float = level_bg_info.get("lines_scroll_angle", lines_scroll_angle)
@@ -140,12 +170,32 @@ func refresh_lines_style() -> void:
     lines_shader.set_shader_parameter("displacement_scroll_angle", warp_scroll_angle)
     lines_solid_shader.set_shader_parameter("displacement_scroll_angle", warp_scroll_angle)
     
+
     var lines_above: String = level_bg_info.get("lines_above", "below")
-    lines.z_index = 3 if lines_above.begins_with("above") else -1
-    lines_solid.z_index = 3 if lines_above.begins_with("above") else -1 
-    if lines_above.contains("solid"):
-        lines_solid.z_index += 1
+    var is_above: bool = lines_above.begins_with("above")
+    var is_solid_on_top: bool = lines_above.contains(", solid on top")
+    var lines_parent: Node = lines_solid.get_parent()
+    lines_parent.move_child(lines_solid, lines.get_index() + (1 if is_solid_on_top else 0))
+
+    var lines_solids_z_offset: int = 3 if is_above else -1
+    lines.z_index = lines_solids_z_offset
+    lines_solid.z_index = lines_solids_z_offset
+
+func rotate_gradient(rotation_amt_turns: float) -> void:
+    var base_fill_from: Vector2 = Vector2(0, -0.5)
+    var base_fill_to: Vector2 = Vector2(0, 0.3)
     
-    if lines_above.begins_with("above") and level_bg_info.get("bg_gradient_above", "below") == "between":
-        bg_gradient.z_index = 2
+    var center_offset: = Vector2.ONE * 0.5
     
+    var rotation_amt: float = rotation_amt_turns * TAU
+    gradient_texture.fill_from = base_fill_from.rotated(rotation_amt) + center_offset
+    gradient_texture.fill_to = base_fill_to.rotated(rotation_amt) + center_offset
+    
+    
+func on_camera_displacement_changed(camera_displacement: Vector2) -> void:
+    if effect_subviewport:
+        effect_subviewport.canvas_transform.origin = -camera_displacement
+        if effect_fixed_in_viewport:
+            effect_fixed_in_viewport.position = camera_displacement
+    if bg_tile_holder.visible:
+        bg_tile_holder.scroll_updated()

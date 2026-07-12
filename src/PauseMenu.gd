@@ -2,6 +2,8 @@ extends Control
 
 const BGStyleEditor = preload("res://Scenes/GameEditor/bg_style_editor.gd")
 
+const Vector2fInput = preload("res://src/GameEditor/ConditionalEditor/vector2f_input.gd")
+
 signal gameplay_paused
 signal pause_menu_closed
 signal level_metadata_changed
@@ -50,6 +52,8 @@ var active = false
 @export var level_notes_text_edit: TextEdit
 
 @export var level_list_picker: OptionButton
+
+@export var override_view_size_input: Vector2fInput
 
 @export var copy_to_clipboard_button: Button
 @export var paste_from_clipboard_button: Button
@@ -107,6 +111,9 @@ func _ready():
 	else:
 		override_cam_limit_select.selected = 0
 	override_cam_limit_select.item_selected.connect(on_override_cam_limit_select_item_selected)
+	
+	override_view_size_input.set_value(Vector2.ZERO)
+	override_view_size_input.value_changed.connect(on_override_view_size_input_value_changed)
 	
 	level_list_picker.item_selected.connect(level_list_picked)
 
@@ -251,6 +258,12 @@ func on_show() -> void:
 			override_cam_limit_select.selected = 1 if is_limit else 2
 		else:
 			override_cam_limit_select.selected = 0
+			
+		var override_view_size: Vector2 = MapManager.get_override_view_size()
+		override_view_size_input.set_value(override_view_size)
+
+		var game_view_size: Vector2 = GameManager.get_window_size_setting()
+		override_view_size_input.set_tooltip("Default view size: (%s, %s)" % [snappedf(game_view_size.x, 0.01), snappedf(game_view_size.y, 0.01)])
 		
 		var map_editor_overlay: Node = Utility.get_map_editor_overlay()
 		if map_editor_overlay:
@@ -532,6 +545,7 @@ func on_override_cam_limit_select_item_selected(index: int) -> void:
 	else:
 		MapManager.set_metadata_value("override_enable_camera_limits", false)
 	level_metadata_changed.emit()
+	GameManager.refresh_view_limit()
 
 func on_level_editor_controls_help_toggle_gui_input(event: InputEvent) -> void:
 	if not Input.is_action_just_pressed_by_event("ui_accept", event):
@@ -556,3 +570,8 @@ func adjust_level_notes_edit_height() -> void:
 	else:
 		level_notes_text_edit.custom_minimum_size.y = level_notes_min_height
 		level_notes_text_edit.scroll_fit_content_height = true
+
+func on_override_view_size_input_value_changed(value: Vector2) -> void:
+	MapManager.set_override_view_size(value)
+	level_metadata_changed.emit()
+	GameManager.refresh_game_view_size()

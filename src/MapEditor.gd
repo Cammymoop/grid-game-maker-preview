@@ -22,6 +22,8 @@ const edited_entity_indicator_icon: Texture2D = preload("res://assets/img/button
 
 @export var cursor_star: Node2D
 
+@export var game_view: Node = null
+
 var start_in_edit_mode: = true
 var edit_mode: = false
 
@@ -109,6 +111,7 @@ func _ready() -> void:
 
 	text_preview.hide()
 
+	editor_cam.game_view = game_view
 	editor_cam.edge_limit_tile_count = extend_camera_limits_by_tiles
 	editor_cam.update_bounds()
 	
