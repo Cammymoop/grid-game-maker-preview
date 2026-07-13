@@ -2,6 +2,8 @@ extends MarginContainer
 
 signal changed_game(game_name: String)
 
+@export var is_main_menu_selector: bool = false
+
 @export var focus_panel: Panel
 
 @export var game_title_label: Label
@@ -22,8 +24,11 @@ signal changed_game(game_name: String)
 @export var edited_title_outline_color: Color = Color.ORANGE
 
 var game_list: Array[String] = []
+var game_is_release_hashed: Dictionary[String, bool] = {}
 var game_titles: Dictionary[String, String] = {}
 var non_unique_titles: Array[String] = []
+
+var current_selected: String = ""
 
 var anim_time: = 0.0
 var _min_width: = 0.0
@@ -33,8 +38,7 @@ var _width_extra: = 0.0
 
 func _ready() -> void:
     _min_width = size.x
-    var main_menu_panel: Control = find_parent("MainMenu")
-    _width_extra = 100 + (main_menu_panel.size.x - _min_width) + 2
+    _width_extra = 100 + (_root_container.size.x - _min_width) + 2
 
     focus_mode = Control.FOCUS_ALL
     focus_panel.visible = false
@@ -43,6 +47,7 @@ func _ready() -> void:
     
     get_viewport().size_changed.connect(update_title_text)
     
+    current_selected = GameManager.get_identified_game_name()
     update_title_text()
     
     next_tex_button.gui_input.connect(on_tex_button_gui_input.bind(next_tex_button))
@@ -53,6 +58,9 @@ func _ready() -> void:
 
 func update_title_text() -> void:
     refresh_game_list()
+    if not is_main_menu_selector:
+        update_title_non_main_menu()
+        return
     game_title_label.text_overrun_behavior = TextServer.OVERRUN_NO_TRIMMING
     game_title_label.size_flags_horizontal = Control.SIZE_FILL
     if not GameManager.get_identified_game_name():
@@ -78,6 +86,31 @@ func update_title_text() -> void:
         custom_minimum_size.x = 0
     
     game_identifier_label.text = GameManager.get_identified_game_name(true)
+    var current_version: = GameManager.get_current_game_current_version()
+    game_identifier_label.text += " " + Utility.version_vec_to_string(current_version)
+
+func update_title_non_main_menu() -> void:
+    game_title_label.text = get_display_title(current_selected, false)
+    var current_is_released: bool = game_is_release_hashed.get(current_selected, false)
+    if current_is_released:
+        game_title_label.add_theme_constant_override("outline_size", 6)
+        game_title_label.add_theme_color_override("font_outline_color", edited_title_outline_color)
+    else:
+        game_title_label.remove_theme_constant_override("outline_size")
+        game_title_label.remove_theme_color_override("font_outline_color")
+    
+    var root_container_width: = _root_container.size.x
+    var vp: Viewport = get_viewport()
+    if root_container_width > vp.size.x:
+        # title overrun detected
+        game_title_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+        game_title_label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+        custom_minimum_size.x = vp.size.x - _width_extra
+    else:
+        custom_minimum_size.x = 0
+    
+    game_identifier_label.text = current_selected
+    # note, not loading version info, probably unnecessary for now
 
 func get_name_with_identifier_or_question_mark(game_name: String) -> String:
     if not game_name.contains("/"):
@@ -98,10 +131,12 @@ func get_display_title(game_name: String, non_unique_with_id: bool) -> String:
 func refresh_game_list() -> void:
     non_unique_titles = []
     game_list = []
+    game_is_release_hashed.clear()
     var game_data = FilesManager.get_game_list_with_titles()
     var existing_titles: Array[String] = []
     for g in game_data:
         game_list.append(g['game_name'])
+        game_is_release_hashed[g['game_name']] = g.get('has_hash', false)
         game_titles[g['game_name']] = g['game_title']
         if g['game_title'] not in existing_titles:
             existing_titles.append(g['game_title'])
@@ -122,13 +157,17 @@ func change_game(dir: int) -> void:
     game_index = posmod(game_index + dir, game_list.size())
     
     var next_game_name: = game_list[game_index]
-    if next_game_name and FilesManager.game_exists(next_game_name):
-        GameManager.load_game_definition_from_file(next_game_name)
-        updated_game()
+    if is_main_menu_selector:
+        if next_game_name and FilesManager.game_exists(next_game_name):
+            GameManager.load_game_definition_from_file(next_game_name)
+            current_selected = GameManager.get_identified_game_name()
+            updated_game()
+    else:
+        select_game(next_game_name)
 
 func updated_game() -> void:
     update_title_text()
-    changed_game.emit(GameManager.get_identified_game_name())
+    changed_game.emit(current_selected)
 
 func _process(delta: float) -> void:
     if not has_focus():
@@ -189,9 +228,20 @@ func on_tex_button_gui_input(event: InputEvent, tex_btn: Control) -> void:
 
 func on_game_list_menu_index_pressed(index: int) -> void:
     var game_name: = game_list[index]
-    if game_name and FilesManager.game_exists(game_name):
-        GameManager.load_game_definition_from_file(game_name)
-        updated_game()
-    await get_tree().process_frame
-    await get_tree().process_frame
-    hide_game_list_menu()
+    if is_main_menu_selector:
+        if game_name and FilesManager.game_exists(game_name):
+            GameManager.load_game_definition_from_file(game_name)
+            current_selected = GameManager.get_identified_game_name()
+            updated_game()
+        await get_tree().process_frame
+        await get_tree().process_frame
+        hide_game_list_menu()
+    else:
+        select_game(game_name)
+        hide_game_list_menu()
+
+func select_game(game_name: String) -> void:
+    if is_main_menu_selector:
+        return
+    current_selected = game_name
+    updated_game()

@@ -77,6 +77,9 @@ var large_auto_scale_size: Vector2 = Vector2.ONE
 
 var _moving: bool = false
 
+var _has_alternate_texture_source: bool = false
+var _alternate_texture_source: Object = null
+
 var rotation_prop: float = 0:
     get:
         return current_rotation
@@ -428,6 +431,16 @@ func _remove_modifier_layers(modifier: String) -> void:
             new_layers.append(layer)
     layers = new_layers
 
+func _get_texture_by_id(texture_id: int) -> Texture:
+    if _has_alternate_texture_source:
+        return _alternate_texture_source.get_texture_by_id(texture_id)
+    return TextureManager.get_texture(texture_id)
+
+func _get_texture_sub_index_rect(texture_id: int, sub_index: int) -> Rect2:
+    if _has_alternate_texture_source:
+        return _alternate_texture_source.get_texture_sub_index_rect(texture_id, sub_index)
+    return TextureManager.get_index_rect(texture_id, sub_index)
+
 func create_and_add_nodes_for_layer(layer_info: Dictionary, layer_index: int) -> void:
     if not layer_info or layer_info.get("mode", "empty") == "empty":
         return
@@ -441,8 +454,8 @@ func create_and_add_nodes_for_layer(layer_info: Dictionary, layer_index: int) ->
         if layer_texture_id == -1:
             return
         
-        var layer_tex: Texture = TextureManager.get_texture(layer_texture_id)
-        var layer_tex_rect: Rect2 = TextureManager.get_index_rect(layer_texture_id, layer_info.get("tex_index", 0))
+        var layer_tex: Texture = _get_texture_by_id(layer_texture_id)
+        var layer_tex_rect: Rect2 = _get_texture_sub_index_rect(layer_texture_id, layer_info.get("tex_index", 0))
     
         
         is_masked = layer_info.get("masked", false)
@@ -459,8 +472,8 @@ func create_and_add_nodes_for_layer(layer_info: Dictionary, layer_index: int) ->
             clipping_spr.region_enabled = true
             main_layer_node = clipping_spr
 
-            var mask_src_tex: Texture = TextureManager.get_texture(mask_texture_id)
-            var mask_tex_rect: Rect2 = TextureManager.get_index_rect(mask_texture_id, layer_info.get("mask_tex_index", 0))
+            var mask_src_tex: Texture = _get_texture_by_id(mask_texture_id)
+            var mask_tex_rect: Rect2 = _get_texture_sub_index_rect(mask_texture_id, layer_info.get("mask_tex_index", 0))
             var mask_clip_outer: bool = layer_info.get("mask_clip_outer", true)
             var mask_is_bw: bool = layer_info.get("mask_is_bw", false)
 
@@ -1130,3 +1143,11 @@ func early_end_spawning_effect() -> void:
         expire_time = 1.0
     _animation_timers[_spawning_with_animated_mod] = expire_time + 1.0
     process_animated_modifiers(0, false)
+
+func set_alternate_texture_source(new_alternate_texture_source: Object) -> void:
+    if not new_alternate_texture_source:
+        _has_alternate_texture_source = false
+        _alternate_texture_source = null
+        return
+    _has_alternate_texture_source = true
+    _alternate_texture_source = new_alternate_texture_source

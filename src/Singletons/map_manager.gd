@@ -1407,6 +1407,32 @@ func _remap_texture_id_in_dict(dict: Dictionary, from_texture_id: int, into_text
         if overwrite_index_with >= 0 and "mask_tex_index" in dict:
             dict["mask_tex_index"] = overwrite_index_with
 
+func accumulate_used_texture_ids_from_dict(dict: Dictionary, texture_ids: Array[int]) -> void:
+    if "preview_variant" in dict:
+        accumulate_used_texture_ids_from_dict(dict["preview_variant"], texture_ids)
+    if "terrain_sprite_modifier" in dict:
+        for mod_layer in dict["terrain_sprite_modifier"].get("layers", []):
+            accumulate_used_texture_ids_from_dict(mod_layer, texture_ids)
+    if "mask_texture" in dict:
+        if typeof(dict["mask_texture"]) in [TYPE_INT, TYPE_FLOAT] and int(dict["mask_texture"]) >= 0:
+            var texture_id: int = int(dict["mask_texture"])
+            if not texture_id in texture_ids:
+                texture_ids.append(texture_id)
+    if "texture" in dict:
+        if typeof(dict["texture"]) not in [TYPE_INT, TYPE_FLOAT]:
+            return
+        var texture_id: int = int(dict["texture"])
+        if texture_id < 0:
+            return
+        if not texture_id in texture_ids:
+            texture_ids.append(texture_id)
+
+func get_used_texture_ids_from_defs(some_tile_defintions: Dictionary) -> Array[int]:
+    var used_texture_ids: Array[int] = []
+    for tile_def in some_tile_defintions.values():
+        accumulate_used_texture_ids_from_dict(tile_def, used_texture_ids)
+    return used_texture_ids
+
 func _is_dict_using_texture_id(dict: Dictionary, texture_id: int) -> bool:
     if int(dict.get("texture", -1)) == texture_id or int(dict.get("mask_texture", -1)) == texture_id:
         return true
@@ -1496,3 +1522,43 @@ func set_level_start_paused(paused: bool) -> void:
         set_metadata_value("start_level_paused", paused, GameManager.is_in_level_edit_mode)
     else:
         erase_metadata_value("start_level_paused", GameManager.is_in_level_edit_mode)
+
+func get_basic_atlas_textures_for_foreign_game(foreign_game_def: Dictionary, game_name: String) -> Dictionary[int, AtlasTexture]:
+    var foreign_texture_spec: Array = foreign_game_def.get("textures", [])
+    var foreign_texture_lookup: Dictionary = TextureManager.make_foreign_texture_lookup(foreign_texture_spec, game_name)
+    if foreign_texture_lookup["errors"].size() > 0:
+        push_warning("Some foreign textures were not able to be loaded: %s" % [foreign_texture_lookup["errors"]])
+    
+    var fallback_atlas_tex: AtlasTexture = AtlasTexture.new()
+    fallback_atlas_tex.atlas = TextureManager.placeholder
+    fallback_atlas_tex.region = Rect2(0, 0, 32, 32)
+
+    var basic_atlas_textures: Dictionary[int, AtlasTexture] = {}
+    var foreign_tile_defs: Dictionary = foreign_game_def.get("tile_definitions", {})
+    for tile_id_str in foreign_tile_defs.keys():
+        var tile_id: int = int(tile_id_str)
+        var texture_id: int = foreign_tile_defs[tile_id_str].get("texture", -1)
+        if texture_id < 0 or not texture_id in foreign_texture_lookup:
+            basic_atlas_textures[tile_id] = fallback_atlas_tex
+            continue
+
+        var sub_index: int = foreign_tile_defs[tile_id_str].get("tex_index", 0)
+        basic_atlas_textures[tile_id] = Utility.atlas_texture_from_id_using_lookup(texture_id, sub_index, foreign_texture_lookup)
+    
+    return basic_atlas_textures
+
+
+func import_new_definition_with_texture_remaps(new_definition: Dictionary, texture_remaps: Dictionary[int, int]) -> int:
+    var new_tile_id: int = max_tile_index() + 1
+    tile_defs[new_tile_id] = new_definition
+    
+    for remap_from_id in texture_remaps:
+        _remap_texture_id_in_tile(new_tile_id, remap_from_id, texture_remaps[remap_from_id])
+
+    return new_tile_id
+
+func import_new_tiles_with_texture_remaps(new_tiles: Array, texture_remaps: Dictionary[int, int]) -> void:
+    for new_tile_definition in new_tiles:
+        if typeof(new_tile_definition) != TYPE_DICTIONARY:
+            continue
+        import_new_definition_with_texture_remaps(new_tile_definition, texture_remaps)

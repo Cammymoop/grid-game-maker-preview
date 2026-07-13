@@ -129,7 +129,6 @@ func _ready():
 	if cam_settings.get("follow_entity_by", "controller") == "controller":
 		selected_controller_type = cam_settings.get("follow_entity", "InputController")
 		if selected_controller_type not in EntityManager.controller_templates.keys():
-			prints("changing follow setting to InputController")
 			selected_controller_type = "InputController"
 			game_settings["camera_settings"]["follow_entity"] = "InputController"
 	Utility.opbtn_select_text(follow_by_controller_picker, selected_controller_type)
@@ -460,13 +459,16 @@ func on_game_identifier_input_editing_toggled(toggled_on: bool) -> void:
 func renaming_game_dir(is_changing_identifier: bool = false) -> void:
 	_disable_name_input()
 	var new_identifier: = GameManager.get_game_identifier()
-	var new_game_dir_name: = GameManager.get_game_name()
+	var new_game_id_name: = GameManager.get_game_name()
 	if is_changing_identifier:
 		new_identifier = game_identifier_input.text
 	else:
-		new_game_dir_name = name_input.text
+		new_game_id_name = name_input.text
 
-	var new_identified_game_name: = new_identifier + "/" + new_game_dir_name
+	var new_identified_game_name: = new_identifier + "/" + new_game_id_name
+	if not new_identifier:
+		new_identified_game_name = new_game_id_name
+
 	if is_changing_identifier:
 		prints("updating identifier, new identified name: ", new_identified_game_name)
 	if new_identified_game_name == GameManager.get_identified_game_name():

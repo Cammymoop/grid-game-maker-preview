@@ -341,6 +341,7 @@ func get_game_list_with_titles() -> Array:
 		games_list.append({
 			'game_name': identified_game_name,
 			'game_title': game_definition.get('game_settings', {}).get('title', game_definition['game_name']),
+			'has_hash': game_definition.get('release_info', {}).get('release_hash', "") != "",
 		})
 	games_list.sort_custom(func(a, b): return a['game_title'] < b['game_title'])
 	return games_list
@@ -1079,3 +1080,44 @@ func friendly_version_string_from_version_info(version_info: Dictionary, with_na
 		else:
 			version_string += " from " + Utility.version_vec_to_string(version_info["base_version"]) + ")"
 	return version_string
+
+
+func is_texture_id_used_in_levels(for_game_name: String, check_level_names: Array[String], texture_id: int) -> bool:
+	if not game_exists(for_game_name):
+		return false
+	var game_dir: = get_game_base_dir(for_game_name)
+	var levels_dir: = game_dir.path_join("levels")
+	if not smarter_dir_exists(levels_dir):
+		return false
+
+	for level_name in check_level_names:
+		if not level_exists(for_game_name, level_name):
+			continue
+		var level_data: = get_level_data(for_game_name, level_name)
+		if not level_data:
+			continue
+		
+		var level_bg_style: Dictionary = GameManager.get_level_bg_info_from_level_data(level_data)
+		if not level_bg_style.has("bg_tile_texture_id"):
+			continue
+		
+		if int(level_bg_style["bg_tile_texture_id"]) == texture_id:
+			return true
+	return false
+
+func remap_texture_id_in_levels(for_game_name: String, check_level_names: Array[String], from_texture_id: int, to_texture_id: int) -> void:
+	if not game_exists(for_game_name):
+		return
+	var game_dir: = get_game_base_dir(for_game_name)
+	var levels_dir: = game_dir.path_join("levels")
+	if not smarter_dir_exists(levels_dir):
+		return
+	for level_name in check_level_names:
+		if not level_exists(for_game_name, level_name):
+			continue
+		var level_data: = get_level_data(for_game_name, level_name)
+		if not level_data:
+			continue
+
+		if GameManager._remap_texture_id_in_level_data(from_texture_id, to_texture_id, level_data):
+			save_level_to_name(for_game_name, level_data, level_name)

@@ -5,6 +5,8 @@ var quick_msg = preload("res://Scenes/GameEditor/QuickMessage.tscn")
 
 var save_as_dialog_scn: = preload("res://Scenes/GameEditor/save_game_as_dialog.tscn")
 
+const ImagesEditor: = preload("res://src/GameEditor/ImagesEditor.gd")
+
 @export var tab_container: TabContainer
 @export var beside_tabs_buttons: HBoxContainer
 
@@ -25,6 +27,13 @@ func _ready():
 	tab_bar.focus_next = focus_neighbor_right
 	first_beside_tabs_button.focus_neighbor_left = tab_bar.get_path()
 	first_beside_tabs_button.focus_previous = first_beside_tabs_button.focus_neighbor_left
+	
+	tab_container.tab_changed.connect(on_tab_changed)
+
+func on_tab_changed(tab_index: int) -> void:
+	var tab_control: = tab_container.get_tab_control(tab_index)
+	if tab_control is ImagesEditor:
+		tab_control.refresh_list()
 
 func _unhandled_input(event: InputEvent) -> void:
 	if Utility.event_is_menu_back_just_pressed(event):
@@ -75,13 +84,15 @@ func _shortcut_input(event: InputEvent) -> void:
 	if Utility.fixed_just_pressed_by_event("save_file_shortcut", event):
 		if not GameManager.is_save_current_overwriting():
 			GameManager.save_current_game_definition()
+			accept_event()
 			GlobalToaster.show_toast_message("Saved %s Game Definition" % [GameManager.get_identified_game_name()])
 		else:
-			_open_save_as_dialog(FilesManager.get_unique_game_name(GameManager.get_identified_game_name()))
+			pass#_open_save_as_dialog(FilesManager.get_unique_game_name(GameManager.get_identified_game_name()))
 	elif Utility.fixed_just_pressed_by_event("save_file_as_shortcut", event):
-		_open_save_as_dialog()
+		pass#_open_save_as_dialog()
 	elif Utility.fixed_just_pressed_by_event("editor_start_no_kb", event):
 		GameManager.start_playing(true)
+		accept_event()
 
 func _open_save_as_dialog(with_name: String = "") -> void:
 	var save_as_dialog: = save_as_dialog_scn.instantiate()

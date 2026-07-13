@@ -54,18 +54,23 @@ func add_texture(texture_name: String, texture: Texture, builtin: bool, enabled:
 
 func on_texture_item_enabled_toggled(item: SelectableTexture, new_is_enabled: bool) -> void:
 	if not new_is_enabled:
-		remove_used_item(item)
+		if not remove_used_item(item, false):
+			item.set_enabled(true)
 	else:
 		images_editor.set_texture_item_enabled(item, true)
 
-func remove_used_item(item: SelectableTexture) -> void:
+func remove_used_item(item: SelectableTexture, skip_remap: bool = false) -> bool:
 	var loaded_texture_id: = _get_loaded_texture_id_from_item(item)
-	if loaded_texture_id != -1 and TextureManager.has_texture_id(loaded_texture_id):
-		# TODO
-		# confirmation dialog perhap
-		# choose an image to remap to or to clear all usage?
-		pass
-	images_editor.set_texture_item_enabled(item, false)
+	if loaded_texture_id == -1 or not TextureManager.has_texture_id(loaded_texture_id):
+		images_editor.disable_texture_item(item)
+		return true
+
+	if not skip_remap and TextureManager.is_texture_id_in_use(loaded_texture_id):
+		images_editor.prompt_for_remap_used_item(item)
+		return false
+	
+	images_editor.disable_texture_item(item)
+	return true
 
 
 func _get_loaded_texture_id_from_item(item: SelectableTexture) -> int:
@@ -187,7 +192,7 @@ func on_context_menu_id_pressed(id: int, img_item: SelectableTexture) -> void:
 	elif id == CTX_EDIT_METADATA:
 		images_editor.edit_texture_metadata_for_item(img_item)
 	elif id == CTX_REMOVE_USAGE:
-		remove_used_item(img_item)
+		remove_used_item(img_item, true)
 		request_refresh_list.emit()
 	elif id == CTX_REMAP_TO_ANOTHER:
 		images_editor.prompt_for_remap_used_item(img_item)

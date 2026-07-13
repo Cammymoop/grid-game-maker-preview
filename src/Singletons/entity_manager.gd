@@ -756,6 +756,20 @@ func create_random_entity(entity_name) -> void:
         create_entity(get_entity_index(entity_name), entity_pos)
         break
 
+func get_entity_def_base_texture_id(entity_definition: Dictionary, fallback_id: int = -1) -> int:
+    if not entity_definition.has("texture"):
+        return fallback_id
+    if typeof(entity_definition["texture"]) not in [TYPE_INT, TYPE_FLOAT]:
+        return fallback_id
+    return int(entity_definition["texture"])
+
+func get_entity_def_base_texture_sub_index(entity_definition: Dictionary, fallback_index: int = 0) -> int:
+    if not entity_definition.has("tex_index"):
+        return fallback_index
+    if typeof(entity_definition["tex_index"]) not in [TYPE_INT, TYPE_FLOAT]:
+        return fallback_index
+    return int(entity_definition["tex_index"])
+
 func get_entity_texture(entity_index: int, preview: bool = false):
     if not preview or entity_defs[entity_index].get("preview_variant", {}).is_empty():
         return TextureManager.get_texture(entity_defs[entity_index]['texture'])
@@ -2287,11 +2301,61 @@ func _is_entity_using_texture_id(entity_id: int, texture_id: int) -> bool:
                 return true
     return false
 
+func accumulate_used_texture_ids_from_dict(dict: Dictionary, texture_ids: Array[int]) -> void:
+    if "preview_variant" in dict:
+        accumulate_used_texture_ids_from_dict(dict["preview_variant"], texture_ids)
+    if "sprite_config" in dict:
+        accumulate_used_texture_ids_from_sprite_config(dict["sprite_config"], texture_ids)
+    if "texture" in dict:
+        if typeof(dict["texture"]) not in [TYPE_INT, TYPE_FLOAT]:
+            return
+        var texture_id: int = int(dict["texture"])
+        if texture_id < 0:
+            return
+        if not texture_id in texture_ids:
+            texture_ids.append(texture_id)
+
+func accumulate_used_texture_ids_from_sprite_config(sprite_config: Dictionary, texture_ids: Array[int]) -> void:
+    for layer_dict in sprite_config.get("layers", []):
+        if "texture" in layer_dict:
+            accumulate_used_texture_ids_from_dict(layer_dict, texture_ids)
+
+func get_used_texture_ids_from_defs(some_entity_defintions: Dictionary) -> Array[int]:
+    var used_texture_ids: Array[int] = []
+    for entity_def in some_entity_defintions.values():
+        accumulate_used_texture_ids_from_dict(entity_def, used_texture_ids)
+    return used_texture_ids
+
+
 func is_texture_id_in_use(texture_id: int) -> bool:
     for entity_id in entity_defs.keys():
         if _is_entity_using_texture_id(entity_id, texture_id):
             return true
     return false
+
+func get_basic_atlas_textures_for_foreign_game(foreign_game_def: Dictionary, game_name: String) -> Dictionary[int, AtlasTexture]:
+    var foreign_texture_spec: Array = foreign_game_def.get("textures", [])
+    var foreign_texture_lookup: Dictionary = TextureManager.make_foreign_texture_lookup(foreign_texture_spec, game_name)
+    if foreign_texture_lookup["errors"].size() > 0:
+        push_warning("Some foreign textures were not able to be loaded: %s" % [foreign_texture_lookup["errors"]])
+    
+    var fallback_atlas_tex: AtlasTexture = AtlasTexture.new()
+    fallback_atlas_tex.atlas = TextureManager.placeholder
+    fallback_atlas_tex.region = Rect2(0, 0, 32, 32)
+
+    var basic_atlas_textures: Dictionary[int, AtlasTexture] = {}
+    var foreign_entity_defs: Dictionary = foreign_game_def.get("entity_definitions", {})
+    for entity_id_str in foreign_entity_defs.keys():
+        var entity_id: int = int(entity_id_str)
+        var texture_id: int = get_entity_def_base_texture_id(foreign_entity_defs[entity_id_str], -1)
+        if texture_id < 0 or not texture_id in foreign_texture_lookup:
+            basic_atlas_textures[entity_id] = fallback_atlas_tex
+            continue
+
+        var sub_index: int = get_entity_def_base_texture_sub_index(foreign_entity_defs[entity_id_str])
+        basic_atlas_textures[entity_id] = Utility.atlas_texture_from_id_using_lookup(texture_id, sub_index, foreign_texture_lookup)
+
+    return basic_atlas_textures
 
 func rerender_entity_sprite_preview(entity_id: int) -> void:
     prints("rerendering entity sprite preview for entity %s" % get_entity_name(entity_id))
@@ -2334,6 +2398,44 @@ func build_sprite_previews() -> void:
     sprite_previewer.queue_free()
     initial_sprite_previews_created = true
     initial_sprite_previews_finished.emit()
+
+func build_foreign_sprite_previews(foreign_game_def: Dictionary, game_name: String, then_callable: Callable) -> void:
+    var sprite_snapshots: Dictionary = {}
+    var foreign_texture_spec: Array = foreign_game_def.get("textures", [])
+    var foreign_texture_lookup: Dictionary = TextureManager.make_foreign_texture_lookup(foreign_texture_spec, game_name)
+    if foreign_texture_lookup["errors"].size() > 0:
+        push_warning("Some foreign textures were not able to be loaded: %s" % [foreign_texture_lookup["errors"]])
+    
+    var foreign_entity_defs: Dictionary = foreign_game_def.get("entity_definitions", {})
+    var to_gen_for: Array = []
+    for entity_id_str in foreign_entity_defs.keys():
+        if foreign_entity_defs[entity_id_str].get("sprite_config", {}):
+            to_gen_for.append(entity_id_str)
+    if not to_gen_for:
+        then_callable.call(sprite_snapshots)
+        return
+    
+    var sprite_previewer: = _get_snapshot_renderer()
+    sprite_previewer.set_foreign_texture_lookup(foreign_texture_lookup)
+    for entity_id_str in to_gen_for:
+        var entity_id: int = int(entity_id_str)
+        var foreign_entity_def: Dictionary = foreign_entity_defs[entity_id_str]
+        var rendered_snapshot: = await _render_foreign_sprite_preview(entity_id, foreign_entity_def, sprite_previewer)
+        if rendered_snapshot:
+            sprite_snapshots[entity_id] = rendered_snapshot
+    
+    sprite_previewer.queue_free()
+    if then_callable.is_valid():
+        then_callable.call(sprite_snapshots)
+
+func _render_foreign_sprite_preview(entity_id: int, foreign_entity_def: Dictionary, sprite_previewer: SpritePreviewer) -> ImageTexture:
+    sprite_previewer.update_sprite_config(foreign_entity_def, entity_id)
+    var sub_vp: SubViewport = sprite_previewer.get_subviewport()
+
+    await Utility.force_rerender_subviewport(sub_vp)
+
+    var img_tex: ImageTexture = ImageTexture.create_from_image(sub_vp.get_texture().get_image())
+    return img_tex
 
 func render_single_sprite_preview(entity_id: int) -> void:
     var entity_def: Dictionary = entity_defs[entity_id]
@@ -2774,3 +2876,19 @@ func get_all_positions_of_entity(entity: BaseEntity, include_moving_away: bool =
         
 func is_discrete_mode() -> bool:
     return GameManager.get_game_mode() != GameManager.MovementMode.MOVEMENT_CONTINUOUS
+
+
+func import_new_definition_with_texture_remaps(new_definition: Dictionary, texture_remaps: Dictionary[int, int]) -> int:
+    var new_entity_id: int = max_entity_index() + 1
+    entity_defs[new_entity_id] = new_definition
+    
+    for remap_from_id in texture_remaps:
+        _remap_texture_id_in_entity(new_entity_id, remap_from_id, texture_remaps[remap_from_id])
+
+    return new_entity_id
+
+func import_new_entities_with_texture_remaps(new_entities: Array, texture_remaps: Dictionary[int, int]) -> void:
+    for new_entity_definition in new_entities:
+        if typeof(new_entity_definition) != TYPE_DICTIONARY:
+            continue
+        import_new_definition_with_texture_remaps(new_entity_definition, texture_remaps)

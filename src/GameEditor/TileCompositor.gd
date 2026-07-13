@@ -629,7 +629,7 @@ func _on_SaveAsFileButton_pressed():
 		FilesManager.get_game_images_dir(GameManager.get_identified_game_name()),
 	]))
 	$SaveAsDialog.current_path = default_dest_dir.path_join(save_as_name)
-	$SaveAsDialog.popup_centered()
+	$SaveAsDialog.popup_file_dialog()
 	$SaveAsDialog.deselect_all()
 
 

@@ -31,6 +31,9 @@ var base_entity_id: int = -1
 var _sprite_is_setup: bool = false
 var _has_custom_size: bool = false
 
+var _is_foreign: bool = false
+var _foreign_texture_lookup: Dictionary = {}
+
 static var saved_bg_is_dark: bool = true
 
 func _ready() -> void:
@@ -93,6 +96,12 @@ func stop_spinning() -> void:
     is_spinning = false
 
 func update_sprite_config(entity_def: Dictionary, entity_id: int = -1) -> void:
+    if _is_foreign:
+        the_sprite.set_alternate_texture_source(self)
+        return
+    elif the_sprite._has_alternate_texture_source:
+        the_sprite.set_alternate_texture_source(null)
+
     base_entity_id = entity_id
     if not the_sprite:
         return
@@ -149,3 +158,24 @@ func set_bg_is_dark(new_is_dark: bool) -> void:
         preview_bg_sprite.texture = preview_bg_dark
     else:
         preview_bg_sprite.texture = preview_bg_light
+
+
+
+func set_foreign_texture_lookup(foreign_texture_lookup: Dictionary) -> void:
+    _foreign_texture_lookup = foreign_texture_lookup
+    _is_foreign = true
+
+func get_texture_by_id(texture_id: int) -> Texture:
+    if not _is_foreign:
+        push_error("get_texture_by_id called on a non-foreign sprite previewer")
+        return null
+    return _foreign_texture_lookup.get(texture_id, null) as Texture
+
+func get_texture_sub_index_rect(texture_id: int, sub_index: int) -> Rect2:
+    if not _is_foreign:
+        push_error("get_texture_sub_index_rect called on a non-foreign sprite previewer")
+        return Rect2()
+    var region: Rect2 = Utility.texture_sub_index_region_from_lookup(texture_id, sub_index, _foreign_texture_lookup)
+    if region.size == Vector2.ZERO:
+        push_warning("Could not lookup texture sub index region for texture ID: %d, sub index: %d" % [texture_id, sub_index])
+    return region

@@ -3,14 +3,25 @@ extends VBoxContainer
 const TileEntityButton = preload("res://src/GameEditor/TileEntityButton.gd")
 var tile_entity_button = preload("res://Scenes/GameEditor/TileEntityDisplay.tscn")
 
+const CloneItemsPanel = preload("res://Scenes/GameEditor/clone_items_panel.gd")
+
 var ui_root
 
 @export var tile_grid: GridContainer
 @export var entity_grid: GridContainer
 
+@export var clone_items_layer: CanvasLayer
+@export var clone_items_panel: CloneItemsPanel
+
+@export var open_clone_panel_button: Button
+
+@export var clone_with_bundled_disclaimer_dialog: Window
+
 var im_ready = false
 
 var grid_item_width: float = 60
+
+var disclaimer_confirmed_continue: Callable = Callable()
 
 const CONTEXT_MENU_DELETE = 0
 const CONTEXT_MENU_DUPLICATE = 1
@@ -42,6 +53,13 @@ func _ready():
 	assert(tile_grid and entity_grid, "TilesEntitiesEditor must have tile_grid and entity_grid")
 	visibility_changed.connect(_on_vis_changed)
 	ui_root = find_parent("UIRoot")
+	
+	open_clone_panel_button.pressed.connect(on_open_clone_panel_button_pressed)
+	
+	clone_items_panel.clone_items_picked.connect(on_clone_items_picked)
+	clone_items_panel.request_back.connect(on_clone_items_panel_request_back)
+	
+	clone_with_bundled_disclaimer_dialog.confirmed.connect(on_clone_with_bundled_disclaimer_confirmed)
 
 	var editor_window: Window = ui_root.find_child("TileEntityEditorWindow")
 	editor_window.hidden.connect(update_all_grids)
@@ -367,3 +385,77 @@ func reorder_item_relative(is_entity: bool, item_id: int, delta: int) -> void:
 	
 	reorder_item(is_entity, item_id, clampi(old_index + delta, 0, old_keys.size() - 1))
 	
+
+func on_open_clone_panel_button_pressed() -> void:
+	clone_items_layer.show()
+	clone_items_panel.show()
+
+func on_clone_items_panel_request_back() -> void:
+	clone_items_layer.hide()
+
+func on_clone_items_picked(items: Dictionary, from_game_name: String) -> void:
+	var from_game_definition: Dictionary = FilesManager.get_game_definition(from_game_name)
+	
+	var texture_ids_used: = EntityManager.get_used_texture_ids_from_defs(items["entities"])
+	for tile_texture_id in MapManager.get_used_texture_ids_from_defs(items["tiles"]):
+		if not tile_texture_id in texture_ids_used:
+			texture_ids_used.append(tile_texture_id)
+
+	var from_game_texture_spec: Array = from_game_definition.get("textures", [])
+	var texture_lookup: = TextureManager.make_foreign_texture_lookup(from_game_texture_spec, from_game_name)
+	
+	var used_bundled_ids: Array[int] = []
+	for bundled_id in texture_lookup["bundled_images"]:
+		if bundled_id in texture_ids_used:
+			used_bundled_ids.append(bundled_id)
+	
+	if used_bundled_ids.size() < 1 or GameManager.is_one_time_message_dismissed(GameManager.OneTimeMessages.CLONE_ITEMS_WITH_BUNDLED_IMAGES):
+		_do_clone_items(items, from_game_name, texture_ids_used)
+		return
+	
+	show_clone_with_bundled_disclaimer(items, from_game_name, texture_ids_used, texture_lookup)
+	
+
+func _do_clone_items(items: Dictionary, from_game_name: String, texture_ids_used: Array) -> void:
+	var from_game_definition: Dictionary = FilesManager.get_game_definition(from_game_name)
+	var from_game_texture_spec: Array = from_game_definition.get("textures", [])
+	var texture_lookup: = TextureManager.make_foreign_texture_lookup(from_game_texture_spec, from_game_name)
+
+	var remaps: Dictionary[int, int] = TextureManager.load_and_copy_from_foreign_lookup(texture_lookup, from_game_name, texture_ids_used)
+	var fallback_id: int = TextureManager.get_fallback_texture_id()
+	for from_id in remaps:
+		if remaps[from_id] < 0:
+			remaps[from_id] = fallback_id
+	
+	var has_entities: bool = items["entities"].size() > 0
+	var has_tiles: bool = items["tiles"].size() > 0
+	
+	if has_entities:
+		EntityManager.import_new_entities_with_texture_remaps(items["entities"].values(), remaps)
+	if has_tiles:
+		MapManager.import_new_tiles_with_texture_remaps(items["tiles"].values(), remaps)
+	
+	TextureManager.refresh_textures()
+	TextureManager.textures_remapped.emit()
+	
+	EntityManager.refresh_definition()
+	MapManager.refresh_definition()
+	
+	update_all_grids()
+
+
+func show_clone_with_bundled_disclaimer(items: Dictionary, from_game_name: String, texture_ids_used: Array, texture_lookup: Dictionary) -> void:
+	disclaimer_confirmed_continue = _do_clone_items.bind(items, from_game_name, texture_ids_used)
+	var bundled_image_names: Array[String] = []
+	var bundled_image_textures: Array[Texture2D] = []
+	for bundled_id in texture_lookup["bundled_images"]:
+		if bundled_id in texture_ids_used:
+			bundled_image_names.append(texture_lookup["bundled_images"][bundled_id])
+			bundled_image_textures.append(texture_lookup[bundled_id])
+	clone_with_bundled_disclaimer_dialog.set_textures(bundled_image_names, bundled_image_textures)
+	clone_with_bundled_disclaimer_dialog.popup_centered()
+
+func on_clone_with_bundled_disclaimer_confirmed() -> void:
+	if disclaimer_confirmed_continue.is_valid():
+		disclaimer_confirmed_continue.call()
+		disclaimer_confirmed_continue = Callable()

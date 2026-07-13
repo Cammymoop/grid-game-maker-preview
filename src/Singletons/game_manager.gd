@@ -175,9 +175,11 @@ static var SPECIAL_PROPS_HINT_TEXT: Dictionary[String, String] = {
 
 enum OneTimeMessages {
 	IMPORTED_IMAGE_DISCLAIMER,
+	CLONE_ITEMS_WITH_BUNDLED_IMAGES,
 }
 const ONE_TIME_MESSAGES_KEYS: Dictionary[OneTimeMessages, String] = {
 	OneTimeMessages.IMPORTED_IMAGE_DISCLAIMER: "imported_image_disclaimer",
+	OneTimeMessages.CLONE_ITEMS_WITH_BUNDLED_IMAGES: "clone_items_with_bundled_images",
 }
 
 @export_file("*.json") var builtin_default_game_file: String = ""
@@ -541,8 +543,10 @@ func _update_saved_game_as_edited() -> void:
 
 func create_released_version() -> String:
 	if current_game_is_release_locked or not is_current_game_resavable():
+		prints("Release Fail: already released or not resavable")
 		return ""
 	if cur_scene == "Play":
+		prints("Release Fail: in play scene")
 		return ""
 	
 	editor_save = {}
@@ -554,6 +558,7 @@ func create_released_version() -> String:
 	if TextureManager.is_using_any_shared_images():
 		if not TextureManager.bundle_all_used_shared_images():
 			GlobalToaster.show_toast_message("Failed to bundle shared images", 2.0)
+			prints("Release Fail: failed to bundle shared images")
 			return ""
 	
 	var old_release_info: Dictionary = game_definition["release_info"].duplicate_deep()
@@ -580,6 +585,7 @@ func create_released_version() -> String:
 	if not game_definition["release_info"]["release_hash"]:
 		game_definition["release_info"] = old_release_info
 		GlobalToaster.show_toast_message("Failed to calculate game release hash", 2.0)
+		prints("Release Fail: failed to calculate game release hash")
 		return ""
 	
 	save_current_game_definition()
@@ -673,6 +679,127 @@ func refresh_view_limit() -> void:
 	if game_camera:
 		game_camera.update_bounds()
 	MapManager.level_size_changed.emit()
+
+
+func is_texture_id_used_in_game_or_levels(texture_id: int, bundled_only: bool = false) -> bool:
+	if is_texture_id_used_in_settings(texture_id):
+		return true
+	if is_texture_id_used_in_levels_and_lists(texture_id, bundled_only):
+		return true
+	return false
+
+func is_texture_id_used_in_settings(texture_id: int) -> bool:
+	if _is_texture_id_used_in_hud(texture_id):
+		return true
+	if _is_texture_id_used_in_game_background(texture_id):
+		return true
+	return false
+
+func is_texture_id_used_in_levels_and_lists(texture_id: int, bundled_only: bool = false) -> bool:
+	if is_texture_id_used_in_level_lists(texture_id, bundled_only):
+		return true
+	if is_texture_id_used_in_all_levels(texture_id, bundled_only):
+		return true
+	return false
+
+func is_texture_id_used_in_level_lists(texture_id: int, bundled_only: bool = false) -> bool:
+	for level_list_info in get_all_level_list_infos(bundled_only):
+		if not level_list_info.get("bg_style", {}):
+			continue
+		if _is_texture_id_used_by_bg_style(level_list_info["bg_style"], texture_id):
+			return true
+	return false
+
+func is_texture_id_used_in_all_levels(texture_id: int, bundled_only: bool = false) -> bool:
+	var bundled_levels: = get_list_of_all_bundled_levels()
+	if FilesManager.is_texture_id_used_in_levels(get_identified_game_name(), bundled_levels, texture_id):
+		return true
+	if not bundled_only:
+		var all_non_bundled_levels: = get_list_of_all_non_bundled_levels()
+		if FilesManager.is_texture_id_used_in_levels(get_identified_game_name(), all_non_bundled_levels, texture_id):
+			return true
+	return false
+
+func _is_texture_id_used_in_hud(texture_id: int) -> bool:
+	var hud_items: Dictionary = get_game_setting("info_panel_items", {})
+	for item_id in hud_items:
+		if not hud_items[item_id].has("image_icon"):
+			continue
+		if int(hud_items[item_id]["image_icon"]) == texture_id:
+			return true
+	return false
+
+func _remap_texture_id_in_hud(from_texture_id: int, to_texture_id: int) -> void:
+	var hud_items: Dictionary = get_game_setting("info_panel_items", {})
+	for item_id in hud_items:
+		if not hud_items[item_id].has("image_icon"):
+			continue
+		if int(hud_items[item_id]["image_icon"]) == from_texture_id:
+			hud_items[item_id]["image_icon"] = to_texture_id
+	set_game_setting("info_panel_items", hud_items)
+
+func _is_texture_id_used_in_game_background(texture_id: int) -> bool:
+	if not get_game_setting("bg_style", {}):
+		return false
+	var default_background_info: Dictionary = get_game_setting("bg_style", {})
+	return _is_texture_id_used_by_bg_style(default_background_info, texture_id)
+
+func _is_texture_id_used_by_bg_style(bg_style_info: Dictionary, texture_id: int) -> bool:
+	if not bg_style_info.get("bg_tile_on", false):
+		return false
+	if not bg_style_info.has("bg_tile_texture_id"):
+		return false
+	return int(bg_style_info["bg_tile_texture_id"]) == texture_id
+
+func remap_texture_id_in_game_and_levels(from_texture_id: int, to_texture_id: int, bundled_only: bool = false) -> void:
+	remap_texture_id_in_settings(from_texture_id, to_texture_id)
+	remap_texture_id_in_levels_and_lists(from_texture_id, to_texture_id, bundled_only)
+	if editor_save:
+		var level_fileified: = {"state": editor_save, "name": "nothing_to_see_here"}
+		_remap_texture_id_in_level_data(from_texture_id, to_texture_id, level_fileified)
+	clear_quicksave()
+	clear_checkpoint()
+	clear_undo_stack()
+
+func remap_texture_id_in_settings(from_texture_id: int, to_texture_id: int) -> void:
+	_remap_texture_id_in_hud(from_texture_id, to_texture_id)
+	_remap_texture_id_game_background(from_texture_id, to_texture_id)
+
+func remap_texture_id_in_levels_and_lists(from_texture_id: int, to_texture_id: int, bundled_only: bool = false) -> void:
+	remap_texture_id_in_level_lists(from_texture_id, to_texture_id, bundled_only)
+	remap_texture_id_in_all_levels(from_texture_id, to_texture_id, bundled_only)
+
+func _remap_texture_id_game_background(from_texture_id: int, to_texture_id: int) -> void:
+	set_game_setting("bg_style", remap_texture_id_in_bg_style(from_texture_id, to_texture_id, get_game_setting("bg_style", {})))
+
+func remap_texture_id_in_level_lists(from_texture_id: int, to_texture_id: int, bundled_only: bool = false) -> void:
+	for level_list_info in get_all_level_list_infos(bundled_only):
+		if not level_list_info.get("bg_style", {}):
+			continue
+		
+		level_list_info["bg_style"] = remap_texture_id_in_bg_style(from_texture_id, to_texture_id, level_list_info["bg_style"])
+	
+	if not bundled_only:
+		non_bundled_lists_updated()
+
+func remap_texture_id_in_all_levels(from_texture_id: int, to_texture_id: int, bundled_only: bool = false) -> void:
+	var bundled_levels: = get_list_of_all_bundled_levels()
+	FilesManager.remap_texture_id_in_levels(get_identified_game_name(), bundled_levels, from_texture_id, to_texture_id)
+	
+	if not bundled_only:
+		var all_non_bundled_levels: = get_list_of_all_non_bundled_levels()
+		FilesManager.remap_texture_id_in_levels(get_identified_game_name(), all_non_bundled_levels, from_texture_id, to_texture_id)
+
+func remap_texture_id_in_bg_style(from_texture_id: int, to_texture_id: int, bg_style_info: Dictionary) -> Dictionary:
+	bg_style_info = bg_style_info.duplicate_deep()
+	if not bg_style_info.get("bg_tile_on", false) and bg_style_info.has("bg_tile_texture_id"):
+		bg_style_info.erase("bg_tile_texture_id")
+		return bg_style_info
+
+	if bg_style_info.has("bg_tile_texture_id"):
+		if int(bg_style_info["bg_tile_texture_id"]) == from_texture_id:
+			bg_style_info["bg_tile_texture_id"] = to_texture_id
+	return bg_style_info
 
 
 func get_default_pixel_scale() -> float:
@@ -1503,7 +1630,7 @@ func rename_and_save_current_game_definition(new_identified_game_name: String, d
 
 	var old_game_name: = get_identified_game_name()
 	if FilesManager.rename_game(old_game_name, new_identified_game_name):
-		_set_game_name(new_identified_game_name)
+		_set_identified_game_name(new_identified_game_name)
 		loaded_from_game_name = get_identified_game_name()
 		if FilesManager.get_default_game() == old_game_name:
 			FilesManager.save_default_game(new_identified_game_name)
@@ -1524,8 +1651,7 @@ func is_save_current_overwriting() -> bool:
 		return false
 	return FilesManager.game_exists(get_identified_game_name())
 
-func is_name_overwriting(new_game_name: String) -> bool:
-	var new_identified_game_name: String = cur_game_identifier + "/" + new_game_name
+func is_name_overwriting(new_identified_game_name: String) -> bool:
 	if new_identified_game_name == loaded_from_game_name:
 		return false
 	return FilesManager.game_exists(new_identified_game_name)
@@ -2633,6 +2759,33 @@ func get_current_bg_info() -> Dictionary:
 	else:
 		return level_list_bg_info
 
+func get_level_bg_info_from_level_data(level_data: Dictionary) -> Dictionary:
+	var map_metadata: Dictionary = level_data.get("state", {}).get("map", {}).get("metadata", {})
+	if not map_metadata:
+		return {}
+	if not map_metadata.has("bg_style"):
+		return {}
+	return map_metadata["bg_style"]
+
+func set_level_bg_info_into_level_data(level_data: Dictionary, bg_info: Dictionary) -> bool:
+	var map: Dictionary = level_data.get("state", {}).get("map", {})
+	if not map:
+		push_warning("Level data has no map")
+		return false
+	if not map.has("metadata"):
+		map["metadata"] = {}
+	map["metadata"]["bg_style"] = bg_info
+	return true
+
+func _remap_texture_id_in_level_data(from_texture_id: int, to_texture_id: int, level_data: Dictionary) -> bool:
+	var level_bg_info: Dictionary = get_level_bg_info_from_level_data(level_data)
+	if not level_bg_info:
+		return false
+	var new_level_bg_info: Dictionary = remap_texture_id_in_bg_style(from_texture_id, to_texture_id, level_bg_info)
+	if new_level_bg_info == level_bg_info:
+		return false
+	return set_level_bg_info_into_level_data(level_data, new_level_bg_info)
+
 func set_level_bg_info(bg_info: Dictionary) -> void:
 	if not editor_save:
 		return
@@ -3276,7 +3429,7 @@ func _calculate_game_release_hash(for_loaded_game: bool, for_game_name: String =
 		game_def_without_hash = get_serialized_game_definition()
 		game_def_without_hash = JSON.parse_string(FilesManager.get_save_formatted_game_info(game_def_without_hash))
 	else:
-		game_def_without_hash = FilesManager.get_game_info(for_game_name)
+		game_def_without_hash = FilesManager.get_game_definition(for_game_name)
 	
 	var base_version: Vector2i = Utility.get_vector2i_from_arr(game_def_without_hash["release_info"]["base_version"])
 	var base_version_bytes: PackedByteArray = []
@@ -3311,6 +3464,7 @@ func _calculate_game_release_hash(for_loaded_game: bool, for_game_name: String =
 	for texture_id in bundled_texture_ids:
 		var image_name: String = TextureManager.get_bundled_texture_image_name_from_spec(texture_spec, texture_id)
 		if not image_name:
+			prints("Calculate Release Hash Fail: failed to get bundled texture image name from spec id: %d" % texture_id)
 			return ""
 		
 		var image_bytes: PackedByteArray = []
@@ -3363,7 +3517,7 @@ func validate_game_release(for_game_name: String) -> bool:
 	if not FilesManager.game_has_release_hash(for_game_name):
 		return false
 	
-	var game_info: Dictionary = FilesManager.get_game_info(for_game_name)
+	var game_info: Dictionary = FilesManager.get_game_definition(for_game_name)
 	var hash_from_info: String = game_info.get("release_info", {}).get("release_hash", "")
 	
 	var calculated_hash: String = _calculate_game_release_hash(false, for_game_name)

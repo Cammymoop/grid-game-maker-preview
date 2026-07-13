@@ -1,0 +1,26 @@
+[gd_scene format=3 uid="uid://c1y44sxxcyxo4"]
+
+[ext_resource type="Script" uid="uid://cgprwnyromi71" path="res://Scenes/UI/just_name_and_image.gd" id="1_qfxre"]
+[ext_resource type="Texture2D" uid="uid://bncdrtdfdcim" path="res://assets/img/frog.png" id="2_qfxre"]
+
+[node name="JustNameAndImage" type="HBoxContainer" unique_id=1080908640 node_paths=PackedStringArray("name_label", "image_texture_rect")]
+custom_minimum_size = Vector2(0, 160)
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_bottom = -608.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_qfxre")
+name_label = NodePath("Label")
+image_texture_rect = NodePath("TextureRect")
+
+[node name="Label" type="Label" parent="." unique_id=1579071664]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "TEXTURE:"
+
+[node name="TextureRect" type="TextureRect" parent="." unique_id=120837020]
+layout_mode = 2
+texture = ExtResource("2_qfxre")
+expand_mode = 3

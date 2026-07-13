@@ -7,11 +7,8 @@
 [ext_resource type="FontFile" uid="uid://cxxr3l22y0327" path="res://assets/font/NotoSans-Regular.ttf" id="3_idohh"]
 [ext_resource type="Texture2D" uid="uid://dqnmn0kgpkmm5" path="res://assets/cammy_birb_tiny.svg" id="3_ma218"]
 [ext_resource type="PackedScene" uid="uid://teuuvlq5n85m" path="res://Scenes/player_profile_picker.tscn" id="5_sjh0l"]
-[ext_resource type="Texture2D" uid="uid://dbewldhewludm" path="res://assets/img/button_icons/prev_small.png" id="6_3jcrr"]
-[ext_resource type="Script" uid="uid://dir0jkugrnyfi" path="res://Scenes/game_selector.gd" id="6_ab40c"]
-[ext_resource type="Texture2D" uid="uid://c8uoricgpavvk" path="res://assets/img/button_icons/next_small.png" id="6_wfhf6"]
 [ext_resource type="Script" uid="uid://ddo0ls2dlbc30" path="res://Scenes/UI/version_switcher_panel.gd" id="7_a8aa6"]
-[ext_resource type="Texture2D" uid="uid://rj1klhsd1xaj" path="res://assets/img/button_icons/game_list.png" id="9_sjh0l"]
+[ext_resource type="PackedScene" uid="uid://cc83bbyk0k4ka" path="res://Scenes/UI/game_selector.tscn" id="8_qki4b"]
 [ext_resource type="Texture2D" uid="uid://b4q7u3xbkyj45" path="res://assets/img/button_icons/gear_small.png" id="11_qki4b"]
 [ext_resource type="PackedScene" uid="uid://4a4bn5o1go4a" path="res://Scenes/user_settings_panel.tscn" id="12_byewe"]
 [ext_resource type="PackedScene" uid="uid://cbpf7ehql8tby" path="res://Scenes/UI/version_chooser_panel.tscn" id="14_x0ao6"]
@@ -43,21 +40,6 @@ func _gui_input(event: InputEvent) -> void:
 		get_node(\"../GGMLabel\").show()
 		queue_free()
 "
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ab40c"]
-draw_center = false
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-corner_radius_top_left = 3
-corner_radius_top_right = 3
-corner_radius_bottom_right = 3
-corner_radius_bottom_left = 3
-expand_margin_left = 4.0
-expand_margin_top = 4.0
-expand_margin_right = 4.0
-expand_margin_bottom = 4.0
 
 [node name="Menu" type="Control" unique_id=151932809]
 layout_mode = 3
@@ -156,7 +138,7 @@ size_flags_vertical = 3
 size_flags_stretch_ratio = 8.0
 mouse_filter = 2
 
-[node name="MainMenu" type="PanelContainer" parent="MarginContainer" unique_id=1211793288 node_paths=PackedStringArray("quit_button", "game_selector", "bg_entity_effect", "edit_game_button", "profile_picker", "show_more_buttons_button", "more_buttons_container", "create_new_game_button", "settings_panel_layer", "user_settings_panel", "version_chooser_panel_layer", "version_chooser_panel", "version_switcher_panel", "version_label")]
+[node name="MainMenu" type="PanelContainer" parent="MarginContainer" unique_id=1211793288 node_paths=PackedStringArray("quit_button", "game_selector", "bg_entity_effect", "edit_game_button", "profile_picker", "show_more_buttons_button", "more_buttons_container", "create_new_game_button", "settings_panel_layer", "user_settings_panel", "version_chooser_panel_layer", "version_chooser_panel", "version_switcher_panel")]
 custom_minimum_size = Vector2(450, 160)
 layout_mode = 2
 size_flags_horizontal = 4
@@ -175,7 +157,6 @@ user_settings_panel = NodePath("SettingsPanelLayer/CenterContainer/UserSettingsP
 version_chooser_panel_layer = NodePath("VersionChooserLayer")
 version_chooser_panel = NodePath("VersionChooserLayer/CenterContainer/VersionChooserPanel")
 version_switcher_panel = NodePath("Anchor/CenterContainer/VersionSwitcherPanel")
-version_label = NodePath("MarginContainer/VBoxContainer/GameSelector/VBoxContainer/GameIdentifierLabel")
 
 [node name="Anchor" type="Control" parent="MarginContainer/MainMenu" unique_id=1418169266]
 layout_mode = 2
@@ -208,7 +189,8 @@ alignment = 1
 [node name="VersionLabel" type="Label" parent="MarginContainer/MainMenu/Anchor/CenterContainer/VersionSwitcherPanel/HBoxContainer" unique_id=1794910036]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.5568628, 0.5568628, 0.5568628, 1)
-theme_override_font_sizes/font_size = 12
+theme_override_fonts/font = ExtResource("2_s2c3o")
+theme_override_font_sizes/font_size = 14
 text = "GGM/Basic 1.0"
 
 [node name="SwitchVersionsButton" type="Button" parent="MarginContainer/MainMenu/Anchor/CenterContainer/VersionSwitcherPanel/HBoxContainer" unique_id=1562950801]
@@ -229,116 +211,10 @@ size_flags_vertical = 4
 theme_override_constants/separation = 18
 alignment = 1
 
-[node name="GameSelector" type="MarginContainer" parent="MarginContainer/MainMenu/MarginContainer/VBoxContainer" unique_id=442655736 node_paths=PackedStringArray("focus_panel", "game_title_label", "game_identifier_label", "prev_tex_button", "next_tex_button", "list_menu_tex_button", "game_list_menu", "_root_container")]
+[node name="GameSelector" parent="MarginContainer/MainMenu/MarginContainer/VBoxContainer" unique_id=1841651763 node_paths=PackedStringArray("_root_container") instance=ExtResource("8_qki4b")]
 layout_mode = 2
-script = ExtResource("6_ab40c")
-focus_panel = NodePath("FocusPanel")
-game_title_label = NodePath("VBoxContainer/HBoxContainer/GameTitleLabel")
-game_identifier_label = NodePath("VBoxContainer/GameIdentifierLabel")
-prev_tex_button = NodePath("VBoxContainer/HBoxContainer/PrevTexButtonWrapper")
-next_tex_button = NodePath("VBoxContainer/HBoxContainer/NextTexButtonWrapper")
-list_menu_tex_button = NodePath("GameListTexBtn")
-game_list_menu = NodePath("GameListMenu")
-flash_color = Color(0.8678479, 0.99999994, 0.9751963, 1)
-edited_title_outline_color = Color(0.80784315, 0.31764707, 0.18039216, 1)
-_root_container = NodePath("../../../..")
-
-[node name="FocusPanel" type="Panel" parent="MarginContainer/MainMenu/MarginContainer/VBoxContainer/GameSelector" unique_id=1609945039]
-layout_mode = 2
-mouse_filter = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_ab40c")
-
-[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/MainMenu/MarginContainer/VBoxContainer/GameSelector" unique_id=801943743]
-layout_mode = 2
-
-[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/MainMenu/MarginContainer/VBoxContainer/GameSelector/VBoxContainer" unique_id=1381437813]
-layout_mode = 2
-size_flags_horizontal = 3
-theme_override_constants/separation = 6
-alignment = 1
-
-[node name="PrevTexButtonWrapper" type="Control" parent="MarginContainer/MainMenu/MarginContainer/VBoxContainer/GameSelector/VBoxContainer/HBoxContainer" unique_id=1937718111]
-custom_minimum_size = Vector2(70, 34)
-layout_mode = 2
-mouse_default_cursor_shape = 2
-
-[node name="PrevTexBtn" type="TextureRect" parent="MarginContainer/MainMenu/MarginContainer/VBoxContainer/GameSelector/VBoxContainer/HBoxContainer/PrevTexButtonWrapper" unique_id=219992255]
-layout_mode = 1
-anchors_preset = 6
-anchor_left = 1.0
-anchor_top = 0.5
-anchor_right = 1.0
-anchor_bottom = 0.5
-offset_left = -20.0
-offset_top = -10.0
-offset_bottom = 10.0
-grow_horizontal = 0
-grow_vertical = 2
-size_flags_horizontal = 4
-size_flags_vertical = 4
-mouse_filter = 2
-texture = ExtResource("6_3jcrr")
-stretch_mode = 2
-
-[node name="GameTitleLabel" type="Label" parent="MarginContainer/MainMenu/MarginContainer/VBoxContainer/GameSelector/VBoxContainer/HBoxContainer" unique_id=986413740]
-clip_children = 2
-layout_mode = 2
-size_flags_horizontal = 4
-theme_override_fonts/font = ExtResource("2_s2c3o")
-theme_override_font_sizes/font_size = 24
-text = "Game Name"
-
-[node name="NextTexButtonWrapper" type="Control" parent="MarginContainer/MainMenu/MarginContainer/VBoxContainer/GameSelector/VBoxContainer/HBoxContainer" unique_id=1067929763]
-custom_minimum_size = Vector2(70, 34)
-layout_mode = 2
-mouse_default_cursor_shape = 2
-
-[node name="NextTexBtn" type="TextureRect" parent="MarginContainer/MainMenu/MarginContainer/VBoxContainer/GameSelector/VBoxContainer/HBoxContainer/NextTexButtonWrapper" unique_id=766805534]
-layout_mode = 1
-anchors_preset = 4
-anchor_top = 0.5
-anchor_bottom = 0.5
-offset_top = -10.0
-offset_right = 20.0
-offset_bottom = 10.0
-grow_vertical = 2
-size_flags_horizontal = 4
-size_flags_vertical = 4
-mouse_filter = 2
-texture = ExtResource("6_wfhf6")
-stretch_mode = 2
-
-[node name="GameIdentifierLabel" type="Label" parent="MarginContainer/MainMenu/MarginContainer/VBoxContainer/GameSelector/VBoxContainer" unique_id=910786289]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.556953, 0.556953, 0.556953, 1)
-theme_override_fonts/font = ExtResource("2_s2c3o")
-theme_override_font_sizes/font_size = 14
-text = "GGM"
-horizontal_alignment = 1
-
-[node name="GameListTexBtn" type="TextureRect" parent="MarginContainer/MainMenu/MarginContainer/VBoxContainer/GameSelector" unique_id=448414233]
-layout_mode = 2
-size_flags_horizontal = 8
-size_flags_vertical = 0
-mouse_default_cursor_shape = 2
-texture = ExtResource("9_sjh0l")
-stretch_mode = 2
-
-[node name="GameListMenu" type="PopupMenu" parent="MarginContainer/MainMenu/MarginContainer/VBoxContainer/GameSelector" unique_id=1638586540]
-oversampling_override = 1.0
-position = Vector2i(200, 200)
-size = Vector2i(197, 140)
-theme_override_font_sizes/font_size = 20
-item_count = 4
-item_0/text = "example"
-item_0/id = 3
-item_0/separator = true
-item_1/text = "Chip Challonge"
-item_1/id = 0
-item_2/text = "Geode"
-item_2/id = 1
-item_3/text = "Basic"
-item_3/id = 2
+is_main_menu_selector = true
+_root_container = NodePath("../../..")
 
 [node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/MainMenu/MarginContainer/VBoxContainer" unique_id=1147939781]
 custom_minimum_size = Vector2(0, 50)

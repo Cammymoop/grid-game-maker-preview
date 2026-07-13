@@ -161,6 +161,10 @@ func on_entity_became_active(entity: BaseEntity) -> void:
 func should_follow_entity(entity: BaseEntity) -> bool:
 	var follow_this: String = Utility.get_camera_setting("follow_entity", "")
 	var by_mode: String = Utility.get_camera_setting("follow_entity_by", "controller")
+	if by_mode == "controller":
+		if not follow_this:
+			follow_this = "InputController"
+
 	if not follow_this or not by_mode:
 		return false
 	

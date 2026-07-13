@@ -7,6 +7,49 @@
 [ext_resource type="Texture2D" uid="uid://b45r57rptl5tq" path="res://assets/img/button_icons/builtin.png" id="4"]
 [ext_resource type="Texture2D" uid="uid://dtjnaa2c5rfjm" path="res://assets/img/button_icons/bundled.png" id="5_b83f6"]
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_wqpp2"]
+content_margin_left = 2.0
+bg_color = Color(0.34064347, 0.34064347, 0.34064347, 0.514)
+draw_center = false
+border_width_left = 4
+border_width_top = 4
+border_width_right = 4
+border_width_bottom = 4
+border_color = Color(1, 1, 1, 1)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+expand_margin_left = 4.0
+expand_margin_top = 4.0
+expand_margin_right = 4.0
+expand_margin_bottom = 4.0
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_cyg33"]
+content_margin_left = 2.0
+bg_color = Color(0.34064347, 0.34064347, 0.34064347, 0.514)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.77929187, 0.7792913, 0.77929115, 1)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+expand_margin_left = 2.0
+expand_margin_top = 2.0
+expand_margin_right = 2.0
+expand_margin_bottom = 2.0
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_aaf7x"]
+content_margin_left = 2.0
+bg_color = Color(0.6221603, 0.78385323, 0.6558016, 1)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_qhhpk"]
 content_margin_left = 2.0
 bg_color = Color(0.23594871, 0.23594871, 0.23594868, 0.28235295)
@@ -14,15 +57,19 @@ border_width_left = 2
 border_width_top = 2
 border_width_right = 2
 border_width_bottom = 2
-border_color = Color(0.86898494, 0.86898494, 0.8689847, 1)
+border_color = Color(0.55695355, 0.5569529, 0.5569527, 1)
 corner_radius_top_left = 12
 corner_radius_top_right = 12
 corner_radius_bottom_right = 12
 corner_radius_bottom_left = 12
+expand_margin_left = 2.0
+expand_margin_top = 2.0
+expand_margin_right = 2.0
+expand_margin_bottom = 2.0
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_4tm3y"]
 content_margin_left = 2.0
-bg_color = Color(1, 1, 1, 1)
+bg_color = Color(0.57434183, 0.9993525, 0.6860917, 1)
 corner_radius_top_left = 12
 corner_radius_top_right = 12
 corner_radius_bottom_right = 12
@@ -31,8 +78,12 @@ corner_radius_bottom_left = 12
 [sub_resource type="Theme" id="Theme_qhhpk"]
 CheckButton/colors/button_checked_color = Color(0.17572346, 0.5492798, 3.85046e-07, 1)
 CheckButton/colors/button_unchecked_color = Color(2.6765938, 2.6765938, 2.6765938, 1)
+CheckButton/colors/font_hover_pressed_color = Color(0, 0, 0, 1)
 CheckButton/colors/font_pressed_color = Color(0, 0, 0, 1)
 CheckButton/font_sizes/font_size = 14
+CheckButton/styles/focus = SubResource("StyleBoxFlat_wqpp2")
+CheckButton/styles/hover = SubResource("StyleBoxFlat_cyg33")
+CheckButton/styles/hover_pressed = SubResource("StyleBoxFlat_aaf7x")
 CheckButton/styles/normal = SubResource("StyleBoxFlat_qhhpk")
 CheckButton/styles/pressed = SubResource("StyleBoxFlat_4tm3y")
 
@@ -69,7 +120,7 @@ theme_override_constants/margin_top = 8
 theme_override_constants/margin_bottom = 8
 
 [node name="CheckButton" type="CheckButton" parent="HB/MarginContainer2" unique_id=1506435098]
-custom_minimum_size = Vector2(0, 50)
+custom_minimum_size = Vector2(84, 50)
 layout_mode = 2
 size_flags_vertical = 4
 mouse_default_cursor_shape = 2

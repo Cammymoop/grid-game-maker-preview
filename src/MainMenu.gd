@@ -30,7 +30,6 @@ const UserSettingsPanel = preload("res://Scenes/user_settings_panel.gd")
 @export var version_chooser_panel: VersionChooserPanel
 
 @export var version_switcher_panel: VersionSwitcherPanel
-@export var version_label: Label
 
 func _ready():
 	user_settings_panel.request_back.connect(on_user_settings_panel_request_back)
@@ -57,7 +56,7 @@ func _ready():
 func refresh_show_version_switcher() -> void:
 	var is_show_version_switcher: bool = GameManager.player_profile.get_profile_setting("main_menu_version_switcher", false)
 	version_switcher_panel.visible = is_show_version_switcher
-	version_label.visible = not is_show_version_switcher
+	game_selector.game_identifier_label.visible = not is_show_version_switcher
 	
 	if version_switcher_panel.visible:
 		version_switcher_panel.refresh_ui()

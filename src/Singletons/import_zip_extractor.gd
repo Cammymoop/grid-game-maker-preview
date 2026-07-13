@@ -306,11 +306,8 @@ func _ensure_dir_exists(path: String) -> int:
 
 func get_game_name_from_zip(zip_file_path: String) -> String:
 	var game_info: = get_game_info_from_zip(zip_file_path)
-	var game_identifier: String = game_info.get("identifier", "")
-	var game_name: String = game_info.get("game_name", "")
-	if game_identifier:
-		game_name = game_identifier + "/" + game_name
-	return game_name
+	var identified_name: = FilesManager.get_identified_game_name_from_data(game_info)
+	return identified_name
 
 func get_game_name_from_zip_buffer(zip_buffer: PackedByteArray) -> String:
 	var temp_file_path: = FilesManager.save_temporary_data_as_file(zip_buffer, ".zip")

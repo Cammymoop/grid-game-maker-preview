@@ -29,6 +29,11 @@ func _ready() -> void:
     
     refresh_ui()
 
+func _shortcut_input(event: InputEvent) -> void:
+    if Utility.event_is_menu_back_just_pressed(event):
+        request_back.emit()
+        accept_event()
+
 func refresh_ui() -> void:
     current_version_label.text = GameManager.get_full_version_string()
 
@@ -58,6 +63,7 @@ func _chose_index_from_list(list: ItemList) -> void:
 
 func load_chosen_version(version_zip_path: String) -> void:
     GameManager.load_game_version_from_zip_file(version_zip_path)
+    request_back.emit()
 
 
 func show_and_load_version_infos() -> void:

@@ -77,7 +77,6 @@ theme_override_constants/separation = 8
 alignment = 1
 
 [node name="ShowWhenEdited" type="VBoxContainer" parent="PanelContainer/PreExportUI/HBoxContainer/VBoxContainer2" unique_id=1176450630]
-visible = false
 layout_mode = 2
 size_flags_vertical = 3
 theme_override_constants/separation = 16
@@ -102,6 +101,7 @@ size_flags_horizontal = 4
 visible = false
 
 [node name="Label2" parent="PanelContainer/PreExportUI/HBoxContainer/VBoxContainer2/ShowWhenEdited/VBoxContainer2/ReleaseVersionInput/HBoxContainer" parent_id_path=PackedInt32Array(2047234622, 96841244) index="4" unique_id=683053561]
+theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_fonts/font = ExtResource("3_xy062")
 text = "."
 
@@ -132,6 +132,7 @@ text = "Export Edited
 (non-release version)"
 
 [node name="ShowWhenLocked" type="VBoxContainer" parent="PanelContainer/PreExportUI/HBoxContainer/VBoxContainer2" unique_id=1034349561]
+visible = false
 layout_mode = 2
 size_flags_vertical = 3
 alignment = 1

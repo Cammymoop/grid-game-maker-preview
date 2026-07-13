@@ -111,6 +111,12 @@ func on_line_edit_gui_input(event: InputEvent) -> void:
         else:
             enable_double_focus()
         return
+    
+    # Because movement keys include wasd, make sure we dont capture shortcuts like ctrl+s to save
+    if Utility.fixed_just_pressed_by_event("save_file_shortcut", event):
+        return
+    if Utility.fixed_just_pressed_by_event("save_file_as_shortcut", event):
+        return
 
     var up_down: int = 0
     if event.is_action_pressed("value_increase"):

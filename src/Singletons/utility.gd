@@ -326,6 +326,32 @@ func atlas_texture_from_entity_index(entity_index: int, preview: bool = false) -
 	atlas_tex.region = EntityManager.get_entity_texture_rect(entity_index, preview)
 	return atlas_tex
 
+func atlas_texture_from_id_using_lookup(texture_id: int, sub_index: int, texture_lookup: Dictionary) -> AtlasTexture:
+	var found_texture: = texture_lookup.get(texture_id, null) as Texture2D
+	if not found_texture:
+		return null
+
+	var tile_size: Vector2 = texture_lookup["tile_sizes"].get(texture_id, Vector2(32, 32))
+	var tiles_per_row: int = found_texture.get_width() / tile_size.x
+	var tile_x: int = sub_index % tiles_per_row
+	var tile_y: int = floori(sub_index / float(tiles_per_row))
+	
+	var atlas_tex: = AtlasTexture.new()
+	atlas_tex.atlas = found_texture
+	atlas_tex.region = Rect2(tile_x * tile_size.x, tile_y * tile_size.y, tile_size.x, tile_size.y)
+	return atlas_tex
+
+func texture_sub_index_region_from_lookup(texture_id: int, sub_index: int, texture_lookup: Dictionary) -> Rect2:
+	var found_texture: = texture_lookup.get(texture_id, null) as Texture2D
+	if not found_texture:
+		return Rect2()
+
+	var tile_size: Vector2 = texture_lookup["tile_sizes"].get(texture_id, Vector2(32, 32))
+	var tiles_per_row: int = found_texture.get_width() / tile_size.x
+	var tile_x: int = sub_index % tiles_per_row
+	var tile_y: int = floori(sub_index / float(tiles_per_row))
+	return Rect2(tile_x * tile_size.x, tile_y * tile_size.y, tile_size.x, tile_size.y)
+
 func get_camera_setting(setting: String, default_value: Variant = null) -> Variant:
 	return GameManager.get_game_setting("camera_settings", {}).get(setting, default_value)
 

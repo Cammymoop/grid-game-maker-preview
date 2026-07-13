@@ -1,0 +1,369 @@
+[gd_scene format=3 uid="uid://boa4urjmt50gc"]
+
+[ext_resource type="Script" uid="uid://bx6f17nxjwie5" path="res://src/GameEditor/TilesEntitiesEditor.gd" id="1_06v17"]
+[ext_resource type="Texture2D" uid="uid://cv8l7ymc05wg5" path="res://assets/img/button_icons/plus.png" id="2_qlncm"]
+[ext_resource type="Script" uid="uid://cvr0el4b8goh7" path="res://Scenes/GameEditor/clone_items_panel.gd" id="3_23tx5"]
+[ext_resource type="PackedScene" uid="uid://cc83bbyk0k4ka" path="res://Scenes/UI/game_selector.tscn" id="3_qlncm"]
+[ext_resource type="Texture2D" uid="uid://d0uyc2rshryrj" path="res://assets/img/entityTiles.png" id="5_pikkr"]
+[ext_resource type="Script" uid="uid://7vpqv6ussiq" path="res://Scenes/GameEditor/clone_items_with_bundled_dialog.gd" id="6_oihqi"]
+
+[sub_resource type="StyleBoxFlat" id="1"]
+bg_color = Color(0.184314, 0.164706, 0.243137, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0, 0, 0, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_06v17"]
+blend_mode = 3
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_23tx5"]
+content_margin_left = 8.0
+content_margin_top = 8.0
+content_margin_right = 8.0
+content_margin_bottom = 8.0
+bg_color = Color(0.0731655, 0.10257391, 0.13932681, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.334955, 0.31812483, 0.44406027, 1)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+corner_detail = 7
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_oihqi"]
+atlas = ExtResource("5_pikkr")
+region = Rect2(128, 32, 32, 32)
+
+[sub_resource type="StyleBoxLine" id="StyleBoxLine_pikkr"]
+color = Color(0.33333334, 0.31764707, 0.44313726, 1)
+grow_begin = 8.0
+grow_end = 8.0
+thickness = 2
+vertical = true
+
+[node name="Tiles & Entities" type="VBoxContainer" unique_id=1564162769 node_paths=PackedStringArray("tile_grid", "entity_grid", "clone_items_layer", "clone_items_panel", "open_clone_panel_button", "clone_with_bundled_disclaimer_dialog")]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+script = ExtResource("1_06v17")
+tile_grid = NodePath("VBoxContainer/VSplitContainer/VBoxContainer2/TilesHBoxContainer/PanelContainer/ScrollContainer/EditTilesGrid")
+entity_grid = NodePath("VBoxContainer/VSplitContainer/VBoxContainer/EntitiesHBoxContainer/PanelContainer/ScrollContainer/EditEntitiesGrid")
+clone_items_layer = NodePath("ClonePanelLayer")
+clone_items_panel = NodePath("ClonePanelLayer/CenterContainer/CloneItemsPanel")
+open_clone_panel_button = NodePath("VBoxContainer/HBoxContainer/StartCloneItemsButton")
+clone_with_bundled_disclaimer_dialog = NodePath("CloneItemsWithBundledDialog")
+metadata/_tab_index = 1
+
+[node name="VBoxContainer" type="VBoxContainer" parent="." unique_id=1949383146]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="VSplitContainer" type="VSplitContainer" parent="VBoxContainer" unique_id=298546484]
+layout_mode = 2
+size_flags_vertical = 3
+dragger_visibility = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="VBoxContainer/VSplitContainer" unique_id=1556832498]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="EntitiesLabel" type="Label" parent="VBoxContainer/VSplitContainer/VBoxContainer" unique_id=1995954886]
+layout_mode = 2
+text = "Entities:"
+horizontal_alignment = 1
+
+[node name="EntitiesHBoxContainer" type="HBoxContainer" parent="VBoxContainer/VSplitContainer/VBoxContainer" unique_id=1604076832]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="PanelContainer" type="PanelContainer" parent="VBoxContainer/VSplitContainer/VBoxContainer/EntitiesHBoxContainer" unique_id=1771723337]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+mouse_filter = 1
+theme_override_styles/panel = SubResource("1")
+
+[node name="ScrollContainer" type="ScrollContainer" parent="VBoxContainer/VSplitContainer/VBoxContainer/EntitiesHBoxContainer/PanelContainer" unique_id=1275277860]
+layout_mode = 2
+
+[node name="EditEntitiesGrid" type="GridContainer" parent="VBoxContainer/VSplitContainer/VBoxContainer/EntitiesHBoxContainer/PanelContainer/ScrollContainer" unique_id=1992180285]
+layout_mode = 2
+size_flags_horizontal = 7
+size_flags_vertical = 3
+columns = 4
+
+[node name="NewEntityButton" type="Button" parent="VBoxContainer/VSplitContainer/VBoxContainer/EntitiesHBoxContainer" unique_id=1120989641]
+layout_mode = 2
+size_flags_vertical = 4
+icon = ExtResource("2_qlncm")
+
+[node name="VBoxContainer2" type="VBoxContainer" parent="VBoxContainer/VSplitContainer" unique_id=476251036]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="TilesLabel" type="Label" parent="VBoxContainer/VSplitContainer/VBoxContainer2" unique_id=535575162]
+layout_mode = 2
+text = "Tiles:"
+horizontal_alignment = 1
+
+[node name="TilesHBoxContainer" type="HBoxContainer" parent="VBoxContainer/VSplitContainer/VBoxContainer2" unique_id=2101739286]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="PanelContainer" type="PanelContainer" parent="VBoxContainer/VSplitContainer/VBoxContainer2/TilesHBoxContainer" unique_id=1225212968]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+mouse_filter = 1
+theme_override_styles/panel = SubResource("1")
+
+[node name="ScrollContainer" type="ScrollContainer" parent="VBoxContainer/VSplitContainer/VBoxContainer2/TilesHBoxContainer/PanelContainer" unique_id=386279937]
+layout_mode = 2
+
+[node name="EditTilesGrid" type="GridContainer" parent="VBoxContainer/VSplitContainer/VBoxContainer2/TilesHBoxContainer/PanelContainer/ScrollContainer" unique_id=1586813436]
+layout_mode = 2
+size_flags_horizontal = 7
+size_flags_vertical = 3
+columns = 4
+
+[node name="NewTileButton" type="Button" parent="VBoxContainer/VSplitContainer/VBoxContainer2/TilesHBoxContainer" unique_id=951124346]
+layout_mode = 2
+size_flags_vertical = 4
+icon = ExtResource("2_qlncm")
+
+[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer" unique_id=123068691]
+layout_mode = 2
+alignment = 1
+
+[node name="StartCloneItemsButton" type="Button" parent="VBoxContainer/HBoxContainer" unique_id=1169566131]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "Clone Tiles/Entities From Another Game"
+
+[node name="ClonePanelLayer" type="CanvasLayer" parent="." unique_id=54431409]
+layer = 5
+visible = false
+
+[node name="CoverDarken" type="ColorRect" parent="ClonePanelLayer" unique_id=1433197656]
+material = SubResource("CanvasItemMaterial_06v17")
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.6542321, 0.6542321, 0.654232, 1)
+
+[node name="CenterContainer" type="CenterContainer" parent="ClonePanelLayer" unique_id=952437860]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="CloneItemsPanel" type="PanelContainer" parent="ClonePanelLayer/CenterContainer" unique_id=1654641794 node_paths=PackedStringArray("game_selector", "entity_list_container", "entity_list", "tile_list_container", "tile_list", "select_all_entities_button", "select_all_tiles_button", "clone_button", "cancel_button")]
+custom_minimum_size = Vector2(550, 0)
+layout_mode = 2
+script = ExtResource("3_23tx5")
+game_selector = NodePath("MarginContainer/VBoxContainer/VBoxContainer/GameSelector")
+entity_list_container = NodePath("MarginContainer/VBoxContainer/PanelContainer/MarginContainer/HBoxContainer/SelectEntities")
+entity_list = NodePath("MarginContainer/VBoxContainer/PanelContainer/MarginContainer/HBoxContainer/SelectEntities/ItemsMultiSelectList")
+tile_list_container = NodePath("MarginContainer/VBoxContainer/PanelContainer/MarginContainer/HBoxContainer/SelectTiles")
+tile_list = NodePath("MarginContainer/VBoxContainer/PanelContainer/MarginContainer/HBoxContainer/SelectTiles/ItemsMultiSelectList")
+select_all_entities_button = NodePath("MarginContainer/VBoxContainer/PanelContainer/MarginContainer/HBoxContainer/SelectEntities/HBoxContainer/SelectAllButton")
+select_all_tiles_button = NodePath("MarginContainer/VBoxContainer/PanelContainer/MarginContainer/HBoxContainer/SelectTiles/HBoxContainer/SelectAllButton")
+clone_button = NodePath("MarginContainer/VBoxContainer/HBoxContainer/CloneButton")
+cancel_button = NodePath("MarginContainer/VBoxContainer/HBoxContainer/CancelButton")
+
+[node name="MarginContainer" type="MarginContainer" parent="ClonePanelLayer/CenterContainer/CloneItemsPanel" unique_id=969438418]
+layout_mode = 2
+theme_override_constants/margin_left = 4
+theme_override_constants/margin_top = 4
+theme_override_constants/margin_right = 4
+theme_override_constants/margin_bottom = 4
+
+[node name="VBoxContainer" type="VBoxContainer" parent="ClonePanelLayer/CenterContainer/CloneItemsPanel/MarginContainer" unique_id=12289534]
+layout_mode = 2
+theme_override_constants/separation = 18
+
+[node name="VBoxContainer" type="VBoxContainer" parent="ClonePanelLayer/CenterContainer/CloneItemsPanel/MarginContainer/VBoxContainer" unique_id=485362066]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="ClonePanelLayer/CenterContainer/CloneItemsPanel/MarginContainer/VBoxContainer/VBoxContainer" unique_id=675941819]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "Clone From:"
+horizontal_alignment = 1
+
+[node name="GameSelector" parent="ClonePanelLayer/CenterContainer/CloneItemsPanel/MarginContainer/VBoxContainer/VBoxContainer" unique_id=1841651763 node_paths=PackedStringArray("_root_container") instance=ExtResource("3_qlncm")]
+layout_mode = 2
+_root_container = NodePath("../../../..")
+
+[node name="PanelContainer" type="PanelContainer" parent="ClonePanelLayer/CenterContainer/CloneItemsPanel/MarginContainer/VBoxContainer" unique_id=45417006]
+custom_minimum_size = Vector2(0, 240)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_23tx5")
+
+[node name="MarginContainer" type="MarginContainer" parent="ClonePanelLayer/CenterContainer/CloneItemsPanel/MarginContainer/VBoxContainer/PanelContainer" unique_id=463809128]
+layout_mode = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="ClonePanelLayer/CenterContainer/CloneItemsPanel/MarginContainer/VBoxContainer/PanelContainer/MarginContainer" unique_id=985057558]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="SelectEntities" type="VBoxContainer" parent="ClonePanelLayer/CenterContainer/CloneItemsPanel/MarginContainer/VBoxContainer/PanelContainer/MarginContainer/HBoxContainer" unique_id=1040931012]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Label" type="Label" parent="ClonePanelLayer/CenterContainer/CloneItemsPanel/MarginContainer/VBoxContainer/PanelContainer/MarginContainer/HBoxContainer/SelectEntities" unique_id=1075066370]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "Entities:"
+
+[node name="ItemsMultiSelectList" type="ItemList" parent="ClonePanelLayer/CenterContainer/CloneItemsPanel/MarginContainer/VBoxContainer/PanelContainer/MarginContainer/HBoxContainer/SelectEntities" unique_id=888068561]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_font_sizes/font_size = 12
+select_mode = 2
+auto_width = true
+auto_height = true
+scroll_hint_mode = 1
+item_count = 4
+max_columns = 2
+same_column_width = true
+fixed_column_width = 150
+fixed_icon_size = Vector2i(24, 24)
+item_0/text = "entity_name"
+item_0/icon = SubResource("AtlasTexture_oihqi")
+item_1/text = "really_really_long_entity_name"
+item_2/text = "short"
+item_3/text = "etc"
+
+[node name="HBoxContainer" type="HBoxContainer" parent="ClonePanelLayer/CenterContainer/CloneItemsPanel/MarginContainer/VBoxContainer/PanelContainer/MarginContainer/HBoxContainer/SelectEntities" unique_id=2118713313]
+layout_mode = 2
+alignment = 1
+
+[node name="SelectAllButton" type="Button" parent="ClonePanelLayer/CenterContainer/CloneItemsPanel/MarginContainer/VBoxContainer/PanelContainer/MarginContainer/HBoxContainer/SelectEntities/HBoxContainer" unique_id=1914143683]
+custom_minimum_size = Vector2(60, 0)
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "All"
+
+[node name="VSeparator" type="VSeparator" parent="ClonePanelLayer/CenterContainer/CloneItemsPanel/MarginContainer/VBoxContainer/PanelContainer/MarginContainer/HBoxContainer" unique_id=1517843440]
+layout_mode = 2
+theme_override_styles/separator = SubResource("StyleBoxLine_pikkr")
+
+[node name="SelectTiles" type="VBoxContainer" parent="ClonePanelLayer/CenterContainer/CloneItemsPanel/MarginContainer/VBoxContainer/PanelContainer/MarginContainer/HBoxContainer" unique_id=1154891236]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Label" type="Label" parent="ClonePanelLayer/CenterContainer/CloneItemsPanel/MarginContainer/VBoxContainer/PanelContainer/MarginContainer/HBoxContainer/SelectTiles" unique_id=835183027]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "Tiles:"
+
+[node name="ItemsMultiSelectList" type="ItemList" parent="ClonePanelLayer/CenterContainer/CloneItemsPanel/MarginContainer/VBoxContainer/PanelContainer/MarginContainer/HBoxContainer/SelectTiles" unique_id=1700543675]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_font_sizes/font_size = 12
+select_mode = 2
+auto_width = true
+auto_height = true
+scroll_hint_mode = 1
+item_count = 4
+max_columns = 2
+same_column_width = true
+fixed_column_width = 150
+fixed_icon_size = Vector2i(24, 24)
+item_0/text = "entity_name"
+item_0/icon = SubResource("AtlasTexture_oihqi")
+item_1/text = "really_really_long_entity_name"
+item_2/text = "short"
+item_3/text = "etc"
+
+[node name="HBoxContainer" type="HBoxContainer" parent="ClonePanelLayer/CenterContainer/CloneItemsPanel/MarginContainer/VBoxContainer/PanelContainer/MarginContainer/HBoxContainer/SelectTiles" unique_id=1613918778]
+layout_mode = 2
+alignment = 1
+
+[node name="SelectAllButton" type="Button" parent="ClonePanelLayer/CenterContainer/CloneItemsPanel/MarginContainer/VBoxContainer/PanelContainer/MarginContainer/HBoxContainer/SelectTiles/HBoxContainer" unique_id=1853467679]
+custom_minimum_size = Vector2(60, 0)
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "All"
+
+[node name="HBoxContainer" type="HBoxContainer" parent="ClonePanelLayer/CenterContainer/CloneItemsPanel/MarginContainer/VBoxContainer" unique_id=190159476]
+layout_mode = 2
+theme_override_constants/separation = 30
+alignment = 1
+
+[node name="CloneButton" type="Button" parent="ClonePanelLayer/CenterContainer/CloneItemsPanel/MarginContainer/VBoxContainer/HBoxContainer" unique_id=610217532]
+layout_mode = 2
+theme_type_variation = &"BigTextButton"
+text = "Clone"
+
+[node name="CancelButton" type="Button" parent="ClonePanelLayer/CenterContainer/CloneItemsPanel/MarginContainer/VBoxContainer/HBoxContainer" unique_id=226012106]
+layout_mode = 2
+theme_type_variation = &"BigTextButton"
+text = "Cancel"
+
+[node name="CloneItemsWithBundledDialog" type="ConfirmationDialog" parent="." unique_id=1904577390 node_paths=PackedStringArray("list_container", "dont_show_again_toggle")]
+oversampling_override = 1.0
+title = "Clone Items With Bundled Images"
+position = Vector2i(80, 80)
+size = Vector2i(580, 500)
+ok_button_text = "Continue"
+script = ExtResource("6_oihqi")
+list_container = NodePath("MarginContainer/VBoxContainer/ScrollContainer/VBoxContainer")
+dont_show_again_toggle = NodePath("MarginContainer/VBoxContainer/DontShowAgainToggle")
+
+[node name="MarginContainer" type="MarginContainer" parent="CloneItemsWithBundledDialog" unique_id=1903459938]
+offset_left = 8.0
+offset_top = 8.0
+offset_right = 572.0
+offset_bottom = 455.0
+
+[node name="VBoxContainer" type="VBoxContainer" parent="CloneItemsWithBundledDialog/MarginContainer" unique_id=363864720]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="CloneItemsWithBundledDialog/MarginContainer/VBoxContainer" unique_id=2046067994]
+layout_mode = 2
+text = "Cloning these items will import these bundled images into this game:"
+
+[node name="ScrollContainer" type="ScrollContainer" parent="CloneItemsWithBundledDialog/MarginContainer/VBoxContainer" unique_id=1503111173]
+layout_mode = 2
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+vertical_scroll_mode = 4
+
+[node name="VBoxContainer" type="VBoxContainer" parent="CloneItemsWithBundledDialog/MarginContainer/VBoxContainer/ScrollContainer" unique_id=93799419]
+layout_mode = 2
+
+[node name="Label2" type="Label" parent="CloneItemsWithBundledDialog/MarginContainer/VBoxContainer" unique_id=2059666459]
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_font_sizes/font_size = 14
+text = "(Take care to only distribute Images you have permission to)"
+
+[node name="DontShowAgainToggle" type="CheckButton" parent="CloneItemsWithBundledDialog/MarginContainer/VBoxContainer" unique_id=2053705031]
+layout_mode = 2
+size_flags_horizontal = 4
+text = "Don't show this again"
+alignment = 2
+
+[connection signal="resized" from="." to="." method="_on_Tiles_resized"]
+[connection signal="pressed" from="VBoxContainer/VSplitContainer/VBoxContainer/EntitiesHBoxContainer/NewEntityButton" to="." method="_on_NewEntityButton_pressed"]
+[connection signal="pressed" from="VBoxContainer/VSplitContainer/VBoxContainer2/TilesHBoxContainer/NewTileButton" to="." method="_on_NewTileButton_pressed"]

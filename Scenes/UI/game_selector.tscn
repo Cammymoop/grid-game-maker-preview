@@ -1,0 +1,132 @@
+[gd_scene format=3 uid="uid://cc83bbyk0k4ka"]
+
+[ext_resource type="Script" uid="uid://dir0jkugrnyfi" path="res://Scenes/game_selector.gd" id="1_6qev3"]
+[ext_resource type="Texture2D" uid="uid://dbewldhewludm" path="res://assets/img/button_icons/prev_small.png" id="2_at44a"]
+[ext_resource type="FontFile" uid="uid://ctnllh13x3iqi" path="res://assets/font/NotoSans-Bold.ttf" id="3_16i1u"]
+[ext_resource type="Texture2D" uid="uid://c8uoricgpavvk" path="res://assets/img/button_icons/next_small.png" id="4_68hsf"]
+[ext_resource type="Texture2D" uid="uid://rj1klhsd1xaj" path="res://assets/img/button_icons/game_list.png" id="5_ckuke"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ab40c"]
+draw_center = false
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+expand_margin_left = 4.0
+expand_margin_top = 4.0
+expand_margin_right = 4.0
+expand_margin_bottom = 4.0
+
+[node name="GameSelector" type="MarginContainer" unique_id=1841651763 node_paths=PackedStringArray("focus_panel", "game_title_label", "game_identifier_label", "prev_tex_button", "next_tex_button", "list_menu_tex_button", "game_list_menu", "_root_container")]
+script = ExtResource("1_6qev3")
+focus_panel = NodePath("FocusPanel")
+game_title_label = NodePath("VBoxContainer/HBoxContainer/GameTitleLabel")
+game_identifier_label = NodePath("VBoxContainer/GameIdentifierLabel")
+prev_tex_button = NodePath("VBoxContainer/HBoxContainer/PrevTexButtonWrapper")
+next_tex_button = NodePath("VBoxContainer/HBoxContainer/NextTexButtonWrapper")
+list_menu_tex_button = NodePath("GameListTexBtn")
+game_list_menu = NodePath("GameListMenu")
+flash_color = Color(0.8678479, 0.99999994, 0.9751963, 1)
+edited_title_outline_color = Color(0.80784315, 0.31764707, 0.18039216, 1)
+_root_container = NodePath("")
+
+[node name="FocusPanel" type="Panel" parent="." unique_id=1186130119]
+layout_mode = 2
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_ab40c")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="." unique_id=746683942]
+layout_mode = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer" unique_id=1682490140]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 6
+alignment = 1
+
+[node name="PrevTexButtonWrapper" type="Control" parent="VBoxContainer/HBoxContainer" unique_id=406538382]
+custom_minimum_size = Vector2(70, 34)
+layout_mode = 2
+mouse_default_cursor_shape = 2
+
+[node name="PrevTexBtn" type="TextureRect" parent="VBoxContainer/HBoxContainer/PrevTexButtonWrapper" unique_id=1311757281]
+layout_mode = 1
+anchors_preset = 6
+anchor_left = 1.0
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+offset_left = -20.0
+offset_top = -10.0
+offset_bottom = 10.0
+grow_horizontal = 0
+grow_vertical = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+mouse_filter = 2
+texture = ExtResource("2_at44a")
+stretch_mode = 2
+
+[node name="GameTitleLabel" type="Label" parent="VBoxContainer/HBoxContainer" unique_id=518349201]
+clip_children = 2
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_fonts/font = ExtResource("3_16i1u")
+theme_override_font_sizes/font_size = 24
+text = "Game Name"
+
+[node name="NextTexButtonWrapper" type="Control" parent="VBoxContainer/HBoxContainer" unique_id=563725724]
+custom_minimum_size = Vector2(70, 34)
+layout_mode = 2
+mouse_default_cursor_shape = 2
+
+[node name="NextTexBtn" type="TextureRect" parent="VBoxContainer/HBoxContainer/NextTexButtonWrapper" unique_id=1101264753]
+layout_mode = 1
+anchors_preset = 4
+anchor_top = 0.5
+anchor_bottom = 0.5
+offset_top = -10.0
+offset_right = 20.0
+offset_bottom = 10.0
+grow_vertical = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+mouse_filter = 2
+texture = ExtResource("4_68hsf")
+stretch_mode = 2
+
+[node name="GameIdentifierLabel" type="Label" parent="VBoxContainer" unique_id=2016198375]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.556953, 0.556953, 0.556953, 1)
+theme_override_fonts/font = ExtResource("3_16i1u")
+theme_override_font_sizes/font_size = 14
+text = "GGM"
+horizontal_alignment = 1
+
+[node name="GameListTexBtn" type="TextureRect" parent="." unique_id=973432654]
+layout_mode = 2
+size_flags_horizontal = 8
+size_flags_vertical = 0
+mouse_default_cursor_shape = 2
+texture = ExtResource("5_ckuke")
+stretch_mode = 2
+
+[node name="GameListMenu" type="PopupMenu" parent="." unique_id=1749784395]
+oversampling_override = 1.0
+position = Vector2i(200, 200)
+size = Vector2i(197, 140)
+theme_override_font_sizes/font_size = 20
+item_count = 4
+item_0/text = "example"
+item_0/id = 3
+item_0/separator = true
+item_1/text = "Chip Challonge"
+item_1/id = 0
+item_2/text = "Geode"
+item_2/id = 1
+item_3/text = "Basic"
+item_3/id = 2
