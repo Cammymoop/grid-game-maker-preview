@@ -340,11 +340,11 @@ func start_managers() -> void:
 func describe_movement_mode(mode: int) -> String:
 	match mode:
 		MovementMode.MOVEMENT_CONTINUOUS:
-			return "Continuous"
+			return "Real-time"
 		MovementMode.MOVEMENT_DISCRETE:
 			return "Discrete"
 		MovementMode.MOVEMENT_DISCRETE_WAIT:
-			return "Discrete+ (wait for all moves to stop)"
+			return "Discrete+ (wait for all movement to settle)"
 	return ""
 
 func get_profile_identifier() -> String:
@@ -638,6 +638,15 @@ func set_game_setting(setting_name: String, value: Variant) -> void:
 		game_definition["game_settings"] = {}
 	game_definition["game_settings"][setting_name] = value
 	game_settings_changed.emit()
+
+func get_movement_mode_id() -> int:
+	return get_game_setting("movement_mode", MovementMode.MOVEMENT_CONTINUOUS)
+
+func is_continuous_movement_mode() -> bool:
+	return get_movement_mode_id() == MovementMode.MOVEMENT_CONTINUOUS
+
+func is_discrete_movement_mode() -> bool:
+	return get_movement_mode_id() != MovementMode.MOVEMENT_CONTINUOUS
 
 func get_window_size_setting() -> Vector2:
 	return Utility.get_vector2_from_arr(get_game_setting("game_view_size", [12, 12]))

@@ -3,6 +3,7 @@
 [ext_resource type="Script" uid="uid://cnf6xu7bpagoy" path="res://Scenes/player_profile_picker.gd" id="1_g7ib3"]
 [ext_resource type="FontFile" uid="uid://ctnllh13x3iqi" path="res://assets/font/NotoSans-Bold.ttf" id="2_n6ebl"]
 [ext_resource type="Texture2D" uid="uid://bo4frkvshv8li" path="res://assets/img/property_list/edit_value.png" id="3_phib5"]
+[ext_resource type="StyleBox" uid="uid://dkki13w27edye" path="res://assets/ui/normal_focus_panel.tres" id="4_ety8d"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_syfuq"]
 content_margin_left = 16.0
@@ -99,7 +100,9 @@ select_all_on_focus = true
 [node name="PickProfileMenuButton" type="MenuButton" parent="VBoxContainer" unique_id=911665173]
 layout_mode = 2
 size_flags_horizontal = 4
+focus_mode = 2
 theme_type_variation = &"MenuOptButton"
 theme_override_font_sizes/font_size = 12
+theme_override_styles/focus = ExtResource("4_ety8d")
 text = "Switch"
 flat = false

@@ -19,6 +19,8 @@ var invalid_field_color = Color(0.7, 0.4, 0.4)
 
 @export var show_level_title_option_picker: OptionButton
 
+@export var movement_mode_picker: OptionButton
+
 @export var game_identifier_label: Label
 @export var game_identifier_panel: Control
 
@@ -103,9 +105,7 @@ func _ready():
 	
 	if "pixel_scale" in game_settings:
 		find_child("PixelScaleInput").value = game_settings["pixel_scale"]
-	if "movement_mode" in game_settings:
-		find_child("MovementModeMenuButton").text = GameManager.describe_movement_mode(game_settings["movement_mode"])
-	
+
 	var cam_settings = {}
 	if "camera_settings" in game_settings:
 		cam_settings = game_settings["camera_settings"]
@@ -138,7 +138,7 @@ func _ready():
 	follow_by_controller_picker.visible = cam_settings.get("follow_entity_by", "controller") == "controller"
 	find_child("FollowEntity").visible = cam_settings.get("follow_entity_by", "controller") != "controller"
 	
-	var is_continuous: bool = is_continuous_movement_mode()
+	var is_continuous: bool = GameManager.is_continuous_movement_mode()
 	auto_undo_option.visible = not is_continuous
 	
 	auto_undo_toggle.set_pressed_no_signal(game_settings.get("auto_undo", true) if not is_continuous else true)
@@ -266,16 +266,15 @@ func on_section_folding_changed(is_folded: bool, section: FoldableContainer) -> 
 		expanded_sections.erase(section.name)
 
 
-func is_continuous_movement_mode() -> bool:
-	return GameManager.get_game_setting("movement_mode", GameManager.MovementMode.MOVEMENT_CONTINUOUS) == GameManager.MovementMode.MOVEMENT_CONTINUOUS
-
 func init_movement_modes() -> void:
-	var popup_menu: PopupMenu = find_child("MovementModeMenuButton").get_popup()
-	
+	movement_mode_picker.clear()
 	for mode in GameManager.MovementMode.values():
-		popup_menu.add_item(GameManager.describe_movement_mode(mode), mode)
+		movement_mode_picker.add_item(GameManager.describe_movement_mode(mode), mode)
+	movement_mode_picker.item_selected.connect(movement_mode_picked)
 	
-	popup_menu.id_pressed.connect(movement_mode_picked)
+	var movement_mode_id: = GameManager.get_movement_mode_id()
+	movement_mode_picker.select(movement_mode_id)
+	refresh_movement_mode_font_size()
 
 func change_follow_by(val: String) -> void:
 	var old_val: String = GameManager.get_cam_setting("follow_entity_by", "controller")
@@ -303,16 +302,23 @@ func change_follow_by(val: String) -> void:
 		GameManager.set_cam_setting("follow_entity", "InputController")
 		Utility.opbtn_select_text(follow_by_controller_picker, "InputController")
 
-func movement_mode_picked(mode_id: int) -> void:
-	var popup_menu: PopupMenu = find_child("MovementModeMenuButton").get_popup()
-	var index = popup_menu.get_item_index(mode_id)
-	find_child("MovementModeMenuButton").text = popup_menu.get_item_text(index)
+func movement_mode_picked(mode_idx: int) -> void:
+	refresh_movement_mode_font_size()
+	var mode_id: = movement_mode_picker.get_item_id(mode_idx)
 	
 	GameManager.set_game_setting("movement_mode", mode_id)
 	
-	var is_continuous: bool = is_continuous_movement_mode()
+	var is_continuous: bool = GameManager.is_continuous_movement_mode()
 	auto_undo_option.visible = not is_continuous
 	start_paused_option.visible = is_continuous
+
+func refresh_movement_mode_font_size() -> void:
+	var movement_mode_text: = Utility.opbtn_get_selected_text(movement_mode_picker)
+	if movement_mode_text.length() > 14:
+		movement_mode_picker.add_theme_font_size_override("font_size", 12)
+	else:
+		movement_mode_picker.remove_theme_font_size_override("font_size")
+
 
 func _on_SaveButton_pressed() -> void:
 	if not GameManager.is_save_current_overwriting():

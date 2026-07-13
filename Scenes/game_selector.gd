@@ -8,10 +8,10 @@ signal changed_game(game_name: String)
 
 @export var game_identifier_label: Label
 
-@export var prev_tex_button: TextureRect
-@export var next_tex_button: TextureRect
+@export var prev_tex_button: Control
+@export var next_tex_button: Control
 
-@export var list_menu_tex_button: TextureRect
+@export var list_menu_tex_button: Control
 @export var game_list_menu: PopupMenu
 
 @export var anim_speed: = 1.2
@@ -175,7 +175,7 @@ func show_game_list_menu() -> void:
 func hide_game_list_menu() -> void:
     game_list_menu.hide()
 
-func on_tex_button_gui_input(event: InputEvent, tex_btn: TextureRect) -> void:
+func on_tex_button_gui_input(event: InputEvent, tex_btn: Control) -> void:
     if not event is InputEventMouseButton or event.is_pressed() or not event.button_index == MOUSE_BUTTON_LEFT:
         return
     if is_same(tex_btn, list_menu_tex_button):

@@ -1,0 +1,56 @@
+[gd_scene format=3 uid="uid://cjvkpo8t0djcr"]
+
+[ext_resource type="Script" uid="uid://trn0oh5htse0" path="res://Scenes/sfx_tester.gd" id="1_bmbiw"]
+
+[node name="SfxTester" type="FoldableContainer" unique_id=1419815514]
+visible = false
+title = "SFX TEST"
+title_alignment = 1
+
+[node name="HBoxContainer" type="HBoxContainer" parent="." unique_id=2098936983 node_paths=PackedStringArray("sfx_picker", "sfx_input", "play_button", "stream_player")]
+layout_mode = 2
+script = ExtResource("1_bmbiw")
+sfx_picker = NodePath("OptionButton")
+sfx_input = NodePath("LineEdit")
+play_button = NodePath("Button")
+stream_player = NodePath("AudioStreamPlayer")
+
+[node name="OptionButton" type="OptionButton" parent="HBoxContainer" unique_id=887868759]
+layout_mode = 2
+item_count = 13
+popup/item_0/text = "36772507"
+popup/item_0/id = 0
+popup/item_1/text = "98574507"
+popup/item_1/id = 6
+popup/item_2/text = "2845707"
+popup/item_2/id = 1
+popup/item_3/text = "74438701"
+popup/item_3/id = 2
+popup/item_4/text = "82957503"
+popup/item_4/id = 4
+popup/item_5/text = "90720904"
+popup/item_5/id = 5
+popup/item_6/text = "9703504"
+popup/item_6/id = 7
+popup/item_7/text = "68529302"
+popup/item_7/id = 8
+popup/item_8/text = "37228708"
+popup/item_8/id = 9
+popup/item_9/text = "23938708"
+popup/item_9/id = 3
+popup/item_10/text = "56523708"
+popup/item_10/id = 10
+popup/item_11/text = "55243708"
+popup/item_11/id = 11
+popup/item_12/text = "77067508"
+popup/item_12/id = 12
+
+[node name="LineEdit" type="LineEdit" parent="HBoxContainer" unique_id=1076108788]
+custom_minimum_size = Vector2(120, 0)
+layout_mode = 2
+
+[node name="Button" type="Button" parent="HBoxContainer" unique_id=662873503]
+layout_mode = 2
+text = "PLAY"
+
+[node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="HBoxContainer" unique_id=1497013848]

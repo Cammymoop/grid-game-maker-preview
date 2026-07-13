@@ -20,6 +20,7 @@ func setup_items() -> void:
 		list.add_item(item)
 
 func _ready():
+	focus_mode = FOCUS_ALL
 	setup_items()
 	
 	var list: PopupMenu = get_popup()
