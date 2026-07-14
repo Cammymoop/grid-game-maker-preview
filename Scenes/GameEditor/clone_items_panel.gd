@@ -153,11 +153,15 @@ func on_select_all_entities_button_pressed() -> void:
 	if selected_items.size() >= entity_list.item_count:
 		entity_list.deselect_all()
 	else:
-		entity_list.select_all()
+		_item_list_select_all(entity_list)
 
 func on_select_all_tiles_button_pressed() -> void:
 	var selected_items: = tile_list.get_selected_items()
 	if selected_items.size() >= tile_list.item_count:
 		tile_list.deselect_all()
 	else:
-		tile_list.select_all()
+		_item_list_select_all(tile_list)
+
+func _item_list_select_all(item_list: ItemList) -> void:
+	for i in item_list.item_count:
+		item_list.select(i, false)
