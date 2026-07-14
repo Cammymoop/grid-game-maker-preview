@@ -6,10 +6,12 @@ signal add_list_requested(list_name: String)
 @export var add_button: Button
 @export var name_input: LineEdit
 
+
 func _ready() -> void:
     set_process_input(false)
     close_button.pressed.connect(close_panel)
     add_button.pressed.connect(add_list)
+    name_input.text_submitted.connect(add_list.unbind(1))
 
 func _input(event: InputEvent) -> void:
     if not visible:

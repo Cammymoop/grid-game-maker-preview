@@ -23,14 +23,22 @@ var DARKEN = Color(.7, .7, .7)
 
 func _gui_input(event):
 	if event is InputEventMouseMotion:
-		var index = tile_pos_to_index(local_pos_to_tile_pos(event.position))
-		highlight_index(index)
+		var index = get_tile_index_from_scaled_pos(event.position)
+		if is_index_in_bounds(index):
+			highlight_index(index)
 	elif event is InputEventMouseButton:
 		if event.is_pressed():
-			var index = tile_pos_to_index(local_pos_to_tile_pos(event.position))
-			set_selected_index(index)
-			if event.double_click and confirm_on_dbl_click:
-				confirmed.emit()
+			var index = get_tile_index_from_scaled_pos(event.position)
+			if is_index_in_bounds(index):
+				set_selected_index(index)
+				if event.double_click and confirm_on_dbl_click:
+					confirmed.emit()
+
+func get_tile_index_from_texture_pos(pos: Vector2) -> int:
+	return Utility.pixel_to_tile_index(pos, tile_size, origin, separation, tpr)
+
+func get_tile_index_from_scaled_pos(pos: Vector2) -> int:
+	return Utility.pixel_to_tile_index(pos / view_scale, tile_size, origin, separation, tpr)
 
 func set_view_scale(new_scale) -> void:
 	view_scale = new_scale
@@ -53,26 +61,17 @@ func local_pos_to_tile_pos(pos: Vector2) -> Vector2:
 func tile_pos_to_index(pos: Vector2) -> int:
 	return int(pos.x) + (int(pos.y) * tpr)
 
-func _generate_size_in_tiles(metadata: Dictionary, texture_size: Vector2) -> Vector2i:
-	var border: = Vector2(metadata['border'])
-	var inner_image: = texture_size - border * 2
-	# add one extra separation to make it easy to calculate the number of tiles
-	inner_image += Vector2(metadata['separation'])
-
-	var tex_tile_size: = Vector2(metadata['tile_size'])
-	return Vector2i((inner_image / tex_tile_size).floor())
-
+func is_index_in_bounds(index: int) -> bool:
+	return index >= 0 and index < tpr * rows
 
 func set_raw_texture(tex: Texture2D, metadata: Dictionary) -> void:
 	cur_texture_id = -1
-	var grid_cells: = Vector2i(metadata.get("size_in_tiles", Vector2(1, 1)))
-	if not metadata.has("size_in_tiles"):
-		grid_cells = _generate_size_in_tiles(metadata, tex.get_size())
-	tpr = grid_cells.x
-	rows = grid_cells.y
 	tile_size = metadata['tile_size']
 	origin = metadata['border']
 	separation = metadata['separation']
+	var grid_cells: = Utility.get_tile_atlas_coords_size(tex.get_size(), tile_size, origin, separation)
+	tpr = grid_cells.x
+	rows = grid_cells.y
 	texture = tex.duplicate()
 
 	raw_mode = true
@@ -86,13 +85,12 @@ func set_picking_texture(texture_id: int) -> void:
 	
 	var tex = TextureManager.get_texture(texture_id)
 	var meta = TextureManager.get_texture_metadata(texture_id).duplicate_deep()
-	if not meta.has("size_in_tiles"):
-		meta["size_in_tiles"] = _generate_size_in_tiles(meta, tex.get_size())
-	tpr = meta['size_in_tiles'].x
-	rows = meta['size_in_tiles'].y
 	tile_size = meta['tile_size']
 	origin = meta['border']
 	separation = meta['separation']
+	var grid_cells: = Utility.get_tile_atlas_coords_size(tex.get_size(), tile_size, origin, separation)
+	tpr = grid_cells.x
+	rows = grid_cells.y
 	texture = tex
 	
 	make_atlas_tex()
@@ -114,28 +112,40 @@ func make_atlas_tex() -> void:
 func set_selected_index(index):
 	selected_sub_index = index
 	
-	var offset = Utility.get_texture_index_offset(index, tile_size, origin, separation, tpr) * view_scale
-	$Cursor.offset_left = offset.x
-	$Cursor.offset_right = offset.x + (tile_size.x * view_scale)
-	$Cursor.offset_top = offset.y
-	$Cursor.offset_bottom = offset.y + (tile_size.y * view_scale)
+	_set_cursor_scaled_rect(_get_scaled_index_rect(index))
+
+func _update_control_offsets_by_rect(control: Control, rect: Rect2) -> void:
+	control.offset_left = rect.position.x
+	control.offset_right = rect.end.x
+	control.offset_top = rect.position.y
+	control.offset_bottom = rect.end.y
+
+func _set_cursor_scaled_rect(rect: Rect2) -> void:
+	_update_control_offsets_by_rect($Cursor, rect)
+
+func _get_index_offset(index: int) -> Vector2:
+	return Utility.get_indexed_tile_offset_by_per_row(index, tpr, tile_size, origin, separation)
+
+func _get_scaled_index_offset(index: int) -> Vector2:
+	return Utility.get_indexed_tile_offset_by_per_row(index, tpr, tile_size, origin, separation) * view_scale
+
+func _get_index_rect(index: int) -> Rect2:
+	return Rect2(_get_index_offset(index), tile_size)
+
+func _get_scaled_index_rect(index: int) -> Rect2:
+	var offset: = _get_scaled_index_offset(index)
+	return Rect2(offset, tile_size * view_scale)
 
 func get_picked_offset() -> Vector2:
-	return Utility.get_texture_index_offset(selected_sub_index, tile_size, origin, separation, tpr)
+	return _get_index_offset(selected_sub_index)
 
 func get_picked_region() -> Rect2:
-	return Utility.get_texture_index_rect(selected_sub_index, tile_size, origin, separation, tpr)
+	return _get_index_rect(selected_sub_index)
 
 func highlight_index(hovered_index):
-	var base_offset: = Utility.get_texture_index_offset(hovered_index, tile_size, origin, separation, tpr)
-	var offset: = base_offset * view_scale
-	$HighlightedTile.offset_left = offset.x
-	$HighlightedTile.offset_top = offset.y
-	$HighlightedTile.offset_right = offset.x + (tile_size.x * view_scale)
-	$HighlightedTile.offset_bottom = offset.y + (tile_size.y * view_scale)
-	
-	$HighlightedTile.texture.region.position = base_offset
-	
+	var scaled_rect: = _get_scaled_index_rect(hovered_index)
+	_update_control_offsets_by_rect($HighlightedTile, scaled_rect)
+	$HighlightedTile.texture.region.position = _get_index_offset(hovered_index)
 
 
 func _on_TilePicker_mouse_entered():

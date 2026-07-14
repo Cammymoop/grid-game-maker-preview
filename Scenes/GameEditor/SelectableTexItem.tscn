@@ -87,7 +87,7 @@ CheckButton/styles/hover_pressed = SubResource("StyleBoxFlat_aaf7x")
 CheckButton/styles/normal = SubResource("StyleBoxFlat_qhhpk")
 CheckButton/styles/pressed = SubResource("StyleBoxFlat_4tm3y")
 
-[node name="SelectableTexItem" type="PanelContainer" unique_id=1682877327 node_paths=PackedStringArray("display_tex_rect", "check_button", "name_label", "builtin_icon", "bundled_icon")]
+[node name="SelectableTexItem" type="PanelContainer" unique_id=1682877327 node_paths=PackedStringArray("display_tex_rect", "check_button", "name_label", "builtin_icon", "bundled_icon", "tile_size_label")]
 offset_left = 196.0
 offset_right = 770.0
 offset_bottom = 142.0
@@ -96,9 +96,10 @@ script = ExtResource("2")
 bold_font = ExtResource("3_4tm3y")
 display_tex_rect = NodePath("HB/TextureRect")
 check_button = NodePath("HB/MarginContainer2/CheckButton")
-name_label = NodePath("HB/MarginContainer/Label")
+name_label = NodePath("HB/MarginContainer/VBoxContainer2/Label")
 builtin_icon = NodePath("HB/MarginContainer/VBoxContainer/Builtin")
 bundled_icon = NodePath("HB/MarginContainer/VBoxContainer/Bundled")
+tile_size_label = NodePath("HB/MarginContainer2/VBoxContainer/TileSizeLabel")
 
 [node name="HB" type="HBoxContainer" parent="." unique_id=166247145]
 layout_mode = 2
@@ -123,9 +124,22 @@ theme_override_constants/margin_bottom = 8
 custom_minimum_size = Vector2(84, 50)
 layout_mode = 2
 size_flags_vertical = 4
+tooltip_text = "Used in this game"
 mouse_default_cursor_shape = 2
 theme = SubResource("Theme_qhhpk")
 text = "Used:"
+
+[node name="VBoxContainer" type="VBoxContainer" parent="HB/MarginContainer2" unique_id=1100787376]
+layout_mode = 2
+mouse_filter = 2
+
+[node name="TileSizeLabel" type="Label" parent="HB/MarginContainer2/VBoxContainer" unique_id=595704404]
+visible = false
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.581033, 0.58103293, 0.5810329, 1)
+text = "32x32"
+horizontal_alignment = 1
 
 [node name="MarginContainer" type="MarginContainer" parent="HB" unique_id=642747095]
 layout_mode = 2
@@ -154,7 +168,11 @@ tooltip_text = "Bunlded with this game"
 mouse_default_cursor_shape = 16
 texture = ExtResource("5_b83f6")
 
-[node name="Label" type="Label" parent="HB/MarginContainer" unique_id=1340523356]
+[node name="VBoxContainer2" type="VBoxContainer" parent="HB/MarginContainer" unique_id=1730848114]
+layout_mode = 2
+alignment = 1
+
+[node name="Label" type="Label" parent="HB/MarginContainer/VBoxContainer2" unique_id=1340523356]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "tiles.png"

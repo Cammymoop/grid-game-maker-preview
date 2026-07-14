@@ -58,15 +58,15 @@ func grab_builtin_metadata() -> void:
         return
     var result = Utility.parse_json(f.get_as_text())
     
-    builtin_meta = fix_vecs_texture_metas(result)
+    builtin_meta = fixup_texture_metas(result)
 
-func fix_vecs_texture_metas(metas: Dictionary) -> Dictionary:
+func fixup_texture_metas(metas: Dictionary) -> Dictionary:
     var new_dict = {}
     for key in metas:
-        new_dict[key] = fix_vecs_texture_meta(metas[key])
+        new_dict[key] = fixup_texture_meta(metas[key])
     return new_dict
 
-func fix_vecs_texture_meta(meta: Dictionary) -> Dictionary:
+func fixup_texture_meta(meta: Dictionary) -> Dictionary:
     var new_dict = {}
     for key in meta:
         if not meta[key] is Array or len(meta[key]) != 2:
@@ -174,7 +174,7 @@ func load_texture(tex: Dictionary):
                 var new_meta: = create_metadata_for_texture(texture, true)
                 push_warning("No metadata for texture: " + texture_name + ", creating default metadata")
                 FilesManager.update_local_image_metadata(texture_name, new_meta, for_game_name)
-            metadata = fix_vecs_texture_meta(FilesManager.get_local_image_metadata(texture_name, for_game_name))
+            metadata = FilesManager.get_local_image_metadata(texture_name, for_game_name)
         else:
             push_warning("Failed to load %s image: %s" % ["shared" if is_shared else "bundled", texture_name])
             texture = placeholder
@@ -192,13 +192,16 @@ func load_texture(tex: Dictionary):
     _set_texture(int(tex['texture_id']), texture, texture_name, metadata)
 
 func _set_texture(texture_id: int, texture: Texture, texture_name: String, metadata: Dictionary) -> void:
-        texture_names[texture_id] = texture_name
-        textures[texture_id] = texture
-        texture_meta[texture_id] = metadata
-        var tile_size = metadata['tile_size']
-        tile_sizes[texture_id] = tile_size
-        tiles_per_row[texture_id] = int(texture.get_width() / tile_size.x)
-        texture_rows[texture_id] = int(texture.get_height() / tile_size.y)
+    texture_names[texture_id] = texture_name
+    textures[texture_id] = texture
+    texture_meta[texture_id] = metadata
+    var tile_size = metadata['tile_size']
+    tile_sizes[texture_id] = tile_size
+    var border: Vector2 = metadata.get("border", Vector2.ZERO)
+    var separation: Vector2 = metadata.get("separation", Vector2.ZERO)
+    var grid_cells: = Utility.get_tile_atlas_coords_size(texture.get_size(), tile_size, border, separation)
+    tiles_per_row[texture_id] = grid_cells.x
+    texture_rows[texture_id] = grid_cells.y
 
 func get_all_possible_textures() -> Dictionary:
     var texs: = {}
@@ -274,9 +277,11 @@ func get_texture(texture_id: int) -> Texture:
     return textures[texture_id]
 
 func get_index_offset(texture_id: int, tile_index: int) -> Vector2:
-    var tpr: int = tiles_per_row[texture_id]
+    var tpr: int = get_tiles_per_row(texture_id)
     var tsize = tile_sizes[texture_id]
-    return Vector2(tile_index % tpr * tsize.x, floor(tile_index/float(tpr)) * tsize.y)
+    var border: Vector2 = texture_meta[texture_id].get("border", Vector2.ZERO)
+    var separation: Vector2 = texture_meta[texture_id].get("separation", Vector2.ZERO)
+    return Utility.get_indexed_tile_offset_by_per_row(tile_index, tpr, tsize, border, separation)
 
 func get_tiles_per_row(texture_id: int) -> int:
     return tiles_per_row[texture_id]
@@ -291,13 +296,7 @@ func get_texture_tile_size(texture_id: int) -> Vector2i:
     return tile_sizes[texture_id]
 
 func get_index_atlas_coords(texture_id: int, tile_index: int) -> Vector2i:
-    var tpr: int = tiles_per_row[texture_id]
-    return Vector2i(tile_index % tpr, floor(tile_index/float(tpr)))
-
-func get_last_sub_index(texture_id: int) -> int:
-    var tpr: int = tiles_per_row[texture_id]
-    var rows: int = texture_rows[texture_id]
-    return (rows * tpr) - 1
+    return Utility.get_indexed_tile_atlas_coords(tile_index, tiles_per_row[texture_id])
 
 func create_metadata_for_texture(texture: Texture2D, as_savable_format: bool = false) -> Dictionary:
     var new_meta: = placeholder_metadata.duplicate_deep()
@@ -377,15 +376,6 @@ func unloaded_texture_has_metadata(texture_name: String, is_builtin: bool = fals
     var for_game_name: String = "" if is_shared else GameManager.get_identified_game_name()
     return FilesManager.has_local_image_metadata(texture_name, for_game_name)
 
-func get_unloaded_texture_meta(texture_name: String, is_builtin: bool = false, is_shared: bool = true) -> Dictionary:
-    if is_builtin:
-        if not builtin_meta:
-            grab_builtin_metadata()
-        return builtin_meta[texture_name]
-    var for_game_name: String = "" if is_shared else GameManager.get_identified_game_name()
-    var raw_meta: = FilesManager.get_local_image_metadata(texture_name, for_game_name)
-    return fix_vecs_texture_meta(raw_meta)
-
 func _convert_texture_meta_for_saving(metadata: Dictionary) -> Dictionary:
     metadata = metadata.duplicate_deep()
     for key in metadata:
@@ -415,6 +405,18 @@ func set_texture_meta_by_name(texture_name: String, is_builtin: bool, is_shared:
     var for_game_name: String = "" if is_shared else GameManager.get_identified_game_name()
     FilesManager.update_local_image_metadata(texture_name, _convert_texture_meta_for_saving(new_meta), for_game_name)
 
+func get_texture_metadata_by_name(texture_name: String, is_builtin: bool, is_shared: bool, containing_game_name: String = "") -> Dictionary:
+    if is_builtin:
+        if not builtin_meta:
+            grab_builtin_metadata()
+        return builtin_meta.get(texture_name, {})
+
+    if is_shared:
+        containing_game_name = ""
+    elif not containing_game_name:
+        containing_game_name = GameManager.get_identified_game_name()
+    return FilesManager.get_local_image_metadata(texture_name, containing_game_name)
+
 func has_loaded_texture_id(texture_id: int) -> bool:
     return texture_id in texture_names
 
@@ -424,7 +426,7 @@ func get_fallback_texture_id() -> int:
     return int(texture_spec[0]['texture_id'])
 
 func get_max_texture_index(texture_id: int) -> int:
-    if not texture_rows.has(texture_id):
+    if not tiles_per_row.has(texture_id) or not texture_rows.has(texture_id):
         return 0
     var rows: int = texture_rows[texture_id]
     var cols: int = tiles_per_row[texture_id]
@@ -520,7 +522,7 @@ func make_shared_image_bundled(shared_texture_name: String) -> bool:
     if not FilesManager.copy_shared_image_into_game(sanitized_name, bundled_name, game_name):
         return false
     
-    var tex_meta: = get_unloaded_texture_meta(shared_texture_name, false, true)
+    var tex_meta: = get_texture_metadata_by_name(shared_texture_name, false, true)
     set_texture_meta_by_name(bundled_name, false, false, tex_meta)
     
     for tex_spec_item in texture_spec:
@@ -559,7 +561,7 @@ func save_local_copy_of_local_image(from_name: String, from_shared: bool, to_nam
     if not success:
         return ""
     
-    var tex_meta: = get_unloaded_texture_meta(from_name, false, from_shared)
+    var tex_meta: = get_texture_metadata_by_name(from_name, false, from_shared)
     set_texture_meta_by_name(to_name, false, to_shared, tex_meta)
     return to_name
 

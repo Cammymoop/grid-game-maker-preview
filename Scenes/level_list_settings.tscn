@@ -3,18 +3,27 @@
 [ext_resource type="Script" uid="uid://cfrnaqldrr8lr" path="res://Scenes/level_list_settings.gd" id="1_8f1op"]
 [ext_resource type="PackedScene" uid="uid://bleyoj5f36kfy" path="res://Scenes/GameEditor/ConditionalEditor/scalar_value_input.tscn" id="2_xli71"]
 
-[node name="LevelListSettings" type="VBoxContainer" unique_id=631932331 node_paths=PackedStringArray("back_button", "name_input", "total_levels_label", "do_progressive_unlock_toggle", "progressive_unlock_num_container", "progressive_unlock_num_input", "default_is_unlocked_container", "default_is_unlocked_toggle", "show_locked_levels_toggle", "completion_mode_selector", "completion_number_container", "completion_number_input")]
+[node name="LevelListSettings" type="VBoxContainer" unique_id=631932331 node_paths=PackedStringArray("back_button", "name_input", "total_levels_label", "do_progressive_unlock_toggle", "progressive_unlock_num_container", "progressive_unlock_num_input", "always_hidden_container", "always_hidden_toggle", "not_always_hidden_container", "is_locked_container", "is_locked_toggle", "is_hidden_container", "is_hidden_toggle", "default_is_unlocked_container", "default_is_unlocked_toggle", "show_locked_levels_toggle", "show_locked_titles_container", "show_locked_titles_toggle", "completion_mode_selector", "completion_number_container", "completion_number_input")]
 custom_minimum_size = Vector2(400, 0)
 script = ExtResource("1_8f1op")
 back_button = NodePath("MarginContainer/BackButton")
 name_input = NodePath("HBoxContainer/NameInput")
 total_levels_label = NodePath("TotalLevelsLabel")
-do_progressive_unlock_toggle = NodePath("HBoxContainer2/ProgUnlockEnable")
-progressive_unlock_num_container = NodePath("ProgressUnlockAmount")
-progressive_unlock_num_input = NodePath("ProgressUnlockAmount/ProgUnlockAmountInput")
-default_is_unlocked_container = NodePath("DefaultUnlockedOption")
-default_is_unlocked_toggle = NodePath("DefaultUnlockedOption/DefaultAllUnlockedToggle")
-show_locked_levels_toggle = NodePath("HBoxContainer3/ListIsLockedToggle")
+do_progressive_unlock_toggle = NodePath("WhenNotAlwaysHidden/HBoxContainer2/ProgUnlockEnable")
+progressive_unlock_num_container = NodePath("WhenNotAlwaysHidden/ProgressUnlockAmount")
+progressive_unlock_num_input = NodePath("WhenNotAlwaysHidden/ProgressUnlockAmount/ProgUnlockAmountInput")
+always_hidden_container = NodePath("HBoxContainer3")
+always_hidden_toggle = NodePath("HBoxContainer3/AlwaysHiddenToggle")
+not_always_hidden_container = NodePath("WhenNotAlwaysHidden")
+is_locked_container = NodePath("WhenNotAlwaysHidden/HBoxContainer7")
+is_locked_toggle = NodePath("WhenNotAlwaysHidden/HBoxContainer7/ListIsLockedToggle")
+is_hidden_container = NodePath("WhenNotAlwaysHidden/ListIsHiddenOption")
+is_hidden_toggle = NodePath("WhenNotAlwaysHidden/ListIsHiddenOption/ListIsHiddenToggle")
+default_is_unlocked_container = NodePath("WhenNotAlwaysHidden/DefaultUnlockedOption")
+default_is_unlocked_toggle = NodePath("WhenNotAlwaysHidden/DefaultUnlockedOption/DefaultAllUnlockedToggle")
+show_locked_levels_toggle = NodePath("HBoxContainer3/AlwaysHiddenToggle")
+show_locked_titles_container = NodePath("WhenNotAlwaysHidden/ShowLockedLevelTitlesOption")
+show_locked_titles_toggle = NodePath("WhenNotAlwaysHidden/ShowLockedLevelTitlesOption/ShowLockedLevelTitlesToggle")
 completion_mode_selector = NodePath("CompletionCriteriaOption/HBoxContainer/CompletionCriteriaSelector")
 completion_number_container = NodePath("CompletionCriteriaOption/CompletionCriteriaNumberContainer")
 completion_number_input = NodePath("CompletionCriteriaOption/CompletionCriteriaNumberContainer/CompletionCriteriaScalarInput")
@@ -63,75 +72,88 @@ layout_mode = 2
 layout_mode = 2
 alignment = 2
 
-[node name="ListIsLockedToggle" type="CheckButton" parent="HBoxContainer3" unique_id=1975699604]
+[node name="AlwaysHiddenToggle" type="CheckButton" parent="HBoxContainer3" unique_id=1975699604]
+layout_mode = 2
+tooltip_text = "A locked level list is unlocked as soon as any level in it is unlocked"
+toggle_mode = false
+text = "Always Hidden"
+
+[node name="WhenNotAlwaysHidden" type="VBoxContainer" parent="." unique_id=2590428]
+layout_mode = 2
+
+[node name="HBoxContainer7" type="HBoxContainer" parent="WhenNotAlwaysHidden" unique_id=775643861]
+layout_mode = 2
+alignment = 2
+
+[node name="ListIsLockedToggle" type="CheckButton" parent="WhenNotAlwaysHidden/HBoxContainer7" unique_id=1121626194]
 layout_mode = 2
 tooltip_text = "A locked level list is unlocked as soon as any level in it is unlocked"
 button_pressed = true
 text = "List Starts Locked"
 
-[node name="ListIsHiddenOption" type="HBoxContainer" parent="." unique_id=1226677780]
+[node name="ListIsHiddenOption" type="HBoxContainer" parent="WhenNotAlwaysHidden" unique_id=1226677780]
 layout_mode = 2
 alignment = 2
 
-[node name="ListIsHiddenToggle" type="CheckButton" parent="ListIsHiddenOption" unique_id=963231984]
+[node name="ListIsHiddenToggle" type="CheckButton" parent="WhenNotAlwaysHidden/ListIsHiddenOption" unique_id=963231984]
 layout_mode = 2
 tooltip_text = "A locked level list is unlocked as soon as any level in it is unlocked"
 button_pressed = true
 text = "Hide Until Unlocked"
 
-[node name="HSeparator5" type="HSeparator" parent="." unique_id=1251058132]
+[node name="HSeparator5" type="HSeparator" parent="WhenNotAlwaysHidden" unique_id=1251058132]
 layout_mode = 2
 
-[node name="HBoxContainer4" type="HBoxContainer" parent="." unique_id=1918289216]
+[node name="HBoxContainer4" type="HBoxContainer" parent="WhenNotAlwaysHidden" unique_id=1918289216]
 layout_mode = 2
 alignment = 2
 
-[node name="ShowLockedEnable" type="CheckButton" parent="HBoxContainer4" unique_id=1472903478]
+[node name="ShowLockedEnable" type="CheckButton" parent="WhenNotAlwaysHidden/HBoxContainer4" unique_id=1472903478]
 layout_mode = 2
 button_pressed = true
 text = "Show Locked Levels"
 
-[node name="ShowLockedLevelTitlesOption" type="HBoxContainer" parent="." unique_id=1281522735]
+[node name="ShowLockedLevelTitlesOption" type="HBoxContainer" parent="WhenNotAlwaysHidden" unique_id=1281522735]
 layout_mode = 2
 alignment = 2
 
-[node name="ShowLockedLevelTitlesToggle" type="CheckButton" parent="ShowLockedLevelTitlesOption" unique_id=1454314798]
+[node name="ShowLockedLevelTitlesToggle" type="CheckButton" parent="WhenNotAlwaysHidden/ShowLockedLevelTitlesOption" unique_id=1454314798]
 layout_mode = 2
 button_pressed = true
 text = "Show Names of Locked Levels"
 
-[node name="HSeparator4" type="HSeparator" parent="." unique_id=2146701389]
+[node name="HSeparator4" type="HSeparator" parent="WhenNotAlwaysHidden" unique_id=2146701389]
 layout_mode = 2
 
-[node name="HBoxContainer2" type="HBoxContainer" parent="." unique_id=736844243]
+[node name="HBoxContainer2" type="HBoxContainer" parent="WhenNotAlwaysHidden" unique_id=736844243]
 layout_mode = 2
 alignment = 2
 
-[node name="ProgUnlockEnable" type="CheckButton" parent="HBoxContainer2" unique_id=1853847298]
+[node name="ProgUnlockEnable" type="CheckButton" parent="WhenNotAlwaysHidden/HBoxContainer2" unique_id=1853847298]
 layout_mode = 2
 tooltip_text = "Levels unlock as you complete earlier levels in the list"
 text = "Progressively Unlock Levels"
 
-[node name="DefaultUnlockedOption" type="HBoxContainer" parent="." unique_id=170060060]
+[node name="DefaultUnlockedOption" type="HBoxContainer" parent="WhenNotAlwaysHidden" unique_id=170060060]
 layout_mode = 2
 alignment = 2
 
-[node name="DefaultAllUnlockedToggle" type="CheckButton" parent="DefaultUnlockedOption" unique_id=1510437156]
+[node name="DefaultAllUnlockedToggle" type="CheckButton" parent="WhenNotAlwaysHidden/DefaultUnlockedOption" unique_id=1510437156]
 layout_mode = 2
 button_pressed = true
 text = "All Levels In List Start Unlocked"
 
-[node name="ProgressUnlockAmount" type="HBoxContainer" parent="." unique_id=1961184265]
+[node name="ProgressUnlockAmount" type="HBoxContainer" parent="WhenNotAlwaysHidden" unique_id=1961184265]
 layout_mode = 2
 alignment = 2
 
-[node name="Label" type="Label" parent="ProgressUnlockAmount" unique_id=1343583928]
+[node name="Label" type="Label" parent="WhenNotAlwaysHidden/ProgressUnlockAmount" unique_id=1343583928]
 layout_mode = 2
 tooltip_text = "How many levels ahead of the furthest completed level should be unlocked?"
 mouse_filter = 1
 text = "Levels Unlocked Ahead of Completion:"
 
-[node name="ProgUnlockAmountInput" parent="ProgressUnlockAmount" unique_id=1458729988 instance=ExtResource("2_xli71")]
+[node name="ProgUnlockAmountInput" parent="WhenNotAlwaysHidden/ProgressUnlockAmount" unique_id=1458729988 instance=ExtResource("2_xli71")]
 layout_mode = 2
 tooltip_text = "How many levels ahead of the furthest completed level should be unlocked?"
 is_int_type = true

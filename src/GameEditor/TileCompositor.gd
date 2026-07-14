@@ -46,7 +46,7 @@ const TBC_MAX_HEIGHT: = 128
 const PICKED_BRUSH_MAX: Vector2 = Vector2(70, 70)
 
 # targeted size for local tile picker
-var ltp_target_height: = 200
+var ltp_target_height: = 240
 var ltp_margin: = 120
 
 @export var brush_wrap: = true

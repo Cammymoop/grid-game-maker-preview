@@ -49,15 +49,18 @@ func refresh_list():
 	var any_enabled_shared_images: bool = false
 	for tex in all_builtin_textures:
 		var is_enabled = TextureManager.is_builtin_loaded(tex)
-		texture_item_list.add_texture(tex, all_builtin_textures[tex], true, is_enabled)
+		var tex_meta: = TextureManager.get_texture_metadata_by_name(tex, true, false)
+		texture_item_list.add_texture(tex, all_builtin_textures[tex], true, is_enabled, false, tex_meta)
 	for tex in all_bundled_textures:
 		var is_enabled = TextureManager.is_local_file_loaded(tex, false)
-		texture_item_list.add_texture(tex, all_bundled_textures[tex], false, is_enabled, false)
+		var tex_meta: = TextureManager.get_texture_metadata_by_name(tex, false, false)
+		texture_item_list.add_texture(tex, all_bundled_textures[tex], false, is_enabled, false, tex_meta)
 	for tex in all_shared_textures:
 		var is_enabled = TextureManager.is_local_file_loaded(tex, true)
 		if is_enabled:
 			any_enabled_shared_images = true
-		texture_item_list.add_texture(tex, all_shared_textures[tex], false, is_enabled, true)
+		var tex_meta: = TextureManager.get_texture_metadata_by_name(tex, false, true)
+		texture_item_list.add_texture(tex, all_shared_textures[tex], false, is_enabled, true, tex_meta)
 	
 	texture_item_list.sort_items()
 
@@ -129,7 +132,7 @@ func edit_texture_from_selectable_texture(sel_tex: SelectableTexture) -> void:
 		dialog.popup_centered()
 		dialog.meta_confirmed.connect(create_texture_meta_and_edit.bind(sel_tex))
 	else:
-		var meta: Dictionary = TextureManager.get_unloaded_texture_meta(texture_name, is_builtin, is_shared)
+		var meta: Dictionary = TextureManager.get_texture_metadata_by_name(texture_name, is_builtin, is_shared)
 		edit_tex_continue(meta, sel_tex)
 
 func edit_texture_metadata_for_item(item: SelectableTexture) -> void:
@@ -138,13 +141,12 @@ func edit_texture_metadata_for_item(item: SelectableTexture) -> void:
 	var is_shared: = item.get_is_shared()
 	var texture_name: = item.get_texture_name()
 	
-	var current_meta: Dictionary = TextureManager.get_unloaded_texture_meta(texture_name, false, is_shared)
+	var current_meta: Dictionary = TextureManager.get_texture_metadata_by_name(texture_name, false, is_shared)
 	if not current_meta:
 		current_meta = TextureManager.create_metadata_for_texture(item.get_texture())
 	var edit_meta_dialog: = metadata_dialog.instantiate() as TextureMetaDialog
 	edit_meta_dialog.is_new_mode = false
 	edit_meta_dialog.edit_shared_meta_warning = item.get_is_shared()
-	prints("loading meta", current_meta)
 	edit_meta_dialog.load_meta(current_meta)
 	add_child(edit_meta_dialog)
 	edit_meta_dialog.popup_centered()
@@ -152,11 +154,13 @@ func edit_texture_metadata_for_item(item: SelectableTexture) -> void:
 
 func on_confirm_meta_edit(new_meta: Dictionary, for_item: SelectableTexture) -> void:
 	TextureManager.set_texture_meta_by_name(for_item.get_texture_name(), false, for_item.get_is_shared(), new_meta)
+	for_item.set_texture_metadata(new_meta)
 
 func create_texture_meta_and_edit(new_meta: Dictionary, selected_item: SelectableTexture) -> void:
 	var t_name: = selected_item.get_texture_name()
 	var is_shared: = selected_item.get_is_shared()
 	TextureManager.set_texture_meta_by_name(t_name, false, is_shared, new_meta)
+	selected_item.set_texture_metadata(new_meta)
 	edit_tex_continue(new_meta, selected_item)
 
 func edit_tex_continue(meta: Dictionary, selected_item: SelectableTexture) -> void:

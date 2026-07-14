@@ -119,13 +119,15 @@ func export_game_zip(game_name: String, save_to_directory: String = "", zip_name
         if not DirAccess.dir_exists_absolute(save_to_directory):
             return ""
     
-    var all_bundled_level_names: Array[String] = []
+    var all_included_level_names: Array[String] = []
     if not include_unbundled_levels:
-        all_bundled_level_names.assign(GameManager.get_list_of_all_bundled_levels())
-        all_bundled_level_names.append_array(GameManager.get_list_of_unlisted_levels())
+        all_included_level_names = GameManager.get_list_of_all_bundled_levels()
+    else:
+        all_included_level_names = FilesManager.get_level_list(game_name)
+    all_included_level_names.erase(FilesManager.AUTO_SAVE_LEVEL_NAME)
     
     var whitelisted_level_filenames: Array[String] = []
-    for level_name in all_bundled_level_names:
+    for level_name in all_included_level_names:
         var level_filename: = FilesManager._level_filename(level_name)
         if not level_filename in whitelisted_level_filenames:
             whitelisted_level_filenames.append(level_filename)

@@ -11,15 +11,10 @@ func _ready():
 	var identified_game_name: String = GameManager.get_identified_game_name()
 	all_levels = FilesManager.get_level_list(identified_game_name)
 	
-	var has_editor_autosave: bool = "editor_autosave" in all_levels
-	var is_editor_autosave_newer: bool = false
-
-	all_levels.erase("editor_autosave")
-
-	var autosave_level_name: String = ""
-	if has_editor_autosave:
-		is_editor_autosave_newer = FilesManager.get_editor_autosave_is_newer(identified_game_name)
-		autosave_level_name = FilesManager.get_editor_autosave_level_name(identified_game_name)
+	var has_editor_autosave: bool = FilesManager.AUTO_SAVE_LEVEL_NAME in all_levels
+	all_levels.erase(FilesManager.AUTO_SAVE_LEVEL_NAME)
+	var is_editor_autosave_newer: bool = FilesManager.get_editor_autosave_is_newer(identified_game_name)
+	var autosave_level_name: String = FilesManager.get_editor_autosave_level_name(identified_game_name)
 	
 	select_level_option.clear()
 	if not has_editor_autosave and all_levels.size() < 1:

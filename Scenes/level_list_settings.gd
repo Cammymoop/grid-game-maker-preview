@@ -14,13 +14,24 @@ const ScalarValueInput = preload("res://src/GameEditor/ConditionalEditor/scalar_
 @export var progressive_unlock_num_container: Control
 @export var progressive_unlock_num_input: ScalarValueInput
 
+@export var always_hidden_container: Control
+@export var always_hidden_toggle: CheckButton
+@export var not_always_hidden_container: Control
+
+@export var is_locked_container: Control
+@export var is_locked_toggle: CheckButton
+@export var is_hidden_container: Control
+@export var is_hidden_toggle: CheckButton
+
 @export var default_is_unlocked_container: Control
 @export var default_is_unlocked_toggle: CheckButton
 
 @export var show_locked_levels_toggle: CheckButton
+@export var show_locked_titles_container: Control
+@export var show_locked_titles_toggle: CheckButton
 
 @export var completion_mode_selector: OptionButton
-@export var completion_number_container: ScalarValueInput
+@export var completion_number_container: Control
 @export var completion_number_input: ScalarValueInput
 
 var editing_list_name: String = ""
@@ -55,15 +66,21 @@ func _ready() -> void:
         completion_mode_selector.add_item(CompletionModeDisplayTexts[completion_mode], completion_mode_id)
     completion_mode_selector.item_selected.connect(on_completion_mode_selected)
     
+    always_hidden_toggle.toggled.connect(on_always_hidden_toggled)
+    
     completion_number_input.value_changed.connect(on_completion_number_input_value_changed)
     
     default_is_unlocked_toggle.toggled.connect(on_default_is_unlocked_toggled)
+    
+    is_locked_toggle.toggled.connect(on_is_locked_toggled)
+    is_hidden_toggle.toggled.connect(on_is_hidden_toggled)
 
     back_button.pressed.connect(request_close.emit)
     name_input.text_changed.connect(on_name_input_text_changed)
     do_progressive_unlock_toggle.toggled.connect(on_do_progressive_unlock_toggled)
     progressive_unlock_num_input.value_changed.connect(prop_unlock_num_changed)
     show_locked_levels_toggle.toggled.connect(on_show_locked_levels_toggled)
+    show_locked_titles_toggle.toggled.connect(on_show_locked_titles_toggled)
     if editing_list_name and visible:
         refresh_ui()
 
@@ -88,12 +105,16 @@ func on_do_progressive_unlock_toggled(toggled_on: bool) -> void:
         GameManager.remove_level_list_data(editing_list_name, "default_individual_locked")
     else:
         GameManager.remove_level_list_data(editing_list_name, "progressive_locked_levels")
-        GameManager.set_level_list_data(editing_list_name, "default_individual_locked", not default_is_unlocked_toggle.button_pressed)
+        var toggle_value: bool = default_is_unlocked_toggle.button_pressed
+        GameManager.set_level_list_data(editing_list_name, "default_individual_locked", not toggle_value)
     refresh_ui()
     list_settings_edited.emit()
 
 func on_show_locked_levels_toggled(toggled_on: bool) -> void:
     GameManager.set_level_list_data(editing_list_name, "show_locked_levels", toggled_on)
+
+func on_show_locked_titles_toggled(toggled_on: bool) -> void:
+    GameManager.set_level_list_data(editing_list_name, "show_locked_titles", toggled_on)
 
 func prop_unlock_num_changed(_new_value: float) -> void:
     set_prog_unlock_num()
@@ -127,10 +148,43 @@ func refresh_ui() -> void:
         push_warning("Unable to get list info for %s" % editing_list_name)
         request_close.emit()
         return
-    var prog_unlock_num: = int(list_info.get("progressive_locked_levels", 0))
-    do_progressive_unlock_toggle.button_pressed = prog_unlock_num > 0
-    progressive_unlock_num_container.visible = prog_unlock_num > 0
-    progressive_unlock_num_input.set_value(maxi(1, prog_unlock_num))
+    
+    var is_first_bundled_list: bool = false
+    var is_custom_level_list: bool = not GameManager.is_level_list_bundled(editing_list_name)
+    if not is_custom_level_list:
+        is_first_bundled_list = GameManager.get_list_of_level_lists(true).find(editing_list_name) == 0
+
+    always_hidden_container.visible = not is_custom_level_list
+    var is_always_hidden: bool = list_info.get("always_hidden", false) and not is_first_bundled_list
+    always_hidden_toggle.set_pressed_no_signal(is_always_hidden)
+    always_hidden_toggle.disabled = is_first_bundled_list
+
+    if is_custom_level_list:
+        is_always_hidden = false
+    
+    not_always_hidden_container.visible = not is_always_hidden
+
+    if not is_always_hidden:
+        var prog_unlock_num: = int(list_info.get("progressive_locked_levels", 0))
+        do_progressive_unlock_toggle.button_pressed = prog_unlock_num > 0
+        progressive_unlock_num_container.visible = prog_unlock_num > 0
+        progressive_unlock_num_input.set_value(maxi(1, prog_unlock_num))
+        
+        var is_locked: bool = list_info.get("default_locked", false)
+        is_locked_toggle.set_pressed_no_signal(is_locked)
+        
+        is_hidden_toggle.set_pressed_no_signal(list_info.get("hide_when_locked", false))
+        is_hidden_container.visible = is_locked
+        
+        var show_locked_levels: bool = list_info.get("show_locked_levels", true)
+        show_locked_levels_toggle.set_pressed_no_signal(show_locked_levels)
+        show_locked_titles_toggle.set_pressed_no_signal(list_info.get("show_locked_titles", false))
+        show_locked_titles_container.visible = show_locked_levels
+        
+        default_is_unlocked_container.visible = prog_unlock_num == 0
+        var default_level_locked: bool = list_info.get("default_individual_locked", false)
+        default_is_unlocked_toggle.set_pressed_no_signal(not default_level_locked)
+
     
     var completion_mode: String = _get_completion_mode(list_info)
     completion_mode_selector.selected = CompletionModes.find(completion_mode)
@@ -145,8 +199,7 @@ func refresh_ui() -> void:
         var completion_number: int = _get_completion_number(list_info, completion_mode)
         completion_number_input.set_value(completion_number)
         _update_last_completion_number(completion_mode, completion_number)
-    
-    default_is_unlocked_container.visible = prog_unlock_num == 0
+
 
 func _get_completion_mode(list_info: Dictionary) -> String:
     var completion_mode: String = list_info.get("completion_mode", "all")
@@ -200,6 +253,22 @@ func on_completion_number_input_value_changed(new_value: float) -> void:
     list_settings_edited.emit()
 
 func on_default_is_unlocked_toggled(toggled_on: bool) -> void:
-    var default_is_locked: bool = not toggled_on
-    GameManager.set_level_list_data(editing_list_name, "default_individual_locked", default_is_locked)
+    var defualt_levels_locked: bool = not toggled_on
+    GameManager.set_level_list_data(editing_list_name, "default_individual_locked", defualt_levels_locked)
+    list_settings_edited.emit()
+
+
+func on_always_hidden_toggled(toggled_on: bool) -> void:
+    GameManager.set_level_list_data(editing_list_name, "always_hidden", toggled_on)
+    refresh_ui()
+    list_settings_edited.emit()
+
+func on_is_locked_toggled(toggled_on: bool) -> void:
+    GameManager.set_level_list_data(editing_list_name, "default_locked", toggled_on)
+    refresh_ui()
+    list_settings_edited.emit()
+
+func on_is_hidden_toggled(toggled_on: bool) -> void:
+    GameManager.set_level_list_data(editing_list_name, "hide_when_locked", toggled_on)
+    refresh_ui()
     list_settings_edited.emit()

@@ -1,8 +1,9 @@
 extends Control
 
+const LevelSelectUI = preload("res://Scenes/level_select_ui.gd")
 const NewListPanel = preload("res://Scenes/GameEditor/new_list_panel.gd")
 
-@export var level_select_ui: VBoxContainer
+@export var level_select_ui: LevelSelectUI
 
 @export var darkener: ColorRect
 @export var background_editor_container: Control
@@ -13,8 +14,10 @@ const NewListPanel = preload("res://Scenes/GameEditor/new_list_panel.gd")
 @export var open_levels_folder_button: Button
 
 func _ready() -> void:
-    no_web_container.visible = not OS.has_feature("web")
-    open_levels_folder_button.pressed.connect(on_open_levels_folder_button_pressed)
+    if no_web_container:
+        no_web_container.visible = not OS.has_feature("web")
+    if open_levels_folder_button:
+        open_levels_folder_button.pressed.connect(on_open_levels_folder_button_pressed)
 
     add_new_list_panel.hide()
     add_new_list_panel.add_list_requested.connect(adding_new_list)
@@ -32,6 +35,7 @@ func on_level_select_ui_close_level_select() -> void:
 
 func open_level_select() -> void:
     GameManager.set_pause("level_select", true)
+    level_select_ui.opening()
     level_select_ui.refresh()
     show()
 
@@ -60,18 +64,16 @@ func show_add_new_list_panel() -> void:
     add_new_list_panel.open_panel()
 
 func adding_new_list(list_name: String) -> void:
-    GameManager.add_level_list(list_name)
+    var is_bundled: = not level_select_ui.custom_levels_tab_button.button_pressed
+    if is_bundled and GameManager.current_game_is_release_locked:
+        is_bundled = false
+    GameManager.add_empty_level_list(list_name, is_bundled)
     level_select_ui.any_edited = true
-    if level_select_ui.editing_level_list:
-        return
-    if level_select_ui.is_rearranging_lists:
-        level_select_ui.refresh_rearrangable_lists()
-    else:
-        level_select_ui.refresh_level_list()
+    level_select_ui.refresh()
 
 func on_open_levels_folder_button_pressed() -> void:
     if not FilesManager.game_exists(GameManager.get_identified_game_name()):
-        GlobalToaster.show_toast_message("Game not saved")
+        GlobalToaster.show_toast_message("Game not saved, folder doesn't exist")
         return
     var levels_folder: = FilesManager.get_game_levels_dir(GameManager.get_identified_game_name())
     OS.shell_open(ProjectSettings.globalize_path(levels_folder))

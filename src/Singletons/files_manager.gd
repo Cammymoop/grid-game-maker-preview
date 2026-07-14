@@ -16,6 +16,8 @@ var LAST_PROFILE_ID_FILE: = "last_profile_id.txt"
 var SHARED_IMAGES_METADATA_FILENAME: = "local_image_meta.json"
 var BUNDLED_IMAGE_METADATA_FILENAME: = "image_metadata.json"
 
+var AUTO_SAVE_LEVEL_NAME: = "editor_autosave"
+
 var base_data_directory: = "user://"
 var games_subdir: = "games"
 var shared_assets_subdir: = "shared_assets"
@@ -389,7 +391,7 @@ func _save_local_images_metadata(new_data: Dictionary, for_game_name: String = "
 func get_local_image_metadata(local_image_name: String, for_game_name: String = "") -> Dictionary:
 	var local_meta = _get_local_images_metadata(for_game_name)
 	if local_meta and local_image_name in local_meta:
-		return local_meta[local_image_name]
+		return TextureManager.fixup_texture_meta(local_meta[local_image_name])
 	return {}
 
 func has_local_image_metadata(local_image_name: String, for_game_name: String = "") -> bool:
@@ -564,14 +566,27 @@ func sanitize_level_filename(level_name: String) -> String:
 	return Utility.sanitize_for_filename(level_name, true, true)
 
 func _level_filename(level_name: String) -> String:
-	return sanitize_level_filename(level_name) + ".json"
+	var sanitized_name: = sanitize_level_filename(level_name)
+	if not sanitized_name:
+		return ""
+	return sanitized_name + ".json"
 
 func save_level_to_name(game_name: String, level_data: Dictionary, as_filename: String) -> bool:
 	if not game_exists(game_name):
 		push_error("Game %s does not exist" % [game_name])
 		return false
-	serialize_and_save_data_to_json(level_data, get_game_levels_dir(game_name), _level_filename(as_filename))
+	var level_filename: = _level_filename(as_filename)
+	if not level_filename:
+		push_error("Level file is empty after sanitization" % [as_filename])
+		return false
+	serialize_and_save_data_to_json(level_data, get_game_levels_dir(game_name), level_filename)
 	return true
+
+func save_level_to_autosave(game_name: String, level_data: Dictionary) -> bool:
+	if not game_exists(game_name):
+		push_error("Game %s does not exist" % [game_name])
+		return false
+	return save_level_to_name(game_name, level_data, AUTO_SAVE_LEVEL_NAME)
 
 func save_level(game_name: String, level_data: Dictionary) -> bool:
 	if not level_data.get("name", "").strip_edges():
@@ -579,11 +594,32 @@ func save_level(game_name: String, level_data: Dictionary) -> bool:
 		return false
 	return save_level_to_name(game_name, level_data, level_data["name"])
 
+func fix_level_name(game_name: String, name_of_level_file: String) -> void:
+	if name_of_level_file == AUTO_SAVE_LEVEL_NAME:
+		return
+	if not game_exists(game_name) or not level_exists(game_name, name_of_level_file):
+		push_error("Invalid game or level name: %s, %s" % [game_name, name_of_level_file])
+	var level_data: = get_level_data(game_name, name_of_level_file)
+	if not level_data.get("name", "") == name_of_level_file:
+		level_data["name"] = name_of_level_file
+		save_level_to_name(game_name, level_data, name_of_level_file)
+
+func fix_all_level_data_names(for_game_name: String) -> void:
+	if not game_exists(for_game_name):
+		push_error("Game %s does not exist" % [for_game_name])
+		return
+	var all_level_files: = get_level_list(for_game_name)
+	for level_file in all_level_files:
+		fix_level_name(for_game_name, level_file)
+
 func level_exists(game_name: String, level_name: String) -> bool:
 	if not level_name or not game_exists(game_name):
 		push_error("Invalid game or level name: %s, %s" % [game_name, level_name])
 		return false
 	var level_filename: = _level_filename(level_name)
+	if not level_filename:
+		push_error("sanitized level filename is empty %s" % [level_name])
+		return false
 	return FileAccess.file_exists(get_game_levels_dir(game_name).path_join(level_filename))
 
 func get_level_title(game_name: String, level_name: String) -> String:
@@ -613,21 +649,20 @@ func get_level_list(game_name: String) -> Array:
 
 func get_editor_autosave_level_name(game_name: String) -> String:
 	var level_list: = get_level_list(game_name)
-	if "editor_autosave" not in level_list:
+	if AUTO_SAVE_LEVEL_NAME not in level_list:
 		return ""
-	var editor_autosave_level_name: String = get_level_data(game_name, "editor_autosave").get("name", "")
-	if not editor_autosave_level_name or editor_autosave_level_name == "editor_autosave" or editor_autosave_level_name not in level_list:
+	var editor_autosave_level_name: String = get_level_data(game_name, AUTO_SAVE_LEVEL_NAME).get("name", "")
+	if not editor_autosave_level_name or editor_autosave_level_name == AUTO_SAVE_LEVEL_NAME or editor_autosave_level_name not in level_list:
 		return ""
 	return editor_autosave_level_name
 
 func get_editor_autosave_is_newer(game_name: String) -> bool:
 	var level_list: = get_level_list(game_name)
-	if "editor_autosave" not in level_list:
-		push_error("Editor autosave not found in level list for game %s" % [game_name])
+	if AUTO_SAVE_LEVEL_NAME not in level_list:
 		return false
-	var editor_autosave_data: = get_level_data(game_name, "editor_autosave")
+	var editor_autosave_data: = get_level_data(game_name, AUTO_SAVE_LEVEL_NAME)
 	var editor_autosave_level_name: String = editor_autosave_data.get("name", "")
-	if not editor_autosave_level_name or editor_autosave_level_name == "editor_autosave" or editor_autosave_level_name not in level_list:
+	if not editor_autosave_level_name or editor_autosave_level_name == AUTO_SAVE_LEVEL_NAME or editor_autosave_level_name not in level_list:
 		return true
 	
 	var editor_autosave_timestamp: = FileAccess.get_modified_time(get_game_levels_dir(game_name).path_join(_level_filename("editor_autosave")))
@@ -1121,3 +1156,24 @@ func remap_texture_id_in_levels(for_game_name: String, check_level_names: Array[
 
 		if GameManager._remap_texture_id_in_level_data(from_texture_id, to_texture_id, level_data):
 			save_level_to_name(for_game_name, level_data, level_name)
+
+
+func save_non_bundled_level_list_info(for_game_name: String, level_list_info: Dictionary) -> void:
+	if not game_exists(for_game_name):
+		return
+	var game_data_dir: = get_game_gamedata_dir(for_game_name)
+	serialize_and_save_data_to_json(level_list_info, game_data_dir, UNBUNDLED_LEVEL_INFO_FILE, FORMAT_GAME_JSON)
+
+func get_non_bundled_level_info(for_game_name: String) -> Dictionary:
+	if not game_exists(for_game_name):
+		return {}
+	var non_bundled_file: = get_unbundled_level_info_path(for_game_name)
+	if not smarter_file_exists(non_bundled_file):
+		var empty_info: Dictionary = GameManager.get_empty_non_bundled_level_list_info()
+		save_non_bundled_level_list_info(for_game_name, empty_info)
+		return empty_info
+
+	var level_list_info: = _get_dict_from_json_file(non_bundled_file)
+	if not level_list_info:
+		return {}
+	return level_list_info

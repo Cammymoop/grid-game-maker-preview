@@ -20,8 +20,8 @@ var edit_shared_meta_warning: bool = false
 
 func _ready():
 	if not is_new_mode:
-		title = "Setup Grid for " + texture_name
-		ok_button_text = "Setup Grid"
+		title = "Update Grid Settings for " + texture_name
+		ok_button_text = "Update Grid"
 	else:
 		title = "New Image"
 		ok_button_text = "Create Image"
@@ -51,7 +51,7 @@ func _on_TextureMetaDialog_confirmed():
 	}
 
 	if is_new_mode:
-		edited_meta["size_in_tiles"] = Vector2(image_size_in_tiles_input.get_value())
+		edited_meta["size_in_tiles"] = Vector2(image_size_in_tiles_input.get_value()).max(Vector2.ONE)
 		var total_size: Vector2 = edited_meta["tile_size"] * edited_meta["size_in_tiles"]
 		total_size += edited_meta["separation"] * (edited_meta["size_in_tiles"] - Vector2.ONE)
 		total_size += edited_meta["border"] * 2

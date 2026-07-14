@@ -913,7 +913,6 @@ func save_current_or_save_as(after_save_callable: Callable = Callable()) -> bool
 		return false
 
 func _auto_save(level_state: Dictionary) -> void:
-	var autosave_filename: = "editor_autosave"
 	var level_name: = GameManager.loaded_level_name
 	if not level_name.strip_edges():
 		level_name = "LEVEL"
@@ -923,7 +922,7 @@ func _auto_save(level_state: Dictionary) -> void:
 		"name": level_name,
 		"state": level_state,
 	}
-	FilesManager.save_level_to_name(GameManager.get_identified_game_name(), level_data, autosave_filename)
+	FilesManager.save_level_to_name(GameManager.get_identified_game_name(), level_data, FilesManager.AUTO_SAVE_LEVEL_NAME)
 
 func get_current_facing() -> int:
 	if cursor_mode == "entity":
@@ -1167,3 +1166,6 @@ func _confirmed_load_level_in_list(level_name: String, level_list_name: String) 
 		GameManager.edit_level_named(level_name)
 	else:
 		GameManager.edit_level_in_list(level_list_name, level_name)
+
+func load_editor_autosave() -> void:
+	_confirm_save_changes_then(GameManager.load_editor_autosave, true)

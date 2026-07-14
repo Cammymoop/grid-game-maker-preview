@@ -5,50 +5,65 @@
 [ext_resource type="FontFile" uid="uid://ctnllh13x3iqi" path="res://assets/font/NotoSans-Bold.ttf" id="2_8vw25"]
 [ext_resource type="Texture2D" uid="uid://b4q7u3xbkyj45" path="res://assets/img/button_icons/gear_small.png" id="3_8vw25"]
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_8vw25"]
+bg_color = Color(0.65045655, 0.6504565, 0.6504565, 0.09411765)
+corner_radius_top_left = 2
+corner_radius_top_right = 2
+corner_radius_bottom_right = 2
+corner_radius_bottom_left = 2
+expand_margin_left = 5.0
+expand_margin_right = 5.0
+expand_margin_bottom = 2.0
+
 [node name="LevelList" type="VBoxContainer" unique_id=407189420 node_paths=PackedStringArray("list_name_label", "level_item_container", "edit_settings_icon_button", "export_list_button", "remove_list_button")]
 offset_right = 295.0
 offset_bottom = 51.0
+size_flags_horizontal = 3
 theme_override_constants/separation = 10
 script = ExtResource("1_kb61r")
-list_name_label = NodePath("HBoxContainer/Label")
+list_name_label = NodePath("BGHighlightPanel/HBoxContainer/Label")
 level_item_container = NodePath("MarginContainer/LevelItems")
-edit_settings_icon_button = NodePath("HBoxContainer/SettingsIconButton")
-export_list_button = NodePath("HBoxContainer/ExportListButton")
-remove_list_button = NodePath("HBoxContainer/HBoxContainer/RemoveListButton")
+edit_settings_icon_button = NodePath("BGHighlightPanel/HBoxContainer/SettingsIconButton")
+export_list_button = NodePath("BGHighlightPanel/HBoxContainer/ExportListButton")
+remove_list_button = NodePath("BGHighlightPanel/HBoxContainer/HBoxContainer/RemoveListButton")
 
-[node name="HBoxContainer" type="HBoxContainer" parent="." unique_id=240377601]
+[node name="BGHighlightPanel" type="PanelContainer" parent="." unique_id=87566857]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_8vw25")
+
+[node name="HBoxContainer" type="HBoxContainer" parent="BGHighlightPanel" unique_id=240377601]
 layout_mode = 2
 
-[node name="Label" type="Label" parent="HBoxContainer" unique_id=1215778152]
+[node name="Label" type="Label" parent="BGHighlightPanel/HBoxContainer" unique_id=1215778152]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_fonts/font = ExtResource("2_8vw25")
 theme_override_font_sizes/font_size = 18
 text = "List A:"
 
-[node name="SettingsIconButton" parent="HBoxContainer" unique_id=451892711 instance=ExtResource("2_0k5vv")]
+[node name="SettingsIconButton" parent="BGHighlightPanel/HBoxContainer" unique_id=451892711 instance=ExtResource("2_0k5vv")]
 layout_mode = 2
 icon = ExtResource("3_8vw25")
 
-[node name="ListOptionsButton" type="Button" parent="HBoxContainer" unique_id=637013142]
+[node name="ListOptionsButton" type="Button" parent="BGHighlightPanel/HBoxContainer" unique_id=637013142]
 visible = false
 layout_mode = 2
 text = "List Settings"
 
-[node name="ExportListButton" type="Button" parent="HBoxContainer" unique_id=510631481]
+[node name="ExportListButton" type="Button" parent="BGHighlightPanel/HBoxContainer" unique_id=510631481]
 layout_mode = 2
 size_flags_vertical = 4
 theme_override_font_sizes/font_size = 14
 text = "export list"
 
-[node name="HBoxContainer" type="HBoxContainer" parent="HBoxContainer" unique_id=988060551]
+[node name="HBoxContainer" type="HBoxContainer" parent="BGHighlightPanel/HBoxContainer" unique_id=988060551]
 layout_mode = 2
 
-[node name="Spacer" type="Control" parent="HBoxContainer/HBoxContainer" unique_id=1874346333]
+[node name="Spacer" type="Control" parent="BGHighlightPanel/HBoxContainer/HBoxContainer" unique_id=1874346333]
 custom_minimum_size = Vector2(6, 0)
 layout_mode = 2
 
-[node name="RemoveListButton" parent="HBoxContainer/HBoxContainer" unique_id=2052134739 instance=ExtResource("2_0k5vv")]
+[node name="RemoveListButton" parent="BGHighlightPanel/HBoxContainer/HBoxContainer" unique_id=2052134739 instance=ExtResource("2_0k5vv")]
 layout_mode = 2
 tooltip_text = "Remove list"
 

@@ -18,6 +18,8 @@ signal double_clicked(item: Node)
 @export var builtin_icon: TextureRect
 @export var bundled_icon: TextureRect
 
+@export var tile_size_label: Label
+
 var is_selected = false
 
 var texture_name: String
@@ -35,6 +37,16 @@ func set_texture(t_name: String, texture: Texture2D, builtin: bool = false, shar
 		built_in = true
 	builtin_icon.visible = built_in
 	bundled_icon.visible = not built_in and not is_shared
+
+func set_texture_metadata(new_metadata: Dictionary) -> void:
+	if not new_metadata:
+		tile_size_label.visible = false
+		return
+	tile_size_label.visible = true
+	var tile_size: Vector2 = new_metadata.get("tile_size", Vector2.ZERO)
+	if tile_size == Vector2.ZERO:
+		tile_size = Vector2.ONE * MapManager.tile_width
+	tile_size_label.text = "%dx%d" % [int(tile_size.x), int(tile_size.y)]
 
 func set_name_bold(new_is_bold: bool) -> void:
 	if not new_is_bold:

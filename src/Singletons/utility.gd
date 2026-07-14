@@ -304,6 +304,43 @@ func get_pause_menu() -> Node:
 	print_debug("Error could not find pause menu")
 	return null
 
+func pixel_to_atlas_coords(pixel_pos: Vector2, tile_size: Vector2, border: Vector2, separation: Vector2) -> Vector2i:
+	var size_with_separation: Vector2 = tile_size + separation
+	var eliminate_border_center_sep: Vector2 = (pixel_pos - border) + (separation / 2)
+	var grid_pos: Vector2 = eliminate_border_center_sep / size_with_separation
+	return Vector2i(grid_pos.floor())
+
+func pixel_to_atlas_coords_clamped(pixel_pos: Vector2, tile_size: Vector2, border: Vector2, separation: Vector2, max_coords: Vector2i, min_coords: Vector2i = Vector2i.ZERO) -> Vector2i:
+	var coords: = pixel_to_atlas_coords(pixel_pos, tile_size, border, separation)
+	return coords.clamp(min_coords, max_coords)
+
+func pixel_to_tile_index(pixel_pos: Vector2, tile_size: Vector2, border: Vector2, separation: Vector2, columns: int, rows: int = 100000) -> int:
+	var clamped_coords: = pixel_to_atlas_coords_clamped(pixel_pos, tile_size, border, separation, Vector2i(columns, rows))
+	return clamped_coords.x + (clamped_coords.y * columns)
+
+func get_indexed_tile_offset(tile_index: int, width: int, tile_size: Vector2, border: Vector2, separation: Vector2) -> Vector2:
+	var per_row: int = floori(width / tile_size.x)
+	return get_indexed_tile_offset_by_per_row(tile_index, per_row, tile_size, border, separation)
+
+func get_indexed_tile_offset_by_per_row(tile_index: int, per_row: int, tile_size: Vector2, border: Vector2, separation: Vector2) -> Vector2:
+	var atlas_coords: = get_indexed_tile_atlas_coords(tile_index, per_row)
+	var size_with_separation: Vector2 = tile_size + separation
+	return (Vector2(atlas_coords) * size_with_separation) + border
+
+func get_indexed_tile_region(tile_index: int, width: int, tile_size: Vector2, border: Vector2 = Vector2.ZERO, separation: Vector2 = Vector2.ZERO) -> Rect2:
+	return Rect2(get_indexed_tile_offset(tile_index, width, tile_size, border, separation), tile_size)
+
+func get_indexed_tile_region_by_per_row(tile_index: int, per_row: int, tile_size: Vector2, border: Vector2 = Vector2.ZERO, separation: Vector2 = Vector2.ZERO) -> Rect2:
+	return Rect2(get_indexed_tile_offset_by_per_row(tile_index, per_row, tile_size, border, separation), tile_size)
+
+func get_indexed_tile_atlas_coords(tile_index: int, per_row: int) -> Vector2i:
+	return Vector2i(tile_index % per_row, floori(tile_index / float(per_row)))
+
+func get_tile_atlas_coords_size(pixel_size: Vector2, tile_size: Vector2, border: Vector2 = Vector2.ZERO, separation: Vector2 = Vector2.ZERO) -> Vector2i:
+	var eliminate_border: Vector2 = pixel_size - border * 2 + separation
+	var size_with_sep: Vector2 = tile_size + separation
+	var atlas_coord_size: Vector2i = Vector2i((eliminate_border / size_with_sep).floor())
+	return atlas_coord_size.max(Vector2i(1, 1))
 
 func atlas_texture_from_texture_index(texture_index, sub_index) -> AtlasTexture:
 	var atlas_tex: = AtlasTexture.new()
@@ -331,14 +368,9 @@ func atlas_texture_from_id_using_lookup(texture_id: int, sub_index: int, texture
 	if not found_texture:
 		return null
 
-	var tile_size: Vector2 = texture_lookup["tile_sizes"].get(texture_id, Vector2(32, 32))
-	var tiles_per_row: int = found_texture.get_width() / tile_size.x
-	var tile_x: int = sub_index % tiles_per_row
-	var tile_y: int = floori(sub_index / float(tiles_per_row))
-	
 	var atlas_tex: = AtlasTexture.new()
 	atlas_tex.atlas = found_texture
-	atlas_tex.region = Rect2(tile_x * tile_size.x, tile_y * tile_size.y, tile_size.x, tile_size.y)
+	atlas_tex.region = texture_sub_index_region_from_lookup(texture_id, sub_index, texture_lookup)
 	return atlas_tex
 
 func texture_sub_index_region_from_lookup(texture_id: int, sub_index: int, texture_lookup: Dictionary) -> Rect2:
@@ -347,10 +379,10 @@ func texture_sub_index_region_from_lookup(texture_id: int, sub_index: int, textu
 		return Rect2()
 
 	var tile_size: Vector2 = texture_lookup["tile_sizes"].get(texture_id, Vector2(32, 32))
-	var tiles_per_row: int = found_texture.get_width() / tile_size.x
-	var tile_x: int = sub_index % tiles_per_row
-	var tile_y: int = floori(sub_index / float(tiles_per_row))
-	return Rect2(tile_x * tile_size.x, tile_y * tile_size.y, tile_size.x, tile_size.y)
+	var meta_for_id: Dictionary = texture_lookup["metadata"].get(texture_id, {})
+	var border: Vector2 = dict_get_vector2(meta_for_id, "border", Vector2.ZERO)
+	var separation: Vector2 = dict_get_vector2(meta_for_id, "separation", Vector2.ZERO)
+	return get_indexed_tile_region(sub_index, found_texture.get_width(), tile_size, border, separation)
 
 func get_camera_setting(setting: String, default_value: Variant = null) -> Variant:
 	return GameManager.get_game_setting("camera_settings", {}).get(setting, default_value)
@@ -453,15 +485,15 @@ func position_in_rect_inclusive(position: Vector2, rect: Rect2) -> bool:
 func get_2d_coords_from_index(index : int, tpr : int) -> Vector2:
 	return Vector2(index % tpr, floor(float(index)/tpr))
 
-func get_texture_index_offset(texture_sub_index, tile_size, border, separation, tpr) -> Vector2:
-	var coord = get_2d_coords_from_index(texture_sub_index, tpr)
-	var combined_tile_size = tile_size + separation
-	return border + (coord * combined_tile_size)
+#func get_texture_index_offset(texture_sub_index, tile_size, border, separation, tpr) -> Vector2:
+	#var coord = get_2d_coords_from_index(texture_sub_index, tpr)
+	#var combined_tile_size = tile_size + separation
+	#return border + (coord * combined_tile_size)
 	#return Vector2(texture_sub_index % tpr * MapManager.tile_width, floor(texture_sub_index/tpr) * MapManager.tile_width)
 
-func get_texture_index_rect(texture_sub_index, tile_size, border, separation, tpr) -> Rect2:
-	var t_offset = get_texture_index_offset(texture_sub_index, tile_size, border, separation, tpr)
-	return Rect2(t_offset, tile_size)
+#func get_texture_index_rect(texture_sub_index, tile_size, border, separation, tpr) -> Rect2:
+	#var t_offset = get_texture_index_offset(texture_sub_index, tile_size, border, separation, tpr)
+	#return Rect2(t_offset, tile_size)
 
 
 const FULL_DIR_RELATIVE_BIT = 4
@@ -1408,3 +1440,18 @@ func list_to_unique_set(list: Array) -> Array:
 
 func version_vec_to_string(version_vec: Vector2i) -> String:
 	return str(version_vec.x) + "." + str(version_vec.y)
+
+func dict_get_dict(dictionary: Dictionary, key: String, default_value: Dictionary = {}) -> Dictionary:
+	if not dictionary.has(key) or not typeof(dictionary[key]) == TYPE_DICTIONARY:
+		return default_value
+	return dictionary[key]
+
+func dict_get_vector2(dictionary: Dictionary, key: String, default_value: Vector2 = Vector2.ZERO) -> Vector2:
+	if not dictionary.has(key) or not typeof(dictionary[key]) in [TYPE_VECTOR2, TYPE_VECTOR2I]:
+		return default_value
+	return Vector2(dictionary[key])
+
+func dict_get_vector2i(dictionary: Dictionary, key: String, default_value: Vector2i = Vector2i.ZERO) -> Vector2i:
+	if not dictionary.has(key) or not typeof(dictionary[key]) in [TYPE_VECTOR2, TYPE_VECTOR2I]:
+		return default_value
+	return Vector2i(dictionary[key])

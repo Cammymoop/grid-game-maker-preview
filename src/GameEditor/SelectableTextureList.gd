@@ -37,13 +37,14 @@ func clear_all() -> void:
 	enabled_textures = []
 	all_textures = []
 
-func add_texture(texture_name: String, texture: Texture, builtin: bool, enabled: bool, is_shared: bool = true) -> void:
+func add_texture(texture_name: String, texture: Texture, builtin: bool, enabled: bool, is_shared: bool = true, with_metadata: Dictionary = {}) -> void:
 	all_textures.append(texture_name)
 	if enabled:
 		enabled_textures.append(texture_name)
 	
 	var list_item: = item_scene.instantiate() as SelectableTexture
 	list_item.set_texture(texture_name, texture, builtin, is_shared)
+	list_item.set_texture_metadata(with_metadata)
 	list_item.set_enabled(enabled)
 	list_item.selected.connect(on_item_selected)
 	list_item.enable_toggled.connect(on_texture_item_enabled_toggled)

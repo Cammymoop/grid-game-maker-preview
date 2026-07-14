@@ -23,7 +23,7 @@ Button/styles/normal = ExtResource("3_bvcnr")
 Button/styles/pressed = ExtResource("4_6novh")
 Label/font_sizes/font_size = 18
 
-[node name="LevelItem" type="MarginContainer" unique_id=508503408 node_paths=PackedStringArray("title_label", "start_level_button", "edit_level_button", "move_up_down_buttons", "move_up_button", "move_down_button", "dot_icon", "check_icon", "locked_icon", "current_level_indicator", "current_level_icon", "highlight_rect")]
+[node name="LevelItem" type="MarginContainer" unique_id=508503408 node_paths=PackedStringArray("title_label", "start_level_button", "edit_level_button", "edit_as_autosave_button", "move_up_down_buttons", "move_up_button", "move_down_button", "dot_icon", "check_icon", "locked_icon", "current_level_indicator", "current_level_icon", "highlight_rect")]
 offset_right = 290.0
 offset_bottom = 28.0
 theme = SubResource("Theme_v4jex")
@@ -36,6 +36,7 @@ unplayed_color = Color(0.78039217, 0.69803923, 0.69803923, 1)
 title_label = NodePath("ItemContents/Label")
 start_level_button = NodePath("ItemContents/Play2Button")
 edit_level_button = NodePath("ItemContents/EditButton")
+edit_as_autosave_button = NodePath("ItemContents/EditAutosaveButton")
 move_up_down_buttons = NodePath("ItemContents/MoveUpDownButtons")
 move_up_button = NodePath("ItemContents/MoveUpDownButtons/MoveUpButton")
 move_down_button = NodePath("ItemContents/MoveUpDownButtons/MoveDownButton")
@@ -117,6 +118,12 @@ layout_mode = 2
 tooltip_text = "Play"
 mouse_default_cursor_shape = 2
 icon = ExtResource("14_ybcw1")
+
+[node name="EditAutosaveButton" type="Button" parent="ItemContents" unique_id=1418667611]
+visible = false
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "Autosave (newer)"
 
 [node name="EditButton" type="Button" parent="ItemContents" unique_id=1105101336]
 visible = false

@@ -6,16 +6,23 @@ const SingleLevelList = preload("res://Scenes/single_level_list.gd")
 const LevelSelectUIRoot = preload("res://Scenes/level_select_root.gd")
 const LevelListSettings = preload("res://Scenes/level_list_settings.gd")
 const RearrangableListItem = preload("res://Scenes/rearrangable_list_item.gd")
+const LevelListItem = preload("res://Scenes/level_list_item.gd")
 
 var single_level_list_scene: = preload("res://Scenes/single_level_list.tscn")
 var rearrangable_level_list_scn: = preload("res://Scenes/rearrangable_list_item.tscn")
 
 @export var level_list_container: Control
 
+@export var tabs_container: Control
+@export var bundled_levels_tab_button: Button
+@export var custom_levels_tab_button: Button
+
 @export var edit_lists_button_container: Control
 @export var add_new_list_button: Button
 @export var rearrange_lists_button: Button
+
 @export var import_levels_button: Button
+@export var import_levels_button_container: Control
 
 @export var level_list_settings: LevelListSettings
 
@@ -24,6 +31,12 @@ var rearrangable_level_list_scn: = preload("res://Scenes/rearrangable_list_item.
 
 @export var list_scroll_container: ScrollContainer
 
+@export var no_web_container: Control
+@export var open_levels_folder_button: Button
+
+@export var edit_autosave_container: Control
+@export var edit_autosave_button: Button
+
 var max_height_ratio: float = 0.82
 var min_max_height: float = 100
 
@@ -31,9 +44,11 @@ var editing_settings_of_list: String = ""
 var is_rearranging_lists: bool = false
 var level_select_root: LevelSelectUIRoot
 
-var any_edited: bool = false
+var fresh_open: = true
 
-var is_editing_locked: bool = false
+var any_edited: = false
+
+var is_editing_locked: = false
 
 const CTX_MOVE_UP = 3
 const CTX_MOVE_DOWN = 4
@@ -41,6 +56,9 @@ const CTX_MOVE_TO_TOP = 5
 const CTX_MOVE_TO_BOTTOM = 6
 
 const CTX_REMOVE_LIST = 14
+
+const CTX_MAKE_LIST_CUSTOM = 21
+const CTX_MAKE_LIST_BUNDLED = 22
 
 
 const SHOW_COMP_HIDE = "Hide"
@@ -59,15 +77,40 @@ func _ready() -> void:
     level_list_settings.request_close.connect(back_to_select_from_list_settings)
     level_list_settings.list_settings_edited.connect(on_list_settings_edited)
     
+    if no_web_container:
+        no_web_container.visible = not OS.has_feature("web")
+    if open_levels_folder_button:
+        open_levels_folder_button.pressed.connect(on_open_levels_folder_button_pressed)
+    
+    bundled_levels_tab_button.pressed.connect(on_bundled_levels_tab_button_pressed)
+    custom_levels_tab_button.pressed.connect(on_custom_levels_tab_button_pressed)
+    
     add_new_list_button.pressed.connect(on_add_new_list_button_pressed)
     rearrange_lists_button.pressed.connect(on_rearrange_lists_button_pressed)
     
     rearrange_lists_back_button.pressed.connect(on_rearrange_lists_back_button_pressed)
+    
+    edit_autosave_button.pressed.connect(on_edit_autosave_button_pressed)
+
     refresh()
     back_to_select_from_list_settings()
 
+func opening() -> void:
+    var is_in_custom_level: = GameManager.is_current_level_custom()
+    if is_in_custom_level:
+        custom_levels_tab_button.set_pressed_no_signal(true)
+        bundled_levels_tab_button.set_pressed_no_signal(false)
+    else:
+        bundled_levels_tab_button.set_pressed_no_signal(true)
+        custom_levels_tab_button.set_pressed_no_signal(false)
+    fresh_open = true
+    GameManager.load_non_bundled_level_lists_from_file()
+
 func is_in_list_settings_mode() -> bool:
     return editing_settings_of_list != ""
+
+func is_showing_custom_levels() -> bool:
+    return custom_levels_tab_button.button_pressed
 
 func refresh() -> void:
     is_editing_locked = not GameManager.is_in_level_edit_mode or GameManager.current_game_is_release_locked
@@ -81,6 +124,9 @@ func refresh() -> void:
         refresh_list_settings()
     elif is_rearranging_lists:
         refresh_rearrangable_lists()
+    
+    if fresh_open:
+        fresh_open = false
 
 func refresh_editing_locked() -> void:
     rearrange_lists_button.disabled = is_editing_locked
@@ -91,6 +137,7 @@ func refresh_list_settings() -> void:
     list_scroll_container.hide()
     edit_lists_button_container.hide()
     rearrange_lists_back_container.hide()
+    edit_autosave_container.hide()
 
     level_list_settings.show()
     if level_list_settings.editing_list_name != editing_settings_of_list:
@@ -101,20 +148,39 @@ func refresh_level_lists() -> void:
     list_scroll_container.show()
     rearrange_lists_button.show()
     rearrange_lists_back_container.hide()
+    edit_autosave_container.hide()
 
     edit_lists_button_container.visible = GameManager.is_in_level_edit_mode
+    
+    import_levels_button_container.visible = is_showing_custom_levels()
+    if GameManager.is_in_level_edit_mode:
+        import_levels_button_container.visible = true
 
     clear_level_lists()
-    if GameManager.is_in_level_edit_mode:
-        for level_list_name in GameManager.get_list_of_level_lists():
-            _add_level_list(GameManager._get_level_list(level_list_name))
+    if not custom_levels_tab_button.button_pressed:
+        if GameManager.is_in_level_edit_mode:
+            for level_list_name in GameManager.get_list_of_level_lists(true):
+                _add_level_list(GameManager._get_level_list(level_list_name))
+        else:
+            for visible_level_list in GameManager.get_all_visible_bundled_level_lists():
+                _add_level_list(visible_level_list)
     else:
-        for unlocked_level_list in GameManager.get_all_unlocked_level_lists():
-            _add_level_list(unlocked_level_list)
-    var unlisted_levels: Array = GameManager.get_list_of_unlisted_levels()
-    if unlisted_levels.size() > 0:
-        add_unlisted_levels()
+        for custom_level_list_info in GameManager.get_all_non_bundled_level_list_infos():
+            _add_level_list(custom_level_list_info)
+
+    if not custom_levels_tab_button.button_pressed or GameManager.is_in_level_edit_mode:
+        var unlisted_levels: Array = GameManager.get_list_of_unlisted_levels()
+        if unlisted_levels.size() > 0:
+            add_unlisted_levels()
     set_level_list_container_min_height()
+    
+    if GameManager.is_in_level_edit_mode:
+        var autosave_level: = FilesManager.get_editor_autosave_level_name(GameManager.get_identified_game_name())
+        if not autosave_level:
+            edit_autosave_container.show()
+    
+    if fresh_open:
+        scroll_to_current_level()
 
 func _add_level_list(level_list_info: Dictionary) -> void:
     var single_level_list: SingleLevelList = single_level_list_scene.instantiate()
@@ -127,6 +193,7 @@ func _setup_level_list(lev_list: SingleLevelList) -> void:
     lev_list.edited.connect(on_level_list_edited)
     lev_list.list_membership_changed.connect(on_level_list_membership_changed)
     lev_list.request_edit_list_settings.connect(on_req_edit_list_settings)
+    lev_list.request_single_list_context_menu.connect(on_request_single_list_context_menu)
     if is_editing_locked:
         lev_list.lock_editing()
 
@@ -135,9 +202,16 @@ func refresh_rearrangable_lists() -> void:
     rearrange_lists_button.hide()
     edit_lists_button_container.hide()
     rearrange_lists_back_container.show()
+    edit_autosave_container.hide()
 
     clear_level_lists()
-    for list_name in GameManager.get_list_of_level_lists():
+    var list_names: Array[String] = []
+    if not custom_levels_tab_button.button_pressed:
+        list_names = GameManager.get_list_of_level_lists(true)
+    else:
+        list_names = GameManager.get_list_of_non_bundled_level_lists()
+
+    for list_name in list_names:
         var rearr_list: = rearrangable_level_list_scn.instantiate() as RearrangableListItem
         rearr_list.request_move_relative.connect(on_rearrangable_list_move_relative)
         rearr_list.request_context_menu.connect(on_rearrangable_list_request_context_menu)
@@ -282,17 +356,22 @@ func back_to_select_from_list_settings() -> void:
 
 
 func save_list_order() -> void:
-    if is_editing_locked:
+    if is_editing_locked and not custom_levels_tab_button.button_pressed:
         return
     if editing_settings_of_list or not level_list_container.get_child_count() > 0:
         return
-    if level_list_container.get_child(0) is SingleLevelList:
-        return
     var new_order: Array = []
     for list_item in level_list_container.get_children():
-        new_order.append(list_item.get_list_name())
-    GameManager.update_bundled_level_list_order(new_order)
-    any_edited = true
+        if list_item is RearrangableListItem:
+            new_order.append(list_item.get_list_name())
+        elif list_item is SingleLevelList and not list_item.is_list_of_unlisted_levels:
+            new_order.append(list_item.level_list_name)
+    if new_order.size() > 0:
+        any_edited = true
+        if not custom_levels_tab_button.button_pressed:
+            GameManager.update_bundled_level_list_order(new_order)
+        else:
+            GameManager.update_non_bundled_level_lists_order(new_order)
 
 func on_add_new_list_button_pressed() -> void:
     level_select_root.show_add_new_list_panel()
@@ -318,34 +397,64 @@ func move_rearrangable_list_item_to(list_item: RearrangableListItem, new_index: 
     save_list_order()
 
 func on_rearrangable_list_request_context_menu(list_item: RearrangableListItem) -> void:
+    var context_menu: = _get_list_context_menu_common()
+    context_menu.id_pressed.connect(on_list_context_menu_id_pressed.bind(true, list_item))
+    Utility.popup_context_menu_at_mouse(context_menu)
+
+func on_request_single_list_context_menu(level_list: SingleLevelList) -> void:
+    var context_menu: = _get_list_context_menu_common()
+    context_menu.id_pressed.connect(on_list_context_menu_id_pressed.bind(false, level_list))
+    Utility.popup_context_menu_at_mouse(context_menu)
+
+func _get_list_context_menu_common() -> PopupMenu:
     var context_menu: = Utility.get_empty_context_menu()
     context_menu.add_item("Move up", CTX_MOVE_UP)
     context_menu.add_item("Move down", CTX_MOVE_DOWN)
     context_menu.add_item("Move to top", CTX_MOVE_TO_TOP)
     context_menu.add_item("Move to bottom", CTX_MOVE_TO_BOTTOM)
     context_menu.add_separator()
+    if not is_showing_custom_levels():
+        context_menu.add_item("Move to Custom Level Lists", CTX_MAKE_LIST_CUSTOM)
+    else:
+        context_menu.add_item("Move to Main Game Lists", CTX_MAKE_LIST_BUNDLED)
+        if is_editing_locked:
+            var idx: = context_menu.get_item_count() - 1
+            context_menu.set_item_disabled(idx, true)
+    context_menu.add_separator()
     context_menu.add_item("Remove List", CTX_REMOVE_LIST)
-    context_menu.id_pressed.connect(on_rearrangable_list_context_menu_id_pressed.bind(list_item))
-    if is_editing_locked:
+    if is_editing_locked and not is_showing_custom_levels():
         for idx in context_menu.get_item_count():
             context_menu.set_item_disabled(idx, true)
-    Utility.popup_context_menu_at_mouse(context_menu)
+    return context_menu
 
-func on_rearrangable_list_context_menu_id_pressed(context_menu_id: int, list_item: RearrangableListItem) -> void:
-    if is_editing_locked:
+
+func on_list_context_menu_id_pressed(context_menu_id: int, is_rearrangable: bool, list_item: Node) -> void:
+    if is_editing_locked and not is_showing_custom_levels():
         return
+    if not is_rearrangable and list_item.is_list_of_unlisted_levels:
+        return
+    any_edited = true
     if context_menu_id == CTX_REMOVE_LIST:
         GameManager.remove_level_list(list_item.get_list_name())
-        any_edited = true
+        refresh()
+    elif context_menu_id in [CTX_MAKE_LIST_CUSTOM, CTX_MAKE_LIST_BUNDLED]:
+        var to_bundled: = context_menu_id == CTX_MAKE_LIST_BUNDLED
+        GameManager.change_level_list_is_bundled(list_item.get_list_name(), to_bundled)
         refresh()
     elif context_menu_id in [CTX_MOVE_UP, CTX_MOVE_DOWN]:
         var rel_index: = 1 if context_menu_id == CTX_MOVE_DOWN else -1
-        move_rearrangable_list_item_to(list_item, list_item.get_index() + rel_index)
-        any_edited = true
+        if is_rearrangable:
+            move_rearrangable_list_item_to(list_item, list_item.get_index() + rel_index)
+        else:
+            GameManager.move_level_list_relative(list_item.level_list_name, rel_index)
+            refresh()
     elif context_menu_id in [CTX_MOVE_TO_TOP, CTX_MOVE_TO_BOTTOM]:
         var to_index: = 0 if context_menu_id == CTX_MOVE_TO_TOP else level_list_container.get_child_count() - 1
-        move_rearrangable_list_item_to(list_item, to_index)
-        any_edited = true
+        if is_rearrangable:
+            move_rearrangable_list_item_to(list_item, to_index)
+        else:
+            GameManager.move_level_list_to_top_bottom(list_item.level_list_name, context_menu_id == CTX_MOVE_TO_TOP)
+            refresh()
 
 func on_rearrange_lists_back_button_pressed() -> void:
     if not is_rearranging_lists:
@@ -376,3 +485,44 @@ func set_level_list_container_min_height() -> void:
 
 func on_import_levels_button_pressed() -> void:
     GameManager.start_import_levels()
+
+
+func on_bundled_levels_tab_button_pressed() -> void:
+    refresh()
+
+func on_custom_levels_tab_button_pressed() -> void:
+    refresh()
+
+
+func scroll_to_current_level() -> void:
+    await get_tree().process_frame
+    var found_current_level: LevelListItem = null
+    for level_list in level_list_container.get_children():
+        if not level_list is SingleLevelList:
+            continue
+        for level_item in level_list.get_children():
+            if not level_item is LevelListItem:
+                continue
+            if level_item.is_current_level():
+                found_current_level = level_item
+                break
+        if found_current_level:
+            break
+    if found_current_level:
+        list_scroll_container.ensure_control_visible(found_current_level)
+
+func on_open_levels_folder_button_pressed() -> void:
+    if not FilesManager.game_exists(GameManager.get_identified_game_name()):
+        GlobalToaster.show_toast_message("Game not saved, folder doesn't exist")
+        return
+    var levels_folder: = FilesManager.get_game_levels_dir(GameManager.get_identified_game_name())
+    OS.shell_open(ProjectSettings.globalize_path(levels_folder))
+
+
+func on_edit_autosave_button_pressed() -> void:
+    if not GameManager.is_in_level_edit_mode:
+        return
+    var map_editor: = Utility.get_map_editor()
+    if map_editor:
+        map_editor.load_editor_autosave()
+        close()
