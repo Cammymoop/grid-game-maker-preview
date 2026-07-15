@@ -1907,18 +1907,31 @@ func _remove_level_from_all_lists(level_name: String) -> void:
 	for non_bundled_info in non_bundled_level_lists:
 		non_bundled_info["level_names"].erase(level_name)
 
-func _get_next_bundled_level_list(level_list_name: String) -> String:
-	var all_bundled_lists: = get_list_of_level_lists(true)
-	var non_empty_lists: Array[String] = []
-	for bundled_list_name in all_bundled_lists:
-		if get_levels_in_level_list(bundled_list_name).size() > 0:
-			non_empty_lists.append(bundled_list_name)
+func _is_list_info_valid_next_list(list_info: Dictionary) -> bool:
+	if list_info.get("always_hidden", false):
+		return false
+	if get_levels_in_list_info(list_info).size() == 0:
+		return false
+	return true
 
-	if not level_list_name in non_empty_lists:
+func _get_next_bundled_level_list_auto(level_list_name: String) -> String:
+	var all_bundled_list_infos: = get_all_level_list_infos(true)
+
+	var valid_target_lists: Array[String] = []
+	for bundled_list_info in all_bundled_list_infos:
+		if bundled_list_info["name"] == level_list_name:
+			if bundled_list_info.get("always_hidden", false):
+				return ""
+			# make sure to include this list so we can check the next index
+			valid_target_lists.append(bundled_list_info["name"])
+
+		if _is_list_info_valid_next_list(bundled_list_info):
+			valid_target_lists.append(bundled_list_info["name"])
+
+	var from_list_index: int = valid_target_lists.find(level_list_name)
+	if from_list_index == valid_target_lists.size() - 1:
 		return ""
-	elif non_empty_lists.find(level_list_name) == non_empty_lists.size() - 1:
-		return ""
-	return non_empty_lists[non_empty_lists.find(level_list_name) + 1]
+	return valid_target_lists[from_list_index + 1]
 
 func _get_level_list_index(level_list_name: String) -> int:
 	var all_lists: = get_list_of_level_lists()
@@ -1932,6 +1945,9 @@ func is_level_list_bundled(level_list_name: String) -> bool:
 		if game_definition.get("level_lists", [])[i].get("name", "") == level_list_name:
 			return true
 	return false
+
+func level_list_exists(level_list_name: String) -> bool:
+	return level_list_name in get_list_of_level_lists()
 
 func change_level_list_is_bundled(level_list_name: String, new_is_bundled: bool) -> void:
 	var exists_in_bundled: bool = is_level_list_bundled(level_list_name)
@@ -2114,9 +2130,12 @@ func get_all_non_bundled_level_list_infos() -> Array[Dictionary]:
 
 func get_levels_in_level_list(level_list_name: String) -> Array[String]:
 	var level_list_info: = _get_level_list(level_list_name)
+	return get_levels_in_list_info(level_list_info)
+
+func get_levels_in_list_info(level_list_info: Dictionary) -> Array[String]:
 	var actual_level_names: Array[String] = []
 	for level_name in level_list_info.get("level_names", []):
-		if FilesManager.level_exists(get_identified_game_name(), level_name):
+		if level_name and FilesManager.level_exists(get_identified_game_name(), level_name):
 			actual_level_names.append(level_name)
 	return actual_level_names
 
@@ -2204,6 +2223,32 @@ func will_list_unlock_list(level_list_name: String, check_unlocking_list_name: S
 	var list_will_unlock_list: String = _get_list_unlocked_by_list(level_list_name)
 	return list_will_unlock_list == check_unlocking_list_name
 
+func get_next_list_of_bundled_list(level_list_name: String) -> String:
+	var level_list_info: = _get_level_list(level_list_name)
+	if not level_list_info or not is_level_list_bundled(level_list_name):
+		return ""
+	if level_list_info.get("always_hidden", false):
+		return ""
+
+	var custom_next_list_name: String = get_custom_next_list_of_bundled_list_info(level_list_info)
+	if custom_next_list_name:
+		return custom_next_list_name
+	
+	# If no custom next list set, or it's invalid, automatically pick the next list
+	return _get_next_bundled_level_list_auto(level_list_name)
+
+func get_custom_next_list_of_bundled_list_info(level_list_info: Dictionary) -> String:
+	if level_list_info.get("custom_next_list", "auto") == "auto":
+		return ""
+
+	var custom_next_list_name: String = level_list_info.get("custom_next_list_name", "")
+	if not custom_next_list_name in get_list_of_level_lists(true):
+		return ""
+	var custom_next_list_info: = _get_level_list(custom_next_list_name)
+	if not _is_list_info_valid_next_list(custom_next_list_info):
+		return ""
+	return custom_next_list_name
+
 func _get_list_unlocked_by_list(level_list_name: String) -> String:
 	if not is_level_list_bundled(level_list_name):
 		return ""
@@ -2213,7 +2258,7 @@ func _get_list_unlocked_by_list(level_list_name: String) -> String:
 		return ""
 	var next_list_name: String = level_list_info.get("auto_next_list", "")
 	if not next_list_name:
-		next_list_name = _get_next_bundled_level_list(level_list_name)
+		next_list_name = _get_next_bundled_level_list_auto(level_list_name)
 		if not next_list_name:
 			return ""
 	if not is_level_list_bundled(next_list_name):
@@ -2241,6 +2286,8 @@ func unlock_list_as_next(next_level_list_name: String) -> void:
 		if levels_in_list.size() > 0:
 			unlock_level_in_list(next_level_list_name, levels_in_list[0])
 
+func unlock_level_code(level_code: String) -> void:
+	unlock_level_in_list(_level_list_from_code(level_code), _level_name_from_code(level_code))
 
 func unlock_level_in_list(level_list_name: String, level_name: String) -> void:
 	if not level_list_name:
@@ -2284,7 +2331,7 @@ func _is_level_list_unlocked_in_save(level_list_name: String) -> bool:
 	var unlocked_lists: Array = get_game_save_data("unlocked_lists", [])
 	return level_list_name in unlocked_lists
 
-func get_unlocked_levels_in_level_list(level_list_name: String) -> Array[String]:
+func get_unlocked_levels_in_level_list(level_list_name: String, current_lvl_complete: bool = false) -> Array[String]:
 	if not is_level_list_unlocked(level_list_name):
 		return []
 	var level_list_info: = _get_level_list(level_list_name)
@@ -2301,7 +2348,7 @@ func get_unlocked_levels_in_level_list(level_list_name: String) -> Array[String]
 	var unlocked_levels: Array[String] = []
 	var max_completed_idx: int = -1
 	if not all_unlocked:
-		max_completed_idx = _max_completed_idx_in_level_list(level_list_name)
+		max_completed_idx = _max_completed_idx_in_level_list(level_list_name, current_lvl_complete)
 
 	for idx in existing_levels.size():
 		if all_unlocked or (prog_unlock_num > 0 and max_completed_idx + prog_unlock_num >= idx):
@@ -2309,6 +2356,18 @@ func get_unlocked_levels_in_level_list(level_list_name: String) -> Array[String]
 		elif _is_level_code_unlocked_in_save(_level_code(level_list_name, existing_levels[idx])):
 			unlocked_levels.append(existing_levels[idx])
 	return unlocked_levels
+
+func is_level_code_unlocked(level_code: String, current_lvl_complete: bool = false) -> bool:
+	return is_level_unlocked_in_list(_level_list_from_code(level_code), _level_name_from_code(level_code), current_lvl_complete)
+
+func is_level_unlocked_in_list(level_list_name: String, level_name: String, current_lvl_complete: bool = false) -> bool:
+	return level_name in get_unlocked_levels_in_level_list(level_list_name, current_lvl_complete)
+
+func is_level_unlocked_in_any_list(level_name: String) -> bool:
+	for level_list_name in get_list_of_level_lists():
+		if is_level_unlocked_in_list(level_list_name, level_name):
+			return true
+	return false
 
 func get_levels_to_show_in_level_list(level_list_name: String, as_edit_mode: bool = false, is_unlisted_levels: bool = false) -> Array[Dictionary]:
 	var levels_with_info: Array[Dictionary] = []
@@ -2367,6 +2426,14 @@ func get_levels_to_show_in_level_list(level_list_name: String, as_edit_mode: boo
 		})
 	return levels_with_info
 
+func is_current_level_completed() -> bool:
+	if not loaded_level_name:
+		return false
+	var list_containing_level: String = current_level_list
+	if not list_containing_level:
+		list_containing_level = get_list_containing_level(loaded_level_name)
+	return is_level_completed_in_list(list_containing_level, loaded_level_name)
+
 func is_level_completed_in_list(level_list_name: String, level_name: String) -> bool:
 	if not FilesManager.level_exists(get_identified_game_name(), level_name):
 		return false
@@ -2377,10 +2444,16 @@ func is_level_completed_in_any_list(level_name: String) -> bool:
 		return false
 	return _is_level_code_completed_in_save(_level_code("", level_name), true)
 
-func _max_completed_idx_in_level_list(level_list_name: String) -> int:
+func _max_completed_idx_in_level_list(level_list_name: String, current_lvl_complete: bool = false) -> int:
+	if current_lvl_complete:
+		if not current_level_list or current_level_list != level_list_name:
+			current_lvl_complete = false
 	var existing_levels: = get_levels_in_level_list(level_list_name)
 	var max_completed_idx: int = -1
 	for idx in existing_levels.size():
+		if current_lvl_complete and existing_levels[idx] == loaded_level_name:
+			max_completed_idx = idx
+			continue
 		if not _is_level_completed_in_save(level_list_name, existing_levels[idx]):
 			continue
 		max_completed_idx = idx
@@ -2540,44 +2613,28 @@ func remove_level_from_list(level_name: String, level_list_name: String) -> void
 		non_bundled_lists_updated()
 
 
-func get_next_level_in_list(level_list_name: String, after_level: String = "") -> String:
-	var level_list_info: = _get_level_list(level_list_name)
-	if not level_list_info or level_list_info.get("level_names", []).size() < 1:
+func get_next_level_in_list(level_list_name: String, after_level: String = "", require_unlocked: bool = false, current_lvl_complete: bool = false) -> String:
+	var levels: = get_levels_in_level_list(level_list_name)
+	if not levels.size() > 0:
 		return ""
 
-	var found: int = level_list_info["level_names"].find(after_level)
-	if not after_level or found < 0:
-		found = 0
-	if found + 1 >= level_list_info["level_names"].size():
-		return ""
-	return level_list_info["level_names"][found + 1]
-
-
-func get_auto_load_list_after_list(level_list_name: String, current_level_as_complete: bool = false) -> String:
-	var level_list_info: = _get_level_list(level_list_name)
-	if not level_list_info:
-		return ""
-	var is_bundled: bool = is_level_list_bundled(level_list_name)
-	if not is_bundled:
-		return ""
-
-	if level_list_info.get("auto_next_list", ""):
-		if _get_bundled_level_list(level_list_info["auto_next_list"]):
-			return level_list_info["auto_next_list"]
-		else:
+	var found: int = -1
+	if after_level:
+		found = levels.find(after_level)
+		if found < 0:
 			return ""
-	elif level_list_info.get("list_complete_to_lvlselect", false):
+	
+	for idx in range(found + 1, levels.size()):
+		if not require_unlocked or is_level_unlocked_in_list(level_list_name, levels[idx], current_lvl_complete):
+			return levels[idx]
+	return ""
+
+
+func get_advance_to_list_after_list(level_list_name: String) -> String:
+	if not is_level_list_bundled(level_list_name):
 		return ""
-	var unlocked_lists: Array = get_all_unlocked_level_lists(current_level_as_complete)
-	var unlocked_lists_names: Array = []
-	for unlocked_list in unlocked_lists:
-		unlocked_lists_names.append(unlocked_list["name"])
-	if unlocked_lists_names.size() <= 1:
-		return ""
-	var index_of: = unlocked_lists_names.find(level_list_name)
-	if index_of == -1 or index_of == unlocked_lists_names.size() - 1:
-		return ""
-	return unlocked_lists_names[index_of + 1]
+	
+	return get_next_list_of_bundled_list(level_list_name)
 
 func get_all_unlocked_level_lists(_current_level_as_complete: bool = false, only_bundled: bool = true) -> Array[Dictionary]:
 	var lists: Array[Dictionary] = []
@@ -2662,7 +2719,7 @@ func add_level_to_list_index(level_name: String, is_bundled_lists: bool, to_inde
 	add_level_to_level_list(level_name, all_level_infos[to_index]["name"])
 
 
-func get_next_level_to_auto_load(after_level: String = "", current_level_as_complete: bool = false) -> Array:
+func get_next_level_to_auto_load(after_level: String, current_level_as_complete: bool) -> Array:
 	if not after_level:
 		after_level = loaded_level_name
 	if not current_level_list or not after_level:
@@ -2671,13 +2728,15 @@ func get_next_level_to_auto_load(after_level: String = "", current_level_as_comp
 	var level_list_info: = _get_level_list(current_level_list)
 	if not level_list_info.get("auto_load_next", true):
 		return []
-	var next_level_in_list: = get_next_level_in_list(current_level_list, after_level)
+	var next_level_in_list: = get_next_level_in_list(current_level_list, after_level, true, current_level_as_complete)
 	if next_level_in_list:
 		return [current_level_list, next_level_in_list]
 
-	var next_list_name: = get_auto_load_list_after_list(current_level_list, current_level_as_complete)
-	if not next_list_name or not is_level_list_unlocked(next_list_name, current_level_as_complete):
+	var next_list_name: = get_advance_to_list_after_list(current_level_list)
+	if not next_list_name:
 		return []
+	#if not is_level_list_unlocked(next_list_name, current_level_as_complete):
+		#return []
 	return [next_list_name, get_first_existing_level_from_list(next_list_name)]
 
 
@@ -2730,7 +2789,7 @@ func _complete_level(level_list_name: String, level_name: String) -> void:
 		set_game_save_data("completed_levels", completed_levels)
 	_recheck_level_list_unlocks()
 
-# Complete the current level in the current list and persist any pending dependant save file values
+# Complete the current level in the current list and persist any pending dependant save file updates
 func complete_current_level() -> void:
 	if is_in_level_edit_mode or not loaded_level_name:
 		return
@@ -2743,11 +2802,13 @@ func complete_current_level() -> void:
 	MapManager.flush_save_persist_on_completion()
 
 
-func advance_level(with_delay: float = 0, with_complete_current_level: bool = true) -> void:
+func advance_level(with_delay: float = 0) -> void:
 	if cur_scene != "Play" or is_in_level_edit_mode:
 		return
-	if with_complete_current_level:
-		complete_current_level()
+	if not current_level_list and get_list_containing_level(loaded_level_name):
+		current_level_list = get_list_containing_level(loaded_level_name)
+	complete_current_level()
+
 	var adv_to_level_and_list: Array = get_advance_to_level_and_list()
 	if not adv_to_level_and_list:
 		return
@@ -2757,43 +2818,38 @@ func advance_level(with_delay: float = 0, with_complete_current_level: bool = tr
 		go_to_level_select(with_delay)
 	else:
 		var level_code: String = _level_code(adv_to_level_and_list[0], adv_to_level_and_list[1])
-		_move_to_code_with_delay(level_code, with_delay)
+		_move_to_code_with_delay(level_code, with_delay, true)
 
 func move_to_level(level_list_name: String, level_name: String, with_delay: float = 0) -> void:
 	if cur_scene != "Play" or is_in_level_edit_mode:
 		return
 	var level_code: String = _level_code(level_list_name, level_name)
-	_move_to_code_with_delay(level_code, with_delay)
+	_move_to_code_with_delay(level_code, with_delay, true)
 
 func move_to_level_list_start(level_list_name: String, with_delay: float = 0) -> void:
 	if cur_scene != "Play" or is_in_level_edit_mode:
 		return
-	var list_info: = _get_level_list(level_list_name)
-	if not list_info or list_info.get("level_names", []).size() < 1:
+	var existing_levels: = get_levels_in_level_list(level_list_name)
+	if not existing_levels.size() > 0:
 		return
-	var level_code: String = _level_code(level_list_name, list_info.get("level_names", [])[0])
-	_move_to_code_with_delay(level_code, with_delay)
+	var level_code: String = _level_code(level_list_name, existing_levels[0])
+	_move_to_code_with_delay(level_code, with_delay, true)
 
-func _move_to_code_with_delay(level_code: String, with_delay: float) -> void:
+func _move_to_code_with_delay(level_code: String, with_delay: float, also_unlock: bool = false) -> void:
+	if also_unlock and not GameManager.is_in_level_edit_mode:
+		if not is_level_code_unlocked(level_code):
+			unlock_level_code(level_code)
 	if with_delay <= 0:
 		goto_level_code(level_code)
 	else:
 		set_game_save_data("last_played_level", level_code)
 		queue_delayed_goto_level(with_delay, level_code)
 
-
-func set_last_played_level_as_next_advance_to() -> void:
-	var adv_to_level_and_list: Array = get_advance_to_level_and_list()
-	if not adv_to_level_and_list or not adv_to_level_and_list[1]:
-		return
-	var adv_to_code: = _level_code(adv_to_level_and_list[0], adv_to_level_and_list[1])
-	set_game_save_data("last_played_level", adv_to_code)
-
-func get_advance_to_level_and_list(with_current_level_as_complete: bool = false) -> Array:
+func get_advance_to_level_and_list(with_current_level_as_complete: bool = true) -> Array:
 	if not loaded_level_name or not current_level_list or current_level_is_museum:
 		return []
 	
-	var next_auto_load_level: Array = get_next_level_to_auto_load("", with_current_level_as_complete)
+	var next_auto_load_level: Array = get_next_level_to_auto_load(loaded_level_name, with_current_level_as_complete)
 	if next_auto_load_level:
 		return next_auto_load_level
 	
@@ -3837,3 +3893,12 @@ func is_current_level_custom() -> bool:
 		var list_of_cur_level: = get_list_containing_level(loaded_level_name)
 		return not is_level_list_bundled(list_of_cur_level)
 	return not is_level_list_bundled(current_level_list)
+
+func get_all_existing_levels_sorted_by_chronology() -> Array[String]:
+	var all_levels: Array[String] = []
+	all_levels.append_array(get_list_of_all_levels_in_lists())
+	
+	for unlisted_level in get_list_of_unlisted_levels():
+		if not unlisted_level in all_levels:
+			all_levels.append(unlisted_level)
+	return all_levels

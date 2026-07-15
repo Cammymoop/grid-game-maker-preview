@@ -521,7 +521,8 @@ func _primary_action_at_cursor(holding: bool = false) -> void:
 	if cursor_mode == "none":
 		set_cursor_mode(_last_tile_entity_mode)
 	if cursor_mode == "tile":
-		MapManager.replace_tiles_at(cursor_tile_pos, current_tile_index, current_tile_facing)
+		MapManager.replace_tiles_at(cursor_tile_pos, current_tile_index, current_tile_facing, true)
+		MapManager.post_editor_placing_tile(cursor_tile_pos, current_tile_index)
 		something_edited()
 	elif cursor_mode == "entity":
 		var entities_here = get_all_entities_at_tile_pos(cursor_tile_pos)
@@ -540,6 +541,7 @@ func _primary_action_at_cursor(holding: bool = false) -> void:
 				new_entity.set_local_properties_dict(entity_properties_copied)
 			if new_entity is LargeEntity:
 				new_entity.update_size(entity_size_copied)
+		EntityManager.post_editor_create_entity(new_entity)
 		_refresh_edited_entity_indicators()
 		something_edited()
 	elif cursor_mode == "text":

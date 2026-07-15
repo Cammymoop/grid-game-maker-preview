@@ -3,7 +3,7 @@
 [ext_resource type="Script" uid="uid://cfrnaqldrr8lr" path="res://Scenes/level_list_settings.gd" id="1_8f1op"]
 [ext_resource type="PackedScene" uid="uid://bleyoj5f36kfy" path="res://Scenes/GameEditor/ConditionalEditor/scalar_value_input.tscn" id="2_xli71"]
 
-[node name="LevelListSettings" type="VBoxContainer" unique_id=631932331 node_paths=PackedStringArray("back_button", "name_input", "total_levels_label", "do_progressive_unlock_toggle", "progressive_unlock_num_container", "progressive_unlock_num_input", "always_hidden_container", "always_hidden_toggle", "not_always_hidden_container", "is_locked_container", "is_locked_toggle", "is_hidden_container", "is_hidden_toggle", "default_is_unlocked_container", "default_is_unlocked_toggle", "show_locked_levels_toggle", "show_locked_titles_container", "show_locked_titles_toggle", "completion_mode_selector", "completion_number_container", "completion_number_input")]
+[node name="LevelListSettings" type="VBoxContainer" unique_id=631932331 node_paths=PackedStringArray("back_button", "name_input", "total_levels_label", "do_progressive_unlock_toggle", "progressive_unlock_num_container", "progressive_unlock_num_input", "always_hidden_container", "always_hidden_toggle", "not_always_hidden_container", "is_locked_container", "is_locked_toggle", "is_hidden_container", "is_hidden_toggle", "default_is_unlocked_container", "default_is_unlocked_toggle", "show_locked_levels_toggle", "show_locked_titles_container", "show_locked_titles_toggle", "completion_mode_selector", "completion_number_container", "completion_number_input", "show_completion_container", "show_completion_selector", "custom_next_list_container", "custom_next_list_selector", "when_completed_selector")]
 custom_minimum_size = Vector2(400, 0)
 script = ExtResource("1_8f1op")
 back_button = NodePath("MarginContainer/BackButton")
@@ -27,6 +27,11 @@ show_locked_titles_toggle = NodePath("WhenNotAlwaysHidden/ShowLockedLevelTitlesO
 completion_mode_selector = NodePath("CompletionCriteriaOption/HBoxContainer/CompletionCriteriaSelector")
 completion_number_container = NodePath("CompletionCriteriaOption/CompletionCriteriaNumberContainer")
 completion_number_input = NodePath("CompletionCriteriaOption/CompletionCriteriaNumberContainer/CompletionCriteriaScalarInput")
+show_completion_container = NodePath("ShowCompletionContainer")
+show_completion_selector = NodePath("ShowCompletionContainer/OptionButton")
+custom_next_list_container = NodePath("HBoxContainer7")
+custom_next_list_selector = NodePath("HBoxContainer7/CustomNextListSelector")
+when_completed_selector = NodePath("HBoxContainer6/UnlockNextStyleSelector")
 
 [node name="MarginContainer" type="MarginContainer" parent="." unique_id=1979548354]
 layout_mode = 2
@@ -210,16 +215,16 @@ default_value = 1.0
 min_value = 1.0
 custom_step = true
 
-[node name="HBoxContainer5" type="HBoxContainer" parent="." unique_id=13282175]
+[node name="ShowCompletionContainer" type="HBoxContainer" parent="." unique_id=13282175]
 layout_mode = 2
 alignment = 2
 
-[node name="Label" type="Label" parent="HBoxContainer5" unique_id=1606734158]
+[node name="Label" type="Label" parent="ShowCompletionContainer" unique_id=1606734158]
 layout_mode = 2
 theme_override_font_sizes/font_size = 14
 text = "Show Completion Counter:"
 
-[node name="OptionButton" type="OptionButton" parent="HBoxContainer5" unique_id=620687529]
+[node name="OptionButton" type="OptionButton" parent="ShowCompletionContainer" unique_id=620687529]
 layout_mode = 2
 theme_override_font_sizes/font_size = 12
 alignment = 1
@@ -239,11 +244,34 @@ popup/item_4/id = 5
 popup/item_5/text = "Completed/Visible Total"
 popup/item_5/id = 4
 
-[node name="VBoxContainer" type="VBoxContainer" parent="HBoxContainer5" unique_id=68205301]
+[node name="VBoxContainer" type="VBoxContainer" parent="ShowCompletionContainer" unique_id=68205301]
 layout_mode = 2
 
 [node name="HSeparator3" type="HSeparator" parent="." unique_id=472371150]
 layout_mode = 2
+
+[node name="HBoxContainer7" type="HBoxContainer" parent="." unique_id=967163472]
+layout_mode = 2
+alignment = 2
+
+[node name="Label" type="Label" parent="HBoxContainer7" unique_id=72743009]
+layout_mode = 2
+tooltip_text = "How many levels ahead of the furthest completed level should be unlocked?"
+mouse_filter = 1
+theme_override_font_sizes/font_size = 14
+text = "Which List Is Next:"
+
+[node name="CustomNextListSelector" type="OptionButton" parent="HBoxContainer7" unique_id=1522402460]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+alignment = 1
+selected = 0
+fit_to_longest_item = false
+item_count = 2
+popup/item_0/text = "Auto"
+popup/item_0/id = 1
+popup/item_1/text = "Levels"
+popup/item_1/id = 0
 
 [node name="HBoxContainer6" type="HBoxContainer" parent="." unique_id=1996421151]
 layout_mode = 2

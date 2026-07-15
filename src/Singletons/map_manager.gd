@@ -383,7 +383,7 @@ func _register_persistant_effect(effect_info: Dictionary) -> void:
         map_metadata["persistant_effects"][key] = []
     map_metadata["persistant_effects"][key].append(effect_info.duplicate_deep())
 
-func _remove_effects_at(at_tile_pos: Vector2i) -> void:
+func _remove_effects_at(at_tile_pos: Vector2i, _is_editor: bool = false) -> void:
     var key: = Utility.vec2i_key(at_tile_pos)
     if not map_metadata.get("persistant_effects", {}).has(key):
         return
@@ -682,11 +682,11 @@ func find_tiles_with_sprite_modifiers() -> void:
             if spr_mod_prop.is_conditional() or spr_mod_prop.get_value():
                 tiles_with_sprite_modifiers.append(ti)
 
-func clear_all_at(tile_position) -> void:
+func clear_all_at(tile_position, _is_editor: bool = false) -> void:
     for l in layers:
         l.set_cell_s(tile_position, -1)
 
-func erase_tiles_at_multiple(position_list: Array) -> void:
+func erase_tiles_at_multiple(position_list: Array, _is_editor: bool = false) -> void:
     for pos in position_list:
         for l in layers:
             l.set_cell_s(pos, -1)
@@ -699,37 +699,61 @@ func replace_tiles_in_rect(rect: Rect2, new_tile, checker_tile=false):
                 ti = checker_tile
             replace_tiles_at(Vector2(x, y), ti)
 
-func replace_tiles_at_multiple(position_list, new_tile):
+func replace_tiles_at_multiple(position_list: Array, new_tile: int, preserve_facing: bool = false, is_editor: bool = false):
+    var facing_val: int = -1 if preserve_facing else 0
     for pos in position_list:
-        replace_tiles_at(pos, new_tile)
+        replace_tiles_at(pos, new_tile, facing_val, is_editor)
 
-func is_pos_out_of_bounds(tile_position) -> bool:
-    return Utility.position_in_rect_inclusive(tile_position, get_map_size())
+func is_pos_out_of_bounds(tile_position, bounds: Rect2i = Rect2i()) -> bool:
+    if bounds == Rect2i():
+        bounds = get_map_size()
+    return Utility.position_in_rect_inclusive(tile_position, bounds)
 
-func replace_tiles_at(tile_position, new_tile, facing: int = 0) -> void:
+# facing -1 => preserve replaced tile's facing
+func replace_tiles_at(tile_position: Vector2i, new_tile: int, facing: int = 0, is_editor_place: bool = false) -> void:
     var old_bounds = get_map_size()
-    clear_all_at(tile_position)
+
+    if facing == -1:
+        facing = get_tile_facing_at(tile_position)
+    clear_all_at(tile_position, is_editor_place)
+
+    var size_changed: = false
     if new_tile != -1:
+        size_changed = is_pos_out_of_bounds(tile_position, old_bounds)
         layers[0].set_cell_s(tile_position, new_tile, facing)
+    else:
+        size_changed = get_map_size() != old_bounds
     
-    if new_tile == -1:
-        if get_map_size() != old_bounds:
-            level_size_changed.emit()
-    elif is_pos_out_of_bounds(tile_position):
+    if size_changed:
         level_size_changed.emit()
+    
+    if is_editor_place:
+        post_editor_placing_tile(tile_position, new_tile)
+    else:
+        post_non_editor_placing_tile(tile_position, new_tile)
 
-func erase_tiles_and_effects_at(tile_position: Vector2i) -> void:
-    clear_all_at(tile_position)
-    _remove_effects_at(tile_position)
+func post_editor_placing_tile(tile_position: Vector2i, new_tile: int) -> void:
+    if new_tile == -1:
+        return
+    resolve_tile_individual_events([tile_position], "editor_placing", null, new_tile)
 
-func erase_tiles_and_effects_at_multiple(position_list: Array) -> void:
-    erase_tiles_at_multiple(position_list)
+func post_non_editor_placing_tile(tile_position: Vector2i, new_tile: int) -> void:
+    if new_tile == -1:
+        return
+    resolve_tile_individual_events([tile_position], "placing_tile", null, new_tile)
+
+func erase_tiles_and_effects_at(tile_position: Vector2i, is_editor: bool = false) -> void:
+    clear_all_at(tile_position, is_editor)
+    _remove_effects_at(tile_position, is_editor)
+
+func erase_tiles_and_effects_at_multiple(position_list: Array, is_editor: bool = false) -> void:
+    erase_tiles_at_multiple(position_list, is_editor)
     for pos in position_list:
-        _remove_effects_at(pos)
+        _remove_effects_at(pos, is_editor)
 
-func erase_effects_at_multiple(position_list: Array) -> void:
+func erase_effects_at_multiple(position_list: Array, _is_editor: bool = false) -> void:
     for pos in position_list:
-        _remove_effects_at(pos)
+        _remove_effects_at(pos, _is_editor)
 
 func get_tile_definition(tile_index):
     return tile_defs[tile_index].duplicate(true)
@@ -1370,6 +1394,8 @@ func get_world_pos_above(tile_position: Vector2i) -> Vector2:
     return tile_to_world_position_centered(tile_position) + (Vector2.UP * (tile_width * 0.75))
 
 func idle_actions() -> void:
+    var activate_id: Array[int] = []
+    var activate_at: Array = []
     for t_id in tile_defs:
         var tile_props: Dictionary = tile_defs[t_id].get("properties", {})
         if not tile_props.has("idle_update"):
@@ -1377,8 +1403,25 @@ func idle_actions() -> void:
         var idle_update_prop: = get_tile_index_property(t_id, "idle_update")
         if not idle_update_prop.is_conditional():
             continue
-        var positions_of_tile: = get_all_positions_of_tile(t_id)
-        resolve_tile_individual_events(positions_of_tile, "idle_update", null, t_id, false)
+        activate_id.append(t_id)
+        activate_at.append(get_all_positions_of_tile(t_id))
+    for idx in activate_id.size():
+        resolve_tile_individual_events(activate_at[idx], "idle_update", null, activate_id[idx], false)
+
+func every_tick_actions() -> void:
+    var activate_id: Array[int] = []
+    var activate_at: Array = []
+    for t_id in tile_defs:
+        var tile_props: Dictionary = tile_defs[t_id].get("properties", {})
+        if not tile_props.has("every_tick"):
+            continue
+        var every_tick_prop: = get_tile_index_property(t_id, "every_tick")
+        if not every_tick_prop.is_conditional():
+            continue
+        activate_id.append(t_id)
+        activate_at.append(get_all_positions_of_tile(t_id))
+    for idx in activate_id.size():
+        resolve_tile_individual_events(activate_at[idx], "every_tick", null, activate_id[idx], false)
 
 func removing_texture_id(_texture_id: int) -> void:
     var fallback_tex: int = TextureManager.get_fallback_texture_id()
@@ -1497,6 +1540,8 @@ func clear_save_persist_on_completion() -> void:
     map_metadata.erase("save_increment_on_completion")
 
 func flush_save_persist_on_completion() -> void:
+    if GameManager.is_in_level_edit_mode:
+        return
     for save_key in map_metadata.get("save_persist_on_completion", {}).keys():
         var val: Variant = map_metadata["save_persist_on_completion"][save_key]
         GameManager.set_game_save_data(save_key, val)
@@ -1562,3 +1607,19 @@ func import_new_tiles_with_texture_remaps(new_tiles: Array, texture_remaps: Dict
         if typeof(new_tile_definition) != TYPE_DICTIONARY:
             continue
         import_new_definition_with_texture_remaps(new_tile_definition, texture_remaps)
+
+func state_load_actions() -> void:
+    if GameManager._state_load_is_start_of_level:
+        starting_event("level_start")
+    starting_event("level_refresh")
+
+func starting_event(event_name: String) -> void:
+    for t_id in tile_defs:
+        var tile_props: Dictionary = tile_defs[t_id].get("properties", {})
+        if not tile_props.has(event_name):
+            continue
+        var event_prop: = get_tile_index_property(t_id, event_name)
+        if not event_prop.is_conditional():
+            continue
+        var positions_of_tile: = get_all_positions_of_tile(t_id)
+        resolve_tile_individual_events(positions_of_tile, event_name, null, t_id, false)

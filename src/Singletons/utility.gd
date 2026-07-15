@@ -1028,6 +1028,11 @@ func opbtn_select_id(opbtn: OptionButton, id: int) -> void:
 func opbtn_select_text(opbtn: OptionButton, text: String) -> void:
 	opbtn.selected = opbtn_get_index_from_text(opbtn, text)
 
+func opbtn_remove_item_at_id(opbtn: OptionButton, id: int) -> void:
+	var index: int = opbtn_get_index_from_id(opbtn, id)
+	if index >= 0:
+		opbtn.remove_item(index)
+
 func opbtn_enumerate_non_separator_idx(opbtn: OptionButton) -> Array[int]:
 	var indices: Array[int] = []
 	for i in opbtn.get_item_count():
@@ -1035,8 +1040,36 @@ func opbtn_enumerate_non_separator_idx(opbtn: OptionButton) -> Array[int]:
 			indices.append(i)
 	return indices
 
+func opbtn_get_text_item_list(opbtn: OptionButton) -> Array[String]:
+	var texts: Array[String] = []
+	for i in opbtn.get_item_count():
+		if not opbtn.is_item_separator(i) and opbtn.get_item_text(i) != "":
+			texts.append(opbtn.get_item_text(i))
+	return texts
+
+func get_anymenu_item_container(menu: Node) -> PopupMenu:
+	if menu is PopupMenu:
+		return menu
+	if menu is MenuButton or menu is OptionButton:
+		return menu.get_popup()
+	push_error("Invalid menu type: %s" % menu.get_class())
+	return null
+
+func anymenu_get_item_index(menu: Node, of_id: int) -> int:
+	var menu_container: = get_anymenu_item_container(menu)
+	return popupmenu_get_index_from_id(menu_container, of_id)
+
+func anymenu_replace_text_item_at_id(menu: Node, at_id: int, new_text: String) -> int:
+	var id_exists_at_index: int = anymenu_get_item_index(menu, at_id)
+	var menu_container: Node = get_anymenu_item_container(menu)
+	if id_exists_at_index == -1:
+		return menu_container.add_item(new_text, at_id)
+	else:
+		menu_container.set_item_text(id_exists_at_index, new_text)
+		return id_exists_at_index
+
 func popupmenu_get_index_from_id(popupmenu: PopupMenu, id: int) -> int:
-	for i in popupmenu.get_item_count():
+	for i in popupmenu.item_count:
 		if popupmenu.get_item_id(i) == id:
 			return i
 	return -1

@@ -1,0 +1,26 @@
+[gd_scene format=3 uid="uid://dk8awa0xycaq4"]
+
+[ext_resource type="PackedScene" uid="uid://bh1w4w8i5hk66" path="res://Scenes/GameEditor/SlotSelectorButton.tscn" id="1_psa02"]
+[ext_resource type="Script" uid="uid://b70235ll47872" path="res://Scenes/GameEditor/ConditionalEditor/level_name_input.gd" id="1_rwdu4"]
+
+[node name="LevelNameInput" type="HBoxContainer" unique_id=995722546 node_paths=PackedStringArray("slot_selector", "level_name_selector")]
+offset_right = 137.0
+offset_bottom = 26.0
+script = ExtResource("1_rwdu4")
+slot_selector = NodePath("SlotSelectorButton")
+level_name_selector = NodePath("LevelNameSelector")
+
+[node name="SlotSelectorButton" parent="." unique_id=1264497244 instance=ExtResource("1_psa02")]
+layout_mode = 2
+show_text_option = true
+default_slot_id = -4
+
+[node name="LevelNameSelector" type="OptionButton" parent="." unique_id=157356647]
+layout_mode = 2
+size_flags_vertical = 4
+alignment = 1
+selected = 0
+fit_to_longest_item = false
+item_count = 1
+popup/item_0/text = "(choose a level)"
+popup/item_0/id = 99999

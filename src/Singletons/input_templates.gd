@@ -44,12 +44,12 @@ enum InputTypes {
 	DyingEffectInput,
 	BumpEffectInput,
 	
+	LevelNameInput,
 	LevelListNameInput,
 	
 	CustomStringEnum,
 	
 	# Janky stuff
-	LevelNameInput,
 	SpecialEffectInput,
 	ExcludeDirectionInput,
 }
@@ -97,9 +97,10 @@ var templates: = {
 	InputTypes.SpecialEffectInput: preload("res://Scenes/GameEditor/static_effect_input.tscn"),
 	InputTypes.ExcludeDirectionInput: preload("res://Scenes/GameEditor/ConditionalEditor/exclude_dir_input.tscn"),
 	
-	InputTypes.LevelListNameInput: preload("res://Scenes/GameEditor/ConditionalEditor/complex_level_list_input.tscn"),
-
-	InputTypes.LevelNameInput: preload("res://Scenes/GameEditor/ConditionalEditor/complex_level_name_input.tscn"),
+	#InputTypes.LevelNameInput: preload("res://Scenes/GameEditor/ConditionalEditor/complex_level_name_input.tscn"),
+	#InputTypes.LevelListNameInput: preload("res://Scenes/GameEditor/ConditionalEditor/complex_level_list_input.tscn"),
+	InputTypes.LevelNameInput: preload("res://Scenes/GameEditor/ConditionalEditor/level_name_input.tscn"),
+	InputTypes.LevelListNameInput: preload("res://Scenes/GameEditor/ConditionalEditor/level_list_name_input.tscn"),
 	
 	# Empty by default, needs options to be set
 	InputTypes.CustomStringEnum: preload("res://Scenes/GameEditor/ConditionalEditor/generic_option_button_input.gd"),

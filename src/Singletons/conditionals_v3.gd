@@ -67,6 +67,7 @@ const all_events: Array[String] = [
     "was_blocked",
 
 	"idle_update",
+    "every_tick",
     "idle_on",
 	"dying",
     
@@ -79,14 +80,22 @@ const all_events: Array[String] = [
     "turn_start",
     "pre_turn_end",
     "turn_end",
+    
+    "level_start",
+    "level_refresh",
+
+    "editor_placing",
+    "creating",
+    "placing_tile",
 ]
 
 const NO_OTHER_EVENTS: = [
 	"i_finish_move_onto_tile", "i_move_off_of_tile", "i_move_onto_tile", "half_moved_off_of_tile", "half_moved_onto_tile",
     "i_finish_move_next_to_tile", "i_move_away_from_tile",
-    "post_move", "idle_update",
+    "post_move", "idle_update", "every_tick",
     "joined_bond_group", "left_bond_group",
     "dying", "do_action_1", "do_action_2", "do_action_3",
+    "level_start", "level_refresh", "creating", "editor_placing", "placing_tile",
 ]
 
 const EMPTY_CONDITIONAL: = [{"v": "3", "conditions": []}]
@@ -551,6 +560,8 @@ const EVENT_HINT_TEXT: Dictionary[String, String] = {
 
 	"idle_update": "Unconditional Event.\nEntities or Tiles. For entities, resolved every idle interval after the entity stops moving.\nFor tiles, resolved every idle interval for every tile type",
     "idle_on": "Unconditional Event.\nTiles only, resolved for any idle entity on this tile every idle interval after that entity stopped moving",
+    "every_tick": "Unconditional Event.\nEntities or Tiles. Resolved every tick (60 times per second) for every entity or tile. Except while waiting for a turn if movement is not real-time.",
+
 	"dying": "Unconditional Event.\nEntities only, resolved when the entity is being destroyed",
     
     "started_tailing": "Unconditional Event.\nEntities only. Resolved when this entity starts tailing another entity",
@@ -562,6 +573,13 @@ const EVENT_HINT_TEXT: Dictionary[String, String] = {
     "turn_start": "[Discrete Movement Modes Only]\nEntities only, Resolved at the start of every game turn.",
     "pre_turn_end": "[Discrete+ Only]\nEntities only, Resolved when a game turn is about to end.",
     "turn_end": "[Discrete Movement Modes Only]\nEntities only, Resolved at the end of every game turn.",
+    
+    "level_start": "Unconditional Event.\nEntities or Tiles. Resolved when the starting state of the level is loaded",
+    "level_refresh": "Unconditional Event.\nEntities or Tiles. Resolved when any state of the level is loaded, including the starting state, undo, checkpoint restore, etc",
+    "creating": "Unconditional Event.\nEntities only. Resolved when the entity is being created through some gameplay effect (not by placing it in the level editor, see editor_placing)",
+    "placing_tile": "Unconditional Event.\nTiles only. Resolved when the tile is placed by some gameplay effect (not by placing it in the level editor, see editor_placing)",
+
+    "editor_placing": "Unconditional Event.\nEntities or Tiles. Resolved immediately when the entity or tile is placed in the level editor",
 }
 
 const EVENT_CATEGORIES: Dictionary[String, String] = {
@@ -603,6 +621,7 @@ const EVENT_CATEGORIES: Dictionary[String, String] = {
     "do_action_3": "input events",
     
     "idle_update": "other",
+    "every_tick": "other",
     "idle_on": "other",
     "dying": "other",
     
@@ -616,4 +635,10 @@ const EVENT_CATEGORIES: Dictionary[String, String] = {
     "turn_start": "turn events",
     "pre_turn_end": "turn events",
     "turn_end": "turn events",
+    
+    "level_start": "creating events",
+    "level_refresh": "creating events",
+    "creating": "creating events",
+    "placing_tile": "creating events",
+    "editor_placing": "creating events",
 }

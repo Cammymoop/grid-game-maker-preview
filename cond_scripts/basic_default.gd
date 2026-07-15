@@ -15,7 +15,7 @@ func cmd_select_defaults(slots: Dictionary) -> void:
 
 func desc_quit() -> Dictionary:
 	return {
-		"display_name": "Quit conditional",
+		"display_name": "Quit Conditional",
 		"slot_type_hint": "none",
 		"template_text": "Stop evaluating the rest of the conditional",
 		"tooltip": "Commands below in this list or in other lists will be skipped, all later steps will not be run.\n" \
@@ -1075,6 +1075,7 @@ func _create_entity_at(e_id: int, pos: Vector2i, facing: int, is_moving: bool) -
 		if new_entity.get_native_steps_per_tile() <= 0:
 			new_entity.set_steps_per_tile_override(EntityManager.get_default_spt())
 		new_entity.start_move(facing)
+	EntityManager.post_gameplay_entity_created(new_entity)
 	return new_entity
 
 func desc_a_create_entity() -> String:
@@ -1122,41 +1123,61 @@ func cmd_a_turn(slots: Dictionary, chosen_slot: int, complex_dir: Dictionary) ->
 		set_tiles_to_facing(slots, chosen_slot, resolve_complex_direction(complex_dir, slots))
 
 
-func desc_select_level_name() -> String:
+func desc_select_current_level_name() -> String:
 	return "string|<= Select the unique internal name of the current level"
-func cmd_select_level_name(slots: Dictionary, chosen_slot: int) -> void:
+func cmd_select_current_level_name(slots: Dictionary, chosen_slot: int) -> void:
 	if not Commands.slot_is_string(chosen_slot):
 		push_error("Invalid slot to select level list name into: %s" % chosen_slot)
 		return
 	slots[chosen_slot] = GameManager.loaded_level_name
 
-func desc_select_level_title() -> String:
-	return "string|<= Select the displayed title of the current level"
-func cmd_select_level_title(slots: Dictionary, chosen_slot: int) -> void:
+func desc_select_current_level_title() -> String:
+	return "string|<= Select the display title of the current level"
+func cmd_select_current_level_title(slots: Dictionary, chosen_slot: int) -> void:
 	if not Commands.slot_is_string(chosen_slot):
 		push_error("Invalid slot to select level title into: %s" % chosen_slot)
 		return
 	slots[chosen_slot] = MapManager.get_level_title()
 
-func desc_select_level_list_name() -> String:
+func desc_select_level_title() -> String:
+	return "string|<= Select the display title of the level with the internal name [level_name:LevelNameInput]"
+func cmd_select_level_title(slots: Dictionary, chosen_slot: int, level_name: Dictionary) -> void:
+	if not Commands.slot_is_string(chosen_slot):
+		push_error("Invalid slot to select level title into: %s" % chosen_slot)
+		return
+	var level_name_str: String = resolve_complex_string(level_name, slots)
+	if not level_name_str:
+		slots[chosen_slot] = ""
+		return
+	slots[chosen_slot] = FilesManager.get_level_title(GameManager.get_identified_game_name(), level_name_str)
+
+func desc_select_current_level_list_name() -> String:
 	return "string|<= Select the name of the current level list"
-func cmd_select_level_list_name(slots: Dictionary, chosen_slot: int) -> void:
+func cmd_select_current_level_list_name(slots: Dictionary, chosen_slot: int) -> void:
 	if not Commands.slot_is_string(chosen_slot):
 		push_error("Invalid slot to select level list name into: %s" % chosen_slot)
 		return
 	slots[chosen_slot] = GameManager.current_level_list
+
+func desc_if_playing_custom_level() -> String:
+	return "none|If the current level [invert:InvertInput:is,is not] a custom level"
+func cmd_if_playing_custom_level(_slots: Dictionary, invert: bool) -> bool:
+	return GameManager.is_current_level_custom() != invert
 
 
 func desc_next_level_exists() -> String:
 	return "none|If there is or will be an unlocked level to advance to after completing this level"
 func cmd_next_level_exists(_slots: Dictionary) -> bool:
 	var next_auto_load_level: Array = GameManager.get_next_level_to_auto_load("", true)
-	if not next_auto_load_level:
-		return false
-	return true
+	return Utility.truthy(next_auto_load_level)
 
-func desc_load_next_level() -> String:
-	return "none|Complete this level. Load the next level, with a [delay:ComplexScalarInput:default=1,step=0.1] second delay"
+func desc_load_next_level() -> Dictionary:
+	return {
+		"name": "load_next_level",
+		"display_name": "Complete Level and Advance",
+		"slot_type_hint": "none",
+		"template_text": "Complete this level. Load the next level, with a [delay:ComplexScalarInput:default=1,step=0.1] second delay",
+	}
 func cmd_load_next_level(slots: Dictionary, _slot: int, delay: Dictionary = {"type": "plain", "value": 1.0}) -> void:
 	var delay_val: float = resolve_complex_scalar(delay, slots)
 	GameManager.advance_level(delay_val)
@@ -1168,12 +1189,12 @@ func cmd_complete_level_and_show_level_select(_slots: Dictionary, delay: Diction
 	GameManager.go_to_level_select(resolve_complex_scalar(delay, _slots))
 
 func desc_exit_to_level_select() -> String:
-	return "none|Leave the current level and show the level select screen after a [delay:ComplexScalarInput:default=1,step=0.1] second delay"
+	return "none|Leave the current level without completing, show the level select screen after a [delay:ComplexScalarInput:default=1,step=0.1] second delay"
 func cmd_exit_to_level_select(_slots: Dictionary, _slot: int, delay: Dictionary) -> void:
 	GameManager.go_to_level_select(resolve_complex_scalar(delay, _slots))
 
 func desc_complete_level() -> String:
-	return "none|Complete this level (do not automatically load another)"
+	return "none|Complete this level (stay in the current level)"
 func cmd_complete_level(_slots: Dictionary) -> void:
 	GameManager.complete_current_level()
 
@@ -1182,15 +1203,61 @@ func desc_load_first_level_of_list() -> String:
 func cmd_load_first_level_of_list(_slots: Dictionary, _slot: int, list_val: Dictionary, delay: Dictionary) -> void:
 	var list_name: String = resolve_complex_string(list_val, _slots)
 	var delay_val: float = resolve_complex_scalar(delay, _slots)
+	if not list_name:
+		return
 	GameManager.move_to_level_list_start(list_name, delay_val)
 
+func desc_if_level_is_in_list() -> String:
+	return "none|If the level [level_val:LevelNameInput] is in the level list [list_val:LevelListNameInput]"
+func cmd_if_level_is_in_list(_slots: Dictionary, _slot: int, level_val: Dictionary, list_val: Dictionary) -> bool:
+	var list_name: String = resolve_complex_string(list_val, _slots)
+	var level_name: String = resolve_complex_string(level_val, _slots)
+	if not list_name or not level_name:
+		return false
+	var levels_in_list: Array = GameManager.get_levels_in_level_list(list_name)
+	return level_name in levels_in_list
+
+func desc_if_level_is_unlocked() -> String:
+	return "none|If the level [level_val:LevelNameInput] in the level list [list_val:LevelListNameInput] is unlocked"
+func cmd_if_level_is_unlocked(_slots: Dictionary, _slot: int, level_val: Dictionary, list_val: Dictionary) -> bool:
+	var list_name: String = resolve_complex_string(list_val, _slots)
+	var level_name: String = resolve_complex_string(level_val, _slots)
+	if not level_name:
+		return false
+
+	if not list_name:
+		return GameManager.is_level_unlocked_in_any_list(level_name)
+	else:
+		return GameManager.is_level_unlocked_in_list(list_name, level_name)
+
+func desc_if_current_level_is_completed() -> String:
+	return "none|If the current level has already been completed"
+func cmd_if_current_level_is_completed(_slots: Dictionary) -> bool:
+	return GameManager.is_current_level_completed()
+
+func desc_if_level_is_completed() -> String:
+	return "none|If the level [level_val:LevelNameInput] in the level list [list_val:LevelListNameInput] has been completed"
+func cmd_if_level_is_completed(_slots: Dictionary, _slot: int, level_val: Dictionary, list_val: Dictionary) -> bool:
+	var list_name: String = resolve_complex_string(list_val, _slots)
+	var level_name: String = resolve_complex_string(level_val, _slots)
+	if not level_name:
+		return false
+	if not list_name:
+		list_name = GameManager.get_list_containing_level(level_name)
+	return GameManager.is_level_completed_in_list(list_name, level_name)
+
 func desc_load_level_within_list() -> String:
-	return "none|Unlock and load the level [level_val:LevelNameInput] within the level list [list_val:LevelListNameInput] with a [delay:ComplexScalarInput:default=1,step=0.1] second delay"
-func cmd_load_level_within_list(_slots: Dictionary, _slot: int, level_val: Dictionary, list_val: Dictionary, delay: Dictionary) -> void:
+	return "none|Unlock and load the level [level_val:LevelNameInput] within the level list [list_val:LevelListNameInput] with a [delay:ComplexScalarInput:default=1,step=0.1] second delay\n" \
+		+ "[complete_current:BoolChoice:true,Complete,Do not complete] the current level"
+func cmd_load_level_within_list(_slots: Dictionary, _slot: int, level_val: Dictionary, list_val: Dictionary, delay: Dictionary, complete_current: bool) -> void:
+	if complete_current:
+		GameManager.complete_current_level()
 	var list_name: String = resolve_complex_string(list_val, _slots)
 	var level_name: String = resolve_complex_string(level_val, _slots)
 	var delay_val: float = resolve_complex_scalar(delay, _slots)
-	GameManager.unlock_level(list_name, level_name)
+	if not level_name:
+		return
+	GameManager.unlock_level_in_list(list_name, level_name)
 	GameManager.goto_level_in_level_list(list_name, level_name, delay_val)
 
 

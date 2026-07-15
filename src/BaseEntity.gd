@@ -32,6 +32,8 @@ var _this_move_is_teleport: = false
 
 var idle_ticks_elapsed: int = 0
 
+var _has_every_tick_update: = false
+
 var sprite: MaskLayerSprite
 
 # tiles per second
@@ -117,6 +119,7 @@ func initialize() -> void:
 	connect_to_signals()
 	
 	update_cached_special_props()
+	refresh_every_tick_update()
 	
 func update_cached_special_props(prop_name: String = "") -> void:
 	if not prop_name or prop_name == "z-index":
@@ -426,6 +429,11 @@ func set_local_property(property_name: String, value: Variant) -> void:
 func refresh_cached_prop(prop_name: String) -> void:
 	if prop_name in GameManager.SPECIAL_PROPS:
 		update_cached_special_props()
+	if prop_name == "every_tick":
+		refresh_every_tick_update()
+
+func refresh_every_tick_update() -> void:
+	_has_every_tick_update = EntityManager.entity_has_conditional_property(self, "every_tick")
 
 func _set_local_property(property_name: String, value: Variant) -> void:
 	if property_name in removed_properties:
@@ -477,6 +485,7 @@ func set_local_properties_dict(properties_dict: Dictionary) -> void:
 	local_properties.assign(properties_dict["local_set"].duplicate_deep())
 	removed_properties.assign(properties_dict["local_removed"].duplicate_deep())
 	update_cached_special_props()
+	refresh_every_tick_update()
 	_local_prop_changed()
 
 func get_intended_move(attempt_num: int = 0) -> int:

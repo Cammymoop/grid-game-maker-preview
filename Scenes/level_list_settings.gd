@@ -34,6 +34,14 @@ const ScalarValueInput = preload("res://src/GameEditor/ConditionalEditor/scalar_
 @export var completion_number_container: Control
 @export var completion_number_input: ScalarValueInput
 
+@export var show_completion_container: Control
+@export var show_completion_selector: OptionButton
+
+@export var custom_next_list_container: Control
+@export var custom_next_list_selector: OptionButton
+
+@export var when_completed_selector: OptionButton
+
 var editing_list_name: String = ""
 var total_levels: int = 0
 
@@ -58,6 +66,18 @@ const CompletionModeDisplayTexts: Dictionary = {
     COMPLETION_MODE_PERCENTAGE: "(X)% of Levels Complete",
 }
 
+const WHEN_COMPLETED_UNLOCK_NEXT = "unlock_next"
+const WHEN_COMPLETED_DO_NOTHING = "do_nothing"
+
+const WhenCompletedOptions: Array[String] = [
+    WHEN_COMPLETED_UNLOCK_NEXT,
+    WHEN_COMPLETED_DO_NOTHING,
+]
+const WhenCompletedDisplayTexts: Dictionary = {
+    WHEN_COMPLETED_UNLOCK_NEXT: "Unlock Next List",
+    WHEN_COMPLETED_DO_NOTHING: "Unlock Nothing",
+}
+
 
 func _ready() -> void:
     completion_mode_selector.clear()
@@ -68,7 +88,9 @@ func _ready() -> void:
     
     always_hidden_toggle.toggled.connect(on_always_hidden_toggled)
     
+    custom_next_list_selector.item_selected.connect(on_custom_next_list_selected)
     completion_number_input.value_changed.connect(on_completion_number_input_value_changed)
+    when_completed_selector.item_selected.connect(on_when_completed_selected)
     
     default_is_unlocked_toggle.toggled.connect(on_default_is_unlocked_toggled)
     
@@ -81,6 +103,9 @@ func _ready() -> void:
     progressive_unlock_num_input.value_changed.connect(prop_unlock_num_changed)
     show_locked_levels_toggle.toggled.connect(on_show_locked_levels_toggled)
     show_locked_titles_toggle.toggled.connect(on_show_locked_titles_toggled)
+    
+    show_completion_selector.item_selected.connect(on_show_completion_selected)
+
     if editing_list_name and visible:
         refresh_ui()
 
@@ -163,6 +188,9 @@ func refresh_ui() -> void:
         is_always_hidden = false
     
     not_always_hidden_container.visible = not is_always_hidden
+    custom_next_list_container.visible = not is_always_hidden and not is_custom_level_list
+    if custom_next_list_container.visible:
+        refresh_custom_next_list_selector()
 
     if not is_always_hidden:
         var prog_unlock_num: = int(list_info.get("progressive_locked_levels", 0))
@@ -199,6 +227,27 @@ func refresh_ui() -> void:
         var completion_number: int = _get_completion_number(list_info, completion_mode)
         completion_number_input.set_value(completion_number)
         _update_last_completion_number(completion_mode, completion_number)
+
+
+func refresh_custom_next_list_selector() -> void:
+    custom_next_list_selector.clear()
+    custom_next_list_selector.add_item("Auto", -1)
+    
+    var selected_custom_next: String = GameManager.get_custom_next_list_of_bundled_list_info(_get_list_info())
+    if not selected_custom_next:
+        custom_next_list_selector.selected = 0
+
+    # Any list which isn't always hidden and has at least one level
+    for bundled_list_info in GameManager.get_all_level_list_infos(true):
+        if bundled_list_info.get("name") == editing_list_name:
+            custom_next_list_selector.add_item(editing_list_name, -2)
+            custom_next_list_selector.set_item_disabled(custom_next_list_selector.item_count - 1, true)
+            continue
+        if not GameManager._is_list_info_valid_next_list(bundled_list_info):
+            continue
+        custom_next_list_selector.add_item(bundled_list_info["name"])
+        if bundled_list_info["name"] == selected_custom_next:
+            custom_next_list_selector.selected = custom_next_list_selector.item_count - 1
 
 
 func _get_completion_mode(list_info: Dictionary) -> String:
@@ -272,3 +321,17 @@ func on_is_hidden_toggled(toggled_on: bool) -> void:
     GameManager.set_level_list_data(editing_list_name, "hide_when_locked", toggled_on)
     refresh_ui()
     list_settings_edited.emit()
+
+func on_when_completed_selected(idx: int) -> void:
+    pass
+
+func on_custom_next_list_selected(idx: int) -> void:
+    if idx == 0:
+        GameManager.set_level_list_data(editing_list_name, "custom_next_list", "auto")
+        GameManager.remove_level_list_data(editing_list_name, "custom_next_list_name")
+    else:
+        GameManager.set_level_list_data(editing_list_name, "custom_next_list", "manual")
+        GameManager.set_level_list_data(editing_list_name, "custom_next_list_name", custom_next_list_selector.get_item_text(idx))
+
+func on_show_completion_selected(idx: int) -> void:
+    pass

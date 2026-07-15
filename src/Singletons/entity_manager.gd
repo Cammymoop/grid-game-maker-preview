@@ -100,6 +100,8 @@ func pressed_any_to_start() -> bool:
     return false
 
 func entity_list_process(delta_time: float) -> void:
+    if GameManager.cur_scene != "Play":
+        return
     if paused_at_start or level_spawn_effect_frames_left > 0:
         if pressed_any_to_start():
             if level_spawn_effect_frames_left > 0:
@@ -172,7 +174,7 @@ func entity_list_process(delta_time: float) -> void:
         #e.sprite_process(delta_time, false)
     
     # Phase 2 - Update idle tick counter (for non-moving) and idle actions
-    # also find entities that started moving after their turn to run starting actions
+    # also find entities that started moving outside of their own starting actions
     process_phase = 2
     for e in idle_entities:
         if e.active:
@@ -185,11 +187,12 @@ func entity_list_process(delta_time: float) -> void:
             MapManager.entity_idle_actions(e)
             e.entity_process_idle_actions()
             e.idle_ticks_elapsed = 0
+
     if frame_counter % idle_delay_frames == 0:
         MapManager.idle_actions()
     
     # Phase 3 - Moving progress and mid-move actions
-    # if an entity starts moving during this phase it will not be processed as moving until the next tick
+    # if an entity starts moving during or after this phase it will not be processed as moving until the next tick
     process_phase = 3
     var entities_that_finished_moving: Array[BaseEntity] = []
     _pending_half_move_actions.clear()
@@ -204,13 +207,16 @@ func entity_list_process(delta_time: float) -> void:
     if _pending_half_move_actions:
         process_half_moves()
     
-    # Phase 4 - All entities moved for the frame, now process actions resulting from completed moves
+    # Phase 4 - All entities moved for the frame, now process actions resulting from completed moves, every_tick events, sprite updates
     process_phase = 4
     for e in entities_that_finished_moving:
         if e.active:
             e.process_finish_move()
-    
+
+    MapManager.every_tick_actions()
     for e in entity_list:
+        if e._has_every_tick_update and e.active:
+            resolve_entity_solo_event("every_tick", e)
         e.sprite_process(delta_time, false)
 
     handle_movement_mode_stuff()
@@ -350,16 +356,31 @@ func _ready():
     GameManager.any_state_loaded.connect(on_any_state_loaded)
 
 func on_any_state_loaded() -> void:
-    if movement_mode != GameManager.MovementMode.MOVEMENT_CONTINUOUS:
-        return
     paused_at_start = false
-    #if GameManager._state_load_is_start_of_level
-    if MapManager.is_level_start_paused():
-        paused_at_start = true
+    if movement_mode == GameManager.MovementMode.MOVEMENT_CONTINUOUS:
+        if MapManager.is_level_start_paused():
+            paused_at_start = true
+    
+    MapManager.state_load_actions()
+
     if GameManager._state_load_is_switched_level:
         if not GameManager.is_in_level_edit_mode:
             if GameManager.get_game_setting("level_start_entity_spawn_effect_enabled", false):
                 apply_level_start_entity_spawn_animation()
+
+    if GameManager._state_load_is_start_of_level:
+        starting_event("level_start")
+    starting_event("level_refresh")
+
+func starting_event(event_name: String) -> void:
+    var active_entities: Array[BaseEntity] = []
+    for e in entity_list:
+        if e.active:
+            active_entities.append(e)
+    for e in active_entities:
+        if not entity_has_conditional_property(e, event_name):
+            continue
+        resolve_entity_solo_event(event_name, e)
 
 func apply_level_start_entity_spawn_animation() -> void:
     var anim_duration: float = GameManager.get_game_setting("level_start_entity_spawn_effect_duration", 0.5)
@@ -859,6 +880,14 @@ func create_entity(entity_index: int, tile_position: Vector2i, facing: int = 0, 
     MapManager.check_terrain_spr_mod_for_created(entity)
     
     return entity
+
+func post_editor_create_entity(entity: BaseEntity) -> void:
+    if entity_has_conditional_property(entity, "editor_placing"):
+        resolve_entity_solo_event("editor_placing", entity)
+
+func post_gameplay_entity_created(entity: BaseEntity) -> void:
+    if entity_has_conditional_property(entity, "creating"):
+        resolve_entity_solo_event("creating", entity)
 
 func setup_new_entity_size(entity: BaseEntity) -> void:
     if not entity is LargeEntity:
@@ -1536,6 +1565,11 @@ func finish_move(moving_entity: BaseEntity, onto_positions: Array) -> void:
 func resolve_entity_interaction_old(event_name: String, actor, interactee, at_tile_position: Vector2i, extra_debug: bool = false) -> void:
     resolve_entity_interaction_event(event_name, actor, interactee, [at_tile_position], extra_debug)
 
+func resolve_entity_solo_event(event_name: String, entity: BaseEntity, custom_positions: bool = false, with_positions: Array = []) -> void:
+    if not custom_positions:
+        with_positions = get_all_positions_of_entity(entity)
+    resolve_entity_interaction_event(event_name, entity, null, with_positions)
+
 func resolve_entity_interaction_event(event_name: String, actor, interactee, at_tile_positions: Array, extra_debug: bool = false) -> void:
     var event_prop: = get_entity_property(actor, event_name)
     if event_prop and event_prop.is_conditional():
@@ -1839,19 +1873,34 @@ func get_entity_prop_is_truthy(entity: BaseEntity, property_name: String, defaul
         return default_val
     return Property.resolve_truthy(get_entity_property(entity, property_name), entity, custom_ctx_entity, entity.tile_position)
 
-func entity_has_property(entity: BaseEntity, property_name: String) -> bool:
+func entity_has_conditional_property(entity: BaseEntity, property_name: String) -> bool:
+    return entity_has_property(entity, property_name, true)
+
+func entity_has_property(entity: BaseEntity, property_name: String, prop_is_conditional: bool = false) -> bool:
     if not entity:
         return false
     if entity.is_property_removed(property_name):
         return false
 
+    if entity.has_local_property(property_name):
+        if prop_is_conditional:
+            var local_prop_type: int = typeof(entity.local_properties[property_name])
+            return local_prop_type == TYPE_ARRAY or local_prop_type == TYPE_DICTIONARY
+        return true
     var entity_props: Dictionary = entity_defs[entity.entity_index]["properties"]
-    var has = entity.has_local_property(property_name) 
-    has = has or property_name in entity_props
-    if "inherit-properties" in entity_props:
-        var from = get_entity_index(entity_props["inherit-properties"])
-        has = has or property_name in entity_defs[from]["properties"]
-    return has
+    
+    var has_default: = property_name in entity_props
+    var prop_val: Variant = entity_props.get(property_name, null)
+    if not has_default and "inherit-properties" in entity_props:
+        var inherit_from_name: = Utility.property_value_to_string(entity_props["inherit-properties"])
+        if entity_name_exists(inherit_from_name):
+            var from_id = get_entity_index(inherit_from_name)
+            has_default = property_name in entity_defs[from_id]["properties"]
+            prop_val = entity_defs[from_id]["properties"].get(property_name, null)
+
+    if has_default and prop_is_conditional:
+        return typeof(prop_val) == TYPE_ARRAY or typeof(prop_val) == TYPE_DICTIONARY
+    return has_default
 
 func get_entity_property_list(entity: BaseEntity) -> Array:
     var props: Dictionary = {}

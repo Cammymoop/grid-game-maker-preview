@@ -13,7 +13,7 @@ var current_slot_id: int = SlotSelectorButton.TEXT_VALUE
 
 func _ready():
     slot_selector.set_valid_slot_categories(["string"])
-    slot_selector.set_current_slot(current_slot_id)
+    slot_selector.set_current_slot(current_slot_id, false)
     slot_selector.slot_changed.connect(on_slot_changed)
     
     plain_value_input.text_changed.connect(on_plain_value_changed)
@@ -41,15 +41,18 @@ func set_value(new_val: Variant) -> void:
     if new_val["type"] == "plain":
         set_plain_value(new_val["value"])
     elif new_val["type"] == "slot_value":
-        current_slot_id = new_val["slot_id"]
+        _set_current_slot_id(new_val["slot_id"])
         refresh_ui()
     else:
         push_error("Invalid complex string value type: %s" % [new_val["type"]])
         set_plain_value("")
 
+func _set_current_slot_id(new_slot_id: int) -> void:
+    current_slot_id = new_slot_id
+    slot_selector.set_current_slot(current_slot_id, false)
+
 func set_plain_value(new_value: String) -> void:
-    current_slot_id = SlotSelectorButton.TEXT_VALUE
-    slot_selector.set_current_slot(current_slot_id)
+    _set_current_slot_id(SlotSelectorButton.TEXT_VALUE)
     plain_value_input.text = new_value
     refresh_ui()
 
