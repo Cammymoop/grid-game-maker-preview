@@ -7,12 +7,16 @@ signal request_move_relative(level_item: LevelListItem, relative_index: int)
 signal play_level(level_name: String)
 signal request_edit_level(level_name: String, as_autosave: bool)
 
+signal focus_up_down_attempted(level_item: LevelListItem, direction: int)
+
 @export var locked_color: Color
 @export var completed_color: Color
 @export var current_level_font: Font
 @export var current_level_font_size: int = 22
 @export var completed_font: Font
 @export var unplayed_color: Color
+
+@export var focus_panel: Panel
 
 @export var title_label: Label
 @export var start_level_button: ButtonContainer
@@ -50,6 +54,7 @@ var _is_current_level: bool = false
 var _is_edit_mode: bool = false
 
 func _ready() -> void:
+    focus_panel.hide()
     highlight_rect.hide()
     current_level_icon.hide()
     current_level_indicator.visible = true
@@ -60,11 +65,18 @@ func _ready() -> void:
     edit_as_autosave_button.pressed.connect(on_edit_as_autosave_button_pressed)
     move_up_button.pressed.connect(on_relative_move_pressed.bind(-1))
     move_down_button.pressed.connect(on_relative_move_pressed.bind(1))
+    
+    start_level_button.button.gui_input.connect(on_sub_item_gui_input.bind(start_level_button.button))
+    edit_level_button.gui_input.connect(on_sub_item_gui_input.bind(edit_level_button))
+    
+    get_viewport().gui_focus_changed.connect(on_gui_focus_changed)
 
     edit_as_autosave_button.visible = false
     refresh_move_buttons()
 
 func is_current_level() -> bool:
+    if level_name == "Ice Dispenser":
+        prints("ice dispenser current level:", _is_current_level)
     return _is_current_level
 
 func not_in_a_list() -> void:
@@ -160,6 +172,9 @@ func refresh_icons_and_text() -> void:
     if _is_current_level:
         title_label.add_theme_font_override("font", current_level_font)
         title_label.add_theme_font_size_override("font_size", current_level_font_size)
+    
+    if not _is_edit_mode and not is_unlocked:
+        start_level_button.visible = false
 
     refresh_edit_as_autosave_button()
 
@@ -188,3 +203,29 @@ func on_edit_as_autosave_button_pressed() -> void:
     if not level_name:
         return
     request_edit_level.emit(level_name, true)
+
+func focus_level_list_item() -> void:
+    if start_level_button.is_visible_in_tree():
+        start_level_button.button.grab_focus()
+    elif edit_level_button.is_visible_in_tree():
+        edit_level_button.grab_focus()
+
+func on_gui_focus_changed(new_focus_owner: Control) -> void:
+    if new_focus_owner == self or is_ancestor_of(new_focus_owner):
+        focus_panel.show()
+    else:
+        focus_panel.hide()
+
+func on_sub_item_gui_input(event: InputEvent, sub_item: Control) -> void:
+    var is_move_up: = Utility.fixed_just_pressed_by_event("move_up", event)
+    var is_move_down: = Utility.fixed_just_pressed_by_event("move_down", event)
+    if not is_move_up and not is_move_down or not sub_item.has_focus():
+        return
+    focus_up_down_attempted.emit(self, 1 if is_move_down else -1)
+
+func can_be_focused() -> bool:
+    if start_level_button.is_visible_in_tree():
+        return true
+    elif edit_level_button.is_visible_in_tree():
+        return true
+    return false

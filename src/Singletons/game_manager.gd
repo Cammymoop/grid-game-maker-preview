@@ -15,6 +15,8 @@ signal profile_switched()
 const CreditsUI = preload("res://Scenes/credits_ui.gd")
 const BGTileHolder = preload("res://Scenes/bg_tile_holder.gd")
 
+const LevelListSettings = preload("res://Scenes/level_list_settings.gd")
+
 const IDENTIFIER_MAX_LENGTH: int = 32
 
 var MAX_UNDO_LIMIT: int = 1000
@@ -2156,7 +2158,7 @@ func is_level_list_unlocked(level_list_name: String, current_level_as_complete: 
 		var list_info: = _get_level_list(level_list_name)
 		if not list_info.get("default_locked", false):
 			return true
-		_recheck_level_list_unlocks()
+		#recheck_level_list_unlocks()
 		if _is_level_list_unlocked_in_save(level_list_name):
 			return true
 		if current_level_as_complete and _is_current_level_unlocking_level_list(level_list_name):
@@ -2189,35 +2191,54 @@ func is_level_list_complete(level_list_name: String) -> bool:
 func will_level_complete_list(level_name: String, level_list_name: String) -> bool:
 	return _check_level_list_completion(level_list_name, level_name) == 2
 
-func _check_level_list_completion(level_list_name: String, with_level_name_completed: String) -> int:
+func _level_list_required_level_count(level_list_name: String) -> int:
 	var level_list_info: = _get_level_list(level_list_name)
 	if not level_list_info:
 		return 0
 	var comletion_mode: String = level_list_info.get("completion_mode", "all")
-	var with_another_completed: bool = false
-	if with_level_name_completed:
-		if level_list_info.get("level_names", []).contains(with_level_name_completed):
-			if not _is_level_completed_in_save(level_list_name, with_level_name_completed):
-				with_another_completed = true
-	var completed_count: int = 0
-	var total_count: int = level_list_info.get("level_names", []).size()
-	for level_name in level_list_info.get("level_names", []):
-		if _is_level_completed_in_save(level_list_name, level_name):
-			completed_count += 1
+	var total_count: int = get_levels_in_level_list(level_list_name).size()
 	var required_count: int = total_count
 	if comletion_mode == "count" or comletion_mode == "inverse_count":
 		required_count = int(level_list_info.get("required_to_complete", 0))
 		if comletion_mode == "inverse_count":
 			required_count = total_count - required_count
-		if completed_count >= required_count:
-			return 1
-		elif with_another_completed and completed_count + 1 >= required_count:
-			return 2
 	elif comletion_mode == "percentage":
 		var required_ratio: float = clampf(level_list_info.get("required_percentage", 0.), 0, 100) / 100
 		required_count = maxi(1, floori(total_count * required_ratio))
+	return required_count
+
+func _check_level_list_completion(level_list_name: String, with_level_name_completed: String) -> int:
+	var level_list_info: = _get_level_list(level_list_name)
+	if not level_list_info:
+		return 0
+	var required_count: int = _level_list_required_level_count(level_list_name)
+	if required_count <= 0:
+		return 1
+
+	var all_levels: Array[String] = get_levels_in_level_list(level_list_name)
+	var with_another_completed: bool = false
+	var completed_count: int = 0
+	for level_name in all_levels:
+		if is_level_completed_in_list(level_list_name, level_name):
+			completed_count += 1
+		elif level_name and with_level_name_completed == level_name:
+			with_another_completed = true
 	
+	if completed_count >= required_count:
+		return 1
+	elif with_another_completed and completed_count + 1 >= required_count:
+		return 2
 	return 0
+
+func get_list_completed_count(level_list_name: String) -> int:
+	if not level_list_exists(level_list_name):
+		return 0
+	var all_levels: Array[String] = get_levels_in_level_list(level_list_name)
+	var completed_count: int = 0
+	for level_name in all_levels:
+		if is_level_completed_in_list(level_list_name, level_name):
+			completed_count += 1
+	return completed_count
 
 func will_list_unlock_list(level_list_name: String, check_unlocking_list_name: String) -> bool:
 	var list_will_unlock_list: String = _get_list_unlocked_by_list(level_list_name)
@@ -2254,18 +2275,18 @@ func _get_list_unlocked_by_list(level_list_name: String) -> String:
 		return ""
 
 	var level_list_info: = _get_level_list(level_list_name)
-	if not level_list_info or level_list_info.get("no_list_unlock", false):
+	if level_list_info.get("always_hidden", false):
 		return ""
-	var next_list_name: String = level_list_info.get("auto_next_list", "")
-	if not next_list_name:
-		next_list_name = _get_next_bundled_level_list_auto(level_list_name)
-		if not next_list_name:
-			return ""
+
+	var when_completed_action: String = level_list_info.get("when_completed_action", LevelListSettings.WHEN_COMPLETED_UNLOCK_NEXT)
+	if when_completed_action != LevelListSettings.WHEN_COMPLETED_UNLOCK_NEXT:
+		return ""
+	var next_list_name: String = get_next_list_of_bundled_list(level_list_name)
 	if not is_level_list_bundled(next_list_name):
 		return ""
 	return next_list_name
 
-func _recheck_level_list_unlocks() -> void:
+func recheck_level_list_unlocks() -> void:
 	var check_all: bool = _is_unlock_all_levels_and_lists()
 
 	for level_list_name in get_list_of_level_lists(true):
@@ -2400,7 +2421,7 @@ func get_levels_to_show_in_level_list(level_list_name: String, as_edit_mode: boo
 			continue
 		played_levels_in_this_list.append(_level_name_from_code(level_code))
 	
-	var show_locked_titles: bool = level_list_info.get("show_locked_titles", false)
+	var show_locked_titles: bool = level_list_info.get("show_locked_titles", false) or as_edit_mode
 	
 	var is_bundled_list: bool = is_level_list_bundled(level_list_name)
 	
@@ -2787,7 +2808,7 @@ func _complete_level(level_list_name: String, level_name: String) -> void:
 	if not level_code in completed_levels:
 		completed_levels.append(level_code)
 		set_game_save_data("completed_levels", completed_levels)
-	_recheck_level_list_unlocks()
+	recheck_level_list_unlocks()
 
 # Complete the current level in the current list and persist any pending dependant save file updates
 func complete_current_level() -> void:
@@ -3902,3 +3923,49 @@ func get_all_existing_levels_sorted_by_chronology() -> Array[String]:
 		if not unlisted_level in all_levels:
 			all_levels.append(unlisted_level)
 	return all_levels
+
+func get_list_completion_style(list_name: String) -> String:
+	var list_info: = _get_level_list(list_name)
+	if not list_info:
+		return LevelListSettings.SHOWCOMP_STYLE_HIDE
+	var show_completion_style: String = list_info.get("show_completion_style", "")
+	if not show_completion_style in LevelListSettings.ShowCompletionOptions:
+		show_completion_style = LevelListSettings.SHOWCOMP_STYLE_HIDE
+	return show_completion_style
+
+func should_show_list_completion(list_name: String) -> bool:
+	var list_info: = _get_level_list(list_name)
+	if not list_info:
+		return false
+	var show_completion_style: = get_list_completion_style(list_name)
+	return show_completion_style != LevelListSettings.SHOWCOMP_STYLE_HIDE
+
+func get_list_completion_text(list_name: String) -> String:
+	var show_completion_style: = get_list_completion_style(list_name)
+	if show_completion_style == LevelListSettings.SHOWCOMP_STYLE_HIDE:
+		return ""
+
+	var completed_count: int = get_list_completed_count(list_name)
+	var required_count: int = _level_list_required_level_count(list_name)
+	var total_count: int = get_levels_in_level_list(list_name).size()
+	
+	if show_completion_style == LevelListSettings.SHOWCOMP_STYLE_COMP_REQ_TOTAL:
+		return "%d/%d/%d" % [completed_count, required_count, total_count]
+	elif show_completion_style == LevelListSettings.SHOWCOMP_STYLE_COMP_REQ:
+		return "%d/%d" % [completed_count, required_count]
+	elif show_completion_style == LevelListSettings.SHOWCOMP_STYLE_COMP_TOTAL:
+		return "%d/%d" % [completed_count, total_count]
+	return ""
+
+func get_list_completion_tooltip(list_name: String) -> String:
+	var show_completion_style: = get_list_completion_style(list_name)
+	if show_completion_style == LevelListSettings.SHOWCOMP_STYLE_HIDE:
+		return ""
+	elif show_completion_style == LevelListSettings.SHOWCOMP_STYLE_COMP_REQ_TOTAL:
+		return "Completed / Required / Total"
+	elif show_completion_style == LevelListSettings.SHOWCOMP_STYLE_COMP_REQ:
+		return "Completed / Required"
+	elif show_completion_style == LevelListSettings.SHOWCOMP_STYLE_COMP_TOTAL:
+		return "Completed / Total"
+	return ""
+	

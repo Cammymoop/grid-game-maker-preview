@@ -78,6 +78,29 @@ const WhenCompletedDisplayTexts: Dictionary = {
     WHEN_COMPLETED_DO_NOTHING: "Unlock Nothing",
 }
 
+const SHOWCOMP_STYLE_HIDE = "hide"
+const SHOWCOMP_STYLE_COMP_REQ_TOTAL = "completed_required_total"
+const SHOWCOMP_STYLE_COMP_REQ = "completed_required"
+const SHOWCOMP_STYLE_COMP_TOTAL = "completed_total"
+const SHOWCOMP_STYLE_COMP_REQ_VIS_TOTAL = "completed_required_visible-total"
+const SHOWCOMP_STYLE_COMP_VIS_TOTAL = "completed_visible-total"
+
+const ShowCompletionOptions: Array[String] = [
+    SHOWCOMP_STYLE_HIDE,
+    SHOWCOMP_STYLE_COMP_REQ_TOTAL,
+    SHOWCOMP_STYLE_COMP_REQ,
+    SHOWCOMP_STYLE_COMP_TOTAL,
+    #SHOWCOMP_STYLE_COMP_REQ_VIS_TOTAL,
+    #SHOWCOMP_STYLE_COMP_VIS_TOTAL,
+]
+const ShowCompletionDisplayTexts: Dictionary = {
+    SHOWCOMP_STYLE_HIDE: "Hide",
+    SHOWCOMP_STYLE_COMP_REQ_TOTAL: "Completed/Required/Total",
+    SHOWCOMP_STYLE_COMP_REQ: "Completed/Required",
+    SHOWCOMP_STYLE_COMP_TOTAL: "Completed/Total",
+    SHOWCOMP_STYLE_COMP_REQ_VIS_TOTAL: "Completed/Required/Visible Total",
+    SHOWCOMP_STYLE_COMP_VIS_TOTAL: "Completed/Visible Total",
+}
 
 func _ready() -> void:
     completion_mode_selector.clear()
@@ -105,6 +128,16 @@ func _ready() -> void:
     show_locked_titles_toggle.toggled.connect(on_show_locked_titles_toggled)
     
     show_completion_selector.item_selected.connect(on_show_completion_selected)
+    
+    when_completed_selector.clear()
+    for when_completed_id in WhenCompletedOptions.size():
+        var when_completed: String = WhenCompletedOptions[when_completed_id]
+        when_completed_selector.add_item(WhenCompletedDisplayTexts[when_completed], when_completed_id)
+
+    show_completion_selector.clear()
+    for show_completion_id in ShowCompletionOptions.size():
+        var show_completion_str: String = ShowCompletionOptions[show_completion_id]
+        show_completion_selector.add_item(ShowCompletionDisplayTexts[show_completion_str], show_completion_id)
 
     if editing_list_name and visible:
         refresh_ui()
@@ -227,6 +260,18 @@ func refresh_ui() -> void:
         var completion_number: int = _get_completion_number(list_info, completion_mode)
         completion_number_input.set_value(completion_number)
         _update_last_completion_number(completion_mode, completion_number)
+    
+    var show_completion_style: String = list_info.get("show_completion_style", SHOWCOMP_STYLE_HIDE)
+    if not show_completion_style in ShowCompletionOptions:
+        show_completion_style = SHOWCOMP_STYLE_HIDE
+    var show_completion_id: int = ShowCompletionOptions.find(show_completion_style)
+    Utility.opbtn_select_id(show_completion_selector, show_completion_id)
+    
+    var when_completed_action: String = list_info.get("when_completed_action", WHEN_COMPLETED_UNLOCK_NEXT)
+    if not when_completed_action in WhenCompletedOptions:
+        when_completed_action = WHEN_COMPLETED_UNLOCK_NEXT
+    var when_completed_id: int = WhenCompletedOptions.find(when_completed_action)
+    Utility.opbtn_select_id(when_completed_selector, when_completed_id)
 
 
 func refresh_custom_next_list_selector() -> void:
@@ -323,7 +368,8 @@ func on_is_hidden_toggled(toggled_on: bool) -> void:
     list_settings_edited.emit()
 
 func on_when_completed_selected(idx: int) -> void:
-    pass
+    GameManager.set_level_list_data(editing_list_name, "when_completed_action", WhenCompletedOptions[idx])
+    list_settings_edited.emit()
 
 func on_custom_next_list_selected(idx: int) -> void:
     if idx == 0:
@@ -332,6 +378,8 @@ func on_custom_next_list_selected(idx: int) -> void:
     else:
         GameManager.set_level_list_data(editing_list_name, "custom_next_list", "manual")
         GameManager.set_level_list_data(editing_list_name, "custom_next_list_name", custom_next_list_selector.get_item_text(idx))
+    list_settings_edited.emit()
 
 func on_show_completion_selected(idx: int) -> void:
-    pass
+    GameManager.set_level_list_data(editing_list_name, "show_completion_style", ShowCompletionOptions[idx])
+    list_settings_edited.emit()

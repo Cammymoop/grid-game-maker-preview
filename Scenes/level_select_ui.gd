@@ -50,6 +50,8 @@ var any_edited: = false
 
 var is_editing_locked: = false
 
+var is_all_lists_expanded: = false
+
 const CTX_MOVE_UP = 3
 const CTX_MOVE_DOWN = 4
 const CTX_MOVE_TO_TOP = 5
@@ -95,7 +97,54 @@ func _ready() -> void:
     refresh()
     back_to_select_from_list_settings()
 
+func is_non_level_item_control_focused(current_focus_owner: Control) -> bool:
+    if not is_ancestor_of(current_focus_owner):
+        return false
+    if current_focus_owner == bundled_levels_tab_button or current_focus_owner == custom_levels_tab_button:
+        return true
+    if current_focus_owner == add_new_list_button or current_focus_owner == rearrange_lists_button:
+        return true
+    if current_focus_owner == import_levels_button or current_focus_owner == open_levels_folder_button:
+        return true
+    return false
+
+# intervene when necessary to move level focus and expand/collapse level lists
+func _unhandled_input(event: InputEvent) -> void:
+    if is_rearranging_lists or is_in_list_settings_mode():
+        return
+    var is_move_up: = Utility.fixed_just_pressed_by_event("move_up", event)
+    var is_move_down: = Utility.fixed_just_pressed_by_event("move_down", event)
+    if not is_move_up and not is_move_down:
+        return
+    
+    var current_focus_owner: = get_viewport().gui_get_focus_owner()
+    if not current_focus_owner:
+        var level_lists_with_visible_levels: = []
+        for level_list in level_list_container.get_children():
+            if not level_list is SingleLevelList:
+                continue
+            if level_list.visible_level_count() > 0:
+                level_lists_with_visible_levels.append(level_list)
+        if level_lists_with_visible_levels.size() == 0:
+            if bundled_levels_tab_button.is_visible_in_tree():
+                accept_event()
+                bundled_levels_tab_button.grab_focus.call_deferred()
+            return
+
+        accept_event()
+        var found_one: = false
+        for level_list in level_lists_with_visible_levels:
+            if level_list.is_expanded:
+                level_list.focus_first_level_item()
+                found_one = true
+                break
+        if not found_one:
+            level_lists_with_visible_levels[0].set_expanded(true)
+            level_lists_with_visible_levels[0].focus_first_level_item()
+        return
+
 func opening() -> void:
+    GameManager.recheck_level_list_unlocks()
     var is_in_custom_level: = GameManager.is_current_level_custom()
     if is_in_custom_level:
         custom_levels_tab_button.set_pressed_no_signal(true)
@@ -157,18 +206,18 @@ func refresh_level_lists() -> void:
         import_levels_button_container.visible = true
 
     clear_level_lists()
-    if not custom_levels_tab_button.button_pressed:
+    if is_showing_custom_levels():
+        for custom_level_list_info in GameManager.get_all_non_bundled_level_list_infos():
+            _add_level_list(custom_level_list_info)
+    else:
         if GameManager.is_in_level_edit_mode:
             for level_list_name in GameManager.get_list_of_level_lists(true):
                 _add_level_list(GameManager._get_level_list(level_list_name))
         else:
             for visible_level_list in GameManager.get_all_visible_bundled_level_lists():
                 _add_level_list(visible_level_list)
-    else:
-        for custom_level_list_info in GameManager.get_all_non_bundled_level_list_infos():
-            _add_level_list(custom_level_list_info)
 
-    if not custom_levels_tab_button.button_pressed or GameManager.is_in_level_edit_mode:
+    if is_showing_custom_levels() or GameManager.is_in_level_edit_mode:
         var unlisted_levels: Array = GameManager.get_list_of_unlisted_levels()
         if unlisted_levels.size() > 0:
             add_unlisted_levels()
@@ -179,8 +228,29 @@ func refresh_level_lists() -> void:
         if not autosave_level:
             edit_autosave_container.show()
     
-    if fresh_open:
-        scroll_to_current_level()
+    var none_has_current: = true
+    var level_list_with_current: SingleLevelList = null
+    for level_list in level_list_container.get_children():
+        if not level_list is SingleLevelList:
+            continue
+        if level_list.has_current_level():
+            none_has_current = false
+            level_list_with_current = level_list
+            break
+    
+    if none_has_current:
+        for level_list in level_list_container.get_children():
+            if not level_list is SingleLevelList or level_list.visible_level_count() == 0:
+                continue
+            level_list.set_expanded(true)
+            if fresh_open:
+                level_list.focus_first_level_item()
+    else:
+        level_list_with_current.set_expanded(true)
+        scroll_to_current_level(fresh_open)
+    
+    #if fresh_open:
+        #scroll_to_current_level()
 
 func _add_level_list(level_list_info: Dictionary) -> void:
     var single_level_list: SingleLevelList = single_level_list_scene.instantiate()
@@ -194,6 +264,8 @@ func _setup_level_list(lev_list: SingleLevelList) -> void:
     lev_list.list_membership_changed.connect(on_level_list_membership_changed)
     lev_list.request_edit_list_settings.connect(on_req_edit_list_settings)
     lev_list.request_single_list_context_menu.connect(on_request_single_list_context_menu)
+    lev_list.expanded_changed.connect(on_level_list_expanded_changed.bind(lev_list))
+    lev_list.focus_up_down_attempted.connect(on_level_list_focus_up_down_attempted)
     if is_editing_locked:
         lev_list.lock_editing()
 
@@ -283,9 +355,11 @@ func try_grab_focus() -> void:
             rearrange_lists_back_button.grab_focus.call_deferred()
     else:
         for single_level_list in level_list_container.get_children():
-            var first_focusable_control: Control = single_level_list.get_first_focusable_control()
-            if first_focusable_control:
-                first_focusable_control.grab_focus.call_deferred()
+            if not single_level_list is SingleLevelList:
+                continue
+            var focusable_list_item: LevelListItem = single_level_list.get_first_focusable_list_item()
+            if focusable_list_item:
+                focusable_list_item.focus_level_list_item.call_deferred()
                 break
 
 func is_active() -> bool:
@@ -481,7 +555,7 @@ func set_level_list_container_min_height() -> void:
     if list_height + other_height >= max_height:
         list_scroll_container.custom_minimum_size.y = max_height - other_height
     else:
-        list_scroll_container.custom_minimum_size.y = list_height
+        list_scroll_container.custom_minimum_size.y = list_height + 4
 
 func on_import_levels_button_pressed() -> void:
     GameManager.start_import_levels()
@@ -494,13 +568,13 @@ func on_custom_levels_tab_button_pressed() -> void:
     refresh()
 
 
-func scroll_to_current_level() -> void:
+func scroll_to_current_level(with_grab_focus: bool) -> void:
     await get_tree().process_frame
     var found_current_level: LevelListItem = null
     for level_list in level_list_container.get_children():
         if not level_list is SingleLevelList:
             continue
-        for level_item in level_list.get_children():
+        for level_item in level_list.level_item_container.get_children():
             if not level_item is LevelListItem:
                 continue
             if level_item.is_current_level():
@@ -509,6 +583,8 @@ func scroll_to_current_level() -> void:
         if found_current_level:
             break
     if found_current_level:
+        if with_grab_focus:
+            found_current_level.focus_level_list_item.call_deferred()
         list_scroll_container.ensure_control_visible(found_current_level)
 
 func on_open_levels_folder_button_pressed() -> void:
@@ -526,3 +602,53 @@ func on_edit_autosave_button_pressed() -> void:
     if map_editor:
         map_editor.load_editor_autosave()
         close()
+
+func on_level_list_expanded_changed(changed_list: SingleLevelList) -> void:
+    if changed_list.is_expanded and not is_all_lists_expanded:
+        for list in level_list_container.get_children():
+            if list is SingleLevelList and list != changed_list:
+                list.set_expanded(false, false)
+
+    set_level_list_container_min_height()
+
+
+func get_next_prev_level_list_with_items(level_list: SingleLevelList, direction: int) -> SingleLevelList:
+    direction = signi(direction)
+    if direction == 0:
+        return null
+    var list_index: = level_list.get_index()
+    
+    var new_index: = list_index + direction
+    while new_index >= 0 and new_index < level_list_container.get_child_count():
+        var next_level_list: = level_list_container.get_child(new_index)
+        new_index += direction
+        if not next_level_list is SingleLevelList:
+            continue
+        if next_level_list.visible_level_count() > 0:
+            return next_level_list
+    return null
+
+func on_level_list_focus_up_down_attempted(from_level_list: SingleLevelList, direction: int) -> void:
+    if not from_level_list:
+        return
+
+    var all_level_lists: Array[SingleLevelList] = []
+    for level_list in level_list_container.get_children():
+        if not level_list is SingleLevelList:
+            continue
+        all_level_lists.append(level_list)
+    
+    var next_level_list: = get_next_prev_level_list_with_items(from_level_list, direction)
+    if not next_level_list:
+        return
+    
+    accept_event()
+    if not next_level_list.is_expanded:
+        next_level_list.set_expanded(true)
+    if direction == 1:
+        next_level_list.focus_first_level_item()
+    else:
+        next_level_list.focus_last_level_item()
+    
+    if not is_all_lists_expanded:
+        from_level_list.set_expanded(false)

@@ -1,5 +1,8 @@
 extends VBoxContainer
 
+@export var expand_icon: Texture2D
+@export var collapse_icon: Texture2D
+
 const SingleLevelList = preload("res://Scenes/single_level_list.gd")
 
 const LevelSelectUI = preload("res://Scenes/level_select_ui.gd")
@@ -9,6 +12,9 @@ signal play_level(level_list_name: String, level_name: String)
 signal edited()
 signal request_edit_list_settings(list_name: String)
 signal list_membership_changed()
+signal expanded_changed()
+
+signal focus_up_down_attempted(level_list: SingleLevelList, direction: int)
 
 signal request_single_list_context_menu(level_list: SingleLevelList)
 
@@ -17,13 +23,19 @@ var is_editing_locked: bool = false
 var level_item_scene: = preload("res://Scenes/level_list_item.tscn")
 
 @export var list_name_label: Label
+@export var list_completion_label: Label
 @export var level_item_container: Container
 @export var edit_settings_icon_button: ButtonContainer
 @export var export_list_button: Button
 
+@export var expand_collapse_texture_button: TextureRect
+@export var levels_section: Control
+
 @export var remove_list_button: ButtonContainer
 
 @export var is_list_of_unlisted_levels: bool = false
+
+var is_expanded: bool = false
 
 var level_list_name: String = ""
 var is_bundled_list: bool = false
@@ -52,6 +64,12 @@ func _ready() -> void:
 
     export_list_button.pressed.connect(on_export_list_button_pressed)
     remove_list_button.pressed.connect(on_remove_list_button_pressed)
+    
+    expand_collapse_texture_button.gui_input.connect(on_expand_collapse_texture_button_gui_input)
+    
+    edit_settings_icon_button.button.gui_input.connect(on_list_button_gui_input.bind(edit_settings_icon_button.button))
+    remove_list_button.button.gui_input.connect(on_list_button_gui_input.bind(remove_list_button.button))
+    export_list_button.gui_input.connect(on_list_button_gui_input.bind(export_list_button))
 
     edit_settings_icon_button.pressed.connect(on_edit_list_settings_button_pressed)
     edit_settings_icon_button.visible = _is_in_edit_mode()
@@ -59,6 +77,38 @@ func _ready() -> void:
     if is_list_of_unlisted_levels:
         edit_settings_icon_button.visible = false
         export_list_button.visible = false
+
+func visible_level_count() -> int:
+    var count: int = 0
+    for level_item in level_item_container.get_children():
+        if not level_item is LevelListItem:
+            continue
+        count += 1
+    return count
+
+func focus_first_level_item() -> void:
+    for level_item in level_item_container.get_children():
+        if not level_item is LevelListItem:
+            continue
+        level_item.focus_level_list_item.call_deferred()
+        break
+
+func focus_last_level_item() -> void:
+    var all_level_items: = level_item_container.get_children()
+    all_level_items.reverse()
+    for level_item in all_level_items:
+        if not level_item is LevelListItem:
+            continue
+        level_item.focus_level_list_item.call_deferred()
+        break
+
+func has_current_level() -> bool:
+    for level_item in level_item_container.get_children():
+        if not level_item is LevelListItem:
+            continue
+        if level_item.is_current_level():
+            return true
+    return false
 
 func _gui_input(event: InputEvent) -> void:
     if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_RIGHT and not event.is_pressed():
@@ -101,6 +151,7 @@ func load_level_list_named(with_level_list_name: String) -> void:
     export_list_button.visible = is_edit
     remove_list_button.visible = is_edit
     refresh_list()
+    update_list_completion_label()
 
 func load_unlisted_levels() -> void:
     export_list_button.visible = false
@@ -110,6 +161,14 @@ func load_unlisted_levels() -> void:
     list_name_label.text = "[Unlisted Levels]"
     is_bundled_list = false
     refresh_list()
+    list_completion_label.visible = false
+
+func update_list_completion_label() -> void:
+    var show_completion: bool = GameManager.should_show_list_completion(level_list_name)
+    list_completion_label.visible = show_completion
+    if show_completion:
+        list_completion_label.text = GameManager.get_list_completion_text(level_list_name)
+        list_completion_label.tooltip_text = GameManager.get_list_completion_tooltip(level_list_name)
 
 func set_level_list_name(new_level_list_name: String) -> void:
     level_list_name = new_level_list_name
@@ -117,6 +176,13 @@ func set_level_list_name(new_level_list_name: String) -> void:
     is_bundled_list = GameManager.is_level_list_bundled(level_list_name)
 
 func refresh_list() -> void:
+    levels_section.visible = is_expanded
+    
+    if is_expanded:
+        expand_collapse_texture_button.texture = collapse_icon
+    else:
+        expand_collapse_texture_button.texture = expand_icon
+
     clear_level_items()
     var levels_with_info: Array[Dictionary] = GameManager.get_levels_to_show_in_level_list(level_list_name, _is_in_edit_mode(), is_list_of_unlisted_levels)
     for level_info in levels_with_info:
@@ -145,6 +211,7 @@ func _add_level_item(level_info: Dictionary) -> LevelListItem:
     level_item.request_edit_level.connect(on_level_item_request_edit_level)
     level_item.request_context_menu.connect(on_level_item_request_context_menu)
     level_item.request_move_relative.connect(move_list_item_relative)
+    level_item.focus_up_down_attempted.connect(on_level_item_focus_up_down_attempted)
     level_item_container.add_child(level_item)
     return level_item
 
@@ -310,12 +377,12 @@ func on_context_menu_id_pressed(context_menu_id: int, for_list_item: LevelListIt
                 GameManager.move_level_to_level_list(for_list_item.level_name, all_lists[idx], level_list_name)
         list_membership_changed.emit()
 
-func get_first_focusable_control() -> Control:
-    for list_item: LevelListItem in level_item_container.get_children():
-        if list_item.start_level_button.visible and not list_item.start_level_button.disabled:
-            return list_item.start_level_button
-        elif list_item.edit_level_button.visible and not list_item.edit_level_button.disabled:
-            return list_item.edit_level_button
+func get_first_focusable_list_item() -> LevelListItem:
+    for list_item in level_item_container.get_children():
+        if not list_item is LevelListItem:
+            continue
+        if list_item.can_be_focused():
+            return list_item
     return null
 
 func on_export_list_button_pressed() -> void:
@@ -328,3 +395,70 @@ func on_remove_list_button_pressed() -> void:
         return
     GameManager.remove_level_list(level_list_name)
     list_membership_changed.emit()
+
+func set_expanded(new_is_expanded: bool, do_emit: bool = true) -> void:
+    is_expanded = new_is_expanded
+    refresh_list()
+    if do_emit:
+        expanded_changed.emit()
+
+func on_expand_collapse_texture_button_gui_input(event: InputEvent) -> void:
+    if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.is_pressed():
+        accept_event()
+        set_expanded(not is_expanded)
+
+func on_level_item_focus_up_down_attempted(level_item: LevelListItem, direction: int) -> void:
+    var all_level_items: Array[LevelListItem] = []
+    for item in level_item_container.get_children():
+        if not item is LevelListItem:
+            continue
+        all_level_items.append(item)
+
+    var current_index: int = all_level_items.find(level_item)
+    var new_index: int = current_index + direction
+    if new_index < 0 or new_index >= all_level_items.size():
+        on_level_item_focus_up_down_out(direction)
+        return
+
+    while not all_level_items[new_index].can_be_focused():
+        new_index += direction
+        if new_index < 0 or new_index >= all_level_items.size():
+            on_level_item_focus_up_down_out(direction)
+            return
+
+    accept_event()
+    all_level_items[new_index].focus_level_list_item.call_deferred()
+
+func on_level_item_focus_up_down_out(direction: int) -> void:
+    if direction < 0:
+        for list_button in [export_list_button, edit_settings_icon_button.button, remove_list_button.button]:
+            if list_button.is_visible_in_tree():
+                accept_event()
+                list_button.grab_focus.call_deferred()
+                return
+    focus_up_down_attempted.emit(self, direction)
+
+func on_list_button_gui_input(event: InputEvent, button: Control) -> void:
+    if button == export_list_button and Utility.fixed_just_pressed_by_event("move_right", event):
+        if remove_list_button.is_visible_in_tree():
+            accept_event()
+            remove_list_button.button.grab_focus.call_deferred()
+        return
+
+    if not button.has_focus():
+        return
+    var is_move_up: = Utility.fixed_just_pressed_by_event("move_up", event)
+    var is_move_down: = Utility.fixed_just_pressed_by_event("move_down", event)
+    if not is_move_up and not is_move_down:
+        return
+    var direction: int = 1 if is_move_down else -1
+    
+    if is_move_down:
+        for list_item in level_item_container.get_children():
+            if not list_item is LevelListItem:
+                continue
+            if list_item.can_be_focused():
+                accept_event()
+                list_item.focus_level_list_item.call_deferred()
+                return
+    focus_up_down_attempted.emit(self, direction)

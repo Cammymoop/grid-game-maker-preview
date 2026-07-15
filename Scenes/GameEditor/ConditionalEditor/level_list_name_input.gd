@@ -28,12 +28,9 @@ func _ready():
     await get_tree().process_frame
     for sibling in get_parent().get_children():
         if sibling is LevelNameInput:
-            prints("found level name input sibling", sibling.get_path())
             _level_name_input_sibling = sibling
             setup_level_name_input_sibling()
             break
-    if not _level_name_input_sibling:
-        prints("no level name input sibling found")
 
 func setup_level_name_input_sibling() -> void:
     _level_name_input_sibling.updated.connect(on_level_name_input_updated)
@@ -41,7 +38,6 @@ func setup_level_name_input_sibling() -> void:
     on_level_name_input_updated()
 
 func setup_list_name_selector(filter_using_level_name: String = "") -> void:
-    prints("updating list names, with level filter: %s" % [filter_using_level_name])
     list_name_selector.clear()
     list_name_selector.add_item("(Any)", OPTION_NO_VALUE)
     list_name_selector.add_separator()
@@ -50,7 +46,6 @@ func setup_list_name_selector(filter_using_level_name: String = "") -> void:
             if not filter_using_level_name in GameManager.get_levels_in_level_list(level_list_name):
                 continue
         list_name_selector.add_item(level_list_name)
-    prints("new list names:", Utility.opbtn_get_text_item_list(list_name_selector))
 
 func set_arg_name(new_arg_name: String) -> void:
     arg_name = new_arg_name

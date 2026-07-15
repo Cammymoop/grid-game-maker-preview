@@ -23,7 +23,22 @@ Button/styles/normal = ExtResource("3_bvcnr")
 Button/styles/pressed = ExtResource("4_6novh")
 Label/font_sizes/font_size = 18
 
-[node name="LevelItem" type="MarginContainer" unique_id=508503408 node_paths=PackedStringArray("title_label", "start_level_button", "edit_level_button", "edit_as_autosave_button", "move_up_down_buttons", "move_up_button", "move_down_button", "dot_icon", "check_icon", "locked_icon", "current_level_indicator", "current_level_icon", "highlight_rect")]
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ybcw1"]
+draw_center = false
+border_width_left = 2
+border_width_top = 4
+border_width_bottom = 4
+border_color = Color(0.6774373, 0.8765334, 0.90697354, 1)
+corner_radius_top_left = 2
+corner_radius_top_right = 2
+corner_radius_bottom_right = 2
+corner_radius_bottom_left = 2
+expand_margin_left = 2.0
+expand_margin_top = 2.0
+expand_margin_right = 2.0
+expand_margin_bottom = 2.0
+
+[node name="LevelItem" type="MarginContainer" unique_id=508503408 node_paths=PackedStringArray("focus_panel", "title_label", "start_level_button", "edit_level_button", "edit_as_autosave_button", "move_up_down_buttons", "move_up_button", "move_down_button", "dot_icon", "check_icon", "locked_icon", "current_level_indicator", "current_level_icon", "highlight_rect")]
 offset_right = 290.0
 offset_bottom = 28.0
 theme = SubResource("Theme_v4jex")
@@ -33,6 +48,7 @@ completed_color = Color(0.7486713, 1, 0.5791102, 1)
 current_level_font = ExtResource("6_bvcnr")
 completed_font = ExtResource("6_bvcnr")
 unplayed_color = Color(0.78039217, 0.69803923, 0.69803923, 1)
+focus_panel = NodePath("FocusPanel")
 title_label = NodePath("ItemContents/Label")
 start_level_button = NodePath("ItemContents/Play2Button")
 edit_level_button = NodePath("ItemContents/EditButton")
@@ -50,6 +66,11 @@ highlight_rect = NodePath("HighlightRect")
 [node name="HighlightRect" type="ColorRect" parent="." unique_id=1351419670]
 layout_mode = 2
 color = Color(0.81104237, 0.81104237, 0.81104237, 0.20784314)
+
+[node name="FocusPanel" type="Panel" parent="." unique_id=277515883]
+layout_mode = 2
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_ybcw1")
 
 [node name="ItemContents" type="HBoxContainer" parent="." unique_id=1266912356]
 layout_mode = 2
