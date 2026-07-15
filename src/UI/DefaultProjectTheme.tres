@@ -13,6 +13,7 @@
 [ext_resource type="FontFile" uid="uid://cxxr3l22y0327" path="res://assets/font/NotoSans-Regular.ttf" id="5_mgbrl"]
 [ext_resource type="Texture2D" uid="uid://dlftqhv4kuv7q" path="res://assets/ui/foldable_collapsed_icon.tres" id="6_xr878"]
 [ext_resource type="StyleBox" uid="uid://bg5tmd1718hxa" path="res://assets/ui/tooltip_stylebox.tres" id="8_xr878"]
+[ext_resource type="StyleBox" uid="uid://dkki13w27edye" path="res://assets/ui/normal_focus_panel.tres" id="9_rihkf"]
 [ext_resource type="StyleBox" uid="uid://d3cqpvegmx6kb" path="res://assets/ui/button_styles/opt_btn_disabled.tres" id="11_i0pw4"]
 [ext_resource type="StyleBox" uid="uid://b6svr3gpfabfg" path="res://assets/ui/button_styles/opt_btn_highlight.tres" id="12_gyapa"]
 [ext_resource type="Texture2D" uid="uid://3xo0n45j2h8g" path="res://assets/ui/vsplit_grabber_vector_icon.tres" id="13_5mvo3"]
@@ -254,7 +255,7 @@ CheckBox/styles/hover_pressed = SubResource("9")
 CheckBox/styles/normal = SubResource("9")
 CheckBox/styles/pressed = SubResource("9")
 CheckButton/styles/disabled = SubResource("13")
-CheckButton/styles/focus = SubResource("12")
+CheckButton/styles/focus = ExtResource("9_rihkf")
 CheckButton/styles/hover = SubResource("13")
 CheckButton/styles/hover_pressed = SubResource("13")
 CheckButton/styles/normal = SubResource("13")

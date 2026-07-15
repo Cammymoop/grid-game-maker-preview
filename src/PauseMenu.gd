@@ -76,6 +76,8 @@ func _ready():
 	level_editor_controls_help_toggle.toggled.connect(on_level_editor_controls_help_toggle_pressed)
 	
 	level_notes_text_edit.text_changed.connect(on_level_notes_text_edited)
+	level_notes_text_edit.gui_input.connect(on_level_notes_text_edit_gui_input)
+	level_notes_text_edit.focus_entered.connect(on_level_notes_text_edit_focus_entered)
 	
 	goto_user_settings_button.pressed.connect(switch_panel.bind("user_settings"))
 
@@ -555,12 +557,38 @@ func on_level_editor_controls_help_toggle_gui_input(event: InputEvent) -> void:
 		if map_editor_overlay:
 			map_editor_overlay.switch_controls_overlay_to_gamepad()
 
-func on_level_notes_text_edited(new_notes_text: String) -> void:
+func on_level_notes_text_edited() -> void:
 	if not GameManager.is_in_level_edit_mode:
 		return
-	MapManager.set_metadata_value("level_notes", new_notes_text)
+	MapManager.set_metadata_value("level_notes", level_notes_text_edit.text)
 	level_metadata_changed.emit()
 	adjust_level_notes_edit_height()
+
+func on_level_notes_text_edit_gui_input(event: InputEvent) -> void:
+	if not level_notes_text_edit.has_focus():
+		return
+	if level_notes_text_edit.editable:
+		if Utility.event_is_menu_back_just_pressed(event):
+			accept_event()
+			level_notes_text_edit.editable = false
+	else:
+		if Utility.fixed_just_pressed_by_event("ui_accept", event):
+			accept_event()
+			level_notes_text_edit.editable = true
+		else:
+			var focus_neighbor: Control = null
+			if Utility.fixed_just_pressed_by_event("ui_up", event):
+				focus_neighbor = level_notes_text_edit.get_node_or_null(level_notes_text_edit.focus_neighbor_top) as Control
+			elif Utility.fixed_just_pressed_by_event("ui_down", event):
+				focus_neighbor = level_notes_text_edit.get_node_or_null(level_notes_text_edit.focus_neighbor_bottom) as Control
+			if focus_neighbor:
+				accept_event()
+				focus_neighbor.grab_focus.call_deferred()
+				return
+	
+
+func on_level_notes_text_edit_focus_entered() -> void:
+	pass#level_notes_text_edit
 
 func adjust_level_notes_edit_height() -> void:
 	var num_lines: int = level_notes_text_edit.get_line_count()
