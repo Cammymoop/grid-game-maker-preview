@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://bnomndi6o3mmb"]
 
 [ext_resource type="Script" uid="uid://bo7hpfhcp3x5c" path="res://Scenes/credits_ui.gd" id="1_oyibb"]
-[ext_resource type="Script" path="res://Scenes/auto_width_scroll_container.gd" id="2_gxy8c"]
+[ext_resource type="Script" uid="uid://c7i1r81fa2kcl" path="res://Scenes/auto_width_scroll_container.gd" id="2_gxy8c"]
 [ext_resource type="Theme" uid="uid://bqr82gmch2tuh" path="res://assets/ui/credits_theme.tres" id="3_72q5r"]
 
 [sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_i0j1v"]
@@ -18,7 +18,7 @@ grow_vertical = 2
 mouse_filter = 2
 script = ExtResource("1_oyibb")
 credits_scroll = NodePath("HBoxContainer/AutoWidthScrollContainer")
-credits_container = NodePath("HBoxContainer/AutoWidthScrollContainer/CreditsSpaceWrapper/CreditsVBox")
+credits_container = NodePath("HBoxContainer/AutoWidthScrollContainer/MarginContainer/CreditsSpaceWrapper/CreditsVBox")
 
 [node name="MultiplyDarkenColor" type="ColorRect" parent="." unique_id=1971739371]
 material = SubResource("CanvasItemMaterial_i0j1v")
@@ -50,32 +50,37 @@ horizontal_scroll_mode = 0
 vertical_scroll_mode = 3
 script = ExtResource("2_gxy8c")
 
-[node name="CreditsSpaceWrapper" type="VBoxContainer" parent="HBoxContainer/AutoWidthScrollContainer" unique_id=243060661]
+[node name="MarginContainer" type="MarginContainer" parent="HBoxContainer/AutoWidthScrollContainer" unique_id=1123748430]
+layout_mode = 2
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_right = 12
+
+[node name="CreditsSpaceWrapper" type="VBoxContainer" parent="HBoxContainer/AutoWidthScrollContainer/MarginContainer" unique_id=243060661]
 custom_minimum_size = Vector2(100, 0)
 layout_mode = 2
 
-[node name="Spacer" type="Control" parent="HBoxContainer/AutoWidthScrollContainer/CreditsSpaceWrapper" unique_id=960530249]
+[node name="Spacer" type="Control" parent="HBoxContainer/AutoWidthScrollContainer/MarginContainer/CreditsSpaceWrapper" unique_id=960530249]
 custom_minimum_size = Vector2(0, 4000)
 layout_mode = 2
 mouse_filter = 2
 
-[node name="CreditsVBox" type="VBoxContainer" parent="HBoxContainer/AutoWidthScrollContainer/CreditsSpaceWrapper" unique_id=352142703]
+[node name="CreditsVBox" type="VBoxContainer" parent="HBoxContainer/AutoWidthScrollContainer/MarginContainer/CreditsSpaceWrapper" unique_id=352142703]
 layout_mode = 2
 theme = ExtResource("3_72q5r")
 
-[node name="TitleLabel" type="Label" parent="HBoxContainer/AutoWidthScrollContainer/CreditsSpaceWrapper/CreditsVBox" unique_id=1296745425]
+[node name="TitleLabel" type="Label" parent="HBoxContainer/AutoWidthScrollContainer/MarginContainer/CreditsSpaceWrapper/CreditsVBox" unique_id=1296745425]
 layout_mode = 2
 theme_type_variation = &"TitleText"
 text = "Game Title"
 horizontal_alignment = 1
 
-[node name="SubtitleLabel" type="Label" parent="HBoxContainer/AutoWidthScrollContainer/CreditsSpaceWrapper/CreditsVBox" unique_id=1265449197]
+[node name="SubtitleLabel" type="Label" parent="HBoxContainer/AutoWidthScrollContainer/MarginContainer/CreditsSpaceWrapper/CreditsVBox" unique_id=1265449197]
 layout_mode = 2
 theme_type_variation = &"SubtitleText"
 text = "Credits"
 horizontal_alignment = 1
 
-[node name="Spacer2" type="Control" parent="HBoxContainer/AutoWidthScrollContainer/CreditsSpaceWrapper" unique_id=1953771218]
+[node name="Spacer2" type="Control" parent="HBoxContainer/AutoWidthScrollContainer/MarginContainer/CreditsSpaceWrapper" unique_id=1953771218]
 custom_minimum_size = Vector2(0, 4000)
 layout_mode = 2
 mouse_filter = 2

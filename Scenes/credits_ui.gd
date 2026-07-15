@@ -12,9 +12,18 @@ const ABOVE_CREDITS: int = 4000
 @export var space_before_section: int = 20
 @export var space_after_section: int = 10
 
+@export var space_before_link: int = 10
+@export var space_after_link: int = 10
+
+@export var space_before_image: int = 20
+@export var space_after_image: int = 20
+
 @export var default_autoscroll_speed: float = 200
 @export var manual_scroll_speed: float = 400
 
+var link_label_scn: PackedScene = preload("res://Scenes/link_rich_label.tscn")
+
+var image_scn: PackedScene = preload("res://Scenes/credits_image.tscn")
 
 var _autoscrolling: = false
 
@@ -95,6 +104,29 @@ func build_credits_list() -> void:
                 current_just_names_flow = _start_just_names_flow()
             var name_label: Label = _get_centered_label(credit_item.get("name", ""), "NameListName")
             current_just_names_flow.add_child(name_label)
+        elif item_type == "link":
+            var link_label: RichTextLabel = _get_link_label(credit_item.get("url", ""))
+            _add_space(space_before_link)
+            credits_container.add_child(link_label)
+            _add_space(space_after_link)
+        elif item_type == "image":
+            var texture_id: int = int(credit_item.get("texture_id", -1))
+            if texture_id >= 0 and TextureManager.has_texture_id(texture_id):
+                var sub_index: int = int(credit_item.get("texture_sub_index", 0))
+                var atlas_tex: Texture2D = Utility.atlas_texture_from_texture_index(texture_id, sub_index)
+                var relative_scale: float = credit_item.get("relative_scale", 1.0)
+                var dark_bg: bool = credit_item.get("with_dark_bg", false)
+                var sharp_scale: bool = credit_item.get("sharp_scale", false)
+                var image: Control = _get_image(atlas_tex, relative_scale, dark_bg, sharp_scale)
+                _add_space(space_before_image)
+                credits_container.add_child(image)
+                _add_space(space_after_image)
+
+    #var test_img: Control = _get_image(load("res://assets/img/entityTiles.png"), 2.0, true, true)
+    #_add_space(space_before_link)
+    #credits_container.add_child(test_img)
+    #_add_space(space_after_link)
+
 
 func reset_scroll() -> void:
     credits_scroll.scroll_vertical = 0
@@ -172,6 +204,16 @@ func _get_label(text: String, type_variation: String = "") -> Label:
     if type_variation:
         label.theme_type_variation = type_variation
     return label
+
+func _get_link_label(url: String) -> RichTextLabel:
+    var link_label: RichTextLabel = link_label_scn.instantiate()
+    link_label.set_link_url(url)
+    return link_label
+
+func _get_image(texture: Texture2D, relative_scale: float, with_dark_bg: bool, sharp_scale: bool) -> Control:
+    var image: Control = image_scn.instantiate()
+    image.set_texture(texture, relative_scale, with_dark_bg, sharp_scale)
+    return image
 
 func clear_credits_container() -> void:
     for child in credits_container.get_children():

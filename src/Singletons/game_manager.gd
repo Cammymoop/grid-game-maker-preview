@@ -696,6 +696,8 @@ func is_texture_id_used_in_settings(texture_id: int) -> bool:
 		return true
 	if _is_texture_id_used_in_game_background(texture_id):
 		return true
+	if _is_texture_id_used_in_credits(texture_id):
+		return true
 	return false
 
 func is_texture_id_used_in_levels_and_lists(texture_id: int, bundled_only: bool = false) -> bool:
@@ -754,6 +756,28 @@ func _is_texture_id_used_by_bg_style(bg_style_info: Dictionary, texture_id: int)
 		return false
 	return int(bg_style_info["bg_tile_texture_id"]) == texture_id
 
+func _is_texture_id_used_in_credits(texture_id: int) -> bool:
+	var credits_info: Dictionary = get_credits_info()
+	for credit_item in credits_info.get("credits_list", []):
+		if not credit_item.get("type", "") == "image" or not credit_item.has("texture_id"):
+			continue
+		var credit_texture_id: Variant = credit_item.get("texture_id", -1)
+		if typeof(credit_texture_id) not in [TYPE_INT, TYPE_FLOAT] or int(credit_texture_id) != texture_id:
+			continue
+		return true
+	return false
+
+func remap_texture_id_in_credits(from_texture_id: int, to_texture_id: int) -> void:
+	var credits_info: Dictionary = get_credits_info()
+	for credit_item in credits_info.get("credits_list", []):
+		if not credit_item.get("type", "") == "image" or not credit_item.has("texture_id"):
+			continue
+		var credit_texture_id: Variant = credit_item.get("texture_id", -1)
+		if typeof(credit_texture_id) not in [TYPE_INT, TYPE_FLOAT] or int(credit_texture_id) != from_texture_id:
+			continue
+		credit_item["texture_id"] = to_texture_id
+	set_credits_info(credits_info)
+
 func remap_texture_id_in_game_and_levels(from_texture_id: int, to_texture_id: int, bundled_only: bool = false) -> void:
 	remap_texture_id_in_settings(from_texture_id, to_texture_id)
 	remap_texture_id_in_levels_and_lists(from_texture_id, to_texture_id, bundled_only)
@@ -767,6 +791,7 @@ func remap_texture_id_in_game_and_levels(from_texture_id: int, to_texture_id: in
 func remap_texture_id_in_settings(from_texture_id: int, to_texture_id: int) -> void:
 	_remap_texture_id_in_hud(from_texture_id, to_texture_id)
 	_remap_texture_id_game_background(from_texture_id, to_texture_id)
+	remap_texture_id_in_credits(from_texture_id, to_texture_id)
 
 func remap_texture_id_in_levels_and_lists(from_texture_id: int, to_texture_id: int, bundled_only: bool = false) -> void:
 	remap_texture_id_in_level_lists(from_texture_id, to_texture_id, bundled_only)

@@ -1,0 +1,32 @@
+[gd_scene format=3 uid="uid://cqlb4e5wlb3bn"]
+
+[ext_resource type="Script" uid="uid://gsq28oi0184b" path="res://Scenes/link_rich_label.gd" id="1_bqvqh"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_bqvqh"]
+content_margin_left = 6.0
+content_margin_right = 6.0
+bg_color = Color(0, 0, 0, 0.6039216)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+expand_margin_left = 4.0
+expand_margin_top = 4.0
+expand_margin_right = 4.0
+expand_margin_bottom = 4.0
+
+[node name="LinkRichLabel" type="RichTextLabel" unique_id=2031786300]
+clip_contents = false
+offset_right = 216.0
+offset_bottom = 23.0
+size_flags_horizontal = 4
+mouse_default_cursor_shape = 2
+theme_override_colors/default_color = Color(0.553005, 0.93125993, 0.9835952, 1)
+theme_override_font_sizes/normal_font_size = 18
+theme_override_styles/normal = SubResource("StyleBoxFlat_bqvqh")
+bbcode_enabled = true
+text = "[url]https://cammymoop.itch.io[/url]"
+fit_content = true
+autowrap_mode = 0
+meta_underlined = false
+script = ExtResource("1_bqvqh")

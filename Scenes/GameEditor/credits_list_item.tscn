@@ -2,14 +2,22 @@
 
 [ext_resource type="Script" uid="uid://bivr1ggtbhl43" path="res://src/GameEditor/credits_list_item.gd" id="1_2c1en"]
 [ext_resource type="Texture2D" uid="uid://dx8arqf2lcidg" path="res://assets/img/button_icons/minus_small.png" id="1_jmlwx"]
+[ext_resource type="PackedScene" uid="uid://cemds60k8ytal" path="res://Scenes/UI/icon_button.tscn" id="2_48v4u"]
+[ext_resource type="PackedScene" uid="uid://bleyoj5f36kfy" path="res://Scenes/GameEditor/ConditionalEditor/scalar_value_input.tscn" id="2_evahj"]
+[ext_resource type="Texture2D" uid="uid://cfokfsynll5sp" path="res://assets/img/err_small.png" id="3_blqha"]
 
-[node name="CreditsListItem" type="HBoxContainer" unique_id=647526226 node_paths=PackedStringArray("type_picker", "input_1", "input_2")]
+[node name="CreditsListItem" type="HBoxContainer" unique_id=647526226 node_paths=PackedStringArray("type_picker", "input_1", "input_2", "image_options", "texture_picker_button", "relative_scale_input", "with_dark_bg_toggle", "smooth_scale_toggle")]
 offset_right = 178.0
 offset_bottom = 31.0
 script = ExtResource("1_2c1en")
 type_picker = NodePath("HBoxContainer/OptionButton")
 input_1 = NodePath("HBoxContainer/RoleInput")
 input_2 = NodePath("HBoxContainer/NameInput")
+image_options = NodePath("HBoxContainer/ImageOptions")
+texture_picker_button = NodePath("HBoxContainer/ImageOptions/TexturePickerButton")
+relative_scale_input = NodePath("HBoxContainer/ImageOptions/ScaleOption/RelativeScaleInput")
+with_dark_bg_toggle = NodePath("HBoxContainer/ImageOptions/DarkBGToggle")
+smooth_scale_toggle = NodePath("HBoxContainer/ImageOptions/ScaleSmoothToggle")
 
 [node name="HBoxContainer" type="HBoxContainer" parent="." unique_id=992293189]
 layout_mode = 2
@@ -20,13 +28,17 @@ alignment = 1
 layout_mode = 2
 alignment = 1
 selected = 0
-item_count = 3
+item_count = 5
 popup/item_0/text = "Role & Name"
 popup/item_0/id = 0
 popup/item_1/text = "Just Name"
 popup/item_1/id = 1
 popup/item_2/text = "Section"
 popup/item_2/id = 2
+popup/item_3/text = "Link"
+popup/item_3/id = 3
+popup/item_4/text = "Image"
+popup/item_4/id = 4
 
 [node name="RoleInput" type="LineEdit" parent="HBoxContainer" unique_id=1597938675]
 layout_mode = 2
@@ -39,6 +51,44 @@ layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 4
 placeholder_text = "Name"
+
+[node name="ImageOptions" type="HBoxContainer" parent="HBoxContainer" unique_id=941007994]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 12
+alignment = 1
+
+[node name="TexturePickerButton" parent="HBoxContainer/ImageOptions" unique_id=451892711 instance=ExtResource("2_48v4u")]
+layout_mode = 2
+icon = ExtResource("3_blqha")
+
+[node name="ScaleOption" type="HBoxContainer" parent="HBoxContainer/ImageOptions" unique_id=2129511669]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="HBoxContainer/ImageOptions/ScaleOption" unique_id=305535000]
+layout_mode = 2
+text = "Scale:"
+
+[node name="RelativeScaleInput" parent="HBoxContainer/ImageOptions/ScaleOption" unique_id=1458729988 instance=ExtResource("2_evahj")]
+layout_mode = 2
+size_flags_vertical = 4
+default_value = 1.0
+min_value = 0.1
+max_value = 20.0
+custom_step = true
+custom_step_value = 0.1
+
+[node name="ScaleSmoothToggle" type="CheckButton" parent="HBoxContainer/ImageOptions" unique_id=1330180894]
+layout_mode = 2
+size_flags_vertical = 4
+theme_override_font_sizes/font_size = 14
+text = "Scale Smooth"
+
+[node name="DarkBGToggle" type="CheckButton" parent="HBoxContainer/ImageOptions" unique_id=1676338756]
+layout_mode = 2
+size_flags_vertical = 4
+theme_override_font_sizes/font_size = 14
+text = "Dark BG"
 
 [node name="RemoveCreditItemButton" type="Button" parent="." unique_id=1689946817]
 layout_mode = 2

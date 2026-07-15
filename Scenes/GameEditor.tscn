@@ -111,11 +111,10 @@ release_lock_layer = NodePath("../../LockedOverlay")
 [node name="TabContainer" type="TabContainer" parent="MarginContainer/UIRoot" unique_id=540253846]
 layout_mode = 2
 theme = ExtResource("3_qrjoe")
-current_tab = 3
+current_tab = 0
 tab_0/title = "Game"
 
 [node name="GameDefinition" type="VBoxContainer" parent="MarginContainer/UIRoot/TabContainer" unique_id=1146228055 node_paths=PackedStringArray("show_level_title_option_picker", "movement_mode_picker", "game_identifier_label", "game_identifier_panel", "game_identifier_input", "game_identifier_input_panel", "game_identifier_set_button", "game_identifier_cancel_button", "name_input", "edit_game_dir_button", "last_release_version_label", "next_release_version_input", "move_interp_option_picker", "tele_interp_option_picker", "action_signal_sent_to_option_picker", "turn_animation_option_picker", "def_dying_eff_picker", "def_spawn_eff_picker", "use_spawn_effect_at_level_start_toggle", "level_start_anim_duration_option", "level_start_animation_duration_input", "default_move_speed_input", "default_teleport_duration_input", "auto_reload_checkpoint_for_no_cam_focus_toggle", "follow_by_controller_picker", "auto_undo_option", "auto_undo_toggle", "action_1_is_undo_toggle", "start_paused_option", "start_level_paused_toggle", "export_release_button", "section_container")]
-visible = false
 layout_mode = 2
 script = ExtResource("6")
 show_level_title_option_picker = NodePath("ScrollContainer/SectionContainer/GameSettingsSection/MarginContainer/HFlowContainer/HFlowContainer/HBoxContainer11/OptionButton")
@@ -981,6 +980,7 @@ theme_override_constants/margin_bottom = 3
 layout_mode = 2
 
 [node name="Images" type="VBoxContainer" parent="MarginContainer/UIRoot/TabContainer" unique_id=500504760 node_paths=PackedStringArray("texture_item_list", "edit_texture_button", "convert_to_bundled_button", "import_image_button", "duplicate_image_button", "open_images_folder_button")]
+visible = false
 layout_mode = 2
 script = ExtResource("5")
 texture_item_list = NodePath("PanelContainer/ScrollContainer/ListContainer")
