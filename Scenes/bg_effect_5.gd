@@ -1,6 +1,7 @@
 extends Node
 
 const BGTileHolder: = preload("res://Scenes/bg_tile_holder.gd")
+const ParticleEmitterParallax: = preload("res://Scenes/particle_emitter_parallax.gd")
 
 @export var game_view: Node = null
 
@@ -13,6 +14,7 @@ const BGTileHolder: = preload("res://Scenes/bg_tile_holder.gd")
 @export var bg_gradient: TextureRect
 
 @export var bg_tile_holder: BGTileHolder
+@export var paticle_emitter_parallaxes: Array[ParticleEmitterParallax] = []
 
 @export var lines: Sprite2D
 @export var lines_solid: Sprite2D
@@ -46,9 +48,13 @@ var lines_warp_scroll_angle: float = 0.4
 var lines_camera_scroll_factor: float = 0.0
 var lines_solid_camera_scroll_factor: float = 0.0
 
+var shader_time_loop_factor: float = 60.0
+
 func _ready() -> void:
     if game_view:
         game_view.camera_displacement_changed.connect(on_camera_displacement_changed)
+    
+    shader_time_loop_factor = ProjectSettings.get_setting("rendering/limits/time/time_rollover_secs", 60.0)
     
     bg_gradient.texture = gradient_texture
 
@@ -138,6 +144,13 @@ func refresh_bg_style() -> void:
         bg_tile_holder.update_bg_tile_info(level_bg_info, between_z_index)
 
 
+func snap_scroll_vector_for_shader_time_loop(scroll_vector: Vector2) -> Vector2:
+    var snapped_vector: Vector2 = (scroll_vector * shader_time_loop_factor).snapped(Vector2.ONE)
+    if snapped_vector == Vector2.ZERO:
+        return Vector2(signf(scroll_vector.x), signf(scroll_vector.y))
+    return snapped_vector / shader_time_loop_factor
+
+
 func refresh_lines_style() -> void:
     var level_bg_info: Dictionary = GameManager.get_current_bg_info()
     lines.visible = level_bg_info.get("lines_on", false)
@@ -154,6 +167,12 @@ func refresh_lines_style() -> void:
     
     var scroll_speed: float = level_bg_info.get("lines_scroll_speed", lines_scroll_speed)
     var scroll_angle: float = level_bg_info.get("lines_scroll_angle", lines_scroll_angle)
+    var scroll_vec: = Vector2.RIGHT.rotated(scroll_angle * TAU) * scroll_speed
+    scroll_vec = snap_scroll_vector_for_shader_time_loop(scroll_vec)
+    scroll_speed = scroll_vec.length()
+    scroll_angle = scroll_vec.angle() / TAU
+    scroll_angle = fposmod(((scroll_vec.angle() + PI) / TAU) - 0.5, 1.0)
+
     lines_shader.set_shader_parameter("scroll_speed", scroll_speed)
     lines_solid_shader.set_shader_parameter("scroll_speed", scroll_speed)
     lines_shader.set_shader_parameter("scroll_angle", scroll_angle)
@@ -165,6 +184,11 @@ func refresh_lines_style() -> void:
     
     var warp_scroll_speed: float = level_bg_info.get("lines_warp_scroll_speed", lines_warp_scroll_speed)
     var warp_scroll_angle: float = level_bg_info.get("lines_warp_scroll_angle", lines_warp_scroll_angle)
+    var warp_scroll_vec: = Vector2.RIGHT.rotated(warp_scroll_angle * TAU) * warp_scroll_speed
+    warp_scroll_vec = snap_scroll_vector_for_shader_time_loop(warp_scroll_vec)
+    warp_scroll_speed = warp_scroll_vec.length()
+    warp_scroll_angle = fposmod(((warp_scroll_vec.angle() + PI) / TAU) - 0.5, 1.0)
+
     lines_shader.set_shader_parameter("displacement_scroll_speed", warp_scroll_speed)
     lines_solid_shader.set_shader_parameter("displacement_scroll_speed", warp_scroll_speed)
     lines_shader.set_shader_parameter("displacement_scroll_angle", warp_scroll_angle)
@@ -175,6 +199,7 @@ func refresh_lines_style() -> void:
     var is_above: bool = lines_above.begins_with("above")
     var is_solid_on_top: bool = lines_above.contains(", solid on top")
     var lines_parent: Node = lines_solid.get_parent()
+    lines_parent.move_child(lines_solid, lines_parent.get_child_count() - 1)
     lines_parent.move_child(lines_solid, lines.get_index() + (1 if is_solid_on_top else 0))
 
     var lines_solids_z_offset: int = 3 if is_above else -1
@@ -199,3 +224,6 @@ func on_camera_displacement_changed(camera_displacement: Vector2) -> void:
             effect_fixed_in_viewport.position = camera_displacement
     if bg_tile_holder.visible:
         bg_tile_holder.scroll_updated()
+    for parallax in paticle_emitter_parallaxes:
+        if parallax.visible:
+            parallax.scroll_updated()

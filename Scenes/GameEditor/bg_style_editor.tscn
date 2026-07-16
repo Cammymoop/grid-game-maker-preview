@@ -22,7 +22,7 @@ thickness = 2
 atlas = ExtResource("5_5n2ag")
 region = Rect2(160, 160, 32, 32)
 
-[node name="BGStyleEditor" type="VBoxContainer" unique_id=1622581633 node_paths=PackedStringArray("reset_button", "remove_override_button", "bg_color_picker", "bg_gradient_enable", "bg_gradient_suboptions", "bg_gradient_color_picker", "bg_gradient_sort_option", "bg_gradient_rotation_input", "dusty_particles_enable", "dusty_particles_suboptions", "dusty_particles_color_picker", "dusty_particles_speed_input", "dusty_particles_amount_input", "pointy_particles_enable", "pointy_particles_suboptions", "pointy_particles_color_picker", "pointy_particles_rainbow_enable", "pointy_particles_dark_mode_enable", "pointy_particles_speed_input", "pointy_particles_amount_input", "lines_enable", "solids_enable", "lines_suboptions", "lines_sort_option", "lines_color_picker", "solids_color_picker", "ln_scroll_speed_input", "ln_scroll_angle_input", "ln_warp_strength_input", "ln_warp_scroll_speed_input", "ln_warp_scroll_angle_input", "tile_enable", "tile_suboptions", "tile_texture_picker_button", "tile_color_picker", "tile_sort_option", "tile_below_gradient_toggle", "tile_angle_input", "tile_scale_input", "tile_smooth_scale_toggle", "tile_spacing_input", "tile_camera_scroll_factor_input", "ln_cam_scroll_factor_input", "ln_solid_cam_scroll_factor_input")]
+[node name="BGStyleEditor" type="VBoxContainer" unique_id=1622581633 node_paths=PackedStringArray("reset_button", "remove_override_button", "bg_color_picker", "bg_gradient_enable", "bg_gradient_suboptions", "bg_gradient_color_picker", "bg_gradient_sort_option", "bg_gradient_rotation_input", "dusty_particles_enable", "dusty_particles_suboptions", "dusty_particles_color_picker", "dusty_particles_speed_input", "dusty_particles_amount_input", "pointy_particles_enable", "pointy_particles_suboptions", "pointy_particles_color_picker", "pointy_particles_rainbow_enable", "pointy_particles_dark_mode_enable", "pointy_particles_speed_input", "pointy_particles_amount_input", "lines_enable", "solids_enable", "lines_suboptions", "lines_sort_option", "lines_color_picker", "solids_color_picker", "ln_scroll_speed_input", "ln_scroll_angle_input", "ln_warp_strength_input", "ln_warp_scroll_speed_input", "ln_warp_scroll_angle_input", "tile_enable", "tile_suboptions", "tile_texture_picker_button", "tile_color_picker", "tile_sort_option", "tile_below_gradient_toggle", "tile_angle_input", "tile_scale_input", "tile_smooth_scale_toggle", "tile_spacing_input", "tile_camera_scroll_factor_input", "tile_auto_scroll_enable", "tile_auto_scroll_suboptions", "tile_auto_scroll_speed_input", "tile_auto_scroll_angle_input", "ln_cam_scroll_factor_input", "ln_solid_cam_scroll_factor_input")]
 theme = SubResource("Theme_48hio")
 script = ExtResource("1_pxgli")
 reset_button = NodePath("HBoxContainer2/ResetButton")
@@ -67,6 +67,10 @@ tile_scale_input = NodePath("VBoxContainer5/TileSuboptions/HBoxContainer4/TileSc
 tile_smooth_scale_toggle = NodePath("VBoxContainer5/TileSuboptions/HBoxContainer7/TileSmoothScale")
 tile_spacing_input = NodePath("VBoxContainer5/TileSuboptions/HBoxContainer9/TileSpacing")
 tile_camera_scroll_factor_input = NodePath("VBoxContainer5/TileSuboptions/HBoxContainer15/TileParallax")
+tile_auto_scroll_enable = NodePath("VBoxContainer5/TileSuboptions/HBoxContainer10/TileAutoScrollEnable")
+tile_auto_scroll_suboptions = NodePath("VBoxContainer5/TileSuboptions/TileAutoScrollSuboptions")
+tile_auto_scroll_speed_input = NodePath("VBoxContainer5/TileSuboptions/TileAutoScrollSuboptions/HBoxContainer17/TileAutoScrollSpeed")
+tile_auto_scroll_angle_input = NodePath("VBoxContainer5/TileSuboptions/TileAutoScrollSuboptions/HBoxContainer18/TileAutoScrollAngle")
 ln_cam_scroll_factor_input = NodePath("VBoxContainer3/NoiseSuboptions/HBoxContainer13/ScalarValueInput")
 ln_solid_cam_scroll_factor_input = NodePath("VBoxContainer3/NoiseSuboptions/HBoxContainer14/ScalarValueInput")
 
@@ -324,6 +328,7 @@ layout_mode = 2
 text = "Enable Noise Solids"
 
 [node name="NoiseSuboptions" type="VBoxContainer" parent="VBoxContainer3" unique_id=109020447]
+visible = false
 layout_mode = 2
 
 [node name="HBoxContainer4" type="HBoxContainer" parent="VBoxContainer3/NoiseSuboptions" unique_id=472606221]
@@ -643,3 +648,44 @@ layout_mode = 2
 max_value = 1.0
 custom_step = true
 custom_step_value = 0.01
+
+[node name="HBoxContainer10" type="HBoxContainer" parent="VBoxContainer5/TileSuboptions" unique_id=94214047]
+layout_mode = 2
+alignment = 2
+
+[node name="TileAutoScrollEnable" type="CheckButton" parent="VBoxContainer5/TileSuboptions/HBoxContainer10" unique_id=1377991886]
+layout_mode = 2
+text = "Auto Scroll:"
+
+[node name="TileAutoScrollSuboptions" type="VBoxContainer" parent="VBoxContainer5/TileSuboptions" unique_id=637533295]
+layout_mode = 2
+
+[node name="HBoxContainer17" type="HBoxContainer" parent="VBoxContainer5/TileSuboptions/TileAutoScrollSuboptions" unique_id=1799240090]
+layout_mode = 2
+alignment = 2
+
+[node name="Label" type="Label" parent="VBoxContainer5/TileSuboptions/TileAutoScrollSuboptions/HBoxContainer17" unique_id=752145506]
+layout_mode = 2
+text = "Scroll Speed:"
+
+[node name="TileAutoScrollSpeed" parent="VBoxContainer5/TileSuboptions/TileAutoScrollSuboptions/HBoxContainer17" unique_id=745362461 instance=ExtResource("2_87jfg")]
+layout_mode = 2
+default_value = 0.5
+min_value = 0.02
+max_value = 10.0
+custom_step = true
+custom_step_value = 0.02
+
+[node name="HBoxContainer18" type="HBoxContainer" parent="VBoxContainer5/TileSuboptions/TileAutoScrollSuboptions" unique_id=1721392866]
+layout_mode = 2
+alignment = 2
+
+[node name="Label" type="Label" parent="VBoxContainer5/TileSuboptions/TileAutoScrollSuboptions/HBoxContainer18" unique_id=313542012]
+layout_mode = 2
+text = "Scroll Angle:"
+
+[node name="TileAutoScrollAngle" parent="VBoxContainer5/TileSuboptions/TileAutoScrollSuboptions/HBoxContainer18" unique_id=1836601096 instance=ExtResource("2_87jfg")]
+layout_mode = 2
+is_int_type = true
+max_value = 360.0
+custom_step = true

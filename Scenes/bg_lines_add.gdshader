@@ -24,14 +24,14 @@ void vertex() {
 void fragment() {
     float scroll_amt = TIME * scroll_speed;
     float ang = 2.0 * PI * scroll_angle;
-    vec2 uv_offset = vec2(sin(ang) * scroll_amt, cos(ang) * scroll_amt);
+    vec2 uv_offset = vec2(-sin(ang) * scroll_amt, cos(ang) * scroll_amt);
     
     vec2 camera_disp = camera_displacement * camera_displacement_scale / 1024.;
     uv_offset += camera_disp;
     
     float wave_time = TIME * displacement_scroll_speed;
     float wave_scroll_ang = 2.0 * PI * displacement_scroll_angle;
-    vec2 wave_offset = vec2(sin(wave_scroll_ang) * wave_time, cos(wave_scroll_ang) * wave_time);
+    vec2 wave_offset = vec2(-sin(wave_scroll_ang) * wave_time, cos(wave_scroll_ang) * wave_time);
     
     wave_offset += camera_disp;
 

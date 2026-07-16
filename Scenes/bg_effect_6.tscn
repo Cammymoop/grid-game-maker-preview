@@ -5,6 +5,7 @@
 [ext_resource type="Shader" uid="uid://bi68mhe1xawmw" path="res://Scenes/bg_lines.gdshader" id="2_dyaob"]
 [ext_resource type="Material" uid="uid://bxpdteawtwgay" path="res://src/Effects/background/lines_as_water.tres" id="2_n4cem"]
 [ext_resource type="Script" uid="uid://15x5jg4jwyc5" path="res://src/Effects/VoidParticles.gd" id="3_dyaob"]
+[ext_resource type="Script" uid="uid://cnjtrck46cism" path="res://Scenes/test_canvas_layer_centering_child.gd" id="3_mx7c4"]
 [ext_resource type="Texture2D" uid="uid://by1uvj4gg53du" path="res://assets/img/square_shadow_white.png" id="4_6ng66"]
 [ext_resource type="Script" uid="uid://c2ksw4bcxmkvq" path="res://src/Effects/ColorRect_FadeToBlack.gd" id="4_n4cem"]
 [ext_resource type="Script" uid="uid://dah28ad1gxx5c" path="res://Scenes/tex_rect_full_rect.gd" id="7_exhar"]
@@ -19,52 +20,6 @@ gradient = SubResource("Gradient_6ng66")
 fill_from = Vector2(0.5, 1)
 fill_to = Vector2(0.5, 0.2)
 metadata/_snap_enabled = true
-
-[sub_resource type="Gradient" id="Gradient_exhar"]
-
-[sub_resource type="FastNoiseLite" id="FastNoiseLite_n4cem"]
-seed = 1
-frequency = 0.0043
-fractal_octaves = 3
-
-[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_4d8kp"]
-width = 1024
-height = 1024
-noise = SubResource("FastNoiseLite_n4cem")
-color_ramp = SubResource("Gradient_exhar")
-seamless = true
-
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_exhar"]
-shader = ExtResource("2_dyaob")
-shader_parameter/scroll_speed = 0.06999999843536
-shader_parameter/scroll_angle = 0.83999998122432
-shader_parameter/displacement_tex = SubResource("NoiseTexture2D_4d8kp")
-shader_parameter/displacement_strength = 1.30000001937156
-shader_parameter/displacement_scroll_speed = 0.06999999843536
-shader_parameter/displacement_scroll_angle = 0.5499999877064
-shader_parameter/camera_displacement_scale = 0.0
-
-[sub_resource type="Gradient" id="Gradient_n4cem"]
-offsets = PackedFloat32Array(0.5154867, 0.53318584)
-colors = PackedColorArray(1, 1, 1, 1, 1, 1, 1, 0)
-
-[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_7f2o1"]
-width = 1024
-height = 1024
-noise = SubResource("FastNoiseLite_n4cem")
-color_ramp = SubResource("Gradient_n4cem")
-seamless = true
-
-[sub_resource type="Gradient" id="Gradient_dyaob"]
-offsets = PackedFloat32Array(0.46238938, 0.4800885, 0.5154867, 0.53318584)
-colors = PackedColorArray(0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1)
-
-[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_exhar"]
-width = 1024
-height = 1024
-noise = SubResource("FastNoiseLite_n4cem")
-color_ramp = SubResource("Gradient_dyaob")
-seamless = true
 
 [sub_resource type="Curve" id="Curve_gkcwl"]
 _limits = [0.0, 2.0, 0.0, 1.0]
@@ -120,6 +75,52 @@ alpha_curve = SubResource("CurveTexture_nkw3m")
 hue_variation_min = -0.41000003
 hue_variation_max = 0.40999997
 
+[sub_resource type="Gradient" id="Gradient_exhar"]
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_n4cem"]
+seed = 1
+frequency = 0.0043
+fractal_octaves = 3
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_4d8kp"]
+width = 1024
+height = 1024
+noise = SubResource("FastNoiseLite_n4cem")
+color_ramp = SubResource("Gradient_exhar")
+seamless = true
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_exhar"]
+shader = ExtResource("2_dyaob")
+shader_parameter/scroll_speed = 0.06999999843536
+shader_parameter/scroll_angle = 0.83999998122432
+shader_parameter/displacement_tex = SubResource("NoiseTexture2D_4d8kp")
+shader_parameter/displacement_strength = 1.30000001937156
+shader_parameter/displacement_scroll_speed = 0.06999999843536
+shader_parameter/displacement_scroll_angle = 0.5499999877064
+shader_parameter/camera_displacement_scale = 0.0
+
+[sub_resource type="Gradient" id="Gradient_n4cem"]
+offsets = PackedFloat32Array(0.5154867, 0.53318584)
+colors = PackedColorArray(1, 1, 1, 1, 1, 1, 1, 0)
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_7f2o1"]
+width = 1024
+height = 1024
+noise = SubResource("FastNoiseLite_n4cem")
+color_ramp = SubResource("Gradient_n4cem")
+seamless = true
+
+[sub_resource type="Gradient" id="Gradient_dyaob"]
+offsets = PackedFloat32Array(0.46238938, 0.4800885, 0.5154867, 0.53318584)
+colors = PackedColorArray(0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1)
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_exhar"]
+width = 1024
+height = 1024
+noise = SubResource("FastNoiseLite_n4cem")
+color_ramp = SubResource("Gradient_dyaob")
+seamless = true
+
 [sub_resource type="ViewportTexture" id="ViewportTexture_4d8kp"]
 viewport_path = NodePath("SubViewportContainer/SubViewport/BGTileHolder/Scrolling/Sprite2D/SubViewport")
 
@@ -128,7 +129,7 @@ atlas = ExtResource("9_7f2o1")
 region = Rect2(128, 96, 32, 32)
 filter_clip = true
 
-[node name="BGEffects" type="Control" unique_id=1715516889 node_paths=PackedStringArray("effect_subviewport", "effect_fixed_in_viewport", "bg_color_rect", "dusty_particles", "pointy_particles", "bg_gradient", "bg_tile_holder", "lines", "lines_solid")]
+[node name="BGEffects" type="Control" unique_id=1715516889 node_paths=PackedStringArray("effect_subviewport", "effect_fixed_in_viewport", "bg_color_rect", "dusty_particles", "pointy_particles", "bg_gradient", "bg_tile_holder", "paticle_emitter_parallaxes", "lines", "lines_solid")]
 process_mode = 3
 layout_mode = 3
 anchors_preset = 15
@@ -139,14 +140,15 @@ grow_vertical = 2
 mouse_filter = 2
 script = ExtResource("1_2aks0")
 effect_subviewport = NodePath("SubViewportContainer/SubViewport")
-effect_fixed_in_viewport = NodePath("SubViewportContainer/SubViewport/FixedOnScreen")
+effect_fixed_in_viewport = NodePath("SubViewportContainer/SubViewport/NoiseLinesLayer/FixedOnScreen")
 bg_color_rect = NodePath("SubViewportContainer/SubViewport/CanvasLayer/ColorRect")
-dusty_particles = NodePath("SubViewportContainer/SubViewport/FixedOnScreen/DustyParticles")
-pointy_particles = NodePath("SubViewportContainer/SubViewport/FixedOnScreen/PointyParticles")
-bg_gradient = NodePath("SubViewportContainer/SubViewport/FixedOnScreen/BGGradient")
+dusty_particles = NodePath("SubViewportContainer/SubViewport/DustyLayer/DustyParticles")
+pointy_particles = NodePath("SubViewportContainer/SubViewport/PointyLayer/PointyParticles")
+bg_gradient = NodePath("SubViewportContainer/SubViewport/NoiseLinesLayer/FixedOnScreen/BGGradient")
 bg_tile_holder = NodePath("SubViewportContainer/SubViewport/BGTileHolder")
-lines = NodePath("SubViewportContainer/SubViewport/FixedOnScreen/Lines")
-lines_solid = NodePath("SubViewportContainer/SubViewport/FixedOnScreen/LinesSolid")
+paticle_emitter_parallaxes = [NodePath(""), NodePath("")]
+lines = NodePath("SubViewportContainer/SubViewport/NoiseLinesLayer/FixedOnScreen/Lines")
+lines_solid = NodePath("SubViewportContainer/SubViewport/NoiseLinesLayer/FixedOnScreen/LinesSolid")
 gradient_texture = SubResource("GradientTexture2D_dyaob")
 
 [node name="SubViewportContainer" type="SubViewportContainer" parent="." unique_id=1971214824]
@@ -178,29 +180,14 @@ script = ExtResource("4_n4cem")
 do_fade = false
 fade_length = 0.2
 
-[node name="FixedOnScreen" type="Node2D" parent="SubViewportContainer/SubViewport" unique_id=241739084]
+[node name="DustyLayer" type="CanvasLayer" parent="SubViewportContainer/SubViewport" unique_id=104529955 node_paths=PackedStringArray("child_node", "void_particles")]
+follow_viewport_enabled = true
+follow_viewport_scale = 0.5
+script = ExtResource("3_mx7c4")
+child_node = NodePath("Sprite2D")
+void_particles = NodePath("DustyParticles")
 
-[node name="LinesSolid" type="Sprite2D" parent="SubViewportContainer/SubViewport/FixedOnScreen" unique_id=1891106267]
-visible = false
-modulate = Color(0.14644936, 0.1573914, 0.6422503, 0.4509804)
-texture_repeat = 2
-material = SubResource("ShaderMaterial_exhar")
-position = Vector2(352, 327)
-texture = SubResource("NoiseTexture2D_7f2o1")
-region_enabled = true
-region_rect = Rect2(-1024, -1024, 5120, 4096)
-
-[node name="Lines" type="Sprite2D" parent="SubViewportContainer/SubViewport/FixedOnScreen" unique_id=1181373835]
-visible = false
-modulate = Color(1, 1, 1, 0.2509804)
-texture_repeat = 2
-material = ExtResource("2_n4cem")
-position = Vector2(352, 327)
-texture = SubResource("NoiseTexture2D_exhar")
-region_enabled = true
-region_rect = Rect2(-1024, -1024, 5120, 4096)
-
-[node name="DustyParticles" type="GPUParticles2D" parent="SubViewportContainer/SubViewport/FixedOnScreen" unique_id=201630246]
+[node name="DustyParticles" type="GPUParticles2D" parent="SubViewportContainer/SubViewport/DustyLayer" unique_id=201630246]
 modulate = Color(0.28503343, 0.5072171, 0.8768182, 0.27450982)
 z_index = 1
 position = Vector2(384, 384)
@@ -214,7 +201,17 @@ script = ExtResource("3_dyaob")
 MAX_AMOUNT = 40000
 smooth_amount_reset = 0.1
 
-[node name="PointyParticles" type="GPUParticles2D" parent="SubViewportContainer/SubViewport/FixedOnScreen" unique_id=1697535648]
+[node name="Sprite2D" type="Sprite2D" parent="SubViewportContainer/SubViewport/DustyLayer" unique_id=987701282]
+visible = false
+position = Vector2(446, 374)
+texture = ExtResource("9_7f2o1")
+
+[node name="PointyLayer" type="CanvasLayer" parent="SubViewportContainer/SubViewport" unique_id=1738042694 node_paths=PackedStringArray("void_particles")]
+follow_viewport_enabled = true
+script = ExtResource("3_mx7c4")
+void_particles = NodePath("PointyParticles")
+
+[node name="PointyParticles" type="GPUParticles2D" parent="SubViewportContainer/SubViewport/PointyLayer" unique_id=1697535648]
 visible = false
 self_modulate = Color(1, 1, 1, 0.3882353)
 z_index = 1
@@ -230,7 +227,31 @@ script = ExtResource("3_dyaob")
 MAX_AMOUNT = 20000
 smooth_amount_reset = 0.5
 
-[node name="BGGradient" type="TextureRect" parent="SubViewportContainer/SubViewport/FixedOnScreen" unique_id=200735861]
+[node name="NoiseLinesLayer" type="CanvasLayer" parent="SubViewportContainer/SubViewport" unique_id=1262906758]
+
+[node name="FixedOnScreen" type="Node2D" parent="SubViewportContainer/SubViewport/NoiseLinesLayer" unique_id=241739084]
+
+[node name="LinesSolid" type="Sprite2D" parent="SubViewportContainer/SubViewport/NoiseLinesLayer/FixedOnScreen" unique_id=1891106267]
+visible = false
+modulate = Color(0.14644936, 0.1573914, 0.6422503, 0.4509804)
+texture_repeat = 2
+material = SubResource("ShaderMaterial_exhar")
+position = Vector2(352, 327)
+texture = SubResource("NoiseTexture2D_7f2o1")
+region_enabled = true
+region_rect = Rect2(-1024, -1024, 5120, 4096)
+
+[node name="Lines" type="Sprite2D" parent="SubViewportContainer/SubViewport/NoiseLinesLayer/FixedOnScreen" unique_id=1181373835]
+visible = false
+modulate = Color(1, 1, 1, 0.2509804)
+texture_repeat = 2
+material = ExtResource("2_n4cem")
+position = Vector2(352, 327)
+texture = SubResource("NoiseTexture2D_exhar")
+region_enabled = true
+region_rect = Rect2(-1024, -1024, 5120, 4096)
+
+[node name="BGGradient" type="TextureRect" parent="SubViewportContainer/SubViewport/NoiseLinesLayer/FixedOnScreen" unique_id=200735861]
 modulate = Color(0.25300944, 0.38964128, 0.9388648, 0.73333335)
 z_index = 2
 custom_minimum_size = Vector2(800, 800)

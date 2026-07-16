@@ -2,6 +2,8 @@ extends Node2D
 
 const DEFAULT_TILE_COLOR: Color = Color(0.28, 0.22, 0.48)
 
+@export var bg_scroll_multiplier: float = 240.0
+
 @export var parallax_amount: float = 1.0
 
 @export var scrolling_piece: Node2D
@@ -15,9 +17,16 @@ const TILING_EXTENTS: int = 4096
 const NEAREST_UPSCALE: int = 4
 const NEAREST_UPSCALE_LARGE: int = 2
 
+var auto_scrolling_vector: Vector2 = Vector2.ZERO
+var accumulated_auto_scroll: Vector2 = Vector2.ZERO
+
+var camera_scroll_pos: Vector2 = Vector2.ZERO
+
 var parent_vp: Viewport
 
 var repeat_vector: Vector2 = Vector2.ONE * 128
+
+var old_texture: String = ""
 
 func _ready() -> void:
     parent_vp = get_viewport()
@@ -27,6 +36,8 @@ func update_bg_tile_info(bg_info: Dictionary, between_z_index: int) -> void:
     visible = is_enabled
     if not is_enabled:
         return
+    
+    var do_reset_auto_scroll: bool = auto_scrolling_vector == Vector2.ZERO
     
     parallax_amount = bg_info.get("bg_tile_camera_scroll_factor", 0.5)
     
@@ -38,6 +49,19 @@ func update_bg_tile_info(bg_info: Dictionary, between_z_index: int) -> void:
     var texture_index: = int(bg_info.get("bg_tile_texture_index", 0))
     if texture_id < 0 or not TextureManager.has_texture_id(texture_id):
         texture_id = TextureManager.get_fallback_texture_id()
+    
+    var texture_key: String = str(texture_id) + "::" + str(texture_index)
+    if texture_key != old_texture:
+        do_reset_auto_scroll = true
+    old_texture = texture_key
+    
+    var is_enable_auto_scroll: bool = bg_info.get("bg_tile_auto_scroll_on", false)
+    if is_enable_auto_scroll:
+        auto_scrolling_vector = Vector2.UP * bg_info.get("bg_tile_auto_scroll_speed", 0.5) * bg_scroll_multiplier
+        var auto_scroll_angle_radians: float = bg_info.get("bg_tile_auto_scroll_angle", 0.0) * TAU
+        auto_scrolling_vector = auto_scrolling_vector.rotated(auto_scroll_angle_radians)
+    else:
+        auto_scrolling_vector = Vector2.ZERO
     
     var tile_scale: float = bg_info.get("bg_tile_scale", 1.0)
     var is_smooth_scale: bool = bg_info.get("bg_tile_smooth_scale", false)
@@ -98,16 +122,29 @@ func update_bg_tile_info(bg_info: Dictionary, between_z_index: int) -> void:
     extent_size *= vp_texture_size
     tiling_sprite.region_rect.size = extent_size
     
+    if do_reset_auto_scroll:
+        accumulated_auto_scroll = Vector2.ZERO
+    
     repeat_vector = vp_texture_size * tile_scale
     scroll_updated()
 
 func scroll_updated() -> void:
-    var scroll_offset: Vector2 = -parent_vp.canvas_transform.origin
+    camera_scroll_pos = -parent_vp.canvas_transform.origin
+    update_position_and_snap()
+
+func update_position_and_snap() -> void:
+    position = (camera_scroll_pos * (1 - parallax_amount)) + accumulated_auto_scroll
     
-    position = scroll_offset * (1 - parallax_amount)
-    
-    var screen_center: Vector2 = scroll_offset + parent_vp.size * 0.5
+    var screen_center: Vector2 = camera_scroll_pos + parent_vp.size * 0.5
     var center_local: = to_local(screen_center)
     
     var closest_snap: = center_local.snapped(repeat_vector)
     scrolling_piece.position = closest_snap
+
+func _process(delta: float) -> void:
+    if not visible:
+        return
+    
+    if auto_scrolling_vector != Vector2.ZERO:
+        accumulated_auto_scroll += auto_scrolling_vector * delta
+        update_position_and_snap()

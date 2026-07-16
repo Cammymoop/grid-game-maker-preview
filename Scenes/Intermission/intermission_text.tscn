@@ -1,0 +1,18 @@
+[gd_scene format=3 uid="uid://cb7yxd6xr7bl5"]
+
+[ext_resource type="FontFile" uid="uid://ctl1lahtrlfks" path="res://assets/font/default_mono_font.tres" id="1_htk8b"]
+
+[node name="IntermissionText" type="MarginContainer" unique_id=1488913074]
+offset_right = 40.0
+offset_bottom = 40.0
+theme_override_constants/margin_top = 18
+theme_override_constants/margin_bottom = 18
+
+[node name="Label" type="Label" parent="." unique_id=1782653433]
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_constants/outline_size = 8
+theme_override_fonts/font = ExtResource("1_htk8b")
+theme_override_font_sizes/font_size = 24
+text = "Intermission Message"
+horizontal_alignment = 1

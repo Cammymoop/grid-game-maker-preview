@@ -57,10 +57,15 @@ var texture_picker_dialog_scn: = preload("res://Scenes/GameEditor/BetterTextureD
 @export var tile_spacing_input: Vector2fInput
 @export var tile_camera_scroll_factor_input: ScalarValueInput
 
+@export var tile_auto_scroll_enable: CheckButton
+@export var tile_auto_scroll_suboptions: Control
+@export var tile_auto_scroll_speed_input: ScalarValueInput
+@export var tile_auto_scroll_angle_input: ScalarValueInput
+
 @export var ln_cam_scroll_factor_input: ScalarValueInput
 @export var ln_solid_cam_scroll_factor_input: ScalarValueInput
 
-const ANGLE_KEYS: = ["lines_scroll_angle", "lines_warp_scroll_angle", "bg_gradient_rotation", "bg_tile_angle"]
+const ANGLE_KEYS: = ["lines_scroll_angle", "lines_warp_scroll_angle", "bg_gradient_rotation", "bg_tile_angle", "bg_tile_auto_scroll_angle"]
 
 var current_tile_texture_id: int = -1
 var current_tile_texture_index: int = 0
@@ -75,8 +80,11 @@ func _ready() -> void:
     lines_enable.toggled.connect(refresh_suboptions.unbind(1))
     solids_enable.toggled.connect(refresh_suboptions.unbind(1))
     tile_enable.toggled.connect(refresh_suboptions.unbind(1))
+
+    tile_auto_scroll_enable.toggled.connect(refresh_suboptions.unbind(1))
     
     tile_texture_picker_button.pressed.connect(open_tile_texture_picker)
+    
     
     GameManager.bg_style_changed.connect(bg_style_changed)
     if not GameManager.current_has_bg_info():
@@ -152,6 +160,10 @@ func load_bg_style() -> void:
     tile_spacing_input.set_value(Utility.get_vector2_from_arr(bg_style.get("bg_tile_spacing", [0.0, 0.0])), true)
     tile_camera_scroll_factor_input.set_value(bg_style.get("bg_tile_camera_scroll_factor", 0.5))
     
+    tile_auto_scroll_enable.set_pressed_no_signal(bg_style.get("bg_tile_auto_scroll_on", false))
+    tile_auto_scroll_speed_input.set_value(bg_style.get("bg_tile_auto_scroll_speed", 0.5))
+    tile_auto_scroll_angle_input.set_value(_turn_to_deg(bg_style.get("bg_tile_auto_scroll_angle", 0.0)))
+    
     current_tile_texture_id = bg_style.get("bg_tile_texture_id", -1)
     current_tile_texture_index = bg_style.get("bg_tile_texture_index", 0)
     set_tile_texture_button_icon(current_tile_texture_id, current_tile_texture_index)
@@ -170,6 +182,7 @@ func refresh_suboptions() -> void:
     pointy_particles_suboptions.visible = pointy_particles_enable.button_pressed
     lines_suboptions.visible = lines_enable.button_pressed or solids_enable.button_pressed
     tile_suboptions.visible = tile_enable.button_pressed
+    tile_auto_scroll_suboptions.visible = tile_auto_scroll_enable.button_pressed
 
 func update_color_option(new_color: Color, color_key: String, no_alpha: bool = false) -> void:
     var color_func: = Utility.color_string_no_alpha if no_alpha else Utility.color_string
@@ -220,6 +233,8 @@ func setup_value_change_signals() -> void:
         "bg_tile_angle": tile_angle_input,
         "bg_tile_scale": tile_scale_input,
         "bg_tile_camera_scroll_factor": tile_camera_scroll_factor_input,
+        "bg_tile_auto_scroll_speed": tile_auto_scroll_speed_input,
+        "bg_tile_auto_scroll_angle": tile_auto_scroll_angle_input,
 
         "dusty_particles_speed": dusty_particles_speed_input,
         "dusty_particles_amount": dusty_particles_amount_input,
@@ -252,6 +267,8 @@ func setup_value_change_signals() -> void:
         "bg_tile_on": tile_enable,
         "bg_tile_below_gradient": tile_below_gradient_toggle,
         "bg_tile_smooth_scale": tile_smooth_scale_toggle,
+        "bg_tile_auto_scroll_on": tile_auto_scroll_enable,
+
         "dusty_particles_on": dusty_particles_enable,
         "pointy_particles_on": pointy_particles_enable,
         "lines_on": lines_enable,

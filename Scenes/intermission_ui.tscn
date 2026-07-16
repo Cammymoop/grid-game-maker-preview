@@ -1,0 +1,80 @@
+[gd_scene format=3 uid="uid://darbiu0pcjkx1"]
+
+[ext_resource type="Script" uid="uid://qeyclc8hi5ef" path="res://Scenes/intermission_ui.gd" id="1_xatok"]
+[ext_resource type="PackedScene" uid="uid://cb7yxd6xr7bl5" path="res://Scenes/Intermission/intermission_text.tscn" id="2_5uw0l"]
+[ext_resource type="PackedScene" uid="uid://dy2mt6p02pp3v" path="res://Scenes/credits_image.tscn" id="3_nd7lh"]
+[ext_resource type="Texture2D" uid="uid://d0uyc2rshryrj" path="res://assets/img/entityTiles.png" id="4_ltj3f"]
+
+[sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_xatok"]
+blend_mode = 1
+
+[node name="IntermissionUI" type="Control" unique_id=983985741]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("1_xatok")
+
+[node name="MultiplyDarkenColor" type="ColorRect" parent="." unique_id=863641257]
+visible = false
+material = SubResource("CanvasItemMaterial_xatok")
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.6913568, 0.69135684, 0.6913566, 1)
+
+[node name="LightenColor" type="ColorRect" parent="." unique_id=1410138020]
+material = SubResource("CanvasItemMaterial_xatok")
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.2015265, 0.20152661, 0.20152652, 1)
+
+[node name="MarginContainer" type="MarginContainer" parent="." unique_id=1370622040]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer" unique_id=1083020789]
+layout_mode = 2
+alignment = 1
+
+[node name="IntermissionText" parent="MarginContainer/VBoxContainer" unique_id=1488913074 instance=ExtResource("2_5uw0l")]
+layout_mode = 2
+
+[node name="CreditsImage" parent="MarginContainer/VBoxContainer" unique_id=151448102 instance=ExtResource("3_nd7lh")]
+layout_mode = 2
+
+[node name="TextureRect" parent="MarginContainer/VBoxContainer/CreditsImage" index="0" unique_id=1226651260]
+texture_filter = 1
+custom_minimum_size = Vector2(288, 224)
+texture = ExtResource("4_ltj3f")
+
+[node name="IntermissionText2" parent="MarginContainer/VBoxContainer" unique_id=879721395 instance=ExtResource("2_5uw0l")]
+layout_mode = 2
+
+[node name="IntermissionText3" parent="MarginContainer/VBoxContainer" unique_id=821603369 instance=ExtResource("2_5uw0l")]
+layout_mode = 2
+
+[node name="Label" parent="MarginContainer/VBoxContainer/IntermissionText3" index="0" unique_id=1782653433]
+theme_override_font_sizes/font_size = 50
+
+[node name="IntermissionText4" parent="MarginContainer/VBoxContainer" unique_id=200912056 instance=ExtResource("2_5uw0l")]
+layout_mode = 2
+
+[editable path="MarginContainer/VBoxContainer/CreditsImage"]
+[editable path="MarginContainer/VBoxContainer/IntermissionText3"]

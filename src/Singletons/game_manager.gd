@@ -287,6 +287,10 @@ func setup_default_bg_style() -> void:
 		"bg_tile_above": "below",
 		"bg_tile_below_gradient": true,
 		"bg_tile_spacing": [0.0, 0.0],
+		
+		"bg_tile_auto_scroll_on": false,
+		"bg_tile_auto_scroll_speed": 0.5,
+		"bg_tile_auto_scroll_angle": 0.0,
 
 		"dusty_particles_on": true,
 		"dusty_particles_amount": 1.0,
