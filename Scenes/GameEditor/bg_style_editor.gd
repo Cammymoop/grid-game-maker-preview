@@ -18,12 +18,14 @@ var texture_picker_dialog_scn: = preload("res://Scenes/GameEditor/BetterTextureD
 @export var bg_gradient_color_picker: ColorPickerButton
 @export var bg_gradient_sort_option: OptionButton
 @export var bg_gradient_rotation_input: ScalarValueInput
+@export var bg_gradient_cover_amount_input: ScalarValueInput
 
 @export var dusty_particles_enable: CheckButton
 @export var dusty_particles_suboptions: Control
 @export var dusty_particles_color_picker: ColorPickerButton
 @export var dusty_particles_speed_input: ScalarValueInput
 @export var dusty_particles_amount_input: ScalarValueInput
+@export var dusty_particles_camera_scroll_factor_input: ScalarValueInput
 
 @export var pointy_particles_enable: CheckButton
 @export var pointy_particles_suboptions: Control
@@ -32,6 +34,7 @@ var texture_picker_dialog_scn: = preload("res://Scenes/GameEditor/BetterTextureD
 @export var pointy_particles_dark_mode_enable: CheckButton
 @export var pointy_particles_speed_input: ScalarValueInput
 @export var pointy_particles_amount_input: ScalarValueInput
+@export var pointy_particles_camera_scroll_factor_input: ScalarValueInput
 
 @export var lines_enable: CheckButton
 @export var solids_enable: CheckButton
@@ -51,9 +54,12 @@ var texture_picker_dialog_scn: = preload("res://Scenes/GameEditor/BetterTextureD
 @export var tile_color_picker: ColorPickerButton
 @export var tile_sort_option: OptionButton
 @export var tile_below_gradient_toggle: CheckButton
+@export var tile_base_offset_input: Vector2fInput
+
 @export var tile_angle_input: ScalarValueInput
 @export var tile_scale_input: ScalarValueInput
 @export var tile_smooth_scale_toggle: CheckButton
+@export var tile_scale_with_camera_toggle: CheckButton
 @export var tile_spacing_input: Vector2fInput
 @export var tile_camera_scroll_factor_input: ScalarValueInput
 
@@ -127,11 +133,13 @@ func load_bg_style() -> void:
     bg_gradient_color_picker.color = Utility.get_dict_color(bg_style, "bg_gradient_color", Color.BLACK)
     Utility.opbtn_select_text(bg_gradient_sort_option, bg_style.get("bg_gradient_above", "below"))
     bg_gradient_rotation_input.set_value(_turn_to_deg(bg_style.get("bg_gradient_rotation", 0.5)))
+    bg_gradient_cover_amount_input.set_value(bg_style.get("bg_gradient_cover_amount", 0.8))
 
     dusty_particles_enable.set_pressed_no_signal(bg_style.get("dusty_particles_on", true))
     dusty_particles_color_picker.color = Utility.get_dict_color(bg_style, "dusty_particles_color", Color.GRAY)
     dusty_particles_speed_input.set_value(bg_style.get("dusty_particles_speed", 1.0))
     dusty_particles_amount_input.set_value(bg_style.get("dusty_particles_amount", 1.0))
+    dusty_particles_camera_scroll_factor_input.set_value(bg_style.get("dusty_particles_camera_scroll_factor", 0.5))
     
     pointy_particles_enable.set_pressed_no_signal(bg_style.get("pointy_particles_on", true))
     pointy_particles_color_picker.color = Utility.get_dict_color(bg_style, "pointy_particles_color", Color.WHITE)
@@ -139,6 +147,7 @@ func load_bg_style() -> void:
     pointy_particles_dark_mode_enable.set_pressed_no_signal(bg_style.get("pointy_particles_dark_mode", false))
     pointy_particles_speed_input.set_value(bg_style.get("pointy_particles_speed", 1.0))
     pointy_particles_amount_input.set_value(bg_style.get("pointy_particles_amount", 1.0))
+    pointy_particles_camera_scroll_factor_input.set_value(bg_style.get("pointy_particles_camera_scroll_factor", 0.0))
     
     lines_enable.set_pressed_no_signal(bg_style.get("lines_on", false))
     solids_enable.set_pressed_no_signal(bg_style.get("lines_solid_on", false))
@@ -150,6 +159,9 @@ func load_bg_style() -> void:
     ln_warp_scroll_speed_input.set_value(bg_style.get("lines_warp_scroll_speed", 0.05))
     ln_warp_scroll_angle_input.set_value(_turn_to_deg(bg_style.get("lines_warp_scroll_angle", 0.4)))
     
+    ln_cam_scroll_factor_input.set_value(bg_style.get("lines_camera_scroll_factor", 1.0))
+    ln_solid_cam_scroll_factor_input.set_value(bg_style.get("lines_solid_camera_scroll_factor", 1.0))
+    
     tile_enable.set_pressed_no_signal(bg_style.get("bg_tile_on", false))
     tile_color_picker.color = Utility.get_dict_color(bg_style, "bg_tile_color", BGTileHolder.DEFAULT_TILE_COLOR)
     Utility.opbtn_select_text(tile_sort_option, bg_style.get("bg_tile_above", "below"))
@@ -157,8 +169,11 @@ func load_bg_style() -> void:
     tile_angle_input.set_value(_turn_to_deg(bg_style.get("bg_tile_angle", 0.0)))
     tile_scale_input.set_value(bg_style.get("bg_tile_scale", 1.0))
     tile_smooth_scale_toggle.set_pressed_no_signal(bg_style.get("bg_tile_smooth_scale", false))
-    tile_spacing_input.set_value(Utility.get_vector2_from_arr(bg_style.get("bg_tile_spacing", [0.0, 0.0])), true)
+    tile_scale_with_camera_toggle.set_pressed_no_signal(bg_style.get("bg_tile_scale_with_camera", true))
     tile_camera_scroll_factor_input.set_value(bg_style.get("bg_tile_camera_scroll_factor", 0.5))
+
+    tile_spacing_input.set_value(Utility.get_vector2_from_arr(bg_style.get("bg_tile_spacing", [0.0, 0.0])), true)
+    tile_base_offset_input.set_value(Utility.get_vector2_from_arr(bg_style.get("bg_tile_base_offset", [0.0, 0.0])), true)
     
     tile_auto_scroll_enable.set_pressed_no_signal(bg_style.get("bg_tile_auto_scroll_on", false))
     tile_auto_scroll_speed_input.set_value(bg_style.get("bg_tile_auto_scroll_speed", 0.5))
@@ -229,6 +244,7 @@ func setup_value_change_signals() -> void:
 
     var scalar_inputs: Dictionary = {
         "bg_gradient_rotation": bg_gradient_rotation_input,
+        "bg_gradient_cover_amount": bg_gradient_cover_amount_input,
         
         "bg_tile_angle": tile_angle_input,
         "bg_tile_scale": tile_scale_input,
@@ -238,8 +254,10 @@ func setup_value_change_signals() -> void:
 
         "dusty_particles_speed": dusty_particles_speed_input,
         "dusty_particles_amount": dusty_particles_amount_input,
+        "dusty_particles_camera_scroll_factor": dusty_particles_camera_scroll_factor_input,
         "pointy_particles_speed": pointy_particles_speed_input,
         "pointy_particles_amount": pointy_particles_amount_input,
+        "pointy_particles_camera_scroll_factor": pointy_particles_camera_scroll_factor_input,
         "lines_scroll_speed": ln_scroll_speed_input,
         "lines_scroll_angle": ln_scroll_angle_input,
         "lines_warp_strength": ln_warp_strength_input,
@@ -267,6 +285,7 @@ func setup_value_change_signals() -> void:
         "bg_tile_on": tile_enable,
         "bg_tile_below_gradient": tile_below_gradient_toggle,
         "bg_tile_smooth_scale": tile_smooth_scale_toggle,
+        "bg_tile_scale_with_camera": tile_scale_with_camera_toggle,
         "bg_tile_auto_scroll_on": tile_auto_scroll_enable,
 
         "dusty_particles_on": dusty_particles_enable,
@@ -282,6 +301,7 @@ func setup_value_change_signals() -> void:
     
     var vector2f_inputs: Dictionary = {
         "bg_tile_spacing": tile_spacing_input,
+        "bg_tile_base_offset": tile_base_offset_input,
     }
     for key in vector2f_inputs:
         var vector2f_input: Vector2fInput = vector2f_inputs[key]

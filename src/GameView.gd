@@ -1,6 +1,7 @@
 extends SubViewport
 
 signal camera_displacement_changed(camera_displacement: Vector2)
+signal camera_zoom_changed(camera_zoom_factor: float)
 
 # render to an oversized subviewport and scale the resulting texture to the actual screen res for good looking but still soft interpolation
 var overscale_factor: int = 2
@@ -60,6 +61,8 @@ func set_resolution(new_resolution: Vector2) -> void:
 	var tex_rect: = get_parent() as TextureRect
 	tex_rect.stretch_mode = TextureRect.STRETCH_KEEP
 	tex_rect.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
+	
+	camera_zoom_changed.emit(get_current_pixel_scale())
 
 func fit_resolution_into_aspect(is_expand: bool) -> Vector2:
 	var window_size: Vector2 = Vector2(get_window().size)

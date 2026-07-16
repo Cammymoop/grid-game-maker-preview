@@ -38,11 +38,15 @@ func _ready():
 	update_size(true)
 	get_viewport().size_changed.connect(update_size)
 
+func set_overscan_factor(new_overscan: float) -> void:
+	viewport_overscan = new_overscan
+
 func set_canvas_layer_scale(new_scale: float) -> void:
 	inverse_canvas_layer_scale = 1.0 / new_scale
 	if TYPE == ProcessType.ParticlesMat:
 		(process_material as ParticleProcessMaterial).scale_min = base_scale_min * inverse_canvas_layer_scale
 		(process_material as ParticleProcessMaterial).scale_max = base_scale_max * inverse_canvas_layer_scale
+	update_size()
 
 func _process(delta):
 	if is_zero_approx(smooth_amount_reset):
@@ -76,7 +80,7 @@ func update_size(no_smooth: bool = false):
 		smooth_timer = smooth_amount_reset
 		set_process(true)
 
-func real_update() -> void:
+func real_update(soft_update: bool = false) -> void:
 	var vp = get_viewport()
 	var size2: = Vector2((vp.size.x/2) * 1.2, (vp.size.y/2) * 1.5) * viewport_overscan * inverse_canvas_layer_scale
 	if TYPE == ProcessType.ParticlesMat:
@@ -85,4 +89,6 @@ func real_update() -> void:
 		process_material.set_shader_parameter("emission_box_extents", Vector3(size2.x, size2.y, 1))
 	if DENSITY_UPDATES:
 		amount = mini(MAX_AMOUNT, maxi(10, density * (vp.size.x * vp.size.y)))
+	if not soft_update:
+		restart()
 	

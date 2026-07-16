@@ -275,6 +275,7 @@ func setup_default_bg_style() -> void:
 		"bg_gradient_above": "below",
 		
 		"bg_gradient_rotation": 0.5,
+		"bg_gradient_cover_amount": 0.8,
 		
 		"bg_tile_on": false,
 		"bg_tile_color": Utility.color_string(BGTileHolder.DEFAULT_TILE_COLOR, true),
@@ -287,6 +288,8 @@ func setup_default_bg_style() -> void:
 		"bg_tile_above": "below",
 		"bg_tile_below_gradient": true,
 		"bg_tile_spacing": [0.0, 0.0],
+		"bg_tile_base_offset": [0.0, 0.0],
+		"bg_tile_scale_with_camera": true,
 		
 		"bg_tile_auto_scroll_on": false,
 		"bg_tile_auto_scroll_speed": 0.5,
@@ -296,6 +299,7 @@ func setup_default_bg_style() -> void:
 		"dusty_particles_amount": 1.0,
 		"dusty_particles_speed": 1.0,
 		"dusty_particles_color": Utility.color_string(customizable_bg.default_particles_color, true),
+		"dusty_particles_camera_scroll_factor": 0.5,
 		
 		"pointy_particles_on": false,
 		"pointy_particles_amount": 1.0,
@@ -303,6 +307,7 @@ func setup_default_bg_style() -> void:
 		"pointy_particles_rainbow_on": false,
 		"pointy_particles_color": Utility.color_string(customizable_bg.default_pointy_particles_color, true),
 		"pointy_particles_dark_mode": customizable_bg.pointy_particles_dark_mode,
+		"pointy_particles_camera_scroll_factor": 0.0,
 		
 		"lines_on": false,
 		"lines_solid_on": false,

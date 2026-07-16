@@ -17,10 +17,10 @@
 [ext_resource type="Script" uid="uid://bihb1rg68jci5" path="res://src/GameEditor/SelectableTextureList.gd" id="11"]
 [ext_resource type="Script" uid="uid://cia8grkwwxcha" path="res://src/GameEditor/PopupLayer.gd" id="12"]
 [ext_resource type="PackedScene" uid="uid://ci5jvijwn0j60" path="res://Scenes/GameEditor/info_panel_config_edit.tscn" id="12_retx3"]
-[ext_resource type="StyleBox" path="res://src/UI/list_background.tres" id="13"]
+[ext_resource type="StyleBox" uid="uid://bf4pw2lygxoq5" path="res://src/UI/list_background.tres" id="13"]
 [ext_resource type="FontFile" uid="uid://cpry5rd5ecdc5" path="res://assets/font/small_font.tres" id="14"]
 [ext_resource type="Script" uid="uid://c1vkx254mpaft" path="res://src/GameEditor/FollowBySelector.gd" id="15"]
-[ext_resource type="Script" path="res://Scenes/GameEditor/background_style_editor_tab.gd" id="15_4q0gk"]
+[ext_resource type="Script" uid="uid://blesifogfyjfp" path="res://Scenes/GameEditor/background_style_editor_tab.gd" id="15_4q0gk"]
 [ext_resource type="PackedScene" uid="uid://boa4urjmt50gc" path="res://Scenes/GameEditor/tiles_and_entities.tscn" id="15_retx3"]
 [ext_resource type="PackedScene" uid="uid://b4fp8ldktkvcd" path="res://Scenes/bg_effect_6.tscn" id="16_iwmpq"]
 [ext_resource type="PackedScene" uid="uid://b1a6s2o32t35i" path="res://Scenes/GameEditor/bg_style_editor.tscn" id="18_umwh7"]
@@ -931,10 +931,12 @@ Game"
 visible = false
 layout_mode = 2
 
-[node name="Background" type="VBoxContainer" parent="MarginContainer/UIRoot/TabContainer" unique_id=1868737150]
+[node name="Background" type="VBoxContainer" parent="MarginContainer/UIRoot/TabContainer" unique_id=1868737150 node_paths=PackedStringArray("bg_effect", "style_editor")]
 visible = false
 layout_mode = 2
 script = ExtResource("15_4q0gk")
+bg_effect = NodePath("HBoxContainer/PanelContainer/BGEffects")
+style_editor = NodePath("HBoxContainer/PanelContainer/HBoxContainer/MarginContainer/PanelContainer")
 metadata/_tab_index = 2
 
 [node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/UIRoot/TabContainer/Background" unique_id=1180145284]

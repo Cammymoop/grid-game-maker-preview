@@ -5,10 +5,9 @@
 [ext_resource type="Shader" uid="uid://bi68mhe1xawmw" path="res://Scenes/bg_lines.gdshader" id="2_dyaob"]
 [ext_resource type="Material" uid="uid://bxpdteawtwgay" path="res://src/Effects/background/lines_as_water.tres" id="2_n4cem"]
 [ext_resource type="Script" uid="uid://15x5jg4jwyc5" path="res://src/Effects/VoidParticles.gd" id="3_dyaob"]
-[ext_resource type="Script" uid="uid://cnjtrck46cism" path="res://Scenes/test_canvas_layer_centering_child.gd" id="3_mx7c4"]
 [ext_resource type="Texture2D" uid="uid://by1uvj4gg53du" path="res://assets/img/square_shadow_white.png" id="4_6ng66"]
 [ext_resource type="Script" uid="uid://c2ksw4bcxmkvq" path="res://src/Effects/ColorRect_FadeToBlack.gd" id="4_n4cem"]
-[ext_resource type="Script" uid="uid://dah28ad1gxx5c" path="res://Scenes/tex_rect_full_rect.gd" id="7_exhar"]
+[ext_resource type="Script" uid="uid://c8krql67slhuj" path="res://Scenes/bg_particle_parallax_helper.gd" id="7_yxxg8"]
 [ext_resource type="Script" uid="uid://47kc2txkq7q6" path="res://Scenes/bg_tile_holder.gd" id="9_4d8kp"]
 [ext_resource type="Texture2D" uid="uid://d0uyc2rshryrj" path="res://assets/img/entityTiles.png" id="9_7f2o1"]
 
@@ -122,14 +121,14 @@ color_ramp = SubResource("Gradient_dyaob")
 seamless = true
 
 [sub_resource type="ViewportTexture" id="ViewportTexture_4d8kp"]
-viewport_path = NodePath("SubViewportContainer/SubViewport/BGTileHolder/Scrolling/Sprite2D/SubViewport")
+viewport_path = NodePath("SubViewportContainer/SubViewport/BGTileHolderLayer/BGTileHolder/Scrolling/Sprite2D/SubViewport")
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_ttruv"]
 atlas = ExtResource("9_7f2o1")
 region = Rect2(128, 96, 32, 32)
 filter_clip = true
 
-[node name="BGEffects" type="Control" unique_id=1715516889 node_paths=PackedStringArray("effect_subviewport", "effect_fixed_in_viewport", "bg_color_rect", "dusty_particles", "pointy_particles", "bg_gradient", "bg_tile_holder", "paticle_emitter_parallaxes", "lines", "lines_solid")]
+[node name="BGEffects" type="Control" unique_id=1715516889 node_paths=PackedStringArray("effect_subviewport", "bg_color_rect", "dusty_particles", "pointy_particles", "bg_gradient", "dusty_particles_parallax_helper", "pointy_particles_parallax_helper", "bg_tile_holder", "bg_tile_layer", "lines", "lines_solid", "lines_layer", "gradient_layer")]
 process_mode = 3
 layout_mode = 3
 anchors_preset = 15
@@ -140,16 +139,19 @@ grow_vertical = 2
 mouse_filter = 2
 script = ExtResource("1_2aks0")
 effect_subviewport = NodePath("SubViewportContainer/SubViewport")
-effect_fixed_in_viewport = NodePath("SubViewportContainer/SubViewport/NoiseLinesLayer/FixedOnScreen")
-bg_color_rect = NodePath("SubViewportContainer/SubViewport/CanvasLayer/ColorRect")
+bg_color_rect = NodePath("SubViewportContainer/SubViewport/BGColorLayer/ColorRect")
 dusty_particles = NodePath("SubViewportContainer/SubViewport/DustyLayer/DustyParticles")
 pointy_particles = NodePath("SubViewportContainer/SubViewport/PointyLayer/PointyParticles")
-bg_gradient = NodePath("SubViewportContainer/SubViewport/NoiseLinesLayer/FixedOnScreen/BGGradient")
-bg_tile_holder = NodePath("SubViewportContainer/SubViewport/BGTileHolder")
-paticle_emitter_parallaxes = [NodePath(""), NodePath("")]
+bg_gradient = NodePath("SubViewportContainer/SubViewport/GradientLayer/BGGradient")
+dusty_particles_parallax_helper = NodePath("SubViewportContainer/SubViewport/DustyLayer")
+pointy_particles_parallax_helper = NodePath("SubViewportContainer/SubViewport/PointyLayer")
+bg_tile_holder = NodePath("SubViewportContainer/SubViewport/BGTileHolderLayer/BGTileHolder")
+bg_tile_layer = NodePath("SubViewportContainer/SubViewport/BGTileHolderLayer")
 lines = NodePath("SubViewportContainer/SubViewport/NoiseLinesLayer/FixedOnScreen/Lines")
 lines_solid = NodePath("SubViewportContainer/SubViewport/NoiseLinesLayer/FixedOnScreen/LinesSolid")
+lines_layer = NodePath("SubViewportContainer/SubViewport/NoiseLinesLayer")
 gradient_texture = SubResource("GradientTexture2D_dyaob")
+gradient_layer = NodePath("SubViewportContainer/SubViewport/GradientLayer")
 
 [node name="SubViewportContainer" type="SubViewportContainer" parent="." unique_id=1971214824]
 layout_mode = 1
@@ -166,10 +168,10 @@ handle_input_locally = false
 size = Vector2i(768, 768)
 render_target_update_mode = 4
 
-[node name="CanvasLayer" type="CanvasLayer" parent="SubViewportContainer/SubViewport" unique_id=51442697]
-layer = -5
+[node name="BGColorLayer" type="CanvasLayer" parent="SubViewportContainer/SubViewport" unique_id=51442697]
+layer = -20
 
-[node name="ColorRect" type="ColorRect" parent="SubViewportContainer/SubViewport/CanvasLayer" unique_id=601981259]
+[node name="ColorRect" type="ColorRect" parent="SubViewportContainer/SubViewport/BGColorLayer" unique_id=601981259]
 show_behind_parent = true
 anchors_preset = 15
 anchor_right = 1.0
@@ -180,11 +182,10 @@ script = ExtResource("4_n4cem")
 do_fade = false
 fade_length = 0.2
 
-[node name="DustyLayer" type="CanvasLayer" parent="SubViewportContainer/SubViewport" unique_id=104529955 node_paths=PackedStringArray("child_node", "void_particles")]
+[node name="DustyLayer" type="CanvasLayer" parent="SubViewportContainer/SubViewport" unique_id=104529955 node_paths=PackedStringArray("void_particles")]
 follow_viewport_enabled = true
 follow_viewport_scale = 0.5
-script = ExtResource("3_mx7c4")
-child_node = NodePath("Sprite2D")
+script = ExtResource("7_yxxg8")
 void_particles = NodePath("DustyParticles")
 
 [node name="DustyParticles" type="GPUParticles2D" parent="SubViewportContainer/SubViewport/DustyLayer" unique_id=201630246]
@@ -201,14 +202,9 @@ script = ExtResource("3_dyaob")
 MAX_AMOUNT = 40000
 smooth_amount_reset = 0.1
 
-[node name="Sprite2D" type="Sprite2D" parent="SubViewportContainer/SubViewport/DustyLayer" unique_id=987701282]
-visible = false
-position = Vector2(446, 374)
-texture = ExtResource("9_7f2o1")
-
 [node name="PointyLayer" type="CanvasLayer" parent="SubViewportContainer/SubViewport" unique_id=1738042694 node_paths=PackedStringArray("void_particles")]
-follow_viewport_enabled = true
-script = ExtResource("3_mx7c4")
+layer = 2
+script = ExtResource("7_yxxg8")
 void_particles = NodePath("PointyParticles")
 
 [node name="PointyParticles" type="GPUParticles2D" parent="SubViewportContainer/SubViewport/PointyLayer" unique_id=1697535648]
@@ -226,6 +222,19 @@ process_material = SubResource("ParticleProcessMaterial_n4cem")
 script = ExtResource("3_dyaob")
 MAX_AMOUNT = 20000
 smooth_amount_reset = 0.5
+
+[node name="GradientLayer" type="CanvasLayer" parent="SubViewportContainer/SubViewport" unique_id=729130220]
+
+[node name="BGGradient" type="TextureRect" parent="SubViewportContainer/SubViewport/GradientLayer" unique_id=200735861]
+modulate = Color(0.25300944, 0.38964128, 0.9388648, 0.73333335)
+z_index = 2
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = SubResource("GradientTexture2D_dyaob")
+expand_mode = 1
 
 [node name="NoiseLinesLayer" type="CanvasLayer" parent="SubViewportContainer/SubViewport" unique_id=1262906758]
 
@@ -251,20 +260,10 @@ texture = SubResource("NoiseTexture2D_exhar")
 region_enabled = true
 region_rect = Rect2(-1024, -1024, 5120, 4096)
 
-[node name="BGGradient" type="TextureRect" parent="SubViewportContainer/SubViewport/NoiseLinesLayer/FixedOnScreen" unique_id=200735861]
-modulate = Color(0.25300944, 0.38964128, 0.9388648, 0.73333335)
-z_index = 2
-custom_minimum_size = Vector2(800, 800)
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-texture = SubResource("GradientTexture2D_dyaob")
-expand_mode = 1
-script = ExtResource("7_exhar")
+[node name="BGTileHolderLayer" type="CanvasLayer" parent="SubViewportContainer/SubViewport" unique_id=1788629077]
+follow_viewport_enabled = true
 
-[node name="BGTileHolder" type="Node2D" parent="SubViewportContainer/SubViewport" unique_id=962226486 node_paths=PackedStringArray("scrolling_piece", "tiling_sprite", "texture_maker_subviewport", "texture_maker_sprite")]
+[node name="BGTileHolder" type="Node2D" parent="SubViewportContainer/SubViewport/BGTileHolderLayer" unique_id=962226486 node_paths=PackedStringArray("scrolling_piece", "tiling_sprite", "texture_maker_subviewport", "texture_maker_sprite")]
 visible = false
 position = Vector2(400, 400)
 rotation = -0.2443461
@@ -274,21 +273,21 @@ tiling_sprite = NodePath("Scrolling/Sprite2D")
 texture_maker_subviewport = NodePath("Scrolling/Sprite2D/SubViewport")
 texture_maker_sprite = NodePath("Scrolling/Sprite2D/SubViewport/TileSprite")
 
-[node name="Scrolling" type="Node2D" parent="SubViewportContainer/SubViewport/BGTileHolder" unique_id=2013220503]
+[node name="Scrolling" type="Node2D" parent="SubViewportContainer/SubViewport/BGTileHolderLayer/BGTileHolder" unique_id=2013220503]
 texture_repeat = 2
 
-[node name="Sprite2D" type="Sprite2D" parent="SubViewportContainer/SubViewport/BGTileHolder/Scrolling" unique_id=602792681]
+[node name="Sprite2D" type="Sprite2D" parent="SubViewportContainer/SubViewport/BGTileHolderLayer/BGTileHolder/Scrolling" unique_id=602792681]
 texture_filter = 4
 texture_repeat = 2
 texture = SubResource("ViewportTexture_4d8kp")
 region_enabled = true
 region_rect = Rect2(0, 0, 4096, 4096)
 
-[node name="SubViewport" type="SubViewport" parent="SubViewportContainer/SubViewport/BGTileHolder/Scrolling/Sprite2D" unique_id=1597813406]
+[node name="SubViewport" type="SubViewport" parent="SubViewportContainer/SubViewport/BGTileHolderLayer/BGTileHolder/Scrolling/Sprite2D" unique_id=1597813406]
 transparent_bg = true
 size = Vector2i(128, 128)
 
-[node name="TileSprite" type="Sprite2D" parent="SubViewportContainer/SubViewport/BGTileHolder/Scrolling/Sprite2D/SubViewport" unique_id=329521773]
+[node name="TileSprite" type="Sprite2D" parent="SubViewportContainer/SubViewport/BGTileHolderLayer/BGTileHolder/Scrolling/Sprite2D/SubViewport" unique_id=329521773]
 texture_filter = 1
 position = Vector2(64, 64)
 scale = Vector2(4, 4)

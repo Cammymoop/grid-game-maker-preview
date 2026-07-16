@@ -22,7 +22,7 @@ thickness = 2
 atlas = ExtResource("5_5n2ag")
 region = Rect2(160, 160, 32, 32)
 
-[node name="BGStyleEditor" type="VBoxContainer" unique_id=1622581633 node_paths=PackedStringArray("reset_button", "remove_override_button", "bg_color_picker", "bg_gradient_enable", "bg_gradient_suboptions", "bg_gradient_color_picker", "bg_gradient_sort_option", "bg_gradient_rotation_input", "dusty_particles_enable", "dusty_particles_suboptions", "dusty_particles_color_picker", "dusty_particles_speed_input", "dusty_particles_amount_input", "pointy_particles_enable", "pointy_particles_suboptions", "pointy_particles_color_picker", "pointy_particles_rainbow_enable", "pointy_particles_dark_mode_enable", "pointy_particles_speed_input", "pointy_particles_amount_input", "lines_enable", "solids_enable", "lines_suboptions", "lines_sort_option", "lines_color_picker", "solids_color_picker", "ln_scroll_speed_input", "ln_scroll_angle_input", "ln_warp_strength_input", "ln_warp_scroll_speed_input", "ln_warp_scroll_angle_input", "tile_enable", "tile_suboptions", "tile_texture_picker_button", "tile_color_picker", "tile_sort_option", "tile_below_gradient_toggle", "tile_angle_input", "tile_scale_input", "tile_smooth_scale_toggle", "tile_spacing_input", "tile_camera_scroll_factor_input", "tile_auto_scroll_enable", "tile_auto_scroll_suboptions", "tile_auto_scroll_speed_input", "tile_auto_scroll_angle_input", "ln_cam_scroll_factor_input", "ln_solid_cam_scroll_factor_input")]
+[node name="BGStyleEditor" type="VBoxContainer" unique_id=1622581633 node_paths=PackedStringArray("reset_button", "remove_override_button", "bg_color_picker", "bg_gradient_enable", "bg_gradient_suboptions", "bg_gradient_color_picker", "bg_gradient_sort_option", "bg_gradient_rotation_input", "bg_gradient_cover_amount_input", "dusty_particles_enable", "dusty_particles_suboptions", "dusty_particles_color_picker", "dusty_particles_speed_input", "dusty_particles_amount_input", "dusty_particles_camera_scroll_factor_input", "pointy_particles_enable", "pointy_particles_suboptions", "pointy_particles_color_picker", "pointy_particles_rainbow_enable", "pointy_particles_dark_mode_enable", "pointy_particles_speed_input", "pointy_particles_amount_input", "pointy_particles_camera_scroll_factor_input", "lines_enable", "solids_enable", "lines_suboptions", "lines_sort_option", "lines_color_picker", "solids_color_picker", "ln_scroll_speed_input", "ln_scroll_angle_input", "ln_warp_strength_input", "ln_warp_scroll_speed_input", "ln_warp_scroll_angle_input", "tile_enable", "tile_suboptions", "tile_texture_picker_button", "tile_color_picker", "tile_sort_option", "tile_below_gradient_toggle", "tile_base_offset_input", "tile_angle_input", "tile_scale_input", "tile_smooth_scale_toggle", "tile_scale_with_camera_toggle", "tile_spacing_input", "tile_camera_scroll_factor_input", "tile_auto_scroll_enable", "tile_auto_scroll_suboptions", "tile_auto_scroll_speed_input", "tile_auto_scroll_angle_input", "ln_cam_scroll_factor_input", "ln_solid_cam_scroll_factor_input")]
 theme = SubResource("Theme_48hio")
 script = ExtResource("1_pxgli")
 reset_button = NodePath("HBoxContainer2/ResetButton")
@@ -33,46 +33,51 @@ bg_gradient_suboptions = NodePath("VBoxContainer/GradientSuboptions")
 bg_gradient_color_picker = NodePath("VBoxContainer/GradientSuboptions/HBoxContainer3/ColorPickerButton")
 bg_gradient_sort_option = NodePath("VBoxContainer/GradientSuboptions/HBoxContainer4/OptionButton")
 bg_gradient_rotation_input = NodePath("VBoxContainer/GradientSuboptions/HBoxContainer5/GradientAngleInput")
-dusty_particles_enable = NodePath("VBoxContainer2/HBoxContainer2/CheckButton")
-dusty_particles_suboptions = NodePath("VBoxContainer2/CloudsSuboptions")
-dusty_particles_color_picker = NodePath("VBoxContainer2/CloudsSuboptions/HBoxContainer3/ColorPickerButton")
-dusty_particles_speed_input = NodePath("VBoxContainer2/CloudsSuboptions/HBoxContainer4/ScalarValueInput")
-dusty_particles_amount_input = NodePath("VBoxContainer2/CloudsSuboptions/HBoxContainer7/ScalarValueInput")
-pointy_particles_enable = NodePath("VBoxContainer4/HBoxContainer2/CheckButton")
-pointy_particles_suboptions = NodePath("VBoxContainer4/SparksSuboptions")
-pointy_particles_color_picker = NodePath("VBoxContainer4/SparksSuboptions/HBoxContainer3/ColorPickerButton")
-pointy_particles_rainbow_enable = NodePath("VBoxContainer4/SparksSuboptions/HBoxContainer5/CheckButton")
-pointy_particles_dark_mode_enable = NodePath("VBoxContainer4/SparksSuboptions/HBoxContainer7/CheckButton")
-pointy_particles_speed_input = NodePath("VBoxContainer4/SparksSuboptions/HBoxContainer4/ScalarValueInput")
-pointy_particles_amount_input = NodePath("VBoxContainer4/SparksSuboptions/HBoxContainer6/ScalarValueInput")
-lines_enable = NodePath("VBoxContainer3/HBoxContainer2/CheckButton")
-solids_enable = NodePath("VBoxContainer3/HBoxContainer3/CheckButton")
-lines_suboptions = NodePath("VBoxContainer3/NoiseSuboptions")
-lines_sort_option = NodePath("VBoxContainer3/NoiseSuboptions/HBoxContainer4/OptionButton")
-lines_color_picker = NodePath("VBoxContainer3/NoiseSuboptions/HBoxContainer3/ColorPickerButton")
-solids_color_picker = NodePath("VBoxContainer3/NoiseSuboptions/HBoxContainer5/ColorPickerButton")
-ln_scroll_speed_input = NodePath("VBoxContainer3/NoiseSuboptions/HBoxContainer8/ScalarValueInput")
-ln_scroll_angle_input = NodePath("VBoxContainer3/NoiseSuboptions/HBoxContainer9/ScalarValueInput")
-ln_warp_strength_input = NodePath("VBoxContainer3/NoiseSuboptions/HBoxContainer10/ScalarValueInput")
-ln_warp_scroll_speed_input = NodePath("VBoxContainer3/NoiseSuboptions/HBoxContainer12/ScalarValueInput")
-ln_warp_scroll_angle_input = NodePath("VBoxContainer3/NoiseSuboptions/HBoxContainer11/ScalarValueInput")
-tile_enable = NodePath("VBoxContainer5/HBoxContainer2/EnableTile")
-tile_suboptions = NodePath("VBoxContainer5/TileSuboptions")
-tile_texture_picker_button = NodePath("VBoxContainer5/TileSuboptions/HBoxContainer3/TileImageButton")
-tile_color_picker = NodePath("VBoxContainer5/TileSuboptions/HBoxContainer5/TileColor")
-tile_sort_option = NodePath("VBoxContainer5/TileSuboptions/HBoxContainer6/SortTile")
-tile_below_gradient_toggle = NodePath("VBoxContainer5/TileSuboptions/HBoxContainer8/TileBelowGradient")
-tile_angle_input = NodePath("VBoxContainer5/TileSuboptions/HBoxContainer16/TileAngle")
-tile_scale_input = NodePath("VBoxContainer5/TileSuboptions/HBoxContainer4/TileScale")
-tile_smooth_scale_toggle = NodePath("VBoxContainer5/TileSuboptions/HBoxContainer7/TileSmoothScale")
-tile_spacing_input = NodePath("VBoxContainer5/TileSuboptions/HBoxContainer9/TileSpacing")
-tile_camera_scroll_factor_input = NodePath("VBoxContainer5/TileSuboptions/HBoxContainer15/TileParallax")
-tile_auto_scroll_enable = NodePath("VBoxContainer5/TileSuboptions/HBoxContainer10/TileAutoScrollEnable")
-tile_auto_scroll_suboptions = NodePath("VBoxContainer5/TileSuboptions/TileAutoScrollSuboptions")
-tile_auto_scroll_speed_input = NodePath("VBoxContainer5/TileSuboptions/TileAutoScrollSuboptions/HBoxContainer17/TileAutoScrollSpeed")
-tile_auto_scroll_angle_input = NodePath("VBoxContainer5/TileSuboptions/TileAutoScrollSuboptions/HBoxContainer18/TileAutoScrollAngle")
-ln_cam_scroll_factor_input = NodePath("VBoxContainer3/NoiseSuboptions/HBoxContainer13/ScalarValueInput")
-ln_solid_cam_scroll_factor_input = NodePath("VBoxContainer3/NoiseSuboptions/HBoxContainer14/ScalarValueInput")
+bg_gradient_cover_amount_input = NodePath("VBoxContainer/GradientSuboptions/HBoxContainer6/GradientCoverInput")
+dusty_particles_enable = NodePath("Clouds/HBoxContainer2/CheckButton")
+dusty_particles_suboptions = NodePath("Clouds/CloudsSuboptions")
+dusty_particles_color_picker = NodePath("Clouds/CloudsSuboptions/HBoxContainer3/ColorPickerButton")
+dusty_particles_speed_input = NodePath("Clouds/CloudsSuboptions/HBoxContainer4/ScalarValueInput")
+dusty_particles_amount_input = NodePath("Clouds/CloudsSuboptions/HBoxContainer7/ScalarValueInput")
+dusty_particles_camera_scroll_factor_input = NodePath("Clouds/CloudsSuboptions/HBoxContainer16/CloudsCameraParallax")
+pointy_particles_enable = NodePath("Sparks/HBoxContainer2/CheckButton")
+pointy_particles_suboptions = NodePath("Sparks/SparksSuboptions")
+pointy_particles_color_picker = NodePath("Sparks/SparksSuboptions/HBoxContainer3/ColorPickerButton")
+pointy_particles_rainbow_enable = NodePath("Sparks/SparksSuboptions/HBoxContainer5/CheckButton")
+pointy_particles_dark_mode_enable = NodePath("Sparks/SparksSuboptions/HBoxContainer7/CheckButton")
+pointy_particles_speed_input = NodePath("Sparks/SparksSuboptions/HBoxContainer4/ScalarValueInput")
+pointy_particles_amount_input = NodePath("Sparks/SparksSuboptions/HBoxContainer6/ScalarValueInput")
+pointy_particles_camera_scroll_factor_input = NodePath("Sparks/SparksSuboptions/HBoxContainer15/SparksCameraParallax")
+lines_enable = NodePath("Noise/HBoxContainer2/CheckButton")
+solids_enable = NodePath("Noise/HBoxContainer3/CheckButton")
+lines_suboptions = NodePath("Noise/NoiseSuboptions")
+lines_sort_option = NodePath("Noise/NoiseSuboptions/HBoxContainer4/OptionButton")
+lines_color_picker = NodePath("Noise/NoiseSuboptions/HBoxContainer3/ColorPickerButton")
+solids_color_picker = NodePath("Noise/NoiseSuboptions/HBoxContainer5/ColorPickerButton")
+ln_scroll_speed_input = NodePath("Noise/NoiseSuboptions/HBoxContainer8/ScalarValueInput")
+ln_scroll_angle_input = NodePath("Noise/NoiseSuboptions/HBoxContainer9/ScalarValueInput")
+ln_warp_strength_input = NodePath("Noise/NoiseSuboptions/HBoxContainer10/ScalarValueInput")
+ln_warp_scroll_speed_input = NodePath("Noise/NoiseSuboptions/HBoxContainer12/ScalarValueInput")
+ln_warp_scroll_angle_input = NodePath("Noise/NoiseSuboptions/HBoxContainer11/ScalarValueInput")
+tile_enable = NodePath("Tile/HBoxContainer2/EnableTile")
+tile_suboptions = NodePath("Tile/TileSuboptions")
+tile_texture_picker_button = NodePath("Tile/TileSuboptions/HBoxContainer3/TileImageButton")
+tile_color_picker = NodePath("Tile/TileSuboptions/HBoxContainer5/TileColor")
+tile_sort_option = NodePath("Tile/TileSuboptions/HBoxContainer6/SortTile")
+tile_below_gradient_toggle = NodePath("Tile/TileSuboptions/HBoxContainer8/TileBelowGradient")
+tile_base_offset_input = NodePath("Tile/TileSuboptions/HBoxContainer11/TileOffset")
+tile_angle_input = NodePath("Tile/TileSuboptions/HBoxContainer16/TileAngle")
+tile_scale_input = NodePath("Tile/TileSuboptions/HBoxContainer4/TileScale")
+tile_smooth_scale_toggle = NodePath("Tile/TileSuboptions/HBoxContainer7/TileSmoothScale")
+tile_scale_with_camera_toggle = NodePath("Tile/TileSuboptions/HBoxContainer12/TileScalCam")
+tile_spacing_input = NodePath("Tile/TileSuboptions/HBoxContainer9/TileSpacing")
+tile_camera_scroll_factor_input = NodePath("Tile/TileSuboptions/HBoxContainer15/TileParallax")
+tile_auto_scroll_enable = NodePath("Tile/TileSuboptions/HBoxContainer10/TileAutoScrollEnable")
+tile_auto_scroll_suboptions = NodePath("Tile/TileSuboptions/TileAutoScrollSuboptions")
+tile_auto_scroll_speed_input = NodePath("Tile/TileSuboptions/TileAutoScrollSuboptions/HBoxContainer17/TileAutoScrollSpeed")
+tile_auto_scroll_angle_input = NodePath("Tile/TileSuboptions/TileAutoScrollSuboptions/HBoxContainer18/TileAutoScrollAngle")
+ln_cam_scroll_factor_input = NodePath("Noise/NoiseSuboptions/HBoxContainer13/ScalarValueInput")
+ln_solid_cam_scroll_factor_input = NodePath("Noise/NoiseSuboptions/HBoxContainer14/ScalarValueInput")
 
 [node name="HBoxContainer2" type="HBoxContainer" parent="." unique_id=181641709]
 layout_mode = 2
@@ -119,7 +124,6 @@ layout_mode = 2
 text = "Enable Gradient"
 
 [node name="GradientSuboptions" type="VBoxContainer" parent="VBoxContainer" unique_id=1116484594]
-visible = false
 layout_mode = 2
 
 [node name="HBoxContainer3" type="HBoxContainer" parent="VBoxContainer/GradientSuboptions" unique_id=236340672]
@@ -169,177 +173,224 @@ is_int_type = true
 max_value = 360.0
 custom_step = true
 
+[node name="HBoxContainer6" type="HBoxContainer" parent="VBoxContainer/GradientSuboptions" unique_id=212519003]
+layout_mode = 2
+alignment = 2
+
+[node name="Label" type="Label" parent="VBoxContainer/GradientSuboptions/HBoxContainer6" unique_id=974039009]
+layout_mode = 2
+text = "Cover Amount:"
+
+[node name="GradientCoverInput" parent="VBoxContainer/GradientSuboptions/HBoxContainer6" unique_id=652103024 instance=ExtResource("2_87jfg")]
+layout_mode = 2
+default_value = 0.8
+min_value = -0.6
+max_value = 2.0
+custom_step = true
+custom_step_value = 0.05
+
 [node name="HSeparator2" type="HSeparator" parent="." unique_id=916788816]
 layout_mode = 2
 theme_override_styles/separator = SubResource("StyleBoxLine_umwh7")
 
-[node name="VBoxContainer2" type="VBoxContainer" parent="." unique_id=651068495]
+[node name="Clouds" type="VBoxContainer" parent="." unique_id=651068495]
 layout_mode = 2
 
-[node name="HBoxContainer2" type="HBoxContainer" parent="VBoxContainer2" unique_id=895619338]
+[node name="HBoxContainer2" type="HBoxContainer" parent="Clouds" unique_id=895619338]
 layout_mode = 2
 alignment = 2
 
-[node name="CheckButton" type="CheckButton" parent="VBoxContainer2/HBoxContainer2" unique_id=1771138808]
+[node name="CheckButton" type="CheckButton" parent="Clouds/HBoxContainer2" unique_id=1771138808]
 layout_mode = 2
 text = "Enable Clouds"
 
-[node name="CloudsSuboptions" type="VBoxContainer" parent="VBoxContainer2" unique_id=64754662]
+[node name="CloudsSuboptions" type="VBoxContainer" parent="Clouds" unique_id=64754662]
 visible = false
 layout_mode = 2
 
-[node name="HBoxContainer3" type="HBoxContainer" parent="VBoxContainer2/CloudsSuboptions" unique_id=537185308]
+[node name="HBoxContainer3" type="HBoxContainer" parent="Clouds/CloudsSuboptions" unique_id=537185308]
 layout_mode = 2
 alignment = 2
 
-[node name="Label" type="Label" parent="VBoxContainer2/CloudsSuboptions/HBoxContainer3" unique_id=585233691]
+[node name="Label" type="Label" parent="Clouds/CloudsSuboptions/HBoxContainer3" unique_id=585233691]
 layout_mode = 2
 text = "Color:"
 
-[node name="ColorPickerButton" type="ColorPickerButton" parent="VBoxContainer2/CloudsSuboptions/HBoxContainer3" unique_id=746370805]
+[node name="ColorPickerButton" type="ColorPickerButton" parent="Clouds/CloudsSuboptions/HBoxContainer3" unique_id=746370805]
 custom_minimum_size = Vector2(34, 24)
 layout_mode = 2
 script = ExtResource("2_pvmex")
 
-[node name="HBoxContainer4" type="HBoxContainer" parent="VBoxContainer2/CloudsSuboptions" unique_id=75483177]
+[node name="HBoxContainer4" type="HBoxContainer" parent="Clouds/CloudsSuboptions" unique_id=75483177]
 layout_mode = 2
 alignment = 2
 
-[node name="Label" type="Label" parent="VBoxContainer2/CloudsSuboptions/HBoxContainer4" unique_id=1399709587]
+[node name="Label" type="Label" parent="Clouds/CloudsSuboptions/HBoxContainer4" unique_id=1399709587]
 layout_mode = 2
 text = "Speed:"
 
-[node name="ScalarValueInput" parent="VBoxContainer2/CloudsSuboptions/HBoxContainer4" unique_id=1299631200 instance=ExtResource("2_87jfg")]
+[node name="ScalarValueInput" parent="Clouds/CloudsSuboptions/HBoxContainer4" unique_id=1299631200 instance=ExtResource("2_87jfg")]
 layout_mode = 2
 max_value = 20.0
 custom_step = true
 custom_step_value = 0.1
 
-[node name="HBoxContainer7" type="HBoxContainer" parent="VBoxContainer2/CloudsSuboptions" unique_id=1743843325]
+[node name="HBoxContainer7" type="HBoxContainer" parent="Clouds/CloudsSuboptions" unique_id=1743843325]
 layout_mode = 2
 alignment = 2
 
-[node name="Label" type="Label" parent="VBoxContainer2/CloudsSuboptions/HBoxContainer7" unique_id=497922775]
+[node name="Label" type="Label" parent="Clouds/CloudsSuboptions/HBoxContainer7" unique_id=497922775]
 layout_mode = 2
 text = "Density:"
 
-[node name="ScalarValueInput" parent="VBoxContainer2/CloudsSuboptions/HBoxContainer7" unique_id=2030402842 instance=ExtResource("2_87jfg")]
+[node name="ScalarValueInput" parent="Clouds/CloudsSuboptions/HBoxContainer7" unique_id=2030402842 instance=ExtResource("2_87jfg")]
 layout_mode = 2
 max_value = 20.0
 custom_step_value = 0.1
+
+[node name="HBoxContainer16" type="HBoxContainer" parent="Clouds/CloudsSuboptions" unique_id=1079521134]
+layout_mode = 2
+alignment = 2
+
+[node name="Label" type="Label" parent="Clouds/CloudsSuboptions/HBoxContainer16" unique_id=1726837301]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "Camera Parallax:"
+
+[node name="CloudsCameraParallax" parent="Clouds/CloudsSuboptions/HBoxContainer16" unique_id=644839404 instance=ExtResource("2_87jfg")]
+layout_mode = 2
+default_value = 0.5
+max_value = 1.0
+custom_step = true
+custom_step_value = 0.01
 
 [node name="HSeparator5" type="HSeparator" parent="." unique_id=1089191770]
 layout_mode = 2
 theme_override_styles/separator = SubResource("StyleBoxLine_umwh7")
 
-[node name="VBoxContainer4" type="VBoxContainer" parent="." unique_id=1140482873]
+[node name="Sparks" type="VBoxContainer" parent="." unique_id=1140482873]
 layout_mode = 2
 
-[node name="HBoxContainer2" type="HBoxContainer" parent="VBoxContainer4" unique_id=209642517]
+[node name="HBoxContainer2" type="HBoxContainer" parent="Sparks" unique_id=209642517]
 layout_mode = 2
 alignment = 2
 
-[node name="CheckButton" type="CheckButton" parent="VBoxContainer4/HBoxContainer2" unique_id=1948427739]
+[node name="CheckButton" type="CheckButton" parent="Sparks/HBoxContainer2" unique_id=1948427739]
 layout_mode = 2
 text = "Enable Sparks"
 
-[node name="SparksSuboptions" type="VBoxContainer" parent="VBoxContainer4" unique_id=2001605745]
+[node name="SparksSuboptions" type="VBoxContainer" parent="Sparks" unique_id=2001605745]
 visible = false
 layout_mode = 2
 
-[node name="HBoxContainer3" type="HBoxContainer" parent="VBoxContainer4/SparksSuboptions" unique_id=238831405]
+[node name="HBoxContainer3" type="HBoxContainer" parent="Sparks/SparksSuboptions" unique_id=238831405]
 layout_mode = 2
 alignment = 2
 
-[node name="Label" type="Label" parent="VBoxContainer4/SparksSuboptions/HBoxContainer3" unique_id=1991453234]
+[node name="Label" type="Label" parent="Sparks/SparksSuboptions/HBoxContainer3" unique_id=1991453234]
 layout_mode = 2
 text = "Color:"
 
-[node name="ColorPickerButton" type="ColorPickerButton" parent="VBoxContainer4/SparksSuboptions/HBoxContainer3" unique_id=1384611050]
+[node name="ColorPickerButton" type="ColorPickerButton" parent="Sparks/SparksSuboptions/HBoxContainer3" unique_id=1384611050]
 custom_minimum_size = Vector2(34, 24)
 layout_mode = 2
 script = ExtResource("2_pvmex")
 
-[node name="HBoxContainer5" type="HBoxContainer" parent="VBoxContainer4/SparksSuboptions" unique_id=1714812141]
+[node name="HBoxContainer5" type="HBoxContainer" parent="Sparks/SparksSuboptions" unique_id=1714812141]
 layout_mode = 2
 alignment = 2
 
-[node name="CheckButton" type="CheckButton" parent="VBoxContainer4/SparksSuboptions/HBoxContainer5" unique_id=217090647]
+[node name="CheckButton" type="CheckButton" parent="Sparks/SparksSuboptions/HBoxContainer5" unique_id=217090647]
 layout_mode = 2
 text = "Rainbow"
 
-[node name="HBoxContainer7" type="HBoxContainer" parent="VBoxContainer4/SparksSuboptions" unique_id=435508240]
+[node name="HBoxContainer7" type="HBoxContainer" parent="Sparks/SparksSuboptions" unique_id=435508240]
 layout_mode = 2
 alignment = 2
 
-[node name="CheckButton" type="CheckButton" parent="VBoxContainer4/SparksSuboptions/HBoxContainer7" unique_id=2071285533]
+[node name="CheckButton" type="CheckButton" parent="Sparks/SparksSuboptions/HBoxContainer7" unique_id=2071285533]
 layout_mode = 2
 text = "Darken"
 
-[node name="HBoxContainer4" type="HBoxContainer" parent="VBoxContainer4/SparksSuboptions" unique_id=477174580]
+[node name="HBoxContainer4" type="HBoxContainer" parent="Sparks/SparksSuboptions" unique_id=477174580]
 layout_mode = 2
 alignment = 2
 
-[node name="Label" type="Label" parent="VBoxContainer4/SparksSuboptions/HBoxContainer4" unique_id=1130233104]
+[node name="Label" type="Label" parent="Sparks/SparksSuboptions/HBoxContainer4" unique_id=1130233104]
 layout_mode = 2
 text = "Speed:"
 
-[node name="ScalarValueInput" parent="VBoxContainer4/SparksSuboptions/HBoxContainer4" unique_id=418338181 instance=ExtResource("2_87jfg")]
+[node name="ScalarValueInput" parent="Sparks/SparksSuboptions/HBoxContainer4" unique_id=418338181 instance=ExtResource("2_87jfg")]
 layout_mode = 2
 max_value = 20.0
 custom_step = true
 custom_step_value = 0.1
 
-[node name="HBoxContainer6" type="HBoxContainer" parent="VBoxContainer4/SparksSuboptions" unique_id=1582793148]
+[node name="HBoxContainer6" type="HBoxContainer" parent="Sparks/SparksSuboptions" unique_id=1582793148]
 layout_mode = 2
 alignment = 2
 
-[node name="Label" type="Label" parent="VBoxContainer4/SparksSuboptions/HBoxContainer6" unique_id=1444385043]
+[node name="Label" type="Label" parent="Sparks/SparksSuboptions/HBoxContainer6" unique_id=1444385043]
 layout_mode = 2
 text = "Density:"
 
-[node name="ScalarValueInput" parent="VBoxContainer4/SparksSuboptions/HBoxContainer6" unique_id=1094196209 instance=ExtResource("2_87jfg")]
+[node name="ScalarValueInput" parent="Sparks/SparksSuboptions/HBoxContainer6" unique_id=1094196209 instance=ExtResource("2_87jfg")]
 layout_mode = 2
 max_value = 20.0
 custom_step = true
 custom_step_value = 0.1
+
+[node name="HBoxContainer15" type="HBoxContainer" parent="Sparks/SparksSuboptions" unique_id=743287871]
+layout_mode = 2
+alignment = 2
+
+[node name="Label" type="Label" parent="Sparks/SparksSuboptions/HBoxContainer15" unique_id=1996585164]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "Camera Parallax:"
+
+[node name="SparksCameraParallax" parent="Sparks/SparksSuboptions/HBoxContainer15" unique_id=993199610 instance=ExtResource("2_87jfg")]
+layout_mode = 2
+max_value = 1.0
+custom_step = true
+custom_step_value = 0.01
 
 [node name="HSeparator4" type="HSeparator" parent="." unique_id=1191155286]
 layout_mode = 2
 theme_override_styles/separator = SubResource("StyleBoxLine_umwh7")
 
-[node name="VBoxContainer3" type="VBoxContainer" parent="." unique_id=1283490961]
+[node name="Noise" type="VBoxContainer" parent="." unique_id=1283490961]
 layout_mode = 2
 
-[node name="HBoxContainer2" type="HBoxContainer" parent="VBoxContainer3" unique_id=171908274]
+[node name="HBoxContainer2" type="HBoxContainer" parent="Noise" unique_id=171908274]
 layout_mode = 2
 alignment = 2
 
-[node name="CheckButton" type="CheckButton" parent="VBoxContainer3/HBoxContainer2" unique_id=1684757310]
+[node name="CheckButton" type="CheckButton" parent="Noise/HBoxContainer2" unique_id=1684757310]
 layout_mode = 2
 text = "Enable Noise Lines"
 
-[node name="HBoxContainer3" type="HBoxContainer" parent="VBoxContainer3" unique_id=706899556]
+[node name="HBoxContainer3" type="HBoxContainer" parent="Noise" unique_id=706899556]
 layout_mode = 2
 alignment = 2
 
-[node name="CheckButton" type="CheckButton" parent="VBoxContainer3/HBoxContainer3" unique_id=854888958]
+[node name="CheckButton" type="CheckButton" parent="Noise/HBoxContainer3" unique_id=854888958]
 layout_mode = 2
 text = "Enable Noise Solids"
 
-[node name="NoiseSuboptions" type="VBoxContainer" parent="VBoxContainer3" unique_id=109020447]
+[node name="NoiseSuboptions" type="VBoxContainer" parent="Noise" unique_id=109020447]
 visible = false
 layout_mode = 2
 
-[node name="HBoxContainer4" type="HBoxContainer" parent="VBoxContainer3/NoiseSuboptions" unique_id=472606221]
+[node name="HBoxContainer4" type="HBoxContainer" parent="Noise/NoiseSuboptions" unique_id=472606221]
 layout_mode = 2
 alignment = 2
 
-[node name="Label" type="Label" parent="VBoxContainer3/NoiseSuboptions/HBoxContainer4" unique_id=762999745]
+[node name="Label" type="Label" parent="Noise/NoiseSuboptions/HBoxContainer4" unique_id=762999745]
 layout_mode = 2
 text = "Sort:"
 
-[node name="OptionButton" type="OptionButton" parent="VBoxContainer3/NoiseSuboptions/HBoxContainer4" unique_id=671465070]
+[node name="OptionButton" type="OptionButton" parent="Noise/NoiseSuboptions/HBoxContainer4" unique_id=671465070]
 layout_mode = 2
 alignment = 1
 selected = 0
@@ -354,134 +405,134 @@ popup/item_2/id = 2
 popup/item_3/text = "above, solid on top"
 popup/item_3/id = 3
 
-[node name="HBoxContainer3" type="HBoxContainer" parent="VBoxContainer3/NoiseSuboptions" unique_id=2107617319]
+[node name="HBoxContainer3" type="HBoxContainer" parent="Noise/NoiseSuboptions" unique_id=2107617319]
 layout_mode = 2
 alignment = 2
 
-[node name="Label" type="Label" parent="VBoxContainer3/NoiseSuboptions/HBoxContainer3" unique_id=616792435]
+[node name="Label" type="Label" parent="Noise/NoiseSuboptions/HBoxContainer3" unique_id=616792435]
 layout_mode = 2
 text = "Lines Color:"
 
-[node name="ColorPickerButton" type="ColorPickerButton" parent="VBoxContainer3/NoiseSuboptions/HBoxContainer3" unique_id=775456445]
+[node name="ColorPickerButton" type="ColorPickerButton" parent="Noise/NoiseSuboptions/HBoxContainer3" unique_id=775456445]
 custom_minimum_size = Vector2(34, 24)
 layout_mode = 2
 script = ExtResource("2_pvmex")
 
-[node name="HBoxContainer5" type="HBoxContainer" parent="VBoxContainer3/NoiseSuboptions" unique_id=2110732092]
+[node name="HBoxContainer5" type="HBoxContainer" parent="Noise/NoiseSuboptions" unique_id=2110732092]
 layout_mode = 2
 alignment = 2
 
-[node name="Label" type="Label" parent="VBoxContainer3/NoiseSuboptions/HBoxContainer5" unique_id=2042268601]
+[node name="Label" type="Label" parent="Noise/NoiseSuboptions/HBoxContainer5" unique_id=2042268601]
 layout_mode = 2
 text = "Solids Color:"
 
-[node name="ColorPickerButton" type="ColorPickerButton" parent="VBoxContainer3/NoiseSuboptions/HBoxContainer5" unique_id=1759660424]
+[node name="ColorPickerButton" type="ColorPickerButton" parent="Noise/NoiseSuboptions/HBoxContainer5" unique_id=1759660424]
 custom_minimum_size = Vector2(34, 24)
 layout_mode = 2
 script = ExtResource("2_pvmex")
 
-[node name="HBoxContainer8" type="HBoxContainer" parent="VBoxContainer3/NoiseSuboptions" unique_id=250992645]
+[node name="HBoxContainer8" type="HBoxContainer" parent="Noise/NoiseSuboptions" unique_id=250992645]
 layout_mode = 2
 alignment = 2
 
-[node name="Label" type="Label" parent="VBoxContainer3/NoiseSuboptions/HBoxContainer8" unique_id=1479777815]
+[node name="Label" type="Label" parent="Noise/NoiseSuboptions/HBoxContainer8" unique_id=1479777815]
 layout_mode = 2
 text = "Scroll Speed:"
 
-[node name="ScalarValueInput" parent="VBoxContainer3/NoiseSuboptions/HBoxContainer8" unique_id=716462493 instance=ExtResource("2_87jfg")]
+[node name="ScalarValueInput" parent="Noise/NoiseSuboptions/HBoxContainer8" unique_id=716462493 instance=ExtResource("2_87jfg")]
 layout_mode = 2
 max_value = 4.0
 custom_step = true
 custom_step_value = 0.02
 
-[node name="HBoxContainer9" type="HBoxContainer" parent="VBoxContainer3/NoiseSuboptions" unique_id=1491560052]
+[node name="HBoxContainer9" type="HBoxContainer" parent="Noise/NoiseSuboptions" unique_id=1491560052]
 layout_mode = 2
 alignment = 2
 
-[node name="Label" type="Label" parent="VBoxContainer3/NoiseSuboptions/HBoxContainer9" unique_id=1780234838]
+[node name="Label" type="Label" parent="Noise/NoiseSuboptions/HBoxContainer9" unique_id=1780234838]
 layout_mode = 2
 text = "Scroll Angle:"
 
-[node name="ScalarValueInput" parent="VBoxContainer3/NoiseSuboptions/HBoxContainer9" unique_id=1659266554 instance=ExtResource("2_87jfg")]
+[node name="ScalarValueInput" parent="Noise/NoiseSuboptions/HBoxContainer9" unique_id=1659266554 instance=ExtResource("2_87jfg")]
 layout_mode = 2
 is_int_type = true
 max_value = 360.0
 custom_step = true
 
-[node name="Spacer" type="Control" parent="VBoxContainer3/NoiseSuboptions" unique_id=1234202883]
+[node name="Spacer" type="Control" parent="Noise/NoiseSuboptions" unique_id=1234202883]
 custom_minimum_size = Vector2(0, 2)
 layout_mode = 2
 
-[node name="HBoxContainer10" type="HBoxContainer" parent="VBoxContainer3/NoiseSuboptions" unique_id=1518913290]
+[node name="HBoxContainer10" type="HBoxContainer" parent="Noise/NoiseSuboptions" unique_id=1518913290]
 layout_mode = 2
 alignment = 2
 
-[node name="Label" type="Label" parent="VBoxContainer3/NoiseSuboptions/HBoxContainer10" unique_id=364537456]
+[node name="Label" type="Label" parent="Noise/NoiseSuboptions/HBoxContainer10" unique_id=364537456]
 layout_mode = 2
 text = "Warp Strength:"
 
-[node name="ScalarValueInput" parent="VBoxContainer3/NoiseSuboptions/HBoxContainer10" unique_id=229777658 instance=ExtResource("2_87jfg")]
+[node name="ScalarValueInput" parent="Noise/NoiseSuboptions/HBoxContainer10" unique_id=229777658 instance=ExtResource("2_87jfg")]
 layout_mode = 2
 max_value = 10.0
 custom_step_value = 0.1
 
-[node name="HBoxContainer12" type="HBoxContainer" parent="VBoxContainer3/NoiseSuboptions" unique_id=1665777814]
+[node name="HBoxContainer12" type="HBoxContainer" parent="Noise/NoiseSuboptions" unique_id=1665777814]
 layout_mode = 2
 alignment = 2
 
-[node name="Label" type="Label" parent="VBoxContainer3/NoiseSuboptions/HBoxContainer12" unique_id=483433450]
+[node name="Label" type="Label" parent="Noise/NoiseSuboptions/HBoxContainer12" unique_id=483433450]
 layout_mode = 2
 text = "Warp Scroll:"
 
-[node name="ScalarValueInput" parent="VBoxContainer3/NoiseSuboptions/HBoxContainer12" unique_id=1065707686 instance=ExtResource("2_87jfg")]
+[node name="ScalarValueInput" parent="Noise/NoiseSuboptions/HBoxContainer12" unique_id=1065707686 instance=ExtResource("2_87jfg")]
 layout_mode = 2
 max_value = 4.0
 custom_step = true
 custom_step_value = 0.02
 
-[node name="HBoxContainer11" type="HBoxContainer" parent="VBoxContainer3/NoiseSuboptions" unique_id=1665801147]
+[node name="HBoxContainer11" type="HBoxContainer" parent="Noise/NoiseSuboptions" unique_id=1665801147]
 layout_mode = 2
 alignment = 2
 
-[node name="Label" type="Label" parent="VBoxContainer3/NoiseSuboptions/HBoxContainer11" unique_id=660659100]
+[node name="Label" type="Label" parent="Noise/NoiseSuboptions/HBoxContainer11" unique_id=660659100]
 layout_mode = 2
 text = "Warp Scroll Angle:"
 
-[node name="ScalarValueInput" parent="VBoxContainer3/NoiseSuboptions/HBoxContainer11" unique_id=503386986 instance=ExtResource("2_87jfg")]
+[node name="ScalarValueInput" parent="Noise/NoiseSuboptions/HBoxContainer11" unique_id=503386986 instance=ExtResource("2_87jfg")]
 layout_mode = 2
 is_int_type = true
 max_value = 360.0
 custom_step = true
 
-[node name="Spacer2" type="Control" parent="VBoxContainer3/NoiseSuboptions" unique_id=169809934]
+[node name="Spacer2" type="Control" parent="Noise/NoiseSuboptions" unique_id=169809934]
 custom_minimum_size = Vector2(0, 2)
 layout_mode = 2
 
-[node name="HBoxContainer13" type="HBoxContainer" parent="VBoxContainer3/NoiseSuboptions" unique_id=1572256018]
+[node name="HBoxContainer13" type="HBoxContainer" parent="Noise/NoiseSuboptions" unique_id=1572256018]
 layout_mode = 2
 alignment = 2
 
-[node name="Label" type="Label" parent="VBoxContainer3/NoiseSuboptions/HBoxContainer13" unique_id=980867754]
+[node name="Label" type="Label" parent="Noise/NoiseSuboptions/HBoxContainer13" unique_id=980867754]
 layout_mode = 2
 theme_override_font_sizes/font_size = 12
 text = "Lines Camera Parallax:"
 
-[node name="ScalarValueInput" parent="VBoxContainer3/NoiseSuboptions/HBoxContainer13" unique_id=1652687614 instance=ExtResource("2_87jfg")]
+[node name="ScalarValueInput" parent="Noise/NoiseSuboptions/HBoxContainer13" unique_id=1652687614 instance=ExtResource("2_87jfg")]
 layout_mode = 2
 max_value = 1.0
 custom_step = true
 custom_step_value = 0.01
 
-[node name="HBoxContainer14" type="HBoxContainer" parent="VBoxContainer3/NoiseSuboptions" unique_id=1183797249]
+[node name="HBoxContainer14" type="HBoxContainer" parent="Noise/NoiseSuboptions" unique_id=1183797249]
 layout_mode = 2
 alignment = 2
 
-[node name="Label" type="Label" parent="VBoxContainer3/NoiseSuboptions/HBoxContainer14" unique_id=2133375291]
+[node name="Label" type="Label" parent="Noise/NoiseSuboptions/HBoxContainer14" unique_id=2133375291]
 layout_mode = 2
 theme_override_font_sizes/font_size = 12
 text = "Solids Camera Parallax:"
 
-[node name="ScalarValueInput" parent="VBoxContainer3/NoiseSuboptions/HBoxContainer14" unique_id=1202639868 instance=ExtResource("2_87jfg")]
+[node name="ScalarValueInput" parent="Noise/NoiseSuboptions/HBoxContainer14" unique_id=1202639868 instance=ExtResource("2_87jfg")]
 layout_mode = 2
 max_value = 1.0
 custom_step = true
@@ -491,30 +542,30 @@ custom_step_value = 0.01
 layout_mode = 2
 theme_override_styles/separator = SubResource("StyleBoxLine_umwh7")
 
-[node name="VBoxContainer5" type="VBoxContainer" parent="." unique_id=1582894889]
+[node name="Tile" type="VBoxContainer" parent="." unique_id=1582894889]
 layout_mode = 2
 
-[node name="HBoxContainer2" type="HBoxContainer" parent="VBoxContainer5" unique_id=51671600]
+[node name="HBoxContainer2" type="HBoxContainer" parent="Tile" unique_id=51671600]
 layout_mode = 2
 alignment = 2
 
-[node name="EnableTile" type="CheckButton" parent="VBoxContainer5/HBoxContainer2" unique_id=1641519139]
+[node name="EnableTile" type="CheckButton" parent="Tile/HBoxContainer2" unique_id=1641519139]
 layout_mode = 2
 theme_override_font_sizes/font_size = 12
 text = "Enable Repeating Tile"
 
-[node name="TileSuboptions" type="VBoxContainer" parent="VBoxContainer5" unique_id=1618054831]
+[node name="TileSuboptions" type="VBoxContainer" parent="Tile" unique_id=1618054831]
 layout_mode = 2
 
-[node name="HBoxContainer3" type="HBoxContainer" parent="VBoxContainer5/TileSuboptions" unique_id=1272833121]
+[node name="HBoxContainer3" type="HBoxContainer" parent="Tile/TileSuboptions" unique_id=1272833121]
 layout_mode = 2
 alignment = 2
 
-[node name="Label" type="Label" parent="VBoxContainer5/TileSuboptions/HBoxContainer3" unique_id=483607630]
+[node name="Label" type="Label" parent="Tile/TileSuboptions/HBoxContainer3" unique_id=483607630]
 layout_mode = 2
 text = "Image:"
 
-[node name="TileImageButton" type="Container" parent="VBoxContainer5/TileSuboptions/HBoxContainer3" unique_id=451892711 node_paths=PackedStringArray("tex_rect")]
+[node name="TileImageButton" type="Container" parent="Tile/TileSuboptions/HBoxContainer3" unique_id=451892711 node_paths=PackedStringArray("tex_rect")]
 layout_mode = 2
 size_flags_horizontal = 4
 size_flags_vertical = 4
@@ -523,7 +574,7 @@ tex_rect = NodePath("MarginContainer/CenterContainer/Icon")
 icon = SubResource("AtlasTexture_qopeb")
 metadata/_custom_type_script = "uid://bq446sgdivroo"
 
-[node name="MarginContainer" type="MarginContainer" parent="VBoxContainer5/TileSuboptions/HBoxContainer3/TileImageButton" unique_id=736765737]
+[node name="MarginContainer" type="MarginContainer" parent="Tile/TileSuboptions/HBoxContainer3/TileImageButton" unique_id=736765737]
 layout_mode = 2
 mouse_filter = 2
 theme_override_constants/margin_left = 4
@@ -531,39 +582,39 @@ theme_override_constants/margin_top = 2
 theme_override_constants/margin_right = 4
 theme_override_constants/margin_bottom = 6
 
-[node name="CenterContainer" type="CenterContainer" parent="VBoxContainer5/TileSuboptions/HBoxContainer3/TileImageButton/MarginContainer" unique_id=1526103059]
+[node name="CenterContainer" type="CenterContainer" parent="Tile/TileSuboptions/HBoxContainer3/TileImageButton/MarginContainer" unique_id=1526103059]
 layout_mode = 2
 mouse_filter = 2
 
-[node name="Icon" type="TextureRect" parent="VBoxContainer5/TileSuboptions/HBoxContainer3/TileImageButton/MarginContainer/CenterContainer" unique_id=608765331]
+[node name="Icon" type="TextureRect" parent="Tile/TileSuboptions/HBoxContainer3/TileImageButton/MarginContainer/CenterContainer" unique_id=608765331]
 custom_minimum_size = Vector2(32, 32)
 layout_mode = 2
 mouse_filter = 2
 texture = SubResource("AtlasTexture_qopeb")
 expand_mode = 1
 
-[node name="HBoxContainer5" type="HBoxContainer" parent="VBoxContainer5/TileSuboptions" unique_id=366585898]
+[node name="HBoxContainer5" type="HBoxContainer" parent="Tile/TileSuboptions" unique_id=366585898]
 layout_mode = 2
 alignment = 2
 
-[node name="Label" type="Label" parent="VBoxContainer5/TileSuboptions/HBoxContainer5" unique_id=1992488198]
+[node name="Label" type="Label" parent="Tile/TileSuboptions/HBoxContainer5" unique_id=1992488198]
 layout_mode = 2
 text = "Modify Color:"
 
-[node name="TileColor" type="ColorPickerButton" parent="VBoxContainer5/TileSuboptions/HBoxContainer5" unique_id=2051085912]
+[node name="TileColor" type="ColorPickerButton" parent="Tile/TileSuboptions/HBoxContainer5" unique_id=2051085912]
 custom_minimum_size = Vector2(34, 24)
 layout_mode = 2
 script = ExtResource("2_pvmex")
 
-[node name="HBoxContainer6" type="HBoxContainer" parent="VBoxContainer5/TileSuboptions" unique_id=1499884900]
+[node name="HBoxContainer6" type="HBoxContainer" parent="Tile/TileSuboptions" unique_id=1499884900]
 layout_mode = 2
 alignment = 2
 
-[node name="Label" type="Label" parent="VBoxContainer5/TileSuboptions/HBoxContainer6" unique_id=147405549]
+[node name="Label" type="Label" parent="Tile/TileSuboptions/HBoxContainer6" unique_id=147405549]
 layout_mode = 2
 text = "Sorting:"
 
-[node name="SortTile" type="OptionButton" parent="VBoxContainer5/TileSuboptions/HBoxContainer6" unique_id=368451612]
+[node name="SortTile" type="OptionButton" parent="Tile/TileSuboptions/HBoxContainer6" unique_id=368451612]
 layout_mode = 2
 alignment = 1
 selected = 0
@@ -575,100 +626,121 @@ popup/item_1/id = 1
 popup/item_2/text = "above"
 popup/item_2/id = 2
 
-[node name="HBoxContainer8" type="HBoxContainer" parent="VBoxContainer5/TileSuboptions" unique_id=2096971957]
+[node name="HBoxContainer8" type="HBoxContainer" parent="Tile/TileSuboptions" unique_id=2096971957]
 layout_mode = 2
 alignment = 2
 
-[node name="TileBelowGradient" type="CheckButton" parent="VBoxContainer5/TileSuboptions/HBoxContainer8" unique_id=2005358086]
+[node name="TileBelowGradient" type="CheckButton" parent="Tile/TileSuboptions/HBoxContainer8" unique_id=2005358086]
 layout_mode = 2
 tooltip_text = "When at the same level as the Gradient"
 theme_override_font_sizes/font_size = 12
 text = "Sort Below Gradient:"
 
-[node name="HBoxContainer16" type="HBoxContainer" parent="VBoxContainer5/TileSuboptions" unique_id=1354947346]
+[node name="HBoxContainer11" type="HBoxContainer" parent="Tile/TileSuboptions" unique_id=302571751]
 layout_mode = 2
 alignment = 2
 
-[node name="Label" type="Label" parent="VBoxContainer5/TileSuboptions/HBoxContainer16" unique_id=2298386]
+[node name="Label" type="Label" parent="Tile/TileSuboptions/HBoxContainer11" unique_id=676567288]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "Center:"
+
+[node name="TileOffset" parent="Tile/TileSuboptions/HBoxContainer11" unique_id=2047234622 instance=ExtResource("6_5n2ag")]
+layout_mode = 2
+
+[node name="HBoxContainer16" type="HBoxContainer" parent="Tile/TileSuboptions" unique_id=1354947346]
+layout_mode = 2
+alignment = 2
+
+[node name="Label" type="Label" parent="Tile/TileSuboptions/HBoxContainer16" unique_id=2298386]
 layout_mode = 2
 text = "Tile Angle:"
 
-[node name="TileAngle" parent="VBoxContainer5/TileSuboptions/HBoxContainer16" unique_id=1541175197 instance=ExtResource("2_87jfg")]
+[node name="TileAngle" parent="Tile/TileSuboptions/HBoxContainer16" unique_id=1541175197 instance=ExtResource("2_87jfg")]
 layout_mode = 2
 is_int_type = true
 max_value = 360.0
 custom_step = true
 
-[node name="HBoxContainer4" type="HBoxContainer" parent="VBoxContainer5/TileSuboptions" unique_id=128308032]
+[node name="HBoxContainer4" type="HBoxContainer" parent="Tile/TileSuboptions" unique_id=128308032]
 layout_mode = 2
 alignment = 2
 
-[node name="Label" type="Label" parent="VBoxContainer5/TileSuboptions/HBoxContainer4" unique_id=1666291771]
+[node name="Label" type="Label" parent="Tile/TileSuboptions/HBoxContainer4" unique_id=1666291771]
 layout_mode = 2
 text = "Scale:"
 
-[node name="TileScale" parent="VBoxContainer5/TileSuboptions/HBoxContainer4" unique_id=1169651795 instance=ExtResource("2_87jfg")]
+[node name="TileScale" parent="Tile/TileSuboptions/HBoxContainer4" unique_id=1169651795 instance=ExtResource("2_87jfg")]
 layout_mode = 2
 min_value = 0.1
 max_value = 20.0
 custom_step = true
 custom_step_value = 0.1
 
-[node name="HBoxContainer7" type="HBoxContainer" parent="VBoxContainer5/TileSuboptions" unique_id=108252727]
+[node name="HBoxContainer7" type="HBoxContainer" parent="Tile/TileSuboptions" unique_id=108252727]
 layout_mode = 2
 alignment = 2
 
-[node name="TileSmoothScale" type="CheckButton" parent="VBoxContainer5/TileSuboptions/HBoxContainer7" unique_id=2103864266]
+[node name="TileSmoothScale" type="CheckButton" parent="Tile/TileSuboptions/HBoxContainer7" unique_id=2103864266]
 layout_mode = 2
 text = "Scale Smooth:"
 
-[node name="HBoxContainer9" type="HBoxContainer" parent="VBoxContainer5/TileSuboptions" unique_id=1135241590]
+[node name="HBoxContainer12" type="HBoxContainer" parent="Tile/TileSuboptions" unique_id=874959053]
 layout_mode = 2
 alignment = 2
 
-[node name="Label" type="Label" parent="VBoxContainer5/TileSuboptions/HBoxContainer9" unique_id=18957452]
+[node name="TileScalCam" type="CheckButton" parent="Tile/TileSuboptions/HBoxContainer12" unique_id=1346373816]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "Scale With Camera:"
+
+[node name="HBoxContainer9" type="HBoxContainer" parent="Tile/TileSuboptions" unique_id=1135241590]
+layout_mode = 2
+alignment = 2
+
+[node name="Label" type="Label" parent="Tile/TileSuboptions/HBoxContainer9" unique_id=18957452]
 layout_mode = 2
 theme_override_font_sizes/font_size = 12
 text = "Spacing:"
 
-[node name="TileSpacing" parent="VBoxContainer5/TileSuboptions/HBoxContainer9" unique_id=2047234622 instance=ExtResource("6_5n2ag")]
+[node name="TileSpacing" parent="Tile/TileSuboptions/HBoxContainer9" unique_id=1410669309 instance=ExtResource("6_5n2ag")]
 layout_mode = 2
 
-[node name="HBoxContainer15" type="HBoxContainer" parent="VBoxContainer5/TileSuboptions" unique_id=1991944113]
+[node name="HBoxContainer15" type="HBoxContainer" parent="Tile/TileSuboptions" unique_id=1991944113]
 layout_mode = 2
 alignment = 2
 
-[node name="Label" type="Label" parent="VBoxContainer5/TileSuboptions/HBoxContainer15" unique_id=2013399500]
+[node name="Label" type="Label" parent="Tile/TileSuboptions/HBoxContainer15" unique_id=2013399500]
 layout_mode = 2
 theme_override_font_sizes/font_size = 12
 text = "Camera Parallax:"
 
-[node name="TileParallax" parent="VBoxContainer5/TileSuboptions/HBoxContainer15" unique_id=1079755556 instance=ExtResource("2_87jfg")]
+[node name="TileParallax" parent="Tile/TileSuboptions/HBoxContainer15" unique_id=1079755556 instance=ExtResource("2_87jfg")]
 layout_mode = 2
 max_value = 1.0
 custom_step = true
 custom_step_value = 0.01
 
-[node name="HBoxContainer10" type="HBoxContainer" parent="VBoxContainer5/TileSuboptions" unique_id=94214047]
+[node name="HBoxContainer10" type="HBoxContainer" parent="Tile/TileSuboptions" unique_id=94214047]
 layout_mode = 2
 alignment = 2
 
-[node name="TileAutoScrollEnable" type="CheckButton" parent="VBoxContainer5/TileSuboptions/HBoxContainer10" unique_id=1377991886]
+[node name="TileAutoScrollEnable" type="CheckButton" parent="Tile/TileSuboptions/HBoxContainer10" unique_id=1377991886]
 layout_mode = 2
 text = "Auto Scroll:"
 
-[node name="TileAutoScrollSuboptions" type="VBoxContainer" parent="VBoxContainer5/TileSuboptions" unique_id=637533295]
+[node name="TileAutoScrollSuboptions" type="VBoxContainer" parent="Tile/TileSuboptions" unique_id=637533295]
 layout_mode = 2
 
-[node name="HBoxContainer17" type="HBoxContainer" parent="VBoxContainer5/TileSuboptions/TileAutoScrollSuboptions" unique_id=1799240090]
+[node name="HBoxContainer17" type="HBoxContainer" parent="Tile/TileSuboptions/TileAutoScrollSuboptions" unique_id=1799240090]
 layout_mode = 2
 alignment = 2
 
-[node name="Label" type="Label" parent="VBoxContainer5/TileSuboptions/TileAutoScrollSuboptions/HBoxContainer17" unique_id=752145506]
+[node name="Label" type="Label" parent="Tile/TileSuboptions/TileAutoScrollSuboptions/HBoxContainer17" unique_id=752145506]
 layout_mode = 2
 text = "Scroll Speed:"
 
-[node name="TileAutoScrollSpeed" parent="VBoxContainer5/TileSuboptions/TileAutoScrollSuboptions/HBoxContainer17" unique_id=745362461 instance=ExtResource("2_87jfg")]
+[node name="TileAutoScrollSpeed" parent="Tile/TileSuboptions/TileAutoScrollSuboptions/HBoxContainer17" unique_id=745362461 instance=ExtResource("2_87jfg")]
 layout_mode = 2
 default_value = 0.5
 min_value = 0.02
@@ -676,15 +748,15 @@ max_value = 10.0
 custom_step = true
 custom_step_value = 0.02
 
-[node name="HBoxContainer18" type="HBoxContainer" parent="VBoxContainer5/TileSuboptions/TileAutoScrollSuboptions" unique_id=1721392866]
+[node name="HBoxContainer18" type="HBoxContainer" parent="Tile/TileSuboptions/TileAutoScrollSuboptions" unique_id=1721392866]
 layout_mode = 2
 alignment = 2
 
-[node name="Label" type="Label" parent="VBoxContainer5/TileSuboptions/TileAutoScrollSuboptions/HBoxContainer18" unique_id=313542012]
+[node name="Label" type="Label" parent="Tile/TileSuboptions/TileAutoScrollSuboptions/HBoxContainer18" unique_id=313542012]
 layout_mode = 2
 text = "Scroll Angle:"
 
-[node name="TileAutoScrollAngle" parent="VBoxContainer5/TileSuboptions/TileAutoScrollSuboptions/HBoxContainer18" unique_id=1836601096 instance=ExtResource("2_87jfg")]
+[node name="TileAutoScrollAngle" parent="Tile/TileSuboptions/TileAutoScrollSuboptions/HBoxContainer18" unique_id=1836601096 instance=ExtResource("2_87jfg")]
 layout_mode = 2
 is_int_type = true
 max_value = 360.0
