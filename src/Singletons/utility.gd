@@ -685,7 +685,14 @@ func short_basis(vec: Vector2) -> Vector2:
 func get_dict_color(from_dict: Dictionary, key: String, default_color: Color = Color.MAGENTA) -> Color:
 	if not key in from_dict:
 		return default_color
-	var val: String = from_dict.get(key, "")
+	var val: Variant = from_dict.get(key, "")
+	if typeof(val) == TYPE_COLOR:
+		push_warning("get_dict_color: %s is already a color" % key)
+		return val
+	elif typeof(val) != TYPE_STRING:
+		push_error("get_dict_color: %s is not a color or string" % key)
+		return default_color
+
 	if not val.is_valid_html_color():
 		return default_color
 	return Color.from_string(val, default_color)

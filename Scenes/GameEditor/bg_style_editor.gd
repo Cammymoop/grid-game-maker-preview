@@ -1,5 +1,9 @@
 extends VBoxContainer
 
+signal request_bg_style()
+signal disable_custom_bg()
+signal edited_bg_style(bg_style: Dictionary)
+
 const IconButton = preload("res://Scenes/UI/icon_button.gd")
 const ScalarValueInput = preload("res://src/GameEditor/ConditionalEditor/scalar_value_input.gd")
 const BGTileHolder = preload("res://Scenes/bg_tile_holder.gd")
@@ -7,6 +11,8 @@ const Vector2fInput = preload("res://src/GameEditor/ConditionalEditor/vector2f_i
 
 const TexturePickerDialog = preload("res://src/GameEditor/BetterTextureDialog.gd")
 var texture_picker_dialog_scn: = preload("res://Scenes/GameEditor/BetterTextureDialog.tscn")
+
+@export var manual_source: = false
 
 @export var reset_button: Button
 @export var remove_override_button: Button
@@ -76,6 +82,8 @@ const ANGLE_KEYS: = ["lines_scroll_angle", "lines_warp_scroll_angle", "bg_gradie
 var current_tile_texture_id: int = -1
 var current_tile_texture_index: int = 0
 
+var manual_info: Dictionary = {}
+
 func _ready() -> void:
     reset_button.pressed.connect(reset_bg_style)
     remove_override_button.pressed.connect(remove_override_bg_style)
@@ -92,9 +100,13 @@ func _ready() -> void:
     tile_texture_picker_button.pressed.connect(open_tile_texture_picker)
     
     
-    GameManager.bg_style_changed.connect(bg_style_changed)
-    if not GameManager.current_has_bg_info():
-        remove_override_button.disabled = true
+    if not manual_source:
+        GameManager.bg_style_changed.connect(bg_style_changed)
+        if not GameManager.current_has_bg_info():
+            remove_override_button.disabled = true
+    else:
+        remove_override_button.visible = true
+        remove_override_button.disabled = false
     
     setup_value_change_signals()
     load_bg_style()
@@ -110,6 +122,11 @@ func open_tile_texture_picker() -> void:
     texture_picker_dialog.popup_centered()
 
 func reset_bg_style() -> void:
+    if manual_source:
+        manual_info = {}
+        edited_bg_style.emit({})
+        return
+
     if GameManager.cur_scene != "Play":
         GameManager.set_game_setting("bg_style", {})
     else:
@@ -118,14 +135,30 @@ func reset_bg_style() -> void:
     load_bg_style()
 
 func remove_override_bg_style() -> void:
+    if manual_source:
+        disable_custom_bg.emit()
+        return
+
     if GameManager.cur_scene != "Play":
         return
     GameManager.remove_current_bg_override()
     remove_override_button.disabled = true
     load_bg_style()
 
-func load_bg_style() -> void:
-    var bg_style: Dictionary = GameManager.get_current_bg_info()
+func manual_copy_game_bg_style() -> void:
+    manual_info = GameManager.get_current_bg_info()
+    load_bg_style(true)
+
+func load_manual_bg_style(new_info: Dictionary) -> void:
+    manual_info = new_info
+    load_bg_style(true)
+
+func load_bg_style(manual_fetched: bool = false) -> void:
+    if manual_source and not manual_fetched:
+        request_bg_style.emit()
+        return
+
+    var bg_style: Dictionary = manual_info if manual_source else GameManager.get_current_bg_info()
     
     bg_color_picker.color = Utility.get_dict_color(bg_style, "background_color", Color.BLACK)
     
@@ -199,23 +232,34 @@ func refresh_suboptions() -> void:
     tile_suboptions.visible = tile_enable.button_pressed
     tile_auto_scroll_suboptions.visible = tile_auto_scroll_enable.button_pressed
 
+func _set_info_value(key: String, value: Variant) -> void:
+    if manual_source:
+        manual_source_set_info(key, value)
+    else:
+        GameManager.set_auto_bg_info_value(key, value)
+
+func manual_source_set_info(key: String, value: Variant) -> void:
+    manual_info[key] = value
+    edited_bg_style.emit(manual_info)
+    
+
 func update_color_option(new_color: Color, color_key: String, no_alpha: bool = false) -> void:
     var color_func: = Utility.color_string_no_alpha if no_alpha else Utility.color_string
-    GameManager.set_auto_bg_info_value(color_key, color_func.call(new_color))
+    _set_info_value(color_key, color_func.call(new_color))
 
 func update_scalar_option(new_value: float, scalar_key: String) -> void:
     if scalar_key in ANGLE_KEYS:
         new_value = _deg_to_turn(new_value)
-    GameManager.set_auto_bg_info_value(scalar_key, new_value)
+    _set_info_value(scalar_key, new_value)
 
 func update_opbtn_option(new_index: int, opbtn: OptionButton, value_key: String) -> void:
-    GameManager.set_auto_bg_info_value(value_key, opbtn.get_item_text(new_index))
+    _set_info_value(value_key, opbtn.get_item_text(new_index))
 
 func update_toggle_option(new_is_pressed: bool, toggle_key: String) -> void:
-    GameManager.set_auto_bg_info_value(toggle_key, new_is_pressed)
+    _set_info_value(toggle_key, new_is_pressed)
 
 func update_vector2f_option(new_value: Vector2, vector2f_key: String) -> void:
-    GameManager.set_auto_bg_info_value(vector2f_key, Utility.get_arr_from_vector2(new_value))
+    _set_info_value(vector2f_key, Utility.get_arr_from_vector2(new_value))
 
 func on_tile_texture_picked(texture_id: int, texture_index: int) -> void:
     current_tile_texture_id = texture_id

@@ -1,0 +1,301 @@
+[gd_scene format=3 uid="uid://cwatfg52by5d"]
+
+[ext_resource type="Script" uid="uid://dwpptmiekwng3" path="res://Scenes/Intermission/intermission_config_item.gd" id="1_jycyh"]
+[ext_resource type="PackedScene" uid="uid://cemds60k8ytal" path="res://Scenes/UI/icon_button.tscn" id="2_kmdca"]
+[ext_resource type="Texture2D" uid="uid://tpslcq3ccosh" path="res://assets/img/button_icons/up_small.png" id="3_8vtpy"]
+[ext_resource type="Texture2D" uid="uid://c1h0arduxil1j" path="res://assets/img/button_icons/down_small.png" id="4_0qqa7"]
+[ext_resource type="PackedScene" uid="uid://bleyoj5f36kfy" path="res://Scenes/GameEditor/ConditionalEditor/scalar_value_input.tscn" id="5_0qqa7"]
+[ext_resource type="Script" uid="uid://dpuajjdauwd7f" path="res://Scenes/GameEditor/remembering_color_picker_button.gd" id="6_nb6yg"]
+[ext_resource type="PackedScene" uid="uid://dvimib4iq4sje" path="res://Scenes/GameEditor/adaptive_multi_line_edit.tscn" id="7_nb6yg"]
+[ext_resource type="Script" uid="uid://bmgocdf51cyew" path="res://Scenes/Intermission/intermission_config_image_section.gd" id="8_1rtii"]
+[ext_resource type="Script" uid="uid://bkf0pmfj7eoac" path="res://Scenes/UI/icon_button.gd" id="8_n5seu"]
+[ext_resource type="Texture2D" uid="uid://clvyilalbfs0l" path="res://assets/img/cursor_delete.png" id="9_hcmjr"]
+
+[sub_resource type="StyleBoxLine" id="StyleBoxLine_1rtii"]
+color = Color(0.7750634, 0.7750634, 0.7750634, 1)
+thickness = 3
+
+[sub_resource type="Theme" id="Theme_eo6lr"]
+CheckButton/font_sizes/font_size = 14
+Label/font_sizes/font_size = 14
+
+[sub_resource type="ButtonGroup" id="ButtonGroup_n5seu"]
+
+[node name="IntermissionConfigItem" type="VBoxContainer" unique_id=1389408321 node_paths=PackedStringArray("type_picker", "top_separator", "text_config_section", "image_config_section", "text_input", "font_size_input", "text_outline_enabled_toggle", "text_color_picker", "text_outline_color_picker", "move_up_button", "move_down_button", "remove_button")]
+offset_right = 762.0
+offset_bottom = 104.0
+theme_override_constants/separation = 0
+script = ExtResource("1_jycyh")
+type_picker = NodePath("HBoxContainer/VBoxContainer/HBoxContainer/TypeSelector")
+top_separator = NodePath("HSeparator")
+text_config_section = NodePath("HBoxContainer/VBoxContainer2/TextStuff")
+image_config_section = NodePath("HBoxContainer/VBoxContainer2/ImageStuff")
+text_input = NodePath("HBoxContainer/VBoxContainer2/TextStuff/HBoxContainer2/AdaptiveMultiLineEdit")
+font_size_input = NodePath("HBoxContainer/VBoxContainer2/TextStuff/TextStyleOptions/HBoxContainer/HBoxContainer/FontSizeInput")
+text_outline_enabled_toggle = NodePath("HBoxContainer/VBoxContainer2/TextStuff/TextStyleOptions/HBoxContainer/EnableBorder")
+text_color_picker = NodePath("HBoxContainer/VBoxContainer2/TextStuff/TextStyleOptions/HBoxContainer/HBoxContainer3/ColorPick")
+text_outline_color_picker = NodePath("HBoxContainer/VBoxContainer2/TextStuff/TextStyleOptions/HBoxContainer/HBoxContainer4/BorderColorPick")
+move_up_button = NodePath("HBoxContainer/OrderButtons/UpButton")
+move_down_button = NodePath("HBoxContainer/OrderButtons/DownButton")
+remove_button = NodePath("HBoxContainer/RemoveItemButton")
+
+[node name="HSeparator" type="HSeparator" parent="." unique_id=628190372]
+custom_minimum_size = Vector2(400, 20)
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_styles/separator = SubResource("StyleBoxLine_1rtii")
+
+[node name="HBoxContainer" type="HBoxContainer" parent="." unique_id=1250220183]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="OrderButtons" type="VBoxContainer" parent="HBoxContainer" unique_id=506863229]
+layout_mode = 2
+alignment = 1
+
+[node name="UpButton" parent="HBoxContainer/OrderButtons" unique_id=451892711 instance=ExtResource("2_kmdca")]
+layout_mode = 2
+tooltip_text = "Move Up
+(Shift - Move to Top)"
+icon = ExtResource("3_8vtpy")
+
+[node name="DownButton" parent="HBoxContainer/OrderButtons" unique_id=554611869 instance=ExtResource("2_kmdca")]
+layout_mode = 2
+tooltip_text = "Move Down
+(Shift - Move to Bottom)"
+icon = ExtResource("4_0qqa7")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="HBoxContainer" unique_id=209912230]
+layout_mode = 2
+alignment = 1
+
+[node name="HBoxContainer" type="HBoxContainer" parent="HBoxContainer/VBoxContainer" unique_id=164111356]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="HBoxContainer/VBoxContainer/HBoxContainer" unique_id=893700462]
+layout_mode = 2
+text = "Type:"
+
+[node name="TypeSelector" type="OptionButton" parent="HBoxContainer/VBoxContainer/HBoxContainer" unique_id=684782763]
+layout_mode = 2
+alignment = 1
+selected = 0
+item_count = 1
+popup/item_0/text = "Text"
+popup/item_0/id = 0
+
+[node name="VBoxContainer2" type="VBoxContainer" parent="HBoxContainer" unique_id=1800736184]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 8
+alignment = 1
+
+[node name="TextStuff" type="VBoxContainer" parent="HBoxContainer/VBoxContainer2" unique_id=296597674]
+visible = false
+layout_mode = 2
+
+[node name="HBoxContainer2" type="HBoxContainer" parent="HBoxContainer/VBoxContainer2/TextStuff" unique_id=409337657]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="HBoxContainer/VBoxContainer2/TextStuff/HBoxContainer2" unique_id=1159475432]
+layout_mode = 2
+text = "Text:"
+
+[node name="AdaptiveMultiLineEdit" parent="HBoxContainer/VBoxContainer2/TextStuff/HBoxContainer2" unique_id=634600988 instance=ExtResource("7_nb6yg")]
+layout_mode = 2
+placeholder_text = "Text goes here"
+
+[node name="TextStyleOptions" type="VBoxContainer" parent="HBoxContainer/VBoxContainer2/TextStuff" unique_id=648824778]
+layout_mode = 2
+theme = SubResource("Theme_eo6lr")
+
+[node name="HBoxContainer" type="HFlowContainer" parent="HBoxContainer/VBoxContainer2/TextStuff/TextStyleOptions" unique_id=76589100]
+layout_mode = 2
+theme_override_constants/h_separation = 12
+alignment = 1
+
+[node name="HBoxContainer" type="HBoxContainer" parent="HBoxContainer/VBoxContainer2/TextStuff/TextStyleOptions/HBoxContainer" unique_id=2033042372]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="HBoxContainer/VBoxContainer2/TextStuff/TextStyleOptions/HBoxContainer/HBoxContainer" unique_id=1787119520]
+layout_mode = 2
+text = "Font Size:"
+
+[node name="FontSizeInput" parent="HBoxContainer/VBoxContainer2/TextStuff/TextStyleOptions/HBoxContainer/HBoxContainer" unique_id=1458729988 instance=ExtResource("5_0qqa7")]
+layout_mode = 2
+is_int_type = true
+default_value = 24.0
+min_value = 2.0
+max_value = 200.0
+
+[node name="AlignmentOption" type="HBoxContainer" parent="HBoxContainer/VBoxContainer2/TextStuff/TextStyleOptions/HBoxContainer" unique_id=712313671]
+visible = false
+layout_mode = 2
+
+[node name="Label2" type="Label" parent="HBoxContainer/VBoxContainer2/TextStuff/TextStyleOptions/HBoxContainer/AlignmentOption" unique_id=471509706]
+layout_mode = 2
+text = "Alignment:"
+
+[node name="Button" type="Button" parent="HBoxContainer/VBoxContainer2/TextStuff/TextStyleOptions/HBoxContainer/AlignmentOption" unique_id=348805195]
+layout_mode = 2
+toggle_mode = true
+button_group = SubResource("ButtonGroup_n5seu")
+text = "left"
+
+[node name="Button2" type="Button" parent="HBoxContainer/VBoxContainer2/TextStuff/TextStyleOptions/HBoxContainer/AlignmentOption" unique_id=910091016]
+layout_mode = 2
+toggle_mode = true
+button_pressed = true
+button_group = SubResource("ButtonGroup_n5seu")
+text = "center"
+
+[node name="Button3" type="Button" parent="HBoxContainer/VBoxContainer2/TextStuff/TextStyleOptions/HBoxContainer/AlignmentOption" unique_id=2076292443]
+layout_mode = 2
+toggle_mode = true
+button_group = SubResource("ButtonGroup_n5seu")
+text = "right"
+
+[node name="HBoxContainer3" type="HBoxContainer" parent="HBoxContainer/VBoxContainer2/TextStuff/TextStyleOptions/HBoxContainer" unique_id=1270177689]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="HBoxContainer/VBoxContainer2/TextStuff/TextStyleOptions/HBoxContainer/HBoxContainer3" unique_id=505696459]
+layout_mode = 2
+text = "Text Color:"
+
+[node name="ColorPick" type="ColorPickerButton" parent="HBoxContainer/VBoxContainer2/TextStuff/TextStyleOptions/HBoxContainer/HBoxContainer3" unique_id=638379163]
+custom_minimum_size = Vector2(30, 0)
+layout_mode = 2
+color = Color(1, 1, 1, 1)
+edit_intensity = false
+script = ExtResource("6_nb6yg")
+
+[node name="EnableBorder" type="CheckButton" parent="HBoxContainer/VBoxContainer2/TextStuff/TextStyleOptions/HBoxContainer" unique_id=1068312765]
+layout_mode = 2
+button_pressed = true
+text = " Border"
+
+[node name="HBoxContainer4" type="HBoxContainer" parent="HBoxContainer/VBoxContainer2/TextStuff/TextStyleOptions/HBoxContainer" unique_id=1021263174]
+layout_mode = 2
+
+[node name="Label2" type="Label" parent="HBoxContainer/VBoxContainer2/TextStuff/TextStyleOptions/HBoxContainer/HBoxContainer4" unique_id=853837453]
+layout_mode = 2
+text = "Border Color:"
+
+[node name="BorderColorPick" type="ColorPickerButton" parent="HBoxContainer/VBoxContainer2/TextStuff/TextStyleOptions/HBoxContainer/HBoxContainer4" unique_id=1834091963]
+custom_minimum_size = Vector2(30, 0)
+layout_mode = 2
+edit_intensity = false
+script = ExtResource("6_nb6yg")
+
+[node name="ImageStuff" type="VBoxContainer" parent="HBoxContainer/VBoxContainer2" unique_id=443190700 node_paths=PackedStringArray("image_picker_button", "scale_input", "scale_smooth_toggle", "dark_background_toggle", "mod_color_picker")]
+layout_mode = 2
+script = ExtResource("8_1rtii")
+no_image_texture = ExtResource("9_hcmjr")
+image_picker_button = NodePath("HBoxContainer2/HBoxContainer/ImagePickerButton")
+scale_input = NodePath("HBoxContainer2/VBoxContainer/HFlowContainer/HBoxContainer2/ScaleInput")
+scale_smooth_toggle = NodePath("HBoxContainer2/VBoxContainer/HFlowContainer/HBoxContainer3/ScaleSmoothToggle")
+dark_background_toggle = NodePath("HBoxContainer2/VBoxContainer/HFlowContainer2/HBoxContainer3/DarkBackgroundToggle")
+mod_color_picker = NodePath("HBoxContainer2/VBoxContainer/HFlowContainer2/HBoxContainer4/ImageModColorPickerButton")
+
+[node name="HBoxContainer2" type="HBoxContainer" parent="HBoxContainer/VBoxContainer2/ImageStuff" unique_id=90234898]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="HBoxContainer" type="HBoxContainer" parent="HBoxContainer/VBoxContainer2/ImageStuff/HBoxContainer2" unique_id=1972534452]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="HBoxContainer/VBoxContainer2/ImageStuff/HBoxContainer2/HBoxContainer" unique_id=45247713]
+layout_mode = 2
+text = "Image:"
+
+[node name="ImagePickerButton" type="Container" parent="HBoxContainer/VBoxContainer2/ImageStuff/HBoxContainer2/HBoxContainer" unique_id=475140303 node_paths=PackedStringArray("tex_rect")]
+layout_mode = 2
+size_flags_vertical = 4
+script = ExtResource("8_n5seu")
+tex_rect = NodePath("MarginContainer2/CenterContainer/Icon")
+icon = ExtResource("9_hcmjr")
+metadata/_custom_type_script = "uid://bq446sgdivroo"
+
+[node name="MarginContainer2" type="MarginContainer" parent="HBoxContainer/VBoxContainer2/ImageStuff/HBoxContainer2/HBoxContainer/ImagePickerButton" unique_id=890089910]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/margin_left = 4
+theme_override_constants/margin_top = 2
+theme_override_constants/margin_right = 4
+theme_override_constants/margin_bottom = 6
+
+[node name="CenterContainer" type="CenterContainer" parent="HBoxContainer/VBoxContainer2/ImageStuff/HBoxContainer2/HBoxContainer/ImagePickerButton/MarginContainer2" unique_id=1694629407]
+layout_mode = 2
+mouse_filter = 2
+
+[node name="Icon" type="TextureRect" parent="HBoxContainer/VBoxContainer2/ImageStuff/HBoxContainer2/HBoxContainer/ImagePickerButton/MarginContainer2/CenterContainer" unique_id=287622765]
+layout_mode = 2
+mouse_filter = 2
+texture = ExtResource("9_hcmjr")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="HBoxContainer/VBoxContainer2/ImageStuff/HBoxContainer2" unique_id=1615854573]
+layout_mode = 2
+size_flags_horizontal = 3
+alignment = 1
+
+[node name="HFlowContainer" type="HFlowContainer" parent="HBoxContainer/VBoxContainer2/ImageStuff/HBoxContainer2/VBoxContainer" unique_id=1085400986]
+layout_mode = 2
+size_flags_horizontal = 3
+alignment = 1
+
+[node name="HBoxContainer2" type="HBoxContainer" parent="HBoxContainer/VBoxContainer2/ImageStuff/HBoxContainer2/VBoxContainer/HFlowContainer" unique_id=369668935]
+layout_mode = 2
+size_flags_vertical = 4
+
+[node name="Label" type="Label" parent="HBoxContainer/VBoxContainer2/ImageStuff/HBoxContainer2/VBoxContainer/HFlowContainer/HBoxContainer2" unique_id=2111434171]
+layout_mode = 2
+text = "Scale:"
+
+[node name="ScaleInput" parent="HBoxContainer/VBoxContainer2/ImageStuff/HBoxContainer2/VBoxContainer/HFlowContainer/HBoxContainer2" unique_id=1836149151 instance=ExtResource("5_0qqa7")]
+layout_mode = 2
+default_value = 0.6
+min_value = 0.1
+max_value = 20.0
+custom_step = true
+custom_step_value = 0.1
+
+[node name="HBoxContainer3" type="HBoxContainer" parent="HBoxContainer/VBoxContainer2/ImageStuff/HBoxContainer2/VBoxContainer/HFlowContainer" unique_id=906200313]
+layout_mode = 2
+
+[node name="ScaleSmoothToggle" type="CheckButton" parent="HBoxContainer/VBoxContainer2/ImageStuff/HBoxContainer2/VBoxContainer/HFlowContainer/HBoxContainer3" unique_id=840010504]
+layout_mode = 2
+text = "Scale Smooth:"
+
+[node name="HFlowContainer2" type="HFlowContainer" parent="HBoxContainer/VBoxContainer2/ImageStuff/HBoxContainer2/VBoxContainer" unique_id=744505060]
+layout_mode = 2
+size_flags_horizontal = 3
+alignment = 1
+
+[node name="HBoxContainer4" type="HBoxContainer" parent="HBoxContainer/VBoxContainer2/ImageStuff/HBoxContainer2/VBoxContainer/HFlowContainer2" unique_id=1972357931]
+layout_mode = 2
+size_flags_vertical = 4
+
+[node name="Label" type="Label" parent="HBoxContainer/VBoxContainer2/ImageStuff/HBoxContainer2/VBoxContainer/HFlowContainer2/HBoxContainer4" unique_id=561204329]
+layout_mode = 2
+text = "Modify Color:"
+
+[node name="ImageModColorPickerButton" type="ColorPickerButton" parent="HBoxContainer/VBoxContainer2/ImageStuff/HBoxContainer2/VBoxContainer/HFlowContainer2/HBoxContainer4" unique_id=1235051988]
+custom_minimum_size = Vector2(34, 28)
+layout_mode = 2
+color = Color(1, 1, 1, 1)
+script = ExtResource("6_nb6yg")
+
+[node name="HBoxContainer3" type="HBoxContainer" parent="HBoxContainer/VBoxContainer2/ImageStuff/HBoxContainer2/VBoxContainer/HFlowContainer2" unique_id=1336816396]
+layout_mode = 2
+
+[node name="DarkBackgroundToggle" type="CheckButton" parent="HBoxContainer/VBoxContainer2/ImageStuff/HBoxContainer2/VBoxContainer/HFlowContainer2/HBoxContainer3" unique_id=390788607]
+layout_mode = 2
+text = "Dark Background:"
+
+[node name="RemoveItemButton" parent="HBoxContainer" unique_id=1944707495 instance=ExtResource("2_kmdca")]
+layout_mode = 2
+tooltip_text = "remove layer"
+
+[node name="Spacer" type="Control" parent="HBoxContainer" unique_id=1537958950]
+layout_mode = 2
+mouse_filter = 2

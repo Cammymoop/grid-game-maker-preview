@@ -54,10 +54,10 @@ gdscript/warnings/treat_warnings_as_errors=true
 
 [display]
 
-window/size/viewport_width=768
+window/size/viewport_width=800
 window/size/viewport_height=768
 window/size/initial_position_type=4
-window/size/window_width_override=768
+window/size/window_width_override=800
 window/size/window_height_override=768
 window/stretch/scale=2.0
 

@@ -10,10 +10,24 @@ const ImagesEditor: = preload("res://src/GameEditor/ImagesEditor.gd")
 @export var tab_container: TabContainer
 @export var beside_tabs_buttons: HBoxContainer
 
+@export var intermission_tab: Control
+
 @onready var popup_layer = get_node("PopupLayerLayer/PopupLayer")
 @onready var message_layer = get_node("MessageLayer")
 
 @export var release_lock_layer: CanvasLayer
+
+func _enter_tree() -> void:
+	if GameManager._requested_tab:
+		var tab_names: Array[String] = []
+		for i in tab_container.get_tab_count():
+			tab_names.append(tab_container.get_tab_title(i).to_lower())
+		if GameManager._requested_tab in tab_names:
+			tab_container.current_tab = tab_names.find(GameManager._requested_tab)
+		else:
+			tab_container.current_tab = 0
+		GameManager._requested_tab = ""
+
 
 func _ready():
 	release_lock_layer.visible = GameManager.current_game_is_release_locked
@@ -34,6 +48,8 @@ func on_tab_changed(tab_index: int) -> void:
 	var tab_control: = tab_container.get_tab_control(tab_index)
 	if tab_control is ImagesEditor:
 		tab_control.refresh_list()
+	elif tab_control == intermission_tab:
+		GameManager.create_default_credits_if_not_exists()
 
 func _unhandled_input(event: InputEvent) -> void:
 	if Utility.event_is_menu_back_just_pressed(event):

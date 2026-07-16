@@ -26,6 +26,7 @@
 [ext_resource type="PackedScene" uid="uid://b1a6s2o32t35i" path="res://Scenes/GameEditor/bg_style_editor.tscn" id="18_umwh7"]
 [ext_resource type="PackedScene" uid="uid://cj8u25mhjg6n8" path="res://Scenes/GameEditor/SelectableTexItem.tscn" id="22_48hio"]
 [ext_resource type="Texture2D" uid="uid://wnx0fg4s27nt" path="res://assets/img/button_icons/folder.png" id="24_xh6ve"]
+[ext_resource type="PackedScene" uid="uid://bkldh21oxpoel" path="res://Scenes/Intermission/intermissions_editor.tscn" id="25_42d0a"]
 [ext_resource type="PackedScene" uid="uid://dgvtr1ghjlqi5" path="res://Scenes/GameEditor/locked_overlay.tscn" id="28_xh6ve"]
 [ext_resource type="FontFile" uid="uid://ctnllh13x3iqi" path="res://assets/font/NotoSans-Bold.ttf" id="29_beh5u"]
 
@@ -1080,6 +1081,15 @@ size_flags_vertical = 4
 tooltip_text = "Makes bundled copies of shared images"
 theme_override_fonts/font = ExtResource("14")
 text = "Bundle used shared images"
+
+[node name="Intermissions" type="VBoxContainer" parent="MarginContainer/UIRoot/TabContainer" unique_id=1900285880]
+visible = false
+layout_mode = 2
+metadata/_tab_index = 4
+
+[node name="IntermissionsEditor" parent="MarginContainer/UIRoot/TabContainer/Intermissions" unique_id=811355557 instance=ExtResource("25_42d0a")]
+layout_mode = 2
+size_flags_vertical = 3
 
 [node name="TileEntityEditorWindow" parent="MarginContainer/UIRoot" unique_id=1695968813 instance=ExtResource("2")]
 visible = false

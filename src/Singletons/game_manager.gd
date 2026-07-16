@@ -202,8 +202,17 @@ var scene_transition_duration = 0.6
 var transition_left = true
 @export var scene_transition_curve: Curve = Curve.new()
 
+var _requested_tab: String = ""
+
 enum MovementMode {
 	MOVEMENT_CONTINUOUS, MOVEMENT_DISCRETE, MOVEMENT_DISCRETE_WAIT
+}
+
+const DEFAULT_INTERMISSION_CREDITS: = "Credits"
+const DEFAULT_CREDITS: Dictionary = {
+	"id": DEFAULT_INTERMISSION_CREDITS,
+	"type": "credits",
+	"bg_info": {}
 }
 
 func _ready():
@@ -392,6 +401,9 @@ func new_empty_game_definition(with_name: String = "") -> void:
 		"level_lists": [
 			{"name": "Levels", "level_names": []},
 		],
+		"intermissions": [
+			DEFAULT_CREDITS.duplicate_deep(),
+		],
 	}
 	load_game_definition_data(empty_game, false)
 
@@ -562,6 +574,9 @@ func create_released_version() -> String:
 		prints("Release Fail: in play scene")
 		return ""
 	
+	if not game_definition.has("intermissions"):
+		game_definition["intermissions"] = []
+	
 	editor_save = {}
 	loaded_level = {}
 	clear_checkpoint()
@@ -646,6 +661,8 @@ func get_serialized_game_definition() -> Dictionary:
 	serialized_def["textures"] = TextureManager.get_texture_spec()
 	serialized_def["entity_definitions"] = EntityManager.entity_defs.duplicate_deep()
 	serialized_def["tile_definitions"] = MapManager.tile_defs.duplicate_deep()
+	if not "intermissions" in serialized_def:
+		serialized_def["intermissions"] = []
 	return serialized_def
 
 func get_game_setting(setting_name, default):
@@ -1284,7 +1301,8 @@ func new_museum_level():
 	
 	new_level_edited_state_and_emit()
 
-func change_scene(new_scene: String, skip_autosave: bool = false):
+func change_scene(new_scene: String, skip_autosave: bool = false, request_tab: String = ""):
+	_requested_tab = request_tab
 	if new_scene == "Play" && not loaded_from_game_name and not FilesManager.game_exists(get_identified_game_name()):
 		save_current_game_definition()
 		
@@ -3207,6 +3225,20 @@ func copy_current_bg_to_level() -> void:
 	set_level_bg_info(get_current_bg_info().duplicate_deep())
 
 
+func get_current_game_profile_setting_v(keys: Array, default_value: Variant) -> Variant:
+	return player_profile.get_profile_setting_v([get_identified_game_name()] + keys, default_value)
+
+func set_current_game_profile_setting_v(keys: Array, value: Variant) -> void:
+	player_profile.set_profile_setting_v([get_identified_game_name()] + keys, value)
+
+
+func get_current_game_profile_setting_1(key: String, default_value: Variant) -> Variant:
+	return player_profile.get_profile_setting_v([get_identified_game_name(), key], default_value)
+
+func set_current_game_profile_setting_1(key: String, value: Variant) -> void:
+	player_profile.get_profile_setting_v([get_identified_game_name(), key], value)
+
+
 func is_one_time_message_dismissed(message_type: OneTimeMessages) -> bool:
 	return player_profile.get_profile_setting_v(["one_time_messages", ONE_TIME_MESSAGES_KEYS[message_type]], false)
 
@@ -3977,4 +4009,79 @@ func get_list_completion_tooltip(list_name: String) -> String:
 	elif show_completion_style == LevelListSettings.SHOWCOMP_STYLE_COMP_TOTAL:
 		return "Completed / Total"
 	return ""
+
+func _clean_intermission_info() -> void:
+	var idx_to_remove: Array[int] = []
+	var intermissions: Array = game_definition.get("intermissions", [])
+	if not intermissions:
+		return
+	var existing_ids: Array[String] = []
+	for i in intermissions.size():
+		var this_id: String = intermissions[i].get("id", "")
+		if not this_id or this_id in existing_ids:
+			idx_to_remove.append(i)
+		existing_ids.append(this_id)
+	if idx_to_remove.size() > 0:
+		prints("cleaning intermissions: %s" % idx_to_remove, "existing_ids: %s" % existing_ids)
+	idx_to_remove.reverse()
+	for idx in idx_to_remove:
+		intermissions.remove_at(idx)
+
+func get_all_intermission_ids() -> Array[String]:
+	var all_intermission_ids: Array[String] = []
+	for intermission_info in game_definition.get("intermissions", []):
+		if not intermission_info.get("id", ""):
+			continue
+		all_intermission_ids.append(intermission_info["id"])
+	if all_intermission_ids.size() == 0:
+		return [DEFAULT_INTERMISSION_CREDITS]
+	return all_intermission_ids
+
+func has_intermission_id(intermission_id: String) -> bool:
+	return intermission_id in get_all_intermission_ids()
+
+func update_intermission_info(update_intermission_id: String, intermission_info: Dictionary) -> void:
+	if not update_intermission_id:
+		return
+	_clean_intermission_info()
+	if not has_intermission_id(update_intermission_id):
+		game_definition["intermissions"].append(intermission_info.duplicate_deep())
+		return
 	
+	var intermissions: Array = game_definition.get("intermissions", [])
+	var saved: bool = false
+	for i in intermissions.size():
+		if intermissions[i]["id"] == update_intermission_id:
+			game_definition["intermissions"][i] = intermission_info.duplicate_deep()
+			saved = true
+			break
+	if not saved:
+		push_error("Failed to save intermission info for id: %s" % update_intermission_id)
+
+func get_intermission_info(intermission_id: String) -> Dictionary:
+	if intermission_id == DEFAULT_INTERMISSION_CREDITS:
+		if not game_definition.get("intermissions", []).size() > 0:
+			return DEFAULT_CREDITS.duplicate_deep()
+	var intermissions: Array = game_definition.get("intermissions", [])
+	for intermission_info in intermissions:
+		if intermission_info.get("id", "") == intermission_id:
+			return intermission_info.duplicate_deep()
+	return {}
+
+func get_available_numeric_intermission_id() -> String:
+	var next_id: int = 1
+	var exisiting_ids: Array[String] = get_all_intermission_ids()
+	while str(next_id) in exisiting_ids:
+		next_id += 1
+	return str(next_id)
+
+func get_default_credits_info() -> Dictionary:
+	if not DEFAULT_INTERMISSION_CREDITS in get_all_intermission_ids():
+		return DEFAULT_CREDITS.duplicate_deep()
+	return get_intermission_info(DEFAULT_INTERMISSION_CREDITS)
+
+func create_default_credits_if_not_exists() -> void:
+	if game_definition.get("intermissions", []).size() == 0:
+		game_definition["intermissions"].append(DEFAULT_CREDITS.duplicate_deep())
+	elif not DEFAULT_INTERMISSION_CREDITS in get_all_intermission_ids():
+		game_definition["intermissions"].append(DEFAULT_CREDITS.duplicate_deep())

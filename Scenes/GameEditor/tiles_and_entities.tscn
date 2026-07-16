@@ -2,22 +2,11 @@
 
 [ext_resource type="Script" uid="uid://bx6f17nxjwie5" path="res://src/GameEditor/TilesEntitiesEditor.gd" id="1_06v17"]
 [ext_resource type="Texture2D" uid="uid://cv8l7ymc05wg5" path="res://assets/img/button_icons/plus.png" id="2_qlncm"]
+[ext_resource type="StyleBox" uid="uid://budvqilufmgf" path="res://assets/ui/editor_dark_bg_panel.tres" id="2_s7e1n"]
 [ext_resource type="Script" uid="uid://cvr0el4b8goh7" path="res://Scenes/GameEditor/clone_items_panel.gd" id="3_23tx5"]
 [ext_resource type="PackedScene" uid="uid://cc83bbyk0k4ka" path="res://Scenes/UI/game_selector.tscn" id="3_qlncm"]
 [ext_resource type="Texture2D" uid="uid://d0uyc2rshryrj" path="res://assets/img/entityTiles.png" id="5_pikkr"]
 [ext_resource type="Script" uid="uid://7vpqv6ussiq" path="res://Scenes/GameEditor/clone_items_with_bundled_dialog.gd" id="6_oihqi"]
-
-[sub_resource type="StyleBoxFlat" id="1"]
-bg_color = Color(0.184314, 0.164706, 0.243137, 1)
-border_width_left = 1
-border_width_top = 1
-border_width_right = 1
-border_width_bottom = 1
-border_color = Color(0, 0, 0, 1)
-corner_radius_top_left = 4
-corner_radius_top_right = 4
-corner_radius_bottom_right = 4
-corner_radius_bottom_left = 4
 
 [sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_06v17"]
 blend_mode = 3
@@ -95,7 +84,7 @@ layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 mouse_filter = 1
-theme_override_styles/panel = SubResource("1")
+theme_override_styles/panel = ExtResource("2_s7e1n")
 
 [node name="ScrollContainer" type="ScrollContainer" parent="VBoxContainer/VSplitContainer/VBoxContainer/EntitiesHBoxContainer/PanelContainer" unique_id=1275277860]
 layout_mode = 2
@@ -130,7 +119,7 @@ layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 mouse_filter = 1
-theme_override_styles/panel = SubResource("1")
+theme_override_styles/panel = ExtResource("2_s7e1n")
 
 [node name="ScrollContainer" type="ScrollContainer" parent="VBoxContainer/VSplitContainer/VBoxContainer2/TilesHBoxContainer/PanelContainer" unique_id=386279937]
 layout_mode = 2

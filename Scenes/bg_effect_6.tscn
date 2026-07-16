@@ -165,8 +165,8 @@ stretch = true
 
 [node name="SubViewport" type="SubViewport" parent="SubViewportContainer" unique_id=1347613943]
 handle_input_locally = false
-size = Vector2i(768, 768)
-render_target_update_mode = 4
+size = Vector2i(800, 768)
+render_target_update_mode = 3
 
 [node name="BGColorLayer" type="CanvasLayer" parent="SubViewportContainer/SubViewport" unique_id=51442697]
 layer = -20

@@ -1,0 +1,252 @@
+[gd_scene format=3 uid="uid://bkldh21oxpoel"]
+
+[ext_resource type="StyleBox" uid="uid://budvqilufmgf" path="res://assets/ui/editor_dark_bg_panel.tres" id="1_v03yp"]
+[ext_resource type="Texture2D" uid="uid://c71dfd3j0223d" path="res://assets/img/button_icons/plus_small.png" id="2_0bdve"]
+[ext_resource type="Script" uid="uid://d0ftus1txxjgs" path="res://Scenes/Intermission/intermissions_editor.gd" id="2_aes7j"]
+[ext_resource type="PackedScene" uid="uid://b4fp8ldktkvcd" path="res://Scenes/bg_effect_6.tscn" id="3_qqtng"]
+[ext_resource type="PackedScene" uid="uid://bapnl3uvf4c8h" path="res://Scenes/Intermission/intermission_content_editor.tscn" id="4_0bdve"]
+[ext_resource type="PackedScene" uid="uid://b1a6s2o32t35i" path="res://Scenes/GameEditor/bg_style_editor.tscn" id="4_ko2ix"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_ko2ix"]
+content_margin_left = 2.0
+content_margin_top = 3.0
+content_margin_right = 2.0
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_qqtng"]
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_8g8ar"]
+content_margin_left = 8.0
+content_margin_top = 8.0
+content_margin_right = 3.0
+content_margin_bottom = 8.0
+bg_color = Color(0.13118428, 0.19086626, 0.2888734, 0.69803923)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.334955, 0.31812483, 0.44406027, 1)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+corner_detail = 5
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_0bdve"]
+content_margin_left = 8.0
+content_margin_top = 8.0
+content_margin_right = 3.0
+content_margin_bottom = 8.0
+bg_color = Color(0.13118428, 0.19086626, 0.2888734, 0.5921569)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.334955, 0.31812483, 0.44406027, 1)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+corner_detail = 5
+
+[node name="IntermissionsEditor" type="PanelContainer" unique_id=811355557 node_paths=PackedStringArray("intermission_id_input", "intermission_type_selector", "edit_new_intermission_button", "edit_intermission_menu_button", "bg_style_edit_container", "background_style_editor", "background_style_preview", "intermission_content_editor", "enable_custom_background_button", "main_options_section", "content_and_bg_section", "content_section")]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxEmpty_ko2ix")
+script = ExtResource("2_aes7j")
+intermission_id_input = NodePath("VBoxContainer/MainIntermissionOptions/HBoxContainer/HBoxContainer2/LineEdit")
+intermission_type_selector = NodePath("VBoxContainer/MainIntermissionOptions/HBoxContainer/HBoxContainer3/TypePicker")
+edit_new_intermission_button = NodePath("VBoxContainer/MainIntermissionOptions/HBoxContainer/HBoxContainer4/EditNewIntermissionButton")
+edit_intermission_menu_button = NodePath("VBoxContainer/MainIntermissionOptions/HBoxContainer5/EditIntermissionButton")
+bg_style_edit_container = NodePath("VBoxContainer/ContentAndBGOptions/VBoxContainer/MarginContainer/EditorUI/MarginContainer")
+background_style_editor = NodePath("VBoxContainer/ContentAndBGOptions/VBoxContainer/MarginContainer/EditorUI/MarginContainer/PanelContainer/ScrollContainer/MarginContainer/BGStyleEditor")
+background_style_preview = NodePath("VBoxContainer/ContentAndBGOptions/VBoxContainer/MarginContainer/BGEffectsClip/BGEffects")
+intermission_content_editor = NodePath("VBoxContainer/ContentAndBGOptions/VBoxContainer/MarginContainer/EditorUI/MarginContainer2/PanelContainer/IntermissionContentEditor")
+enable_custom_background_button = NodePath("VBoxContainer/ContentAndBGOptions/VBoxContainer/MarginContainer/EditorUI/MarginContainer3/EnableCustomBackgroundButton")
+main_options_section = NodePath("VBoxContainer/MainIntermissionOptions")
+content_and_bg_section = NodePath("VBoxContainer/ContentAndBGOptions")
+content_section = NodePath("VBoxContainer/ContentAndBGOptions/VBoxContainer/MarginContainer/EditorUI/MarginContainer2")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="." unique_id=370450557]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="MainIntermissionOptions" type="HBoxContainer" parent="VBoxContainer" unique_id=418710714]
+layout_mode = 2
+theme_override_constants/separation = 12
+alignment = 1
+
+[node name="HBoxContainer5" type="HBoxContainer" parent="VBoxContainer/MainIntermissionOptions" unique_id=427529855]
+custom_minimum_size = Vector2(50, 0)
+layout_mode = 2
+alignment = 1
+
+[node name="EditIntermissionButton" type="MenuButton" parent="VBoxContainer/MainIntermissionOptions/HBoxContainer5" unique_id=1054408322]
+layout_mode = 2
+size_flags_vertical = 4
+focus_mode = 2
+theme_type_variation = &"MenuOptButton"
+theme_override_font_sizes/font_size = 12
+text = "Other Intermissions"
+flat = false
+
+[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer/MainIntermissionOptions" unique_id=1882439513]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 12
+alignment = 1
+
+[node name="HBoxContainer3" type="HBoxContainer" parent="VBoxContainer/MainIntermissionOptions/HBoxContainer" unique_id=2063513016]
+layout_mode = 2
+alignment = 1
+
+[node name="Label" type="Label" parent="VBoxContainer/MainIntermissionOptions/HBoxContainer/HBoxContainer3" unique_id=1750098777]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "Type:"
+
+[node name="TypePicker" type="OptionButton" parent="VBoxContainer/MainIntermissionOptions/HBoxContainer/HBoxContainer3" unique_id=1701597679]
+layout_mode = 2
+size_flags_vertical = 4
+alignment = 1
+selected = 0
+fit_to_longest_item = false
+item_count = 2
+popup/item_0/text = "Intermission"
+popup/item_0/id = 0
+popup/item_1/text = "Credits"
+popup/item_1/id = 1
+
+[node name="HBoxContainer2" type="HBoxContainer" parent="VBoxContainer/MainIntermissionOptions/HBoxContainer" unique_id=1350555096]
+layout_mode = 2
+alignment = 1
+
+[node name="Label" type="Label" parent="VBoxContainer/MainIntermissionOptions/HBoxContainer/HBoxContainer2" unique_id=1143570133]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "Intermission Name/ID:"
+
+[node name="LineEdit" type="LineEdit" parent="VBoxContainer/MainIntermissionOptions/HBoxContainer/HBoxContainer2" unique_id=1584604647]
+custom_minimum_size = Vector2(160, 0)
+layout_mode = 2
+size_flags_vertical = 4
+theme_override_font_sizes/font_size = 14
+
+[node name="HBoxContainer4" type="HBoxContainer" parent="VBoxContainer/MainIntermissionOptions/HBoxContainer" unique_id=2121937471]
+layout_mode = 2
+alignment = 1
+
+[node name="EditNewIntermissionButton" type="Button" parent="VBoxContainer/MainIntermissionOptions/HBoxContainer/HBoxContainer4" unique_id=360416543]
+layout_mode = 2
+size_flags_vertical = 4
+theme_override_font_sizes/font_size = 12
+text = "New Intermission"
+icon = ExtResource("2_0bdve")
+icon_alignment = 2
+
+[node name="ContentAndBGOptions" type="PanelContainer" parent="VBoxContainer" unique_id=1591876298]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_styles/panel = ExtResource("1_v03yp")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="VBoxContainer/ContentAndBGOptions" unique_id=796230265]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="VBoxContainer/ContentAndBGOptions/VBoxContainer" unique_id=1217442386]
+layout_mode = 2
+text = "Content & Background:"
+horizontal_alignment = 1
+
+[node name="MarginContainer" type="MarginContainer" parent="VBoxContainer/ContentAndBGOptions/VBoxContainer" unique_id=706163369]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/margin_left = 4
+theme_override_constants/margin_top = 4
+theme_override_constants/margin_right = 4
+theme_override_constants/margin_bottom = 4
+
+[node name="BGEffectsClip" type="Panel" parent="VBoxContainer/ContentAndBGOptions/VBoxContainer/MarginContainer" unique_id=2104598085]
+clip_children = 1
+layout_mode = 2
+mouse_behavior_recursive = 1
+theme_override_styles/panel = SubResource("StyleBoxFlat_qqtng")
+
+[node name="BGEffects" parent="VBoxContainer/ContentAndBGOptions/VBoxContainer/MarginContainer/BGEffectsClip" unique_id=1715516889 instance=ExtResource("3_qqtng")]
+layout_mode = 1
+
+[node name="PreviewIntermissionRoot" type="Control" parent="VBoxContainer/ContentAndBGOptions/VBoxContainer/MarginContainer/BGEffectsClip" unique_id=1960714078]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="EditorUI" type="HBoxContainer" parent="VBoxContainer/ContentAndBGOptions/VBoxContainer/MarginContainer" unique_id=713944629]
+layout_mode = 2
+alignment = 2
+
+[node name="MarginContainer2" type="MarginContainer" parent="VBoxContainer/ContentAndBGOptions/VBoxContainer/MarginContainer/EditorUI" unique_id=234862391]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 12
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 12
+
+[node name="PanelContainer" type="PanelContainer" parent="VBoxContainer/ContentAndBGOptions/VBoxContainer/MarginContainer/EditorUI/MarginContainer2" unique_id=720247585]
+layout_mode = 2
+size_flags_vertical = 4
+theme_override_styles/panel = SubResource("StyleBoxFlat_8g8ar")
+
+[node name="IntermissionContentEditor" parent="VBoxContainer/ContentAndBGOptions/VBoxContainer/MarginContainer/EditorUI/MarginContainer2/PanelContainer" unique_id=1787788247 node_paths=PackedStringArray("height_limit_parent") instance=ExtResource("4_0bdve")]
+layout_mode = 2
+height_limit_parent = NodePath("../..")
+
+[node name="MarginContainer3" type="MarginContainer" parent="VBoxContainer/ContentAndBGOptions/VBoxContainer/MarginContainer/EditorUI" unique_id=1816247486]
+layout_mode = 2
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 12
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 12
+
+[node name="EnableCustomBackgroundButton" type="Button" parent="VBoxContainer/ContentAndBGOptions/VBoxContainer/MarginContainer/EditorUI/MarginContainer3" unique_id=802017119]
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+theme_override_font_sizes/font_size = 14
+text = "Custom
+Background"
+
+[node name="MarginContainer" type="MarginContainer" parent="VBoxContainer/ContentAndBGOptions/VBoxContainer/MarginContainer/EditorUI" unique_id=873488143]
+visible = false
+layout_mode = 2
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 12
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 12
+
+[node name="PanelContainer" type="PanelContainer" parent="VBoxContainer/ContentAndBGOptions/VBoxContainer/MarginContainer/EditorUI/MarginContainer" unique_id=1186448510]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_0bdve")
+
+[node name="ScrollContainer" type="ScrollContainer" parent="VBoxContainer/ContentAndBGOptions/VBoxContainer/MarginContainer/EditorUI/MarginContainer/PanelContainer" unique_id=347788329]
+layout_mode = 2
+horizontal_scroll_mode = 0
+vertical_scroll_mode = 4
+
+[node name="MarginContainer" type="MarginContainer" parent="VBoxContainer/ContentAndBGOptions/VBoxContainer/MarginContainer/EditorUI/MarginContainer/PanelContainer/ScrollContainer" unique_id=1571080187]
+layout_mode = 2
+theme_override_constants/margin_top = 3
+theme_override_constants/margin_bottom = 3
+
+[node name="BGStyleEditor" parent="VBoxContainer/ContentAndBGOptions/VBoxContainer/MarginContainer/EditorUI/MarginContainer/PanelContainer/ScrollContainer/MarginContainer" unique_id=1622581633 instance=ExtResource("4_ko2ix")]
+layout_mode = 2
+manual_source = true

@@ -1,0 +1,44 @@
+[gd_scene format=3 uid="uid://bapnl3uvf4c8h"]
+
+[ext_resource type="Script" uid="uid://131y5b8fx2mw" path="res://Scenes/Intermission/intermission_content_editor.gd" id="1_wge7g"]
+[ext_resource type="Texture2D" uid="uid://c71dfd3j0223d" path="res://assets/img/button_icons/plus_small.png" id="2_xi230"]
+
+[node name="IntermissionContentEditor" type="VBoxContainer" unique_id=1787788247 node_paths=PackedStringArray("item_container", "add_item_button", "scroll_container")]
+offset_right = 771.0
+offset_bottom = 271.0
+theme_override_constants/separation = 12
+alignment = 1
+script = ExtResource("1_wge7g")
+item_container = NodePath("ScrollContainer/MarginContainer/IntermissionContentItems")
+add_item_button = NodePath("HBoxContainer/NewContentItemButton")
+scroll_container = NodePath("ScrollContainer")
+
+[node name="Label" type="Label" parent="." unique_id=197402219]
+layout_mode = 2
+text = "Intermission Contents:"
+horizontal_alignment = 1
+
+[node name="ScrollContainer" type="ScrollContainer" parent="." unique_id=1663121505]
+layout_mode = 2
+horizontal_scroll_mode = 0
+vertical_scroll_mode = 4
+
+[node name="MarginContainer" type="MarginContainer" parent="ScrollContainer" unique_id=469400403]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/margin_top = 3
+theme_override_constants/margin_bottom = 3
+
+[node name="IntermissionContentItems" type="VBoxContainer" parent="ScrollContainer/MarginContainer" unique_id=1408242358]
+layout_mode = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="." unique_id=1462168496]
+layout_mode = 2
+alignment = 1
+
+[node name="NewContentItemButton" type="Button" parent="HBoxContainer" unique_id=1156958298]
+layout_mode = 2
+size_flags_vertical = 4
+text = "Add Content"
+icon = ExtResource("2_xi230")
+icon_alignment = 2

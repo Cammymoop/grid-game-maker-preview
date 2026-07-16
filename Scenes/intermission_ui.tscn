@@ -1,4 +1,4 @@
-[gd_scene format=3 uid="uid://darbiu0pcjkx1"]
+[gd_scene format=3 uid="uid://dtqeq5w27e6dr"]
 
 [ext_resource type="Script" uid="uid://qeyclc8hi5ef" path="res://Scenes/intermission_ui.gd" id="1_xatok"]
 [ext_resource type="PackedScene" uid="uid://cb7yxd6xr7bl5" path="res://Scenes/Intermission/intermission_text.tscn" id="2_5uw0l"]
@@ -8,7 +8,44 @@
 [sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_xatok"]
 blend_mode = 1
 
-[node name="IntermissionUI" type="Control" unique_id=983985741]
+[sub_resource type="Animation" id="Animation_nd7lh"]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Label:modulate")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Color(1, 1, 1, 1)]
+}
+
+[sub_resource type="Animation" id="Animation_ltj3f"]
+resource_name = "pulse"
+loop_mode = 1
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Label:modulate")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.40000004, 1),
+"transitions": PackedFloat32Array(1, 1, 1),
+"update": 0,
+"values": [Color(1, 1, 1, 1), Color(0.56064034, 0.56064034, 0.56064034, 1), Color(1, 1, 1, 1)]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_2skfw"]
+_data = {
+&"RESET": SubResource("Animation_nd7lh"),
+&"pulse": SubResource("Animation_ltj3f")
+}
+
+[node name="IntermissionUI" type="Control" unique_id=983985741 node_paths=PackedStringArray("dark_bg", "light_bg", "content_section", "continue_section")]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -17,6 +54,10 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 script = ExtResource("1_xatok")
+dark_bg = NodePath("MultiplyDarkenColor")
+light_bg = NodePath("LightenColor")
+content_section = NodePath("MarginContainer/MainVbox/ContentSection")
+continue_section = NodePath("MarginContainer/MainVbox/ContinueSection")
 
 [node name="MultiplyDarkenColor" type="ColorRect" parent="." unique_id=863641257]
 visible = false
@@ -49,32 +90,53 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer" unique_id=1083020789]
+[node name="MainVbox" type="VBoxContainer" parent="MarginContainer" unique_id=802936195]
 layout_mode = 2
+
+[node name="ContentSection" type="VBoxContainer" parent="MarginContainer/MainVbox" unique_id=1083020789]
+layout_mode = 2
+size_flags_vertical = 3
+size_flags_stretch_ratio = 1.5
 alignment = 1
 
-[node name="IntermissionText" parent="MarginContainer/VBoxContainer" unique_id=1488913074 instance=ExtResource("2_5uw0l")]
+[node name="IntermissionText" parent="MarginContainer/MainVbox/ContentSection" unique_id=1488913074 instance=ExtResource("2_5uw0l")]
 layout_mode = 2
 
-[node name="CreditsImage" parent="MarginContainer/VBoxContainer" unique_id=151448102 instance=ExtResource("3_nd7lh")]
+[node name="CreditsImage" parent="MarginContainer/MainVbox/ContentSection" unique_id=151448102 instance=ExtResource("3_nd7lh")]
 layout_mode = 2
 
-[node name="TextureRect" parent="MarginContainer/VBoxContainer/CreditsImage" index="0" unique_id=1226651260]
+[node name="TextureRect" parent="MarginContainer/MainVbox/ContentSection/CreditsImage" index="0" unique_id=1226651260]
 texture_filter = 1
 custom_minimum_size = Vector2(288, 224)
 texture = ExtResource("4_ltj3f")
 
-[node name="IntermissionText2" parent="MarginContainer/VBoxContainer" unique_id=879721395 instance=ExtResource("2_5uw0l")]
+[node name="IntermissionText2" parent="MarginContainer/MainVbox/ContentSection" unique_id=879721395 instance=ExtResource("2_5uw0l")]
 layout_mode = 2
 
-[node name="IntermissionText3" parent="MarginContainer/VBoxContainer" unique_id=821603369 instance=ExtResource("2_5uw0l")]
+[node name="IntermissionText3" parent="MarginContainer/MainVbox/ContentSection" unique_id=821603369 instance=ExtResource("2_5uw0l")]
 layout_mode = 2
 
-[node name="Label" parent="MarginContainer/VBoxContainer/IntermissionText3" index="0" unique_id=1782653433]
+[node name="Label" parent="MarginContainer/MainVbox/ContentSection/IntermissionText3" index="0" unique_id=1782653433]
 theme_override_font_sizes/font_size = 50
 
-[node name="IntermissionText4" parent="MarginContainer/VBoxContainer" unique_id=200912056 instance=ExtResource("2_5uw0l")]
+[node name="IntermissionText4" parent="MarginContainer/MainVbox/ContentSection" unique_id=200912056 instance=ExtResource("2_5uw0l")]
 layout_mode = 2
 
-[editable path="MarginContainer/VBoxContainer/CreditsImage"]
-[editable path="MarginContainer/VBoxContainer/IntermissionText3"]
+[node name="ContinueSection" type="VBoxContainer" parent="MarginContainer/MainVbox" unique_id=759065974]
+layout_mode = 2
+size_flags_vertical = 3
+alignment = 1
+
+[node name="IntermissionText" parent="MarginContainer/MainVbox/ContinueSection" unique_id=1966940770 instance=ExtResource("2_5uw0l")]
+layout_mode = 2
+
+[node name="Label" parent="MarginContainer/MainVbox/ContinueSection/IntermissionText" index="0" unique_id=1782653433]
+text = "- Continue -"
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="MarginContainer/MainVbox/ContinueSection/IntermissionText" unique_id=2101906491]
+libraries/ = SubResource("AnimationLibrary_2skfw")
+autoplay = &"pulse"
+
+[editable path="MarginContainer/MainVbox/ContentSection/CreditsImage"]
+[editable path="MarginContainer/MainVbox/ContentSection/IntermissionText3"]
+[editable path="MarginContainer/MainVbox/ContinueSection/IntermissionText"]
