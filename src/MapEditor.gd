@@ -901,17 +901,19 @@ func forwarded_shortcut_input(event: InputEvent) -> void:
 			elif Utility.fixed_just_pressed_by_event("editor_non_pointer_secondary", event, true):
 				_inspect_next_at(cursor_tile_pos, entity_instance_editor.edited_entity)
 
-func save_current_or_save_as(after_save_callable: Callable = Callable()) -> bool:
+func save_current_or_save_as(after_save_callable: Callable = Callable(), no_toast: bool = false) -> bool:
 	if GameManager.loaded_level_name:
-		GameManager.save_edited_level_as(GameManager.loaded_level_name)
+		GameManager.save_edited_level_as(GameManager.loaded_level_name, no_toast)
 		has_edited_something = false
 		after_save_callable.call()
 		return true
-	else:
+	elif not no_toast:
 		var pause_menu: = Utility.get_pause_menu()
 		if pause_menu:
 			pause_menu.pause_and_open()
 			pause_menu.on_save_as_button_pressed(after_save_callable)
+		return false
+	else:
 		return false
 
 func _auto_save(level_state: Dictionary) -> void:

@@ -3,7 +3,6 @@
 [ext_resource type="StyleBox" uid="uid://budvqilufmgf" path="res://assets/ui/editor_dark_bg_panel.tres" id="1_v03yp"]
 [ext_resource type="Texture2D" uid="uid://c71dfd3j0223d" path="res://assets/img/button_icons/plus_small.png" id="2_0bdve"]
 [ext_resource type="Script" uid="uid://d0ftus1txxjgs" path="res://Scenes/Intermission/intermissions_editor.gd" id="2_aes7j"]
-[ext_resource type="PackedScene" uid="uid://b4fp8ldktkvcd" path="res://Scenes/bg_effect_6.tscn" id="3_qqtng"]
 [ext_resource type="PackedScene" uid="uid://bapnl3uvf4c8h" path="res://Scenes/Intermission/intermission_content_editor.tscn" id="4_0bdve"]
 [ext_resource type="PackedScene" uid="uid://b1a6s2o32t35i" path="res://Scenes/GameEditor/bg_style_editor.tscn" id="4_ko2ix"]
 
@@ -54,7 +53,7 @@ corner_radius_bottom_right = 3
 corner_radius_bottom_left = 3
 corner_detail = 5
 
-[node name="IntermissionsEditor" type="PanelContainer" unique_id=811355557 node_paths=PackedStringArray("intermission_id_input", "intermission_type_selector", "edit_new_intermission_button", "duplicate_button", "edit_intermission_menu_button", "bg_style_edit_container", "background_style_editor", "background_style_preview", "intermission_content_editor", "enable_custom_background_button", "main_options_section", "content_and_bg_section", "content_section", "hide_overlay_button", "back_button", "to_assignments_editor_button")]
+[node name="IntermissionsEditor" type="PanelContainer" unique_id=811355557 node_paths=PackedStringArray("intermission_id_input", "intermission_type_selector", "edit_new_intermission_button", "duplicate_button", "edit_intermission_menu_button", "storage_location_selector", "custom_list_name_selector", "bg_style_edit_container", "background_style_editor", "background_style_preview", "intermission_content_editor", "enable_custom_background_button", "main_options_section", "content_and_bg_section", "content_section", "hide_overlay_button", "back_button", "to_assignments_editor_button", "game_editor_bg_container", "main_options_section_panel")]
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -67,9 +66,11 @@ intermission_type_selector = NodePath("VBoxContainer/PanelContainer/MainIntermis
 edit_new_intermission_button = NodePath("VBoxContainer/PanelContainer/MainIntermissionOptions/HBoxContainer/VBoxContainer/HBoxContainer5/EditNewIntermissionButton")
 duplicate_button = NodePath("VBoxContainer/PanelContainer/MainIntermissionOptions/HBoxContainer/VBoxContainer/HBoxContainer4/DuplicateButton")
 edit_intermission_menu_button = NodePath("VBoxContainer/PanelContainer/MainIntermissionOptions/HBoxContainer5/EditIntermissionButton")
+storage_location_selector = NodePath("VBoxContainer/PanelContainer/MainIntermissionOptions/HBoxContainer/HBoxContainer/GameBundleSelector")
+custom_list_name_selector = NodePath("VBoxContainer/PanelContainer/MainIntermissionOptions/HBoxContainer/HBoxContainer/CustomListSelector")
 bg_style_edit_container = NodePath("VBoxContainer/ContentAndBGOptions/VBoxContainer/MarginContainer/EditorUI/MarginContainer")
 background_style_editor = NodePath("VBoxContainer/ContentAndBGOptions/VBoxContainer/MarginContainer/EditorUI/MarginContainer/PanelContainer/ScrollContainer/MarginContainer/BGStyleEditor")
-background_style_preview = NodePath("VBoxContainer/ContentAndBGOptions/VBoxContainer/MarginContainer/BGEffectsClip/BGEffects")
+background_style_preview = NodePath("")
 intermission_content_editor = NodePath("VBoxContainer/ContentAndBGOptions/VBoxContainer/MarginContainer/EditorUI/MarginContainer2/PanelContainer/IntermissionContentEditor")
 enable_custom_background_button = NodePath("VBoxContainer/ContentAndBGOptions/VBoxContainer/MarginContainer/EditorUI/MarginContainer3/EnableCustomBackgroundButton")
 main_options_section = NodePath("VBoxContainer/PanelContainer/MainIntermissionOptions")
@@ -78,6 +79,8 @@ content_section = NodePath("VBoxContainer/ContentAndBGOptions/VBoxContainer/Marg
 hide_overlay_button = NodePath("VBoxContainer/ContentAndBGOptions/VBoxContainer/MarginContainer/EditorUI/MarginContainer2/PanelContainer/HideButtonHolder/HideButton")
 back_button = NodePath("VBoxContainer/HBoxContainer/HBoxContainer/BackToLevelSelectButton")
 to_assignments_editor_button = NodePath("VBoxContainer/HBoxContainer/GoToAssignmentEditorButton")
+game_editor_bg_container = NodePath("VBoxContainer/ContentAndBGOptions/VBoxContainer/MarginContainer/BGEffectsClip")
+main_options_section_panel = NodePath("VBoxContainer/PanelContainer")
 
 [node name="VBoxContainer" type="VBoxContainer" parent="." unique_id=370450557]
 layout_mode = 2
@@ -234,10 +237,6 @@ clip_children = 1
 layout_mode = 2
 mouse_behavior_recursive = 1
 theme_override_styles/panel = SubResource("StyleBoxFlat_qqtng")
-
-[node name="BGEffects" parent="VBoxContainer/ContentAndBGOptions/VBoxContainer/MarginContainer/BGEffectsClip" unique_id=1715516889 instance=ExtResource("3_qqtng")]
-layout_mode = 1
-no_auto_update = true
 
 [node name="PreviewIntermissionRoot" type="Control" parent="VBoxContainer/ContentAndBGOptions/VBoxContainer/MarginContainer/BGEffectsClip" unique_id=1960714078]
 layout_mode = 1

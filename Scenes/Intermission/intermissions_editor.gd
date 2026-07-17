@@ -8,6 +8,12 @@ const BgEffect = preload("res://Scenes/bg_effect_5.gd")
 
 const IntermissionContentEditor = preload("res://Scenes/Intermission/intermission_content_editor.gd")
 
+const IntermissionUI = preload("res://Scenes/intermission_ui.gd")
+
+var intermission_ui_scn: = preload("res://Scenes/intermission_ui.tscn")
+
+var editor_dark_bg_stylebox: = preload("res://assets/ui/editor_dark_bg_panel.tres")
+
 @export var intermission_id_input: LineEdit
 
 @export var intermission_type_selector: OptionButton
@@ -27,13 +33,19 @@ const IntermissionContentEditor = preload("res://Scenes/Intermission/intermissio
 @export var enable_custom_background_button: Button
 
 @export var main_options_section: Control
-@export var content_and_bg_section: Control
+@export var content_and_bg_section: PanelContainer
 @export var content_section: Control
 
 @export var hide_overlay_button: Button
 
 @export var back_button: Button
 @export var to_assignments_editor_button: Button
+
+@export var game_editor_bg_container: Control
+@export var main_options_section_panel: PanelContainer
+
+@export var game_editor_intermission_preview_root: Control
+@export var other_intermission_preview_root: Control
 
 var is_editing_inside_level_list: String = ""
 
@@ -57,6 +69,8 @@ func _ready() -> void:
     if GameManager.cur_scene == "Play":
         game_editor_mode = false
     
+    visibility_changed.connect(on_visibility_changed)
+    
     back_button.visible = not game_editor_mode
     back_button.pressed.connect(on_back_pressed)
     
@@ -73,6 +87,11 @@ func _ready() -> void:
     else:
         edit_new_intermission_button.pressed.connect(edit_new_intermission)
     duplicate_button.pressed.connect(duplicate_intermission)
+    
+    if not game_editor_mode:
+        game_editor_bg_container.hide()
+        content_and_bg_section.add_theme_stylebox_override("panel", StyleBoxEmpty.new())
+        main_options_section_panel.add_theme_stylebox_override("panel", editor_dark_bg_stylebox)
     
     edit_intermission_menu_button.about_to_popup.connect(on_edit_intermission_menu_about_to_popup)
     var popup_menu: PopupMenu = edit_intermission_menu_button.get_popup()
@@ -101,13 +120,15 @@ func _ready() -> void:
     else:
         refresh_ui()
 
-func edit_new_intermission(force_bundled: bool = false, force_custom_list: String = "") -> void:
+func edit_new_intermission(force_bundled: bool = false, force_custom_list: String = "", try_intermission_id: String = "") -> String:
     if force_bundled:
         is_editing_inside_level_list = ""
     elif force_custom_list:
         is_editing_inside_level_list = force_custom_list
 
-    var new_id: String = GameManager.get_available_numeric_intermission_id()
+    var new_id: String = try_intermission_id
+    if GameManager.has_intermission_id(new_id, is_editing_inside_level_list):
+        new_id = GameManager.get_available_numeric_intermission_id(is_editing_inside_level_list)
     var new_info: Dictionary = {
         "id": new_id,
         "type": TYPE_INTERMISSION,
@@ -116,6 +137,7 @@ func edit_new_intermission(force_bundled: bool = false, force_custom_list: Strin
     }
     write_intermission_info(new_id, new_info, is_editing_inside_level_list)
     load_intermission_from_id(new_id)
+    return new_id
 
 func duplicate_intermission() -> void:
     if not is_editing_intermission:
@@ -154,6 +176,11 @@ func load_intermission_from_id(intermission_id: String, from_custom_list: String
     if type == TYPE_INTERMISSION:
         old_content_items = editing_intermission_info.get("content_items", [])
     save_last_edited_intermission_id(intermission_id)
+    refresh_ui()
+
+func load_nothing() -> void:
+    is_editing_intermission = false
+    is_editing_inside_level_list = ""
     refresh_ui()
 
 func on_intermission_content_updated() -> void:
@@ -195,6 +222,7 @@ func on_edited_bg_style(bg_style: Dictionary) -> void:
     refresh_show_bg_style_ui()
 
 func update_bg_preview(bg_style: Dictionary) -> void:
+    background_style_preview.no_auto_update = true
     background_style_preview.set_bg_style(bg_style)
 
 # save using the last valid id if the current is invalid so data isn't lost unnecessarily
@@ -420,11 +448,14 @@ func make_overlay_ui_transparent() -> void:
     content_section.modulate = Color.TRANSPARENT
     bg_style_edit_container.modulate = Color.TRANSPARENT
     enable_custom_background_button.modulate = Color.TRANSPARENT
+    if not game_editor_mode:
+        main_options_section_panel.modulate = Color.TRANSPARENT
 
 func make_overlay_ui_visible() -> void:
     content_section.modulate = Color.WHITE
     bg_style_edit_container.modulate = Color.WHITE
     enable_custom_background_button.modulate = Color.WHITE
+    main_options_section_panel.modulate = Color.WHITE
 
 func on_gui_focus_changed(_new_focus: Control) -> void:
     make_overlay_ui_visible()
@@ -439,3 +470,40 @@ func on_to_assignments_editor_pressed() -> void:
         GameManager.change_scene("Play", false, "intermission-assignment-editor")
     else:
         to_assignment_editor.emit()
+
+func update_intermission_preview() -> void:
+    if not is_editing_intermission:
+        remove_intermission_preview()
+        return
+    
+    var preview_root: Control
+    if game_editor_mode:
+        preview_root = game_editor_intermission_preview_root
+    else:
+        preview_root = other_intermission_preview_root 
+    for child in preview_root.get_children():
+        if child is IntermissionUI:
+            child.setup_with_info(editing_intermission_info.duplicate_deep())
+            return
+    
+    var intermission_ui: = intermission_ui_scn.instantiate() as IntermissionUI
+    
+    preview_root.add_child(intermission_ui)
+    intermission_ui.setup_with_info(editing_intermission_info.duplicate_deep())
+
+
+func remove_intermission_preview() -> void:
+    var preview_root: Control
+    if game_editor_mode:
+        preview_root = game_editor_intermission_preview_root
+    else:
+        preview_root = other_intermission_preview_root
+    for child in preview_root.get_children():
+        preview_root.remove_child(child)
+        child.queue_free()
+
+
+func on_visibility_changed() -> void:
+    if not game_editor_mode and not is_visible_in_tree():
+        background_style_preview.no_auto_update = false
+        background_style_preview.refresh_bg_style()

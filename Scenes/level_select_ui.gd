@@ -146,6 +146,8 @@ func _unhandled_input(event: InputEvent) -> void:
         return
 
 func opening() -> void:
+    editing_settings_of_list = ""
+    is_rearranging_lists = false
     GameManager.recheck_level_list_unlocks()
     var is_in_custom_level: = GameManager.is_current_level_custom()
     if is_in_custom_level:
@@ -156,6 +158,7 @@ func opening() -> void:
         custom_levels_tab_button.set_pressed_no_signal(false)
     fresh_open = true
     GameManager.load_non_bundled_level_lists_from_file()
+    refresh()
 
 func is_in_list_settings_mode() -> bool:
     return editing_settings_of_list != ""

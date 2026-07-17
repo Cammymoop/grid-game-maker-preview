@@ -2,7 +2,7 @@
 
 [ext_resource type="PackedScene" uid="uid://byt0p1dxwdwb3" path="res://Scenes/MapEditor.tscn" id="1"]
 [ext_resource type="Script" uid="uid://0coueog1ftu6" path="res://Scenes/input_catcher.gd" id="1_r5y0w"]
-[ext_resource type="Script" uid="uid://d2ug0fux2u8js" path="res://Scenes/play_scene.gd" id="1_t3can"]
+[ext_resource type="Script" path="res://Scenes/play_scene.gd" id="1_t3can"]
 [ext_resource type="PackedScene" uid="uid://c56bx5og1o0x1" path="res://Scenes/PauseMenu.tscn" id="2"]
 [ext_resource type="Script" uid="uid://0xx8dh5smcvl" path="res://src/PlayUI/overlay_ui.gd" id="3_vx41i"]
 [ext_resource type="PackedScene" uid="uid://4c11q33d8c57" path="res://Scenes/GameEditor/entity_instance_editor.tscn" id="4_ek1d2"]
@@ -22,6 +22,7 @@
 [ext_resource type="PackedScene" uid="uid://cdx3gttyeybd1" path="res://Scenes/editor_controls_help.tscn" id="14_n5m2s"]
 [ext_resource type="PackedScene" uid="uid://22wn5812pyeo" path="res://Scenes/GameEditor/placeable_text_panel.tscn" id="15_vpmux"]
 [ext_resource type="PackedScene" uid="uid://dqrac5iaeqv0o" path="res://Scenes/Intermission/edit_intermission_assignments.tscn" id="16_a0wjn"]
+[ext_resource type="PackedScene" uid="uid://bkldh21oxpoel" path="res://Scenes/Intermission/intermissions_editor.tscn" id="17_p15gy"]
 
 [sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_n5m2s"]
 blend_mode = 4
@@ -365,7 +366,7 @@ layout_mode = 2
 [node name="CreditsUI" parent="OverlayLayer" unique_id=1760736673 groups=["Credits"] instance=ExtResource("6_4cgsu")]
 visible = false
 
-[node name="LevelSelectRoot" type="Control" parent="OverlayLayer" unique_id=718450970 node_paths=PackedStringArray("level_select_ui", "darkener", "background_editor_container", "bg_style_editor", "add_new_list_panel", "level_select_all", "edit_intermissions_container", "edit_intermissions") groups=["LevelSelectRoot"]]
+[node name="LevelSelectRoot" type="Control" parent="OverlayLayer" unique_id=718450970 node_paths=PackedStringArray("level_select_ui", "darkener", "background_editor_container", "bg_style_editor", "add_new_list_panel", "level_select_all", "edit_intermissions_container", "edit_intermission_assignements", "edit_intermissions") groups=["LevelSelectRoot"]]
 process_mode = 3
 layout_mode = 3
 anchors_preset = 15
@@ -375,14 +376,15 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 script = ExtResource("7_hagi3")
-level_select_ui = NodePath("HBoxContainer/CenterContainer/LevelSelectPanel/MarginContainer/VBoxContainer/LevelSelectUI")
+level_select_ui = NodePath("LevelSelectAll/CenterContainer/LevelSelectPanel/MarginContainer/VBoxContainer/LevelSelectUI")
 darkener = NodePath("MultiplyDarkenColor")
-background_editor_container = NodePath("HBoxContainer/BackgroundEditor")
-bg_style_editor = NodePath("HBoxContainer/BackgroundEditor/MarginContainer/PanelContainer/ScrollContainer/MarginContainer/BGStyleEditor")
-add_new_list_panel = NodePath("HBoxContainer/CenterContainer/NewListDialog")
-level_select_all = NodePath("HBoxContainer")
-edit_intermissions_container = NodePath("HBoxContainer2")
-edit_intermissions = NodePath("HBoxContainer2/CenterContainer/EditIntermissionAssignments")
+background_editor_container = NodePath("LevelSelectAll/BackgroundEditor")
+bg_style_editor = NodePath("LevelSelectAll/BackgroundEditor/MarginContainer/PanelContainer/ScrollContainer/MarginContainer/BGStyleEditor")
+add_new_list_panel = NodePath("LevelSelectAll/CenterContainer/NewListDialog")
+level_select_all = NodePath("LevelSelectAll")
+edit_intermissions_container = NodePath("EditIntermissions")
+edit_intermission_assignements = NodePath("EditIntermissions/CenterContainer/EditIntermissionAssignments")
+edit_intermissions = NodePath("EditIntermissions/MarginContainer/IntermissionsEditor")
 
 [node name="MultiplyDarkenColor" type="ColorRect" parent="OverlayLayer/LevelSelectRoot" unique_id=1877095181]
 material = SubResource("CanvasItemMaterial_4cgsu")
@@ -395,7 +397,8 @@ grow_vertical = 2
 mouse_filter = 2
 color = Color(0.62152386, 0.6215239, 0.6215237, 1)
 
-[node name="HBoxContainer" type="HBoxContainer" parent="OverlayLayer/LevelSelectRoot" unique_id=1477228057]
+[node name="LevelSelectAll" type="HBoxContainer" parent="OverlayLayer/LevelSelectRoot" unique_id=1477228057]
+visible = false
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -403,57 +406,57 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="CenterContainer" type="CenterContainer" parent="OverlayLayer/LevelSelectRoot/HBoxContainer" unique_id=429055740]
+[node name="CenterContainer" type="CenterContainer" parent="OverlayLayer/LevelSelectRoot/LevelSelectAll" unique_id=429055740]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="LevelSelectPanel" type="PanelContainer" parent="OverlayLayer/LevelSelectRoot/HBoxContainer/CenterContainer" unique_id=276448297]
+[node name="LevelSelectPanel" type="PanelContainer" parent="OverlayLayer/LevelSelectRoot/LevelSelectAll/CenterContainer" unique_id=276448297]
 layout_mode = 2
 
-[node name="MarginContainer" type="MarginContainer" parent="OverlayLayer/LevelSelectRoot/HBoxContainer/CenterContainer/LevelSelectPanel" unique_id=1679474327]
+[node name="MarginContainer" type="MarginContainer" parent="OverlayLayer/LevelSelectRoot/LevelSelectAll/CenterContainer/LevelSelectPanel" unique_id=1679474327]
 layout_mode = 2
 theme_override_constants/margin_top = 8
 theme_override_constants/margin_bottom = 8
 
-[node name="VBoxContainer" type="VBoxContainer" parent="OverlayLayer/LevelSelectRoot/HBoxContainer/CenterContainer/LevelSelectPanel/MarginContainer" unique_id=67623878]
+[node name="VBoxContainer" type="VBoxContainer" parent="OverlayLayer/LevelSelectRoot/LevelSelectAll/CenterContainer/LevelSelectPanel/MarginContainer" unique_id=67623878]
 layout_mode = 2
 
-[node name="LevelSelectUI" parent="OverlayLayer/LevelSelectRoot/HBoxContainer/CenterContainer/LevelSelectPanel/MarginContainer/VBoxContainer" unique_id=1015399753 instance=ExtResource("9_t3can")]
+[node name="LevelSelectUI" parent="OverlayLayer/LevelSelectRoot/LevelSelectAll/CenterContainer/LevelSelectPanel/MarginContainer/VBoxContainer" unique_id=1015399753 instance=ExtResource("9_t3can")]
 layout_mode = 2
 
-[node name="NewListDialog" parent="OverlayLayer/LevelSelectRoot/HBoxContainer/CenterContainer" unique_id=1730346067 instance=ExtResource("10_ui3gn")]
+[node name="NewListDialog" parent="OverlayLayer/LevelSelectRoot/LevelSelectAll/CenterContainer" unique_id=1730346067 instance=ExtResource("10_ui3gn")]
 visible = false
 layout_mode = 2
 
-[node name="BackgroundEditor" type="HBoxContainer" parent="OverlayLayer/LevelSelectRoot/HBoxContainer" unique_id=1413652382]
+[node name="BackgroundEditor" type="HBoxContainer" parent="OverlayLayer/LevelSelectRoot/LevelSelectAll" unique_id=1413652382]
 visible = false
 layout_mode = 2
 
-[node name="MarginContainer" type="MarginContainer" parent="OverlayLayer/LevelSelectRoot/HBoxContainer/BackgroundEditor" unique_id=39011910]
+[node name="MarginContainer" type="MarginContainer" parent="OverlayLayer/LevelSelectRoot/LevelSelectAll/BackgroundEditor" unique_id=39011910]
 layout_mode = 2
 theme_override_constants/margin_left = 12
 theme_override_constants/margin_top = 12
 theme_override_constants/margin_right = 12
 theme_override_constants/margin_bottom = 12
 
-[node name="PanelContainer" type="PanelContainer" parent="OverlayLayer/LevelSelectRoot/HBoxContainer/BackgroundEditor/MarginContainer" unique_id=1711158392]
+[node name="PanelContainer" type="PanelContainer" parent="OverlayLayer/LevelSelectRoot/LevelSelectAll/BackgroundEditor/MarginContainer" unique_id=1711158392]
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_n87tl")
 
-[node name="ScrollContainer" type="ScrollContainer" parent="OverlayLayer/LevelSelectRoot/HBoxContainer/BackgroundEditor/MarginContainer/PanelContainer" unique_id=1305098633]
+[node name="ScrollContainer" type="ScrollContainer" parent="OverlayLayer/LevelSelectRoot/LevelSelectAll/BackgroundEditor/MarginContainer/PanelContainer" unique_id=1305098633]
 layout_mode = 2
 horizontal_scroll_mode = 0
 vertical_scroll_mode = 4
 
-[node name="MarginContainer" type="MarginContainer" parent="OverlayLayer/LevelSelectRoot/HBoxContainer/BackgroundEditor/MarginContainer/PanelContainer/ScrollContainer" unique_id=2063032859]
+[node name="MarginContainer" type="MarginContainer" parent="OverlayLayer/LevelSelectRoot/LevelSelectAll/BackgroundEditor/MarginContainer/PanelContainer/ScrollContainer" unique_id=2063032859]
 layout_mode = 2
 theme_override_constants/margin_top = 3
 theme_override_constants/margin_bottom = 3
 
-[node name="BGStyleEditor" parent="OverlayLayer/LevelSelectRoot/HBoxContainer/BackgroundEditor/MarginContainer/PanelContainer/ScrollContainer/MarginContainer" unique_id=1622581633 instance=ExtResource("11_ui3gn")]
+[node name="BGStyleEditor" parent="OverlayLayer/LevelSelectRoot/LevelSelectAll/BackgroundEditor/MarginContainer/PanelContainer/ScrollContainer/MarginContainer" unique_id=1622581633 instance=ExtResource("11_ui3gn")]
 layout_mode = 2
 
-[node name="HBoxContainer2" type="HBoxContainer" parent="OverlayLayer/LevelSelectRoot" unique_id=706899661]
+[node name="EditIntermissions" type="HBoxContainer" parent="OverlayLayer/LevelSelectRoot" unique_id=706899661]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -462,13 +465,26 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 
-[node name="CenterContainer" type="CenterContainer" parent="OverlayLayer/LevelSelectRoot/HBoxContainer2" unique_id=102908692]
+[node name="CenterContainer" type="CenterContainer" parent="OverlayLayer/LevelSelectRoot/EditIntermissions" unique_id=102908692]
+visible = false
 layout_mode = 2
 size_flags_horizontal = 3
 mouse_filter = 2
 
-[node name="EditIntermissionAssignments" parent="OverlayLayer/LevelSelectRoot/HBoxContainer2/CenterContainer" unique_id=388429380 instance=ExtResource("16_a0wjn")]
+[node name="EditIntermissionAssignments" parent="OverlayLayer/LevelSelectRoot/EditIntermissions/CenterContainer" unique_id=388429380 instance=ExtResource("16_a0wjn")]
 layout_mode = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="OverlayLayer/LevelSelectRoot/EditIntermissions" unique_id=739232094]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 8
+
+[node name="IntermissionsEditor" parent="OverlayLayer/LevelSelectRoot/EditIntermissions/MarginContainer" unique_id=811355557 node_paths=PackedStringArray("background_style_preview") instance=ExtResource("17_p15gy")]
+layout_mode = 2
+background_style_preview = NodePath("../../../../../BGLayer/BGEffects")
 
 [node name="MapEditorUILayer" type="CanvasLayer" parent="." unique_id=1275328928]
 layer = 10
