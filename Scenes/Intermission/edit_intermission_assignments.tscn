@@ -1,0 +1,219 @@
+[gd_scene format=3 uid="uid://dqrac5iaeqv0o"]
+
+[ext_resource type="Script" uid="uid://bq446sgdivroo" path="res://ButtonContainer.gd" id="1_0ud0w"]
+[ext_resource type="PackedScene" uid="uid://dnli1gomovvvl" path="res://Scenes/Intermission/intermission_assignment_list.tscn" id="1_ax3e7"]
+[ext_resource type="Texture2D" uid="uid://dbewldhewludm" path="res://assets/img/button_icons/prev_small.png" id="1_cr3xy"]
+[ext_resource type="Texture2D" uid="uid://c8uoricgpavvk" path="res://assets/img/button_icons/next_small.png" id="2_ax3e7"]
+[ext_resource type="Texture2D" uid="uid://bruxxxosd2tqa" path="res://assets/img/button_icons/intermission.png" id="4_up3ti"]
+
+[sub_resource type="ButtonGroup" id="ButtonGroup_ax3e7"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_smxsq"]
+bg_color = Color(0.85486335, 0.85486335, 0.8548633, 0.08627451)
+expand_margin_left = 19.0
+expand_margin_right = 19.0
+
+[node name="EditIntermissionAssignments" type="HBoxContainer" unique_id=1591271212]
+offset_left = 8.0
+offset_top = 8.0
+offset_right = 382.0
+offset_bottom = 433.0
+theme_override_constants/separation = 20
+
+[node name="EditIntermissionAssignmentsPanel" type="PanelContainer" parent="." unique_id=388429380]
+custom_minimum_size = Vector2(300, 0)
+layout_mode = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="EditIntermissionAssignmentsPanel" unique_id=1206698394]
+layout_mode = 2
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 12
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 12
+
+[node name="VBoxContainer2" type="VBoxContainer" parent="EditIntermissionAssignmentsPanel/MarginContainer" unique_id=1747550647]
+layout_mode = 2
+
+[node name="TabsContainer" type="HBoxContainer" parent="EditIntermissionAssignmentsPanel/MarginContainer/VBoxContainer2" unique_id=1081730441]
+custom_minimum_size = Vector2(0, 28)
+layout_mode = 2
+theme_override_constants/separation = 2
+alignment = 1
+
+[node name="GameEventsRadioButton" type="Button" parent="EditIntermissionAssignmentsPanel/MarginContainer/VBoxContainer2/TabsContainer" unique_id=927430440]
+custom_minimum_size = Vector2(110, 0)
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+toggle_mode = true
+button_pressed = true
+button_group = SubResource("ButtonGroup_ax3e7")
+text = "Game Events"
+
+[node name="LevelListEventsRadioButton" type="Button" parent="EditIntermissionAssignmentsPanel/MarginContainer/VBoxContainer2/TabsContainer" unique_id=2107394974]
+custom_minimum_size = Vector2(131, 0)
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+toggle_mode = true
+button_group = SubResource("ButtonGroup_ax3e7")
+text = "Level List Events"
+
+[node name="LevelEventsRadioButton" type="Button" parent="EditIntermissionAssignmentsPanel/MarginContainer/VBoxContainer2/TabsContainer" unique_id=715253779]
+custom_minimum_size = Vector2(105, 0)
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+toggle_mode = true
+button_group = SubResource("ButtonGroup_ax3e7")
+text = "Level Events"
+
+[node name="TabsContainer2" type="HBoxContainer" parent="EditIntermissionAssignmentsPanel/MarginContainer/VBoxContainer2" unique_id=3591005]
+custom_minimum_size = Vector2(0, 28)
+layout_mode = 2
+theme_override_constants/separation = 2
+alignment = 1
+
+[node name="LevelListEventsRadioButton2" type="Button" parent="EditIntermissionAssignmentsPanel/MarginContainer/VBoxContainer2/TabsContainer2" unique_id=1468022405]
+custom_minimum_size = Vector2(131, 0)
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+toggle_mode = true
+button_group = SubResource("ButtonGroup_ax3e7")
+text = "Custom Level List Events"
+
+[node name="VBoxContainer" type="VBoxContainer" parent="EditIntermissionAssignmentsPanel/MarginContainer/VBoxContainer2" unique_id=409795856]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 14
+alignment = 1
+
+[node name="HBoxContainer3" type="HBoxContainer" parent="EditIntermissionAssignmentsPanel/MarginContainer/VBoxContainer2/VBoxContainer" unique_id=35505249]
+layout_mode = 2
+size_flags_vertical = 3
+alignment = 1
+
+[node name="VBoxContainer4" type="VBoxContainer" parent="EditIntermissionAssignmentsPanel/MarginContainer/VBoxContainer2/VBoxContainer/HBoxContainer3" unique_id=1951524722]
+layout_mode = 2
+alignment = 1
+
+[node name="Label3" type="Label" parent="EditIntermissionAssignmentsPanel/MarginContainer/VBoxContainer2/VBoxContainer/HBoxContainer3/VBoxContainer4" unique_id=576445474]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "Before Starting:"
+horizontal_alignment = 1
+
+[node name="BeforeStartingList" parent="EditIntermissionAssignmentsPanel/MarginContainer/VBoxContainer2/VBoxContainer/HBoxContainer3/VBoxContainer4" unique_id=1055885602 instance=ExtResource("1_ax3e7")]
+layout_mode = 2
+
+[node name="PanelContainer" type="PanelContainer" parent="EditIntermissionAssignmentsPanel/MarginContainer/VBoxContainer2/VBoxContainer" unique_id=1196100760]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_smxsq")
+
+[node name="HBoxContainer2" type="HBoxContainer" parent="EditIntermissionAssignmentsPanel/MarginContainer/VBoxContainer2/VBoxContainer/PanelContainer" unique_id=1714423485]
+layout_mode = 2
+theme_override_constants/separation = 9
+alignment = 1
+
+[node name="NavBackButton" type="Button" parent="EditIntermissionAssignmentsPanel/MarginContainer/VBoxContainer2/VBoxContainer/PanelContainer/HBoxContainer2" unique_id=1430972826]
+layout_mode = 2
+size_flags_vertical = 4
+icon = ExtResource("1_cr3xy")
+
+[node name="Label" type="Label" parent="EditIntermissionAssignmentsPanel/MarginContainer/VBoxContainer2/VBoxContainer/PanelContainer/HBoxContainer2" unique_id=1319973630]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "List:"
+
+[node name="ListNameLabel" type="Label" parent="EditIntermissionAssignmentsPanel/MarginContainer/VBoxContainer2/VBoxContainer/PanelContainer/HBoxContainer2" unique_id=1345897611]
+layout_mode = 2
+size_flags_stretch_ratio = 4.0
+theme_override_font_sizes/font_size = 28
+text = "LIST NAME"
+horizontal_alignment = 1
+
+[node name="NavForwardButton" type="Button" parent="EditIntermissionAssignmentsPanel/MarginContainer/VBoxContainer2/VBoxContainer/PanelContainer/HBoxContainer2" unique_id=2086517082]
+layout_mode = 2
+size_flags_vertical = 4
+icon = ExtResource("2_ax3e7")
+icon_alignment = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="EditIntermissionAssignmentsPanel/MarginContainer/VBoxContainer2/VBoxContainer" unique_id=1089520092]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 20
+alignment = 1
+
+[node name="VBoxContainer" type="VBoxContainer" parent="EditIntermissionAssignmentsPanel/MarginContainer/VBoxContainer2/VBoxContainer/HBoxContainer" unique_id=1823154817]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Label2" type="Label" parent="EditIntermissionAssignmentsPanel/MarginContainer/VBoxContainer2/VBoxContainer/HBoxContainer/VBoxContainer" unique_id=412470394]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "After Completing:"
+horizontal_alignment = 1
+
+[node name="AfterCompletingList" parent="EditIntermissionAssignmentsPanel/MarginContainer/VBoxContainer2/VBoxContainer/HBoxContainer/VBoxContainer" unique_id=1425872551 instance=ExtResource("1_ax3e7")]
+layout_mode = 2
+
+[node name="AfterLastLevelContainer" type="VBoxContainer" parent="EditIntermissionAssignmentsPanel/MarginContainer/VBoxContainer2/VBoxContainer/HBoxContainer" unique_id=719541861]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Label4" type="Label" parent="EditIntermissionAssignmentsPanel/MarginContainer/VBoxContainer2/VBoxContainer/HBoxContainer/AfterLastLevelContainer" unique_id=1071589505]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "After Last Level:"
+horizontal_alignment = 1
+
+[node name="AfterLastList" parent="EditIntermissionAssignmentsPanel/MarginContainer/VBoxContainer2/VBoxContainer/HBoxContainer/AfterLastLevelContainer" unique_id=1330763015 instance=ExtResource("1_ax3e7")]
+layout_mode = 2
+
+[node name="BackButtonContainer" type="VBoxContainer" parent="EditIntermissionAssignmentsPanel/MarginContainer/VBoxContainer2" unique_id=899149322]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="HBoxContainer2" type="HBoxContainer" parent="EditIntermissionAssignmentsPanel/MarginContainer/VBoxContainer2/BackButtonContainer" unique_id=1901305793]
+layout_mode = 2
+alignment = 1
+
+[node name="Button" type="Button" parent="EditIntermissionAssignmentsPanel/MarginContainer/VBoxContainer2/BackButtonContainer/HBoxContainer2" unique_id=731202429]
+layout_mode = 2
+text = "Back"
+
+[node name="IntermissionEditorButtons" type="VBoxContainer" parent="." unique_id=394788978]
+layout_mode = 2
+theme_override_constants/separation = 2
+alignment = 1
+
+[node name="Button" type="Button" parent="IntermissionEditorButtons" unique_id=843081981]
+layout_mode = 2
+text = "Intermission
+Editor"
+
+[node name="ButtonContainer2" type="Container" parent="IntermissionEditorButtons" unique_id=420041289]
+layout_mode = 2
+script = ExtResource("1_0ud0w")
+metadata/_custom_type_script = "uid://bq446sgdivroo"
+
+[node name="MarginContainer" type="MarginContainer" parent="IntermissionEditorButtons/ButtonContainer2" unique_id=129739485]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 4
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 4
+
+[node name="VBoxContainer" type="VBoxContainer" parent="IntermissionEditorButtons/ButtonContainer2/MarginContainer" unique_id=1554562556]
+layout_mode = 2
+mouse_filter = 2
+
+[node name="Label" type="Label" parent="IntermissionEditorButtons/ButtonContainer2/MarginContainer/VBoxContainer" unique_id=483526987]
+layout_mode = 2
+text = "Edit New
+Intermission"
+horizontal_alignment = 1
+
+[node name="TextureRect" type="TextureRect" parent="IntermissionEditorButtons/ButtonContainer2/MarginContainer/VBoxContainer" unique_id=217475573]
+layout_mode = 2
+size_flags_horizontal = 4
+texture = ExtResource("4_up3ti")
+stretch_mode = 2

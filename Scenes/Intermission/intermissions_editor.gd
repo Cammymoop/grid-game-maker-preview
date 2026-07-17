@@ -1,5 +1,8 @@
 extends PanelContainer
 
+signal to_assignment_editor
+signal to_level_list_editor
+
 const StyleEditor = preload("res://Scenes/GameEditor/bg_style_editor.gd")
 const BgEffect = preload("res://Scenes/bg_effect_5.gd")
 
@@ -10,7 +13,11 @@ const IntermissionContentEditor = preload("res://Scenes/Intermission/intermissio
 @export var intermission_type_selector: OptionButton
 
 @export var edit_new_intermission_button: Button
+@export var duplicate_button: Button
 @export var edit_intermission_menu_button: MenuButton
+
+@export var storage_location_selector: OptionButton
+@export var custom_list_name_selector: OptionButton
 
 @export var bg_style_edit_container: Control
 @export var background_style_editor: StyleEditor
@@ -25,6 +32,11 @@ const IntermissionContentEditor = preload("res://Scenes/Intermission/intermissio
 
 @export var hide_overlay_button: Button
 
+@export var back_button: Button
+@export var to_assignments_editor_button: Button
+
+var is_editing_inside_level_list: String = ""
+
 var is_editing_intermission: bool = false
 var editing_intermission_info: Dictionary = {}
 
@@ -35,18 +47,32 @@ var current_id_is_valid: bool = false
 
 var old_content_items: Array = []
 
+var game_editor_mode: bool = true
+
 const TYPE_CREDITS: String = "credits"
 const TYPE_INTERMISSION: String = "intermission"
 const INTERMISSION_TYPES: Array[String] = [TYPE_CREDITS, TYPE_INTERMISSION]
 
 func _ready() -> void:
+    if GameManager.cur_scene == "Play":
+        game_editor_mode = false
+    
+    back_button.visible = not game_editor_mode
+    back_button.pressed.connect(on_back_pressed)
+    
+    to_assignments_editor_button.pressed.connect(on_to_assignments_editor_pressed)
+
     intermission_type_selector.clear()
     for type_id in INTERMISSION_TYPES.size():
         intermission_type_selector.add_item(INTERMISSION_TYPES[type_id], type_id)
     intermission_type_selector.selected = 0
     intermission_type_selector.item_selected.connect(on_intermission_type_selected)
     
-    edit_new_intermission_button.pressed.connect(edit_new_intermission)
+    if game_editor_mode:
+        edit_new_intermission_button.pressed.connect(edit_new_intermission.bind(true))
+    else:
+        edit_new_intermission_button.pressed.connect(edit_new_intermission)
+    duplicate_button.pressed.connect(duplicate_intermission)
     
     edit_intermission_menu_button.about_to_popup.connect(on_edit_intermission_menu_about_to_popup)
     var popup_menu: PopupMenu = edit_intermission_menu_button.get_popup()
@@ -67,12 +93,20 @@ func _ready() -> void:
     
     get_viewport().gui_focus_changed.connect(on_gui_focus_changed)
     
-    load_last_edited_intermission()
-    if not is_editing_intermission:
+    if not GameManager.current_game_is_release_locked:
+        load_last_edited_intermission()
+        if not is_editing_intermission:
+            refresh_ui()
+            pass#
+    else:
         refresh_ui()
-        pass#
 
-func edit_new_intermission() -> void:
+func edit_new_intermission(force_bundled: bool = false, force_custom_list: String = "") -> void:
+    if force_bundled:
+        is_editing_inside_level_list = ""
+    elif force_custom_list:
+        is_editing_inside_level_list = force_custom_list
+
     var new_id: String = GameManager.get_available_numeric_intermission_id()
     var new_info: Dictionary = {
         "id": new_id,
@@ -80,7 +114,16 @@ func edit_new_intermission() -> void:
         "content_items": [],
         "bg_style": {}
     }
-    GameManager.update_intermission_info(new_id, new_info)
+    write_intermission_info(new_id, new_info, is_editing_inside_level_list)
+    load_intermission_from_id(new_id)
+
+func duplicate_intermission() -> void:
+    if not is_editing_intermission:
+        return
+    var new_id: String = GameManager.get_available_numeric_intermission_id()
+    var new_info: Dictionary = editing_intermission_info.duplicate_deep()
+    new_info["id"] = new_id
+    write_intermission_info(new_id, new_info, is_editing_inside_level_list)
     load_intermission_from_id(new_id)
 
 func load_last_edited_intermission() -> void:
@@ -90,13 +133,18 @@ func load_last_edited_intermission() -> void:
         return
     load_intermission_from_id(last_edited_id)
 
-func load_intermission_from_id(intermission_id: String) -> void:
-    if not intermission_id or not GameManager.has_intermission_id(intermission_id):
+func load_intermission_from_id(intermission_id: String, from_custom_list: String = "") -> void:
+    if not intermission_id or not GameManager.has_intermission_id(intermission_id, from_custom_list):
         return
     is_editing_intermission = true
-    editing_intermission_info = GameManager.get_intermission_info(intermission_id)
+    is_editing_inside_level_list = from_custom_list
+    if not is_editing_inside_level_list and GameManager.current_game_is_release_locked:
+        return
+
+    editing_intermission_info = GameManager.get_intermission_info(intermission_id, from_custom_list)
     if not editing_intermission_info:
         is_editing_intermission = false
+        is_editing_inside_level_list = ""
         refresh_ui()
         return
     last_saved_id = editing_intermission_info["id"]
@@ -151,15 +199,23 @@ func update_bg_preview(bg_style: Dictionary) -> void:
 
 # save using the last valid id if the current is invalid so data isn't lost unnecessarily
 func save_edited_intermission_info() -> void:
-    if not is_editing_intermission or not last_valid_id:
+    if not is_editing_intermission or not last_valid_id or not last_saved_id:
         return
+    if not is_editing_inside_level_list and GameManager.current_game_is_release_locked:
+        return
+
     var save_info: = editing_intermission_info.duplicate_deep()
     save_info["id"] = last_valid_id
-    GameManager.update_intermission_info(last_saved_id, save_info)
+    write_intermission_info(last_saved_id, save_info, is_editing_inside_level_list)
     last_saved_id = last_valid_id
     save_last_edited_intermission_id(last_valid_id)
 
+func write_intermission_info(update_id: String, intermission_info: Dictionary, inside_level_list: String = "") -> void:
+    GameManager.update_intermission_info(update_id, intermission_info, inside_level_list)
+
 func save_last_edited_intermission_id(intermission_id: String) -> void:
+    if is_editing_inside_level_list:
+        return
     GameManager.set_current_game_profile_setting_1("last_edited_intermission_id", intermission_id)
 
 func on_intermission_id_changed(new_id: String) -> void:
@@ -212,6 +268,31 @@ func change_type_to(type: String) -> void:
     refresh_show_sections(type)
 
 
+func change_storage_location_to(is_bundled: bool, custom_list_name: String = "") -> void:
+    if not is_editing_intermission:
+        return
+    if is_bundled:
+        custom_list_name = ""
+
+    var new_saved_id: String = ""
+    if not is_editing_inside_level_list and is_bundled:
+        return
+    elif is_editing_inside_level_list != "" and is_editing_inside_level_list == custom_list_name:
+        return
+    elif is_editing_inside_level_list:
+        if is_bundled:
+            new_saved_id = GameManager.import_intermission_from_custom_list(is_editing_inside_level_list, last_saved_id)
+        else:
+            new_saved_id = GameManager.move_intermission_between_custom_lists(is_editing_inside_level_list, custom_list_name, last_saved_id)
+    else:
+        new_saved_id = GameManager.move_intermission_to_custom_list(custom_list_name, last_saved_id)
+    
+    if new_saved_id:
+        last_saved_id = new_saved_id
+        is_editing_inside_level_list = custom_list_name
+        refresh_ui()
+
+
 # valid identifier characters and ' ' and '-', no spaces around the edges
 func _is_valid_id_char(id_char: String) -> bool:
     if id_char.is_valid_int() or id_char == ' ' or id_char == '-':
@@ -235,6 +316,9 @@ func filter_to_valid_id(new_id: String) -> String:
 
 
 func refresh_ui() -> void:
+    refresh_storage_location_selectors()
+    duplicate_button.disabled = not is_editing_intermission
+
     make_overlay_ui_visible()
     if is_editing_intermission:
         intermission_id_input.text = editing_intermission_info.get("id", "")
@@ -270,18 +354,55 @@ func refresh_show_sections(intermission_type: String = "") -> void:
     intermission_id_input.editable = intermission_type != ""
     intermission_type_selector.disabled = intermission_type == ""
 
+func refresh_storage_location_selectors() -> void:
+    storage_location_selector.visible = is_editing_intermission
+    storage_location_selector.disabled = not is_editing_intermission
+    custom_list_name_selector.visible = false
+    if GameManager.current_game_is_release_locked:
+        storage_location_selector.selected = 1
+        storage_location_selector.disabled = true
+
+    if not is_editing_intermission:
+        storage_location_selector.selected = 0
+        return
+
+    custom_list_name_selector.clear()
+    var all_custom_list_names: Array[String] = GameManager.get_list_of_non_bundled_level_lists()
+    if is_editing_inside_level_list and is_editing_inside_level_list not in all_custom_list_names:
+        change_storage_location_to(true)
+
+    for custom_list_name in all_custom_list_names:
+        custom_list_name_selector.add_item(custom_list_name)
+        if is_editing_inside_level_list == custom_list_name:
+            custom_list_name_selector.selected = custom_list_name_selector.item_count - 1
+
+    custom_list_name_selector.visible = is_editing_inside_level_list != ""
+    storage_location_selector.selected = 0 if is_editing_inside_level_list == "" else 1
+
 
 func on_edit_intermission_menu_about_to_popup() -> void:
     var popup_menu: PopupMenu = edit_intermission_menu_button.get_popup()
     
     popup_menu.clear()
-    var all_ids: Array[String] = GameManager.get_all_intermission_ids()
-    for id in all_ids:
+    var lists_by_storage_location: Dictionary = GameManager.get_lists_of_intermission_ids_by_storage_location()
+    for id in lists_by_storage_location["bundled"]:
         popup_menu.add_radio_check_item(id)
         var idx: = popup_menu.item_count - 1
-        if is_editing_intermission and id == last_saved_id:
+        if GameManager.current_game_is_release_locked:
+            popup_menu.set_item_disabled(idx, true)
+        if is_editing_intermission and not is_editing_inside_level_list and id == last_saved_id:
             popup_menu.set_item_checked(idx, true)
             popup_menu.set_item_disabled(idx, true)
+    
+    for custom_list_name in lists_by_storage_location["custom_lists"]:
+        popup_menu.add_separator(custom_list_name)
+        var is_editing_in_this_list: bool = is_editing_intermission and is_editing_inside_level_list == custom_list_name
+        for id in lists_by_storage_location["custom_lists"][custom_list_name]:
+            popup_menu.add_radio_check_item(id)
+            var idx: = popup_menu.item_count - 1
+            if is_editing_in_this_list and id == last_saved_id:
+                popup_menu.set_item_checked(idx, true)
+                popup_menu.set_item_disabled(idx, true)
 
 func on_edit_intermission_menu_selected(index: int) -> void:
     var popup_menu: PopupMenu = edit_intermission_menu_button.get_popup()
@@ -307,3 +428,14 @@ func make_overlay_ui_visible() -> void:
 
 func on_gui_focus_changed(_new_focus: Control) -> void:
     make_overlay_ui_visible()
+
+func on_back_pressed() -> void:
+    if game_editor_mode:
+        return
+    to_level_list_editor.emit()
+
+func on_to_assignments_editor_pressed() -> void:
+    if game_editor_mode:
+        GameManager.change_scene("Play", false, "intermission-assignment-editor")
+    else:
+        to_assignment_editor.emit()

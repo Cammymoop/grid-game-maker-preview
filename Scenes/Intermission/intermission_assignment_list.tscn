@@ -1,0 +1,47 @@
+[gd_scene format=3 uid="uid://dnli1gomovvvl"]
+
+[ext_resource type="Script" uid="uid://bq446sgdivroo" path="res://ButtonContainer.gd" id="1_s8kln"]
+[ext_resource type="Script" uid="uid://cfk7q4pdouoki" path="res://Scenes/Intermission/intermission_assignment_list.gd" id="1_wfyk2"]
+[ext_resource type="Texture2D" uid="uid://bruxxxosd2tqa" path="res://assets/img/button_icons/intermission.png" id="2_wfyk2"]
+[ext_resource type="Texture2D" uid="uid://c71dfd3j0223d" path="res://assets/img/button_icons/plus_small.png" id="3_h2wqx"]
+
+[node name="IntermissionAssignmentList" type="VBoxContainer" unique_id=1055885602]
+theme_override_constants/separation = 0
+script = ExtResource("1_wfyk2")
+
+[node name="ItemContainer" type="VBoxContainer" parent="." unique_id=2123124323]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="Spacer" type="Control" parent="." unique_id=1123047632]
+custom_minimum_size = Vector2(0, 6)
+layout_mode = 2
+mouse_filter = 2
+
+[node name="AddIntermissionButton" type="Container" parent="." unique_id=452855241]
+layout_mode = 2
+size_flags_horizontal = 4
+script = ExtResource("1_s8kln")
+metadata/_custom_type_script = "uid://bq446sgdivroo"
+
+[node name="MarginContainer" type="MarginContainer" parent="AddIntermissionButton" unique_id=1504379862]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/margin_left = 3
+theme_override_constants/margin_top = 3
+theme_override_constants/margin_right = 3
+theme_override_constants/margin_bottom = 3
+
+[node name="HBoxContainer" type="HBoxContainer" parent="AddIntermissionButton/MarginContainer" unique_id=737438979]
+layout_mode = 2
+mouse_filter = 2
+
+[node name="TextureRect" type="TextureRect" parent="AddIntermissionButton/MarginContainer/HBoxContainer" unique_id=1555739071]
+layout_mode = 2
+texture = ExtResource("2_wfyk2")
+
+[node name="TextureRect2" type="TextureRect" parent="AddIntermissionButton/MarginContainer/HBoxContainer" unique_id=1854290068]
+layout_mode = 2
+size_flags_vertical = 4
+texture = ExtResource("3_h2wqx")
+stretch_mode = 2

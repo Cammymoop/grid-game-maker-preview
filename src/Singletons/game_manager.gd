@@ -1986,6 +1986,9 @@ func change_level_list_is_bundled(level_list_name: String, new_is_bundled: bool)
 			exists_in_non_bundled = true
 			break
 	
+	if exists_in_bundled and exists_in_non_bundled:
+		return
+	
 	if new_is_bundled and not exists_in_non_bundled:
 		return
 	if not new_is_bundled and not exists_in_bundled:
@@ -1993,7 +1996,14 @@ func change_level_list_is_bundled(level_list_name: String, new_is_bundled: bool)
 	
 	var info: Dictionary = {}
 	if new_is_bundled:
+		var intermission_id_remaps: Dictionary = {}
+		for custom_list_intermission_id in get_all_intermission_ids_from_custom_list(level_list_name):
+			var new_id: = import_intermission_from_custom_list(level_list_name, custom_list_intermission_id)
+			intermission_id_remaps[custom_list_intermission_id] = new_id
 		info = _get_non_bundled_level_list(level_list_name)
+		info.erase("intermissions")
+		_remap_intermission_ids_in_level_list_info(info, intermission_id_remaps)
+
 		_remove_non_bundled_level_list(level_list_name)
 	else:
 		info = _get_bundled_level_list(level_list_name)
@@ -2025,6 +2035,9 @@ func _remove_non_bundled_level_list(level_list_name: String) -> void:
 		non_bundled_level_lists.remove_at(index)
 	if found_at_indices.size() > 0:
 		non_bundled_lists_updated()
+
+func _remap_intermission_ids_in_level_list_info(level_list_info: Dictionary, intermission_id_remaps: Dictionary) -> void:
+	pass
 
 func add_empty_level_list(level_list_name: String, is_bundled: bool) -> void:
 	level_list_name = make_new_list_name_unique(level_list_name)
@@ -4028,20 +4041,55 @@ func _clean_intermission_info() -> void:
 		intermissions.remove_at(idx)
 
 func get_all_intermission_ids() -> Array[String]:
-	var all_intermission_ids: Array[String] = []
-	for intermission_info in game_definition.get("intermissions", []):
-		if not intermission_info.get("id", ""):
-			continue
-		all_intermission_ids.append(intermission_info["id"])
+	var all_intermission_ids: Array[String] = _get_all_intermission_ids_from(game_definition.get("intermissions", []))
 	if all_intermission_ids.size() == 0:
 		return [DEFAULT_INTERMISSION_CREDITS]
 	return all_intermission_ids
 
-func has_intermission_id(intermission_id: String) -> bool:
+func get_all_intermission_ids_from_custom_list(from_custom_list: String) -> Array[String]:
+	if not from_custom_list in get_list_of_non_bundled_level_lists():
+		return []
+	var custom_list_info: = _get_level_list(from_custom_list)
+	if not custom_list_info:
+		return []
+	return _get_all_intermission_ids_from(custom_list_info.get("intermissions", []))
+
+func get_lists_of_intermission_ids_by_storage_location() -> Dictionary:
+	var lists_of_intermission_ids: Dictionary = {
+		"bundled": get_all_intermission_ids(),
+		"custom_lists": {},
+	}
+
+	for custom_list_name in get_list_of_non_bundled_level_lists():
+		var intermission_ids: Array[String] = get_all_intermission_ids_from_custom_list(custom_list_name)
+		if intermission_ids.size() > 0:
+			lists_of_intermission_ids["custom_lists"][custom_list_name] = get_all_intermission_ids_from_custom_list(custom_list_name)
+	return lists_of_intermission_ids
+
+func _get_all_intermission_ids_from(intermissions: Array) -> Array[String]:
+	var all_intermission_ids: Array[String] = []
+	for intermission_info in intermissions:
+		if not intermission_info.get("id", ""):
+			continue
+		all_intermission_ids.append(intermission_info["id"])
+	return all_intermission_ids
+
+func has_intermission_id(intermission_id: String, from_custom_list: String = "") -> bool:
+	if not from_custom_list:
+		return _has_bundled_intermission_id(intermission_id)
+	return _has_custom_intermission_id(intermission_id, from_custom_list)
+
+func _has_bundled_intermission_id(intermission_id: String) -> bool:
 	return intermission_id in get_all_intermission_ids()
 
-func update_intermission_info(update_intermission_id: String, intermission_info: Dictionary) -> void:
+func _has_custom_intermission_id(intermission_id: String, from_custom_list: String) -> bool:
+	return intermission_id in get_all_intermission_ids_from_custom_list(from_custom_list)
+
+func update_intermission_info(update_intermission_id: String, intermission_info: Dictionary, in_custom_list: String = "") -> void:
 	if not update_intermission_id:
+		return
+	if current_game_is_release_locked and not in_custom_list:
+		push_warning("Trying to edit bundled intermission data in release locked game")
 		return
 	_clean_intermission_info()
 	if not has_intermission_id(update_intermission_id) or game_definition.get("intermissions", []).size() == 0:
@@ -4058,7 +4106,7 @@ func update_intermission_info(update_intermission_id: String, intermission_info:
 	if not saved:
 		push_error("Failed to save intermission info for id: %s" % update_intermission_id)
 
-func get_intermission_info(intermission_id: String) -> Dictionary:
+func get_intermission_info(intermission_id: String, from_custom_list: String = "") -> Dictionary:
 	if intermission_id == DEFAULT_INTERMISSION_CREDITS:
 		if not game_definition.get("intermissions", []).size() > 0:
 			return DEFAULT_CREDITS.duplicate_deep()
@@ -4085,3 +4133,13 @@ func create_default_credits_if_not_exists() -> void:
 		game_definition["intermissions"].append(DEFAULT_CREDITS.duplicate_deep())
 	elif not DEFAULT_INTERMISSION_CREDITS in get_all_intermission_ids():
 		game_definition["intermissions"].append(DEFAULT_CREDITS.duplicate_deep())
+
+
+func import_intermission_from_custom_list(from_custom_list: String, intermission_id: String) -> String:
+	return ""
+
+func move_intermission_between_custom_lists(from_custom_list: String, to_custom_list: String, intermission_id: String) -> String:
+	return ""
+
+func move_intermission_to_custom_list(to_custom_list: String, intermission_id: String) -> String:
+	return ""
