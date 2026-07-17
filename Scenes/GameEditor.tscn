@@ -17,7 +17,7 @@
 [ext_resource type="Script" uid="uid://bihb1rg68jci5" path="res://src/GameEditor/SelectableTextureList.gd" id="11"]
 [ext_resource type="Script" uid="uid://cia8grkwwxcha" path="res://src/GameEditor/PopupLayer.gd" id="12"]
 [ext_resource type="PackedScene" uid="uid://ci5jvijwn0j60" path="res://Scenes/GameEditor/info_panel_config_edit.tscn" id="12_retx3"]
-[ext_resource type="StyleBox" uid="uid://bf4pw2lygxoq5" path="res://src/UI/list_background.tres" id="13"]
+[ext_resource type="StyleBox" path="res://src/UI/list_background.tres" id="13"]
 [ext_resource type="FontFile" uid="uid://cpry5rd5ecdc5" path="res://assets/font/small_font.tres" id="14"]
 [ext_resource type="Script" uid="uid://c1vkx254mpaft" path="res://src/GameEditor/FollowBySelector.gd" id="15"]
 [ext_resource type="Script" uid="uid://blesifogfyjfp" path="res://Scenes/GameEditor/background_style_editor_tab.gd" id="15_4q0gk"]
@@ -101,12 +101,13 @@ theme_override_constants/margin_top = 35
 theme_override_constants/margin_right = 20
 theme_override_constants/margin_bottom = 35
 
-[node name="UIRoot" type="PanelContainer" parent="MarginContainer" unique_id=1142772979 node_paths=PackedStringArray("tab_container", "beside_tabs_buttons", "release_lock_layer")]
+[node name="UIRoot" type="PanelContainer" parent="MarginContainer" unique_id=1142772979 node_paths=PackedStringArray("tab_container", "beside_tabs_buttons", "intermission_tab", "release_lock_layer")]
 layout_mode = 2
 theme_override_styles/panel = SubResource("4")
 script = ExtResource("10")
 tab_container = NodePath("TabContainer")
 beside_tabs_buttons = NodePath("HBoxContainer")
+intermission_tab = NodePath("TabContainer/Intermissions")
 release_lock_layer = NodePath("../../LockedOverlay")
 
 [node name="TabContainer" type="TabContainer" parent="MarginContainer/UIRoot" unique_id=540253846]

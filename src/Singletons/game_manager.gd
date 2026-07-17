@@ -3236,7 +3236,7 @@ func get_current_game_profile_setting_1(key: String, default_value: Variant) -> 
 	return player_profile.get_profile_setting_v([get_identified_game_name(), key], default_value)
 
 func set_current_game_profile_setting_1(key: String, value: Variant) -> void:
-	player_profile.get_profile_setting_v([get_identified_game_name(), key], value)
+	player_profile.set_profile_setting_v([get_identified_game_name(), key], value)
 
 
 func is_one_time_message_dismissed(message_type: OneTimeMessages) -> bool:
@@ -4044,7 +4044,7 @@ func update_intermission_info(update_intermission_id: String, intermission_info:
 	if not update_intermission_id:
 		return
 	_clean_intermission_info()
-	if not has_intermission_id(update_intermission_id):
+	if not has_intermission_id(update_intermission_id) or game_definition.get("intermissions", []).size() == 0:
 		game_definition["intermissions"].append(intermission_info.duplicate_deep())
 		return
 	

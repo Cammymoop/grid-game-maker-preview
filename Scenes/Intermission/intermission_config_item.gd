@@ -18,6 +18,7 @@ const ScalarValueInput = preload("res://src/GameEditor/ConditionalEditor/scalar_
 
 @export var text_config_section: Control
 @export var image_config_section: ImageConfigSection
+@export var space_config_section: Control
 
 @export var text_input: AdaptiveMultiLineEdit
 @export var font_size_input: ScalarValueInput
@@ -31,10 +32,13 @@ const ScalarValueInput = preload("res://src/GameEditor/ConditionalEditor/scalar_
 
 @export var remove_button: ButtonContainer
 
+@export var space_amount_input: ScalarValueInput
+
 const TEXT_IDX: int = 0
 const IMAGE_IDX: int = 1
+const SPACE_IDX: int = 2
 
-const TYPES: Array[String] = ["text", "image"]
+const TYPES: Array[String] = ["text", "image", "space"]
 
 var default_font_size: float = 24
 
@@ -52,6 +56,8 @@ func _ready() -> void:
     text_outline_color_picker.color_changed.connect(item_updated.emit.unbind(1))
     text_outline_enabled_toggle.toggled.connect(item_updated.emit.unbind(1))
     font_size_input.value_changed.connect(item_updated.emit.unbind(1))
+    
+    space_amount_input.value_changed.connect(item_updated.emit.unbind(1))
 
     type_picker.item_selected.connect(on_type_selected)
 
@@ -72,37 +78,51 @@ func setup_type_picker() -> void:
 
 func on_type_selected(type_index: int) -> void:
     var type_id: = type_picker.get_item_id(type_index)
+    if type_id not in [IMAGE_IDX, TEXT_IDX, SPACE_IDX]:
+        type_id = SPACE_IDX
+        type_picker.selected = type_id
     
     image_config_section.visible = type_id == IMAGE_IDX
     text_config_section.visible = type_id == TEXT_IDX
+    space_config_section.visible = type_id == SPACE_IDX
     item_updated.emit()
 
 
 func load_item_info(item_info: Dictionary) -> void:
     setup_type_picker()
     var is_text: bool = item_info["type"].to_lower() == TYPES[TEXT_IDX]
+    var is_image: bool = item_info["type"].to_lower() == TYPES[IMAGE_IDX]
+    var is_space: bool = item_info["type"].to_lower() == TYPES[SPACE_IDX]
+
     if is_text:
         type_picker.selected = TEXT_IDX
-    else:
+    elif is_image:
         type_picker.selected = IMAGE_IDX
+    else:
+        is_space = true
+        type_picker.selected = SPACE_IDX
     
     text_config_section.visible = is_text
-    image_config_section.visible = not is_text
+    image_config_section.visible = is_image
+    space_config_section.visible = is_space
     
-    if not is_text:
+    if is_image:
         image_config_section.set_image_info(item_info)
-    else:
+    elif is_text:
         text_input.set_text_contents(item_info.get("text", ""))
         font_size_input.set_value(item_info.get("font_size", default_font_size))
         text_color_picker.color = Utility.get_dict_color(item_info, "text_color", Color.WHITE)
         text_outline_enabled_toggle.button_pressed = item_info.get("text_outline_enabled", true)
         text_outline_color_picker.color = Utility.get_dict_color(item_info, "text_outline_color", Color.BLACK)
+    else:
+        space_amount_input.set_value(item_info.get("space_amount", 20.0))
 
 func get_item_info() -> Dictionary:
     var info: = {
         "type": Utility.opbtn_get_selected_text(type_picker).to_lower(),
     }
     var is_text: bool = info["type"].to_lower() == "text"
+    var is_image: bool = info["type"].to_lower() == "image"
     
     if is_text:
         info["text"] = text_input.multi_line_contents
@@ -111,8 +131,10 @@ func get_item_info() -> Dictionary:
         info["text_outline_enabled"] = text_outline_enabled_toggle.button_pressed
         if text_outline_enabled_toggle.button_pressed:
             info["text_outline_color"] = Utility.color_string(text_outline_color_picker.color)
-    else:
+    elif is_image:
         info.merge(image_config_section.get_image_info())
+    else:
+        info["space_amount"] = space_amount_input.get_value()
 
     return info
 

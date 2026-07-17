@@ -170,7 +170,7 @@ func update_position_and_snap() -> void:
 
     position = half_vp_size + (camera_scroll_pos * parallax_amount) + accumulated_auto_scroll
 
-    var scaled_base_offset: Vector2 = base_offset
+    var scaled_base_offset: Vector2 = to_local(position + base_offset)
     if scale_with_camera:
         scaled_base_offset *= camera_zoom_factor
     

@@ -4,6 +4,8 @@ const BGParticleParallaxHelper: = preload("res://Scenes/bg_particle_parallax_hel
 const BGTileHolder: = preload("res://Scenes/bg_tile_holder.gd")
 const ParticleEmitterParallax: = preload("res://Scenes/particle_emitter_parallax.gd")
 
+@export var no_auto_update: bool = false
+
 @export var game_view: Node = null
 
 @export var effect_subviewport: SubViewport
@@ -99,10 +101,15 @@ func _ready() -> void:
     refresh_bg_style()
 
 func on_bg_style_changed() -> void:
+    if no_auto_update:
+        return
     refresh_bg_style()
 
 func refresh_bg_style() -> void:
     var level_bg_info: Dictionary = GameManager.get_current_bg_info()
+    set_bg_style(level_bg_info)
+
+func set_bg_style(level_bg_info: Dictionary) -> void:
     var background_color: Color = Utility.get_dict_color(level_bg_info, "background_color", default_bg_color)
     var dusty_particles_color: Color = Utility.get_dict_color(level_bg_info, "dusty_particles_color", default_particles_color)
     
@@ -147,7 +154,7 @@ func refresh_bg_style() -> void:
 
     rotate_gradient(level_bg_info.get("bg_gradient_rotation", 0.5), gradient_cover_amount)
     
-    refresh_lines_style()
+    refresh_lines_style(level_bg_info)
     var between_layer_index: int = 0
     if lines_layer.layer >= 5:
         between_layer_index = 4
@@ -183,8 +190,7 @@ func snap_scroll_vector_for_shader_time_loop(scroll_vector: Vector2) -> Vector2:
     return snapped_vector / shader_time_loop_factor
 
 
-func refresh_lines_style() -> void:
-    var level_bg_info: Dictionary = GameManager.get_current_bg_info()
+func refresh_lines_style(level_bg_info: Dictionary) -> void:
     lines.visible = level_bg_info.get("lines_on", false)
     lines_solid.visible = level_bg_info.get("lines_solid_on", false)
     if not lines.visible and not lines_solid.visible:

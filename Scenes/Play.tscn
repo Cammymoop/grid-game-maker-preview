@@ -21,6 +21,8 @@
 [ext_resource type="Script" uid="uid://b4kmfrl8rik3w" path="res://Scenes/map_editor_overlay.gd" id="12_n87tl"]
 [ext_resource type="PackedScene" uid="uid://cdx3gttyeybd1" path="res://Scenes/editor_controls_help.tscn" id="14_n5m2s"]
 [ext_resource type="PackedScene" uid="uid://22wn5812pyeo" path="res://Scenes/GameEditor/placeable_text_panel.tscn" id="15_vpmux"]
+[ext_resource type="Texture2D" uid="uid://dbewldhewludm" path="res://assets/img/button_icons/prev_small.png" id="16_p15gy"]
+[ext_resource type="Texture2D" uid="uid://c8uoricgpavvk" path="res://assets/img/button_icons/next_small.png" id="17_4prk4"]
 
 [sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_n5m2s"]
 blend_mode = 4
@@ -364,9 +366,8 @@ layout_mode = 2
 [node name="CreditsUI" parent="OverlayLayer" unique_id=1760736673 groups=["Credits"] instance=ExtResource("6_4cgsu")]
 visible = false
 
-[node name="LevelSelectRoot" type="Control" parent="OverlayLayer" unique_id=718450970 node_paths=PackedStringArray("level_select_ui", "darkener", "background_editor_container", "bg_style_editor", "add_new_list_panel") groups=["LevelSelectRoot"]]
+[node name="LevelSelectRoot" type="Control" parent="OverlayLayer" unique_id=718450970 node_paths=PackedStringArray("level_select_ui", "darkener", "background_editor_container", "bg_style_editor", "add_new_list_panel", "level_select_all", "edit_intermissions_container", "edit_intermissions") groups=["LevelSelectRoot"]]
 process_mode = 3
-visible = false
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -380,6 +381,9 @@ darkener = NodePath("MultiplyDarkenColor")
 background_editor_container = NodePath("HBoxContainer/BackgroundEditor")
 bg_style_editor = NodePath("HBoxContainer/BackgroundEditor/MarginContainer/PanelContainer/ScrollContainer/MarginContainer/BGStyleEditor")
 add_new_list_panel = NodePath("HBoxContainer/CenterContainer/NewListDialog")
+level_select_all = NodePath("HBoxContainer")
+edit_intermissions_container = NodePath("HBoxContainer2")
+edit_intermissions = NodePath("HBoxContainer2/CenterContainer/EditIntermissionAssignments")
 
 [node name="MultiplyDarkenColor" type="ColorRect" parent="OverlayLayer/LevelSelectRoot" unique_id=1877095181]
 material = SubResource("CanvasItemMaterial_4cgsu")
@@ -449,6 +453,139 @@ theme_override_constants/margin_bottom = 3
 
 [node name="BGStyleEditor" parent="OverlayLayer/LevelSelectRoot/HBoxContainer/BackgroundEditor/MarginContainer/PanelContainer/ScrollContainer/MarginContainer" unique_id=1622581633 instance=ExtResource("11_ui3gn")]
 layout_mode = 2
+
+[node name="HBoxContainer2" type="HBoxContainer" parent="OverlayLayer/LevelSelectRoot" unique_id=706899661]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="CenterContainer" type="CenterContainer" parent="OverlayLayer/LevelSelectRoot/HBoxContainer2" unique_id=102908692]
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 2
+
+[node name="EditIntermissionAssignments" type="PanelContainer" parent="OverlayLayer/LevelSelectRoot/HBoxContainer2/CenterContainer" unique_id=1206590429]
+custom_minimum_size = Vector2(300, 440)
+layout_mode = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="OverlayLayer/LevelSelectRoot/HBoxContainer2/CenterContainer/EditIntermissionAssignments" unique_id=1281102470]
+layout_mode = 2
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 12
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 12
+
+[node name="VBoxContainer2" type="VBoxContainer" parent="OverlayLayer/LevelSelectRoot/HBoxContainer2/CenterContainer/EditIntermissionAssignments/MarginContainer" unique_id=915152477]
+layout_mode = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="OverlayLayer/LevelSelectRoot/HBoxContainer2/CenterContainer/EditIntermissionAssignments/MarginContainer/VBoxContainer2" unique_id=96865631]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 14
+alignment = 1
+
+[node name="VBoxContainer4" type="VBoxContainer" parent="OverlayLayer/LevelSelectRoot/HBoxContainer2/CenterContainer/EditIntermissionAssignments/MarginContainer/VBoxContainer2/VBoxContainer" unique_id=611109929]
+layout_mode = 2
+
+[node name="Label3" type="Label" parent="OverlayLayer/LevelSelectRoot/HBoxContainer2/CenterContainer/EditIntermissionAssignments/MarginContainer/VBoxContainer2/VBoxContainer/VBoxContainer4" unique_id=1749648215]
+layout_mode = 2
+text = "Before Starting:"
+horizontal_alignment = 1
+
+[node name="StartingIntermissions" type="VBoxContainer" parent="OverlayLayer/LevelSelectRoot/HBoxContainer2/CenterContainer/EditIntermissionAssignments/MarginContainer/VBoxContainer2/VBoxContainer/VBoxContainer4" unique_id=603531528]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="Button" type="Button" parent="OverlayLayer/LevelSelectRoot/HBoxContainer2/CenterContainer/EditIntermissionAssignments/MarginContainer/VBoxContainer2/VBoxContainer/VBoxContainer4/StartingIntermissions" unique_id=588981350]
+layout_mode = 2
+size_flags_horizontal = 4
+text = "Add Intermission"
+
+[node name="HBoxContainer2" type="HBoxContainer" parent="OverlayLayer/LevelSelectRoot/HBoxContainer2/CenterContainer/EditIntermissionAssignments/MarginContainer/VBoxContainer2/VBoxContainer" unique_id=1261804192]
+layout_mode = 2
+theme_override_constants/separation = 9
+alignment = 1
+
+[node name="Label" type="Label" parent="OverlayLayer/LevelSelectRoot/HBoxContainer2/CenterContainer/EditIntermissionAssignments/MarginContainer/VBoxContainer2/VBoxContainer/HBoxContainer2" unique_id=1664597706]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "List:"
+
+[node name="ListNameLabel" type="Label" parent="OverlayLayer/LevelSelectRoot/HBoxContainer2/CenterContainer/EditIntermissionAssignments/MarginContainer/VBoxContainer2/VBoxContainer/HBoxContainer2" unique_id=216395042]
+layout_mode = 2
+size_flags_stretch_ratio = 4.0
+theme_override_font_sizes/font_size = 28
+text = "LIST NAME"
+horizontal_alignment = 1
+
+[node name="HBoxContainer" type="HBoxContainer" parent="OverlayLayer/LevelSelectRoot/HBoxContainer2/CenterContainer/EditIntermissionAssignments/MarginContainer/VBoxContainer2/VBoxContainer" unique_id=361482367]
+layout_mode = 2
+theme_override_constants/separation = 20
+
+[node name="VBoxContainer" type="VBoxContainer" parent="OverlayLayer/LevelSelectRoot/HBoxContainer2/CenterContainer/EditIntermissionAssignments/MarginContainer/VBoxContainer2/VBoxContainer/HBoxContainer" unique_id=1352108879]
+layout_mode = 2
+
+[node name="Label2" type="Label" parent="OverlayLayer/LevelSelectRoot/HBoxContainer2/CenterContainer/EditIntermissionAssignments/MarginContainer/VBoxContainer2/VBoxContainer/HBoxContainer/VBoxContainer" unique_id=1276993414]
+layout_mode = 2
+text = "After Completing:"
+horizontal_alignment = 1
+
+[node name="CompletedIntermissions" type="VBoxContainer" parent="OverlayLayer/LevelSelectRoot/HBoxContainer2/CenterContainer/EditIntermissionAssignments/MarginContainer/VBoxContainer2/VBoxContainer/HBoxContainer/VBoxContainer" unique_id=1699736002]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="Button" type="Button" parent="OverlayLayer/LevelSelectRoot/HBoxContainer2/CenterContainer/EditIntermissionAssignments/MarginContainer/VBoxContainer2/VBoxContainer/HBoxContainer/VBoxContainer/CompletedIntermissions" unique_id=1681587493]
+layout_mode = 2
+size_flags_horizontal = 4
+text = "Add Intermission"
+
+[node name="VBoxContainer2" type="VBoxContainer" parent="OverlayLayer/LevelSelectRoot/HBoxContainer2/CenterContainer/EditIntermissionAssignments/MarginContainer/VBoxContainer2/VBoxContainer/HBoxContainer" unique_id=1449007348]
+layout_mode = 2
+
+[node name="Label4" type="Label" parent="OverlayLayer/LevelSelectRoot/HBoxContainer2/CenterContainer/EditIntermissionAssignments/MarginContainer/VBoxContainer2/VBoxContainer/HBoxContainer/VBoxContainer2" unique_id=104093433]
+layout_mode = 2
+text = "After Last Level:"
+horizontal_alignment = 1
+
+[node name="FinalIntermissions" type="VBoxContainer" parent="OverlayLayer/LevelSelectRoot/HBoxContainer2/CenterContainer/EditIntermissionAssignments/MarginContainer/VBoxContainer2/VBoxContainer/HBoxContainer/VBoxContainer2" unique_id=1839137335]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="Button" type="Button" parent="OverlayLayer/LevelSelectRoot/HBoxContainer2/CenterContainer/EditIntermissionAssignments/MarginContainer/VBoxContainer2/VBoxContainer/HBoxContainer/VBoxContainer2/FinalIntermissions" unique_id=1486711038]
+layout_mode = 2
+size_flags_horizontal = 4
+text = "Add Intermission"
+
+[node name="NavigationButtons" type="VBoxContainer" parent="OverlayLayer/LevelSelectRoot/HBoxContainer2/CenterContainer/EditIntermissionAssignments/MarginContainer/VBoxContainer2" unique_id=580575336]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="HBoxContainer" type="HBoxContainer" parent="OverlayLayer/LevelSelectRoot/HBoxContainer2/CenterContainer/EditIntermissionAssignments/MarginContainer/VBoxContainer2/NavigationButtons" unique_id=437052191]
+layout_mode = 2
+alignment = 1
+
+[node name="Button" type="Button" parent="OverlayLayer/LevelSelectRoot/HBoxContainer2/CenterContainer/EditIntermissionAssignments/MarginContainer/VBoxContainer2/NavigationButtons/HBoxContainer" unique_id=166231338]
+layout_mode = 2
+text = "Previous List"
+icon = ExtResource("16_p15gy")
+
+[node name="Button2" type="Button" parent="OverlayLayer/LevelSelectRoot/HBoxContainer2/CenterContainer/EditIntermissionAssignments/MarginContainer/VBoxContainer2/NavigationButtons/HBoxContainer" unique_id=736164540]
+layout_mode = 2
+text = "Next List"
+icon = ExtResource("17_4prk4")
+icon_alignment = 2
+
+[node name="HBoxContainer2" type="HBoxContainer" parent="OverlayLayer/LevelSelectRoot/HBoxContainer2/CenterContainer/EditIntermissionAssignments/MarginContainer/VBoxContainer2/NavigationButtons" unique_id=265073111]
+layout_mode = 2
+alignment = 1
+
+[node name="Button" type="Button" parent="OverlayLayer/LevelSelectRoot/HBoxContainer2/CenterContainer/EditIntermissionAssignments/MarginContainer/VBoxContainer2/NavigationButtons/HBoxContainer2" unique_id=974463524]
+layout_mode = 2
+text = "Back"
 
 [node name="MapEditorUILayer" type="CanvasLayer" parent="." unique_id=1275328928]
 layer = 10

@@ -4,6 +4,7 @@
 [ext_resource type="Texture2D" uid="uid://c71dfd3j0223d" path="res://assets/img/button_icons/plus_small.png" id="2_xi230"]
 
 [node name="IntermissionContentEditor" type="VBoxContainer" unique_id=1787788247 node_paths=PackedStringArray("item_container", "add_item_button", "scroll_container")]
+custom_minimum_size = Vector2(0, 200)
 offset_right = 771.0
 offset_bottom = 271.0
 theme_override_constants/separation = 12
@@ -20,6 +21,7 @@ horizontal_alignment = 1
 
 [node name="ScrollContainer" type="ScrollContainer" parent="." unique_id=1663121505]
 layout_mode = 2
+size_flags_vertical = 3
 horizontal_scroll_mode = 0
 vertical_scroll_mode = 4
 

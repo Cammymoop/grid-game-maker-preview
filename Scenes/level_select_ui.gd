@@ -37,6 +37,8 @@ var rearrangable_level_list_scn: = preload("res://Scenes/rearrangable_list_item.
 @export var edit_autosave_container: Control
 @export var edit_autosave_button: Button
 
+@export var edit_intermissions_button: Button
+
 var max_height_ratio: float = 0.82
 var min_max_height: float = 100
 

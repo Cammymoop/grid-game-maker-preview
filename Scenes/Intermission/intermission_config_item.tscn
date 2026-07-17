@@ -21,7 +21,7 @@ Label/font_sizes/font_size = 14
 
 [sub_resource type="ButtonGroup" id="ButtonGroup_n5seu"]
 
-[node name="IntermissionConfigItem" type="VBoxContainer" unique_id=1389408321 node_paths=PackedStringArray("type_picker", "top_separator", "text_config_section", "image_config_section", "text_input", "font_size_input", "text_outline_enabled_toggle", "text_color_picker", "text_outline_color_picker", "move_up_button", "move_down_button", "remove_button")]
+[node name="IntermissionConfigItem" type="VBoxContainer" unique_id=1389408321 node_paths=PackedStringArray("type_picker", "top_separator", "text_config_section", "image_config_section", "space_config_section", "text_input", "font_size_input", "text_outline_enabled_toggle", "text_color_picker", "text_outline_color_picker", "move_up_button", "move_down_button", "remove_button", "space_amount_input")]
 offset_right = 762.0
 offset_bottom = 104.0
 theme_override_constants/separation = 0
@@ -30,6 +30,7 @@ type_picker = NodePath("HBoxContainer/VBoxContainer/HBoxContainer/TypeSelector")
 top_separator = NodePath("HSeparator")
 text_config_section = NodePath("HBoxContainer/VBoxContainer2/TextStuff")
 image_config_section = NodePath("HBoxContainer/VBoxContainer2/ImageStuff")
+space_config_section = NodePath("HBoxContainer/VBoxContainer2/SpaceStuff")
 text_input = NodePath("HBoxContainer/VBoxContainer2/TextStuff/HBoxContainer2/AdaptiveMultiLineEdit")
 font_size_input = NodePath("HBoxContainer/VBoxContainer2/TextStuff/TextStyleOptions/HBoxContainer/HBoxContainer/FontSizeInput")
 text_outline_enabled_toggle = NodePath("HBoxContainer/VBoxContainer2/TextStuff/TextStyleOptions/HBoxContainer/EnableBorder")
@@ -38,6 +39,7 @@ text_outline_color_picker = NodePath("HBoxContainer/VBoxContainer2/TextStuff/Tex
 move_up_button = NodePath("HBoxContainer/OrderButtons/UpButton")
 move_down_button = NodePath("HBoxContainer/OrderButtons/DownButton")
 remove_button = NodePath("HBoxContainer/RemoveItemButton")
+space_amount_input = NodePath("HBoxContainer/VBoxContainer2/SpaceStuff/HBoxContainer2/SpaceAmountInput")
 
 [node name="HSeparator" type="HSeparator" parent="." unique_id=628190372]
 custom_minimum_size = Vector2(400, 20)
@@ -90,6 +92,24 @@ size_flags_horizontal = 3
 theme_override_constants/separation = 8
 alignment = 1
 
+[node name="SpaceStuff" type="VBoxContainer" parent="HBoxContainer/VBoxContainer2" unique_id=611122916]
+layout_mode = 2
+
+[node name="HBoxContainer2" type="HBoxContainer" parent="HBoxContainer/VBoxContainer2/SpaceStuff" unique_id=2080404638]
+layout_mode = 2
+alignment = 1
+
+[node name="Label" type="Label" parent="HBoxContainer/VBoxContainer2/SpaceStuff/HBoxContainer2" unique_id=273771876]
+layout_mode = 2
+text = "Space Amount:"
+
+[node name="SpaceAmountInput" parent="HBoxContainer/VBoxContainer2/SpaceStuff/HBoxContainer2" unique_id=1458729988 instance=ExtResource("5_0qqa7")]
+layout_mode = 2
+is_int_type = true
+default_value = 20.0
+min_value = 2.0
+max_value = 200.0
+
 [node name="TextStuff" type="VBoxContainer" parent="HBoxContainer/VBoxContainer2" unique_id=296597674]
 visible = false
 layout_mode = 2
@@ -121,7 +141,7 @@ layout_mode = 2
 layout_mode = 2
 text = "Font Size:"
 
-[node name="FontSizeInput" parent="HBoxContainer/VBoxContainer2/TextStuff/TextStyleOptions/HBoxContainer/HBoxContainer" unique_id=1458729988 instance=ExtResource("5_0qqa7")]
+[node name="FontSizeInput" parent="HBoxContainer/VBoxContainer2/TextStuff/TextStyleOptions/HBoxContainer/HBoxContainer" unique_id=1735108172 instance=ExtResource("5_0qqa7")]
 layout_mode = 2
 is_int_type = true
 default_value = 24.0
@@ -188,6 +208,7 @@ edit_intensity = false
 script = ExtResource("6_nb6yg")
 
 [node name="ImageStuff" type="VBoxContainer" parent="HBoxContainer/VBoxContainer2" unique_id=443190700 node_paths=PackedStringArray("image_picker_button", "scale_input", "scale_smooth_toggle", "dark_background_toggle", "mod_color_picker")]
+visible = false
 layout_mode = 2
 script = ExtResource("8_1rtii")
 no_image_texture = ExtResource("9_hcmjr")

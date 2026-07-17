@@ -157,12 +157,45 @@ func _get_recursive(data: Variant, keys: Array, key_index: int, def: Variant) ->
         return def
     return _get_recursive(next_data, keys, key_index + 1, def)
 
+func _get_ensure_level(data: Variant, keys: Array, key_index: int) -> Variant:
+    var next_data: Variant = null
+    var final_key: bool = key_index == keys.size() - 1
+    if typeof(data) == TYPE_ARRAY:
+        var arr_key: int = _arr_key(keys[key_index])
+        if arr_key < 0 or arr_key >= data.size():
+            # does not ensure array size
+            return null
+        else:
+            if final_key:
+                return data[arr_key]
+            next_data = data[arr_key]
+    elif typeof(data) in [TYPE_OBJECT, TYPE_DICTIONARY]:
+        if not keys[key_index] in data or data[keys[key_index]] == null:
+            data[keys[key_index]] = {}
+            next_data = data[keys[key_index]]
+            if final_key:
+                return next_data
+        else:
+            if final_key:
+                return data.get(keys[key_index])
+            next_data = data.get(keys[key_index])
+    else:
+        push_error("Unexpected type: %s" % [type_string(typeof(data))])
+        return null
+    if next_data == null:
+        return null
+    return _get_ensure_level(next_data, keys, key_index + 1)
+
 func _set_nested(data: Variant, keys: Array, new_value: Variant) -> void:
     if not keys or keys.size() < 2:
         push_error("_set_nested called with less than 2 nested keys")
         return
     var set_key: Variant = keys[-1]
-    var containing_data: Variant = _get_recursive(data, keys.slice(0, -1), 0, null)
+    var containing_data: Variant = _get_ensure_level(data, keys.slice(0, -1), 0)
+    if containing_data == null:
+        push_error("Could not set nested keys: %s, incompatible existing structure" % [keys])
+        return
+
     if typeof(containing_data) == TYPE_DICTIONARY:
         containing_data[set_key] = new_value
     elif typeof(containing_data) == TYPE_ARRAY:
@@ -175,6 +208,7 @@ func _set_nested(data: Variant, keys: Array, new_value: Variant) -> void:
             containing_data[arr_key] = new_value
         else:
             push_error("Array index out of bounds: %s (%s)" % [arr_key, containing_data.size()])
+            return
     elif typeof(containing_data) == TYPE_OBJECT and containing_data != null:
         if set_key not in containing_data:
             push_error("Set key %s not found in containing object %s" % [set_key, containing_data])

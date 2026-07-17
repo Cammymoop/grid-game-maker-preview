@@ -13,6 +13,10 @@ const NewListPanel = preload("res://Scenes/GameEditor/new_list_panel.gd")
 @export var no_web_container: Control
 @export var open_levels_folder_button: Button
 
+@export var level_select_all: Control
+@export var edit_intermissions_container: Control
+@export var edit_intermissions: Control
+
 func _ready() -> void:
     if no_web_container:
         no_web_container.visible = not OS.has_feature("web")
@@ -34,10 +38,11 @@ func on_level_select_ui_close_level_select() -> void:
     close_level_select()
 
 func open_level_select() -> void:
+    show()
     GameManager.set_pause("level_select", true)
     level_select_ui.opening()
     level_select_ui.refresh()
-    show()
+    level_select_all.show()
 
 func close_level_select() -> void:
     GameManager.set_pause("level_select", false)
@@ -47,7 +52,24 @@ func close_level_select() -> void:
         GlobalToaster.show_toast_message("Saved Changes")
     if background_editor_container.visible:
         hide_background_editor()
+    level_select_all.hide()
+    edit_intermissions_container.hide()
+
     hide()
+
+func show_edit_intermissions() -> void:
+    if not visible:
+        open_level_select()
+    level_select_all.hide()
+    edit_intermissions_container.show()
+    edit_intermissions.refresh()
+
+func back_from_edit_intermissions() -> void:
+    if not visible:
+        return
+    level_select_all.show()
+    edit_intermissions_container.hide()
+
 
 func show_background_editor() -> void:
     darkener.hide()

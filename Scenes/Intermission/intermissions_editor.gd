@@ -23,6 +23,8 @@ const IntermissionContentEditor = preload("res://Scenes/Intermission/intermissio
 @export var content_and_bg_section: Control
 @export var content_section: Control
 
+@export var hide_overlay_button: Button
+
 var is_editing_intermission: bool = false
 var editing_intermission_info: Dictionary = {}
 
@@ -57,6 +59,13 @@ func _ready() -> void:
     background_style_editor.edited_bg_style.connect(on_edited_bg_style)
     
     intermission_id_input.text_changed.connect(on_intermission_id_changed)
+    
+    hide_overlay_button.pressed.connect(on_hide_overlay_pressed)
+    hide_overlay_button.mouse_entered.connect(make_overlay_ui_transparent)
+    hide_overlay_button.mouse_exited.connect(make_overlay_ui_visible)
+    hide_overlay_button.focus_exited.connect(make_overlay_ui_visible)
+    
+    get_viewport().gui_focus_changed.connect(on_gui_focus_changed)
     
     load_last_edited_intermission()
     if not is_editing_intermission:
@@ -107,6 +116,9 @@ func on_intermission_content_updated() -> void:
 
 func on_enable_custom_background_pressed() -> void:
     background_style_editor.manual_copy_game_bg_style()
+    var bg_style: Dictionary = background_style_editor.manual_info
+    editing_intermission_info["bg_style"] = bg_style
+    update_bg_preview(bg_style)
     refresh_show_bg_style_ui()
 
 func refresh_show_bg_style_ui() -> void:
@@ -124,17 +136,21 @@ func on_disable_custom_background() -> void:
     if not is_editing_intermission:
         return
     editing_intermission_info["bg_style"] = {}
+    update_bg_preview(GameManager.get_game_bg_info())
     save_edited_intermission_info()
     refresh_show_bg_style_ui()
 
 func on_edited_bg_style(bg_style: Dictionary) -> void:
     editing_intermission_info["bg_style"] = bg_style
+    update_bg_preview(bg_style)
     save_edited_intermission_info()
     refresh_show_bg_style_ui()
 
+func update_bg_preview(bg_style: Dictionary) -> void:
+    background_style_preview.set_bg_style(bg_style)
+
 # save using the last valid id if the current is invalid so data isn't lost unnecessarily
 func save_edited_intermission_info() -> void:
-    prints("tring to save", last_valid_id, last_saved_id)
     if not is_editing_intermission or not last_valid_id:
         return
     var save_info: = editing_intermission_info.duplicate_deep()
@@ -219,18 +235,25 @@ func filter_to_valid_id(new_id: String) -> String:
 
 
 func refresh_ui() -> void:
+    make_overlay_ui_visible()
     if is_editing_intermission:
         intermission_id_input.text = editing_intermission_info.get("id", "")
         var intermission_type: String = editing_intermission_info.get("type", "")
+        if not intermission_type in INTERMISSION_TYPES:
+            intermission_type = TYPE_INTERMISSION
+        intermission_type_selector.selected = INTERMISSION_TYPES.find(intermission_type)
         refresh_show_sections(intermission_type)
+        var custom_bg_info: Dictionary = editing_intermission_info.get("bg_style", {})
+        if custom_bg_info:
+            background_style_editor.load_manual_bg_style(custom_bg_info)
+            update_bg_preview(custom_bg_info)
+        else:
+            update_bg_preview(GameManager.get_game_bg_info())
+        refresh_show_bg_style_ui()
         if intermission_type == TYPE_CREDITS:
             pass
         elif intermission_type == TYPE_INTERMISSION:
             intermission_content_editor.load_contents_info(editing_intermission_info.get("content_items", []))
-            var custom_bg_info: Dictionary = editing_intermission_info.get("bg_style", {})
-            if custom_bg_info:
-                background_style_editor.load_manual_bg_style(custom_bg_info)
-            refresh_show_bg_style_ui()
         else:
             push_warning("Unknown intermission type: %s" % intermission_type)
     else:
@@ -241,7 +264,6 @@ func refresh_show_sections(intermission_type: String = "") -> void:
     if not is_editing_intermission:
         intermission_type = ""
     
-    #main_options_section.visible = intermission_type != ""
     content_and_bg_section.visible = intermission_type != ""
     content_section.visible = intermission_type == TYPE_INTERMISSION
     
@@ -255,9 +277,33 @@ func on_edit_intermission_menu_about_to_popup() -> void:
     popup_menu.clear()
     var all_ids: Array[String] = GameManager.get_all_intermission_ids()
     for id in all_ids:
-        popup_menu.add_item(id)
+        popup_menu.add_radio_check_item(id)
+        var idx: = popup_menu.item_count - 1
+        if is_editing_intermission and id == last_saved_id:
+            popup_menu.set_item_checked(idx, true)
+            popup_menu.set_item_disabled(idx, true)
 
 func on_edit_intermission_menu_selected(index: int) -> void:
     var popup_menu: PopupMenu = edit_intermission_menu_button.get_popup()
     var to_edit_id: String = popup_menu.get_item_text(index)
     load_intermission_from_id(to_edit_id)
+
+
+func on_hide_overlay_pressed() -> void:
+    if content_section.modulate != Color.WHITE:
+        make_overlay_ui_visible()
+    else:
+        make_overlay_ui_transparent()
+
+func make_overlay_ui_transparent() -> void:
+    content_section.modulate = Color.TRANSPARENT
+    bg_style_edit_container.modulate = Color.TRANSPARENT
+    enable_custom_background_button.modulate = Color.TRANSPARENT
+
+func make_overlay_ui_visible() -> void:
+    content_section.modulate = Color.WHITE
+    bg_style_edit_container.modulate = Color.WHITE
+    enable_custom_background_button.modulate = Color.WHITE
+
+func on_gui_focus_changed(_new_focus: Control) -> void:
+    make_overlay_ui_visible()

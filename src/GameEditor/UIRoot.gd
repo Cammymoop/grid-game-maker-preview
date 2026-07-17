@@ -17,7 +17,8 @@ const ImagesEditor: = preload("res://src/GameEditor/ImagesEditor.gd")
 
 @export var release_lock_layer: CanvasLayer
 
-func _enter_tree() -> void:
+
+func _ready():
 	if GameManager._requested_tab:
 		var tab_names: Array[String] = []
 		for i in tab_container.get_tab_count():
@@ -28,8 +29,6 @@ func _enter_tree() -> void:
 			tab_container.current_tab = 0
 		GameManager._requested_tab = ""
 
-
-func _ready():
 	release_lock_layer.visible = GameManager.current_game_is_release_locked
 	
 	if GameManager.current_game_is_release_locked:

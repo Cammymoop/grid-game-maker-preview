@@ -52,7 +52,7 @@ corner_radius_bottom_right = 3
 corner_radius_bottom_left = 3
 corner_detail = 5
 
-[node name="IntermissionsEditor" type="PanelContainer" unique_id=811355557 node_paths=PackedStringArray("intermission_id_input", "intermission_type_selector", "edit_new_intermission_button", "edit_intermission_menu_button", "bg_style_edit_container", "background_style_editor", "background_style_preview", "intermission_content_editor", "enable_custom_background_button", "main_options_section", "content_and_bg_section", "content_section")]
+[node name="IntermissionsEditor" type="PanelContainer" unique_id=811355557 node_paths=PackedStringArray("intermission_id_input", "intermission_type_selector", "edit_new_intermission_button", "edit_intermission_menu_button", "bg_style_edit_container", "background_style_editor", "background_style_preview", "intermission_content_editor", "enable_custom_background_button", "main_options_section", "content_and_bg_section", "content_section", "hide_overlay_button")]
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -72,10 +72,11 @@ enable_custom_background_button = NodePath("VBoxContainer/ContentAndBGOptions/VB
 main_options_section = NodePath("VBoxContainer/MainIntermissionOptions")
 content_and_bg_section = NodePath("VBoxContainer/ContentAndBGOptions")
 content_section = NodePath("VBoxContainer/ContentAndBGOptions/VBoxContainer/MarginContainer/EditorUI/MarginContainer2")
+hide_overlay_button = NodePath("VBoxContainer/ContentAndBGOptions/VBoxContainer/MarginContainer/EditorUI/MarginContainer2/PanelContainer/HideButtonHolder/HideButton")
 
 [node name="VBoxContainer" type="VBoxContainer" parent="." unique_id=370450557]
 layout_mode = 2
-theme_override_constants/separation = 8
+theme_override_constants/separation = 2
 
 [node name="MainIntermissionOptions" type="HBoxContainer" parent="VBoxContainer" unique_id=418710714]
 layout_mode = 2
@@ -102,27 +103,6 @@ size_flags_horizontal = 3
 theme_override_constants/separation = 12
 alignment = 1
 
-[node name="HBoxContainer3" type="HBoxContainer" parent="VBoxContainer/MainIntermissionOptions/HBoxContainer" unique_id=2063513016]
-layout_mode = 2
-alignment = 1
-
-[node name="Label" type="Label" parent="VBoxContainer/MainIntermissionOptions/HBoxContainer/HBoxContainer3" unique_id=1750098777]
-layout_mode = 2
-theme_override_font_sizes/font_size = 14
-text = "Type:"
-
-[node name="TypePicker" type="OptionButton" parent="VBoxContainer/MainIntermissionOptions/HBoxContainer/HBoxContainer3" unique_id=1701597679]
-layout_mode = 2
-size_flags_vertical = 4
-alignment = 1
-selected = 0
-fit_to_longest_item = false
-item_count = 2
-popup/item_0/text = "Intermission"
-popup/item_0/id = 0
-popup/item_1/text = "Credits"
-popup/item_1/id = 1
-
 [node name="HBoxContainer2" type="HBoxContainer" parent="VBoxContainer/MainIntermissionOptions/HBoxContainer" unique_id=1350555096]
 layout_mode = 2
 alignment = 1
@@ -138,6 +118,26 @@ layout_mode = 2
 size_flags_vertical = 4
 theme_override_font_sizes/font_size = 14
 
+[node name="HBoxContainer3" type="HBoxContainer" parent="VBoxContainer/MainIntermissionOptions/HBoxContainer" unique_id=2063513016]
+layout_mode = 2
+alignment = 1
+
+[node name="Label" type="Label" parent="VBoxContainer/MainIntermissionOptions/HBoxContainer/HBoxContainer3" unique_id=1750098777]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "Type:"
+
+[node name="TypePicker" type="OptionButton" parent="VBoxContainer/MainIntermissionOptions/HBoxContainer/HBoxContainer3" unique_id=1701597679]
+layout_mode = 2
+size_flags_vertical = 4
+alignment = 1
+selected = 0
+item_count = 2
+popup/item_0/text = "Intermission"
+popup/item_0/id = 0
+popup/item_1/text = "Credits"
+popup/item_1/id = 1
+
 [node name="HBoxContainer4" type="HBoxContainer" parent="VBoxContainer/MainIntermissionOptions/HBoxContainer" unique_id=2121937471]
 layout_mode = 2
 alignment = 1
@@ -149,6 +149,10 @@ theme_override_font_sizes/font_size = 12
 text = "New Intermission"
 icon = ExtResource("2_0bdve")
 icon_alignment = 2
+
+[node name="Spacer" type="Control" parent="VBoxContainer" unique_id=637212276]
+custom_minimum_size = Vector2(0, 4)
+layout_mode = 2
 
 [node name="ContentAndBGOptions" type="PanelContainer" parent="VBoxContainer" unique_id=1591876298]
 layout_mode = 2
@@ -179,6 +183,7 @@ theme_override_styles/panel = SubResource("StyleBoxFlat_qqtng")
 
 [node name="BGEffects" parent="VBoxContainer/ContentAndBGOptions/VBoxContainer/MarginContainer/BGEffectsClip" unique_id=1715516889 instance=ExtResource("3_qqtng")]
 layout_mode = 1
+no_auto_update = true
 
 [node name="PreviewIntermissionRoot" type="Control" parent="VBoxContainer/ContentAndBGOptions/VBoxContainer/MarginContainer/BGEffectsClip" unique_id=1960714078]
 layout_mode = 1
@@ -209,6 +214,15 @@ theme_override_styles/panel = SubResource("StyleBoxFlat_8g8ar")
 [node name="IntermissionContentEditor" parent="VBoxContainer/ContentAndBGOptions/VBoxContainer/MarginContainer/EditorUI/MarginContainer2/PanelContainer" unique_id=1787788247 node_paths=PackedStringArray("height_limit_parent") instance=ExtResource("4_0bdve")]
 layout_mode = 2
 height_limit_parent = NodePath("../..")
+
+[node name="HideButtonHolder" type="VBoxContainer" parent="VBoxContainer/ContentAndBGOptions/VBoxContainer/MarginContainer/EditorUI/MarginContainer2/PanelContainer" unique_id=1677851356]
+layout_mode = 2
+mouse_filter = 2
+
+[node name="HideButton" type="Button" parent="VBoxContainer/ContentAndBGOptions/VBoxContainer/MarginContainer/EditorUI/MarginContainer2/PanelContainer/HideButtonHolder" unique_id=1085234748]
+layout_mode = 2
+size_flags_horizontal = 8
+text = "HIDE"
 
 [node name="MarginContainer3" type="MarginContainer" parent="VBoxContainer/ContentAndBGOptions/VBoxContainer/MarginContainer/EditorUI" unique_id=1816247486]
 layout_mode = 2
@@ -250,3 +264,12 @@ theme_override_constants/margin_bottom = 3
 [node name="BGStyleEditor" parent="VBoxContainer/ContentAndBGOptions/VBoxContainer/MarginContainer/EditorUI/MarginContainer/PanelContainer/ScrollContainer/MarginContainer" unique_id=1622581633 instance=ExtResource("4_ko2ix")]
 layout_mode = 2
 manual_source = true
+
+[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer" unique_id=54112558]
+layout_mode = 2
+alignment = 1
+
+[node name="GoToLevelListEditorButton" type="Button" parent="VBoxContainer/HBoxContainer" unique_id=16367544]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "Use Intermissions in Level List Editor"
