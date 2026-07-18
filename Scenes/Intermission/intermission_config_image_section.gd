@@ -68,13 +68,11 @@ func refresh_picker_button() -> void:
     image_picker_button.set_icon_scale(icon_scale)
 
 func set_image_info(item_info: Dictionary) -> void:
-    prints("image loaded info:", item_info)
     set_image(int(item_info.get("texture_id", -1)), int(item_info.get("texture_sub_index", 0)))
     scale_input.set_value(item_info.get("scale", 1.0))
     scale_smooth_toggle.set_pressed_no_signal(item_info.get("scale_smooth", false))
     mod_color_picker.color = Utility.get_dict_color(item_info, "mod_color", Color.WHITE)
     dark_background_toggle.set_pressed_no_signal(item_info.get("dark_background", false))
-    prints("current scale:", scale_input.get_value())
 
 func get_image_info() -> Dictionary:
     var ret: =  {
@@ -85,5 +83,4 @@ func get_image_info() -> Dictionary:
         "mod_color": Utility.color_string(mod_color_picker.color),
         "dark_background": dark_background_toggle.button_pressed,
     }
-    prints("image saving info:", ret)
     return ret

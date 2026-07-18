@@ -626,7 +626,9 @@ func _on_add_preview_variant_button_pressed() -> void:
 func save_fancy_sprite_snapshot(fancy_sprite_editor: FancySpriteEditor) -> void:
     if not fancy_sprite_editor.snapshot_tex:
         return
-    sprite_snapshot_tex = ImageTexture.create_from_image(fancy_sprite_editor.snapshot_tex.get_image())
+    var snapshot_img: = fancy_sprite_editor.snapshot_tex.get_image()
+    snapshot_img.fix_alpha_edges()
+    sprite_snapshot_tex = ImageTexture.create_from_image(snapshot_img)
     sprite_snapshot_scale = GameManager.get_default_pixel_scale()
     on_info_changed()
     update_image_button()

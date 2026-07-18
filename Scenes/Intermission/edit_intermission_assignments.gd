@@ -2,6 +2,8 @@ extends HBoxContainer
 
 const IntermissionAssignmentList: = preload("res://Scenes/Intermission/intermission_assignment_list.gd")
 
+signal request_back()
+
 signal to_intermission_editor(with_intermission_id: String, in_custom_list: String, is_duplicate: bool)
 signal to_intermission_editor_new(in_custom_list: String)
 
@@ -27,6 +29,8 @@ signal to_intermission_editor_new(in_custom_list: String)
 
 @export var next_nav_button: Button
 @export var previous_nav_button: Button
+
+@export var back_button: Button
 
 
 @export var go_to_intermission_editor_button: Button
@@ -67,6 +71,8 @@ func _ready() -> void:
         assignment_list.list_edited.connect(on_any_assignment_changed)
         assignment_list.request_edit_intermission.connect(on_request_edit_intermission)
         assignment_list.request_edit_duplicate_intermission.connect(on_request_duplicate_intermission.bind(assignment_list))
+    
+    back_button.pressed.connect(request_back.emit)
 
     go_to_intermission_editor_button.pressed.connect(on_intermission_editor_button_pressed)
     edit_new_intermission_button.pressed.connect(on_new_intermission_button_pressed)
@@ -198,6 +204,32 @@ func refresh_ui() -> void:
         editing_cur_level_disclaimer.visible = true
     else:
         editing_cur_level_disclaimer.visible = false
+    
+    if current_mode == Modes.CUSTOM_LISTS:
+        var cur_list_index: = all_custom_lists.find(current_level_list_name)
+        if cur_list_index == -1:
+            next_nav_button.disabled = false
+            previous_nav_button.disabled = false
+        else:
+            next_nav_button.disabled = cur_list_index == all_custom_lists.size() - 1
+            previous_nav_button.disabled = cur_list_index == 0
+    elif current_mode == Modes.BUNDLED_LISTS:
+        var cur_list_index: = all_bundled_lists.find(current_level_list_name)
+        if cur_list_index == -1:
+            next_nav_button.disabled = false
+            previous_nav_button.disabled = false
+        else:
+            next_nav_button.disabled = cur_list_index == all_bundled_lists.size() - 1
+            previous_nav_button.disabled = cur_list_index == 0
+    elif current_mode == Modes.LEVELS:
+        var all_levels_orderd: = GameManager.get_all_existing_levels_sorted_by_chronology()
+        var current_index: = all_levels_orderd.find(current_level_name)
+        if current_index == -1:
+            next_nav_button.disabled = false
+            previous_nav_button.disabled = false
+        else:
+            next_nav_button.disabled = current_index == all_levels_orderd.size() - 1
+            previous_nav_button.disabled = current_index == 0
 
 
 func on_any_assignment_changed() -> void:
@@ -294,7 +326,8 @@ func refresh_assignment_lists() -> void:
         before_start_assignment_list.load_assignments(assignments_dict.get("before_start", []))
         after_complete_assignment_list.load_assignments(assignments_dict.get("after_complete", []))
         after_last_level_assignment_list.load_assignments(assignments_dict.get("after_last_level", []))
-        custom_failure_assignment_list.load_assignments(assignments_dict.get("custom_fail", []))
+        if custom_failure_assignment_list:
+            custom_failure_assignment_list.load_assignments(assignments_dict.get("custom_fail", []))
     elif current_mode == Modes.LEVELS:
         if not current_level_name:
             return
@@ -310,7 +343,8 @@ func refresh_assignment_lists() -> void:
             assignments_dict = cur_map_metadata.get("intermission_assignments", {})
         before_start_assignment_list.load_assignments(assignments_dict.get("before_start", []))
         after_complete_assignment_list.load_assignments(assignments_dict.get("after_complete", []))
-        custom_failure_assignment_list.load_assignments(assignments_dict.get("custom_fail", []))
+        if custom_failure_assignment_list:
+            custom_failure_assignment_list.load_assignments(assignments_dict.get("custom_fail", []))
     elif current_mode == Modes.GAME:
         var game_intermission_assignments: Variant = GameManager.get_game_setting("default_intermissions", {})
         if typeof(game_intermission_assignments) != TYPE_DICTIONARY:
@@ -335,7 +369,8 @@ func update_and_save_current() -> void:
         _set_or_erase_assignment_list(assgn, "before_start", before_start_assignment_list.get_assignments())
         _set_or_erase_assignment_list(assgn, "after_complete", after_complete_assignment_list.get_assignments())
         _set_or_erase_assignment_list(assgn, "after_last_level", after_last_level_assignment_list.get_assignments())
-        _set_or_erase_assignment_list(assgn, "custom_fail", custom_failure_assignment_list.get_assignments())
+        if custom_failure_assignment_list:
+            _set_or_erase_assignment_list(assgn, "custom_fail", custom_failure_assignment_list.get_assignments())
         GameManager.set_level_list_data(current_level_list_name, "intermission_assignments", assgn)
         if current_mode == Modes.BUNDLED_LISTS:
             GameManager.save_current_definition_if_auto_enabled()
@@ -364,7 +399,8 @@ func update_and_save_current() -> void:
             var assgn: Dictionary = cur_map_metadata["intermission_assignments"]
             _set_or_erase_assignment_list(assgn, "before_start", before_start_assignment_list.get_assignments())
             _set_or_erase_assignment_list(assgn, "after_complete", after_complete_assignment_list.get_assignments())
-            _set_or_erase_assignment_list(assgn, "custom_fail", custom_failure_assignment_list.get_assignments())
+            if custom_failure_assignment_list:
+                _set_or_erase_assignment_list(assgn, "custom_fail", custom_failure_assignment_list.get_assignments())
             
             GameManager.set_map_metadata_into_level_file(current_level_name, cur_map_metadata)
 
@@ -380,7 +416,8 @@ func update_and_save_edited_level() -> void:
         cur_map_assignments = {}
     _set_or_erase_assignment_list(cur_map_assignments, "before_start", before_start_assignment_list.get_assignments())
     _set_or_erase_assignment_list(cur_map_assignments, "after_complete", after_complete_assignment_list.get_assignments())
-    _set_or_erase_assignment_list(cur_map_assignments, "custom_fail", custom_failure_assignment_list.get_assignments())
+    if custom_failure_assignment_list:
+        _set_or_erase_assignment_list(cur_map_assignments, "custom_fail", custom_failure_assignment_list.get_assignments())
     MapManager.set_metadata_value("intermission_assignments", cur_map_assignments, true)
     
     if not map_editor.save_current_or_save_as(Callable(), true):
@@ -393,4 +430,5 @@ func refresh_current_level_assignments() -> void:
     
     before_start_assignment_list.load_assignments(cur_map_assignments.get("before_start", []))
     after_complete_assignment_list.load_assignments(cur_map_assignments.get("after_complete", []))
-    custom_failure_assignment_list.load_assignments(cur_map_assignments.get("custom_fail", []))
+    if custom_failure_assignment_list:
+        custom_failure_assignment_list.load_assignments(cur_map_assignments.get("custom_fail", []))

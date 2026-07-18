@@ -363,10 +363,28 @@ script = ExtResource("8_lcjex")
 [node name="InfoItem" parent="OverlayLayer/OverlayUI/RightCenter/InfoRoot/InfoPanel/InfoList" unique_id=739492208 instance=ExtResource("7_ijdo8")]
 layout_mode = 2
 
+[node name="Full" type="Control" parent="OverlayLayer/OverlayUI" unique_id=1099890474]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="IntermissionRoot" type="Control" parent="OverlayLayer/OverlayUI/Full" unique_id=14050545]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
 [node name="CreditsUI" parent="OverlayLayer" unique_id=1760736673 groups=["Credits"] instance=ExtResource("6_4cgsu")]
 visible = false
 
-[node name="LevelSelectRoot" type="Control" parent="OverlayLayer" unique_id=718450970 node_paths=PackedStringArray("level_select_ui", "darkener", "background_editor_container", "bg_style_editor", "add_new_list_panel", "level_select_all", "edit_intermissions_container", "edit_intermission_assignements", "edit_intermissions") groups=["LevelSelectRoot"]]
+[node name="LevelSelectRoot" type="Control" parent="OverlayLayer" unique_id=718450970 node_paths=PackedStringArray("level_select_ui", "darkener", "background_editor_container", "bg_style_editor", "add_new_list_panel", "level_select_all", "intermissions_all", "edit_intermissions_container", "edit_intermission_assignements_container", "edit_intermission_assignements", "edit_intermissions", "game_view_container") groups=["LevelSelectRoot"]]
 process_mode = 3
 layout_mode = 3
 anchors_preset = 15
@@ -382,9 +400,12 @@ background_editor_container = NodePath("LevelSelectAll/BackgroundEditor")
 bg_style_editor = NodePath("LevelSelectAll/BackgroundEditor/MarginContainer/PanelContainer/ScrollContainer/MarginContainer/BGStyleEditor")
 add_new_list_panel = NodePath("LevelSelectAll/CenterContainer/NewListDialog")
 level_select_all = NodePath("LevelSelectAll")
-edit_intermissions_container = NodePath("EditIntermissions")
+intermissions_all = NodePath("EditIntermissions")
+edit_intermissions_container = NodePath("EditIntermissions/MarginContainer")
+edit_intermission_assignements_container = NodePath("EditIntermissions/CenterContainer")
 edit_intermission_assignements = NodePath("EditIntermissions/CenterContainer/EditIntermissionAssignments")
 edit_intermissions = NodePath("EditIntermissions/MarginContainer/IntermissionsEditor")
+game_view_container = NodePath("../../Display")
 
 [node name="MultiplyDarkenColor" type="ColorRect" parent="OverlayLayer/LevelSelectRoot" unique_id=1877095181]
 material = SubResource("CanvasItemMaterial_4cgsu")
@@ -466,7 +487,6 @@ grow_vertical = 2
 mouse_filter = 2
 
 [node name="CenterContainer" type="CenterContainer" parent="OverlayLayer/LevelSelectRoot/EditIntermissions" unique_id=102908692]
-visible = false
 layout_mode = 2
 size_flags_horizontal = 3
 mouse_filter = 2
@@ -475,6 +495,7 @@ mouse_filter = 2
 layout_mode = 2
 
 [node name="MarginContainer" type="MarginContainer" parent="OverlayLayer/LevelSelectRoot/EditIntermissions" unique_id=739232094]
+visible = false
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_constants/margin_left = 8
@@ -482,9 +503,10 @@ theme_override_constants/margin_top = 8
 theme_override_constants/margin_right = 8
 theme_override_constants/margin_bottom = 8
 
-[node name="IntermissionsEditor" parent="OverlayLayer/LevelSelectRoot/EditIntermissions/MarginContainer" unique_id=811355557 node_paths=PackedStringArray("background_style_preview") instance=ExtResource("17_p15gy")]
+[node name="IntermissionsEditor" parent="OverlayLayer/LevelSelectRoot/EditIntermissions/MarginContainer" unique_id=811355557 node_paths=PackedStringArray("background_style_preview", "other_intermission_preview_root") instance=ExtResource("17_p15gy")]
 layout_mode = 2
 background_style_preview = NodePath("../../../../../BGLayer/BGEffects")
+other_intermission_preview_root = NodePath("../../../../OverlayUI/Full/IntermissionRoot")
 
 [node name="MapEditorUILayer" type="CanvasLayer" parent="." unique_id=1275328928]
 layer = 10

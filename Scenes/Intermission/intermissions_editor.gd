@@ -83,6 +83,7 @@ func _ready() -> void:
     intermission_type_selector.item_selected.connect(on_intermission_type_selected)
     
     if game_editor_mode:
+        prints("game editor new binding")
         edit_new_intermission_button.pressed.connect(edit_new_intermission.bind(true))
     else:
         edit_new_intermission_button.pressed.connect(edit_new_intermission)
@@ -127,7 +128,7 @@ func edit_new_intermission(force_bundled: bool = false, force_custom_list: Strin
         is_editing_inside_level_list = force_custom_list
 
     var new_id: String = try_intermission_id
-    if GameManager.has_intermission_id(new_id, is_editing_inside_level_list):
+    if not new_id or GameManager.has_intermission_id(new_id, is_editing_inside_level_list):
         new_id = GameManager.get_available_numeric_intermission_id(is_editing_inside_level_list)
     var new_info: Dictionary = {
         "id": new_id,
@@ -156,12 +157,16 @@ func load_last_edited_intermission() -> void:
     load_intermission_from_id(last_edited_id)
 
 func load_intermission_from_id(intermission_id: String, from_custom_list: String = "") -> void:
+    is_editing_intermission = false
+    is_editing_inside_level_list = ""
     if not intermission_id or not GameManager.has_intermission_id(intermission_id, from_custom_list):
+        refresh_ui()
+        return
+    if not is_editing_inside_level_list and GameManager.current_game_is_release_locked:
+        refresh_ui()
         return
     is_editing_intermission = true
     is_editing_inside_level_list = from_custom_list
-    if not is_editing_inside_level_list and GameManager.current_game_is_release_locked:
-        return
 
     editing_intermission_info = GameManager.get_intermission_info(intermission_id, from_custom_list)
     if not editing_intermission_info:
@@ -188,6 +193,7 @@ func on_intermission_content_updated() -> void:
         return
     editing_intermission_info["content_items"] = intermission_content_editor.get_contents_info()
     save_edited_intermission_info()
+    update_intermission_preview()
 
 func on_enable_custom_background_pressed() -> void:
     background_style_editor.manual_copy_game_bg_style()
@@ -222,6 +228,8 @@ func on_edited_bg_style(bg_style: Dictionary) -> void:
     refresh_show_bg_style_ui()
 
 func update_bg_preview(bg_style: Dictionary) -> void:
+    if not is_visible_in_tree():
+        return
     background_style_preview.no_auto_update = true
     background_style_preview.set_bg_style(bg_style)
 
@@ -371,6 +379,8 @@ func refresh_ui() -> void:
     else:
         intermission_id_input.text = ""
         refresh_show_sections()
+    
+    update_intermission_preview()
 
 func refresh_show_sections(intermission_type: String = "") -> void:
     if not is_editing_intermission:
@@ -467,12 +477,16 @@ func on_back_pressed() -> void:
 
 func on_to_assignments_editor_pressed() -> void:
     if game_editor_mode:
+        GameManager.is_in_level_edit_mode = true
         GameManager.change_scene("Play", false, "intermission-assignment-editor")
     else:
         to_assignment_editor.emit()
 
 func update_intermission_preview() -> void:
-    if not is_editing_intermission:
+    if not is_visible_in_tree():
+        remove_intermission_preview()
+        return
+    if not is_editing_intermission or editing_intermission_info.get("type", "") != TYPE_INTERMISSION:
         remove_intermission_preview()
         return
     
@@ -507,3 +521,6 @@ func on_visibility_changed() -> void:
     if not game_editor_mode and not is_visible_in_tree():
         background_style_preview.no_auto_update = false
         background_style_preview.refresh_bg_style()
+
+    if game_editor_mode and is_visible_in_tree():
+        refresh_ui()

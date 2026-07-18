@@ -14,7 +14,7 @@ bg_color = Color(0.85486335, 0.85486335, 0.8548633, 0.08627451)
 expand_margin_left = 19.0
 expand_margin_right = 19.0
 
-[node name="EditIntermissionAssignments" type="HBoxContainer" unique_id=1591271212 node_paths=PackedStringArray("main_content_container", "before_start_assignment_list", "after_complete_assignment_list", "after_last_level_assignment_list", "game_fail_section", "game_fail_assignment_list", "before_container", "after_container", "list_or_list_name_section", "type_label", "level_or_list_name_label", "next_nav_button", "previous_nav_button", "go_to_intermission_editor_button", "edit_new_intermission_button", "mode_tab_buttons_container", "game_mode_btn", "bundled_lists_btn", "custom_lists_btn", "levels_btn")]
+[node name="EditIntermissionAssignments" type="HBoxContainer" unique_id=1591271212 node_paths=PackedStringArray("main_content_container", "before_start_assignment_list", "after_complete_assignment_list", "after_last_level_assignment_list", "editing_cur_level_disclaimer", "game_fail_section", "game_fail_assignment_list", "before_container", "after_container", "list_or_list_name_section", "type_label", "level_or_list_name_label", "next_nav_button", "previous_nav_button", "back_button", "go_to_intermission_editor_button", "edit_new_intermission_button", "mode_tab_buttons_container", "game_mode_btn", "bundled_lists_btn", "custom_lists_btn", "levels_btn")]
 offset_left = 8.0
 offset_top = 8.0
 offset_right = 382.0
@@ -25,6 +25,7 @@ main_content_container = NodePath("EditIntermissionAssignmentsPanel/MarginContai
 before_start_assignment_list = NodePath("EditIntermissionAssignmentsPanel/MarginContainer/VBoxContainer2/MainContentSpaceHolder/MainContentSection/HBoxContainer3/VBoxContainer4/BeforeStartingList")
 after_complete_assignment_list = NodePath("EditIntermissionAssignmentsPanel/MarginContainer/VBoxContainer2/MainContentSpaceHolder/MainContentSection/HBoxContainer/VBoxContainer/AfterCompletingList")
 after_last_level_assignment_list = NodePath("EditIntermissionAssignmentsPanel/MarginContainer/VBoxContainer2/MainContentSpaceHolder/MainContentSection/HBoxContainer/AfterLastLevelContainer/AfterLastList")
+editing_cur_level_disclaimer = NodePath("EditIntermissionAssignmentsPanel/MarginContainer/VBoxContainer2/MainContentSpaceHolder/MainContentSection/EditingCurrentLevelDisclaimer")
 game_fail_section = NodePath("EditIntermissionAssignmentsPanel/MarginContainer/VBoxContainer2/MainContentSpaceHolder/MainContentSection/GameEventFailSection")
 game_fail_assignment_list = NodePath("EditIntermissionAssignmentsPanel/MarginContainer/VBoxContainer2/MainContentSpaceHolder/MainContentSection/GameEventFailSection/VBoxContainer4/GameFailList")
 before_container = NodePath("EditIntermissionAssignmentsPanel/MarginContainer/VBoxContainer2/MainContentSpaceHolder/MainContentSection/HBoxContainer3")
@@ -33,7 +34,8 @@ list_or_list_name_section = NodePath("EditIntermissionAssignmentsPanel/MarginCon
 type_label = NodePath("EditIntermissionAssignmentsPanel/MarginContainer/VBoxContainer2/MainContentSpaceHolder/MainContentSection/PanelContainer/HBoxContainer2/Label")
 level_or_list_name_label = NodePath("EditIntermissionAssignmentsPanel/MarginContainer/VBoxContainer2/MainContentSpaceHolder/MainContentSection/PanelContainer/HBoxContainer2/ListNameLabel")
 next_nav_button = NodePath("EditIntermissionAssignmentsPanel/MarginContainer/VBoxContainer2/MainContentSpaceHolder/MainContentSection/PanelContainer/HBoxContainer2/NavForwardButton")
-previous_nav_button = NodePath("EditIntermissionAssignmentsPanel/MarginContainer/VBoxContainer2/MainContentSpaceHolder/MainContentSection/PanelContainer/HBoxContainer2/NavForwardButton")
+previous_nav_button = NodePath("EditIntermissionAssignmentsPanel/MarginContainer/VBoxContainer2/MainContentSpaceHolder/MainContentSection/PanelContainer/HBoxContainer2/NavBackButton")
+back_button = NodePath("EditIntermissionAssignmentsPanel/MarginContainer/VBoxContainer2/BackButtonContainer/HBoxContainer2/BackButton")
 go_to_intermission_editor_button = NodePath("IntermissionEditorButtons/GoToIntermissionEditorButton")
 edit_new_intermission_button = NodePath("IntermissionEditorButtons/EditNewIntermissionButton")
 mode_tab_buttons_container = NodePath("EditIntermissionAssignmentsPanel/MarginContainer/VBoxContainer2/VBoxContainer2")
@@ -237,7 +239,7 @@ theme_override_constants/separation = 8
 layout_mode = 2
 alignment = 1
 
-[node name="Button" type="Button" parent="EditIntermissionAssignmentsPanel/MarginContainer/VBoxContainer2/BackButtonContainer/HBoxContainer2" unique_id=731202429]
+[node name="BackButton" type="Button" parent="EditIntermissionAssignmentsPanel/MarginContainer/VBoxContainer2/BackButtonContainer/HBoxContainer2" unique_id=731202429]
 layout_mode = 2
 text = "Back"
 

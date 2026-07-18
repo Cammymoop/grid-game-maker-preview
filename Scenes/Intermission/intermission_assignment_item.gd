@@ -3,14 +3,15 @@ extends Control
 signal request_remove()
 signal request_edit(intermission_id: String)
 signal request_edit_duplicate(intermission_id: String)
+signal changed()
 
 signal request_move_relative(direction: int)
 signal request_move_top_bottom(direction: int)
 
 @export var intermission_id_selector: OptionButton
 
-@export var edit_button: ButtonContainer
-@export var edit_duplicate_button: ButtonContainer
+@export var edit_button: Button
+@export var edit_duplicate_button: Button
 
 @export var up_button: ButtonContainer
 @export var down_button: ButtonContainer
@@ -25,6 +26,7 @@ func _ready() -> void:
     base_locked = GameManager.current_game_is_release_locked
 
     edit_button.pressed.connect(on_edit_button_pressed)
+    edit_duplicate_button.pressed.connect(on_edit_duplicate_button_pressed)
     up_button.pressed.connect(on_up_button_pressed)
     down_button.pressed.connect(on_down_button_pressed)
     remove_button.pressed.connect(on_remove_button_pressed)
@@ -62,6 +64,9 @@ func get_intermission_id() -> String:
 func on_edit_button_pressed() -> void:
     request_edit.emit(get_intermission_id())
 
+func on_edit_duplicate_button_pressed() -> void:
+    request_edit_duplicate.emit(get_intermission_id())
+
 func on_remove_button_pressed() -> void:
     request_remove.emit()
 
@@ -80,6 +85,7 @@ func _move_pressed(direction: int) -> void:
 func on_selector_item_selected(index: int) -> void:
     var current_id: = intermission_id_selector.get_item_text(index)
     refresh_is_local_intermission(current_id)
+    changed.emit()
 
 func refresh_is_local_intermission(intermission_id: String) -> void:
     var is_local: = intermission_id.begins_with(":")

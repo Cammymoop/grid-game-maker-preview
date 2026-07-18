@@ -60,6 +60,7 @@ func _add_assignment_item() -> IntermissionAssignmentItem:
     assignment_item.request_edit.connect(edit_intermission_id)
     assignment_item.request_edit_duplicate.connect(edit_duplicate_intermission_id.bind(assignment_item))
     assignment_item.request_remove.connect(remove_assignment_item.bind(assignment_item))
+    assignment_item.changed.connect(list_edited.emit)
     return assignment_item
 
 func _get_local_intermissions() -> Array[String]:

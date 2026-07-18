@@ -27,6 +27,9 @@ func setup(intermission_id: String) -> void:
 func setup_with_info(intermission_info: Dictionary) -> void:
     clear_content()
     
+    light_bg.hide()
+    dark_bg.hide()
+    
     var content_items: Array = intermission_info.get("content_items", [])
     content_section.visible = content_items.size() > 0
     for item_info in content_items:
@@ -61,10 +64,13 @@ func _get_credits_image_item(item_info: Dictionary) -> CreditsImage:
     var texture_sub_index: int = item_info.get("texture_sub_index", 0)
     var atlas_texture: Texture2D = Utility.atlas_texture_from_texture_index(texture_id, texture_sub_index)
 
-    var relative_scale: float = item_info.get("relative_scale", 1.0)
-    var with_dark_bg: bool = item_info.get("with_dark_bg", false)
-    var sharp_scale: bool = not item_info.get("smooth_scale", false)
+    var relative_scale: float = item_info.get("scale", 1.0)
+    var with_dark_bg: bool = item_info.get("dark_background", false)
+    var sharp_scale: bool = not item_info.get("scale_smooth", false)
     image_item.set_texture(atlas_texture, relative_scale, with_dark_bg, sharp_scale)
+
+    var mod_color: Color = Utility.get_dict_color(item_info, "mod_color", Color.WHITE)
+    image_item.set_mod_color(mod_color)
     return image_item
 
 func clear_content() -> void:

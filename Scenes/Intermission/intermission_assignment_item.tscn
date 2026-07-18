@@ -6,9 +6,15 @@
 [ext_resource type="Texture2D" uid="uid://c1h0arduxil1j" path="res://assets/img/button_icons/down_small.png" id="3_2mfbi"]
 [ext_resource type="PackedScene" uid="uid://cemds60k8ytal" path="res://Scenes/UI/icon_button.tscn" id="4_5qkhl"]
 
-[node name="IntermissionAssignmentItem" type="HBoxContainer" unique_id=392717682]
+[node name="IntermissionAssignmentItem" type="HBoxContainer" unique_id=392717682 node_paths=PackedStringArray("intermission_id_selector", "edit_button", "edit_duplicate_button", "up_button", "down_button", "remove_button")]
 theme_override_constants/separation = 8
 script = ExtResource("1_pr5s5")
+intermission_id_selector = NodePath("HBoxContainer2/IntermissionIDSelector")
+edit_button = NodePath("HBoxContainer3/EditButton")
+edit_duplicate_button = NodePath("HBoxContainer3/EditDuplicateButton")
+up_button = NodePath("HBoxContainer/UpButton")
+down_button = NodePath("HBoxContainer/DownButton")
+remove_button = NodePath("RemoveItemButton")
 
 [node name="HBoxContainer" type="HBoxContainer" parent="." unique_id=1327091536]
 layout_mode = 2

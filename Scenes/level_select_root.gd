@@ -16,10 +16,16 @@ const IntermissionEditor = preload("res://Scenes/Intermission/intermissions_edit
 @export var open_levels_folder_button: Button
 
 @export var level_select_all: Control
+@export var intermissions_all: Control
+
 @export var edit_intermissions_container: Control
+
+@export var edit_intermission_assignements_container: Control
 
 @export var edit_intermission_assignements: Control
 @export var edit_intermissions: IntermissionEditor
+
+@export var game_view_container: Control
 
 func _ready() -> void:
     if no_web_container:
@@ -28,8 +34,10 @@ func _ready() -> void:
         open_levels_folder_button.pressed.connect(on_open_levels_folder_button_pressed)
     
     edit_intermissions.to_assignment_editor.connect(show_edit_intermission_assignements)
+    edit_intermissions.to_level_list_editor.connect(back_from_edit_intermissions)
     edit_intermission_assignements.to_intermission_editor.connect(on_assignment_editor_to_intermission_editor)
     edit_intermission_assignements.to_intermission_editor_new.connect(on_assignments_edit_new_intermission)
+    edit_intermission_assignements.request_back.connect(back_from_edit_intermissions)
 
     add_new_list_panel.hide()
     add_new_list_panel.add_list_requested.connect(adding_new_list)
@@ -37,11 +45,15 @@ func _ready() -> void:
     hide()
     level_select_ui.level_select_root = self
     level_select_ui.close_level_select.connect(on_level_select_ui_close_level_select)
+    level_select_ui.to_intermission_assignments.connect(show_edit_intermission_assignements)
+    
+    level_select_all.hide()
+    intermissions_all.hide()
 
 func _unhandled_input(event: InputEvent) -> void:
     if not visible:
         return
-    if edit_intermissions_container.visible:
+    if intermissions_all.visible:
         if Utility.event_is_menu_back_just_pressed(event):
             accept_event()
             back_from_edit_intermissions()
@@ -69,16 +81,17 @@ func close_level_select() -> void:
         #GlobalToaster.show_toast_message("Saved Changes")
     if background_editor_container.visible:
         hide_background_editor()
+    game_view_container.show()
     level_select_all.hide()
     _hide_intermission_editor_stuff()
 
     hide()
 
 func _hide_intermission_editor_stuff() -> void:
-    if edit_intermissions_container.visible:
+    if intermissions_all.visible:
         edit_intermissions.remove_intermission_preview()
         hide_background_editor()
-        edit_intermissions_container.hide()
+        intermissions_all.hide()
 
 func close_intermission_editor() -> void:
     close_level_select()
@@ -86,6 +99,7 @@ func close_intermission_editor() -> void:
 func back_from_edit_intermissions() -> void:
     if not visible:
         return
+    game_view_container.show()
     level_select_all.show()
     _hide_intermission_editor_stuff()
 
@@ -93,9 +107,12 @@ func back_from_edit_intermissions() -> void:
 func show_edit_intermission_assignements() -> void:
     if not visible:
         open_level_select()
+    game_view_container.show()
     level_select_all.hide()
-    edit_intermissions_container.show()
+    intermissions_all.show()
+    edit_intermissions_container.hide()
     edit_intermissions.hide()
+    edit_intermission_assignements_container.show()
     edit_intermission_assignements.show()
     edit_intermission_assignements.refresh_ui()
     darkener.show()
@@ -103,9 +120,12 @@ func show_edit_intermission_assignements() -> void:
 func show_edit_intermissions() -> void:
     if not visible:
         open_level_select()
+    game_view_container.hide()
     level_select_all.hide()
+    intermissions_all.show()
     edit_intermissions_container.show()
     edit_intermissions.show()
+    edit_intermission_assignements_container.hide()
     edit_intermission_assignements.hide()
     darkener.hide()
 

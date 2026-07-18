@@ -18,7 +18,7 @@ var _paused_hidden: = false
 func _ready() -> void:
     process_mode = Node.PROCESS_MODE_ALWAYS
     add_child(hide_delay_timer)
-    hide_delay_timer.process_mode = Node.PROCESS_MODE_PAUSABLE
+    #hide_delay_timer.process_mode = Node.PROCESS_MODE_PAUSABLE
     var show_level_title_opt: String = GameManager.get_game_setting("show_level_title", "At Level Start").to_lower()
     is_show_level_title = show_level_title_opt != "hide"
     is_keep_level_title_shown = show_level_title_opt == "always"

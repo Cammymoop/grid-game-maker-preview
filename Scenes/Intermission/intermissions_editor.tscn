@@ -53,7 +53,7 @@ corner_radius_bottom_right = 3
 corner_radius_bottom_left = 3
 corner_detail = 5
 
-[node name="IntermissionsEditor" type="PanelContainer" unique_id=811355557 node_paths=PackedStringArray("intermission_id_input", "intermission_type_selector", "edit_new_intermission_button", "duplicate_button", "edit_intermission_menu_button", "storage_location_selector", "custom_list_name_selector", "bg_style_edit_container", "background_style_editor", "background_style_preview", "intermission_content_editor", "enable_custom_background_button", "main_options_section", "content_and_bg_section", "content_section", "hide_overlay_button", "back_button", "to_assignments_editor_button", "game_editor_bg_container", "main_options_section_panel")]
+[node name="IntermissionsEditor" type="PanelContainer" unique_id=811355557 node_paths=PackedStringArray("intermission_id_input", "intermission_type_selector", "edit_new_intermission_button", "duplicate_button", "edit_intermission_menu_button", "storage_location_selector", "custom_list_name_selector", "bg_style_edit_container", "background_style_editor", "background_style_preview", "intermission_content_editor", "enable_custom_background_button", "main_options_section", "content_and_bg_section", "content_section", "hide_overlay_button", "back_button", "to_assignments_editor_button", "game_editor_bg_container", "main_options_section_panel", "game_editor_intermission_preview_root")]
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -81,6 +81,7 @@ back_button = NodePath("VBoxContainer/HBoxContainer/HBoxContainer/BackToLevelSel
 to_assignments_editor_button = NodePath("VBoxContainer/HBoxContainer/GoToAssignmentEditorButton")
 game_editor_bg_container = NodePath("VBoxContainer/ContentAndBGOptions/VBoxContainer/MarginContainer/BGEffectsClip")
 main_options_section_panel = NodePath("VBoxContainer/PanelContainer")
+game_editor_intermission_preview_root = NodePath("VBoxContainer/ContentAndBGOptions/VBoxContainer/MarginContainer/BGEffectsClip/PreviewIntermissionRoot")
 
 [node name="VBoxContainer" type="VBoxContainer" parent="." unique_id=370450557]
 layout_mode = 2

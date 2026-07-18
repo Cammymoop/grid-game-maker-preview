@@ -838,6 +838,7 @@ func create_alpha_mask_from_texture_region(tex: Texture2D, tex_rect: Rect2i, tex
 
 func create_alpha_mask_from_texture_region_alpha(tex: Texture2D, tex_rect: Rect2i, clip_outer: bool) -> Texture:
     var mask_img: Image = create_expanded_mask_from_rect(tex, tex_rect, Color.TRANSPARENT, clip_outer)
+    mask_img.fix_alpha_edges()
     return ImageTexture.create_from_image(mask_img)
 
 func create_alpha_mask_from_bw_texture_region(tex: Texture2D, tex_rect: Rect2i, clip_outer: bool) -> Texture:
@@ -845,6 +846,7 @@ func create_alpha_mask_from_bw_texture_region(tex: Texture2D, tex_rect: Rect2i, 
     for y in mask_img.get_height():
         for x in mask_img.get_width():
             mask_img.set_pixel(x, y, Color.WHITE if mask_img.get_pixel(x, y).r > 0.5 else Color.TRANSPARENT)
+    mask_img.fix_alpha_edges()
     return ImageTexture.create_from_image(mask_img)
 
 func set_digit_display_number(new_number: Variant, digit_display: DigitDisplay) -> void:

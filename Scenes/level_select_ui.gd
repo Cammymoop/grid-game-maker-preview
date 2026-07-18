@@ -1,6 +1,7 @@
 extends VBoxContainer
 
 signal close_level_select()
+signal to_intermission_assignments()
 
 const SingleLevelList = preload("res://Scenes/single_level_list.gd")
 const LevelSelectUIRoot = preload("res://Scenes/level_select_root.gd")
@@ -95,6 +96,8 @@ func _ready() -> void:
     rearrange_lists_back_button.pressed.connect(on_rearrange_lists_back_button_pressed)
     
     edit_autosave_button.pressed.connect(on_edit_autosave_button_pressed)
+    
+    edit_intermissions_button.pressed.connect(to_intermission_assignments.emit)
 
     refresh()
     back_to_select_from_list_settings()

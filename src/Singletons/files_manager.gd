@@ -560,6 +560,7 @@ func load_file_as_texture(file_path: String) -> Texture:
 		push_error("File %s does not exist" % [file_path])
 		return null
 	var loaded_img: = Image.load_from_file(file_path)
+	loaded_img.fix_alpha_edges()
 	return ImageTexture.create_from_image(loaded_img)
 
 func sanitize_level_filename(level_name: String) -> String:

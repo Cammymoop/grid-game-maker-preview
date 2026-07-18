@@ -12,3 +12,6 @@ func set_texture(texture: Texture2D, relative_scale: float, with_dark_bg: bool, 
     
     if sharp_scale:
         texture_rect.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+
+func set_mod_color(color: Color) -> void:
+    texture_rect.modulate = color

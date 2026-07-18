@@ -2483,7 +2483,9 @@ func _render_foreign_sprite_preview(entity_id: int, foreign_entity_def: Dictiona
 
     await Utility.force_rerender_subviewport(sub_vp)
 
-    var img_tex: ImageTexture = ImageTexture.create_from_image(sub_vp.get_texture().get_image())
+    var img: = sub_vp.get_texture().get_image()
+    img.fix_alpha_edges()
+    var img_tex: ImageTexture = ImageTexture.create_from_image(img)
     return img_tex
 
 func render_single_sprite_preview(entity_id: int) -> void:
@@ -2494,7 +2496,9 @@ func render_single_sprite_preview(entity_id: int) -> void:
 
     var sub_vp: SubViewport = sprite_previewer.get_subviewport()
     await Utility.force_rerender_subviewport(sub_vp)
-    var img_tex: ImageTexture = ImageTexture.create_from_image(sub_vp.get_texture().get_image())
+    var img: = sub_vp.get_texture().get_image()
+    img.fix_alpha_edges()
+    var img_tex: ImageTexture = ImageTexture.create_from_image(img)
     save_entity_sprite_snapshot(entity_id, img_tex, 1)
     sprite_previewer.queue_free()
     entity_snapshots_updated.emit()
@@ -2506,7 +2510,9 @@ func _update_sprite_preview_for_entity(entity_id: int, entity_def: Dictionary, s
     var sub_vp: SubViewport = sprite_previewer.get_subviewport()
 
     await Utility.force_rerender_subviewport(sub_vp)
-    var img_tex: ImageTexture = ImageTexture.create_from_image(sub_vp.get_texture().get_image())
+    var img: = sub_vp.get_texture().get_image()
+    img.fix_alpha_edges()
+    var img_tex: ImageTexture = ImageTexture.create_from_image(img)
     save_entity_sprite_snapshot(entity_id, img_tex, 1)
 
 func _get_all_entities_that_are_tailing_something(include_inactive: bool = false) -> Array[BaseEntity]:

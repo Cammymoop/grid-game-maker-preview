@@ -1275,6 +1275,7 @@ func new_level_edited_state_and_emit() -> void:
 	save_edited()
 	level_state_loaded.emit()
 	any_state_loaded.emit()
+	bg_style_changed.emit()
 
 func new_museum_level():
 	loaded_level_name = "Museum"
@@ -1407,6 +1408,13 @@ func post_scene_change() -> void:
 							load_editor_autosave()
 			else:
 				new_empty_level()
+			if _requested_tab:
+				var requested_tab: = _requested_tab
+				_requested_tab = ""
+				if requested_tab == "intermission-assignment-editor":
+					var level_select_root: = Utility.get_level_select_root()
+					if level_select_root:
+						level_select_root.show_edit_intermission_assignements()
 		else:
 			play_current_save_level()
 			#play_first_level()
@@ -3171,7 +3179,7 @@ func remove_current_level_custom_bg_info() -> void:
 	if cur_scene != "Play":
 		return
 	if MapManager.has_metadata_value("bg_style"):
-		MapManager.remove_metadata_value("bg_style")
+		MapManager.erase_metadata_value("bg_style")
 		bg_style_changed.emit()
 
 func remove_level_list_custom_bg_info(level_list_name: String) -> void:
@@ -4088,6 +4096,8 @@ func _get_all_intermission_ids_from(intermissions: Array) -> Array[String]:
 	return all_intermission_ids
 
 func has_intermission_id(intermission_id: String, from_custom_list: String = "") -> bool:
+	if not intermission_id:
+		return false
 	if not from_custom_list:
 		return _has_bundled_intermission_id(intermission_id)
 	return _has_custom_intermission_id(intermission_id, from_custom_list)
@@ -4298,7 +4308,7 @@ func set_map_metadata_into_level_file(level_name: String, map_metadata: Dictiona
 
 	var level_data: = FilesManager.get_level_data(get_identified_game_name(), level_name)
 	level_data_set_map_metadata(level_data, map_metadata)
-	FilesManager.save_level_data(get_identified_game_name(), level_name, level_data)
+	FilesManager.save_level_to_name(get_identified_game_name(), level_data, level_name)
 
 func get_map_metadata_from_level_file(level_name: String) -> Dictionary:
 	if not FilesManager.level_exists(get_identified_game_name(), level_name):

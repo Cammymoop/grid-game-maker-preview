@@ -162,10 +162,14 @@ func update_scale() -> void:
     update_position_and_snap()
 
 func scroll_updated() -> void:
+    if not parent_vp:
+        parent_vp = get_viewport()
     camera_scroll_pos = -parent_vp.canvas_transform.origin
     update_position_and_snap()
 
 func update_position_and_snap() -> void:
+    if not parent_vp:
+        parent_vp = get_viewport()
     var half_vp_size: Vector2 = parent_vp.size * 0.5
 
     position = half_vp_size + (camera_scroll_pos * parallax_amount) + accumulated_auto_scroll

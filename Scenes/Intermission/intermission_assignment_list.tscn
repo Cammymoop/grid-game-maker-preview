@@ -5,9 +5,11 @@
 [ext_resource type="Texture2D" uid="uid://bruxxxosd2tqa" path="res://assets/img/button_icons/intermission.png" id="2_wfyk2"]
 [ext_resource type="Texture2D" uid="uid://c71dfd3j0223d" path="res://assets/img/button_icons/plus_small.png" id="3_h2wqx"]
 
-[node name="IntermissionAssignmentList" type="VBoxContainer" unique_id=1055885602]
+[node name="IntermissionAssignmentList" type="VBoxContainer" unique_id=1055885602 node_paths=PackedStringArray("add_assignment_button", "assignment_list_container")]
 theme_override_constants/separation = 0
 script = ExtResource("1_wfyk2")
+add_assignment_button = NodePath("AddIntermissionButton")
+assignment_list_container = NodePath("ItemContainer")
 
 [node name="ItemContainer" type="VBoxContainer" parent="." unique_id=2123124323]
 layout_mode = 2
@@ -38,10 +40,12 @@ mouse_filter = 2
 
 [node name="TextureRect" type="TextureRect" parent="AddIntermissionButton/MarginContainer/HBoxContainer" unique_id=1555739071]
 layout_mode = 2
+mouse_filter = 2
 texture = ExtResource("2_wfyk2")
 
 [node name="TextureRect2" type="TextureRect" parent="AddIntermissionButton/MarginContainer/HBoxContainer" unique_id=1854290068]
 layout_mode = 2
 size_flags_vertical = 4
+mouse_filter = 2
 texture = ExtResource("3_h2wqx")
 stretch_mode = 2

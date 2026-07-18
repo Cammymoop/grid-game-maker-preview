@@ -42,6 +42,8 @@ func _process(_delta: float) -> void:
     update_particles_position()
 
 func update_particles_position() -> void:
+    if not parent_vp:
+        parent_vp = get_viewport()
     var vp_center: Vector2 = parent_vp.size / 2
     if not follow_viewport_enabled:
         void_particles.position = vp_center
