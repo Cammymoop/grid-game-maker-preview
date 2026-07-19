@@ -302,6 +302,8 @@ func should_bump_move() -> bool:
     #return process_phase >= 3
 
 func _physics_process(delta: float) -> void:
+    if GameManager.is_intermission_mode:
+        return
     entity_list_process(delta)
 
 func handle_movement_mode_stuff() -> void:

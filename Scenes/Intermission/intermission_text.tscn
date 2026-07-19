@@ -2,6 +2,8 @@
 
 [ext_resource type="Script" uid="uid://ng51pemde5lu" path="res://Scenes/Intermission/intermission_text.gd" id="1_2tooc"]
 [ext_resource type="FontFile" uid="uid://ctl1lahtrlfks" path="res://assets/font/default_mono_font.tres" id="1_htk8b"]
+[ext_resource type="StyleBox" uid="uid://buf74pa6or5fd" path="res://assets/ui/intermission_light_bg.tres" id="2_3qe2m"]
+[ext_resource type="StyleBox" uid="uid://bobvdbaskluat" path="res://assets/ui/intermission_dark_bg.tres" id="3_20ve2"]
 
 [node name="IntermissionText" type="MarginContainer" unique_id=1488913074 node_paths=PackedStringArray("label")]
 offset_right = 40.0
@@ -9,6 +11,8 @@ offset_bottom = 40.0
 theme_override_constants/margin_top = 18
 theme_override_constants/margin_bottom = 18
 script = ExtResource("1_2tooc")
+bg_stylebox_light = ExtResource("2_3qe2m")
+bg_stylebox_dark = ExtResource("3_20ve2")
 label = NodePath("Label")
 
 [node name="Label" type="Label" parent="." unique_id=1782653433]

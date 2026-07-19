@@ -14,6 +14,8 @@ const TYPE_SPACE: String = IntermissionConfigItem.TYPES[IntermissionConfigItem.S
 var intermission_text_scn: = preload("res://Scenes/Intermission/intermission_text.tscn")
 var credits_image_scn: = preload("res://Scenes/credits_image.tscn")
 
+const SPACE_MULTIPLIER: float = 5
+
 @export var dark_bg: Control
 @export var light_bg: Control
 
@@ -27,8 +29,8 @@ func setup(intermission_id: String) -> void:
 func setup_with_info(intermission_info: Dictionary) -> void:
     clear_content()
     
-    light_bg.hide()
-    dark_bg.hide()
+    light_bg.visible = intermission_info.get("light_background", true)
+    dark_bg.visible = not light_bg.visible and intermission_info.get("dark_background", false)
     
     var content_items: Array = intermission_info.get("content_items", [])
     content_section.visible = content_items.size() > 0
@@ -52,7 +54,7 @@ func append_item(item_info: Dictionary) -> void:
         content_section.add_child(image_item)
     elif item_type == TYPE_SPACE:
         var space_item: Control = Control.new()
-        space_item.custom_minimum_size.y = minf(item_info.get("space_amount", 0), 200)
+        space_item.custom_minimum_size.y = minf(item_info.get("space_amount", 0) * SPACE_MULTIPLIER, 400)
         space_item.mouse_filter = Control.MOUSE_FILTER_IGNORE
         content_section.add_child(space_item)
 
@@ -71,6 +73,10 @@ func _get_credits_image_item(item_info: Dictionary) -> CreditsImage:
 
     var mod_color: Color = Utility.get_dict_color(item_info, "mod_color", Color.WHITE)
     image_item.set_mod_color(mod_color)
+    
+    if item_info.get("light_background", false):
+        image_item.make_bg_light()
+
     return image_item
 
 func clear_content() -> void:

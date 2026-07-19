@@ -1623,3 +1623,8 @@ func starting_event(event_name: String) -> void:
             continue
         var positions_of_tile: = get_all_positions_of_tile(t_id)
         resolve_tile_individual_events(positions_of_tile, event_name, null, t_id, false)
+
+func get_fail_state_intermission_info() -> Dictionary:
+    if not map_metadata.has("fail_state_intermission_info"):
+        return GameManager.get_current_list_fail_state_intermission_info()
+    return map_metadata["fail_state_intermission_info"]

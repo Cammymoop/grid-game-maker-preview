@@ -27,6 +27,8 @@ const ScalarValueInput = preload("res://src/GameEditor/ConditionalEditor/scalar_
 @export var text_color_picker: ColorPickerButton
 @export var text_outline_color_picker: ColorPickerButton
 
+@export var text_background_selector: OptionButton
+
 @export var move_up_button: ButtonContainer
 @export var move_down_button: ButtonContainer
 
@@ -56,6 +58,7 @@ func _ready() -> void:
     text_outline_color_picker.color_changed.connect(item_updated.emit.unbind(1))
     text_outline_enabled_toggle.toggled.connect(item_updated.emit.unbind(1))
     font_size_input.value_changed.connect(item_updated.emit.unbind(1))
+    text_background_selector.item_selected.connect(item_updated.emit.unbind(1))
     
     space_amount_input.value_changed.connect(item_updated.emit.unbind(1))
 
@@ -114,8 +117,17 @@ func load_item_info(item_info: Dictionary) -> void:
         text_color_picker.color = Utility.get_dict_color(item_info, "text_color", Color.WHITE)
         text_outline_enabled_toggle.button_pressed = item_info.get("text_outline_enabled", true)
         text_outline_color_picker.color = Utility.get_dict_color(item_info, "text_outline_color", Color.BLACK)
+        
+        var light_background: bool = item_info.get("light_background", false)
+        var dark_background: bool = item_info.get("dark_background", false)
+        if light_background:
+            text_background_selector.selected = 1
+        elif dark_background:
+            text_background_selector.selected = 2
+        else:
+            text_background_selector.selected = 0
     else:
-        space_amount_input.set_value(item_info.get("space_amount", 20.0))
+        space_amount_input.set_value(item_info.get("space_amount", 10.0))
 
 func get_item_info() -> Dictionary:
     var info: = {
@@ -131,6 +143,8 @@ func get_item_info() -> Dictionary:
         info["text_outline_enabled"] = text_outline_enabled_toggle.button_pressed
         if text_outline_enabled_toggle.button_pressed:
             info["text_outline_color"] = Utility.color_string(text_outline_color_picker.color)
+        info["light_background"] = text_background_selector.selected == 1
+        info["dark_background"] = text_background_selector.selected == 2
     elif is_image:
         info.merge(image_config_section.get_image_info())
     else:

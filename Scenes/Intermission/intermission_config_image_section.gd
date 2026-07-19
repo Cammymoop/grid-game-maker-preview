@@ -20,7 +20,7 @@ var current_texture_sub_index: int = 0
 @export var scale_input: ScalarValueInput
 @export var scale_smooth_toggle: CheckButton
 
-@export var dark_background_toggle: CheckButton
+@export var background_selector: OptionButton
 
 @export var mod_color_picker: ColorPickerButton
 
@@ -30,7 +30,7 @@ func _ready() -> void:
     scale_input.value_changed.connect(other_changed.emit.unbind(1))
     scale_smooth_toggle.toggled.connect(other_changed.emit.unbind(1))
     mod_color_picker.color_changed.connect(other_changed.emit.unbind(1))
-    dark_background_toggle.toggled.connect(other_changed.emit.unbind(1))
+    background_selector.item_selected.connect(other_changed.emit.unbind(1))
 
 func set_image(texture_id: int, texture_sub_index: int) -> void:
     current_texture_id = texture_id
@@ -72,7 +72,15 @@ func set_image_info(item_info: Dictionary) -> void:
     scale_input.set_value(item_info.get("scale", 1.0))
     scale_smooth_toggle.set_pressed_no_signal(item_info.get("scale_smooth", false))
     mod_color_picker.color = Utility.get_dict_color(item_info, "mod_color", Color.WHITE)
-    dark_background_toggle.set_pressed_no_signal(item_info.get("dark_background", false))
+    
+    var light_background: bool = item_info.get("light_background", false)
+    var dark_background: bool = item_info.get("dark_background", false)
+    if light_background:
+        background_selector.selected = 1
+    elif dark_background:
+        background_selector.selected = 2
+    else:
+        background_selector.selected = 0
 
 func get_image_info() -> Dictionary:
     var ret: =  {
@@ -81,6 +89,7 @@ func get_image_info() -> Dictionary:
         "scale": scale_input.get_value(),
         "scale_smooth": scale_smooth_toggle.button_pressed,
         "mod_color": Utility.color_string(mod_color_picker.color),
-        "dark_background": dark_background_toggle.button_pressed,
+        "light_background": background_selector.selected == 1,
+        "dark_background": background_selector.selected == 2,
     }
     return ret

@@ -356,9 +356,10 @@ func refresh_assignment_lists() -> void:
 
 func update_and_save_current() -> void:
     var current_mode: = get_current_mode()
+    var locked: = GameManager.current_game_is_release_locked
     
     if current_mode == Modes.BUNDLED_LISTS or current_mode == Modes.CUSTOM_LISTS:
-        if not current_level_list_name:
+        if not current_level_list_name or (locked and GameManager.is_level_list_bundled(current_level_list_name)):
             return
         var list_info: = GameManager._get_level_list(current_level_list_name)
         if not list_info:
@@ -391,6 +392,8 @@ func update_and_save_current() -> void:
             update_and_save_edited_level()
         else:
             if not FilesManager.level_exists(GameManager.get_identified_game_name(), current_level_name):
+                return
+            if locked and GameManager.is_level_bundled(current_level_name):
                 return
             var cur_map_metadata: = GameManager.get_map_metadata_from_level_file(current_level_name)
             

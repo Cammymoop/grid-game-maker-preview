@@ -19,6 +19,7 @@ var active = false
 
 @export var regen_museum_button: Button
 
+@export var credits_button: Button
 @export var level_title_edit: LineEdit
 @export var level_subtitle_edit: LineEdit
 
@@ -274,6 +275,16 @@ func on_show() -> void:
 		var level_notes: String = MapManager.get_metadata_value("level_notes", "")
 		level_notes_text_edit.text = level_notes
 		adjust_level_notes_edit_height()
+	else:
+		var is_intermission: = GameManager.is_intermission_mode
+		
+		reload_checkpoint_button.disabled = not is_intermission
+		restart_level_button.disabled = not is_intermission
+		regen_museum_button.disabled = not is_intermission
+		level_edit_mode_button.disabled = not is_intermission
+		credits_button.disabled = not is_intermission
+		level_select_button.disabled = not is_intermission
+		
 	
 	refresh_level_settings()
 

@@ -1,6 +1,7 @@
 extends PanelContainer
 
 @export var bg_stylebox_dark: StyleBoxFlat
+@export var bg_stylebox_light: StyleBoxFlat
 
 @export var texture_rect: TextureRect
 
@@ -12,6 +13,9 @@ func set_texture(texture: Texture2D, relative_scale: float, with_dark_bg: bool, 
     
     if sharp_scale:
         texture_rect.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+
+func make_bg_light() -> void:
+    add_theme_stylebox_override("panel", bg_stylebox_light)
 
 func set_mod_color(color: Color) -> void:
     texture_rect.modulate = color

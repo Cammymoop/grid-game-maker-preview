@@ -22,6 +22,8 @@ var editor_dark_bg_stylebox: = preload("res://assets/ui/editor_dark_bg_panel.tre
 @export var duplicate_button: Button
 @export var edit_intermission_menu_button: MenuButton
 
+@export var other_game_editor_only: Array[Control]
+
 @export var storage_location_selector: OptionButton
 @export var custom_list_name_selector: OptionButton
 
@@ -46,6 +48,9 @@ var editor_dark_bg_stylebox: = preload("res://assets/ui/editor_dark_bg_panel.tre
 
 @export var game_editor_intermission_preview_root: Control
 @export var other_intermission_preview_root: Control
+
+@export var bg_shade_selector: OptionButton
+@export var show_continue_toggle: CheckButton
 
 var is_editing_inside_level_list: String = ""
 
@@ -82,8 +87,10 @@ func _ready() -> void:
     intermission_type_selector.selected = 0
     intermission_type_selector.item_selected.connect(on_intermission_type_selected)
     
+    bg_shade_selector.item_selected.connect(on_bg_shade_selected)
+    show_continue_toggle.toggled.connect(on_show_continue_toggled)
+    
     if game_editor_mode:
-        prints("game editor new binding")
         edit_new_intermission_button.pressed.connect(edit_new_intermission.bind(true))
     else:
         edit_new_intermission_button.pressed.connect(edit_new_intermission)
@@ -93,6 +100,9 @@ func _ready() -> void:
         game_editor_bg_container.hide()
         content_and_bg_section.add_theme_stylebox_override("panel", StyleBoxEmpty.new())
         main_options_section_panel.add_theme_stylebox_override("panel", editor_dark_bg_stylebox)
+        
+        for other_control in other_game_editor_only:
+            other_control.hide()
     
     edit_intermission_menu_button.about_to_popup.connect(on_edit_intermission_menu_about_to_popup)
     var popup_menu: PopupMenu = edit_intermission_menu_button.get_popup()
@@ -248,6 +258,8 @@ func save_edited_intermission_info() -> void:
 
 func write_intermission_info(update_id: String, intermission_info: Dictionary, inside_level_list: String = "") -> void:
     GameManager.update_intermission_info(update_id, intermission_info, inside_level_list)
+    if not game_editor_mode and not inside_level_list:
+        GameManager.save_current_definition_if_auto_enabled()
 
 func save_last_edited_intermission_id(intermission_id: String) -> void:
     if is_editing_inside_level_list:
@@ -374,6 +386,16 @@ func refresh_ui() -> void:
             pass
         elif intermission_type == TYPE_INTERMISSION:
             intermission_content_editor.load_contents_info(editing_intermission_info.get("content_items", []))
+            
+            var shade_light: bool = editing_intermission_info.get("light_background", true)
+            var shade_dark: bool = editing_intermission_info.get("dark_background", false)
+            if shade_light:
+                bg_shade_selector.selected = 1
+            elif shade_dark:
+                bg_shade_selector.selected = 2
+            else:
+                bg_shade_selector.selected = 0
+            show_continue_toggle.button_pressed = editing_intermission_info.get("show_continue", true)
         else:
             push_warning("Unknown intermission type: %s" % intermission_type)
     else:
@@ -524,3 +546,18 @@ func on_visibility_changed() -> void:
 
     if game_editor_mode and is_visible_in_tree():
         refresh_ui()
+
+func on_bg_shade_selected(index: int) -> void:
+    if not is_editing_intermission or not editing_intermission_info.get("type", "") == TYPE_INTERMISSION:
+        return
+    editing_intermission_info["light_background"] = index == 1
+    editing_intermission_info["dark_background"] = index == 2
+    save_edited_intermission_info()
+    update_intermission_preview()
+
+func on_show_continue_toggled(button_pressed: bool) -> void:
+    if not is_editing_intermission or not editing_intermission_info.get("type", "") == TYPE_INTERMISSION:
+        return
+    editing_intermission_info["show_continue"] = button_pressed
+    save_edited_intermission_info()
+    update_intermission_preview()

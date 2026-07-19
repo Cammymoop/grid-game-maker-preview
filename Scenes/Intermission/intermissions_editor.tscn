@@ -22,7 +22,7 @@ corner_radius_bottom_left = 12
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_8g8ar"]
 content_margin_left = 8.0
 content_margin_top = 8.0
-content_margin_right = 3.0
+content_margin_right = 8.0
 content_margin_bottom = 8.0
 bg_color = Color(0.13118428, 0.19086626, 0.2888734, 0.69803923)
 border_width_left = 1
@@ -35,6 +35,16 @@ corner_radius_top_right = 3
 corner_radius_bottom_right = 3
 corner_radius_bottom_left = 3
 corner_detail = 5
+
+[sub_resource type="StyleBoxLine" id="StyleBoxLine_ko2ix"]
+content_margin_left = 0.0
+content_margin_top = 4.0
+content_margin_right = 0.0
+content_margin_bottom = 4.0
+color = Color(0.33333334, 0.31764707, 0.44313726, 1)
+grow_begin = 8.0
+grow_end = 8.0
+vertical = true
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_0bdve"]
 content_margin_left = 8.0
@@ -53,7 +63,7 @@ corner_radius_bottom_right = 3
 corner_radius_bottom_left = 3
 corner_detail = 5
 
-[node name="IntermissionsEditor" type="PanelContainer" unique_id=811355557 node_paths=PackedStringArray("intermission_id_input", "intermission_type_selector", "edit_new_intermission_button", "duplicate_button", "edit_intermission_menu_button", "storage_location_selector", "custom_list_name_selector", "bg_style_edit_container", "background_style_editor", "background_style_preview", "intermission_content_editor", "enable_custom_background_button", "main_options_section", "content_and_bg_section", "content_section", "hide_overlay_button", "back_button", "to_assignments_editor_button", "game_editor_bg_container", "main_options_section_panel", "game_editor_intermission_preview_root")]
+[node name="IntermissionsEditor" type="PanelContainer" unique_id=811355557 node_paths=PackedStringArray("intermission_id_input", "intermission_type_selector", "edit_new_intermission_button", "duplicate_button", "edit_intermission_menu_button", "other_game_editor_only", "storage_location_selector", "custom_list_name_selector", "bg_style_edit_container", "background_style_editor", "intermission_content_editor", "enable_custom_background_button", "main_options_section", "content_and_bg_section", "content_section", "hide_overlay_button", "back_button", "to_assignments_editor_button", "game_editor_bg_container", "main_options_section_panel", "game_editor_intermission_preview_root", "bg_shade_selector", "show_continue_toggle")]
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -66,12 +76,12 @@ intermission_type_selector = NodePath("VBoxContainer/PanelContainer/MainIntermis
 edit_new_intermission_button = NodePath("VBoxContainer/PanelContainer/MainIntermissionOptions/HBoxContainer/VBoxContainer/HBoxContainer5/EditNewIntermissionButton")
 duplicate_button = NodePath("VBoxContainer/PanelContainer/MainIntermissionOptions/HBoxContainer/VBoxContainer/HBoxContainer4/DuplicateButton")
 edit_intermission_menu_button = NodePath("VBoxContainer/PanelContainer/MainIntermissionOptions/HBoxContainer5/EditIntermissionButton")
+other_game_editor_only = [NodePath("VBoxContainer/ContentAndBGOptions/VBoxContainer/Label")]
 storage_location_selector = NodePath("VBoxContainer/PanelContainer/MainIntermissionOptions/HBoxContainer/HBoxContainer/GameBundleSelector")
 custom_list_name_selector = NodePath("VBoxContainer/PanelContainer/MainIntermissionOptions/HBoxContainer/HBoxContainer/CustomListSelector")
 bg_style_edit_container = NodePath("VBoxContainer/ContentAndBGOptions/VBoxContainer/MarginContainer/EditorUI/MarginContainer")
 background_style_editor = NodePath("VBoxContainer/ContentAndBGOptions/VBoxContainer/MarginContainer/EditorUI/MarginContainer/PanelContainer/ScrollContainer/MarginContainer/BGStyleEditor")
-background_style_preview = NodePath("")
-intermission_content_editor = NodePath("VBoxContainer/ContentAndBGOptions/VBoxContainer/MarginContainer/EditorUI/MarginContainer2/PanelContainer/IntermissionContentEditor")
+intermission_content_editor = NodePath("VBoxContainer/ContentAndBGOptions/VBoxContainer/MarginContainer/EditorUI/MarginContainer2/PanelContainer/HBoxContainer/IntermissionContentEditor")
 enable_custom_background_button = NodePath("VBoxContainer/ContentAndBGOptions/VBoxContainer/MarginContainer/EditorUI/MarginContainer3/EnableCustomBackgroundButton")
 main_options_section = NodePath("VBoxContainer/PanelContainer/MainIntermissionOptions")
 content_and_bg_section = NodePath("VBoxContainer/ContentAndBGOptions")
@@ -82,6 +92,8 @@ to_assignments_editor_button = NodePath("VBoxContainer/HBoxContainer/GoToAssignm
 game_editor_bg_container = NodePath("VBoxContainer/ContentAndBGOptions/VBoxContainer/MarginContainer/BGEffectsClip")
 main_options_section_panel = NodePath("VBoxContainer/PanelContainer")
 game_editor_intermission_preview_root = NodePath("VBoxContainer/ContentAndBGOptions/VBoxContainer/MarginContainer/BGEffectsClip/PreviewIntermissionRoot")
+bg_shade_selector = NodePath("VBoxContainer/ContentAndBGOptions/VBoxContainer/MarginContainer/EditorUI/MarginContainer2/PanelContainer/HBoxContainer/VBoxContainer/VBoxContainer/HBoxContainer/ShadeSelector")
+show_continue_toggle = NodePath("VBoxContainer/ContentAndBGOptions/VBoxContainer/MarginContainer/EditorUI/MarginContainer2/PanelContainer/HBoxContainer/VBoxContainer/VBoxContainer/ShowContinueToggle")
 
 [node name="VBoxContainer" type="VBoxContainer" parent="." unique_id=370450557]
 layout_mode = 2
@@ -255,9 +267,9 @@ alignment = 2
 [node name="MarginContainer2" type="MarginContainer" parent="VBoxContainer/ContentAndBGOptions/VBoxContainer/MarginContainer/EditorUI" unique_id=234862391]
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_constants/margin_left = 12
+theme_override_constants/margin_left = 5
 theme_override_constants/margin_top = 12
-theme_override_constants/margin_right = 12
+theme_override_constants/margin_right = 5
 theme_override_constants/margin_bottom = 12
 
 [node name="PanelContainer" type="PanelContainer" parent="VBoxContainer/ContentAndBGOptions/VBoxContainer/MarginContainer/EditorUI/MarginContainer2" unique_id=720247585]
@@ -265,9 +277,60 @@ layout_mode = 2
 size_flags_vertical = 4
 theme_override_styles/panel = SubResource("StyleBoxFlat_8g8ar")
 
-[node name="IntermissionContentEditor" parent="VBoxContainer/ContentAndBGOptions/VBoxContainer/MarginContainer/EditorUI/MarginContainer2/PanelContainer" unique_id=1787788247 node_paths=PackedStringArray("height_limit_parent") instance=ExtResource("4_0bdve")]
+[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer/ContentAndBGOptions/VBoxContainer/MarginContainer/EditorUI/MarginContainer2/PanelContainer" unique_id=1670711489]
 layout_mode = 2
-height_limit_parent = NodePath("../..")
+
+[node name="IntermissionContentEditor" parent="VBoxContainer/ContentAndBGOptions/VBoxContainer/MarginContainer/EditorUI/MarginContainer2/PanelContainer/HBoxContainer" unique_id=1787788247 node_paths=PackedStringArray("height_limit_parent") instance=ExtResource("4_0bdve")]
+layout_mode = 2
+size_flags_horizontal = 3
+height_limit_parent = NodePath("../../..")
+
+[node name="VSeparator" type="VSeparator" parent="VBoxContainer/ContentAndBGOptions/VBoxContainer/MarginContainer/EditorUI/MarginContainer2/PanelContainer/HBoxContainer" unique_id=1676911141]
+layout_mode = 2
+theme_override_styles/separator = SubResource("StyleBoxLine_ko2ix")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="VBoxContainer/ContentAndBGOptions/VBoxContainer/MarginContainer/EditorUI/MarginContainer2/PanelContainer/HBoxContainer" unique_id=950501919]
+layout_mode = 2
+
+[node name="Control" type="Control" parent="VBoxContainer/ContentAndBGOptions/VBoxContainer/MarginContainer/EditorUI/MarginContainer2/PanelContainer/HBoxContainer/VBoxContainer" unique_id=1615175270]
+custom_minimum_size = Vector2(0, 30)
+layout_mode = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="VBoxContainer/ContentAndBGOptions/VBoxContainer/MarginContainer/EditorUI/MarginContainer2/PanelContainer/HBoxContainer/VBoxContainer" unique_id=542525694]
+layout_mode = 2
+size_flags_vertical = 3
+alignment = 1
+
+[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer/ContentAndBGOptions/VBoxContainer/MarginContainer/EditorUI/MarginContainer2/PanelContainer/HBoxContainer/VBoxContainer/VBoxContainer" unique_id=1060608381]
+layout_mode = 2
+alignment = 1
+
+[node name="Label" type="Label" parent="VBoxContainer/ContentAndBGOptions/VBoxContainer/MarginContainer/EditorUI/MarginContainer2/PanelContainer/HBoxContainer/VBoxContainer/VBoxContainer/HBoxContainer" unique_id=1407451206]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "BG
+Shade"
+horizontal_alignment = 1
+
+[node name="ShadeSelector" type="OptionButton" parent="VBoxContainer/ContentAndBGOptions/VBoxContainer/MarginContainer/EditorUI/MarginContainer2/PanelContainer/HBoxContainer/VBoxContainer/VBoxContainer/HBoxContainer" unique_id=1709470849]
+layout_mode = 2
+size_flags_vertical = 4
+alignment = 1
+selected = 1
+item_count = 3
+popup/item_0/text = "None"
+popup/item_0/id = 2
+popup/item_1/text = "Light"
+popup/item_1/id = 1
+popup/item_2/text = "Dark"
+popup/item_2/id = 0
+
+[node name="ShowContinueToggle" type="CheckButton" parent="VBoxContainer/ContentAndBGOptions/VBoxContainer/MarginContainer/EditorUI/MarginContainer2/PanelContainer/HBoxContainer/VBoxContainer/VBoxContainer" unique_id=1881940291]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "Continue
+Prompt"
+alignment = 1
 
 [node name="HideButtonHolder" type="VBoxContainer" parent="VBoxContainer/ContentAndBGOptions/VBoxContainer/MarginContainer/EditorUI/MarginContainer2/PanelContainer" unique_id=1677851356]
 layout_mode = 2
@@ -280,9 +343,9 @@ text = "HIDE"
 
 [node name="MarginContainer3" type="MarginContainer" parent="VBoxContainer/ContentAndBGOptions/VBoxContainer/MarginContainer/EditorUI" unique_id=1816247486]
 layout_mode = 2
-theme_override_constants/margin_left = 12
+theme_override_constants/margin_left = 5
 theme_override_constants/margin_top = 12
-theme_override_constants/margin_right = 12
+theme_override_constants/margin_right = 5
 theme_override_constants/margin_bottom = 12
 
 [node name="EnableCustomBackgroundButton" type="Button" parent="VBoxContainer/ContentAndBGOptions/VBoxContainer/MarginContainer/EditorUI/MarginContainer3" unique_id=802017119]
@@ -296,7 +359,7 @@ Background"
 [node name="MarginContainer" type="MarginContainer" parent="VBoxContainer/ContentAndBGOptions/VBoxContainer/MarginContainer/EditorUI" unique_id=873488143]
 visible = false
 layout_mode = 2
-theme_override_constants/margin_left = 12
+theme_override_constants/margin_left = 5
 theme_override_constants/margin_top = 12
 theme_override_constants/margin_right = 12
 theme_override_constants/margin_bottom = 12

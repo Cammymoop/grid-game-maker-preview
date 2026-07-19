@@ -1,5 +1,8 @@
 extends MarginContainer
 
+@export var bg_stylebox_light: StyleBoxFlat
+@export var bg_stylebox_dark: StyleBoxFlat
+
 @export var label: Label
 
 
@@ -20,3 +23,10 @@ func setup(item_info: Dictionary) -> void:
         label.add_theme_color_override("font_outline_color", item_info.get("text_outline_color", Color.BLACK))
     else:
         label.add_theme_constant_override("outline_size", 0)
+    
+    var light_background: bool = item_info.get("light_background", false)
+    var dark_background: bool = item_info.get("dark_background", false)
+    if light_background:
+        label.add_theme_stylebox_override("normal", bg_stylebox_light)
+    elif dark_background:
+        label.add_theme_stylebox_override("normal", bg_stylebox_dark)

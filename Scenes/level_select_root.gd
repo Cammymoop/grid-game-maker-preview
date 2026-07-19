@@ -118,6 +118,10 @@ func show_edit_intermission_assignements() -> void:
     darkener.show()
 
 func show_edit_intermissions() -> void:
+    _show_edit_intermissions()
+    edit_intermissions.refresh_ui()
+
+func _show_edit_intermissions() -> void:
     if not visible:
         open_level_select()
     game_view_container.hide()
@@ -134,7 +138,8 @@ func on_assignment_editor_to_intermission_editor(intermission_id: String, in_cus
         if in_custom_list:
             open_intermission_editor_for_custom_list(in_custom_list)
         else:
-            show_edit_intermissions()
+            _show_edit_intermissions()
+            edit_intermissions.refresh_ui()
         return
     
     if GameManager.current_game_is_release_locked and not in_custom_list and not is_duplicate:
@@ -155,8 +160,9 @@ func on_assignment_editor_to_intermission_editor(intermission_id: String, in_cus
 
 func on_assignments_edit_new_intermission(in_custom_list: String) -> void:
     var is_bundled: = not in_custom_list
-    show_edit_intermissions()
+    _show_edit_intermissions()
     if GameManager.current_game_is_release_locked and is_bundled:
+        edit_intermissions.load_nothing()
         return
     edit_intermissions.edit_new_intermission(is_bundled, in_custom_list)
 
@@ -195,7 +201,7 @@ func on_open_levels_folder_button_pressed() -> void:
 
 func open_intermission_editor_for_custom_list(custom_list_name: String) -> void:
     var all_intermission_ids: = GameManager.get_all_intermission_ids_from_custom_list(custom_list_name)
-    show_edit_intermissions()
+    _show_edit_intermissions()
     if all_intermission_ids.size() > 0:
         edit_intermissions.load_intermission_from_id(all_intermission_ids[0], custom_list_name)
     else:
@@ -206,7 +212,7 @@ func open_intermission_editor_for_intermission(intermission_id: String, in_custo
         return
     if GameManager.current_game_is_release_locked and not in_custom_list:
         return
-    show_edit_intermissions()
+    _show_edit_intermissions()
     edit_intermissions.load_intermission_from_id(intermission_id, in_custom_list)
 
 

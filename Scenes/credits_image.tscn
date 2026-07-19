@@ -1,19 +1,10 @@
 [gd_scene format=3 uid="uid://dy2mt6p02pp3v"]
 
 [ext_resource type="Script" uid="uid://dbo41xb3vg71u" path="res://Scenes/credits_image.gd" id="1_jsti1"]
+[ext_resource type="StyleBox" uid="uid://bobvdbaskluat" path="res://assets/ui/intermission_dark_bg.tres" id="2_p8k8y"]
+[ext_resource type="StyleBox" uid="uid://buf74pa6or5fd" path="res://assets/ui/intermission_light_bg.tres" id="3_kekm0"]
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_jsti1"]
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_jsti1"]
-bg_color = Color(0, 0, 0, 0.6039216)
-corner_radius_top_left = 4
-corner_radius_top_right = 4
-corner_radius_bottom_right = 4
-corner_radius_bottom_left = 4
-expand_margin_left = 8.0
-expand_margin_top = 8.0
-expand_margin_right = 8.0
-expand_margin_bottom = 8.0
 
 [node name="CreditsImage" type="PanelContainer" unique_id=151448102 node_paths=PackedStringArray("texture_rect")]
 offset_right = 16.0
@@ -21,7 +12,8 @@ offset_bottom = 16.0
 size_flags_horizontal = 4
 theme_override_styles/panel = SubResource("StyleBoxEmpty_jsti1")
 script = ExtResource("1_jsti1")
-bg_stylebox_dark = SubResource("StyleBoxFlat_jsti1")
+bg_stylebox_dark = ExtResource("2_p8k8y")
+bg_stylebox_light = ExtResource("3_kekm0")
 texture_rect = NodePath("TextureRect")
 
 [node name="TextureRect" type="TextureRect" parent="." unique_id=1226651260]
