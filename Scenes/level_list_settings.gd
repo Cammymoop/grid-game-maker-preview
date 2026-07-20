@@ -186,6 +186,12 @@ func set_prog_unlock_num() -> void:
 func on_name_input_text_changed(new_text: String) -> void:
     if new_text == editing_list_name:
         return
+    new_text = new_text.strip_edges()
+    while new_text.contains("??"):
+        new_text = new_text.replace("??", "?")
+    if new_text.ends_with("?"):
+        new_text += "%"
+        
     if GameManager.level_list_name_exists(new_text):
         name_input.add_theme_color_override("font_color", Color.RED)
         return
@@ -199,7 +205,10 @@ func on_name_input_text_changed(new_text: String) -> void:
 func refresh_ui() -> void:
     total_levels_label.text = "Total Levels: %d" % total_levels
 
+    var old_caret_column: int = name_input.caret_column
     name_input.text = editing_list_name
+    if name_input.is_editing():
+        name_input.caret_column = old_caret_column
     name_input.remove_theme_color_override("font_color")
     var list_info: = _get_list_info()
     if not list_info:

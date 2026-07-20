@@ -4477,19 +4477,21 @@ func _now_goto_level_with_intermissions(to_level_code: String, intermission_id_l
 	show_next_intermission()
 
 func goto_level_with_starting_intermissions(level_code: String) -> void:
-	var starting_intermissions: Array[String] = get_intermissions_for_game_start()
+	var starting_intermissions: Array[String] = get_intermissions_for_game_start(level_code)
+	prints("got starting intermissions", starting_intermissions, "starting level", level_code)
 	_now_goto_level_with_intermissions(level_code, starting_intermissions)
 
 
-func get_intermissions_for_game_start() -> Array[String]:
+func get_intermissions_for_game_start(level_code: String) -> Array[String]:
 	if is_in_level_edit_mode:
 		return []
 	
 	var intermissions: Array[String] = []
 	var game_intermission_assignments: Dictionary = get_game_setting("default_intermissions", {})
+	prints("game intermission assignments", game_intermission_assignments)
 	intermissions.append_array(game_intermission_assignments.get("game_start", []))
 	
-	intermissions.append_array(get_intermissions_for_level_code(current_level_list))
+	intermissions.append_array(get_intermissions_for_level_code(level_code))
 	return intermissions
 
 func get_intermissions_for_level_code(level_code: String) -> Array[String]:
@@ -4584,15 +4586,19 @@ func show_next_intermission() -> void:
 		clear_intermission_state()
 		if not is_overlaying:
 			if to_level_code:
+				prints("intermission queue done, going to level", to_level_code)
+				hide_intermissions()
 				goto_level_code(to_level_code)
 		else:
 			hide_intermissions()
 		return
 	
 	var next: String = queue.pop_front()
+	prints("next intermission in queue", next)
 	
 	var intermission_info: Dictionary = get_tagged_intermission_info(next)
 	if not intermission_info:
+		prints("no intermission info found for", next)
 		show_next_intermission()
 		return
 

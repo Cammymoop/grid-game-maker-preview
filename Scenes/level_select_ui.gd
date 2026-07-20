@@ -296,7 +296,7 @@ func refresh_rearrangable_lists() -> void:
         rearr_list.request_move_relative.connect(on_rearrangable_list_move_relative)
         rearr_list.request_context_menu.connect(on_rearrangable_list_request_context_menu)
         rearr_list.request_remove.connect(on_rearrangable_list_request_remove)
-        rearr_list.set_list_name(list_name)
+        rearr_list.set_list_name(list_name.trim_suffix("%"))
 
         var levels_in_list: = GameManager.get_levels_in_level_list(list_name)
         if levels_in_list.size() > 0:

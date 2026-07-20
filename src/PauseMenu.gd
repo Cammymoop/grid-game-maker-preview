@@ -278,12 +278,12 @@ func on_show() -> void:
 	else:
 		var is_intermission: = GameManager.is_intermission_mode
 		
-		reload_checkpoint_button.disabled = not is_intermission
-		restart_level_button.disabled = not is_intermission
-		regen_museum_button.disabled = not is_intermission
-		level_edit_mode_button.disabled = not is_intermission
-		credits_button.disabled = not is_intermission
-		level_select_button.disabled = not is_intermission
+		reload_checkpoint_button.disabled = is_intermission
+		restart_level_button.disabled = is_intermission
+		regen_museum_button.disabled = is_intermission
+		level_edit_mode_button.disabled = is_intermission
+		credits_button.disabled = is_intermission
+		level_select_button.disabled = is_intermission
 		
 	
 	refresh_level_settings()

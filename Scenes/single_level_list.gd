@@ -172,7 +172,7 @@ func update_list_completion_label() -> void:
 
 func set_level_list_name(new_level_list_name: String) -> void:
     level_list_name = new_level_list_name
-    list_name_label.text = level_list_name
+    list_name_label.text = level_list_name.trim_suffix("%")
     is_bundled_list = GameManager.is_level_list_bundled(level_list_name)
 
 func refresh_list() -> void:
