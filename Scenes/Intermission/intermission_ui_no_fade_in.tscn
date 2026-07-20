@@ -1,0 +1,10 @@
+[gd_scene format=3 uid="uid://ym6w7o4s3a5d"]
+
+[ext_resource type="PackedScene" uid="uid://dtqeq5w27e6dr" path="res://Scenes/Intermission/intermission_ui.tscn" id="1_g1i1i"]
+
+[node name="IntermissionUI" unique_id=983985741 instance=ExtResource("1_g1i1i")]
+do_fade_in = false
+
+[editable path="MarginContainer/MainVbox/ContentSection/CreditsImage"]
+[editable path="MarginContainer/MainVbox/ContentSection/IntermissionText3"]
+[editable path="MarginContainer/MainVbox/ContinueSection/IntermissionText"]

@@ -1168,8 +1168,7 @@ func cmd_if_playing_custom_level(_slots: Dictionary, invert: bool) -> bool:
 func desc_next_level_exists() -> String:
 	return "none|If there is or will be an unlocked level to advance to after completing this level"
 func cmd_next_level_exists(_slots: Dictionary) -> bool:
-	var next_auto_load_level: Array = GameManager.get_next_level_to_auto_load("", true)
-	return Utility.truthy(next_auto_load_level)
+	return GameManager.has_level_advance()
 
 func desc_load_next_level() -> Dictionary:
 	return {
@@ -1185,27 +1184,31 @@ func cmd_load_next_level(slots: Dictionary, _slot: int, delay: Dictionary = {"ty
 func desc_complete_level_and_show_level_select() -> String:
 	return "none|Complete this level. Show the level select screen after a [delay:ComplexScalarInput:default=1,step=0.1] second delay"
 func cmd_complete_level_and_show_level_select(_slots: Dictionary, delay: Dictionary) -> void:
-	GameManager.complete_current_level()
-	GameManager.go_to_level_select(resolve_complex_scalar(delay, _slots))
+	var delay_val: float = resolve_complex_scalar(delay, _slots)
+	GameManager.complete_and_move_to_level_select(delay_val)
 
 func desc_exit_to_level_select() -> String:
 	return "none|Leave the current level without completing, show the level select screen after a [delay:ComplexScalarInput:default=1,step=0.1] second delay"
 func cmd_exit_to_level_select(_slots: Dictionary, _slot: int, delay: Dictionary) -> void:
-	GameManager.go_to_level_select(resolve_complex_scalar(delay, _slots))
+	var delay_val: float = resolve_complex_scalar(delay, _slots)
+	GameManager.move_to_level_select(delay_val)
 
 func desc_complete_level() -> String:
-	return "none|Complete this level (stay in the current level)"
+	return "none|Complete this level (without leaving the level)"
 func cmd_complete_level(_slots: Dictionary) -> void:
-	GameManager.complete_current_level()
+	GameManager.complete_current_level_without_transition()
 
 func desc_load_first_level_of_list() -> String:
-	return "none|Unlock and load the first level of the level list [list_val:LevelListNameInput] with a [delay:ComplexScalarInput:default=1,step=0.1] second delay"
-func cmd_load_first_level_of_list(_slots: Dictionary, _slot: int, list_val: Dictionary, delay: Dictionary) -> void:
+	return "none|Unlock and load the first level of the level list [list_val:LevelListNameInput] with a [delay:ComplexScalarInput:default=1,step=0.1] second delay\n" \
+		+ "[complete_current:BoolChoice:true,Complete,Do not complete] the current level"
+func cmd_load_first_level_of_list(_slots: Dictionary, _slot: int, list_val: Dictionary, delay: Dictionary, complete_current: bool) -> void:
 	var list_name: String = resolve_complex_string(list_val, _slots)
 	var delay_val: float = resolve_complex_scalar(delay, _slots)
 	if not list_name:
+		if complete_current:
+			GameManager.complete_current_level_without_transition()
 		return
-	GameManager.move_to_level_list_start(list_name, delay_val)
+	GameManager.move_to_level_list_start(list_name, delay_val, complete_current)
 
 func desc_if_level_is_in_list() -> String:
 	return "none|If the level [level_val:LevelNameInput] is in the level list [list_val:LevelListNameInput]"
@@ -1250,15 +1253,18 @@ func desc_load_level_within_list() -> String:
 	return "none|Unlock and load the level [level_val:LevelNameInput] within the level list [list_val:LevelListNameInput] with a [delay:ComplexScalarInput:default=1,step=0.1] second delay\n" \
 		+ "[complete_current:BoolChoice:true,Complete,Do not complete] the current level"
 func cmd_load_level_within_list(_slots: Dictionary, _slot: int, level_val: Dictionary, list_val: Dictionary, delay: Dictionary, complete_current: bool) -> void:
-	if complete_current:
-		GameManager.complete_current_level()
 	var list_name: String = resolve_complex_string(list_val, _slots)
 	var level_name: String = resolve_complex_string(level_val, _slots)
 	var delay_val: float = resolve_complex_scalar(delay, _slots)
 	if not level_name:
+		if complete_current:
+			GameManager.complete_current_level_without_transition()
 		return
-	GameManager.unlock_level_in_list(list_name, level_name)
-	GameManager.goto_level_in_level_list(list_name, level_name, delay_val)
+	
+	if complete_current:
+		GameManager.complete_and_move_to_level(list_name, level_name, delay_val)
+	else:
+		GameManager.move_to_level(list_name, level_name, delay_val)
 
 
 func desc_take_a_turn() -> String:
@@ -2838,9 +2844,9 @@ func cmd_remove_entity_controller(slots: Dictionary, chosen_slot: int) -> void:
 
 
 func desc_create_undo_point() -> String:
-	return "none|Create a new undo point (end of this game tick), enabling rewinding to the previous undo point"
+	return "none|Create a new undo point at the end of this game tick, enabling rewinding to the previous undo point"
 func cmd_create_undo_point(_slots: Dictionary) -> void:
-	GameManager.push_undo_state.call_deferred(true)
+	EntityManager.request_create_undo()
 
 func desc_mark_changed_since_last_undo() -> String:
 	return "none|Mark the current state as changed since the last added undo point, enabling rewinding to it"

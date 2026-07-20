@@ -81,10 +81,17 @@ var _finished_related_move_node: Dictionary = {}
 var paused_at_start: bool = false
 var level_spawn_effect_frames_left: int = 0
 
+var intermission_overlay_paused: bool = false
+var intermission_overlay_undoable: bool = false
+
 #var _move_resolution_stack: Array[Dictionary] = []
 #var _move_stack_metadata: Dictionary = {}
 
 var entity_id_sort_order: PackedInt32Array = []
+
+var _undo_create_requested: bool = false
+var _undo_pop_requested: bool = false
+var _input_action_ignore_frame: bool = true
 
 func paused_visual_process(delta_time: float) -> void:
     for e in entity_list:
@@ -102,34 +109,45 @@ func pressed_any_to_start() -> bool:
 func entity_list_process(delta_time: float) -> void:
     if GameManager.cur_scene != "Play":
         return
+    
+    var any_press_started: bool = false
     if paused_at_start or level_spawn_effect_frames_left > 0:
-        if pressed_any_to_start():
-            if level_spawn_effect_frames_left > 0:
-                do_early_end_level_spawn_animation()
-                level_spawn_effect_frames_left = 0
-            paused_at_start = false
-        elif level_spawn_effect_frames_left > 0:
-            level_spawn_effect_frames_left -= 1
+        if not intermission_overlay_paused:
+            if pressed_any_to_start():
+                any_press_started = true
+                if level_spawn_effect_frames_left > 0:
+                    do_early_end_level_spawn_animation()
+                    level_spawn_effect_frames_left = 0
+                paused_at_start = false
+            elif level_spawn_effect_frames_left > 0:
+                level_spawn_effect_frames_left -= 1
 
-    if paused_at_start or level_spawn_effect_frames_left > 0:
+    if paused_at_start or level_spawn_effect_frames_left > 0 or intermission_overlay_paused:
         paused_visual_process(delta_time)
-        return
+        if not (intermission_overlay_paused and intermission_overlay_undoable):
+            return
 
     var active_entities: Array[BaseEntity] = []
     var moving_entities: Array[BaseEntity] = []
     var idle_entities: Array[BaseEntity] = []
     
     var new_action_activations: Array[String] = []
-    for action_num in ["1", "2", "3"]:
-        if Input.is_action_just_pressed("input_action_" + action_num):
-            new_action_activations.append("do_action_" + action_num)
-            if action_num == "1" and GameManager.action_1_does_undo():
-                if GameManager.has_undo_state():
-                    GameManager.pop_and_load_undo_state.call_deferred()
-                    return
-        elif action_num == "3" and not GameManager.is_in_level_edit_mode and Input.is_action_just_pressed("input_action_3_no_editor"):
-            new_action_activations.append("do_action_" + action_num)
+    if not _input_action_ignore_frame:
+        for action_num in ["1", "2", "3"]:
+            if Input.is_action_just_pressed("input_action_" + action_num):
+                new_action_activations.append("do_action_" + action_num)
+                if action_num == "1" and GameManager.action_1_does_undo() and not any_press_started:
+                    if GameManager.has_undo_state():
+                        GameManager.pop_and_load_undo_state.call_deferred()
+                        return
+        if not GameManager.is_in_level_edit_mode and Input.is_action_just_pressed("input_action_3_no_editor"):
+            if not "do_action_3" in new_action_activations:
+                new_action_activations.append("do_action_3")
     
+    _undo_create_requested = false
+    
+    if intermission_overlay_paused and intermission_overlay_undoable:
+        return
     # Phased processing so each entity completes a phase before any entity processes the next phase
     
     _build_entity_at_cache()
@@ -219,12 +237,23 @@ func entity_list_process(delta_time: float) -> void:
             resolve_entity_solo_event("every_tick", e)
         e.sprite_process(delta_time, false)
 
+    # last possible events, if discrete+ mode, and this is potentially the end of a turn, will run pre_turn_end events
+    # if any turn-based mode, and turn is actually ending, will run turn_end events
     handle_movement_mode_stuff()
     
     process_phase = 0
 
+func request_create_undo() -> void:
+    if process_phase == 0:
+        return
+    _undo_create_requested = true
+
+func request_pop_undo() -> void:
+    if process_phase == 0:
+        return
+    _undo_pop_requested = true
+
 func do_early_end_level_spawn_animation() -> void:
-    prints("early end of level spawn animation")
     for e in entity_list:
         var sprite: MaskLayerSprite = e.sprite
         if sprite:
@@ -232,19 +261,19 @@ func do_early_end_level_spawn_animation() -> void:
 
 func handle_turn_start_events() -> void:
     for e in entity_list:
-        if not e.active or not entity_has_property(e, "turn_start"):
+        if not e.active:
             continue
         resolve_entity_interaction_event("turn_start", e, null, [e.get_moving_position()])
 
 func handle_pre_turn_end_events() -> void:
     for e in entity_list:
-        if not e.active or not entity_has_property(e, "pre_turn_end"):
+        if not e.active:
             continue
         resolve_entity_interaction_event("pre_turn_end", e, null, [e.get_moving_position()])
 
 func handle_turn_end_events() -> void:
     for e in entity_list:
-        if not e.active or not entity_has_property(e, "turn_end"):
+        if not e.active:
             continue
         resolve_entity_interaction_event("turn_end", e, null, [e.get_moving_position()])
 
@@ -305,6 +334,7 @@ func _physics_process(delta: float) -> void:
     if GameManager.is_intermission_mode:
         return
     entity_list_process(delta)
+    _input_action_ignore_frame = false
 
 func handle_movement_mode_stuff() -> void:
     var all_settled: = false
@@ -337,7 +367,11 @@ func handle_movement_mode_stuff() -> void:
     if was_movement_enabled and not movements_enabled:
         handle_turn_end_events()
         if GameManager.is_auto_undo_enabled():
-            GameManager.push_undo_state(true)
+            _undo_create_requested = true
+
+    if _undo_create_requested:
+        GameManager.push_undo_state(true)
+        _undo_create_requested = false
 
 func all_entities_settled() -> bool:
     var settled = true
@@ -396,8 +430,10 @@ func apply_level_start_entity_spawn_animation() -> void:
     var delay_factor: float = 1.0
     var delay_offset_direction: Vector2 = Vector2.RIGHT.rotated(TAU / 12.)
     var screen_center_map_pos: = MapManager.world_to_tile_position(GameManager.get_gameplay_camera_following_position())
+    
+    var enable_staggered: bool = GameManager.get_game_setting("level_start_entity_spawn_effect_staggered", true)
 
-    if individual_duration > 0.04:
+    if individual_duration > 0.04 and enable_staggered:
         max_delay = individual_duration * .5
         individual_duration *= 0.5
         
@@ -604,6 +640,7 @@ func clear():
     process_phase = 0
     animation_frame_counter = 0
     frame_counter = 0
+    _undo_pop_requested = false
 
 func clear_entity_list():
     clear_related_move_cache()
@@ -2895,7 +2932,7 @@ func get_controller_duplicate(controller: Node) -> Node:
     return controller_duplicate
 
 func get_all_with_controller_type(controller_type: String, include_inactive: bool = false) -> Array[BaseEntity]:
-    if not controller_type:
+    if not controller_type or not controller_templates.has(controller_type):
         return []
     var controller_inst: Node = controller_templates[controller_type].instantiate()
     var controller_script: Script = controller_inst.get_script()
@@ -2949,3 +2986,12 @@ func import_new_entities_with_texture_remaps(new_entities: Array, texture_remaps
         if typeof(new_entity_definition) != TYPE_DICTIONARY:
             continue
         import_new_definition_with_texture_remaps(new_entity_definition, texture_remaps)
+
+
+func start_pause_for_intermission_overlay(undoable: bool) -> void:
+    intermission_overlay_paused = true
+    intermission_overlay_undoable = undoable
+
+func stop_pause_for_intermission_overlay() -> void:
+    intermission_overlay_paused = false
+    intermission_overlay_undoable = false

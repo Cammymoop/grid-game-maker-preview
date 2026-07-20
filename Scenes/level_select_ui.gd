@@ -346,7 +346,7 @@ func on_level_list_play_level(level_list_name: String, level_name: String) -> vo
         #GameManager.current_level_list = level_list_name
         #GameManager.try_load_level(level_name)
     else:
-        GameManager.goto_level_in_level_list(level_list_name, level_name)
+        GameManager.move_to_level(level_list_name, level_name)
 
 func close() -> void:
     close_level_select.emit()

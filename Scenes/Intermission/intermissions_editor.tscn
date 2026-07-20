@@ -63,7 +63,7 @@ corner_radius_bottom_right = 3
 corner_radius_bottom_left = 3
 corner_detail = 5
 
-[node name="IntermissionsEditor" type="PanelContainer" unique_id=811355557 node_paths=PackedStringArray("intermission_id_input", "intermission_type_selector", "edit_new_intermission_button", "duplicate_button", "edit_intermission_menu_button", "other_game_editor_only", "storage_location_selector", "custom_list_name_selector", "bg_style_edit_container", "background_style_editor", "intermission_content_editor", "enable_custom_background_button", "main_options_section", "content_and_bg_section", "content_section", "hide_overlay_button", "back_button", "to_assignments_editor_button", "game_editor_bg_container", "main_options_section_panel", "game_editor_intermission_preview_root", "bg_shade_selector", "show_continue_toggle")]
+[node name="IntermissionsEditor" type="PanelContainer" unique_id=811355557 node_paths=PackedStringArray("intermission_id_input", "intermission_type_selector", "edit_new_intermission_button", "duplicate_button", "edit_intermission_menu_button", "other_game_editor_only", "storage_location_selector", "custom_list_name_selector", "bg_style_edit_container", "background_style_editor", "intermission_content_editor", "enable_custom_background_button", "main_options_section", "content_and_bg_section", "content_section", "hide_overlay_button", "back_button", "to_assignments_editor_button", "game_editor_bg_container", "main_options_section_panel", "game_editor_intermission_preview_root", "bg_shade_selector", "show_continue_toggle", "show_only_once_toggle")]
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -94,6 +94,7 @@ main_options_section_panel = NodePath("VBoxContainer/PanelContainer")
 game_editor_intermission_preview_root = NodePath("VBoxContainer/ContentAndBGOptions/VBoxContainer/MarginContainer/BGEffectsClip/PreviewIntermissionRoot")
 bg_shade_selector = NodePath("VBoxContainer/ContentAndBGOptions/VBoxContainer/MarginContainer/EditorUI/MarginContainer2/PanelContainer/HBoxContainer/VBoxContainer/VBoxContainer/HBoxContainer/ShadeSelector")
 show_continue_toggle = NodePath("VBoxContainer/ContentAndBGOptions/VBoxContainer/MarginContainer/EditorUI/MarginContainer2/PanelContainer/HBoxContainer/VBoxContainer/VBoxContainer/ShowContinueToggle")
+show_only_once_toggle = NodePath("VBoxContainer/PanelContainer/MainIntermissionOptions/HBoxContainer/VBoxContainer3/OnlyViewOnceToggle")
 
 [node name="VBoxContainer" type="VBoxContainer" parent="." unique_id=370450557]
 layout_mode = 2
@@ -192,6 +193,19 @@ popup/item_0/text = "Intermission"
 popup/item_0/id = 0
 popup/item_1/text = "Credits"
 popup/item_1/id = 1
+
+[node name="VBoxContainer3" type="VBoxContainer" parent="VBoxContainer/PanelContainer/MainIntermissionOptions/HBoxContainer" unique_id=1143068340]
+layout_mode = 2
+alignment = 1
+
+[node name="OnlyViewOnceToggle" type="CheckButton" parent="VBoxContainer/PanelContainer/MainIntermissionOptions/HBoxContainer/VBoxContainer3" unique_id=2114008093]
+layout_mode = 2
+tooltip_text = "If enabled, this intermission will be skipped after the first time a player views it"
+theme_override_font_sizes/font_size = 12
+text = "Only
+View
+Once"
+alignment = 1
 
 [node name="VBoxContainer" type="VBoxContainer" parent="VBoxContainer/PanelContainer/MainIntermissionOptions/HBoxContainer" unique_id=1582955824]
 layout_mode = 2

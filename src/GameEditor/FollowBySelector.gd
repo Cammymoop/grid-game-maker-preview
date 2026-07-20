@@ -15,6 +15,6 @@ func _ready():
 func picked(index) -> void:
 	var new_text = options[index]
 	text = new_text
-	emit_signal("changed", new_text)
+	changed.emit(new_text)
 
 

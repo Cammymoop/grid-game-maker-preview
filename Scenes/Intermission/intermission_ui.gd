@@ -19,15 +19,35 @@ const SPACE_MULTIPLIER: float = 5
 @export var dark_bg: Control
 @export var light_bg: Control
 
+@export var inner_container: Control
+
 @export var content_section: Control
 @export var continue_section: Control
 
+var is_setup: = false
+
+@export var do_fade_in: = true
+var fade_in_duration: = 0.45
+var fade_in_timer: = Timer.new()
+
+var fade_in_ease_param: float = 2.5
+var scale_from: float = 0.86
+
+func _ready() -> void:
+    fade_in_timer = Timer.new()
+    fade_in_timer.one_shot = true
+    add_child(fade_in_timer)
+    if do_fade_in and is_setup:
+        fade_in_timer.start(fade_in_duration)
+        _fade_in_update()
+
 func setup(intermission_id: String) -> void:
-    var intermission_info: Dictionary = GameManager.get_intermission_info(intermission_id)
+    var intermission_info: Dictionary = GameManager.get_tagged_intermission_info(intermission_id)
     setup_with_info(intermission_info)
 
 func setup_with_info(intermission_info: Dictionary) -> void:
     clear_content()
+    reset_fade()
     
     light_bg.visible = intermission_info.get("light_background", true)
     dark_bg.visible = not light_bg.visible and intermission_info.get("dark_background", false)
@@ -39,6 +59,32 @@ func setup_with_info(intermission_info: Dictionary) -> void:
     
     var show_continue: bool = intermission_info.get("show_continue", true)
     continue_section.visible = show_continue
+    
+    if do_fade_in and fade_in_timer:
+        fade_in_timer.start(fade_in_duration)
+        _fade_in_update()
+    
+    is_setup = true
+
+func _process(_delta: float) -> void:
+    if fade_in_timer.is_stopped():
+        reset_fade()
+        return
+    _fade_in_update()
+    
+func _fade_in_update() -> void:
+    var time_left: float = fade_in_timer.time_left
+    var progress: float = 1.0 - (time_left / fade_in_duration)
+    var non_linear_amt: = ease(progress, fade_in_ease_param)
+
+    inner_container.modulate = Color(1, 1, 1, non_linear_amt)
+    inner_container.scale = Vector2.ONE * (non_linear_amt * (1 - scale_from) + scale_from)
+
+func reset_fade() -> void:
+    fade_in_timer.stop()
+    inner_container.scale = Vector2.ONE
+    inner_container.modulate = Color.WHITE
+    
 
 func append_item(item_info: Dictionary) -> void:
     var item_type: String = item_info.get("type", "")

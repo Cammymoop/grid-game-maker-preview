@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://dtqeq5w27e6dr"]
 
-[ext_resource type="Script" uid="uid://qeyclc8hi5ef" path="res://Scenes/intermission_ui.gd" id="1_xatok"]
+[ext_resource type="Script" uid="uid://qeyclc8hi5ef" path="res://Scenes/Intermission/intermission_ui.gd" id="1_xatok"]
 [ext_resource type="PackedScene" uid="uid://cb7yxd6xr7bl5" path="res://Scenes/Intermission/intermission_text.tscn" id="2_5uw0l"]
 [ext_resource type="PackedScene" uid="uid://dy2mt6p02pp3v" path="res://Scenes/credits_image.tscn" id="3_nd7lh"]
 [ext_resource type="Texture2D" uid="uid://d0uyc2rshryrj" path="res://assets/img/entityTiles.png" id="4_ltj3f"]
@@ -48,7 +48,7 @@ _data = {
 &"pulse": SubResource("Animation_ltj3f")
 }
 
-[node name="IntermissionUI" type="Control" unique_id=983985741 node_paths=PackedStringArray("dark_bg", "light_bg", "content_section", "continue_section")]
+[node name="IntermissionUI" type="Control" unique_id=983985741 node_paths=PackedStringArray("dark_bg", "light_bg", "inner_container", "content_section", "continue_section")]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -59,6 +59,7 @@ mouse_filter = 2
 script = ExtResource("1_xatok")
 dark_bg = NodePath("MultiplyDarkenColor")
 light_bg = NodePath("LightenColor")
+inner_container = NodePath("MarginContainer")
 content_section = NodePath("MarginContainer/MainVbox/ContentSection")
 continue_section = NodePath("MarginContainer/MainVbox/ContinueSection")
 
@@ -92,6 +93,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+pivot_offset_ratio = Vector2(0.5, 0.5)
 
 [node name="MainVbox" type="VBoxContainer" parent="MarginContainer" unique_id=802936195]
 layout_mode = 2

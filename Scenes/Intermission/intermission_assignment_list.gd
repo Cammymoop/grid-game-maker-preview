@@ -22,7 +22,7 @@ func set_locked_mode(locked: bool) -> void:
     add_assignment_button.disabled = locked
 
 func load_assignments(assignments: Array) -> void:
-    var all_intermission_ids: = GameManager.get_all_intermission_ids()
+    var all_intermission_ids: Array[String] = GameManager.get_all_intermission_ids()
     var local_intermission_ids: = _get_local_intermissions()
     clear_assignment_list()
     for intermission_id in assignments:

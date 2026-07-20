@@ -8,9 +8,9 @@ const BgEffect = preload("res://Scenes/bg_effect_5.gd")
 
 const IntermissionContentEditor = preload("res://Scenes/Intermission/intermission_content_editor.gd")
 
-const IntermissionUI = preload("res://Scenes/intermission_ui.gd")
+const IntermissionUI = preload("res://Scenes/Intermission/intermission_ui.gd")
 
-var intermission_ui_scn: = preload("res://Scenes/intermission_ui.tscn")
+var intermission_ui_scn: = preload("res://Scenes/Intermission/intermission_ui_no_fade_in.tscn")
 
 var editor_dark_bg_stylebox: = preload("res://assets/ui/editor_dark_bg_panel.tres")
 
@@ -52,6 +52,8 @@ var editor_dark_bg_stylebox: = preload("res://assets/ui/editor_dark_bg_panel.tre
 @export var bg_shade_selector: OptionButton
 @export var show_continue_toggle: CheckButton
 
+@export var show_only_once_toggle: CheckButton
+
 var is_editing_inside_level_list: String = ""
 
 var is_editing_intermission: bool = false
@@ -74,6 +76,7 @@ func _ready() -> void:
     if GameManager.cur_scene == "Play":
         game_editor_mode = false
     
+    
     visibility_changed.connect(on_visibility_changed)
     
     back_button.visible = not game_editor_mode
@@ -89,6 +92,8 @@ func _ready() -> void:
     
     bg_shade_selector.item_selected.connect(on_bg_shade_selected)
     show_continue_toggle.toggled.connect(on_show_continue_toggled)
+    
+    show_only_once_toggle.toggled.connect(on_show_only_once_toggled)
     
     if game_editor_mode:
         edit_new_intermission_button.pressed.connect(edit_new_intermission.bind(true))
@@ -161,7 +166,6 @@ func duplicate_intermission() -> void:
 
 func load_last_edited_intermission() -> void:
     var last_edited_id: String = GameManager.get_current_game_profile_setting_1("last_edited_intermission_id", "")
-    prints("last_edited_id: %s" % last_edited_id)
     if not last_edited_id:
         return
     load_intermission_from_id(last_edited_id)
@@ -374,6 +378,9 @@ func refresh_ui() -> void:
         if not intermission_type in INTERMISSION_TYPES:
             intermission_type = TYPE_INTERMISSION
         intermission_type_selector.selected = INTERMISSION_TYPES.find(intermission_type)
+        
+        show_only_once_toggle.set_pressed_no_signal(editing_intermission_info.get("show_only_once", false))
+
         refresh_show_sections(intermission_type)
         var custom_bg_info: Dictionary = editing_intermission_info.get("bg_style", {})
         if custom_bg_info:
@@ -561,3 +568,7 @@ func on_show_continue_toggled(button_pressed: bool) -> void:
     editing_intermission_info["show_continue"] = button_pressed
     save_edited_intermission_info()
     update_intermission_preview()
+
+
+func on_show_only_once_toggled(button_pressed: bool) -> void:
+    save_edited_intermission_info()

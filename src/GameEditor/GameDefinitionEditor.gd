@@ -283,10 +283,11 @@ func change_follow_by(val: String) -> void:
 		set_camera_settings("follow_entity", "")
 	set_camera_settings("follow_entity_by", val)
 	
-	var prop_entity_name_input: PropOrEntityNameInput = find_child("FollowEntity") as PropOrEntityNameInput
+	var prop_entity_name_input: = find_child("FollowEntity") as PropOrEntityNameInput
 	if prop_entity_name_input:
 		if val == "controller":
 			prop_entity_name_input.hide()
+			prop_entity_name_input.text = ""
 		else:
 			prop_entity_name_input.show()
 			var mode: String = PropOrEntityNameInput.PROP_NAME
@@ -297,7 +298,9 @@ func change_follow_by(val: String) -> void:
 			prop_entity_name_input.set_hint_mode(mode)
 	
 	follow_by_controller_picker.visible = val == "controller"
-	if val == "controller" and GameManager.get_cam_setting("follow_entity", "InputController") not in EntityManager.controller_templates:
+	var current_follow_by: String = GameManager.get_cam_setting("follow_entity", "InputController")
+	if val == "controller" and not EntityManager.controller_templates.has(current_follow_by):
+		prints("updating follow by when selecting controller")
 		GameManager.set_cam_setting("follow_entity", "InputController")
 		Utility.opbtn_select_text(follow_by_controller_picker, "InputController")
 
@@ -366,6 +369,7 @@ func set_camera_settings(setting: String, value) -> void:
 	game_settings["camera_settings"][setting] = value
 
 func _on_FollowEntity_text_changed(new_text: String) -> void:
+	prints("on_FollowEntity_text_changed: ", new_text)
 	set_camera_settings("follow_entity", new_text)
 func _on_EnableLimitsToggle_toggled(button_pressed: bool) -> void:
 	set_camera_settings("enable_limits", button_pressed)

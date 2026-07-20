@@ -285,6 +285,15 @@ func on_show() -> void:
 		credits_button.disabled = is_intermission
 		level_select_button.disabled = is_intermission
 		
+		var no_resume_allowed: = GameManager.is_pause_no_current_level()
+		resume_button.disabled = no_resume_allowed
+		if no_resume_allowed:
+			resume_button.tooltip_text = "Select a level to play"
+			restart_level_button.visible = false
+			reload_checkpoint_button.visible = false
+		else:
+			resume_button.tooltip_text = ""
+
 	
 	refresh_level_settings()
 
@@ -438,13 +447,12 @@ func _on_museum_button_pressed() -> void:
 
 
 func _on_credits_button_pressed() -> void:
-	GameManager.show_credits()
+	GameManager.show_credits_as_overlay(true)
 	toggle()
 
 func go_to_level_select() -> void:
 	if GameManager.is_in_level_edit_mode:
-		if not do_save_or_save_as_if_edited():
-			return
+		pass
 	if active:
 		toggle()
 	var level_select_root = Utility.get_level_select_root()

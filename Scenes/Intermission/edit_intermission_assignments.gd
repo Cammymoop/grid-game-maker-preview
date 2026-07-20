@@ -37,6 +37,31 @@ signal to_intermission_editor_new(in_custom_list: String)
 @export var edit_new_intermission_button: ButtonContainer
 
 
+enum Events {
+    NEW_GAME,
+    LEVEL_LIST_START,
+    LEVEL_START,
+
+    LEVEL_COMPLETE,
+    LEVEL_LIST_COMPLETE,
+    LEVEL_LIST_ALL_COMPLETE,
+    GAME_COMPLETE,
+    GAME_ALL_COMPLETE,
+}
+
+const EVENT_KEYS: = {
+    Events.NEW_GAME: "new_game",
+    Events.LEVEL_LIST_START: "before_start",
+    Events.LEVEL_START: "before_start",
+
+    Events.LEVEL_COMPLETE: "after_complete",
+    Events.LEVEL_LIST_COMPLETE: "after_complete",
+    Events.LEVEL_LIST_ALL_COMPLETE: "after_last_level",
+    Events.GAME_COMPLETE: "game_complete",
+    Events.GAME_ALL_COMPLETE: "all_levels_complete",
+}
+
+
 enum Modes {
     GAME,
     BUNDLED_LISTS,
@@ -87,7 +112,7 @@ func _ready() -> void:
 
 
 func edit_first_bundled_list() -> void:
-    var all_bundled_lists: = GameManager.get_list_of_level_lists(true)
+    var all_bundled_lists: Array = GameManager.get_list_of_level_lists(true)
     if all_bundled_lists.size() == 0:
         push_error("No bundled lists found")
         return
@@ -97,7 +122,7 @@ func edit_first_bundled_list() -> void:
         edit_assignments_for_level_list(all_bundled_lists[0])
 
 func edit_first_custom_list() -> void:
-    var all_custom_lists: = GameManager.get_list_of_non_bundled_level_lists()
+    var all_custom_lists: Array[String] = GameManager.get_list_of_non_bundled_level_lists()
     if all_custom_lists.size() == 0:
         push_error("No custom lists found")
         return
@@ -107,7 +132,7 @@ func edit_first_custom_list() -> void:
         edit_assignments_for_level_list(all_custom_lists[0])
 
 func edit_first_level() -> void:
-    var all_levels: = GameManager.get_all_existing_levels_sorted_by_chronology()
+    var all_levels: Array[String] = GameManager.get_all_existing_levels_sorted_by_chronology()
     if all_levels.size() == 0:
         push_error("No levels found")
         return
@@ -124,7 +149,7 @@ func edit_assignments_for_level_list(level_list_name: String) -> void:
     
     current_level_list_name = level_list_name
     current_level_name = ""
-    var is_bundled_list: = GameManager.is_level_list_bundled(level_list_name)
+    var is_bundled_list: bool = GameManager.is_level_list_bundled(level_list_name)
     var new_mode: = Modes.BUNDLED_LISTS if is_bundled_list else Modes.CUSTOM_LISTS
     set_current_mode(new_mode)
     
@@ -158,7 +183,7 @@ func edit_assignments_for_game() -> void:
 func refresh_ui() -> void:
     assignment_list_getting_duplicate = null
     var current_mode: = get_current_mode()
-    var locked: = GameManager.current_game_is_release_locked
+    var locked: bool = GameManager.current_game_is_release_locked
     
     list_or_list_name_section.visible = current_mode in [Modes.BUNDLED_LISTS, Modes.CUSTOM_LISTS, Modes.LEVELS]
     if list_or_list_name_section.visible:
@@ -175,8 +200,8 @@ func refresh_ui() -> void:
     if locked and current_mode == Modes.CUSTOM_LISTS:
         edit_new_intermission_button.disabled = current_level_list_name == ""
     
-    var all_bundled_lists: = GameManager.get_list_of_level_lists(true)
-    var all_custom_lists: = GameManager.get_list_of_non_bundled_level_lists()
+    var all_bundled_lists: Array = GameManager.get_list_of_level_lists(true)
+    var all_custom_lists: Array[String] = GameManager.get_list_of_non_bundled_level_lists()
     
     bundled_lists_btn.disabled = all_bundled_lists.size() == 0
     custom_lists_btn.disabled = all_custom_lists.size() == 0
@@ -222,7 +247,7 @@ func refresh_ui() -> void:
             next_nav_button.disabled = cur_list_index == all_bundled_lists.size() - 1
             previous_nav_button.disabled = cur_list_index == 0
     elif current_mode == Modes.LEVELS:
-        var all_levels_orderd: = GameManager.get_all_existing_levels_sorted_by_chronology()
+        var all_levels_orderd: Array[String] = GameManager.get_all_existing_levels_sorted_by_chronology()
         var current_index: = all_levels_orderd.find(current_level_name)
         if current_index == -1:
             next_nav_button.disabled = false
@@ -250,7 +275,7 @@ func on_navigate(direction: int) -> void:
         current_index = clampi(current_index + direction, 0, all_custom_lists.size() - 1)
         edit_assignments_for_level_list(all_custom_lists[current_index])
     elif current_mode == Modes.LEVELS:
-        var all_levels: = GameManager.get_all_existing_levels_sorted_by_chronology()
+        var all_levels: Array[String] = GameManager.get_all_existing_levels_sorted_by_chronology()
         var current_index: = all_levels.find(current_level_name)
         if current_index == -1:
             current_index = 0
@@ -316,7 +341,7 @@ func refresh_assignment_lists() -> void:
     if current_mode == Modes.BUNDLED_LISTS or current_mode == Modes.CUSTOM_LISTS:
         if not current_level_list_name:
             return
-        var list_info: = GameManager._get_level_list(current_level_list_name)
+        var list_info: Dictionary = GameManager._get_level_list(current_level_list_name)
         if not list_info:
             push_error("unable to get level list info for %s" % current_level_list_name)
             return
@@ -337,7 +362,7 @@ func refresh_assignment_lists() -> void:
 
         if not FilesManager.level_exists(GameManager.get_identified_game_name(), current_level_name):
             return
-        var cur_map_metadata: = GameManager.get_map_metadata_from_level_file(current_level_name)
+        var cur_map_metadata: Dictionary = GameManager.get_map_metadata_from_level_file(current_level_name)
         var assignments_dict: Dictionary = {}
         if typeof(cur_map_metadata.get("intermission_assignments", {})) == TYPE_DICTIONARY:
             assignments_dict = cur_map_metadata.get("intermission_assignments", {})
@@ -356,12 +381,12 @@ func refresh_assignment_lists() -> void:
 
 func update_and_save_current() -> void:
     var current_mode: = get_current_mode()
-    var locked: = GameManager.current_game_is_release_locked
+    var locked: bool = GameManager.current_game_is_release_locked
     
     if current_mode == Modes.BUNDLED_LISTS or current_mode == Modes.CUSTOM_LISTS:
         if not current_level_list_name or (locked and GameManager.is_level_list_bundled(current_level_list_name)):
             return
-        var list_info: = GameManager._get_level_list(current_level_list_name)
+        var list_info: Dictionary = GameManager._get_level_list(current_level_list_name)
         if not list_info:
             return
         if not list_info.has("intermission_assignments") or typeof(list_info["intermission_assignments"]) != TYPE_DICTIONARY:
@@ -395,7 +420,7 @@ func update_and_save_current() -> void:
                 return
             if locked and GameManager.is_level_bundled(current_level_name):
                 return
-            var cur_map_metadata: = GameManager.get_map_metadata_from_level_file(current_level_name)
+            var cur_map_metadata: Dictionary = GameManager.get_map_metadata_from_level_file(current_level_name)
             
             if not cur_map_metadata.has("intermission_assignments") or typeof(cur_map_metadata["intermission_assignments"]) != TYPE_DICTIONARY:
                 cur_map_metadata["intermission_assignments"] = {}
@@ -435,3 +460,11 @@ func refresh_current_level_assignments() -> void:
     after_complete_assignment_list.load_assignments(cur_map_assignments.get("after_complete", []))
     if custom_failure_assignment_list:
         custom_failure_assignment_list.load_assignments(cur_map_assignments.get("custom_fail", []))
+
+
+static func get_event_key(event_id: Events) -> String:
+    if not event_id in Events.values():
+        push_error("Invalid event id: %s" % event_id)
+    if not event_id in EVENT_KEYS:
+        push_error("No event key for event id: %s (%s)" % [event_id, EVENT_KEYS.find_key(event_id)])
+    return EVENT_KEYS[event_id]

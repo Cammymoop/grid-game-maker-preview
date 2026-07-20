@@ -195,24 +195,13 @@ func refresh_list() -> void:
 #func _add_level_item(with_level_name: String, with_level_title: String, as_played: bool, as_completed: bool) -> LevelListItem:
 func _add_level_item(level_info: Dictionary) -> LevelListItem:
     var level_item: Control = level_item_scene.instantiate()
-    level_item.is_editing_locked = is_editing_locked
-    level_item.is_in_bundled_list = is_bundled_list
-    level_item.set_level_name_and_title(level_info["level_name"], level_info["display_title"])
-    if is_list_of_unlisted_levels:
-        level_item.not_in_a_list()
-    else:
-        level_item.level_list_name = level_list_name
-    var is_edit: = _is_in_edit_mode()
-    level_item.set_edit_mode(is_edit)
-    if not is_edit:
-        level_item.set_is_completed_is_played(level_info["is_completed"], level_info["is_played"])
-        level_item.set_is_unlocked(level_info["is_unlocked"])
+    level_item_container.add_child(level_item)
+    level_item.set_all_info(level_info, is_list_of_unlisted_levels, level_list_name, is_editing_locked, is_bundled_list)
     level_item.play_level.connect(on_level_item_play_level)
     level_item.request_edit_level.connect(on_level_item_request_edit_level)
     level_item.request_context_menu.connect(on_level_item_request_context_menu)
     level_item.request_move_relative.connect(move_list_item_relative)
     level_item.focus_up_down_attempted.connect(on_level_item_focus_up_down_attempted)
-    level_item_container.add_child(level_item)
     return level_item
 
 func on_level_item_play_level(level_name: String) -> void:

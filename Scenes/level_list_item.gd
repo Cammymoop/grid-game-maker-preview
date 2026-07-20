@@ -56,10 +56,8 @@ var _is_edit_mode: bool = false
 func _ready() -> void:
     focus_panel.hide()
     highlight_rect.hide()
-    current_level_icon.hide()
-    current_level_indicator.visible = true
-    refresh_current_level_indicator()
-    refresh_icons_and_text()
+    current_level_indicator.hide()
+
     start_level_button.pressed.connect(on_start_level_button_pressed)
     edit_level_button.pressed.connect(on_edit_level_button_pressed)
     edit_as_autosave_button.pressed.connect(on_edit_as_autosave_button_pressed)
@@ -72,41 +70,63 @@ func _ready() -> void:
     get_viewport().gui_focus_changed.connect(on_gui_focus_changed)
 
     edit_as_autosave_button.visible = false
-    refresh_move_buttons()
+
+func set_all_info(level_info: Dictionary, is_list_of_unlisted_levels: bool, for_list_name: String, edit_lock: bool, is_bundled: bool) -> void:
+    _not_in_a_list = is_list_of_unlisted_levels
+    level_list_name = for_list_name
+    is_editing_locked = edit_lock
+    is_in_bundled_list = is_bundled
+    
+    level_name = level_info["level_name"]
+    level_title = level_info["display_title"]
+
+    _is_edit_mode = GameManager.is_in_level_edit_mode
+    
+    is_completed = level_info["is_completed"]
+    is_played = level_info["is_played"]
+    is_unlocked = level_info["is_unlocked"]
+    
+    do_is_current_level_check()
+
+    refresh_ui()
+
+func refresh_ui() -> void:
+    move_up_down_buttons.visible = not _not_in_a_list and _is_edit_mode
+
+    start_level_button.visible = not _is_edit_mode
+    edit_level_button.visible = _is_edit_mode
+    if not _not_in_a_list:
+        move_up_down_buttons.visible = _is_edit_mode
+
+    if _is_edit_mode and level_name.to_lower() != level_title.to_lower():
+        title_label.text = "%s (%s)" % [level_title, level_name]
+    else:
+        title_label.text = level_title
+
+    start_level_button.disabled = not is_unlocked
+    start_level_button.tooltip_text = "Play level" if is_unlocked else "Locked"
+
+    current_level_indicator.visible = _is_current_level
+    highlight_rect.visible = _is_current_level
+
+    refresh_icons_and_text()
+    refresh_edit_as_autosave_button()
 
 func is_current_level() -> bool:
-    if level_name == "Ice Dispenser":
-        prints("ice dispenser current level:", _is_current_level)
     return _is_current_level
-
-func not_in_a_list() -> void:
-    _not_in_a_list = true
-    move_up_down_buttons.visible = false
 
 func on_relative_move_pressed(relative_index: int) -> void:
     request_move_relative.emit(self, relative_index)
-    refresh_move_buttons()
 
 func refresh_move_buttons() -> void:
-    if _not_in_a_list or not is_inside_tree():
+    if _not_in_a_list:
         return
     var idx: = get_index()
     move_up_button.disabled = idx == 0
     move_down_button.disabled = idx == get_parent().get_child_count() - 1
-
-func set_edit_mode(is_edit: bool) -> void:
-    _is_edit_mode = is_edit
-    #current_level_indicator.visible = not is_edit
-    start_level_button.visible = not is_edit
-    edit_level_button.visible = is_edit
-    if not _not_in_a_list:
-        move_up_down_buttons.visible = is_edit
-    refresh_move_buttons()
-    refresh_current_level_indicator()
-    set_level_name_and_title(level_name, level_title)
-    refresh_edit_as_autosave_button()
     
 func refresh_edit_as_autosave_button() -> void:
+    edit_as_autosave_button.visible = false
     if _is_edit_mode:
         var autosave_level: = FilesManager.get_editor_autosave_level_name(GameManager.get_identified_game_name())
         if autosave_level != level_name:
@@ -115,41 +135,12 @@ func refresh_edit_as_autosave_button() -> void:
             edit_as_autosave_button.visible = true
             var is_autosave_newer: = FilesManager.get_editor_autosave_is_newer(GameManager.get_identified_game_name())
             edit_as_autosave_button.text = "Autosave " + ("(newer)" if is_autosave_newer else "(older)")
-    else:
-        edit_as_autosave_button.visible = false
 
-func set_level_name_and_title(new_name: String, new_title: String) -> void:
-    level_name = new_name
-    level_title = new_title
-    if _is_edit_mode and level_name.to_lower() != level_title.to_lower():
-        title_label.text = "%s (%s)" % [level_title, level_name]
-    else:
-        title_label.text = level_title
-
-func setup_current_level_indicator() -> void:
-    current_level_indicator.visible = true
-    refresh_current_level_indicator()
-
-func refresh_current_level_indicator() -> void:
-    if not current_level_indicator.visible:
-        highlight_rect.hide()
-        return
-    if GameManager.cur_scene == "Play" and GameManager.loaded_level_name:
-        if GameManager.loaded_level_name == level_name:
-            _is_current_level = false
-            if not GameManager.current_level_list and _not_in_a_list:
-                _is_current_level = true
-            elif GameManager.current_level_list == level_list_name:
-                _is_current_level = true
-            if _is_current_level:
-                current_level_icon.show()
-                highlight_rect.show()
-                refresh_icons_and_text()
-
-func set_is_completed_is_played(new_is_completed: bool, new_is_played: bool) -> void:
-    is_completed = new_is_completed
-    is_played = new_is_played
-    refresh_icons_and_text()
+func do_is_current_level_check() -> void:
+    var check_list: = ""
+    if not _not_in_a_list:
+        check_list = level_list_name
+    _is_current_level = GameManager.is_level_select_current_level(check_list, level_name)
 
 func refresh_icons_and_text() -> void:
     title_label.remove_theme_color_override("font_color")
@@ -175,14 +166,6 @@ func refresh_icons_and_text() -> void:
     
     if not _is_edit_mode and not is_unlocked:
         start_level_button.visible = false
-
-    refresh_edit_as_autosave_button()
-
-func set_is_unlocked(new_is_unlocked: bool) -> void:
-    is_unlocked = new_is_unlocked
-    start_level_button.disabled = not is_unlocked
-    start_level_button.tooltip_text = "Play level" if is_unlocked else "Locked"
-    refresh_icons_and_text()
 
 func on_start_level_button_pressed() -> void:
     if not level_name:

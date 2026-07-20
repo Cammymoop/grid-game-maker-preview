@@ -905,7 +905,8 @@ func save_current_or_save_as(after_save_callable: Callable = Callable(), no_toas
 	if GameManager.loaded_level_name:
 		GameManager.save_edited_level_as(GameManager.loaded_level_name, no_toast)
 		has_edited_something = false
-		after_save_callable.call()
+		if after_save_callable.is_valid():
+			after_save_callable.call()
 		return true
 	elif not no_toast:
 		var pause_menu: = Utility.get_pause_menu()

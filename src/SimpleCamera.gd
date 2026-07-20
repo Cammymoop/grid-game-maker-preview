@@ -205,6 +205,8 @@ func get_follow_targets() -> Array[BaseEntity]:
 	var follow_this = Utility.get_camera_setting("follow_entity", "")
 	var by_mode = Utility.get_camera_setting("follow_entity_by", "controller")
 	if by_mode == "controller":
+		if not follow_this:
+			follow_this = "InputController"
 		return EntityManager.get_all_with_controller_type(follow_this)
 	if by_mode == "instances":
 		var ent_arr: Array[BaseEntity] = []
@@ -213,7 +215,7 @@ func get_follow_targets() -> Array[BaseEntity]:
 	
 	var follow_targets: Array[BaseEntity] = []
 	if follow_this:
-		if by_mode == "name":
+		if by_mode == "name" and EntityManager.entity_name_exists(follow_this):
 			#print_debug("finding name " + follow_this)
 			var ent_id = EntityManager.get_entity_index(follow_this)
 			follow_targets = EntityManager.find_all_entities_by_index(ent_id, false)

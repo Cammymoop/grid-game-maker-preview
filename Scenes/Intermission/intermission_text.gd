@@ -21,6 +21,8 @@ func setup(item_info: Dictionary) -> void:
     var border_enabled: bool = item_info.get("text_outline_enabled", false)
     if border_enabled:
         label.add_theme_color_override("font_outline_color", item_info.get("text_outline_color", Color.BLACK))
+        var outline_size: int = mini(ceili(font_size / 3.0), 30)
+        label.add_theme_constant_override("outline_size", outline_size)
     else:
         label.add_theme_constant_override("outline_size", 0)
     
