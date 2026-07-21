@@ -222,7 +222,7 @@ const DEFAULT_INTERMISSION_CREDITS: = "Credits"
 const DEFAULT_CREDITS: Dictionary = {
 	"id": DEFAULT_INTERMISSION_CREDITS,
 	"type": "credits",
-	"bg_info": {}
+	"bg_style": {}
 }
 
 const COMPLETION__ALL_LISTS = "all_lists_complete"
@@ -987,7 +987,8 @@ func load_serialized_play_state(serialized_state: Dictionary, as_level_load: boo
 	if not serialized_state or queued_level_load:
 		return
 	
-	hide_intermissions()
+	clear_intermission_state()
+	close_all_intermissions()
 
 	if EntityManager.process_phase != 0:
 		await get_tree().physics_frame
@@ -1536,41 +1537,42 @@ func _process(_delta):
 	if transitioning:
 		scene_transisiton_update()
 	
-	if cur_scene == "Play":
-		if Input.is_action_just_pressed(&"press_quicksave"):
-			save_quicksave()
-			GlobalToaster.show_toast_message("Quicksaved")
-			return
-		elif Input.is_action_just_pressed(&"press_quickload"):
-			if quicksave_state:
-				if queued_level_load:
-					cancel_queued_level_load()
-				load_quicksave()
-				GlobalToaster.show_toast_message("Loaded quicksave")
-			else:
-				GlobalToaster.show_toast_message("No Quicksave")
-			return
+	if cur_scene != "Play":
+		return
 
-		if is_intermission_mode:
-			if is_intermission_advancable():
-				var do_advance: = false
-				for action in ["input_action_1", "input_action_2", "input_action_3"]:
-					if Input.is_action_just_pressed(action):
-						do_advance = true
-						break
-				if not do_advance and is_intermission_advance_timeout():
-					do_advance = true
-				if do_advance:
-					show_next_intermission()
-					EntityManager._input_action_ignore_frame = true
+	if Input.is_action_just_pressed(&"press_quicksave"):
+		save_quicksave()
+		GlobalToaster.show_toast_message("Quicksaved")
+		return
+	elif Input.is_action_just_pressed(&"press_quickload"):
+		if quicksave_state:
+			if queued_level_load:
+				cancel_queued_level_load()
+			load_quicksave()
+			GlobalToaster.show_toast_message("Loaded quicksave")
 		else:
-			if not get_tree().paused and Input.is_action_just_pressed(&"reload_checkpoint"):
-				if not EntityManager.intermission_overlay_paused or EntityManager.intermission_overlay_undoable:
-					if _queued_lack_of_cam_target_action:
-						cancel_queued_level_load()
-					if not cur_undo_is_current_state:
-						push_undo_state(false)
-					load_checkpoint()
+			GlobalToaster.show_toast_message("No Quicksave")
+		return
+
+	var do_intermission_advance: = false
+	if is_showing_advancable_intermission():
+		for action in ["input_action_1", "input_action_2", "input_action_3"]:
+			if Input.is_action_just_pressed(action):
+				do_intermission_advance = true
+				break
+		if not do_intermission_advance and is_intermission_advance_timeout():
+			do_intermission_advance = true
+
+	if do_intermission_advance:
+		show_next_intermission()
+		EntityManager._input_action_ignore_frame = true
+	elif not get_tree().paused and Input.is_action_just_pressed(&"reload_checkpoint"):
+		if not EntityManager.intermission_overlay_paused or EntityManager.intermission_overlay_undoable:
+			if _queued_lack_of_cam_target_action:
+				cancel_queued_level_load()
+			if not cur_undo_is_current_state:
+				push_undo_state(false)
+			load_checkpoint()
 
 func _unhandled_input(event: InputEvent) -> void:
 	if Utility.fixed_just_pressed_by_event("pause_game", event) or Utility.fixed_just_pressed_by_event("escape", event):
@@ -3072,10 +3074,13 @@ func complete_current_level_for_transition() -> Dictionary:
 	return _complete_current_level()
 
 # Make sure to show the intermissions for completing the level and list, since we're not leaving the level, they show as overlay
-func complete_current_level_without_transition() -> void:
+func complete_current_level_without_transition(extra_intermissions: Array = []) -> void:
 	var result: Dictionary = _complete_current_level()
-	if result.get("intermissions", []):
-		show_overlay_intermissions(result.get("intermissions", []))
+	var intermissions: Array[String] = []
+	intermissions.append_array(extra_intermissions)
+	intermissions.append_array(result.get("intermissions", []))
+	if intermissions.size() > 0:
+		show_overlay_intermissions(intermissions)
 
 func _complete_current_level() -> Dictionary:
 	if is_in_level_edit_mode or not loaded_level_name:
@@ -3102,15 +3107,42 @@ func _complete_current_level() -> Dictionary:
 		"intermissions": intermissions,
 	}
 
+func move_to_next_level(with_delay: float = 0, extra_intermissions: Array = []) -> void:
+	if cur_scene != "Play" or is_in_level_edit_mode:
+		return
+	if not current_level_list and get_list_containing_level(loaded_level_name):
+		current_level_list = get_list_containing_level(loaded_level_name)
+	var next_level_in_list: String = get_next_level_in_list(current_level_list, loaded_level_name, true, true)
+	if not next_level_in_list:
+		return
+	
+	var intermissions: Array[String] = []
+	intermissions.append_array(extra_intermissions)
 
-func advance_level(with_delay: float = 0, advance_to_code: String = "") -> void:
+	var adv_to_info: Array = get_advance_to_code_or_special(false)
+	var advance_to_special: String = adv_to_info[0]
+	var advance_to_code: String = adv_to_info[1]
+	
+	if advance_to_code and not advance_to_special:
+		if not is_level_code_unlocked(advance_to_code):
+			advance_to_code = ""
+			advance_to_special = "select"
+
+	if not advance_to_special and not advance_to_code:
+		show_overlay_intermissions(intermissions)
+		return
+	_advance_to_special_or_code_with_intermissions(with_delay, advance_to_special, advance_to_code, intermissions)
+
+func advance_level(with_delay: float = 0, advance_to_code: String = "", extra_intermissions: Array = []) -> void:
 	if cur_scene != "Play" or is_in_level_edit_mode:
 		return
 	if not current_level_list and get_list_containing_level(loaded_level_name):
 		current_level_list = get_list_containing_level(loaded_level_name)
 	var result: Dictionary = complete_current_level_for_transition()
 	
-	var transition_intermissions: Array[String] = result.get("intermissions", [])
+	var transition_intermissions: Array[String] = []
+	transition_intermissions.append_array(extra_intermissions)
+	transition_intermissions.append_array(result.get("intermissions", []))
 
 	var advance_to_special: String = ""
 	if not advance_to_code:
@@ -3121,18 +3153,21 @@ func advance_level(with_delay: float = 0, advance_to_code: String = "") -> void:
 	if not advance_to_special and not advance_to_code:
 		show_overlay_intermissions(transition_intermissions)
 		return
-	if advance_to_special == "end":
-		go_to_game_end(with_delay, transition_intermissions)
-	elif advance_to_special == "select":
-		_go_to_level_select(with_delay, transition_intermissions)
-	elif advance_to_special:
-		push_error("Unknown advance 'special': %s" % [advance_to_special])
-		show_overlay_intermissions(transition_intermissions)
-	elif not _level_name_from_code(advance_to_code):
-		push_error("Invalid advance to level code: %s" % [advance_to_code])
-		show_overlay_intermissions(transition_intermissions)
+	_advance_to_special_or_code_with_intermissions(with_delay, advance_to_special, advance_to_code, transition_intermissions)
+
+func _advance_to_special_or_code_with_intermissions(with_delay: float = 0, to_special: String = "", to_code: String = "", interm_q: Array[String] = []) -> void:
+	if to_special == "end":
+		go_to_game_end(with_delay, interm_q)
+	elif to_special == "select":
+		_go_to_level_select(with_delay, interm_q)
+	elif to_special:
+		push_error("Unknown advance 'special': %s" % [to_special])
+		show_overlay_intermissions(interm_q)
+	elif not to_code or not _level_name_from_code(to_code):
+		push_error("unknown advance to level code: %s" % [to_code])
+		show_overlay_intermissions(interm_q)
 	else:
-		_move_to_code_with_delay(advance_to_code, with_delay, true, transition_intermissions)
+		_move_to_code_with_delay(to_code, with_delay, true, interm_q)
 
 # External API for gameplay level transition with completing current level
 func move_to_level_code(level_code: String, with_delay: float = 0) -> void:
@@ -3143,18 +3178,29 @@ func move_to_level_code(level_code: String, with_delay: float = 0) -> void:
 	move_to_level(list_name, level_name, with_delay)
 
 
-func complete_and_move_to_level(level_list_name: String, level_name: String, with_delay: float = 0) -> void:
+func complete_and_move_to_level(level_list_name: String, level_name: String, with_delay: float = 0, extra_intermissions: Array = []) -> void:
 	var to_level_code: String = _level_code(level_list_name, level_name)
-	advance_level(with_delay, to_level_code)
+	advance_level(with_delay, to_level_code, extra_intermissions)
+
+func complete_and_move_to_level_select(with_delay: float = 0, extra_intermissions: Array = []) -> void:
+	var result: Dictionary = complete_current_level_for_transition()
+	var intermissions: Array[String] = []
+	intermissions.append_array(extra_intermissions)
+	intermissions.append_array(result.get("intermissions", []))
+	_go_to_level_select(with_delay, intermissions)
+
+func move_to_level_select(with_delay: float = 0, with_intermissions: Array = []) -> void:
+	_go_to_level_select(with_delay, Array(with_intermissions, TYPE_STRING, "", null))
+
 
 # External API for gameplay/level select level transition without completing current level
-func move_to_level(level_list_name: String, level_name: String, with_delay: float = 0) -> void:
+func move_to_level(level_list_name: String, level_name: String, with_delay: float = 0, extra_intermissions: Array = []) -> void:
 	if cur_scene != "Play" or is_in_level_edit_mode:
 		return
 	var level_code: String = _level_code(level_list_name, level_name)
-	_move_to_code_with_delay(level_code, with_delay, true, [])
+	_move_to_code_with_delay(level_code, with_delay, true, extra_intermissions)
 
-func move_to_level_list_start(level_list_name: String, with_delay: float = 0, complete_current: bool = false) -> void:
+func move_to_level_list_start(level_list_name: String, with_delay: float = 0, complete_current: bool = false, extra_intermissions: Array = []) -> void:
 	if cur_scene != "Play" or is_in_level_edit_mode:
 		return
 	var existing_levels: = get_levels_in_level_list(level_list_name)
@@ -3162,13 +3208,13 @@ func move_to_level_list_start(level_list_name: String, with_delay: float = 0, co
 		return
 	var to_level_code: String = _level_code(level_list_name, existing_levels[0])
 	if complete_current:
-		advance_level(with_delay, to_level_code)
+		advance_level(with_delay, to_level_code, extra_intermissions)
 	else:
-		_move_to_code_with_delay(to_level_code, with_delay, true, [])
+		_move_to_code_with_delay(to_level_code, with_delay, true, extra_intermissions)
 
 
 # Check for list transitions to add intermissions
-func _move_to_code_with_delay(level_code: String, with_delay: float, also_unlock: bool, interm_q: Array[String]) -> void:
+func _move_to_code_with_delay(level_code: String, with_delay: float, also_unlock: bool, interm_q: Array) -> void:
 	if GameManager.cur_scene != "Play" or GameManager.is_in_level_edit_mode:
 		return
 	
@@ -3179,12 +3225,14 @@ func _move_to_code_with_delay(level_code: String, with_delay: float, also_unlock
 	_move_to_level_by_code_with_delay(level_code, with_delay, also_unlock, interm_q)
 
 # Skip checking list transition
-func _move_to_level_by_code_with_delay(level_code: String, with_delay: float, also_unlock: bool, interm_q: Array[String]) -> void:
+func _move_to_level_by_code_with_delay(level_code: String, with_delay: float, also_unlock: bool, interm_q: Array) -> void:
 	if also_unlock and not is_level_code_unlocked(level_code):
 		unlock_level_code(level_code)
 	
-	interm_q.append_array(get_intermissions_for_level_code_event(level_code, IntermissionEvents.LEVEL_START))
-	_queue_goto_level_with_intermissions(level_code, interm_q, with_delay)
+	var intermissions: Array[String] = []
+	intermissions.append_array(interm_q)
+	intermissions.append_array(get_intermissions_for_level_code_event(level_code, IntermissionEvents.LEVEL_START))
+	_queue_goto_level_with_intermissions(level_code, intermissions, with_delay)
 	#if with_delay <= 0:
 		#goto_level_code(level_code)
 	#else:
@@ -4399,6 +4447,16 @@ func _get_all_intermission_ids_from(intermissions: Array) -> Array[String]:
 		all_intermission_ids.append(intermission_info["id"])
 	return all_intermission_ids
 
+func has_tagged_intermission_id(intermission_id: String, for_custom_list: String = "") -> bool:
+	if not for_custom_list:
+		for_custom_list = current_level_list
+
+	if intermission_id.begins_with(":"):
+		if not for_custom_list:
+			return false
+		return has_intermission_id(intermission_id.trim_prefix(":"), for_custom_list)
+	return has_intermission_id(intermission_id)
+
 func has_intermission_id(intermission_id: String, from_custom_list: String = "") -> bool:
 	if not intermission_id:
 		return false
@@ -4466,12 +4524,14 @@ func get_intermission_info(intermission_id: String, from_custom_list: String = "
 			return intermission_info.duplicate_deep()
 	return {}
 
-func get_tagged_intermission_info(intermission_id: String) -> Dictionary:
+func get_tagged_intermission_info(intermission_id: String, context_list_name: String = "") -> Dictionary:
+	if not context_list_name:
+		context_list_name = current_level_list
 	if intermission_id.begins_with(":"):
-		if not current_level_list:
+		if not context_list_name:
 			return {}
 		var inner_id: String = intermission_id.trim_prefix(":")
-		return get_intermission_info(inner_id, current_level_list)
+		return get_intermission_info(inner_id, context_list_name)
 	return get_intermission_info(intermission_id)
 
 func _get_bundled_intermission_info(intermission_id: String) -> Dictionary:
@@ -4488,13 +4548,36 @@ func remove_intermission_info(intermission_id: String) -> void:
 	if not intermission_id or not has_intermission_id(intermission_id):
 		return
 	
+	remove_intermission_id_from_defualt_assignments(intermission_id)
 	var new_intermissions: Array = []
 	for intermission_info in game_definition.get("intermissions", []):
+		if intermission_info.get("type", "") == "sequence":
+			var filtered_sequence_ids: Array[String] = []
+			for sequence_id in intermission_info.get("sequence_ids", []):
+				if sequence_id != intermission_id:
+					filtered_sequence_ids.append(sequence_id)
+			intermission_info["sequence_ids"] = filtered_sequence_ids
 		if not intermission_info.get("id", ""):
 			continue
 		if intermission_info["id"] != intermission_id:
 			new_intermissions.append(intermission_info.duplicate_deep())
 	game_definition["intermissions"] = new_intermissions
+
+func remove_intermission_id_from_defualt_assignments(intermission_id: String) -> void:
+	var game_intermission_assignments: Dictionary = get_game_setting("default_intermissions", {}).duplicate_deep()
+	var has_filtered_any: bool = false
+	for event_key in game_intermission_assignments:
+		if not game_intermission_assignments[event_key].size() > 0:
+			continue
+		var filtered_intermission_ids: Array[String] = []
+		for id in game_intermission_assignments[event_key]:
+			if id != intermission_id:
+				filtered_intermission_ids.append(id)
+			else:
+				has_filtered_any = true
+		game_intermission_assignments[event_key] = filtered_intermission_ids
+	if has_filtered_any:
+		set_game_setting("default_intermissions", game_intermission_assignments)
 
 
 func get_available_numeric_intermission_id(in_custom_list: String = "") -> String:
@@ -4587,19 +4670,33 @@ func move_intermission_to_custom_list(to_custom_list: String, intermission_id: S
 		remove_intermission_info(intermission_id)
 	return new_intermission_id
 
-func duplicate_bundled_intermission_into_custom_list(to_custom_list: String, intermission_id: String) -> String:
+func duplicate_bundled_intermission_into_custom_list(to_custom_list: String, intermission_id: String, try_suffix: String = "-custom") -> String:
 	if not intermission_id or not to_custom_list in get_list_of_non_bundled_level_lists():
 		return ""
 	if not has_intermission_id(intermission_id):
 		return ""
 	
-	return _copy_intermission_to_custom_list(to_custom_list, get_intermission_info(intermission_id))
+	return _copy_intermission_to_custom_list(to_custom_list, get_intermission_info(intermission_id), try_suffix)
 
-func _copy_intermission_to_custom_list(to_custom_list: String, intermission_info: Dictionary) -> String:
+func append_numbered_intermission_id_suffix(intermission_id: String, suffix: String) -> String:
+	if not intermission_id or not suffix:
+		return intermission_id
+	if intermission_id.ends_with(suffix) or intermission_id.left(-1).ends_with(suffix):
+		var old_number: int = 1
+		if not intermission_id.ends_with(suffix):
+			old_number = int(intermission_id.right(-1))
+		intermission_id += suffix + str(old_number + 1)
+	else:
+		intermission_id += suffix
+	return intermission_id
+
+func _copy_intermission_to_custom_list(to_custom_list: String, intermission_info: Dictionary, try_suffix: String = "-custom") -> String:
 	intermission_info = intermission_info.duplicate_deep()
 	var intermission_id: String = intermission_info["id"]
+	if try_suffix:
+		intermission_id = append_numbered_intermission_id_suffix(intermission_id, try_suffix)
 	var intermissions_at_destination: = get_all_intermission_ids_from_custom_list(to_custom_list)
-	if intermission_id in intermissions_at_destination:
+	if not intermission_id or intermission_id in intermissions_at_destination:
 		intermission_id = get_available_numeric_intermission_id(to_custom_list)
 	intermission_info["id"] = intermission_id
 	update_intermission_info(intermission_id, intermission_info, to_custom_list)
@@ -4633,7 +4730,10 @@ func get_map_metadata_from_level_file(level_name: String) -> Dictionary:
 func get_current_fail_state_intermission_info() -> Dictionary:
 	if not cur_scene == "Play" or not loaded_level_name:
 		return get_default_fail_state_intermission_info()
-	return MapManager.get_fail_state_intermission_info()
+	var fail_intermission_id_from_map: String = MapManager.get_custom_fail_state_intermission_id()
+	if not fail_intermission_id_from_map:
+		return get_current_list_fail_state_intermission_info()
+	return get_tagged_intermission_info(fail_intermission_id_from_map)
 
 func get_current_list_fail_state_intermission_info() -> Dictionary:
 	if not cur_scene == "Play" or not loaded_level_name:
@@ -4642,18 +4742,25 @@ func get_current_list_fail_state_intermission_info() -> Dictionary:
 	if not current_level_list:
 		return def_info
 
-	var list_info: = _get_level_list(current_level_list)
-	var intermission_assignments: Dictionary = list_info.get("intermission_assignments", {})
-	if not intermission_assignments.get("custom_fail", []).size() > 0:
+	var fail_state_intermission_ids: Array[String] = get_intermissions_for_list_event(current_level_list, IntermissionEvents.CUSTOM_FAIL_STATE)
+	var first_valid_id: String = get_first_non_sequence_intermission_from_list(fail_state_intermission_ids)
+	if not first_valid_id:
 		return def_info
-	var intermission_id: String = intermission_assignments["custom_fail"][0]
-	return get_tagged_intermission_info(intermission_id)
+	return get_tagged_intermission_info(first_valid_id)
 
 func get_default_fail_state_intermission_info() -> Dictionary:
-	var game_intermission_assignments: Dictionary = get_game_setting("default_intermissions", {})
-	if not game_intermission_assignments.get("fail_state", []).size() > 0:
+	var fail_state_intermission_ids: Array[String] = get_intermissions_for_game_event(IntermissionEvents.DEFAULT_FAIL_STATE)
+	var first_valid_id: String = get_first_non_sequence_intermission_from_list(fail_state_intermission_ids)
+	if not first_valid_id:
 		return {}
-	return get_intermission_info(game_intermission_assignments["fail_state"][0])
+	return get_tagged_intermission_info(first_valid_id)
+
+func _get_intermission_info_if_not_sequence(tagged_intermission_id: String, context_list_name: String = "") -> Dictionary:
+	var info: Dictionary = get_tagged_intermission_info(tagged_intermission_id, context_list_name)
+	if info.get("type", "") == "sequence":
+		return {}
+	return info
+
 
 
 func show_credits_as_overlay(manually_triggered: bool) -> void:
@@ -4663,24 +4770,104 @@ func show_credits_as_overlay(manually_triggered: bool) -> void:
 	
 	if manually_triggered:
 		credits_intermission_info["show_only_once"] = false
-	show_overlay_intermission(credits_intermission_info, DEFAULT_INTERMISSION_CREDITS)
+	if not credits_intermission_info.has("id"):
+		credits_intermission_info["id"] = DEFAULT_INTERMISSION_CREDITS
+	show_single_overlay_intermission(credits_intermission_info, true)
 
 func get_credtis_intermission_info() -> Dictionary:
-	if not has_intermission_id(DEFAULT_INTERMISSION_CREDITS):
+	var first_id: String = get_credits_intermission_first_id()
+	if not first_id:
 		return DEFAULT_CREDITS.duplicate_deep()
-	return get_intermission_info(DEFAULT_INTERMISSION_CREDITS)
 
+	return get_intermission_info(first_id)
+
+func get_credits_intermission_first_id() -> String:
+	if not has_intermission_id(DEFAULT_INTERMISSION_CREDITS):
+		return DEFAULT_INTERMISSION_CREDITS
+	return _get_first_non_sequence_intermission_id(DEFAULT_INTERMISSION_CREDITS)
+
+
+func get_first_non_sequence_intermission_from_list(intermission_ids: Array, context_list_name: String = "") -> String:
+	if not intermission_ids.size() > 0 or typeof(intermission_ids[0]) != TYPE_STRING:
+		return ""
+	var first_id: String = _get_first_non_sequence_intermission_id(intermission_ids[0], context_list_name)
+	if not first_id:
+		return ""
+	return first_id
+
+func _get_first_non_sequence_intermission_id(from_id: String, context_list_name: String = "", search_depth: int = 0) -> String:
+	if search_depth > 50:
+		return ""
+	if not has_tagged_intermission_id(from_id, context_list_name):
+		return ""
+
+	var intermission_info: = get_tagged_intermission_info(from_id, context_list_name)
+	if not intermission_info:
+		return ""
+	var intermission_type: String = intermission_info.get("type", "")
+	if intermission_type != "sequence":
+		return from_id
+	else:
+		var sequence_ids: Array[String] = intermission_info.get("sequence_ids", [])
+		if not sequence_ids.size() > 0:
+			return ""
+		return _get_first_non_sequence_intermission_id(sequence_ids[0], context_list_name, search_depth + 1)
+
+
+# external API for showing overlay intermission, if mupltiple needed make a sequence intermission
+func show_custom_intermission_overlay(tagged_intermission_id: String) -> void:
+	var intermission_info: = {}
+	if not has_tagged_intermission_id(tagged_intermission_id):
+		intermission_info = _get_not_found_intermission_info()
+	else:
+		intermission_info = get_tagged_intermission_info(tagged_intermission_id)
+	if not intermission_info:
+		push_error("Trying to show empty intermission info as custom intermission overlay")
+		return
+
+	show_single_overlay_intermission(intermission_info, true)
+
+# external API for showing a single intermission 
+func show_custom_fail_state_overlay(tagged_intermission_id: String) -> void:
+	if not has_tagged_intermission_id(tagged_intermission_id):
+		show_current_fail_state_intermission_as_overlay()
+		return
+	
+	var info: = get_tagged_intermission_info(tagged_intermission_id)
+	_show_fail_state_overlay_info(info)
+
+func _get_not_found_intermission_info() -> Dictionary:
+	return {
+		"type": "intermission",
+		"id": "NOT_FOUND",
+		"show_only_once": false,
+		"show_continue": true,
+		"content_items": [
+			{
+				"type": "text",
+				"text": "Missing\nIntermission",
+				"font_size": 50,
+			}
+		]
+	}
 
 func show_current_fail_state_intermission_as_overlay() -> void:
-	var fail_state_intermission_info: = get_current_fail_state_intermission_info().duplicate_deep()
-	fail_state_intermission_info["show_only_once"] = false
-	var intermission_id: String = fail_state_intermission_info.get("id", "FAIL")
+	var fail_state_intermission_info: = get_current_fail_state_intermission_info()
+	_show_fail_state_overlay_info(fail_state_intermission_info)
+
+func _show_fail_state_overlay_info(intermission_info: Dictionary) -> void:
+	if not intermission_info:
+		push_error("Trying to show empty intermission info as fail state overlay")
+		return
+	intermission_info = intermission_info.duplicate_deep()
+	intermission_info["show_only_once"] = false
+	if not intermission_info.has("id"):
+		intermission_info["id"] = "FAIL"
 	
-	fail_state_intermission_info["show_undo"] = undo_stack.size() > 1 and action_1_does_undo()
-	fail_state_intermission_info["show_reload_checkpoint"] = true
+	intermission_info["show_undo"] = undo_stack.size() > 1 and action_1_does_undo()
+	intermission_info["show_reload_checkpoint"] = true
 	
-	show_overlay_intermission(fail_state_intermission_info, intermission_id)
-	EntityManager.start_pause_for_intermission_overlay(true)
+	show_single_overlay_intermission(intermission_info)
 
 
 func show_overlay_intermissions(intermission_id_list: Array[String]) -> void:
@@ -4690,7 +4877,9 @@ func show_overlay_intermissions(intermission_id_list: Array[String]) -> void:
 	intermission_state["intermission_queue"] = intermission_id_list.duplicate_deep()
 	intermission_state["to_level_code"] = ""
 	intermission_state["is_overlaying"] = true
+	set_overlay_intermission_state()
 	show_next_intermission()
+	start_intermission_expire_timer(2000)
 
 func _queue_goto_level_with_intermissions(to_level_code: String, intermission_id_list: Array[String], with_delay: float = 0.0) -> void:
 	if with_delay <= 0:
@@ -4809,19 +4998,25 @@ func _get_intermission_root() -> Node:
 	return get_tree().current_scene.intermission_root
 
 
-#func show_intermission_as_level_overlay(intermission_info: Dictionary) -> void:
-	#pass
-
-func show_overlay_intermission(intermission_info: Dictionary, intermission_id: String = "") -> bool:
+func show_single_overlay_intermission(intermission_info: Dictionary, advancable: bool = false) -> bool:
+	if is_intermission_mode:
+		return false
+	var intermission_id: String = intermission_info.get("id", "")
+	if not intermission_id:
+		return false
 	var only_once: bool = intermission_info.get("show_only_once", false)
 	if only_once and has_saved_intermission_id_viewed(intermission_id):
 		return false
 
+	clear_intermission_state()
 	set_overlay_intermission_state()
+	intermission_state["advancable"] = advancable
+
 	return show_intermission(intermission_info, intermission_id)
 
 # Also saves viewed intermission ids
 func show_intermission(intermission_info: Dictionary, tagged_intermission_id: String = "") -> bool:
+	intermission_info = intermission_info.duplicate_deep()
 	if not is_in_level_edit_mode:
 		var only_once: bool = intermission_info.get("show_only_once", false)
 		if only_once and has_saved_intermission_id_viewed(tagged_intermission_id):
@@ -4843,8 +5038,12 @@ func show_intermission(intermission_info: Dictionary, tagged_intermission_id: St
 		if cur_scene == "Play":
 			show_credits()
 		return true
+	elif intermission_info.get("type", "") == "sequence":
+		push_error("sequence info passed to show_intermission, should have been queued and called with show_next_intermission")
+		return false
 
 	var intermission_ui: = intermission_ui_scn.instantiate() as IntermissionUI
+	intermission_ui.advancable = intermission_state.get("advancable", true)
 	intermission_root.add_child(intermission_ui)
 	intermission_ui.setup_with_info(intermission_info)
 	return true
@@ -4894,6 +5093,10 @@ func _hide_credits_ui() -> void:
 		credits_ui.close_credits()
 
 func hide_intermissions() -> void:
+	_hide_credits_ui()
+	_clear_intermission_root()
+
+func close_all_intermissions() -> void:
 	EntityManager.stop_pause_for_intermission_overlay()
 	_hide_credits_ui()
 	_clear_intermission_root()
@@ -4915,25 +5118,34 @@ func set_overlay_intermission_state() -> void:
 	intermission_state["is_overlaying"] = true
 	EntityManager.start_pause_for_intermission_overlay(false)
 
+func is_showing_advancable_intermission() -> bool:
+	if not is_intermission_mode and not is_showing_intermission_overlay():
+		return false
+	if not is_intermission_advancable():
+		return false
+	return true
+
 func is_showing_intermission_overlay() -> bool:
 	return intermission_state.get("is_overlaying", false)
 
-func show_next_intermission() -> void:
+func show_next_intermission(depth: int = 0) -> void:
+	if depth > 400:
+		push_error("Intermission sequence depth too deep, probably infinite sequence loop")
+		skip_all_queued_intermissions()
+		return
+
 	if not cur_scene == "Play":
+		prints("next intermission not in play scene")
 		return
 	
 	_hide_credits_ui()
 
-	var is_overlaying: bool = intermission_state.get("is_overlaying", false)
-	if is_overlaying and not is_intermission_mode:
-		return
-	
 	var queue: Array[String] = intermission_state.get("intermission_queue", [])
 	if queue.size() == 0:
 		var to_special: String = intermission_state.get("to_special", "")
 		var to_level_code: String = intermission_state.get("to_level_code", "")
 		clear_intermission_state()
-		hide_intermissions()
+		close_all_intermissions()
 		if not to_level_code and not to_special:
 			return
 		if to_special:
@@ -4947,6 +5159,22 @@ func show_next_intermission() -> void:
 	var next: String = queue.pop_front()
 	
 	var intermission_info: Dictionary = get_tagged_intermission_info(next)
+	if intermission_info.get("type", "") == "sequence":
+		var new_queue: Array[String] = []
+		var checked_sequence_ids: Array[String] = []
+		for id in intermission_info.get("sequence_ids", []):
+			if has_tagged_intermission_id(id):
+				checked_sequence_ids.append(id)
+		new_queue.assign(checked_sequence_ids + queue)
+		intermission_state["intermission_queue"] = new_queue
+		if new_queue.size() > 400:
+			push_error("Too many intermissions in queue, aborting")
+			skip_all_queued_intermissions()
+			return
+		# use depth for cheap infinite loop detection
+		show_next_intermission(depth + 1)
+		return
+
 	if not intermission_info:
 		print_debug("no intermission info found for: ", next)
 		show_next_intermission()
@@ -4962,7 +5190,13 @@ func skip_all_queued_intermissions() -> void:
 func is_intermission_advancable() -> bool:
 	if not is_intermission_mode and not is_showing_intermission_overlay():
 		return false
+	if not intermission_state.get("advancable", true):
+		return false
 	return intermission_advancable_timer.is_stopped()
+
+func start_intermission_expire_timer(for_seconds: float) -> void:
+	intermission_state["expire_time"] = for_seconds
+	intermission_expire_timer.start(for_seconds)
 
 func is_intermission_advance_timeout() -> bool:
 	if not is_intermission_mode or not is_showing_intermission_overlay():

@@ -2,17 +2,43 @@ extends Window
 
 signal hidden
 
+const BetterTextureDialog = preload("res://src/GameEditor/BetterTextureDialog.gd")
 const Toaster = preload("res://src/Singletons/global_toaster.gd")
+
+const TilePicker = preload("res://src/GameEditor/TilePicker.gd")
 
 var texture_dialog = preload("res://Scenes/GameEditor/BetterTextureDialog.tscn")
 
-@onready var local_tile_picker = find_child("TilePickerLocal")
+@export var local_tile_picker: TilePicker
 @export var loaded_texture: Texture2D
 @export var make_tex_with_size: Vector2
 
 @export var title_label: Label
 
 @export var local_toaster: Toaster
+
+@export var tl_paint_btn: ButtonContainer
+@export var tr_paint_btn: ButtonContainer
+@export var bl_paint_btn: ButtonContainer
+@export var br_paint_btn: ButtonContainer
+@export var whole_brush_paint_btn: ButtonContainer
+
+@onready var corner_buttons_by_index: Dictionary = {
+	0: tl_paint_btn,
+	1: tr_paint_btn,
+	2: bl_paint_btn,
+	3: br_paint_btn,
+	-1: whole_brush_paint_btn,
+}
+
+@export var rotate_brush_ccw_button: ButtonContainer
+@export var rotate_brush_cw_button: ButtonContainer
+@export var shift_brush_button: ButtonContainer
+@export var flip_brush_button: ButtonContainer
+
+@export var brush_color_picker: ColorPickerButton
+@export var brush_secondary_color_picker: ColorPickerButton
+@export var swap_colors_button: ButtonContainer
 
 var save_as_name: = ""
 
@@ -45,13 +71,15 @@ const TBC_MAX_HEIGHT: = 128
 
 const PICKED_BRUSH_MAX: Vector2 = Vector2(70, 70)
 
+const COLOR_PREVIEW_MAX: Vector2 = Vector2(128, 128)
+
 # targeted size for local tile picker
 var ltp_target_height: = 240
 var ltp_margin: = 120
 
 @export var brush_wrap: = true
 
-var picked_texture_index = 0
+var starting_brush_id: int = 0
 var picked_texture_sub_index = 0
 
 var picked_brush_offset: Vector2 = Vector2.ZERO
@@ -72,6 +100,12 @@ var tr_corner: Rect2i
 var bl_corner: Rect2i
 var br_corner: Rect2i
 var whole_brush: Rect2i
+
+var picked_brush_texture_info: Dictionary = {}
+
+@export var hold_corner_button_timer: Timer = Timer.new()
+var hold_corner_index: int = -2
+var toggled_corner_index: int = -2
 
 func set_texture(tex: Texture2D) -> void:
 	loaded_texture = tex
@@ -96,6 +130,16 @@ func set_filename(file_name: String) -> void:
 		
 
 func _ready():
+	size_changed.connect(on_size_changed)
+
+	if not TextureManager.has_texture_id(starting_brush_id):
+		starting_brush_id = TextureManager.get_fallback_texture_id()
+	
+	brush_secondary_color_picker.hide()
+	brush_secondary_color_picker.color_changed.connect(secondary_color_changed)
+	swap_colors_button.pressed.connect(swap_colors)
+	swap_colors_button.hide()
+
 	find_child("BrushWrap").set_pressed_no_signal(brush_wrap)
 	close_requested.connect(hide)
 	visibility_changed.connect(Callable(self, "_on_vis_changed"))
@@ -111,6 +155,20 @@ func _ready():
 	undoer.set_buttons("tile_brush", find_child("UndoBrushButton"), find_child("RedoBrushButton"))
 	undoer.add_undo_stack("texture", MAX_TEXTURE_UNDOS)
 	undoer.set_buttons("texture", find_child("UndoTextureButton"), find_child("RedoTextureButton"))
+	
+	hold_corner_button_timer.one_shot = true
+	hold_corner_button_timer.timeout.connect(hold_corner_button_timeout)
+	
+	tl_paint_btn.button.gui_input.connect(paint_button_gui_input.bind(tl_paint_btn))
+	tr_paint_btn.button.gui_input.connect(paint_button_gui_input.bind(tr_paint_btn))
+	bl_paint_btn.button.gui_input.connect(paint_button_gui_input.bind(bl_paint_btn))
+	br_paint_btn.button.gui_input.connect(paint_button_gui_input.bind(br_paint_btn))
+	whole_brush_paint_btn.button.gui_input.connect(paint_button_gui_input.bind(whole_brush_paint_btn))
+	
+	rotate_brush_ccw_button.pressed.connect(rotate_brush_ccw)
+	rotate_brush_cw_button.pressed.connect(rotate_brush_cw)
+	shift_brush_button.pressed.connect(shift_brush_right)
+	flip_brush_button.pressed.connect(flip_brush_horizontal)
 	
 	
 	var tile_size = image_meta['tile_size']
@@ -142,6 +200,9 @@ func _ready():
 	
 	hidden.connect(queue_free)
 
+func secondary_color_changed(_color: Color) -> void:
+	update_picked_colored_brush()
+
 func _shortcut_input(event: InputEvent) -> void:
 	if Utility.event_is_menu_back_just_pressed(event):
 		hide()
@@ -150,12 +211,35 @@ func on_scale() -> void:
 	rescale_tile_picker()
 
 func rescale_tile_picker() -> void:
-	var tp_scale = Utility.max_integer_scale_in(edited_image.get_size(), Vector2(size.x - ltp_margin, ltp_target_height))
+	if not edited_image:
+		return
+	local_tile_picker.set_view_scale(1)
+	var content_minimum_height: int = int(get_child(0).get_minimum_size().y)
+	var picker_parent_height: int = int(local_tile_picker.get_parent().get_minimum_size().y)
+
+	var available_height: int = size.y - (content_minimum_height - picker_parent_height)
+
+	var target_height: int = maxi(ltp_target_height, available_height)
+	var tp_scale = Utility.max_integer_scale_in(edited_image.get_size(), Vector2(size.x - ltp_margin, target_height))
 	if tp_scale == 0:
 		tp_scale = 1
 	local_tile_picker.set_view_scale(tp_scale)
 #	local_tile_picker.rect_min_size = edited_image.get_size() * tp_scale
 #	local_tile_picker.rect_size = local_tile_picker.rect_min_size
+
+func on_size_changed() -> void:
+	if local_tile_picker:
+		local_tile_picker.set_view_scale(1)
+		await get_tree().process_frame
+
+	var min_content_size: Vector2 = get_child(0).get_minimum_size()
+	if size.x < min_content_size.x:
+		size.x = min_content_size.x
+	if size.y < min_content_size.y:
+		size.y = min_content_size.y
+
+	if local_tile_picker:
+		rescale_tile_picker()
 
 
 func set_tile_brush_size(tile_size: Vector2) -> void:
@@ -190,7 +274,16 @@ func set_tile_brush_size(tile_size: Vector2) -> void:
 func _on_BrushModeChange(new_selected):
 	brush_creator_mode = new_selected.text.to_lower()
 func _on_BrushColorModeChange(new_selected):
-	brush_color_mode = new_selected.text.to_lower()
+	brush_color_mode = new_selected.name
+	var is_dual_colorize: = brush_color_mode.begins_with("dual_colorize")
+	brush_secondary_color_picker.visible = is_dual_colorize
+	swap_colors_button.visible = is_dual_colorize
+	update_picked_colored_brush()
+
+func swap_colors() -> void:
+	brush_color_picker.color = brush_secondary_color_picker.color
+	brush_secondary_color_picker.color = brush_color
+	brush_color = brush_color_picker.color
 	update_picked_colored_brush()
 
 func update_picked_brush() -> void:
@@ -204,15 +297,25 @@ func update_picked_colored_brush() -> void:
 	color_brush()
 	picked_colored_preview = ImageTexture.create_from_image(picked_colored_brush_image) #,0
 	
-	var picked_size = picked_brush_image.get_size()
+	var picked_size: = picked_brush_image.get_size()
 	for tex_rect in [find_child("BrushColorPreview"), find_child("PickBrushButton").find_child("Icon")]:
 		tex_rect.texture = picked_colored_preview
-		tex_rect.stretch_mode = TextureRect.STRETCH_KEEP
+		#tex_rect.stretch_mode = TextureRect.STRETCH_KEEP
 		tex_rect.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
 		
 		var preview_scale = Utility.max_integer_scale_in(picked_size, PICKED_BRUSH_MAX)
 		tex_rect.custom_minimum_size = picked_size * preview_scale
 		tex_rect.size = picked_size * preview_scale
+	
+	var color_preview: = find_child("BrushColorPreview") as TextureRect
+	color_preview.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT
+	var color_preview_scale: = Utility.max_integer_scale_in(picked_size, COLOR_PREVIEW_MAX)
+	if color_preview_scale == 0:
+		color_preview_scale = 0.5
+	var new_min_size: = picked_size * color_preview_scale
+	color_preview.custom_minimum_size = new_min_size.min(COLOR_PREVIEW_MAX)
+	color_preview.size = color_preview.custom_minimum_size
+	#color_preview.update_minimum_size()
 	
 	var crosshair = find_child("PickedCrosshair")
 	picked_brush_offset = ((picked_size - tile_brush_image.get_size()) / 2.0).floor()
@@ -227,19 +330,67 @@ func color_brush() -> void:
 	var img = picked_colored_brush_image
 	
 	var mode_flat: = brush_color_mode == "flat"
-	var mode_colorize: = brush_color_mode == "colorize"
+	var mode_colorize: = brush_color_mode.begins_with("colorize")
+	var alt_colorize_lightness: = brush_color_mode == "colorize_2"
+	var mode_dual_colorize: = brush_color_mode.begins_with("dual_colorize")
+	var alt_dual_lightness: = brush_color_mode == "dual_colorize_2"
+	var colorizing: = mode_colorize or mode_dual_colorize
+	
+	var secondary_color: = brush_secondary_color_picker.color
+	
+	if not colorizing and not mode_flat:
+		return
+	
+	# fix hues in case one of the inputs is fully desaturated to avoid rainbow shifts
+	var v4_color: = Utility.color_to_ok_hsl_vector4(brush_color)
+	var v4_secondary_color: = Utility.color_to_ok_hsl_vector4(secondary_color)
+	if mode_dual_colorize:
+		if is_zero_approx(v4_color.y):
+			v4_color.x = v4_secondary_color.x
+		elif is_zero_approx(v4_secondary_color.y):
+			v4_secondary_color.x = v4_color.x
+	
+	var lightness_normalized_scale: = 1.0
+	var lightness_max: = 1.0
+	var lightness_min: = 0.0
+	var lightness_bright_factor: = 1.0
+	if mode_dual_colorize or (mode_colorize and not alt_colorize_lightness):
+		lightness_max = 0.0
+		lightness_min = 1.0
+		for y in range(img.get_height()):
+			for x in range(img.get_width()):
+				var pixel_color: = img.get_pixel(x, y)
+				if pixel_color.a < 0.01:
+					continue
+				var source_lightness: = pixel_color.ok_hsl_l
+				lightness_max = maxf(lightness_max, source_lightness)
+				lightness_min = minf(lightness_min, source_lightness)
+		var lightness_normalized_span: = lightness_max - lightness_min
+		lightness_normalized_scale = 1.0 / lightness_normalized_span
+		lightness_bright_factor = (1 - lightness_min) / lightness_normalized_span
 	
 	for x in range(img.get_width()):
 		for y in range(img.get_height()):
-			var pixel_color = img.get_pixel(x, y)
+			var pixel_color: = img.get_pixel(x, y)
 			if mode_flat:
-				var flat_colored: = brush_color
-				flat_colored.a *= pixel_color.a
-				img.set_pixel(x, y, flat_colored)
-			elif mode_colorize:
-				var lightness = pixel_color.ok_hsl_l * brush_color.ok_hsl_l
-				var alpha = pixel_color.a * brush_color.a
-				img.set_pixel(x, y, Color.from_ok_hsl(brush_color.ok_hsl_h, brush_color.ok_hsl_s, lightness, alpha))
+				img.set_pixel(x, y, Color(brush_color, brush_color.a * pixel_color.a))
+			elif colorizing:
+				var colorize_to: = brush_color
+				var source_lightness: = pixel_color.ok_hsl_l
+				var lerp_factor: = (source_lightness - lightness_min) * lightness_normalized_scale
+				if mode_dual_colorize:
+					var lerp_v4: = v4_secondary_color.lerp(v4_color, lerp_factor)
+					lerp_v4.x = lerp_angle(v4_secondary_color.x * TAU, v4_color.x * TAU, lerp_factor) / TAU
+					colorize_to = Color.from_ok_hsl(lerp_v4.x, lerp_v4.y, lerp_v4.z, lerp_v4.w)
+				var lightness: float = 1
+				if mode_dual_colorize and not alt_dual_lightness:
+					lightness = colorize_to.ok_hsl_l
+				elif mode_colorize and not alt_colorize_lightness:
+					lightness = ((source_lightness - lightness_min) * lightness_bright_factor + lightness_min) * colorize_to.ok_hsl_l
+				else:
+					lightness = source_lightness * colorize_to.ok_hsl_l
+				var alpha: = pixel_color.a * colorize_to.a
+				img.set_pixel(x, y, Color.from_ok_hsl(colorize_to.ok_hsl_h, colorize_to.ok_hsl_s, lightness, alpha))
 		
 
 func update_tile_brush_preview() -> void:
@@ -257,11 +408,33 @@ func paint_corner_to_tile_brush(corner: Rect2i) -> void:
 	
 	update_tile_brush_preview()
 
+func paint_positioned_corner_at_pos(center_pos: Vector2) -> void:
+	if toggled_corner_index == -2:
+		return
+	undoer.save_current_image("tile_brush", tile_brush_image)
+	_paint_positioned_corner_at_pos(center_pos, tile_brush_image, toggled_corner_index)
+
+	showing_tile_brush_preview = false
+	update_tile_brush_preview()
+
+func preview_positioned_corner_at_pos(center_pos: Vector2) -> void:
+	if toggled_corner_index == -2:
+		return
+	tile_brush_preview_image = tile_brush_image.duplicate()
+	_paint_positioned_corner_at_pos(center_pos, tile_brush_preview_image, toggled_corner_index)
+
+	showing_tile_brush_preview = true
+	update_tile_brush_preview()
+
+func _paint_positioned_corner_at_pos(center_pos: Vector2, to_image: Image, corner_index: int) -> void:
+	var corner: = get_corner_rect_for_index(corner_index, to_image.get_size())
+	do_positioned_corner_paint(corner, to_image, center_pos, corner_index)
+
 func do_corner_paint(corner: Rect2i, dest_image: Image) -> void:
 	var src_rect: = corner
 	src_rect.position += Vector2i(picked_brush_offset)
 	if brush_creator_mode == "erase":
-		dest_image.blit_rect(transparent_img, src_rect, corner.position)
+		dest_image.blit_rect(transparent_img, corner, corner.position)
 	elif brush_creator_mode == "replace":
 		dest_image.blit_rect(picked_colored_brush_image, src_rect, corner.position)
 	elif brush_creator_mode == "over":
@@ -278,6 +451,68 @@ func do_corner_paint(corner: Rect2i, dest_image: Image) -> void:
 	elif brush_creator_mode == "hole cut":
 		alpha_subtract(picked_colored_brush_image, dest_image, src_rect, corner.position)
 
+func do_positioned_corner_paint(corner: Rect2i, dest_image: Image, dest_center: Vector2, corner_index: int) -> void:
+	var src_rect: = corner
+	src_rect.position += Vector2i(picked_brush_offset)
+	
+	var dest_rect: = corner
+	dest_rect.position = Vector2i((dest_center - (Vector2(corner.size) / 2.0)).ceil())
+	_rect_mode_paint(src_rect, dest_image, dest_rect, corner_index)
+
+func _rect_mode_paint(src_rect: Rect2i, dest_image: Image, dest_rect: Rect2i, corner_index: int) -> void:
+	var expanded_dest_rect: = get_expanded_corner(corner_index, dest_image.get_size(), dest_rect)
+	var expanded_src_rect: = Rect2i(src_rect.position + (expanded_dest_rect.position - dest_rect.position), expanded_dest_rect.size)
+
+	if brush_creator_mode == "erase":
+		# use center of dest rect in erase mode since brush size doesn't matter
+		var center_pos: = dest_rect.get_center()
+		var erase_rect: = get_positioned_corner(corner_index, dest_image.get_size(), center_pos)
+		dest_image.blit_rect(transparent_img, erase_rect, erase_rect.position)
+	elif brush_creator_mode == "replace":
+		# use expanded rect to erase stuff outside of the reach of src
+		dest_image.blit_rect(transparent_img, expanded_dest_rect, expanded_dest_rect.position)
+		dest_image.blit_rect(picked_colored_brush_image, src_rect, dest_rect.position)
+	elif brush_creator_mode == "over":
+		dest_image.blend_rect(picked_colored_brush_image, src_rect, dest_rect.position)
+	elif brush_creator_mode == "under":
+		var old_dest = Image.new()
+		old_dest.copy_from(dest_image)
+		dest_image.fill(Color.TRANSPARENT)
+		dest_image.blit_rect(picked_colored_brush_image, src_rect, dest_rect.position)
+		dest_image.blend_rect(old_dest, Rect2i(Vector2i.ZERO, old_dest.get_size()), Vector2i.ZERO)
+	elif brush_creator_mode == "stamp":
+		stamp_blit(picked_colored_brush_image, dest_image, src_rect, dest_rect.position)
+	elif brush_creator_mode == "cut":
+		alpha_min(picked_colored_brush_image, dest_image, expanded_src_rect, expanded_dest_rect.position)
+	elif brush_creator_mode == "hole cut":
+		alpha_subtract(picked_colored_brush_image, dest_image, expanded_src_rect, expanded_dest_rect.position)
+
+func get_positioned_corner(corner_index: int, in_size: Vector2i, at_position: Vector2i) -> Rect2i:
+	if corner_index == -1:
+		return Rect2i(Vector2i.ZERO, in_size)
+	var corner_dir: = Vector2i(corner_index % 2, 0 if corner_index < 2 else 1)
+	var outer_corner_size: = in_size - at_position
+	var actual_size: = (at_position * (Vector2i.ONE - corner_dir)) + (outer_corner_size * corner_dir)
+	return Rect2i(at_position * corner_dir, actual_size)
+
+func get_expanded_corner(corner_index: int, in_size: Vector2i, current_rect: Rect2i) -> Rect2i:
+	if corner_index == -1:
+		return Rect2i(Vector2i.ZERO, in_size)
+	var corner_dir: = Vector2i(corner_index % 2, 0 if corner_index < 2 else 1)
+	var old_end = current_rect.end
+	current_rect.position = current_rect.position * corner_dir
+	current_rect.end = old_end * (Vector2i.ONE - corner_dir) + (in_size * corner_dir)
+	return current_rect
+
+func get_corner_rect_for_index(corner_index: int, in_size: Vector2i) -> Rect2i:
+	if corner_index == -1:
+		return Rect2i(Vector2i.ZERO, in_size)
+	var corner_dir: = Vector2i(corner_index % 2, 0 if corner_index < 2 else 1)
+	var the_corner_size: Vector2i = (Vector2(in_size) / 2.0).ceil()
+	var odds: = Vector2i(int(in_size.x) % 2, int(in_size.y) % 2)
+	return Rect2i((the_corner_size * corner_dir) - odds, the_corner_size)
+
+
 func alpha_subtract(from_image: Image, to_image, src_rect: Rect2i, dest_offset: Vector2) -> void:
 	var w = src_rect.size.x
 	var h = src_rect.size.y
@@ -285,10 +520,15 @@ func alpha_subtract(from_image: Image, to_image, src_rect: Rect2i, dest_offset: 
 	
 	for x in range(w):
 		for y in range(h):
-			var alpha: = from_image.get_pixel(src_offset.x + x, src_offset.y + y).a8
+			var alpha: = _extended_get_pixel_alpha8(from_image, src_offset.x + x, src_offset.y + y)
 			var cur_pixel: Color = to_image.get_pixel(dest_offset.x + x, dest_offset.y + y)
 			cur_pixel.a8 = int(max(0, cur_pixel.a8 - alpha))
 			to_image.set_pixel(dest_offset.x + x, dest_offset.y + y, cur_pixel)
+
+func _extended_get_pixel_alpha8(image: Image, x: int, y: int) -> int:
+	if x < 0 or y < 0 or x >= image.get_width() or y >= image.get_height():
+		return 0
+	return image.get_pixel(x, y).a8
 
 func alpha_min(from_image: Image, to_image: Image, src_rect: Rect2i, dest_offset: Vector2) -> void:
 	var w = src_rect.size.x
@@ -297,7 +537,7 @@ func alpha_min(from_image: Image, to_image: Image, src_rect: Rect2i, dest_offset
 	
 	for x in range(w):
 		for y in range(h):
-			var brush_alpha: = from_image.get_pixel(src_offset.x + x, src_offset.y + y).a8
+			var brush_alpha: = _extended_get_pixel_alpha8(from_image, src_offset.x + x, src_offset.y + y)
 			var cur_pixel: Color = to_image.get_pixel(dest_offset.x + x, dest_offset.y + y)
 			cur_pixel.a8 = int(min(cur_pixel.a8, brush_alpha))
 			to_image.set_pixel(dest_offset.x + x, dest_offset.y + y, cur_pixel)
@@ -307,17 +547,71 @@ func stamp_blit(from_image: Image, to_image: Image, src_rect: Rect2i, dest_offse
 	var w = src_rect.size.x
 	var h = src_rect.size.y
 	var src_offset = src_rect.position
+	var src_image_rect: = Rect2i(Vector2.ZERO, from_image.get_size())
+	var dest_image_rect: = Rect2i(Vector2.ZERO, to_image.get_size())
 	
 	for x in range(w):
 		for y in range(h):
-			var color: = from_image.get_pixel(src_offset.x + x, src_offset.y + y)
+			var from_pos: = Vector2i(src_offset.x + x, src_offset.y + y)
+			var dest_pos: = Vector2i(dest_offset.x + x, dest_offset.y + y)
+			if not src_image_rect.has_point(from_pos) or not dest_image_rect.has_point(dest_pos):
+				continue
+			var color: = from_image.get_pixelv(from_pos)
 			if color.a8 < 1:
 				# ignore completely transparent_img pixels from source
 				continue
-			var dest_color: = to_image.get_pixel(dest_offset.x + x, dest_offset.y + y)
-			var final_color: = dest_color.lerp(color, color.a)
-			final_color.a = dest_color.a
-			to_image.set_pixel(dest_offset.x + x, dest_offset.y + y, final_color)
+			var dest_color: = to_image.get_pixelv(dest_pos)
+			var blended: = dest_color.blend(color)
+			to_image.set_pixelv(dest_pos, Color(blended.r, blended.g, blended.b, dest_color.a))
+
+func paint_button_to_corner_index(button: ButtonContainer) -> int:
+	if button == tl_paint_btn:
+		return 0
+	elif button == tr_paint_btn:
+		return 1
+	elif button == bl_paint_btn:
+		return 2
+	elif button == br_paint_btn:
+		return 3
+	elif button == whole_brush_paint_btn:
+		return -1
+	else:
+		return -2
+
+func paint_button_gui_input(event: InputEvent, corner_button: ButtonContainer) -> void:
+	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_MASK_LEFT:
+		var corner_index: = paint_button_to_corner_index(corner_button)
+		if event.is_pressed():
+			hold_corner_index = corner_index
+			hold_corner_button_timer.start()
+
+			showing_tile_brush_preview = false
+			update_tile_brush_preview()
+		else:
+			if corner_index == hold_corner_index:
+				if not corner_index == toggled_corner_index:
+					if toggled_corner_index != -2:
+						change_toggled_corner_index(-2)
+						_on_paint_corner_hovered(get_corner_rect_for_index(corner_index, tile_brush_image.get_size()))
+					else:
+						hold_corner_button_timer.stop()
+						paint_corner_button_psuedo_pressed(corner_button)
+				else:
+					change_toggled_corner_index(-2)
+					_on_paint_corner_hovered(get_corner_rect_for_index(corner_index, tile_brush_image.get_size()))
+			hold_corner_index = -2
+
+func change_toggled_corner_index(toggled_index: int) -> void:
+	toggled_corner_index = toggled_index
+	for btn_idx in corner_buttons_by_index.keys():
+		var is_pressed: = int(btn_idx) == toggled_index
+		corner_buttons_by_index[btn_idx].toggle_mode = is_pressed
+		corner_buttons_by_index[btn_idx].button_pressed = is_pressed
+		corner_buttons_by_index[btn_idx].disabled = is_pressed
+
+func hold_corner_button_timeout() -> void:
+	change_toggled_corner_index(hold_corner_index)
+	hold_corner_index = -2
 
 func _on_TLButton_pressed() -> void:
 	paint_corner_to_tile_brush(tl_corner)
@@ -330,20 +624,39 @@ func _on_BRButton_pressed() -> void:
 func _on_AllButton_pressed() -> void:
 	paint_corner_to_tile_brush(whole_brush)
 
+func paint_corner_button_psuedo_pressed(corner_button: ButtonContainer) -> void:
+	var corner_index: = paint_button_to_corner_index(corner_button)
+	var corner: = get_corner_rect_for_index(corner_index, tile_brush_image.get_size())
+	paint_corner_to_tile_brush(corner)
+
+func paint_tl() -> void:
+	paint_corner_to_tile_brush(tl_corner)
+func paint_tr() -> void:
+	paint_corner_to_tile_brush(tr_corner)
+func paint_bl() -> void:
+	paint_corner_to_tile_brush(bl_corner)
+func paint_br() -> void:
+	paint_corner_to_tile_brush(br_corner)
+func paint_whole_brush() -> void:
+	paint_corner_to_tile_brush(whole_brush)
+
 func _on_paint_corner_hovered(corner: Rect2i) -> void:
+	if toggled_corner_index != -2:
+		return
 	tile_brush_preview_image = tile_brush_image.duplicate()
 	do_corner_paint(corner, tile_brush_preview_image)
 	showing_tile_brush_preview = true
 	update_tile_brush_preview()
 
 func _on_paint_corner_unhovered() -> void:
+	if toggled_corner_index != -2:
+		return
 	showing_tile_brush_preview = false
 	update_tile_brush_preview()
 
 # not assumes square img
 func make_transposed_img(from_img: Image) -> Image:
-	var copy = Image.new()
-	copy.copy_from(from_img)
+	var copy = Image.create(from_img.get_height(), from_img.get_width(), false, from_img.get_format())
 	
 	for x in range(from_img.get_width()):
 		for y in range(from_img.get_height()):
@@ -444,15 +757,15 @@ func make_half_h_shifted_img(from_img: Image, do_wrap: bool) -> Image:
 	return copy
 
 func rotated_ccw(from_img: Image) -> Image:
-	var copy = Image.new()
-	copy.copy_from(from_img)
-	copy.flip_x()
-	return make_transposed_img(copy)
+	var flipped_copy = Image.new()
+	flipped_copy.copy_from(from_img)
+	flipped_copy.flip_x()
+	return make_transposed_img(flipped_copy)
 func rotated_cw(from_img: Image) -> Image:
-	var copy = Image.new()
-	copy.copy_from(from_img)
-	copy.flip_y()
-	return make_transposed_img(copy)
+	var flipped_copy = Image.new()
+	flipped_copy.copy_from(from_img)
+	flipped_copy.flip_y()
+	return make_transposed_img(flipped_copy)
 	
 
 func _on_PaintButton_pressed():
@@ -485,6 +798,7 @@ func _on_PickTileFromEditedButton_pressed():
 func _on_TileToBrushButton_pressed():
 	picked_brush_tex.atlas = ImageTexture.create_from_image(tile_brush_image)
 	picked_brush_tex.region.position = Vector2.ZERO
+	picked_brush_tex.region.size = Vector2(tile_brush_image.get_size())
 	update_picked_brush()
 
 func _on_CCWButton_pressed():
@@ -514,23 +828,62 @@ func _on_ShiftRightButton_pressed():
 	tile_brush_image = make_half_h_shifted_img(tile_brush_image, brush_wrap)
 	update_tile_brush_preview()
 
-func brush_picked(dialog) -> void:
-	picked_texture_index = dialog.get_selected_texture()
-	picked_texture_sub_index = dialog.get_selected_sub_index()
+func rotate_brush_ccw() -> void:
+	picked_brush_image = rotated_ccw(picked_brush_image)
+	update_picked_colored_brush()
+func rotate_brush_cw() -> void:
+	picked_brush_image = rotated_cw(picked_brush_image)
+	update_picked_colored_brush()
+func shift_brush_right() -> void:
+	picked_brush_image = make_half_h_shifted_img(picked_brush_image, true)
+	update_picked_colored_brush()
+func flip_brush_horizontal() -> void:
+	picked_brush_image.flip_x()
+	update_picked_colored_brush()
+
+func _update_picked_brush_tex_from_image() -> void:
+	var image_tex = ImageTexture.create_from_image(picked_brush_image)
+	picked_brush_tex.atlas = image_tex
+	picked_brush_tex.region.position = Vector2.ZERO
+	picked_brush_tex.region.size = Vector2(picked_brush_image.get_size())
+
+#func brush_picked(dialog) -> void:
+	#picked_texture_id = dialog.get_selected_texture()
+	#picked_texture_sub_index = dialog.get_selected_sub_index()
 	
-	picked_brush_tex.atlas = TextureManager.get_texture(picked_texture_index)
-	picked_brush_tex.region = TextureManager.get_index_rect(picked_texture_index, picked_texture_sub_index)
-	#picked_brush_tex.region.position = TextureManager.get_index_offset(picked_texture_index, picked_texture_sub_index)
+	#picked_brush_tex.atlas = TextureManager.get_texture(picked_texture_id)
+	#picked_brush_tex.region = TextureManager.get_index_rect(picked_texture_id, picked_texture_sub_index)
+	#picked_brush_tex.region.position = TextureManager.get_index_offset(picked_texture_id, picked_texture_sub_index)
+	#update_picked_brush()
+
+func brush_picked_raw(texture: Texture2D, texture_rect: Rect2, picked_index: int, texture_info: Dictionary) -> void:
+	picked_brush_tex.atlas = texture
+	picked_brush_tex.region = texture_rect
+	picked_texture_sub_index = picked_index
+	picked_brush_texture_info = texture_info
 	update_picked_brush()
 	
 
 func _on_PickBrushButton_pressed():
-	var dialog = texture_dialog.instantiate()
-	if not TextureManager.has_texture_id(picked_texture_index):
-		picked_texture_index = TextureManager.get_fallback_texture_id()
-	dialog.setup(picked_texture_index, picked_texture_sub_index)
+	if not picked_brush_texture_info:
+		var starting_texture_info: = TextureManager.get_loaded_texture_info(starting_brush_id)
+		picked_brush_texture_info = {
+			"texture_name": starting_texture_info["name"],
+			"is_builtin": starting_texture_info["is_builtin"],
+			"is_shared": starting_texture_info["is_shared"],
+		}
+	var dialog: = texture_dialog.instantiate() as BetterTextureDialog
+
+	#dialog.setup(picked_texture_id, picked_texture_sub_index)
+	dialog.setup_raw(
+		picked_brush_texture_info["texture_name"],
+		picked_brush_texture_info["is_builtin"],
+		picked_brush_texture_info["is_shared"],
+		picked_texture_sub_index
+	)
 	
-	dialog.connect("confirmed", Callable(self, "brush_picked").bind(dialog))
+	#dialog.confirmed.connect(brush_picked.bind(dialog))
+	dialog.picked_raw_texture.connect(brush_picked_raw)
 	add_child(dialog)
 	dialog.popup_centered()
 
@@ -697,13 +1050,6 @@ func _on_vis_changed():
 	if not visible:
 		hidden.emit()
 
-func _on_margin_container_resized() -> void:
-	var min_content_size = get_child(0).get_minimum_size()
-	if size.x < min_content_size.x:
-		size.x = min_content_size.x
-	if size.y < min_content_size.y:
-		size.y = min_content_size.y
-
 
 var click_paint_holding_click: bool = false
 var click_paint_last_pos: Vector2 = Vector2.ZERO
@@ -718,25 +1064,37 @@ func _on_brush_view_gui_input(event: InputEvent) -> void:
 		if click_paint_holding_click and not event.is_pressed():
 			click_paint_holding_click = false
 		if event.is_pressed():
-			start_click_paint()
+			if toggled_corner_index == -2:
+				start_click_paint()
+			else:
+				var at_pixel_pos: Vector2 = event.position / tile_brush_canvas.size * Vector2(tile_brush_image.get_size())
+				paint_positioned_corner_at_pos(at_pixel_pos)
 	
-	if click_paint_holding_click and event is InputEventMouseMotion:
-		var cur_pos: Vector2 = (event.position / tile_brush_canvas.size) * Vector2(tile_brush_image.get_size())
-		var prev_pos: = click_paint_last_pos
-		click_paint_last_pos = cur_pos
+	if event is InputEventMouseMotion:
+		var cur_pos: Vector2 = event.position / tile_brush_canvas.size * Vector2(tile_brush_image.get_size())
+		if click_paint_holding_click:
+			var prev_pos: = click_paint_last_pos
+			click_paint_last_pos = cur_pos
 
-		if not Rect2(Vector2.ZERO, tile_brush_image.get_size()).has_point(cur_pos):
-			click_paint_last_was_in_bounds = false
-			return
+			if not Rect2(Vector2.ZERO, tile_brush_image.get_size()).has_point(cur_pos):
+				click_paint_last_was_in_bounds = false
+				return
 
-		if click_paint_last_was_in_bounds:
-			for pixel_pos in bresenham_line(prev_pos, cur_pos):
-				tile_brush_image.set_pixelv(pixel_pos, brush_color)
-		else:
-			tile_brush_image.set_pixelv(cur_pos.floor(), brush_color)
+			if click_paint_last_was_in_bounds:
+				for pixel_pos in bresenham_line(prev_pos, cur_pos):
+					tile_brush_image.set_pixelv(pixel_pos, brush_color)
+			else:
+				tile_brush_image.set_pixelv(cur_pos.floor(), brush_color)
+			update_tile_brush_preview()
+			
+			click_paint_last_was_in_bounds = true
+		elif toggled_corner_index != -2:
+			preview_positioned_corner_at_pos(cur_pos)
+
+func _on_brush_view_mouse_exited() -> void:
+	if showing_tile_brush_preview:
+		showing_tile_brush_preview = false
 		update_tile_brush_preview()
-		
-		click_paint_last_was_in_bounds = true
 
 func bresenham_line(start_pos: Vector2, end_pos: Vector2) -> Array[Vector2i]:
 	var start_pixel_pos: Vector2i = Vector2i(start_pos.floor())

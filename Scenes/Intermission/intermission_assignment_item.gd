@@ -59,6 +59,8 @@ func set_intermission_id(intermission_id: String) -> void:
     refresh_is_local_intermission(intermission_id)
 
 func get_intermission_id() -> String:
+    if intermission_id_selector.selected == -1:
+        return ""
     return Utility.opbtn_get_selected_text(intermission_id_selector)
 
 func on_edit_button_pressed() -> void:

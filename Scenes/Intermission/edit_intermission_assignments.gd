@@ -352,6 +352,12 @@ func _set_or_erase_assignment_list(in_dict: Dictionary, key: String, assignment_
 func refresh_assignment_lists() -> void:
     var current_mode: = get_current_mode()
     
+    var custom_list_name: String = ""
+    if current_mode == Modes.CUSTOM_LISTS and current_level_list_name:
+        custom_list_name = current_level_list_name
+    for assignment_list in all_assignment_lists:
+        assignment_list.local_custom_list_name = custom_list_name
+    
     if current_mode == Modes.BUNDLED_LISTS or current_mode == Modes.CUSTOM_LISTS:
         if not current_level_list_name:
             return

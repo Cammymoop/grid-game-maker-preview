@@ -17,9 +17,9 @@
 		},
 	"shapes32x.png":
 		{
-			"size": [288, 160],
+			"size": [288, 288],
 			"tile_size": [32, 32],
-			"size_in_tiles": [9, 5],
+			"size_in_tiles": [9, 9],
 			"border": [0, 0],
 			"separation": [0, 0]
 		},

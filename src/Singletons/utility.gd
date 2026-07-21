@@ -336,6 +336,16 @@ func get_indexed_tile_region_by_per_row(tile_index: int, per_row: int, tile_size
 func get_indexed_tile_atlas_coords(tile_index: int, per_row: int) -> Vector2i:
 	return Vector2i(tile_index % per_row, floori(tile_index / float(per_row)))
 
+func get_raw_indexed_atlas_rect(texture_name: String, is_builtin: bool, is_shared: bool, tile_index: int) -> Rect2:
+	var metadata: = TextureManager.get_texture_metadata_by_name(texture_name, is_builtin, is_shared)
+	var texture: = TextureManager.get_texture_by_name(texture_name, is_builtin, is_shared)
+	var tile_size: Vector2 = metadata.get("tile_size", Vector2(32, 32))
+	
+	var border: Vector2 = dict_get_vector2(metadata, "border", Vector2.ZERO)
+	var separation: Vector2 = dict_get_vector2(metadata, "separation", Vector2.ZERO)
+	var offset: = get_indexed_tile_offset(tile_index, texture.get_width(), tile_size, border, separation)
+	return Rect2(offset, tile_size)
+
 func get_tile_atlas_coords_size(pixel_size: Vector2, tile_size: Vector2, border: Vector2 = Vector2.ZERO, separation: Vector2 = Vector2.ZERO) -> Vector2i:
 	var eliminate_border: Vector2 = pixel_size - border * 2 + separation
 	var size_with_sep: Vector2 = tile_size + separation
@@ -919,7 +929,11 @@ func lerp_ok_hsl_color(from_color: Color, to_color: Color, factor: float) -> Col
 	var a: = Vector4(from_color.ok_hsl_h, from_color.ok_hsl_s, from_color.ok_hsl_l, from_color.a)
 	var b: = Vector4(to_color.ok_hsl_h, to_color.ok_hsl_s, to_color.ok_hsl_l, to_color.a)
 	var interpolated: = a.lerp(b, factor)
+	interpolated.x = lerp_angle(a.x * TAU, b.x * TAU, factor) / TAU
 	return Color.from_ok_hsl(interpolated.x, interpolated.y, interpolated.z, interpolated.w)
+
+func color_to_ok_hsl_vector4(color: Color) -> Vector4:
+	return Vector4(color.ok_hsl_h, color.ok_hsl_s, color.ok_hsl_l, color.a)
 
 func rect2i_iter(rect: Rect2i) -> Array[Vector2i]:
 	rect = rect2i_pos_inclusive_abs(rect)

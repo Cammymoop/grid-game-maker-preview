@@ -1161,7 +1161,7 @@ func cmd_select_current_level_list_name(slots: Dictionary, chosen_slot: int) -> 
 
 func desc_if_playing_custom_level() -> String:
 	return "none|If the current level [invert:InvertInput:is,is not] a custom level"
-func cmd_if_playing_custom_level(_slots: Dictionary, invert: bool) -> bool:
+func cmd_if_playing_custom_level(_slots: Dictionary, _slot: int, invert: bool) -> bool:
 	return GameManager.is_current_level_custom() != invert
 
 
@@ -1173,19 +1173,46 @@ func cmd_next_level_exists(_slots: Dictionary) -> bool:
 func desc_load_next_level() -> Dictionary:
 	return {
 		"name": "load_next_level",
-		"display_name": "Complete Level and Advance",
+		"display_name": "Complete and Advance Level (Deprecated)",
+		"is_deprecated": true,
 		"slot_type_hint": "none",
-		"template_text": "Complete this level. Load the next level, with a [delay:ComplexScalarInput:default=1,step=0.1] second delay",
+		"template_text": "(Deprecated, use 'Advance Level') Complete this level. Load the next level, with a [delay:ComplexScalarInput:default=1,step=0.1] second delay",
 	}
 func cmd_load_next_level(slots: Dictionary, _slot: int, delay: Dictionary = {"type": "plain", "value": 1.0}) -> void:
 	var delay_val: float = resolve_complex_scalar(delay, slots)
 	GameManager.advance_level(delay_val)
 
-func desc_complete_level_and_show_level_select() -> String:
-	return "none|Complete this level. Show the level select screen after a [delay:ComplexScalarInput:default=1,step=0.1] second delay"
-func cmd_complete_level_and_show_level_select(_slots: Dictionary, delay: Dictionary) -> void:
+func desc_advance_to_next_level() -> Dictionary:
+	return {
+		"name": "advance_level",
+		"display_name": "Advance to Next Level",
+		"slot_type_hint": "none",
+		"template_text": "Advance to the next level, with a [delay:ComplexScalarInput:default=1,step=0.1] second delay\n" \
+			+ "[complete_current:BoolChoice:true,Complete,Do not complete] the current level\n" \
+			+ "Extra transition intermission: [with_intermission_id:IntermissionIdInput]",
+	}
+func cmd_advance_to_next_level(_slots: Dictionary, _slot: int, delay: Dictionary, do_complete: bool, with_intermission_id: String) -> void:
 	var delay_val: float = resolve_complex_scalar(delay, _slots)
-	GameManager.complete_and_move_to_level_select(delay_val)
+	var with_intermissions: Array[String] = []
+	if with_intermission_id:
+		with_intermissions.append(with_intermission_id)
+	if do_complete:
+		GameManager.advance_level(delay_val, "", with_intermissions)
+	else:
+		GameManager.move_to_next_level(delay_val, with_intermissions)
+
+func desc_complete_level_and_show_level_select() -> String:
+	return "none|Leave this level, [do_complete:BoolChoice:true,completing,not completing] the level. Show the level select screen after a [delay:ComplexScalarInput:default=1,step=0.1] second delay\n" \
+		+ "Extra transition intermission: [with_intermission_id:IntermissionIdInput]"
+func cmd_complete_level_and_show_level_select(_slots: Dictionary, _slot: int, delay: Dictionary, do_complete: bool, with_intermission_id: String) -> void:
+	var delay_val: float = resolve_complex_scalar(delay, _slots)
+	var with_intermissions: Array[String] = []
+	if with_intermission_id:
+		with_intermissions.append(with_intermission_id)
+	if do_complete:
+		GameManager.complete_and_move_to_level_select(delay_val, with_intermissions)
+	else:
+		GameManager.move_to_level_select(delay_val, with_intermissions)
 
 func desc_exit_to_level_select() -> String:
 	return "none|Leave the current level without completing, show the level select screen after a [delay:ComplexScalarInput:default=1,step=0.1] second delay"
@@ -1193,22 +1220,29 @@ func cmd_exit_to_level_select(_slots: Dictionary, _slot: int, delay: Dictionary)
 	var delay_val: float = resolve_complex_scalar(delay, _slots)
 	GameManager.move_to_level_select(delay_val)
 
-func desc_complete_level() -> String:
-	return "none|Complete this level (without leaving the level)"
-func cmd_complete_level(_slots: Dictionary) -> void:
-	GameManager.complete_current_level_without_transition()
+func desc_complete_level_without_leaving() -> String:
+	return "none|Complete this level (without leaving the level) Extra completion intermission: [with_intermission_id:IntermissionIdInput]"
+func cmd_complete_level_without_leaving(_slots: Dictionary, _slot: int, with_intermission_id: String) -> void:
+	var extra_intermissions: Array[String] = []
+	if with_intermission_id:
+		extra_intermissions.append(with_intermission_id)
+	GameManager.complete_current_level_without_transition(extra_intermissions)
 
 func desc_load_first_level_of_list() -> String:
 	return "none|Unlock and load the first level of the level list [list_val:LevelListNameInput] with a [delay:ComplexScalarInput:default=1,step=0.1] second delay\n" \
-		+ "[complete_current:BoolChoice:true,Complete,Do not complete] the current level"
-func cmd_load_first_level_of_list(_slots: Dictionary, _slot: int, list_val: Dictionary, delay: Dictionary, complete_current: bool) -> void:
+		+ "[complete_current:BoolChoice:true,Complete,Do not complete] the current level\n" \
+		+ "Extra transition intermission: [with_intermission_id:IntermissionIdInput]"
+func cmd_load_first_level_of_list(_slots: Dictionary, _slot: int, list_val: Dictionary, delay: Dictionary, complete_current: bool, with_intermission_id: String) -> void:
 	var list_name: String = resolve_complex_string(list_val, _slots)
 	var delay_val: float = resolve_complex_scalar(delay, _slots)
+	var extra_intermissions: Array[String] = []
+	if with_intermission_id:
+		extra_intermissions.append(with_intermission_id)
 	if not list_name:
 		if complete_current:
-			GameManager.complete_current_level_without_transition()
+			GameManager.complete_current_level_without_transition(extra_intermissions)
 		return
-	GameManager.move_to_level_list_start(list_name, delay_val, complete_current)
+	GameManager.move_to_level_list_start(list_name, delay_val, complete_current, extra_intermissions)
 
 func desc_if_level_is_in_list() -> String:
 	return "none|If the level [level_val:LevelNameInput] is in the level list [list_val:LevelListNameInput]"
@@ -1251,20 +1285,24 @@ func cmd_if_level_is_completed(_slots: Dictionary, _slot: int, level_val: Dictio
 
 func desc_load_level_within_list() -> String:
 	return "none|Unlock and load the level [level_val:LevelNameInput] within the level list [list_val:LevelListNameInput] with a [delay:ComplexScalarInput:default=1,step=0.1] second delay\n" \
-		+ "[complete_current:BoolChoice:true,Complete,Do not complete] the current level"
-func cmd_load_level_within_list(_slots: Dictionary, _slot: int, level_val: Dictionary, list_val: Dictionary, delay: Dictionary, complete_current: bool) -> void:
+		+ "[complete_current:BoolChoice:true,Complete,Do not complete] the current level\n" \
+		+ "Extra transition intermission: [with_intermission_id:IntermissionIdInput]"
+func cmd_load_level_within_list(_slots: Dictionary, _slot: int, level_val: Dictionary, list_val: Dictionary, delay: Dictionary, complete_current: bool, with_intermission_id: String) -> void:
 	var list_name: String = resolve_complex_string(list_val, _slots)
 	var level_name: String = resolve_complex_string(level_val, _slots)
 	var delay_val: float = resolve_complex_scalar(delay, _slots)
+	var extra_intermissions: Array[String] = []
+	if with_intermission_id:
+		extra_intermissions.append(with_intermission_id)
 	if not level_name:
 		if complete_current:
-			GameManager.complete_current_level_without_transition()
+			GameManager.complete_current_level_without_transition(extra_intermissions)
 		return
 	
 	if complete_current:
-		GameManager.complete_and_move_to_level(list_name, level_name, delay_val)
+		GameManager.complete_and_move_to_level(list_name, level_name, delay_val, extra_intermissions)
 	else:
-		GameManager.move_to_level(list_name, level_name, delay_val)
+		GameManager.move_to_level(list_name, level_name, delay_val, extra_intermissions)
 
 
 func desc_take_a_turn() -> String:
@@ -1619,8 +1657,9 @@ func cmd_is_intended_move_direction(slots: Dictionary, chosen_slot: int, complex
 func desc_show_mini_text_at() -> Dictionary:
 	return {
 		"non_condition": true,
-		"deprecated": true,
+		"is_deprecated": true,
 		"slot_type_hint": "pos,entity",
+		"tooltip": "Deprecated, use 'Create popup text' or 'Create permanent text' instead",
 		"template_text": "Temporarily show the text [text_slot:SlotInput:string,number]\n" \
 			+ "[is_above:BoolChoice:true,above,at] this position/entity",
 	}
@@ -2956,3 +2995,20 @@ func cmd_if_named_loop_detected(slots: Dictionary, _slot: int, loop_name: Dictio
 		max_loops_val = DEFAULT_MAX_LOOPS
 	var loop_name_str: String = resolve_complex_string(loop_name, slots)
 	return ConditionalsV3.is_loop_detected(max_loops_val, loop_name_str)
+
+
+func desc_fail_state() -> String:
+	return "none|Show the default fail state overlay"
+func cmd_fail_state(_slots: Dictionary) -> void:
+	GameManager.show_current_fail_state_intermission_as_overlay()
+
+func desc_custom_failure_intermission() -> String:
+	return "none|Show the intermission [intermission_id:IntermissionIdInput] as a fail state overlay"
+func cmd_custom_failure_intermission(_slots: Dictionary, _slot: int, intermission_id: String) -> void:
+	GameManager.show_custom_fail_state_overlay(intermission_id)
+
+func desc_show_intermission_overlay() -> String:
+	return "none|Show the intermission [intermission_id:IntermissionIdInput] overlaying the current level"
+func cmd_show_intermission_overlay(_slots: Dictionary, _slot: int, intermission_id: String) -> void:
+	prints("showing intermission overlay: %s" % [intermission_id])
+	GameManager.show_overlay_intermissions(Array([intermission_id], TYPE_STRING, "", null))

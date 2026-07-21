@@ -31,6 +31,8 @@ const SPACE_MULTIPLIER: float = 5
 @export var undo_prompt_label: Label
 @export var reload_prompt: Control
 
+@export var advancable: = true
+
 var is_setup: = false
 
 @export var do_fade_in: = true
@@ -64,7 +66,7 @@ func setup_with_info(intermission_info: Dictionary) -> void:
     for item_info in content_items:
         append_item(item_info)
     
-    var show_continue: bool = intermission_info.get("show_continue", true)
+    var show_continue: bool = intermission_info.get("show_continue", true) and advancable
     var show_undo: bool = intermission_info.get("show_undo", false)
     var show_reload: bool = intermission_info.get("show_reload_checkpoint", false)
     prompt_section.visible = show_continue or show_undo or show_reload

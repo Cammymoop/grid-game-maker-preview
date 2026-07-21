@@ -49,6 +49,8 @@ enum InputTypes {
 	
 	CustomStringEnum,
 	
+	IntermissionIdInput,
+	
 	# Janky stuff
 	SpecialEffectInput,
 	ExcludeDirectionInput,
@@ -104,6 +106,8 @@ var templates: = {
 	
 	# Empty by default, needs options to be set
 	InputTypes.CustomStringEnum: preload("res://Scenes/GameEditor/ConditionalEditor/generic_option_button_input.gd"),
+	
+	InputTypes.IntermissionIdInput: preload("res://Scenes/GameEditor/ConditionalEditor/intermission_id_input.tscn"),
 
 	InputTypes.SpawnEffectInput: preload("res://Scenes/GameEditor/spawn_effect_input.tscn"),
 	InputTypes.DyingEffectInput: preload("res://Scenes/GameEditor/dying_effect_input.tscn"),

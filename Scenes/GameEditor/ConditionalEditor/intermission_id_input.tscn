@@ -1,0 +1,20 @@
+[gd_scene format=3 uid="uid://dge8u3nmmkx0o"]
+
+[ext_resource type="Script" uid="uid://dosejdallc0yx" path="res://Scenes/GameEditor/ConditionalEditor/intermission_id_input.gd" id="1_fytha"]
+
+[node name="IntermissionIdInput" type="HBoxContainer" unique_id=447538154 node_paths=PackedStringArray("intermission_id_selector")]
+offset_right = 40.0
+offset_bottom = 40.0
+script = ExtResource("1_fytha")
+intermission_id_selector = NodePath("IntermissionIdSelector")
+
+[node name="IntermissionIdSelector" type="OptionButton" parent="." unique_id=427173859]
+layout_mode = 2
+size_flags_vertical = 4
+tooltip_text = "Add more intermissions in the Game Editor or Level Editor menu"
+alignment = 1
+selected = 0
+fit_to_longest_item = false
+item_count = 1
+popup/item_0/text = "[None]"
+popup/item_0/id = 0

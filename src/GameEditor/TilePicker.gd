@@ -72,13 +72,18 @@ func set_raw_texture(tex: Texture2D, metadata: Dictionary) -> void:
 	var grid_cells: = Utility.get_tile_atlas_coords_size(tex.get_size(), tile_size, origin, separation)
 	tpr = grid_cells.x
 	rows = grid_cells.y
-	texture = tex.duplicate()
+	texture = tex
 
 	raw_mode = true
 	
 	make_atlas_tex()
 	custom_minimum_size = tex.get_size() * view_scale
 	update_minimum_size()
+
+func get_raw_texture() -> Texture2D:
+	if not raw_mode:
+		return null
+	return texture
 
 func set_picking_texture(texture_id: int) -> void:
 	cur_texture_id = texture_id
@@ -110,6 +115,7 @@ func make_atlas_tex() -> void:
 	highlight_index(selected_sub_index)
 
 func set_selected_index(index):
+	index = clampi(index, 0, (tpr * rows) - 1)
 	selected_sub_index = index
 	
 	_set_cursor_scaled_rect(_get_scaled_index_rect(index))

@@ -812,7 +812,6 @@ func _add_new_property(property_name: String, as_conditional: bool, include_valu
         info["value"] = {}
     else:
         info["value"] = GameManager.get_default_value_for_prop_name(property_name)
-    prints("adding new property: %s, include_value: %s, default for name: %s, value: %s" % [property_name, include_value, GameManager.get_default_value_for_prop_name(property_name), info["value"]])
 
     if typeof(info["value"]) in [TYPE_DICTIONARY, TYPE_ARRAY]:
         info["is_conditional"] = true

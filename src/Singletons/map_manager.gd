@@ -4,6 +4,9 @@ const MapLayer = preload("res://src/MapLayer.gd")
 
 const MiniTextMessage = preload("res://Scenes/GameEditor/Effects/mini_text_message.gd")
 
+const EditIntermissionAssignments = preload("res://Scenes/Intermission/edit_intermission_assignments.gd")
+const IntermissionEvents = EditIntermissionAssignments.Events
+
 signal level_size_changed
 signal map_cleared
 
@@ -1624,7 +1627,18 @@ func starting_event(event_name: String) -> void:
         var positions_of_tile: = get_all_positions_of_tile(t_id)
         resolve_tile_individual_events(positions_of_tile, event_name, null, t_id, false)
 
-func get_fail_state_intermission_info() -> Dictionary:
-    if not map_metadata.has("fail_state_intermission_info"):
-        return GameManager.get_current_list_fail_state_intermission_info()
-    return map_metadata["fail_state_intermission_info"]
+func get_custom_fail_state_intermission_id() -> String:
+    var custom_fail_assignments: Array = get_intermission_assignements_for_event(IntermissionEvents.CUSTOM_FAIL_STATE)
+    return GameManager.get_first_non_sequence_intermission_from_list(custom_fail_assignments)
+
+
+func get_intermission_assignements_for_event(event: IntermissionEvents) -> Array:
+    var event_key: String = EditIntermissionAssignments.get_event_key(event)
+    if not event_key:
+        return []
+
+    var intermissions: Array[String] = []
+    var intermission_assignments: Dictionary = map_metadata.get("intermission_assignments", {})
+    intermissions.append_array(intermission_assignments.get(event_key, []))
+
+    return intermissions

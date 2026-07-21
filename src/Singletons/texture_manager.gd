@@ -209,6 +209,16 @@ func get_all_possible_textures() -> Dictionary:
     texs.merge(get_all_local_textures(), true)
     return texs
 
+func get_all_possible_textures_info() -> Array[Dictionary]:
+    var texs: Array[Dictionary] = []
+    for tex_name in get_all_builtin_textures():
+        texs.append({ "texture_name": tex_name, "is_builtin": true, "is_shared": false })
+    for tex_name in get_all_bundled_textures():
+        texs.append({ "texture_name": tex_name, "is_builtin": false, "is_shared": false })
+    for tex_name in get_all_shared_textures():
+        texs.append({ "texture_name": tex_name, "is_builtin": false, "is_shared": true })
+    return texs
+
 func get_all_builtin_textures() -> Dictionary:
     var texs: = {}
     for tex in builtin_textures:
@@ -416,6 +426,15 @@ func get_texture_metadata_by_name(texture_name: String, is_builtin: bool, is_sha
     elif not containing_game_name:
         containing_game_name = GameManager.get_identified_game_name()
     return FilesManager.get_local_image_metadata(texture_name, containing_game_name)
+
+func get_texture_by_name(texture_name: String, is_builtin: bool, is_shared: bool, containing_game_name: String = "") -> Texture2D:
+    if is_builtin:
+        return get_builtin_texture_as_texture(texture_name)
+    if is_shared:
+        containing_game_name = ""
+    elif not containing_game_name:
+        containing_game_name = GameManager.get_identified_game_name()
+    return FilesManager.load_local_image_as_texture(texture_name, containing_game_name)
 
 func has_loaded_texture_id(texture_id: int) -> bool:
     return texture_id in texture_names

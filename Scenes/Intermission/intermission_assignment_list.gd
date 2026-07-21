@@ -40,7 +40,9 @@ func load_assignments(assignments: Array) -> void:
 func get_assignments() -> Array:
     var assignments: = []
     for assignment_item: IntermissionAssignmentItem in assignment_list_container.get_children():
-        assignments.append(assignment_item.get_intermission_id())
+        var intermission_id: = assignment_item.get_intermission_id()
+        if intermission_id:
+            assignments.append(intermission_id)
     return assignments
 
 
@@ -66,7 +68,7 @@ func _add_assignment_item() -> IntermissionAssignmentItem:
 func _get_local_intermissions() -> Array[String]:
     if not local_custom_list_name:
         return []
-    return GameManager.get_all_intermissions_in_custom_list(local_custom_list_name)
+    return GameManager.get_all_intermission_ids_from_custom_list(local_custom_list_name)
 
 func append_assignment_id(intermission_id: String, do_emit: bool = false) -> void:
     _append_assignment_id(intermission_id)
