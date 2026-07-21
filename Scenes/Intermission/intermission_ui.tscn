@@ -4,6 +4,7 @@
 [ext_resource type="PackedScene" uid="uid://cb7yxd6xr7bl5" path="res://Scenes/Intermission/intermission_text.tscn" id="2_5uw0l"]
 [ext_resource type="PackedScene" uid="uid://dy2mt6p02pp3v" path="res://Scenes/credits_image.tscn" id="3_nd7lh"]
 [ext_resource type="Texture2D" uid="uid://d0uyc2rshryrj" path="res://assets/img/entityTiles.png" id="4_ltj3f"]
+[ext_resource type="Texture2D" uid="uid://3iulwhtnfhaq" path="res://assets/img/button_icons/controller_button_right.png" id="5_pmh45"]
 
 [sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_nd7lh"]
 blend_mode = 3
@@ -48,7 +49,7 @@ _data = {
 &"pulse": SubResource("Animation_ltj3f")
 }
 
-[node name="IntermissionUI" type="Control" unique_id=983985741 node_paths=PackedStringArray("dark_bg", "light_bg", "inner_container", "content_section", "continue_section")]
+[node name="IntermissionUI" type="Control" unique_id=983985741 node_paths=PackedStringArray("dark_bg", "light_bg", "inner_container", "content_section", "prompt_section", "continue_prompt_section", "undo_or_reload_prompt_section", "undo_prompt", "reload_prompt")]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -61,7 +62,11 @@ dark_bg = NodePath("MultiplyDarkenColor")
 light_bg = NodePath("LightenColor")
 inner_container = NodePath("MarginContainer")
 content_section = NodePath("MarginContainer/MainVbox/ContentSection")
-continue_section = NodePath("MarginContainer/MainVbox/ContinueSection")
+prompt_section = NodePath("MarginContainer/MainVbox/ContinueSection")
+continue_prompt_section = NodePath("MarginContainer/MainVbox/ContinueSection/HBoxContainer/ContinuePromptText")
+undo_or_reload_prompt_section = NodePath("MarginContainer/MainVbox/ContinueSection/HBoxContainer/UndoOrReloadPrompts")
+undo_prompt = NodePath("MarginContainer/MainVbox/ContinueSection/HBoxContainer/UndoOrReloadPrompts/MarginContainer/UndoOrReloadPrompts/HBoxContainer/UndoPromptText")
+reload_prompt = NodePath("MarginContainer/MainVbox/ContinueSection/HBoxContainer/UndoOrReloadPrompts/MarginContainer/UndoOrReloadPrompts/ReloadCheckpointPromptText")
 
 [node name="MultiplyDarkenColor" type="ColorRect" parent="." unique_id=863641257]
 material = SubResource("CanvasItemMaterial_nd7lh")
@@ -132,16 +137,77 @@ layout_mode = 2
 size_flags_vertical = 3
 alignment = 1
 
-[node name="IntermissionText" parent="MarginContainer/MainVbox/ContinueSection" unique_id=1966940770 instance=ExtResource("2_5uw0l")]
+[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/MainVbox/ContinueSection" unique_id=2008103272]
+layout_mode = 2
+alignment = 1
+
+[node name="ContinuePromptText" parent="MarginContainer/MainVbox/ContinueSection/HBoxContainer" unique_id=1966940770 instance=ExtResource("2_5uw0l")]
+visible = false
 layout_mode = 2
 
-[node name="Label" parent="MarginContainer/MainVbox/ContinueSection/IntermissionText" index="0" unique_id=1782653433]
+[node name="Label" parent="MarginContainer/MainVbox/ContinueSection/HBoxContainer/ContinuePromptText" index="0" unique_id=1782653433]
 text = "- Continue -"
 
-[node name="AnimationPlayer" type="AnimationPlayer" parent="MarginContainer/MainVbox/ContinueSection/IntermissionText" unique_id=2101906491]
+[node name="AnimationPlayer" type="AnimationPlayer" parent="MarginContainer/MainVbox/ContinueSection/HBoxContainer/ContinuePromptText" unique_id=2101906491]
+libraries/ = SubResource("AnimationLibrary_2skfw")
+autoplay = &"pulse"
+
+[node name="UndoOrReloadPrompts" type="HBoxContainer" parent="MarginContainer/MainVbox/ContinueSection/HBoxContainer" unique_id=414866124]
+layout_mode = 2
+size_flags_horizontal = 3
+alignment = 1
+
+[node name="Spacer" type="Control" parent="MarginContainer/MainVbox/ContinueSection/HBoxContainer/UndoOrReloadPrompts" unique_id=1443122234]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 1.4
+mouse_filter = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="MarginContainer/MainVbox/ContinueSection/HBoxContainer/UndoOrReloadPrompts" unique_id=96045932]
+layout_mode = 2
+theme_override_constants/margin_left = 0
+theme_override_constants/margin_right = 10
+
+[node name="UndoOrReloadPrompts" type="VBoxContainer" parent="MarginContainer/MainVbox/ContinueSection/HBoxContainer/UndoOrReloadPrompts/MarginContainer" unique_id=1075204200]
+custom_minimum_size = Vector2(240, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/MainVbox/ContinueSection/HBoxContainer/UndoOrReloadPrompts/MarginContainer/UndoOrReloadPrompts" unique_id=11823433]
+layout_mode = 2
+
+[node name="UndoPromptText" parent="MarginContainer/MainVbox/ContinueSection/HBoxContainer/UndoOrReloadPrompts/MarginContainer/UndoOrReloadPrompts/HBoxContainer" unique_id=1264227793 instance=ExtResource("2_5uw0l")]
+layout_mode = 2
+size_flags_horizontal = 0
+
+[node name="Label" parent="MarginContainer/MainVbox/ContinueSection/HBoxContainer/UndoOrReloadPrompts/MarginContainer/UndoOrReloadPrompts/HBoxContainer/UndoPromptText" index="0" unique_id=1782653433]
+text = "Undo: [Z] or "
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="MarginContainer/MainVbox/ContinueSection/HBoxContainer/UndoOrReloadPrompts/MarginContainer/UndoOrReloadPrompts/HBoxContainer/UndoPromptText" unique_id=1494030364]
+libraries/ = SubResource("AnimationLibrary_2skfw")
+autoplay = &"pulse"
+
+[node name="TextureRect" type="TextureRect" parent="MarginContainer/MainVbox/ContinueSection/HBoxContainer/UndoOrReloadPrompts/MarginContainer/UndoOrReloadPrompts/HBoxContainer" unique_id=1530301295]
+custom_minimum_size = Vector2(50, 50)
+layout_mode = 2
+size_flags_vertical = 4
+texture = ExtResource("5_pmh45")
+expand_mode = 1
+
+[node name="ReloadCheckpointPromptText" parent="MarginContainer/MainVbox/ContinueSection/HBoxContainer/UndoOrReloadPrompts/MarginContainer/UndoOrReloadPrompts" unique_id=1899840342 instance=ExtResource("2_5uw0l")]
+layout_mode = 2
+size_flags_horizontal = 0
+
+[node name="Label" parent="MarginContainer/MainVbox/ContinueSection/HBoxContainer/UndoOrReloadPrompts/MarginContainer/UndoOrReloadPrompts/ReloadCheckpointPromptText" index="0" unique_id=1782653433]
+theme_override_font_sizes/font_size = 22
+text = "Reload Checkpoint: [R] or L1"
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="MarginContainer/MainVbox/ContinueSection/HBoxContainer/UndoOrReloadPrompts/MarginContainer/UndoOrReloadPrompts/ReloadCheckpointPromptText" unique_id=27537469]
 libraries/ = SubResource("AnimationLibrary_2skfw")
 autoplay = &"pulse"
 
 [editable path="MarginContainer/MainVbox/ContentSection/CreditsImage"]
 [editable path="MarginContainer/MainVbox/ContentSection/IntermissionText3"]
-[editable path="MarginContainer/MainVbox/ContinueSection/IntermissionText"]
+[editable path="MarginContainer/MainVbox/ContinueSection/HBoxContainer/ContinuePromptText"]
+[editable path="MarginContainer/MainVbox/ContinueSection/HBoxContainer/UndoOrReloadPrompts/MarginContainer/UndoOrReloadPrompts/HBoxContainer/UndoPromptText"]
+[editable path="MarginContainer/MainVbox/ContinueSection/HBoxContainer/UndoOrReloadPrompts/MarginContainer/UndoOrReloadPrompts/ReloadCheckpointPromptText"]

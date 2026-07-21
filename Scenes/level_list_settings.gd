@@ -53,6 +53,8 @@ const COMPLETION_MODE_COUNT: String = "count"
 const COMPLETION_MODE_INVERSE_COUNT: String = "inverse_count"
 const COMPLETION_MODE_PERCENTAGE: String = "percentage"
 
+const COMPLETION_MODE_UNCOMPLETABLE = "uncompletable"
+
 const CompletionModes: Array[String] = [
     COMPLETION_MODE_ALL,
     COMPLETION_MODE_COUNT,
@@ -305,7 +307,7 @@ func refresh_custom_next_list_selector() -> void:
 
 
 func _get_completion_mode(list_info: Dictionary) -> String:
-    var completion_mode: String = list_info.get("completion_mode", "all")
+    var completion_mode: String = list_info.get("completion_mode", "")
     if not completion_mode in CompletionModes:
         completion_mode = GameManager.DEFAULT_LIST_COMPLETION_MODE
     return completion_mode

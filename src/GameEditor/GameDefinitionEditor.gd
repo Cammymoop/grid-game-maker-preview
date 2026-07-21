@@ -50,7 +50,7 @@ var invalid_field_color = Color(0.7, 0.4, 0.4)
 @export var default_move_speed_input: ScalarValueInput
 @export var default_teleport_duration_input: ScalarValueInput
 
-@export var auto_reload_checkpoint_for_no_cam_focus_toggle: CheckButton
+@export var camera_no_focus_action_picker: OptionButton
 
 @export var follow_by_controller_picker: OptionButton
 
@@ -236,9 +236,20 @@ func _ready():
 	level_start_animation_duration_input.set_value(level_start_anim_duration)
 	level_start_animation_duration_input.value_changed.connect(on_level_start_animation_duration_changed)
 	
+	var auto_fail_no_cam_focus: bool = GameManager.get_game_setting("auto_fail_if_no_cam_focus", false)
 	var auto_reload_no_cam_focus: bool = GameManager.get_game_setting("auto_reload_checkpoint_for_no_cam_focus", false)
-	auto_reload_checkpoint_for_no_cam_focus_toggle.set_pressed_no_signal(auto_reload_no_cam_focus)
-	auto_reload_checkpoint_for_no_cam_focus_toggle.toggled.connect(on_auto_reload_checkpoint_for_no_cam_focus_toggled)
+	camera_no_focus_action_picker.clear()
+	camera_no_focus_action_picker.add_item("Do Nothing")
+	camera_no_focus_action_picker.add_item("Show Fail State")
+	camera_no_focus_action_picker.add_item("Reload Checkpoint")
+	
+	if auto_fail_no_cam_focus:
+		camera_no_focus_action_picker.selected = 1
+	elif auto_reload_no_cam_focus:
+		camera_no_focus_action_picker.selected = 2
+	else:
+		camera_no_focus_action_picker.selected = 0
+	camera_no_focus_action_picker.item_selected.connect(on_camera_no_focus_action_option_picked)
 
 
 func refresh_expanded_sections() -> void:
@@ -300,8 +311,7 @@ func change_follow_by(val: String) -> void:
 	follow_by_controller_picker.visible = val == "controller"
 	var current_follow_by: String = GameManager.get_cam_setting("follow_entity", "InputController")
 	if val == "controller" and not EntityManager.controller_templates.has(current_follow_by):
-		prints("updating follow by when selecting controller")
-		GameManager.set_cam_setting("follow_entity", "InputController")
+		set_camera_settings("follow_entity", "InputController")
 		Utility.opbtn_select_text(follow_by_controller_picker, "InputController")
 
 func movement_mode_picked(mode_idx: int) -> void:
@@ -313,6 +323,8 @@ func movement_mode_picked(mode_idx: int) -> void:
 	var is_continuous: bool = GameManager.is_continuous_movement_mode()
 	auto_undo_option.visible = not is_continuous
 	start_paused_option.visible = is_continuous
+	
+	action_1_is_undo_toggle.set_pressed_no_signal(GameManager.action_1_does_undo())
 
 func refresh_movement_mode_font_size() -> void:
 	var movement_mode_text: = Utility.opbtn_get_selected_text(movement_mode_picker)
@@ -649,3 +661,11 @@ func on_level_start_animation_duration_changed(value: float) -> void:
 
 func on_next_release_version_input_value_changed(value: Vector2i) -> void:
 	GameManager.game_definition["release_info"]["next_version"] = Utility.get_arr_from_vector2i(value)
+
+
+func on_camera_no_focus_action_option_picked(index: int) -> void:
+	var set_fail: bool = index == 1
+	var set_reload: bool = index == 2
+	GameManager.set_game_setting("auto_fail_if_no_cam_focus", set_fail)
+	GameManager.set_game_setting("auto_reload_checkpoint_for_no_cam_focus", set_reload)
+	GameManager.game_settings_changed.emit()

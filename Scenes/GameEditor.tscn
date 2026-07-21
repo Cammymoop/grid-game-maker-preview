@@ -101,13 +101,12 @@ theme_override_constants/margin_top = 35
 theme_override_constants/margin_right = 20
 theme_override_constants/margin_bottom = 35
 
-[node name="UIRoot" type="PanelContainer" parent="MarginContainer" unique_id=1142772979 node_paths=PackedStringArray("tab_container", "beside_tabs_buttons", "intermission_tab", "release_lock_layer")]
+[node name="UIRoot" type="PanelContainer" parent="MarginContainer" unique_id=1142772979 node_paths=PackedStringArray("tab_container", "beside_tabs_buttons", "release_lock_layer")]
 layout_mode = 2
 theme_override_styles/panel = SubResource("4")
 script = ExtResource("10")
 tab_container = NodePath("TabContainer")
 beside_tabs_buttons = NodePath("HBoxContainer")
-intermission_tab = NodePath("")
 release_lock_layer = NodePath("../../LockedOverlay")
 
 [node name="TabContainer" type="TabContainer" parent="MarginContainer/UIRoot" unique_id=540253846]
@@ -116,7 +115,7 @@ theme = ExtResource("3_qrjoe")
 current_tab = 0
 tab_0/title = "Game"
 
-[node name="GameDefinition" type="VBoxContainer" parent="MarginContainer/UIRoot/TabContainer" unique_id=1146228055 node_paths=PackedStringArray("show_level_title_option_picker", "movement_mode_picker", "game_identifier_label", "game_identifier_panel", "game_identifier_input", "game_identifier_input_panel", "game_identifier_set_button", "game_identifier_cancel_button", "name_input", "edit_game_dir_button", "last_release_version_label", "next_release_version_input", "move_interp_option_picker", "tele_interp_option_picker", "action_signal_sent_to_option_picker", "turn_animation_option_picker", "def_dying_eff_picker", "def_spawn_eff_picker", "use_spawn_effect_at_level_start_toggle", "level_start_anim_duration_option", "level_start_animation_duration_input", "default_move_speed_input", "default_teleport_duration_input", "auto_reload_checkpoint_for_no_cam_focus_toggle", "follow_by_controller_picker", "auto_undo_option", "auto_undo_toggle", "action_1_is_undo_toggle", "start_paused_option", "start_level_paused_toggle", "export_release_button", "section_container")]
+[node name="GameDefinition" type="VBoxContainer" parent="MarginContainer/UIRoot/TabContainer" unique_id=1146228055 node_paths=PackedStringArray("show_level_title_option_picker", "movement_mode_picker", "game_identifier_label", "game_identifier_panel", "game_identifier_input", "game_identifier_input_panel", "game_identifier_set_button", "game_identifier_cancel_button", "name_input", "edit_game_dir_button", "last_release_version_label", "next_release_version_input", "move_interp_option_picker", "tele_interp_option_picker", "action_signal_sent_to_option_picker", "turn_animation_option_picker", "def_dying_eff_picker", "def_spawn_eff_picker", "use_spawn_effect_at_level_start_toggle", "level_start_anim_duration_option", "level_start_animation_duration_input", "default_move_speed_input", "default_teleport_duration_input", "camera_no_focus_action_picker", "follow_by_controller_picker", "auto_undo_option", "auto_undo_toggle", "action_1_is_undo_toggle", "start_paused_option", "start_level_paused_toggle", "export_release_button", "section_container")]
 layout_mode = 2
 script = ExtResource("6")
 show_level_title_option_picker = NodePath("ScrollContainer/SectionContainer/GameSettingsSection/MarginContainer/HFlowContainer/HFlowContainer/HBoxContainer11/OptionButton")
@@ -142,7 +141,7 @@ level_start_anim_duration_option = NodePath("ScrollContainer/SectionContainer/Ga
 level_start_animation_duration_input = NodePath("ScrollContainer/SectionContainer/GameSettingsSection/MarginContainer/HFlowContainer/HFlowContainer/SpawnAnimDurationOption/SpawnAnimDurationInput")
 default_move_speed_input = NodePath("ScrollContainer/SectionContainer/GameSettingsSection/MarginContainer/HFlowContainer/HFlowContainer/HBoxContainer10/DefMoveSpeedInput")
 default_teleport_duration_input = NodePath("ScrollContainer/SectionContainer/GameSettingsSection/MarginContainer/HFlowContainer/HFlowContainer/HBoxContainer14/DefTeleDurationInput")
-auto_reload_checkpoint_for_no_cam_focus_toggle = NodePath("ScrollContainer/SectionContainer/DefaultCameraSection/MarginContainer/HFlowContainer/HBoxContainer8/AutoCheckpointCamFocusToggle")
+camera_no_focus_action_picker = NodePath("ScrollContainer/SectionContainer/GameSettingsSection/MarginContainer/HFlowContainer/HFlowContainer/HBoxContainer15/NoCamActionPicker")
 follow_by_controller_picker = NodePath("ScrollContainer/SectionContainer/DefaultCameraSection/MarginContainer/HFlowContainer/HBoxContainer6/FollowByController")
 auto_undo_option = NodePath("ScrollContainer/SectionContainer/GameSettingsSection/MarginContainer/HFlowContainer/HFlowContainer/AutoUndoOption")
 auto_undo_toggle = NodePath("ScrollContainer/SectionContainer/GameSettingsSection/MarginContainer/HFlowContainer/HFlowContainer/AutoUndoOption/AutoUndoToggle")
@@ -454,7 +453,7 @@ alignment = 2
 
 [node name="Action1IsUndoToggle" type="CheckButton" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/SectionContainer/GameSettingsSection/MarginContainer/HFlowContainer/HFlowContainer/HBoxContainer" unique_id=460943727]
 layout_mode = 2
-text = "Action 1 (Z) is undo:"
+text = "Action 1 (Z or Xbox X) is undo:"
 
 [node name="HBoxContainer2" type="HBoxContainer" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/SectionContainer/GameSettingsSection/MarginContainer/HFlowContainer/HFlowContainer" unique_id=891502879]
 layout_mode = 2
@@ -532,8 +531,8 @@ tooltip_text = "Use event props like \"do_action_1\"
 Default Bindings:
 Z, X, C
 J, K, L
-Space, Shift, E
-Xbox: B, A, X
+Shift, Space, E
+Xbox Layout: X, A, B
 "
 mouse_filter = 1
 mouse_default_cursor_shape = 16
@@ -560,6 +559,7 @@ text = "Show Level Title:"
 
 [node name="OptionButton" type="OptionButton" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/SectionContainer/GameSettingsSection/MarginContainer/HFlowContainer/HFlowContainer/HBoxContainer11" unique_id=584782591]
 layout_mode = 2
+alignment = 1
 selected = 0
 item_count = 3
 popup/item_0/text = "At Level Start"
@@ -597,6 +597,23 @@ mouse_filter = 2
 value = 32.0
 editable = false
 suffix = "px"
+
+[node name="HBoxContainer15" type="HBoxContainer" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/SectionContainer/GameSettingsSection/MarginContainer/HFlowContainer/HFlowContainer" unique_id=1148389021]
+layout_mode = 2
+alignment = 2
+
+[node name="Label" type="Label" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/SectionContainer/GameSettingsSection/MarginContainer/HFlowContainer/HFlowContainer/HBoxContainer15" unique_id=443028950]
+layout_mode = 2
+text = "Action When No Camera Target:"
+
+[node name="NoCamActionPicker" type="OptionButton" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/SectionContainer/GameSettingsSection/MarginContainer/HFlowContainer/HFlowContainer/HBoxContainer15" unique_id=1846553117]
+layout_mode = 2
+alignment = 1
+selected = 0
+fit_to_longest_item = false
+item_count = 1
+popup/item_0/text = "Reload Checkpoint"
+popup/item_0/id = 0
 
 [node name="VersionSettingsSection" type="FoldableContainer" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/SectionContainer" unique_id=1694859046]
 layout_mode = 2
@@ -708,6 +725,7 @@ text = "Aspect Ratio Handling:"
 
 [node name="ExpandCropView" type="OptionButton" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/SectionContainer/WindowSection/MarginContainer/VBoxContainer/HBoxContainer8" unique_id=791322447]
 layout_mode = 2
+alignment = 1
 selected = 0
 item_count = 2
 popup/item_0/text = "Expand View"
@@ -787,15 +805,6 @@ min_value = -256.0
 max_value = 1000.0
 rounded = true
 suffix = "px"
-
-[node name="HBoxContainer8" type="HBoxContainer" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/SectionContainer/DefaultCameraSection/MarginContainer/HFlowContainer" unique_id=557712138]
-layout_mode = 2
-alignment = 2
-
-[node name="AutoCheckpointCamFocusToggle" type="CheckButton" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/SectionContainer/DefaultCameraSection/MarginContainer/HFlowContainer/HBoxContainer8" unique_id=486077773]
-layout_mode = 2
-text = "Reload Checkpoint when
-camera has nothing to focus"
 
 [node name="SfxSection" type="FoldableContainer" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/SectionContainer" unique_id=1949552966]
 layout_mode = 2
@@ -1084,6 +1093,7 @@ theme_override_fonts/font = ExtResource("14")
 text = "Bundle used shared images"
 
 [node name="Intermissions" parent="MarginContainer/UIRoot/TabContainer" unique_id=1505033007 instance=ExtResource("25_42d0a")]
+visible = false
 layout_mode = 2
 
 [node name="TileEntityEditorWindow" parent="MarginContainer/UIRoot" unique_id=1695968813 instance=ExtResource("2")]

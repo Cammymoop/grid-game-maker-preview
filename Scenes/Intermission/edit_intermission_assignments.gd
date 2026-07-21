@@ -36,6 +36,14 @@ signal to_intermission_editor_new(in_custom_list: String)
 @export var go_to_intermission_editor_button: Button
 @export var edit_new_intermission_button: ButtonContainer
 
+@onready var all_assignment_lists: Array[IntermissionAssignmentList] = [
+    before_start_assignment_list,
+    after_complete_assignment_list,
+    after_last_level_assignment_list,
+    custom_failure_assignment_list,
+    game_fail_assignment_list,
+]
+
 
 enum Events {
     NEW_GAME,
@@ -47,6 +55,9 @@ enum Events {
     LEVEL_LIST_ALL_COMPLETE,
     GAME_COMPLETE,
     GAME_ALL_COMPLETE,
+    
+    DEFAULT_FAIL_STATE,
+    CUSTOM_FAIL_STATE,
 }
 
 const EVENT_KEYS: = {
@@ -59,6 +70,9 @@ const EVENT_KEYS: = {
     Events.LEVEL_LIST_ALL_COMPLETE: "after_last_level",
     Events.GAME_COMPLETE: "game_complete",
     Events.GAME_ALL_COMPLETE: "all_levels_complete",
+    
+    Events.DEFAULT_FAIL_STATE: "fail_state",
+    Events.CUSTOM_FAIL_STATE: "custom_fail",
 }
 
 
@@ -85,12 +99,12 @@ var remembered_level_name: String = ""
 var remembered_bundled_list_name: String = ""
 var remembered_custom_list_name: String = ""
 
-var all_assignment_lists: Array[IntermissionAssignmentList] = []
-
 func _ready() -> void:
-    for assignment_list in [before_start_assignment_list, after_complete_assignment_list, after_last_level_assignment_list, custom_failure_assignment_list]:
-        if assignment_list:
-            all_assignment_lists.append(assignment_list)
+    var potential_lists: = all_assignment_lists.duplicate()
+    all_assignment_lists.clear()
+    for a in potential_lists:
+        if a:
+            all_assignment_lists.append(a)
     
     for assignment_list in all_assignment_lists:
         assignment_list.list_edited.connect(on_any_assignment_changed)
@@ -378,6 +392,7 @@ func refresh_assignment_lists() -> void:
         after_complete_assignment_list.load_assignments(game_intermission_assignments.get("game_complete", []))
         after_last_level_assignment_list.load_assignments(game_intermission_assignments.get("all_levels_complete", []))
         game_fail_assignment_list.load_assignments(game_intermission_assignments.get("fail_state", []))
+        prints("game fail state assignments: %s" % [game_intermission_assignments.get("fail_state", [])])
 
 func update_and_save_current() -> void:
     var current_mode: = get_current_mode()
@@ -408,6 +423,7 @@ func update_and_save_current() -> void:
         _set_or_erase_assignment_list(game_intermission_assignments, "game_complete", after_complete_assignment_list.get_assignments())
         _set_or_erase_assignment_list(game_intermission_assignments, "all_levels_complete", after_last_level_assignment_list.get_assignments())
         _set_or_erase_assignment_list(game_intermission_assignments, "fail_state", game_fail_assignment_list.get_assignments())
+        prints("saving game intermission assignments: %s" % game_intermission_assignments)
         GameManager.set_game_setting("default_intermissions", game_intermission_assignments)
         GameManager.save_current_definition_if_auto_enabled()
     elif current_mode == Modes.LEVELS:

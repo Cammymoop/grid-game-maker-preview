@@ -138,7 +138,7 @@ func entity_list_process(delta_time: float) -> void:
                 new_action_activations.append("do_action_" + action_num)
                 if action_num == "1" and GameManager.action_1_does_undo() and not any_press_started:
                     if GameManager.has_undo_state():
-                        GameManager.pop_and_load_undo_state.call_deferred()
+                        do_pop_undo()
                         return
         if not GameManager.is_in_level_edit_mode and Input.is_action_just_pressed("input_action_3_no_editor"):
             if not "do_action_3" in new_action_activations:
@@ -242,6 +242,10 @@ func entity_list_process(delta_time: float) -> void:
     handle_movement_mode_stuff()
     
     process_phase = 0
+    
+    if _undo_pop_requested:
+        do_pop_undo()
+        _undo_pop_requested = false
 
 func request_create_undo() -> void:
     if process_phase == 0:
@@ -252,6 +256,11 @@ func request_pop_undo() -> void:
     if process_phase == 0:
         return
     _undo_pop_requested = true
+
+func do_pop_undo() -> void:
+    if GameManager._queued_lack_of_cam_target_action:
+        GameManager.cancel_queued_level_load()
+    GameManager.pop_and_load_undo_state.call_deferred()
 
 func do_early_end_level_spawn_animation() -> void:
     for e in entity_list:

@@ -22,7 +22,14 @@ const SPACE_MULTIPLIER: float = 5
 @export var inner_container: Control
 
 @export var content_section: Control
-@export var continue_section: Control
+@export var prompt_section: Control
+
+@export var continue_prompt_section: Control
+@export var undo_or_reload_prompt_section: Control
+
+@export var undo_prompt: Control
+@export var undo_prompt_label: Label
+@export var reload_prompt: Control
 
 var is_setup: = false
 
@@ -58,7 +65,18 @@ func setup_with_info(intermission_info: Dictionary) -> void:
         append_item(item_info)
     
     var show_continue: bool = intermission_info.get("show_continue", true)
-    continue_section.visible = show_continue
+    var show_undo: bool = intermission_info.get("show_undo", false)
+    var show_reload: bool = intermission_info.get("show_reload_checkpoint", false)
+    prompt_section.visible = show_continue or show_undo or show_reload
+    
+    continue_prompt_section.visible = not (show_undo or show_reload)
+    undo_or_reload_prompt_section.visible = show_undo or show_reload
+    
+    undo_prompt.visible = show_undo
+    reload_prompt.visible = show_reload
+    
+    #if undo_prompt.visible:
+        #set_undo_prompt_text()
     
     if do_fade_in and fade_in_timer:
         fade_in_timer.start(fade_in_duration)
@@ -129,3 +147,7 @@ func clear_content() -> void:
     for child in content_section.get_children():
         content_section.remove_child(child)
         child.queue_free()
+
+
+#func set_undo_prompt_text() -> void:
+    #var undo_text: String = "Undo: "

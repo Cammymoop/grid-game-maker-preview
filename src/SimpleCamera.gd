@@ -162,14 +162,14 @@ func should_follow_entity(entity: BaseEntity) -> bool:
 	var follow_this: String = Utility.get_camera_setting("follow_entity", "")
 	var by_mode: String = Utility.get_camera_setting("follow_entity_by", "controller")
 	if by_mode == "controller":
-		if not follow_this:
+		if not follow_this or not EntityManager.controller_templates.has(follow_this):
 			follow_this = "InputController"
 
 	if not follow_this or not by_mode:
 		return false
 	
 	if by_mode == "controller":
-		return EntityManager.is_entity_controller_type(entity, follow_this if follow_this else "InputController")
+		return EntityManager.is_entity_controller_type(entity, follow_this)
 	elif by_mode == "name":
 		return EntityManager.get_entity_name(entity.entity_index) == follow_this
 	elif by_mode == "property":
@@ -205,7 +205,7 @@ func get_follow_targets() -> Array[BaseEntity]:
 	var follow_this = Utility.get_camera_setting("follow_entity", "")
 	var by_mode = Utility.get_camera_setting("follow_entity_by", "controller")
 	if by_mode == "controller":
-		if not follow_this:
+		if not follow_this or not EntityManager.controller_templates.has(follow_this):
 			follow_this = "InputController"
 		return EntityManager.get_all_with_controller_type(follow_this)
 	if by_mode == "instances":
