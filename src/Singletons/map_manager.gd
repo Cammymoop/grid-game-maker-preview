@@ -1629,7 +1629,7 @@ func starting_event(event_name: String) -> void:
 
 func get_custom_fail_state_intermission_id() -> String:
     var custom_fail_assignments: Array = get_intermission_assignements_for_event(IntermissionEvents.CUSTOM_FAIL_STATE)
-    return GameManager.get_first_non_sequence_intermission_from_list(custom_fail_assignments)
+    return GameManager.get_first_viewable_intermission_from_list(custom_fail_assignments)
 
 
 func get_intermission_assignements_for_event(event: IntermissionEvents) -> Array:

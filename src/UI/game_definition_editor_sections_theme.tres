@@ -1,0 +1,8 @@
+[gd_resource type="Theme" format=3 uid="uid://bs8wn8kmwonyc"]
+
+[resource]
+CheckButton/font_sizes/font_size = 12
+Label/font_sizes/font_size = 12
+LineEdit/font_sizes/font_size = 14
+MenuButton/font_sizes/font_size = 14
+OptionButton/font_sizes/font_size = 14

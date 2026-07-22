@@ -3012,3 +3012,8 @@ func desc_show_intermission_overlay() -> String:
 func cmd_show_intermission_overlay(_slots: Dictionary, _slot: int, intermission_id: String) -> void:
 	prints("showing intermission overlay: %s" % [intermission_id])
 	GameManager.show_overlay_intermissions(Array([intermission_id], TYPE_STRING, "", null))
+
+func desc_if_has_viewed_intermission() -> String:
+	return "none|If the player has viewed the intermission [intermission_id:IntermissionIdInput:include_reserved_flags=true]"
+func cmd_if_has_viewed_intermission(_slots: Dictionary, _slot: int, intermission_id: String) -> bool:
+	return GameManager.has_intermission_flag(intermission_id)

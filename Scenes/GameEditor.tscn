@@ -3,10 +3,12 @@
 [ext_resource type="PackedScene" uid="uid://dp8klau6une1m" path="res://Scenes/GameEditor/TileEntityEditorWindow.tscn" id="2"]
 [ext_resource type="Theme" uid="uid://d02pi6tltv1cc" path="res://assets/ui/game_editor_tab_theme.tres" id="3_qrjoe"]
 [ext_resource type="Script" uid="uid://x80wuvd66lkn" path="res://Scenes/GameEditor/game_def_display_settings.gd" id="4_32qri"]
+[ext_resource type="Theme" uid="uid://bs8wn8kmwonyc" path="res://src/UI/game_definition_editor_sections_theme.tres" id="4_as6b5"]
 [ext_resource type="Script" uid="uid://cakuc61ui0t57" path="res://src/GameEditor/ImagesEditor.gd" id="5"]
 [ext_resource type="PackedScene" uid="uid://bgbv61t8v8ji5" path="res://Scenes/GameEditor/ConditionalEditor/vector2f_input.tscn" id="5_73cj6"]
 [ext_resource type="PackedScene" uid="uid://bleyoj5f36kfy" path="res://Scenes/GameEditor/ConditionalEditor/scalar_value_input.tscn" id="5_ixkgg"]
 [ext_resource type="Script" uid="uid://benwn44a0nm5f" path="res://src/GameEditor/GameDefinitionEditor.gd" id="6"]
+[ext_resource type="PackedScene" uid="uid://cgauww24s1ulm" path="res://Scenes/GameEditor/game_events_section.tscn" id="6_beh5u"]
 [ext_resource type="PackedScene" uid="uid://b6fax3dpo74i4" path="res://Scenes/GameEditor/credits_list.tscn" id="6_qrjoe"]
 [ext_resource type="PackedScene" uid="uid://yskjico8qrbl" path="res://Scenes/GameEditor/ConditionalEditor/vector2i_input.tscn" id="6_ybheo"]
 [ext_resource type="Script" uid="uid://bh535vdhldxn6" path="res://src/GameEditor/ConditionalEditor/prop_or_entity_name_input.gd" id="7_73cj6"]
@@ -17,7 +19,7 @@
 [ext_resource type="Script" uid="uid://bihb1rg68jci5" path="res://src/GameEditor/SelectableTextureList.gd" id="11"]
 [ext_resource type="Script" uid="uid://cia8grkwwxcha" path="res://src/GameEditor/PopupLayer.gd" id="12"]
 [ext_resource type="PackedScene" uid="uid://ci5jvijwn0j60" path="res://Scenes/GameEditor/info_panel_config_edit.tscn" id="12_retx3"]
-[ext_resource type="StyleBox" path="res://src/UI/list_background.tres" id="13"]
+[ext_resource type="StyleBox" uid="uid://bf4pw2lygxoq5" path="res://src/UI/list_background.tres" id="13"]
 [ext_resource type="FontFile" uid="uid://cpry5rd5ecdc5" path="res://assets/font/small_font.tres" id="14"]
 [ext_resource type="Script" uid="uid://c1vkx254mpaft" path="res://src/GameEditor/FollowBySelector.gd" id="15"]
 [ext_resource type="Script" uid="uid://blesifogfyjfp" path="res://Scenes/GameEditor/background_style_editor_tab.gd" id="15_4q0gk"]
@@ -48,13 +50,6 @@ corner_radius_top_right = 3
 corner_radius_bottom_right = 3
 corner_radius_bottom_left = 3
 corner_detail = 7
-
-[sub_resource type="Theme" id="Theme_qrjoe"]
-CheckButton/font_sizes/font_size = 12
-Label/font_sizes/font_size = 12
-LineEdit/font_sizes/font_size = 14
-MenuButton/font_sizes/font_size = 14
-OptionButton/font_sizes/font_size = 14
 
 [sub_resource type="Theme" id="3"]
 default_font = ExtResource("9")
@@ -254,7 +249,7 @@ size_flags_horizontal = 3
 [node name="ScrollContainer" type="ScrollContainer" parent="MarginContainer/UIRoot/TabContainer/GameDefinition" unique_id=867284119]
 layout_mode = 2
 size_flags_vertical = 3
-theme = SubResource("Theme_qrjoe")
+theme = ExtResource("4_as6b5")
 follow_focus = true
 vertical_scroll_mode = 4
 scroll_hint_mode = 1
@@ -614,6 +609,9 @@ fit_to_longest_item = false
 item_count = 1
 popup/item_0/text = "Reload Checkpoint"
 popup/item_0/id = 0
+
+[node name="GameEventsSection" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/SectionContainer" unique_id=1914446224 instance=ExtResource("6_beh5u")]
+layout_mode = 2
 
 [node name="VersionSettingsSection" type="FoldableContainer" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/SectionContainer" unique_id=1694859046]
 layout_mode = 2

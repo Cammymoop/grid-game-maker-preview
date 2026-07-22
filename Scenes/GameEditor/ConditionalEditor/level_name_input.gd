@@ -8,6 +8,10 @@ const SlotSelectorButton = preload("res://src/GameEditor/SlotSelectorButton.gd")
 @export var slot_selector: SlotSelectorButton
 @export var level_name_selector: OptionButton
 
+@export var bundled_only: bool = false
+
+@export var plain_value_only: bool = false
+
 var arg_name: String = ""
 var current_slot_id: int = SlotSelectorButton.TEXT_VALUE
 
@@ -17,6 +21,9 @@ const OPTION_NO_VALUE: int = 99999
 const TEMPORARY_OPTION_ID: int = 99998
 
 func _ready():
+    if plain_value_only:
+        slot_selector.visible = false
+
     slot_selector.set_valid_slot_categories(["string"])
     slot_selector.set_current_slot(current_slot_id, false)
     slot_selector.slot_changed.connect(on_slot_changed)
@@ -32,7 +39,11 @@ func get_arg_name() -> String:
     return arg_name
 
 func _fetch_level_list() -> void:
-    var sorted_levels: Array[String] = GameManager.get_all_existing_levels_sorted_by_chronology()
+    var sorted_levels: Array[String] = []
+    if bundled_only:
+        sorted_levels = GameManager.get_list_of_all_bundled_levels()
+    else:
+        sorted_levels = GameManager.get_all_existing_levels_sorted_by_chronology()
     level_name_selector.clear()
     level_name_selector.add_item("(Select a level)", OPTION_NO_VALUE)
     level_name_selector.add_separator()
@@ -41,7 +52,7 @@ func _fetch_level_list() -> void:
     level_list_fetched = true
 
 func get_value() -> Dictionary:
-    if current_slot_id == SlotSelectorButton.TEXT_VALUE:
+    if is_plain_value():
         var text_value: String = Utility.opbtn_get_selected_text(level_name_selector)
         if Utility.opbtn_get_selected_id(level_name_selector) == OPTION_NO_VALUE:
             text_value = ""
@@ -55,6 +66,8 @@ func get_value() -> Dictionary:
 func set_value(new_val: Dictionary) -> void:
     if new_val.get("type", "plain") == "plain":
         set_plain_value(new_val.get("value", ""))
+    elif plain_value_only:
+        set_plain_value("")
     elif new_val["type"] == "slot_value":
         current_slot_id = new_val["slot_id"]
         refresh_ui()
@@ -64,6 +77,8 @@ func set_value(new_val: Dictionary) -> void:
     value_set.emit()
 
 func _set_current_slot_id(new_slot_id: int) -> void:
+    if plain_value_only:
+        return
     current_slot_id = new_slot_id
     slot_selector.set_current_slot(current_slot_id, false)
 
@@ -82,14 +97,19 @@ func set_plain_value(new_value: String) -> void:
     refresh_ui()
 
 func on_slot_changed(new_slot_id: int) -> void:
+    if plain_value_only:
+        return
     current_slot_id = new_slot_id
     refresh_ui()
     updated.emit()
 
+func is_plain_value() -> bool:
+    return plain_value_only or current_slot_id == SlotSelectorButton.TEXT_VALUE
+
 func refresh_ui() -> void:
     if not level_list_fetched:
         _fetch_level_list()
-    level_name_selector.visible = current_slot_id == SlotSelectorButton.TEXT_VALUE
+    level_name_selector.visible = is_plain_value()
     
     if level_name_selector.visible:
         var selected_id: int = Utility.opbtn_get_selected_id(level_name_selector)

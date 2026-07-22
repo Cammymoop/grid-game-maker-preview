@@ -3,7 +3,7 @@
 [ext_resource type="Script" uid="uid://cfrnaqldrr8lr" path="res://Scenes/level_list_settings.gd" id="1_8f1op"]
 [ext_resource type="PackedScene" uid="uid://bleyoj5f36kfy" path="res://Scenes/GameEditor/ConditionalEditor/scalar_value_input.tscn" id="2_xli71"]
 
-[node name="LevelListSettings" type="VBoxContainer" unique_id=631932331 node_paths=PackedStringArray("back_button", "name_input", "total_levels_label", "do_progressive_unlock_toggle", "progressive_unlock_num_container", "progressive_unlock_num_input", "always_hidden_container", "always_hidden_toggle", "not_always_hidden_container", "is_locked_container", "is_locked_toggle", "is_hidden_container", "is_hidden_toggle", "default_is_unlocked_container", "default_is_unlocked_toggle", "show_locked_levels_toggle", "show_locked_titles_container", "show_locked_titles_toggle", "completion_mode_selector", "completion_number_container", "completion_number_input", "show_completion_container", "show_completion_selector", "custom_next_list_container", "custom_next_list_selector", "when_completed_selector")]
+[node name="LevelListSettings" type="VBoxContainer" unique_id=631932331 node_paths=PackedStringArray("back_button", "name_input", "total_levels_label", "do_progressive_unlock_toggle", "progressive_unlock_num_container", "progressive_unlock_num_input", "always_hidden_container", "always_hidden_toggle", "not_always_hidden_container", "is_locked_container", "is_locked_toggle", "is_hidden_container", "is_hidden_toggle", "default_is_unlocked_container", "default_is_unlocked_toggle", "show_locked_levels_toggle", "show_locked_titles_container", "show_locked_titles_toggle", "completion_mode_selector", "completion_number_container", "completion_number_input", "show_completion_container", "show_completion_selector", "custom_next_list_container", "custom_next_list_selector", "when_completed_selector", "hidden_all_count_for_completion_container", "hidden_all_count_for_completion_toggle", "show_name_as_hidden_container", "show_name_as_hidden_toggle")]
 custom_minimum_size = Vector2(400, 0)
 script = ExtResource("1_8f1op")
 back_button = NodePath("MarginContainer/BackButton")
@@ -32,6 +32,10 @@ show_completion_selector = NodePath("ShowCompletionContainer/OptionButton")
 custom_next_list_container = NodePath("HBoxContainer7")
 custom_next_list_selector = NodePath("HBoxContainer7/CustomNextListSelector")
 when_completed_selector = NodePath("HBoxContainer6/UnlockNextStyleSelector")
+hidden_all_count_for_completion_container = NodePath("CountLevelsForCompletionOption")
+hidden_all_count_for_completion_toggle = NodePath("CountLevelsForCompletionOption/CountLevelsForCompletionToggle")
+show_name_as_hidden_container = NodePath("ShowNameAsHiddenOption")
+show_name_as_hidden_toggle = NodePath("ShowNameAsHiddenOption/ShowNameAsHiddenToggle")
 
 [node name="MarginContainer" type="MarginContainer" parent="." unique_id=1979548354]
 layout_mode = 2
@@ -79,9 +83,42 @@ alignment = 2
 
 [node name="AlwaysHiddenToggle" type="CheckButton" parent="HBoxContainer3" unique_id=1975699604]
 layout_mode = 2
-tooltip_text = "A locked level list is unlocked as soon as any level in it is unlocked"
+tooltip_text = "With this option:
+* Never shows name or levels in Level Select, except to show current level.
+* All levels start locked, regardless of list position nothing will auto advance to levels in this list.
+* Levels can still be played and completed if the player is manually sent there."
 toggle_mode = false
-text = "Always Hidden"
+text = "Always Hidden List"
+
+[node name="CountLevelsForCompletionOption" type="HBoxContainer" parent="." unique_id=1605837016]
+visible = false
+layout_mode = 2
+alignment = 2
+
+[node name="CountLevelsForCompletionToggle" type="CheckButton" parent="CountLevelsForCompletionOption" unique_id=3869657]
+layout_mode = 2
+tooltip_text = "If the list is Always Hidden, enable this if contained levels should be
+counted toward completing the game or completing all levels.
+(default off)"
+theme_override_font_sizes/font_size = 14
+toggle_mode = false
+text = "Contained Levels Still Count Toward Completion
+(Regular & Full Completion)"
+alignment = 1
+
+[node name="ShowNameAsHiddenOption" type="HBoxContainer" parent="." unique_id=1628357880]
+visible = false
+layout_mode = 2
+alignment = 2
+
+[node name="ShowNameAsHiddenToggle" type="CheckButton" parent="ShowNameAsHiddenOption" unique_id=529909151]
+layout_mode = 2
+tooltip_text = "If enabled, will use the list name instead of a placeholder name in level select above the current level if the player is in the list
+(default off)"
+theme_override_font_sizes/font_size = 14
+toggle_mode = false
+text = "Use Actual Name Instead of Placeholder"
+alignment = 1
 
 [node name="WhenNotAlwaysHidden" type="VBoxContainer" parent="." unique_id=2590428]
 layout_mode = 2

@@ -22,5 +22,5 @@ alignment = 1
 selected = 0
 fit_to_longest_item = false
 item_count = 1
-popup/item_0/text = "(choose a level)"
+popup/item_0/text = "(Any)"
 popup/item_0/id = 99999

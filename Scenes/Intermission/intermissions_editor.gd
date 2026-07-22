@@ -12,6 +12,8 @@ const IntermissionContentEditor = preload("res://Scenes/Intermission/intermissio
 
 const IntermissionUI = preload("res://Scenes/Intermission/intermission_ui.gd")
 
+const ScalarValueInput = preload("res://src/GameEditor/ConditionalEditor/scalar_value_input.gd")
+
 var intermission_ui_scn: = preload("res://Scenes/Intermission/intermission_ui_no_fade_in.tscn")
 
 var editor_dark_bg_stylebox: = preload("res://assets/ui/editor_dark_bg_panel.tres")
@@ -59,6 +61,8 @@ var editor_dark_bg_stylebox: = preload("res://assets/ui/editor_dark_bg_panel.tre
 
 @export var show_only_once_toggle: CheckButton
 
+@export var expire_time_input: ScalarValueInput
+
 var is_editing_inside_level_list: String = ""
 
 var is_editing_intermission: bool = false
@@ -76,7 +80,8 @@ var game_editor_mode: bool = true
 const TYPE_CREDITS: String = "credits"
 const TYPE_INTERMISSION: String = "intermission"
 const TYPE_SEQUENCE: String = "sequence"
-const INTERMISSION_TYPES: Array[String] = [TYPE_CREDITS, TYPE_INTERMISSION, TYPE_SEQUENCE]
+const TYPE_FLAG: String = "flag"
+const INTERMISSION_TYPES: Array[String] = [TYPE_CREDITS, TYPE_INTERMISSION, TYPE_SEQUENCE, TYPE_FLAG]
 
 const STORAGE_BUNDLED: int = 5
 const STORAGE_CUSTOM_LIST: int = 6
@@ -95,7 +100,7 @@ func _ready() -> void:
 
     intermission_type_selector.clear()
     for type_id in INTERMISSION_TYPES.size():
-        intermission_type_selector.add_item(INTERMISSION_TYPES[type_id], type_id)
+        intermission_type_selector.add_item(INTERMISSION_TYPES[type_id].capitalize(), type_id)
     intermission_type_selector.selected = 0
     intermission_type_selector.item_selected.connect(on_intermission_type_selected)
     
@@ -147,6 +152,8 @@ func _ready() -> void:
     intermission_sequence_list.list_edited.connect(on_intermission_sequence_list_edited)
     intermission_sequence_list.request_edit_intermission.connect(edit_intermission_from_sequence)
     intermission_sequence_list.request_edit_duplicate_intermission.connect(edit_duplicate_intermission_from_sequence)
+    
+    expire_time_input.value_changed.connect(on_expire_time_changed)
     
     get_viewport().gui_focus_changed.connect(on_gui_focus_changed)
     
@@ -219,6 +226,9 @@ func load_intermission_from_id(intermission_id: String, from_custom_list: String
     if not is_editing_inside_level_list and GameManager.current_game_is_release_locked:
         refresh_ui()
         return
+    if not from_custom_list and GameManager.is_intermission_id_reserved(intermission_id):
+        refresh_ui()
+        return
     is_editing_intermission = true
     is_editing_inside_level_list = from_custom_list
 
@@ -282,6 +292,8 @@ func on_disable_custom_background() -> void:
     refresh_show_bg_style_ui()
 
 func on_edited_bg_style(bg_style: Dictionary) -> void:
+    if not is_editing_intermission:
+        return
     editing_intermission_info["bg_style"] = bg_style
     update_bg_preview(bg_style)
     save_edited_intermission_info()
@@ -359,6 +371,9 @@ func change_type_to(type: String) -> void:
     if type != TYPE_INTERMISSION:
         old_content_items = editing_intermission_info.get("content_items", [])
         editing_intermission_info.erase("content_items")
+        editing_intermission_info.erase("expire_time")
+        if type != TYPE_CREDITS:
+            editing_intermission_info.erase("bg_style")
     else:
         editing_intermission_info["content_items"] = old_content_items
 
@@ -408,6 +423,8 @@ func _is_valid_id_char(id_char: String) -> bool:
     return id_char.is_valid_ascii_identifier()
 
 func validate_intermission_id(new_id: String) -> bool:
+    if GameManager.is_intermission_id_reserved(new_id):
+        return false
     if not new_id or new_id.strip_edges().length() != new_id.length():
         return false
     for id_char in new_id:
@@ -439,6 +456,8 @@ func refresh_ui() -> void:
             intermission_type_selector.tooltip_text = "Sequence of other intermissions"
         elif intermission_type == TYPE_CREDITS:
             intermission_type_selector.tooltip_text = "Show the credits defined for the game in the Credits section of the Game tab"
+        elif intermission_type == TYPE_FLAG:
+            intermission_type_selector.tooltip_text = "Not shown, just saves a flag noting that the player has seen this intermission"
         else:
             intermission_type_selector.tooltip_text = ""
         
@@ -455,6 +474,8 @@ func refresh_ui() -> void:
         if intermission_type == TYPE_CREDITS:
             pass
         elif intermission_type == TYPE_INTERMISSION:
+            expire_time_input.set_value(editing_intermission_info.get("expire_time", 0.0))
+
             intermission_content_editor.load_contents_info(editing_intermission_info.get("content_items", []))
             
             var shade_light: bool = editing_intermission_info.get("light_background", true)
@@ -712,3 +733,9 @@ func edit_duplicate_intermission_from_sequence(intermission_id: String, to_list_
     update_intermission_sequence()
     save_edited_intermission_info()
     load_intermission_from_id(duplicate_id, to_list_name)
+
+func on_expire_time_changed(value: float) -> void:
+    if not is_editing_intermission or not editing_intermission_info.get("type", "") == TYPE_INTERMISSION:
+        return
+    editing_intermission_info["expire_time"] = value
+    save_edited_intermission_info()

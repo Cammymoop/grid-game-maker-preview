@@ -37,6 +37,9 @@ var level_item_scene: = preload("res://Scenes/level_list_item.tscn")
 
 var is_expanded: bool = false
 
+var is_hidden_list: bool = false
+var show_name_as_hidden: bool = false
+
 var level_list_name: String = ""
 var is_bundled_list: bool = false
 
@@ -141,11 +144,15 @@ func load_level_list_named(with_level_list_name: String) -> void:
     if not with_level_list_name:
         clear_level_items()
         return
-    set_level_list_name(with_level_list_name)
     var level_list_info: Dictionary = GameManager._get_level_list(level_list_name)
     if not level_list_info:
         clear_level_items()
         return
+
+    is_hidden_list = level_list_info.get("always_hidden", false)
+    show_name_as_hidden = level_list_info.get("always_hidden_use_name_when_current", false)
+    set_level_list_name(with_level_list_name)
+
 
     var is_edit: = _is_in_edit_mode()
     export_list_button.visible = is_edit
@@ -154,6 +161,7 @@ func load_level_list_named(with_level_list_name: String) -> void:
     update_list_completion_label()
 
 func load_unlisted_levels() -> void:
+    is_hidden_list = false
     export_list_button.visible = false
     remove_list_button.visible = false
     level_list_name = "NONE"
@@ -175,6 +183,10 @@ func set_level_list_name(new_level_list_name: String) -> void:
     list_name_label.text = level_list_name.trim_suffix("%")
     is_bundled_list = GameManager.is_level_list_bundled(level_list_name)
 
+    if not _is_in_edit_mode() and is_hidden_list and not show_name_as_hidden:
+        list_name_label.text = ["??", "Elsewhere"].pick_random()
+
+
 func refresh_list() -> void:
     levels_section.visible = is_expanded
     
@@ -186,7 +198,9 @@ func refresh_list() -> void:
     clear_level_items()
     var levels_with_info: Array[Dictionary] = GameManager.get_levels_to_show_in_level_list(level_list_name, _is_in_edit_mode(), is_list_of_unlisted_levels)
     for level_info in levels_with_info:
-        if level_info["is_hidden"]:
+        if not _is_in_edit_mode() and is_hidden_list and not level_info["is_current_level"]:
+            continue
+        elif level_info["is_hidden"]:
             continue
         _add_level_item(level_info)
 

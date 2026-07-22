@@ -1,0 +1,51 @@
+[gd_scene format=3 uid="uid://c3qvpvu2m643d"]
+
+[ext_resource type="Script" uid="uid://bqgi3f4ryyieh" path="res://Scenes/GameEditor/list_and_level_input.gd" id="1_enlu8"]
+[ext_resource type="PackedScene" uid="uid://cvcvtgiapcwew" path="res://Scenes/GameEditor/ConditionalEditor/level_list_name_input.tscn" id="2_8nvxq"]
+[ext_resource type="PackedScene" uid="uid://dk8awa0xycaq4" path="res://Scenes/GameEditor/ConditionalEditor/level_name_input.tscn" id="3_h83at"]
+
+[node name="ListAndLevelInput" type="HBoxContainer" unique_id=1528544791 node_paths=PackedStringArray("list_input", "level_name_input")]
+theme_override_constants/separation = 12
+script = ExtResource("1_enlu8")
+list_input = NodePath("HBoxContainer/LevelListNameInput")
+level_name_input = NodePath("HBoxContainer2/LevelNameInput")
+
+[node name="HBoxContainer" type="HBoxContainer" parent="." unique_id=446460653]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="HBoxContainer" unique_id=334821754]
+layout_mode = 2
+text = "List:"
+
+[node name="LevelListNameInput" parent="HBoxContainer" unique_id=995722546 node_paths=PackedStringArray("_level_name_input_sibling") instance=ExtResource("2_8nvxq")]
+layout_mode = 2
+bundled_only = true
+plain_value_only = true
+_level_name_input_sibling = NodePath("../../HBoxContainer2/LevelNameInput")
+
+[node name="SlotSelectorButton" parent="HBoxContainer/LevelListNameInput" index="0" unique_id=1264497244]
+visible = false
+
+[node name="ListNameSelector" parent="HBoxContainer/LevelListNameInput" index="1" unique_id=820956591]
+theme_override_font_sizes/font_size = 12
+
+[node name="HBoxContainer2" type="HBoxContainer" parent="." unique_id=276720062]
+layout_mode = 2
+
+[node name="Label2" type="Label" parent="HBoxContainer2" unique_id=1548121763]
+layout_mode = 2
+text = "Level:"
+
+[node name="LevelNameInput" parent="HBoxContainer2" unique_id=613939575 instance=ExtResource("3_h83at")]
+layout_mode = 2
+bundled_only = true
+plain_value_only = true
+
+[node name="SlotSelectorButton" parent="HBoxContainer2/LevelNameInput" index="0" unique_id=1264497244]
+visible = false
+
+[node name="LevelNameSelector" parent="HBoxContainer2/LevelNameInput" index="1" unique_id=157356647]
+theme_override_font_sizes/font_size = 12
+
+[editable path="HBoxContainer/LevelListNameInput"]
+[editable path="HBoxContainer2/LevelNameInput"]

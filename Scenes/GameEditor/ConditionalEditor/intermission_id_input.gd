@@ -4,6 +4,8 @@ extends HBoxContainer
 
 const NO_INTERMISSION_ID: int = 999999
 
+var including_reserved_flags: bool = false
+
 var arg_name: String = ""
 var include_from_custom_list: String = ""
 var _setup_with_list: String = ""
@@ -18,6 +20,19 @@ func set_arg_name(new_arg_name: String) -> void:
 
 func get_arg_name() -> String:
     return arg_name
+
+func set_input_args(new_args: Array) -> void:
+    if not new_args:
+        return
+    for arg: String in new_args:
+        if arg.begins_with("include_reserved_flags="):
+            var split_arg: = arg.split("=")
+            var value: = split_arg[1]
+            including_reserved_flags = value and value.strip_edges().to_lower() != "false"
+            if value.is_valid_float():
+                if float(value) == 0:
+                    including_reserved_flags = false
+            setup_intermission_id_selector()
 
 func set_value(value: String) -> void:
     if _setup_with_list != include_from_custom_list:
@@ -42,6 +57,13 @@ func setup_intermission_id_selector() -> void:
     
     for intermission_id in GameManager.get_all_intermission_ids():
         intermission_id_selector.add_item(intermission_id)
+    
+    if including_reserved_flags:
+        var reserved_flags: = GameManager.get_all_reserved_intermission_flags()
+        if reserved_flags.size() > 0:
+            intermission_id_selector.add_separator("Builtin Flags")
+            for reserved_flag in reserved_flags:
+                intermission_id_selector.add_item(reserved_flag)
     
     if include_from_custom_list:
         intermission_id_selector.add_separator(include_from_custom_list)

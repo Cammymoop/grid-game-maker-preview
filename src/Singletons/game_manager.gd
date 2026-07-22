@@ -203,6 +203,7 @@ var game_camera: Camera2D = null
 
 var stateful_camera_settings: = {}
 
+# Only viewing intermissions, no level
 var is_intermission_mode: bool = false
 var intermission_state: Dictionary = {}
 
@@ -225,13 +226,31 @@ const DEFAULT_CREDITS: Dictionary = {
 	"bg_style": {}
 }
 
+const INTERM_GAME_STARTED_FLAG = "_GAME_STARTED_"
+const INTERM_GAME_COMLETE_FLAG = "_GAME_COMPLETE_"
+const INTERM_FULL_COMPLETE_FLAG = "_FULL_COMPLETE_"
+
+const RESERVED_INTERMISSION_IDS: Array[String] = [
+	INTERM_GAME_STARTED_FLAG,
+	INTERM_GAME_COMLETE_FLAG,
+]
+
+const RESERVED_INTERMISSIONS: Dictionary[String, Dictionary] = {
+	INTERM_GAME_COMLETE_FLAG: {
+		"id": INTERM_GAME_COMLETE_FLAG,
+		"type": "flag",
+	},
+}
+
 const COMPLETION__ALL_LISTS = "all_lists_complete"
+const COMPLETION__ALL_LEVELS = "all_levels_complete"
 const COMPLETION__SPECIFIC_LIST = "specific_list_complete"
 const COMPLETION__SPECIFIC_LEVEL_CODE = "specific_level_code_complete"
 const COMPLETION__SPECIFIC_LEVEL_NAME = "specific_level_name_complete"
 
 const ALL_COMPLETION_MODES: Array[String] = [
 	COMPLETION__ALL_LISTS,
+	COMPLETION__ALL_LEVELS,
 	COMPLETION__SPECIFIC_LIST,
 	COMPLETION__SPECIFIC_LEVEL_CODE,
 	COMPLETION__SPECIFIC_LEVEL_NAME,
@@ -2386,6 +2405,22 @@ func get_list_completed_count(level_list_name: String) -> int:
 			completed_count += 1
 	return completed_count
 
+func is_list_completable(level_list_name: String) -> bool:
+	if not level_list_exists(level_list_name):
+		return false
+	var list_info: = _get_level_list(level_list_name)
+	if not list_info:
+		return false
+	if list_info.get("always_hidden", false):
+		if not list_info.get("always_hidden_levels_completable", false):
+			return false
+	if get_levels_in_level_list(level_list_name).size() <= 0:
+		return false
+	var completion_mode: String = list_info.get("completion_mode", "")
+	if completion_mode == LevelListSettings.COMPLETION_MODE_UNCOMPLETABLE:
+		return false
+	return true
+
 func is_every_bundled_completable_list_complete() -> bool:
 	var completable_lists: Array[String] = []
 	var all_bundled_list_infos: = get_all_level_list_infos(true)
@@ -2394,7 +2429,8 @@ func is_every_bundled_completable_list_complete() -> bool:
 		if not list_name or not get_levels_in_level_list(list_name).size() > 0:
 			continue
 		if list_info.get("always_hidden", false):
-			continue
+			if not list_info.get("always_hidden_levels_completable", false):
+				continue
 		var completion_mode: String = list_info.get("completion_mode", "")
 		if completion_mode == LevelListSettings.COMPLETION_MODE_UNCOMPLETABLE:
 			continue
@@ -2609,6 +2645,7 @@ func get_levels_to_show_in_level_list(level_list_name: String, as_edit_mode: boo
 			"is_any_completed": is_complete_normal or is_level_completed_in_any_list(level_name),
 			"is_hidden": not (is_unlocked or should_show_locked),
 			"is_bundled": is_bundled_list,
+			"is_current_level": (loaded_level_name and level_name == loaded_level_name) and current_level_list == level_list_name,
 		})
 	return levels_with_info
 
@@ -2713,6 +2750,15 @@ func is_level_bundled(level_name: String) -> bool:
 	if not FilesManager.level_exists(get_identified_game_name(), level_name):
 		return false
 	return level_name in get_list_of_all_bundled_levels()
+
+func is_level_code_valid_and_bundled(level_code: String) -> bool:
+	if not is_level_code_valid(level_code) or not _level_list_from_code(level_code):
+		return false
+	if not is_level_list_bundled(_level_list_from_code(level_code)):
+		return false
+	if not is_level_bundled(_level_name_from_code(level_code)):
+		return false
+	return true
 
 func get_list_of_all_levels_in_lists() -> Array[String]:
 	var all_listed: Array[String] = get_list_of_all_bundled_levels()
@@ -2847,12 +2893,15 @@ func get_all_unlocked_level_lists(_current_level_as_complete: bool = false, only
 			lists.append(level_list_info)
 	return lists
 
-func get_all_visible_bundled_level_lists(current_level_as_complete: bool = false) -> Array[Dictionary]:
+func get_all_visible_bundled_level_lists(current_level_as_complete: bool = false, exclude_current_hidden: bool = false) -> Array[Dictionary]:
 	var lists: Array[Dictionary] = []
 	var all_list_infos: = get_all_level_list_infos(true)
 	var first_list: bool = true
+	var hidden_current_list_info: Dictionary = {}
 	for list_info in all_list_infos:
 		if list_info.get("always_hidden", false) and not first_list:
+			if current_level_list and list_info.get("name", "") == current_level_list:
+				hidden_current_list_info = list_info
 			continue
 		first_list = false
 		var hide_when_locked: bool = list_info.get("hide_when_locked", false)
@@ -2862,6 +2911,10 @@ func get_all_visible_bundled_level_lists(current_level_as_complete: bool = false
 		if not get_game_setting("show_empty_level_lists", false) and included_levels.size() == 0:
 			continue
 		lists.append(list_info)
+	
+	if not is_intermission_mode and not exclude_current_hidden and hidden_current_list_info:
+		if loaded_level_name and loaded_level_name in get_levels_in_level_list(current_level_list):
+			lists.push_front(hidden_current_list_info)
 	
 	return lists
 
@@ -2949,6 +3002,11 @@ func _level_code(level_list_name: String, level_name: String) -> String:
 		return ""
 	return level_list_name + "??" + level_name
 
+func is_a_level_code(level_code: String) -> bool:
+	if not level_code or not level_code.contains("??"):
+		return false
+	return true
+
 func is_level_code_valid(level_code: String) -> bool:
 	if not level_code or not level_code.contains("??"):
 		return false
@@ -2956,10 +3014,11 @@ func is_level_code_valid(level_code: String) -> bool:
 	if not level_name or not FilesManager.level_exists(get_identified_game_name(), level_name):
 		return false
 	var level_list_name: = _level_list_from_code(level_code)
-	if not level_list_exists(level_list_name):
-		return false
-	if not level_name in get_levels_in_level_list(level_list_name):
-		return false
+	if level_list_name: 
+		if not level_list_exists(level_list_name):
+			return false
+		if not level_name in get_levels_in_level_list(level_list_name):
+			return false
 	return true
 
 func _level_list_from_code(level_code: String) -> String:
@@ -2971,6 +3030,13 @@ func _level_name_from_code(level_code: String) -> String:
 	if not level_code:
 		return ""
 	return level_code.split("??")[1]
+
+func split_level_code(level_code: String, validate_code: bool = false) -> Array[String]:
+	if not is_a_level_code(level_code):
+		return ["", ""]
+	if validate_code and not is_level_code_valid(level_code):
+		return ["", ""]
+	return [_level_list_from_code(level_code), _level_name_from_code(level_code)]
 
 func goto_level_code(level_code: String, as_queued_load: bool = false) -> void:
 	goto_level_in_level_list(_level_list_from_code(level_code), _level_name_from_code(level_code), as_queued_load)
@@ -3035,7 +3101,7 @@ func _complete_level(level_list_name: String, level_name: String) -> Dictionary:
 	var intermissions: Array[String] = []
 	
 	
-	var was_every_level_complete: bool = false
+	var was_every_level_complete: bool = has_intermission_flag(INTERM_FULL_COMPLETE_FLAG)
 
 	var level_list_was_complete: bool = true
 	var list_was_all_complete: bool = true
@@ -3051,20 +3117,22 @@ func _complete_level(level_list_name: String, level_name: String) -> Dictionary:
 		set_game_save_data("completed_levels", completed_levels)
 		intermissions.append_array(get_intermissions_for_level_code_event(level_code, IntermissionEvents.LEVEL_COMPLETE))
 
-		recheck_level_list_unlocks()
-		if not level_list_was_complete and is_level_list_complete(level_list_name):
-			intermissions.append_array(get_intermissions_for_list_event(level_list_name, IntermissionEvents.LEVEL_LIST_COMPLETE))
-		
-		if not list_was_all_complete and is_level_list_fully_completed(level_list_name):
-			intermissions.append_array(get_intermissions_for_list_event(level_list_name, IntermissionEvents.LEVEL_LIST_ALL_COMPLETE))
+	recheck_level_list_unlocks()
+	if not level_list_was_complete and is_level_list_complete(level_list_name):
+		intermissions.append_array(get_intermissions_for_list_event(level_list_name, IntermissionEvents.LEVEL_LIST_COMPLETE))
+	
+	if not list_was_all_complete and is_level_list_fully_completed(level_list_name):
+		intermissions.append_array(get_intermissions_for_list_event(level_list_name, IntermissionEvents.LEVEL_LIST_ALL_COMPLETE))
+	
+	if not was_game_complete:
+		var game_is_now_complete: bool = check_for_game_completion()
+		if game_is_now_complete:
+			intermissions.append_array(get_intermissions_for_game_event(IntermissionEvents.GAME_COMPLETE))
 			
-			if not was_every_level_complete and is_every_level_completed():
-				intermissions.append_array(get_intermissions_for_game_event(IntermissionEvents.GAME_ALL_COMPLETE))
-		
-		if not was_game_complete:
-			var game_is_now_complete: bool = check_for_game_completion()
-			if game_is_now_complete:
-				intermissions.append_array(get_intermissions_for_game_event(IntermissionEvents.GAME_COMPLETE))
+	if not was_every_level_complete and is_every_level_completed():
+		# dont require viewing the intermissions for this flag, just set it
+		set_intermission_flag(INTERM_FULL_COMPLETE_FLAG)
+		intermissions.append_array(get_intermissions_for_game_event(IntermissionEvents.GAME_ALL_COMPLETE))
 
 	ret["intermissions"] = intermissions
 	return ret
@@ -3145,10 +3213,15 @@ func advance_level(with_delay: float = 0, advance_to_code: String = "", extra_in
 	transition_intermissions.append_array(result.get("intermissions", []))
 
 	var advance_to_special: String = ""
+	
 	if not advance_to_code:
 		var adv_to_info: Array = get_advance_to_code_or_special()
 		advance_to_special = adv_to_info[0]
 		advance_to_code = adv_to_info[1]
+
+	if result.get("game_was_completed", false):
+		if get_game_setting("game_end_replace_transition", false):
+			advance_to_special = "end"
 
 	if not advance_to_special and not advance_to_code:
 		show_overlay_intermissions(transition_intermissions)
@@ -3157,7 +3230,7 @@ func advance_level(with_delay: float = 0, advance_to_code: String = "", extra_in
 
 func _advance_to_special_or_code_with_intermissions(with_delay: float = 0, to_special: String = "", to_code: String = "", interm_q: Array[String] = []) -> void:
 	if to_special == "end":
-		go_to_game_end(with_delay, interm_q)
+		_go_to_game_end(with_delay, interm_q)
 	elif to_special == "select":
 		_go_to_level_select(with_delay, interm_q)
 	elif to_special:
@@ -3283,12 +3356,19 @@ func _go_to_level_select_for_real() -> void:
 	else:
 		push_warning("Level select root not found")
 
-# TODO TODO
-func go_to_game_end(with_delay: float = 0, interm_q: Array[String] = []) -> void:
-	if with_delay <= 0:
-		show_credits()
+func get_after_game_level_code() -> String:
+	var post_end_level_code: String = get_game_setting("game_end_transition_level_code", "")
+	if not is_level_code_valid_and_bundled(post_end_level_code):
+		return ""
+	return post_end_level_code
+
+func _go_to_game_end(with_delay: float = 0, interm_q: Array[String] = []) -> void:
+	var post_end_level_code: String = get_after_game_level_code()
+	if not post_end_level_code:
+		_go_to_level_select(with_delay, interm_q)
+		return
 	else:
-		queue_delayed_other_load(with_delay, show_credits)
+		_move_to_code_with_delay(post_end_level_code, with_delay, true, interm_q)
 
 func start_playing(in_level_edit_mode: bool = false) -> void:
 	if cur_scene == "Play":
@@ -3296,7 +3376,7 @@ func start_playing(in_level_edit_mode: bool = false) -> void:
 	is_in_level_edit_mode = in_level_edit_mode
 	change_scene("Play")
 
-func play_first_level() -> void:
+func play_first_level(extra_intermissions: Array[String] = []) -> void:
 	if is_in_level_edit_mode:
 		push_warning("Trying to call play_first_level in level edit mode")
 		return
@@ -3307,7 +3387,7 @@ func play_first_level() -> void:
 		return
 	var level_code: String = _level_code(first_level_and_list[0], first_level_and_list[1])
 	current_level_list = ""
-	goto_level_with_starting_intermissions(level_code)
+	goto_level_with_starting_intermissions(level_code, extra_intermissions)
 	#goto_level_in_level_list(first_level_and_list[0], first_level_and_list[1])
 
 
@@ -3336,12 +3416,19 @@ func get_game_save_current_level_list() -> String:
 func play_current_save_level() -> void:
 	if is_in_level_edit_mode:
 		return
+	
+	var intermissions: Array[String] = []
+	# If the game was already completed but the ending sequence hasn't been viewed, show it when starting from the menu
+	if is_game_completed() and not has_viewed_game_completion():
+		intermissions.append_array(get_intermissions_for_game_event(IntermissionEvents.GAME_COMPLETE))
+
 	var cur_save_level: String = get_game_save_current_level_if_exists()
 	if not cur_save_level:
-		play_first_level()
+		play_first_level(intermissions)
 		return
+
 	var level_list_name: = get_game_save_current_level_list()
-	move_to_level(level_list_name, cur_save_level)
+	move_to_level(level_list_name, cur_save_level, 0, intermissions)
 
 
 func get_new_player_profile(with_id: String = "") -> PlayerProfile:
@@ -4364,6 +4451,11 @@ func should_show_list_completion(list_name: String) -> bool:
 	var list_info: = _get_level_list(list_name)
 	if not list_info:
 		return false
+	var completion_mode: String = list_info.get("completion_mode", "")
+	if completion_mode == LevelListSettings.COMPLETION_MODE_UNCOMPLETABLE:
+		return false
+	if list_info.get("always_hidden", false) and not list_info.get("always_hidden_levels_completable", false):
+		return false
 	var show_completion_style: = get_list_completion_style(list_name)
 	return show_completion_style != LevelListSettings.SHOWCOMP_STYLE_HIDE
 
@@ -4448,6 +4540,8 @@ func _get_all_intermission_ids_from(intermissions: Array) -> Array[String]:
 	return all_intermission_ids
 
 func has_tagged_intermission_id(intermission_id: String, for_custom_list: String = "") -> bool:
+	if is_intermission_id_reserved(intermission_id):
+		return true
 	if not for_custom_list:
 		for_custom_list = current_level_list
 
@@ -4458,6 +4552,9 @@ func has_tagged_intermission_id(intermission_id: String, for_custom_list: String
 	return has_intermission_id(intermission_id)
 
 func has_intermission_id(intermission_id: String, from_custom_list: String = "") -> bool:
+	if is_intermission_id_reserved(intermission_id):
+		return true
+
 	if not intermission_id:
 		return false
 	if not from_custom_list:
@@ -4465,13 +4562,15 @@ func has_intermission_id(intermission_id: String, from_custom_list: String = "")
 	return _has_custom_intermission_id(intermission_id, from_custom_list)
 
 func _has_bundled_intermission_id(intermission_id: String) -> bool:
+	if is_intermission_id_reserved(intermission_id):
+		return true
 	return intermission_id in get_all_intermission_ids()
 
 func _has_custom_intermission_id(intermission_id: String, from_custom_list: String) -> bool:
 	return intermission_id in get_all_intermission_ids_from_custom_list(from_custom_list)
 
 func update_intermission_info(update_intermission_id: String, intermission_info: Dictionary, in_custom_list: String = "") -> void:
-	if not update_intermission_id:
+	if not update_intermission_id or is_intermission_id_reserved(update_intermission_id):
 		return
 	if current_game_is_release_locked and not in_custom_list:
 		push_warning("Trying to edit bundled intermission data in release locked game")
@@ -4512,6 +4611,15 @@ func _update_bundled_intermission_info(update_intermission_id: String, intermiss
 		push_error("Failed to save intermission info for id: %s" % update_intermission_id)
 
 func get_intermission_info(intermission_id: String, from_custom_list: String = "") -> Dictionary:
+	if not from_custom_list and is_intermission_id_reserved(intermission_id):
+		if not RESERVED_INTERMISSIONS.has(intermission_id):
+			push_warning("Reserved intermission id %s not found in RESERVED_INTERMISSIONS" % intermission_id)
+			var default_info: = {
+				"id": intermission_id,
+				"type": "flag",
+			}
+			return default_info
+		return RESERVED_INTERMISSIONS[intermission_id]
 	if not from_custom_list:
 		return _get_bundled_intermission_info(intermission_id)
 	if not from_custom_list in get_list_of_non_bundled_level_lists():
@@ -4535,6 +4643,10 @@ func get_tagged_intermission_info(intermission_id: String, context_list_name: St
 	return get_intermission_info(intermission_id)
 
 func _get_bundled_intermission_info(intermission_id: String) -> Dictionary:
+	# this method shouldn't be called except from get_intermission_info but just in case
+	if is_intermission_id_reserved(intermission_id):
+		return get_intermission_info(intermission_id)
+
 	if intermission_id == DEFAULT_INTERMISSION_CREDITS:
 		if not game_definition.get("intermissions", []).size() > 0:
 			return DEFAULT_CREDITS.duplicate_deep()
@@ -4662,6 +4774,8 @@ func move_intermission_between_custom_lists(from_custom_list: String, to_custom_
 func move_intermission_to_custom_list(to_custom_list: String, intermission_id: String) -> String:
 	if not intermission_id or not to_custom_list in get_list_of_non_bundled_level_lists():
 		return ""
+	if is_intermission_id_reserved(intermission_id):
+		return ""
 	if not has_intermission_id(intermission_id):
 		return ""
 
@@ -4743,17 +4857,17 @@ func get_current_list_fail_state_intermission_info() -> Dictionary:
 		return def_info
 
 	var fail_state_intermission_ids: Array[String] = get_intermissions_for_list_event(current_level_list, IntermissionEvents.CUSTOM_FAIL_STATE)
-	var first_valid_id: String = get_first_non_sequence_intermission_from_list(fail_state_intermission_ids)
-	if not first_valid_id:
+	var first_viewable: String = get_first_viewable_intermission_from_list(fail_state_intermission_ids)
+	if not first_viewable:
 		return def_info
-	return get_tagged_intermission_info(first_valid_id)
+	return get_tagged_intermission_info(first_viewable)
 
 func get_default_fail_state_intermission_info() -> Dictionary:
 	var fail_state_intermission_ids: Array[String] = get_intermissions_for_game_event(IntermissionEvents.DEFAULT_FAIL_STATE)
-	var first_valid_id: String = get_first_non_sequence_intermission_from_list(fail_state_intermission_ids)
-	if not first_valid_id:
+	var first_viewable_id: String = get_first_viewable_intermission_from_list(fail_state_intermission_ids)
+	if not first_viewable_id:
 		return {}
-	return get_tagged_intermission_info(first_valid_id)
+	return get_tagged_intermission_info(first_viewable_id)
 
 func _get_intermission_info_if_not_sequence(tagged_intermission_id: String, context_list_name: String = "") -> Dictionary:
 	var info: Dictionary = get_tagged_intermission_info(tagged_intermission_id, context_list_name)
@@ -4784,34 +4898,49 @@ func get_credtis_intermission_info() -> Dictionary:
 func get_credits_intermission_first_id() -> String:
 	if not has_intermission_id(DEFAULT_INTERMISSION_CREDITS):
 		return DEFAULT_INTERMISSION_CREDITS
-	return _get_first_non_sequence_intermission_id(DEFAULT_INTERMISSION_CREDITS)
+	return _get_first_viewable_intermission_id(DEFAULT_INTERMISSION_CREDITS)
 
 
-func get_first_non_sequence_intermission_from_list(intermission_ids: Array, context_list_name: String = "") -> String:
-	if not intermission_ids.size() > 0 or typeof(intermission_ids[0]) != TYPE_STRING:
-		return ""
-	var first_id: String = _get_first_non_sequence_intermission_id(intermission_ids[0], context_list_name)
-	if not first_id:
-		return ""
-	return first_id
+func get_first_viewable_intermission_from_list(intermission_ids: Array, context_list_name: String = "") -> String:
+	for intermission_id in intermission_ids:
+		if typeof(intermission_ids[0]) != TYPE_STRING:
+			push_error("Non-string intermission id: %s" % [intermission_id])
+		if not is_intermission_id_viewable(intermission_id, context_list_name):
+			continue
+		var first_viewable_id: String = _get_first_viewable_intermission_id(intermission_id, context_list_name)
+		if first_viewable_id:
+			return first_viewable_id
+	return ""
 
-func _get_first_non_sequence_intermission_id(from_id: String, context_list_name: String = "", search_depth: int = 0) -> String:
+func _get_first_viewable_intermission_id(from_id: String, context_list_name: String = "", search_depth: int = 0) -> String:
 	if search_depth > 50:
 		return ""
 	if not has_tagged_intermission_id(from_id, context_list_name):
 		return ""
 
 	var intermission_info: = get_tagged_intermission_info(from_id, context_list_name)
-	if not intermission_info:
+	if not intermission_info or intermission_info.get("type", "") == "flag":
 		return ""
 	var intermission_type: String = intermission_info.get("type", "")
 	if intermission_type != "sequence":
 		return from_id
 	else:
 		var sequence_ids: Array[String] = intermission_info.get("sequence_ids", [])
-		if not sequence_ids.size() > 0:
-			return ""
-		return _get_first_non_sequence_intermission_id(sequence_ids[0], context_list_name, search_depth + 1)
+		for index in sequence_ids.size():
+			if not is_intermission_id_viewable(sequence_ids[index], context_list_name):
+				continue
+			else:
+				return _get_first_viewable_intermission_id(sequence_ids[index], context_list_name, search_depth + 1)
+		return ""
+
+func is_intermission_info_viewable(intermission_info: Dictionary) -> bool:
+	return intermission_info.get("type", "") != "flag"
+
+func is_intermission_id_viewable(intermission_id: String, context_list_name: String = "") -> bool:
+	var intermission_info: = get_tagged_intermission_info(intermission_id, context_list_name)
+	if not intermission_info:
+		return false
+	return is_intermission_info_viewable(intermission_info)
 
 
 # external API for showing overlay intermission, if mupltiple needed make a sequence intermission
@@ -4941,17 +5070,21 @@ func _now_goto_level_select_with_intermissions(intermission_id_list: Array[Strin
 	
 	show_next_intermission()
 
-func goto_level_with_starting_intermissions(level_code: String) -> void:
-	var starting_intermissions: Array[String] = get_intermissions_for_game_start(level_code)
-	_now_goto_level_with_intermissions(level_code, starting_intermissions)
+func goto_level_with_starting_intermissions(level_code: String, with_intermissions: Array[String] = []) -> void:
+	with_intermissions.append_array(get_intermissions_for_game_start(level_code))
+	_now_goto_level_with_intermissions(level_code, with_intermissions)
 
 
 func get_intermissions_for_game_start(to_level_code: String) -> Array[String]:
 	var intermissions: Array[String] = []
-	intermissions.append_array(get_intermissions_for_game_event(IntermissionEvents.NEW_GAME))
+
+	if not has_intermission_flag(INTERM_GAME_STARTED_FLAG):
+		intermissions.append_array(get_intermissions_for_game_event(IntermissionEvents.NEW_GAME))
+
 	var level_list_name: String = _level_list_from_code(to_level_code)
 	if level_list_name and level_list_exists(level_list_name):
-		intermissions.append_array(get_intermissions_for_list_start(level_list_name))
+		intermissions.append_array(get_intermissions_for_list_event(level_list_name, IntermissionEvents.LEVEL_LIST_START))
+
 	intermissions.append_array(get_intermissions_for_level_code_event(to_level_code, IntermissionEvents.LEVEL_START))
 	return intermissions
 
@@ -4986,10 +5119,14 @@ func get_intermissions_for_game_event(event: IntermissionEvents) -> Array[String
 	var intermissions: Array[String] = []
 	var game_intermission_assignments: Dictionary = get_game_setting("default_intermissions", {})
 	intermissions.append_array(game_intermission_assignments.get(event_key, []))
-	return intermissions
 
-func get_intermissions_for_list_start(level_list_name: String) -> Array[String]:
-	return get_intermissions_for_list_event(level_list_name, IntermissionEvents.LEVEL_LIST_START)
+	# Add builtin flags for certain events
+	if event == IntermissionEvents.GAME_COMPLETE:
+		intermissions.append(INTERM_GAME_COMLETE_FLAG)
+	elif event == IntermissionEvents.NEW_GAME:
+		intermissions.append(INTERM_GAME_STARTED_FLAG)
+
+	return intermissions
 
 
 func _get_intermission_root() -> Node:
@@ -5012,7 +5149,10 @@ func show_single_overlay_intermission(intermission_info: Dictionary, advancable:
 	set_overlay_intermission_state()
 	intermission_state["advancable"] = advancable
 
-	return show_intermission(intermission_info, intermission_id)
+	if not show_intermission(intermission_info, intermission_id):
+		clear_intermission_state()
+		return false
+	return true
 
 # Also saves viewed intermission ids
 func show_intermission(intermission_info: Dictionary, tagged_intermission_id: String = "") -> bool:
@@ -5023,22 +5163,26 @@ func show_intermission(intermission_info: Dictionary, tagged_intermission_id: St
 			return false
 
 	intermission_state["showing_id"] = tagged_intermission_id
+	
+	save_intermission_id_viewed(tagged_intermission_id)
+	var intermission_type: String = intermission_info.get("type", "")
+	if intermission_type == "flag":
+		return false
 
 	var intermission_root: Node = _get_intermission_root()
 	if not intermission_root:
 		push_error("No intermission root found")
 		return false
-	
-	save_intermission_id_viewed(tagged_intermission_id)
+
 	hide_intermissions()
 	
 	intermission_advancable_timer.start(intermission_advancable_delay)
 	
-	if intermission_info.get("type", "") == "credits":
+	if intermission_type == "credits":
 		if cur_scene == "Play":
 			show_credits()
 		return true
-	elif intermission_info.get("type", "") == "sequence":
+	elif intermission_type == "sequence":
 		push_error("sequence info passed to show_intermission, should have been queued and called with show_next_intermission")
 		return false
 
@@ -5062,15 +5206,21 @@ func save_intermission_id_viewed(intermission_id: String) -> void:
 func has_saved_intermission_id_viewed(intermission_id: String) -> bool:
 	if not intermission_id.strip_edges() or intermission_id.strip_edges() == ":":
 		return false
+	var check_id: String = intermission_id
 	if intermission_id.begins_with(":"):
 		var inner_id: String = intermission_id.trim_prefix(":")
 		if not has_intermission_id(inner_id, current_level_list):
 			return false
 		else:
-			var combined_id: String = _make_combined_intermission_id(inner_id, current_level_list)
-			return has_saved_intermission_id_viewed(combined_id)
+			check_id = _make_combined_intermission_id(inner_id, current_level_list)
 	var viewed_intermissions: Array = get_game_save_data("viewed_intermissions", [])
-	return intermission_id in viewed_intermissions
+	return check_id in viewed_intermissions
+
+func has_intermission_flag(flag_id: String) -> bool:
+	return has_saved_intermission_id_viewed(flag_id)
+
+func set_intermission_flag(flag_id: String) -> void:
+	save_intermission_id_viewed(flag_id)
 
 func _make_combined_intermission_id(intermission_id: String, custom_list_name: String) -> String:
 	return ":" + custom_list_name + ":" + intermission_id
@@ -5144,10 +5294,15 @@ func show_next_intermission(depth: int = 0) -> void:
 	if queue.size() == 0:
 		var to_special: String = intermission_state.get("to_special", "")
 		var to_level_code: String = intermission_state.get("to_level_code", "")
+		var was_intermission_mode: bool = is_intermission_mode
 		clear_intermission_state()
 		close_all_intermissions()
 		if not to_level_code and not to_special:
+			if was_intermission_mode:
+				push_warning("Intermission queue empty in intermission mode but no destination")
+				open_pause_menu()
 			return
+
 		if to_special:
 			if to_special == "select":
 				_go_to_level_select_for_real()
@@ -5159,7 +5314,9 @@ func show_next_intermission(depth: int = 0) -> void:
 	var next: String = queue.pop_front()
 	
 	var intermission_info: Dictionary = get_tagged_intermission_info(next)
-	if intermission_info.get("type", "") == "sequence":
+	var intermission_type: String = intermission_info.get("type", "")
+		
+	if intermission_type == "sequence":
 		var new_queue: Array[String] = []
 		var checked_sequence_ids: Array[String] = []
 		for id in intermission_info.get("sequence_ids", []):
@@ -5179,7 +5336,7 @@ func show_next_intermission(depth: int = 0) -> void:
 		print_debug("no intermission info found for: ", next)
 		show_next_intermission()
 	elif not show_intermission(intermission_info, next):
-		# intermission not shown, could have been a show once that was already viewed
+		# intermission not shown, could have been a show once that was already viewed, or a flag
 		show_next_intermission()
 
 func skip_all_queued_intermissions() -> void:
@@ -5238,22 +5395,43 @@ func is_game_completed() -> bool:
 func _save_game_completion() -> void:
 	set_game_save_data("game_completed", true)
 
-func get_game_completion_mode_and_key() -> Array:
-	if has_game_setting("game_completion_mode"):
-		return [
-			get_game_setting("game_completion_mode", COMPLETION__ALL_LISTS),
-			get_game_setting("specific_completion_key", "")
-		]
+func has_viewed_game_completion() -> bool:
+	return not has_intermission_flag(INTERM_GAME_COMLETE_FLAG)
 
-	var all_bundled_lists: = get_list_of_level_lists(true)
-	if "Levels" in all_bundled_lists:
-		return [
-			COMPLETION__SPECIFIC_LIST,
-			"Levels"
-		]
+func get_game_completion_mode_and_key() -> Array:
+	var game_completion_mode: String = get_game_setting("game_completion_mode", "")
+	if not game_completion_mode or game_completion_mode not in ALL_COMPLETION_MODES:
+		game_completion_mode = COMPLETION__ALL_LISTS
+	var specific_key: String = get_game_setting("specific_completion_key", "")
+
+	if game_completion_mode == COMPLETION__SPECIFIC_LIST:
+		if not specific_key:
+			var all_bundled_lists: = get_list_of_level_lists(true)
+			if "Levels" in all_bundled_lists:
+				return [
+					COMPLETION__SPECIFIC_LIST,
+					"Levels"
+				]
+			elif all_bundled_lists.size() > 0:
+				return [
+					COMPLETION__SPECIFIC_LIST,
+					all_bundled_lists[-1]
+				]
+	elif game_completion_mode == COMPLETION__SPECIFIC_LEVEL_CODE or game_completion_mode == COMPLETION__SPECIFIC_LEVEL_NAME:
+		if not specific_key:
+			var all_levels: Array[String] = get_list_of_all_bundled_levels()
+			if all_levels.size() > 0:
+				var last_level: String = all_levels[-1]
+				if game_completion_mode == COMPLETION__SPECIFIC_LEVEL_CODE:
+					last_level = _level_code(get_list_containing_level(last_level), last_level)
+				return [
+					game_completion_mode,
+					last_level
+				]
+
 	return [
-		COMPLETION__ALL_LISTS,
-		""
+		game_completion_mode,
+		specific_key
 	]
 
 func get_game_completion_mode() -> String:
@@ -5275,18 +5453,42 @@ func check_for_game_completion() -> bool:
 	if game_completion_mode == COMPLETION__ALL_LISTS:
 		if is_every_bundled_completable_list_complete():
 			is_completed = true
+	elif game_completion_mode == COMPLETION__ALL_LEVELS:
+		if is_every_level_completed():
+			is_completed = true
 	elif game_completion_mode == COMPLETION__SPECIFIC_LIST:
-		if is_level_list_complete(specific_key):
+		if not is_level_list_bundled(specific_key):
+			# invalid list, default to completed
+			is_completed = is_every_level_completed()
+		elif is_level_list_complete(specific_key):
 			is_completed = true
 	elif game_completion_mode == COMPLETION__SPECIFIC_LEVEL_CODE or game_completion_mode == COMPLETION__SPECIFIC_LEVEL_NAME:
 		if game_completion_mode == COMPLETION__SPECIFIC_LEVEL_NAME or get_game_setting("levels_complete_in_any_list", true):
-			if is_level_completed_in_any_list(specific_key):
+			var level_name: String = specific_key
+			if game_completion_mode == COMPLETION__SPECIFIC_LEVEL_CODE:
+				level_name = ""
+				if is_level_code_valid(specific_key):
+					level_name = _level_name_from_code(specific_key)
+			if not is_level_bundled(level_name):
+				# invalid level, default to all levels complete
+				is_completed = is_every_level_completed()
+			elif is_level_completed_in_any_list(specific_key):
 				is_completed = true
-		elif is_level_completed_in_list(_level_list_from_code(specific_key), _level_name_from_code(specific_key)):
-			is_completed = true
+		else:
+			if not is_level_code_valid_and_bundled(specific_key):
+				# invalid level, default to all levels complete
+				is_completed = is_every_level_completed()
+			elif is_level_completed_in_list(_level_list_from_code(specific_key), _level_name_from_code(specific_key)):
+				is_completed = true
 
 	if is_completed:
 		_save_game_completion()
 		return true
 	else:
 		return false
+
+func is_intermission_id_reserved(intermission_id: String) -> bool:
+	return intermission_id in RESERVED_INTERMISSION_IDS
+
+func get_all_reserved_intermission_flags() -> Array[String]:
+	return RESERVED_INTERMISSION_IDS.duplicate()

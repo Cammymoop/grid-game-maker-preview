@@ -42,6 +42,12 @@ const ScalarValueInput = preload("res://src/GameEditor/ConditionalEditor/scalar_
 
 @export var when_completed_selector: OptionButton
 
+@export var hidden_all_count_for_completion_container: Control
+@export var hidden_all_count_for_completion_toggle: CheckButton
+
+@export var show_name_as_hidden_container: Control
+@export var show_name_as_hidden_toggle: CheckButton
+
 var editing_list_name: String = ""
 var total_levels: int = 0
 
@@ -130,6 +136,9 @@ func _ready() -> void:
     show_locked_titles_toggle.toggled.connect(on_show_locked_titles_toggled)
     
     show_completion_selector.item_selected.connect(on_show_completion_selected)
+    
+    hidden_all_count_for_completion_toggle.toggled.connect(on_hidden_all_count_for_completion_toggled)
+    show_name_as_hidden_toggle.toggled.connect(on_show_name_as_hidden_toggled)
     
     when_completed_selector.clear()
     for when_completed_id in WhenCompletedOptions.size():
@@ -230,6 +239,12 @@ func refresh_ui() -> void:
 
     if is_custom_level_list:
         is_always_hidden = false
+    
+    hidden_all_count_for_completion_container.visible = is_always_hidden
+    show_name_as_hidden_container.visible = is_always_hidden
+    if is_always_hidden:
+        hidden_all_count_for_completion_toggle.set_pressed_no_signal(list_info.get("always_hidden_levels_completable", false))
+        show_name_as_hidden_toggle.set_pressed_no_signal(list_info.get("always_hidden_use_name_when_current", false))
     
     not_always_hidden_container.visible = not is_always_hidden
     custom_next_list_container.visible = not is_always_hidden and not is_custom_level_list
@@ -365,6 +380,12 @@ func on_default_is_unlocked_toggled(toggled_on: bool) -> void:
 
 func on_always_hidden_toggled(toggled_on: bool) -> void:
     GameManager.set_level_list_data(editing_list_name, "always_hidden", toggled_on)
+    if not toggled_on:
+        GameManager.remove_level_list_data(editing_list_name, "always_hidden_levels_completable")
+        GameManager.remove_level_list_data(editing_list_name, "always_hidden_use_name_when_current")
+    else:
+        GameManager.set_level_list_data(editing_list_name, "always_hidden_levels_completable", false)
+        GameManager.set_level_list_data(editing_list_name, "always_hidden_use_name_when_current", false)
     refresh_ui()
     list_settings_edited.emit()
 
@@ -393,4 +414,12 @@ func on_custom_next_list_selected(idx: int) -> void:
 
 func on_show_completion_selected(idx: int) -> void:
     GameManager.set_level_list_data(editing_list_name, "show_completion_style", ShowCompletionOptions[idx])
+    list_settings_edited.emit()
+
+func on_hidden_all_count_for_completion_toggled(toggled_on: bool) -> void:
+    GameManager.set_level_list_data(editing_list_name, "always_hidden_levels_completable", toggled_on)
+    list_settings_edited.emit()
+
+func on_show_name_as_hidden_toggled(toggled_on: bool) -> void:
+    GameManager.set_level_list_data(editing_list_name, "always_hidden_use_name_when_current", toggled_on)
     list_settings_edited.emit()

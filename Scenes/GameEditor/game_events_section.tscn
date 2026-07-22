@@ -1,0 +1,137 @@
+[gd_scene format=3 uid="uid://cgauww24s1ulm"]
+
+[ext_resource type="Theme" uid="uid://bs8wn8kmwonyc" path="res://src/UI/game_definition_editor_sections_theme.tres" id="1_a4dd1"]
+[ext_resource type="Script" uid="uid://c5lkcj675uoc" path="res://Scenes/GameEditor/game_events_section.gd" id="1_ugw3o"]
+[ext_resource type="PackedScene" uid="uid://c3qvpvu2m643d" path="res://Scenes/GameEditor/list_and_level_input.tscn" id="3_8f0of"]
+[ext_resource type="PackedScene" uid="uid://cvcvtgiapcwew" path="res://Scenes/GameEditor/ConditionalEditor/level_list_name_input.tscn" id="4_dvar1"]
+
+[node name="GameEventsSection" type="FoldableContainer" unique_id=1914446224 node_paths=PackedStringArray("game_end_has_transition_toggle", "game_end_transition_option", "game_end_code_input", "game_completion_mode_selector", "specific_completion_level_option", "specific_completion_level_code_input", "specific_completion_list_option", "specific_completion_list_input")]
+offset_right = 799.0
+offset_bottom = 51.0
+theme = ExtResource("1_a4dd1")
+title = "Game Events:"
+title_alignment = 1
+script = ExtResource("1_ugw3o")
+game_end_has_transition_toggle = NodePath("MarginContainer/HFlowContainer/VBoxContainer/EndHasTransitionToggle")
+game_end_transition_option = NodePath("MarginContainer/HFlowContainer/VBoxContainer/PostEndLevelOption")
+game_end_code_input = NodePath("MarginContainer/HFlowContainer/VBoxContainer/PostEndLevelOption/PanelContainer/ListAndLevelInput")
+game_completion_mode_selector = NodePath("MarginContainer/HFlowContainer/VBoxContainer2/HBoxContainer/CompletionModeSelect")
+specific_completion_level_option = NodePath("MarginContainer/HFlowContainer/VBoxContainer2/SpecificCompletionLevelOption")
+specific_completion_level_code_input = NodePath("MarginContainer/HFlowContainer/VBoxContainer2/SpecificCompletionLevelOption/PanelContainer/SpecificCompletionLevel")
+specific_completion_list_option = NodePath("MarginContainer/HFlowContainer/VBoxContainer2/SpecificCompletionListOption")
+specific_completion_list_input = NodePath("MarginContainer/HFlowContainer/VBoxContainer2/SpecificCompletionListOption/PanelContainer/SpecificCompletionList")
+
+[node name="MarginContainer" type="MarginContainer" parent="." unique_id=518200642]
+layout_mode = 2
+theme_override_constants/margin_bottom = 4
+
+[node name="HFlowContainer" type="HFlowContainer" parent="MarginContainer" unique_id=1659375352]
+layout_mode = 2
+theme_override_constants/h_separation = 12
+alignment = 1
+
+[node name="VBoxContainer2" type="VBoxContainer" parent="MarginContainer/HFlowContainer" unique_id=2078649545]
+layout_mode = 2
+alignment = 1
+
+[node name="Label2" type="Label" parent="MarginContainer/HFlowContainer/VBoxContainer2" unique_id=315815585]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "Game Completion Criteria:"
+horizontal_alignment = 1
+
+[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/HFlowContainer/VBoxContainer2" unique_id=657680388]
+layout_mode = 2
+alignment = 1
+
+[node name="Label" type="Label" parent="MarginContainer/HFlowContainer/VBoxContainer2/HBoxContainer" unique_id=137983363]
+layout_mode = 2
+text = "Mode:"
+
+[node name="CompletionModeSelect" type="OptionButton" parent="MarginContainer/HFlowContainer/VBoxContainer2/HBoxContainer" unique_id=847958742]
+layout_mode = 2
+alignment = 1
+selected = 0
+item_count = 1
+popup/item_0/text = "NONE"
+popup/item_0/id = 0
+
+[node name="SpecificCompletionLevelOption" type="HBoxContainer" parent="MarginContainer/HFlowContainer/VBoxContainer2" unique_id=111942797]
+visible = false
+layout_mode = 2
+
+[node name="PanelContainer" type="PanelContainer" parent="MarginContainer/HFlowContainer/VBoxContainer2/SpecificCompletionLevelOption" unique_id=1756313381]
+layout_mode = 2
+
+[node name="SpecificCompletionLevel" parent="MarginContainer/HFlowContainer/VBoxContainer2/SpecificCompletionLevelOption/PanelContainer" unique_id=1528544791 instance=ExtResource("3_8f0of")]
+layout_mode = 2
+
+[node name="SpecificCompletionListOption" type="HBoxContainer" parent="MarginContainer/HFlowContainer/VBoxContainer2" unique_id=1142079132]
+visible = false
+layout_mode = 2
+alignment = 1
+
+[node name="PanelContainer" type="PanelContainer" parent="MarginContainer/HFlowContainer/VBoxContainer2/SpecificCompletionListOption" unique_id=2114372251]
+layout_mode = 2
+
+[node name="SpecificCompletionList" parent="MarginContainer/HFlowContainer/VBoxContainer2/SpecificCompletionListOption/PanelContainer" unique_id=995722546 instance=ExtResource("4_dvar1")]
+layout_mode = 2
+bundled_only = true
+plain_value_only = true
+no_level = true
+
+[node name="SlotSelectorButton" parent="MarginContainer/HFlowContainer/VBoxContainer2/SpecificCompletionListOption/PanelContainer/SpecificCompletionList" index="0" unique_id=1264497244]
+visible = false
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/HFlowContainer" unique_id=1636394669]
+layout_mode = 2
+alignment = 1
+
+[node name="Label" type="Label" parent="MarginContainer/HFlowContainer/VBoxContainer" unique_id=2056805054]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "Game End:"
+horizontal_alignment = 1
+
+[node name="EndHasTransitionToggle" type="CheckButton" parent="MarginContainer/HFlowContainer/VBoxContainer" unique_id=534274778]
+layout_mode = 2
+size_flags_horizontal = 4
+tooltip_text = "When the game is first completed,
+unlock and send the player to a specific level
+after they view the ending sequence"
+text = "Enable Post-End Level"
+alignment = 2
+
+[node name="PostEndLevelOption" type="HBoxContainer" parent="MarginContainer/HFlowContainer/VBoxContainer" unique_id=1676946606]
+visible = false
+layout_mode = 2
+
+[node name="Label" type="Label" parent="MarginContainer/HFlowContainer/VBoxContainer/PostEndLevelOption" unique_id=1034235113]
+layout_mode = 2
+text = "Post-End Level:"
+
+[node name="PanelContainer" type="PanelContainer" parent="MarginContainer/HFlowContainer/VBoxContainer/PostEndLevelOption" unique_id=1344539240]
+layout_mode = 2
+
+[node name="ListAndLevelInput" parent="MarginContainer/HFlowContainer/VBoxContainer/PostEndLevelOption/PanelContainer" unique_id=146880570 instance=ExtResource("3_8f0of")]
+layout_mode = 2
+
+[node name="VBoxContainer3" type="VBoxContainer" parent="MarginContainer/HFlowContainer" unique_id=995995203]
+layout_mode = 2
+alignment = 1
+
+[node name="Label" type="Label" parent="MarginContainer/HFlowContainer/VBoxContainer3" unique_id=44793108]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "Other:"
+horizontal_alignment = 1
+
+[node name="Button" type="Button" parent="MarginContainer/HFlowContainer/VBoxContainer3" unique_id=809589865]
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+theme_override_font_sizes/font_size = 14
+text = "Edit Event Intermissions
+in level editor"
+
+[editable path="MarginContainer/HFlowContainer/VBoxContainer2/SpecificCompletionListOption/PanelContainer/SpecificCompletionList"]
