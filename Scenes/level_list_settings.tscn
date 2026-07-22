@@ -3,7 +3,7 @@
 [ext_resource type="Script" uid="uid://cfrnaqldrr8lr" path="res://Scenes/level_list_settings.gd" id="1_8f1op"]
 [ext_resource type="PackedScene" uid="uid://bleyoj5f36kfy" path="res://Scenes/GameEditor/ConditionalEditor/scalar_value_input.tscn" id="2_xli71"]
 
-[node name="LevelListSettings" type="VBoxContainer" unique_id=631932331 node_paths=PackedStringArray("back_button", "name_input", "total_levels_label", "do_progressive_unlock_toggle", "progressive_unlock_num_container", "progressive_unlock_num_input", "always_hidden_container", "always_hidden_toggle", "not_always_hidden_container", "is_locked_container", "is_locked_toggle", "is_hidden_container", "is_hidden_toggle", "default_is_unlocked_container", "default_is_unlocked_toggle", "show_locked_levels_toggle", "show_locked_titles_container", "show_locked_titles_toggle", "completion_mode_selector", "completion_number_container", "completion_number_input", "show_completion_container", "show_completion_selector", "custom_next_list_container", "custom_next_list_selector", "when_completed_selector", "hidden_all_count_for_completion_container", "hidden_all_count_for_completion_toggle", "show_name_as_hidden_container", "show_name_as_hidden_toggle")]
+[node name="LevelListSettings" type="VBoxContainer" unique_id=631932331 node_paths=PackedStringArray("back_button", "name_input", "total_levels_label", "do_progressive_unlock_toggle", "progressive_unlock_num_container", "progressive_unlock_num_input", "always_hidden_container", "always_hidden_toggle", "not_always_hidden_container", "is_locked_container", "is_locked_toggle", "is_hidden_container", "is_hidden_toggle", "default_is_unlocked_container", "default_is_unlocked_toggle", "show_locked_levels_toggle", "show_locked_titles_container", "show_locked_titles_toggle", "completion_mode_selector", "completion_number_container", "completion_number_input", "show_completion_container", "show_completion_selector", "custom_next_list_container", "custom_next_list_selector", "when_completed_selector", "hidden_all_count_for_completion_container", "hidden_all_count_for_completion_toggle", "show_name_as_hidden_container", "show_name_as_hidden_toggle", "auto_advance_enabled_toggle", "auto_advance_to_next_list_container", "auto_advance_to_next_list_toggle")]
 custom_minimum_size = Vector2(400, 0)
 script = ExtResource("1_8f1op")
 back_button = NodePath("MarginContainer/BackButton")
@@ -36,6 +36,9 @@ hidden_all_count_for_completion_container = NodePath("CountLevelsForCompletionOp
 hidden_all_count_for_completion_toggle = NodePath("CountLevelsForCompletionOption/CountLevelsForCompletionToggle")
 show_name_as_hidden_container = NodePath("ShowNameAsHiddenOption")
 show_name_as_hidden_toggle = NodePath("ShowNameAsHiddenOption/ShowNameAsHiddenToggle")
+auto_advance_enabled_toggle = NodePath("WhenNotAlwaysHidden/AutoAdvanceOption/AutoAdvanceEnabledToggle")
+auto_advance_to_next_list_container = NodePath("WhenNotAlwaysHidden/AutoAdvanceList")
+auto_advance_to_next_list_toggle = NodePath("WhenNotAlwaysHidden/AutoAdvanceList/AutoAdvanceListToggle")
 
 [node name="MarginContainer" type="MarginContainer" parent="." unique_id=1979548354]
 layout_mode = 2
@@ -85,7 +88,7 @@ alignment = 2
 layout_mode = 2
 tooltip_text = "With this option:
 * Never shows name or levels in Level Select, except to show current level.
-* All levels start locked, regardless of list position nothing will auto advance to levels in this list.
+* All levels start locked, regardless of list position nothing will auto advance to levels in this list. Levels in this list have no auto advance target.
 * Levels can still be played and completed if the player is manually sent there."
 toggle_mode = false
 text = "Always Hidden List"
@@ -202,6 +205,28 @@ is_int_type = true
 default_value = 1.0
 min_value = 1.0
 custom_step = true
+
+[node name="HSeparator6" type="HSeparator" parent="WhenNotAlwaysHidden" unique_id=784865118]
+layout_mode = 2
+
+[node name="AutoAdvanceOption" type="HBoxContainer" parent="WhenNotAlwaysHidden" unique_id=1957126683]
+layout_mode = 2
+alignment = 2
+
+[node name="AutoAdvanceEnabledToggle" type="CheckButton" parent="WhenNotAlwaysHidden/AutoAdvanceOption" unique_id=197321012]
+layout_mode = 2
+tooltip_text = "If this is disabled, attempting to advance to the next level will instead go to the level select."
+button_pressed = true
+text = "\"Next Level\" Advance Enabled"
+
+[node name="AutoAdvanceList" type="HBoxContainer" parent="WhenNotAlwaysHidden" unique_id=353748790]
+layout_mode = 2
+alignment = 2
+
+[node name="AutoAdvanceListToggle" type="CheckButton" parent="WhenNotAlwaysHidden/AutoAdvanceList" unique_id=1618868150]
+layout_mode = 2
+button_pressed = true
+text = "\"Next Level\" Continues Into Next List"
 
 [node name="HSeparator2" type="HSeparator" parent="." unique_id=1861232697]
 layout_mode = 2

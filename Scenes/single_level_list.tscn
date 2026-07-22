@@ -5,8 +5,10 @@
 [ext_resource type="FontFile" uid="uid://ctnllh13x3iqi" path="res://assets/font/NotoSans-Bold.ttf" id="2_8vw25"]
 [ext_resource type="Texture2D" uid="uid://60iwvkpxef2x" path="res://assets/img/button_icons/dot_extra_small.png" id="2_c7my1"]
 [ext_resource type="Script" uid="uid://bkf0pmfj7eoac" path="res://Scenes/UI/icon_button.gd" id="2_t418e"]
+[ext_resource type="Texture2D" uid="uid://b46og27r6df3q" path="res://assets/img/button_icons/not_expanded.png" id="2_tucbf"]
 [ext_resource type="Texture2D" uid="uid://b4q7u3xbkyj45" path="res://assets/img/button_icons/gear_small.png" id="3_8vw25"]
-[ext_resource type="Texture2D" uid="uid://c71dfd3j0223d" path="res://assets/img/button_icons/plus_small.png" id="3_c7my1"]
+[ext_resource type="Texture2D" uid="uid://dy3lpxekf0j22" path="res://assets/img/button_icons/expanded.png" id="4_tucbf"]
+[ext_resource type="Texture2D" uid="uid://bicmwyncxdix0" path="res://assets/img/button_icons/check_small.png" id="6_bj4ju"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_8vw25"]
 bg_color = Color(0.65045655, 0.6504565, 0.6504565, 0.09411765)
@@ -18,14 +20,14 @@ expand_margin_left = 5.0
 expand_margin_right = 5.0
 expand_margin_bottom = 2.0
 
-[node name="LevelList" type="VBoxContainer" unique_id=407189420 node_paths=PackedStringArray("list_name_label", "list_completion_label", "level_item_container", "edit_settings_icon_button", "export_list_button", "expand_collapse_texture_button", "levels_section", "remove_list_button")]
-offset_right = 295.0
-offset_bottom = 51.0
+[node name="LevelList" type="VBoxContainer" unique_id=407189420 node_paths=PackedStringArray("list_name_label", "list_completion_label", "level_item_container", "edit_settings_icon_button", "export_list_button", "expand_collapse_texture_button", "levels_section", "remove_list_button", "completed_icon")]
+offset_right = 517.0
+offset_bottom = 106.0
 size_flags_horizontal = 3
 theme_override_constants/separation = 10
 script = ExtResource("1_kb61r")
-expand_icon = ExtResource("3_c7my1")
-collapse_icon = ExtResource("2_c7my1")
+expand_icon = ExtResource("2_tucbf")
+collapse_icon = ExtResource("4_tucbf")
 list_name_label = NodePath("HBoxContainer/BGHighlightPanel/HBoxContainer/HBoxContainer2/NameLabel")
 list_completion_label = NodePath("HBoxContainer/BGHighlightPanel/HBoxContainer/HBoxContainer2/CompletionLabel")
 level_item_container = NodePath("LevelsSection/HBoxContainer/LevelItems")
@@ -34,6 +36,8 @@ export_list_button = NodePath("HBoxContainer/BGHighlightPanel/HBoxContainer/Expo
 expand_collapse_texture_button = NodePath("HBoxContainer/ExpandCollapseTexButton")
 levels_section = NodePath("LevelsSection")
 remove_list_button = NodePath("HBoxContainer/BGHighlightPanel/HBoxContainer/HBoxContainer/RemoveListButton")
+completed_list_label_color = Color(0.7490196, 1, 0.5803922, 1)
+completed_icon = NodePath("HBoxContainer/BGHighlightPanel/HBoxContainer/HBoxContainer2/CheckIcon")
 
 [node name="HBoxContainer" type="HBoxContainer" parent="." unique_id=1631488980]
 layout_mode = 2
@@ -42,7 +46,7 @@ layout_mode = 2
 custom_minimum_size = Vector2(24, 24)
 layout_mode = 2
 size_flags_vertical = 4
-texture = ExtResource("2_c7my1")
+texture = ExtResource("4_tucbf")
 stretch_mode = 3
 
 [node name="ExpandListButton" type="Container" parent="HBoxContainer" unique_id=451892711 node_paths=PackedStringArray("tex_rect")]
@@ -99,6 +103,14 @@ tooltip_text = "Completed/Required/Total"
 mouse_filter = 1
 theme_override_font_sizes/font_size = 14
 text = "2/8/10"
+
+[node name="CheckIcon" type="TextureRect" parent="HBoxContainer/BGHighlightPanel/HBoxContainer/HBoxContainer2" unique_id=1491963162]
+self_modulate = Color(0.4057349, 0.80183524, 0.31315115, 1)
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+tooltip_text = "cleared"
+texture = ExtResource("6_bj4ju")
 
 [node name="Spacer" type="Control" parent="HBoxContainer/BGHighlightPanel/HBoxContainer" unique_id=591713607]
 custom_minimum_size = Vector2(20, 0)

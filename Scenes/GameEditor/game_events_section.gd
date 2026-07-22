@@ -18,6 +18,8 @@ const LevelListNameInput = preload("res://Scenes/GameEditor/ConditionalEditor/le
 @export var specific_completion_list_option: Control
 @export var specific_completion_list_input: LevelListNameInput
 
+@export var to_intermission_assignments_button: ButtonContainer
+
 const SettingsKeys = {
     "game_end_transition": "game_end_replace_transition",
     "game_end_code": "game_end_transition_level_code",
@@ -40,6 +42,8 @@ func _ready() -> void:
     game_completion_mode_selector.item_selected.connect(on_game_completion_mode_selected)
     specific_completion_level_code_input.value_changed.connect(on_completion_code_value_changed)
     specific_completion_list_input.either_value_changed.connect(on_specific_list_value_changed)
+    
+    to_intermission_assignments_button.pressed.connect(on_to_intermission_assignments_button_pressed)
     
     setup_game_completion_mode_selector()
     
@@ -131,3 +135,7 @@ func on_specific_list_value_changed() -> void:
     else:
         GameManager.set_game_setting(SettingsKeys.specific_completion_key, "")
     settings_updated.emit()
+
+func on_to_intermission_assignments_button_pressed() -> void:
+    GameManager.is_in_level_edit_mode = true
+    GameManager.change_scene("Play", false, "intermission-assignment-editor")

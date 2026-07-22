@@ -48,6 +48,11 @@ const ScalarValueInput = preload("res://src/GameEditor/ConditionalEditor/scalar_
 @export var show_name_as_hidden_container: Control
 @export var show_name_as_hidden_toggle: CheckButton
 
+@export var auto_advance_enabled_toggle: CheckButton
+
+@export var auto_advance_to_next_list_container: Control
+@export var auto_advance_to_next_list_toggle: CheckButton
+
 var editing_list_name: String = ""
 var total_levels: int = 0
 
@@ -139,6 +144,9 @@ func _ready() -> void:
     
     hidden_all_count_for_completion_toggle.toggled.connect(on_hidden_all_count_for_completion_toggled)
     show_name_as_hidden_toggle.toggled.connect(on_show_name_as_hidden_toggled)
+    
+    auto_advance_enabled_toggle.toggled.connect(on_auto_advance_enabled_toggled)
+    auto_advance_to_next_list_toggle.toggled.connect(on_auto_advance_to_next_list_toggled)
     
     when_completed_selector.clear()
     for when_completed_id in WhenCompletedOptions.size():
@@ -271,6 +279,13 @@ func refresh_ui() -> void:
         default_is_unlocked_container.visible = prog_unlock_num == 0
         var default_level_locked: bool = list_info.get("default_individual_locked", false)
         default_is_unlocked_toggle.set_pressed_no_signal(not default_level_locked)
+        
+        var is_auto_advance: bool = list_info.get("auto_advance_enabled", true)
+        auto_advance_enabled_toggle.set_pressed_no_signal(is_auto_advance)
+        
+        auto_advance_to_next_list_container.visible = is_auto_advance
+        var is_auto_advance_to_next_list: bool = list_info.get("auto_advance_to_next_list", true)
+        auto_advance_to_next_list_toggle.set_pressed_no_signal(is_auto_advance_to_next_list)
 
     
     var completion_mode: String = _get_completion_mode(list_info)
@@ -422,4 +437,12 @@ func on_hidden_all_count_for_completion_toggled(toggled_on: bool) -> void:
 
 func on_show_name_as_hidden_toggled(toggled_on: bool) -> void:
     GameManager.set_level_list_data(editing_list_name, "always_hidden_use_name_when_current", toggled_on)
+    list_settings_edited.emit()
+
+func on_auto_advance_enabled_toggled(toggled_on: bool) -> void:
+    GameManager.set_level_list_data(editing_list_name, "auto_advance_enabled", toggled_on)
+    list_settings_edited.emit()
+
+func on_auto_advance_to_next_list_toggled(toggled_on: bool) -> void:
+    GameManager.set_level_list_data(editing_list_name, "auto_advance_to_next_list", toggled_on)
     list_settings_edited.emit()

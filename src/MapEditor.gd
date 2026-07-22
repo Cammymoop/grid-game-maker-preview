@@ -94,6 +94,8 @@ var _placing_text_offset: Vector2 = Vector2.ZERO
 
 var _holding_non_pointer_delete: = false
 
+var _confirming_save_autosave: = false
+
 var autosave_delay: float = 5
 var autosave_delay_timer: Timer = null
 
@@ -903,6 +905,16 @@ func forwarded_shortcut_input(event: InputEvent) -> void:
 
 func save_current_or_save_as(after_save_callable: Callable = Callable(), no_toast: bool = false) -> bool:
 	if GameManager.loaded_level_name:
+		if GameManager.loaded_is_autosave and not _confirming_save_autosave:
+			_confirming_save_autosave = true
+			if not FilesManager.get_editor_autosave_is_newer(GameManager.get_identified_game_name()):
+				var callable: = after_save_callable if after_save_callable.is_valid() else Callable()
+				if not _confirm_save_autosave_over_newer_level(callable):
+					return false
+				else:
+					_confirming_save_autosave = false
+					return true
+
 		GameManager.save_edited_level_as(GameManager.loaded_level_name, no_toast)
 		has_edited_something = false
 		if after_save_callable.is_valid():
@@ -1056,6 +1068,26 @@ func on_request_delete_entity(entity: BaseEntity) -> void:
 func on_level_edit_mode_changed() -> void:
 	ui_layer.visible = GameManager.is_in_level_edit_mode
 
+func _confirm_save_autosave_over_newer_level(then_callable: Callable) -> bool:
+	if not has_edited_something:
+		then_callable.call()
+		return true
+	
+	if GameManager.player_profile.get_profile_setting("skip_critical_save_dialogs", false):
+		then_callable.call()
+		return true
+
+	var confirm_text: = ""
+	if not GameManager.loaded_level_is_saved:
+		confirm_text = "This is an autosaved version of the level. Saving will overwrite the newer non-autosave version."
+		confirm_text += "Do you want to save over the existing level?"
+	
+	if confirm_text:
+		_show_save_confirm_dialog(then_callable, confirm_text, false)
+		return false
+	
+	then_callable.call()
+	return true
 
 func _confirm_save_changes_then(then_callable: Callable, is_discard: bool) -> void:
 	if not has_edited_something:
@@ -1116,6 +1148,10 @@ func _closed_save_confirm_dialog(dialog: ConfirmationDialog) -> void:
 		return
 	if edit_mode:
 		request_grab_gui_focus.emit()
+
+	await get_tree().process_frame
+	await get_tree().process_frame
+	_confirming_save_autosave = false
 
 
 func quit_to_main_menu_with_confirm() -> void:

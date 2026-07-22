@@ -1159,6 +1159,16 @@ func cmd_select_current_level_list_name(slots: Dictionary, chosen_slot: int) -> 
 		return
 	slots[chosen_slot] = GameManager.current_level_list
 
+func desc_if_current_level_list_is_hidden() -> String:
+	return "none|If the current level is in a hidden list"
+func cmd_if_current_level_list_is_hidden(_slots: Dictionary) -> bool:
+	if not GameManager.current_level_list:
+		return false
+	if not GameManager.is_level_list_bundled(GameManager.current_level_list):
+		return false
+	var level_list_info: = GameManager._get_level_list(GameManager.current_level_list)
+	return level_list_info.get("always_hidden", false)
+
 func desc_if_playing_custom_level() -> String:
 	return "none|If the current level [invert:InvertInput:is,is not] a custom level"
 func cmd_if_playing_custom_level(_slots: Dictionary, _slot: int, invert: bool) -> bool:
@@ -1176,7 +1186,7 @@ func desc_load_next_level() -> Dictionary:
 		"display_name": "Complete and Advance Level (Deprecated)",
 		"is_deprecated": true,
 		"slot_type_hint": "none",
-		"template_text": "(Deprecated, use 'Advance Level') Complete this level. Load the next level, with a [delay:ComplexScalarInput:default=1,step=0.1] second delay",
+		"template_text": "(Deprecated, use 'Advance to Next Level') Complete this level. Load the next level, with a [delay:ComplexScalarInput:default=1,step=0.1] second delay",
 	}
 func cmd_load_next_level(slots: Dictionary, _slot: int, delay: Dictionary = {"type": "plain", "value": 1.0}) -> void:
 	var delay_val: float = resolve_complex_scalar(delay, slots)
@@ -3017,3 +3027,24 @@ func desc_if_has_viewed_intermission() -> String:
 	return "none|If the player has viewed the intermission [intermission_id:IntermissionIdInput:include_reserved_flags=true]"
 func cmd_if_has_viewed_intermission(_slots: Dictionary, _slot: int, intermission_id: String) -> bool:
 	return GameManager.has_intermission_flag(intermission_id)
+
+
+func desc_if_game_is_completed() -> String:
+	return "none|If the game is completed (Regular Completion)"
+func cmd_if_game_is_completed(_slots: Dictionary) -> bool:
+	return GameManager.is_game_completed()
+
+func desc_if_all_levels_are_completed() -> String:
+	return "none|If all (non-custom) levels in the game are completed"
+func cmd_if_all_levels_are_completed(_slots: Dictionary) -> bool:
+	return GameManager.is_every_level_completed()
+
+func desc_if_level_list_is_completed() -> String:
+	return "none|If the level list [level_list_name:LevelListNameInput] is completed"
+func cmd_if_level_list_is_completed(_slots: Dictionary, level_list_name: String) -> bool:
+	return GameManager.is_level_list_completed(level_list_name)
+
+func desc_if_all_level_lists_are_completed() -> String:
+	return "none|If all completable, non-custom level lists in the game are completed"
+func cmd_if_all_level_lists_are_completed(_slots: Dictionary) -> bool:
+	return GameManager.is_every_bundled_completable_list_complete()

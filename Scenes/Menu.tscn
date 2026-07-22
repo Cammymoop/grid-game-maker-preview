@@ -9,6 +9,7 @@
 [ext_resource type="PackedScene" uid="uid://teuuvlq5n85m" path="res://Scenes/player_profile_picker.tscn" id="5_sjh0l"]
 [ext_resource type="Script" uid="uid://ddo0ls2dlbc30" path="res://Scenes/UI/version_switcher_panel.gd" id="7_a8aa6"]
 [ext_resource type="PackedScene" uid="uid://cc83bbyk0k4ka" path="res://Scenes/UI/game_selector.tscn" id="8_qki4b"]
+[ext_resource type="Script" uid="uid://bq446sgdivroo" path="res://ButtonContainer.gd" id="9_byewe"]
 [ext_resource type="Texture2D" uid="uid://b4q7u3xbkyj45" path="res://assets/img/button_icons/gear_small.png" id="11_qki4b"]
 [ext_resource type="PackedScene" uid="uid://4a4bn5o1go4a" path="res://Scenes/user_settings_panel.tscn" id="12_byewe"]
 [ext_resource type="PackedScene" uid="uid://cbpf7ehql8tby" path="res://Scenes/UI/version_chooser_panel.tscn" id="14_x0ao6"]
@@ -40,6 +41,9 @@ func _gui_input(event: InputEvent) -> void:
 		get_node(\"../GGMLabel\").show()
 		queue_free()
 "
+
+[sub_resource type="Theme" id="Theme_byewe"]
+Label/colors/font_color = Color(0.8745098, 0.8745098, 0.8745098, 1)
 
 [node name="Menu" type="Control" unique_id=151932809]
 layout_mode = 3
@@ -138,15 +142,19 @@ size_flags_vertical = 3
 size_flags_stretch_ratio = 8.0
 mouse_filter = 2
 
-[node name="MainMenu" type="PanelContainer" parent="MarginContainer" unique_id=1211793288 node_paths=PackedStringArray("quit_button", "game_selector", "bg_entity_effect", "edit_game_button", "profile_picker", "show_more_buttons_button", "more_buttons_container", "create_new_game_button", "settings_panel_layer", "user_settings_panel", "version_chooser_panel_layer", "version_chooser_panel", "version_switcher_panel")]
+[node name="MainMenu" type="PanelContainer" parent="MarginContainer" unique_id=1211793288 node_paths=PackedStringArray("quit_button", "game_selector", "bg_entity_effect", "play_game_button", "play_game_button_label", "play_game_progress_label", "edit_game_button", "profile_picker", "show_more_buttons_button", "more_buttons_container", "create_new_game_button", "settings_panel_layer", "user_settings_panel", "version_chooser_panel_layer", "version_chooser_panel", "version_switcher_panel")]
 custom_minimum_size = Vector2(450, 160)
 layout_mode = 2
 size_flags_horizontal = 4
 size_flags_vertical = 4
 script = ExtResource("1")
+bold_font = ExtResource("2_s2c3o")
 quit_button = NodePath("MarginContainer/VBoxContainer/QuitButton")
 game_selector = NodePath("MarginContainer/VBoxContainer/GameSelector")
 bg_entity_effect = NodePath("../../FallingEntities/CanvasLayer2/Effects")
+play_game_button = NodePath("MarginContainer/VBoxContainer/HBoxContainer/NewPlayButton")
+play_game_button_label = NodePath("")
+play_game_progress_label = NodePath("MarginContainer/VBoxContainer/HBoxContainer/NewPlayButton/MarginContainer/VBoxContainer/CompletionLabel")
 edit_game_button = NodePath("MarginContainer/VBoxContainer/HBoxContainer/EditButton")
 profile_picker = NodePath("../VBoxContainer2/PlayerProfilePicker")
 show_more_buttons_button = NodePath("MarginContainer/VBoxContainer/VBoxContainer/ShowMoreButtonsButton")
@@ -157,6 +165,7 @@ user_settings_panel = NodePath("SettingsPanelLayer/CenterContainer/UserSettingsP
 version_chooser_panel_layer = NodePath("VersionChooserLayer")
 version_chooser_panel = NodePath("VersionChooserLayer/CenterContainer/VersionChooserPanel")
 version_switcher_panel = NodePath("Anchor/CenterContainer/VersionSwitcherPanel")
+game_completed_text_color = Color(0.7490196, 1, 0.5803922, 1)
 
 [node name="Anchor" type="Control" parent="MarginContainer/MainMenu" unique_id=1418169266]
 layout_mode = 2
@@ -224,12 +233,56 @@ theme_override_constants/separation = 12
 alignment = 1
 
 [node name="PlayButton" type="Button" parent="MarginContainer/MainMenu/MarginContainer/VBoxContainer/HBoxContainer" unique_id=1539786938]
+visible = false
 custom_minimum_size = Vector2(164, 62)
 layout_mode = 2
 theme_type_variation = &"BigTextButton"
 theme_override_font_sizes/font_size = 30
 text = "Play"
 icon_alignment = 2
+
+[node name="NewPlayButton" type="Container" parent="MarginContainer/MainMenu/MarginContainer/VBoxContainer/HBoxContainer" unique_id=1956266971]
+custom_minimum_size = Vector2(164, 62)
+layout_mode = 2
+script = ExtResource("9_byewe")
+metadata/_custom_type_script = "uid://bq446sgdivroo"
+
+[node name="MarginContainer" type="MarginContainer" parent="MarginContainer/MainMenu/MarginContainer/VBoxContainer/HBoxContainer/NewPlayButton" unique_id=1522509468]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/margin_bottom = 5
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/MainMenu/MarginContainer/VBoxContainer/HBoxContainer/NewPlayButton/MarginContainer" unique_id=2060936388]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 0
+alignment = 2
+
+[node name="CompletionLabel" type="Label" parent="MarginContainer/MainMenu/MarginContainer/VBoxContainer/HBoxContainer/NewPlayButton/MarginContainer/VBoxContainer" unique_id=1329183927]
+visible = false
+layout_mode = 2
+theme_override_colors/font_color = Color(0.51718444, 0.5171845, 0.51718444, 1)
+theme_override_font_sizes/font_size = 12
+text = "100%"
+horizontal_alignment = 1
+
+[node name="VBoxContainer2" type="VBoxContainer" parent="MarginContainer/MainMenu/MarginContainer/VBoxContainer/HBoxContainer/NewPlayButton" unique_id=1880810245]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 0
+alignment = 1
+
+[node name="PlayLabel" type="Label" parent="MarginContainer/MainMenu/MarginContainer/VBoxContainer/HBoxContainer/NewPlayButton/VBoxContainer2" unique_id=1089088432]
+layout_mode = 2
+theme = SubResource("Theme_byewe")
+theme_override_font_sizes/font_size = 30
+text = "Play"
+horizontal_alignment = 1
+
+[node name="SpaceMaker" type="Control" parent="MarginContainer/MainMenu/MarginContainer/VBoxContainer/HBoxContainer/NewPlayButton/VBoxContainer2" unique_id=151264927]
+custom_minimum_size = Vector2(0, 4)
+layout_mode = 2
+mouse_filter = 2
 
 [node name="EditButton" type="Button" parent="MarginContainer/MainMenu/MarginContainer/VBoxContainer/HBoxContainer" unique_id=284899672]
 custom_minimum_size = Vector2(164, 62)
@@ -324,7 +377,6 @@ metadata/_edit_lock_ = true
 [node name="Effects" parent="FallingEntities/CanvasLayer2" parent_id_path=PackedInt32Array(1839494414, 1037858481) index="0" unique_id=477139096]
 metadata/_edit_lock_ = true
 
-[connection signal="pressed" from="MarginContainer/MainMenu/MarginContainer/VBoxContainer/HBoxContainer/PlayButton" to="MarginContainer/MainMenu" method="_on_PlayButton_pressed"]
 [connection signal="pressed" from="MarginContainer/MainMenu/MarginContainer/VBoxContainer/HBoxContainer/EditButton" to="MarginContainer/MainMenu" method="_on_EditButton_pressed"]
 [connection signal="pressed" from="MarginContainer/MainMenu/MarginContainer/VBoxContainer/VBoxContainer/SettingsButton" to="MarginContainer/MainMenu" method="show_user_settings_panel"]
 [connection signal="pressed" from="MarginContainer/MainMenu/MarginContainer/VBoxContainer/MoreMenuButtons/ImportNewGameButton" to="MarginContainer/MainMenu" method="_on_import_new_game_button_pressed"]

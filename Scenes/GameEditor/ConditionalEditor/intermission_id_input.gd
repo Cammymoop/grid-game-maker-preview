@@ -59,7 +59,7 @@ func setup_intermission_id_selector() -> void:
         intermission_id_selector.add_item(intermission_id)
     
     if including_reserved_flags:
-        var reserved_flags: = GameManager.get_all_reserved_intermission_flags()
+        var reserved_flags: Array[String] = GameManager.get_all_reserved_intermission_flags()
         if reserved_flags.size() > 0:
             intermission_id_selector.add_separator("Builtin Flags")
             for reserved_flag in reserved_flags:

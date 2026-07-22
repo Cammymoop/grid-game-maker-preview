@@ -1233,6 +1233,9 @@ func load_editor_autosave() -> void:
 	load_level_data(autosave_data)
 	loaded_level_is_saved = false
 	loaded_is_autosave = true
+	
+	if FilesManager.level_exists(get_identified_game_name(), loaded_level_name):
+		current_level_list = get_list_containing_level(loaded_level_name)
 
 func load_level_data(level_data: Dictionary, process_queued_load: bool = false):
 	if not process_queued_load and queued_level_load:
@@ -1296,6 +1299,7 @@ func try_load_level(level_name: String, as_queued_load: bool = false):
 	if not the_level_data["name"] == level_name:
 		the_level_data["name"] = level_name
 	load_level_data(the_level_data, as_queued_load)
+	loaded_level_is_saved = true
 
 func edit_level_named(level_name: String, auto_list: bool = false) -> bool:
 	if not FilesManager.level_exists(get_identified_game_name(), level_name):
@@ -1307,6 +1311,7 @@ func edit_level_named(level_name: String, auto_list: bool = false) -> bool:
 	if auto_list:
 		current_level_list = get_list_containing_level(level_name)
 	load_level_data(the_level_data)
+	loaded_level_is_saved = true
 	return true
 
 func edit_level_in_list(level_list_name: String, level_name: String) -> void:
@@ -1469,9 +1474,10 @@ func post_scene_change() -> void:
 						load_editor_autosave()
 					else:
 						if autosave_level_name:
-							load_level_data(FilesManager.get_level_data(get_identified_game_name(), autosave_level_name))
+							edit_level_named(autosave_level_name, true)
+							#load_level_data(FilesManager.get_level_data(get_identified_game_name(), autosave_level_name))
 						else:
-							GlobalToaster.show_toast_message("Loading level autosave", 1.2)
+							GlobalToaster.show_toast_message("Loaded level autosave", 1.2)
 							load_editor_autosave()
 			else:
 				new_empty_level()
@@ -2918,16 +2924,17 @@ func get_all_visible_bundled_level_lists(current_level_as_complete: bool = false
 	
 	return lists
 
-func move_level_to_relative_list(level_name: String, from_list_name: String, delta: int) -> void:
+func move_level_to_relative_list(level_name: String, from_list_name: String, delta: int) -> String:
 	var list_info: = _get_level_list(from_list_name)
 	if not list_info or not level_name in list_info.get("level_names", []):
-		return
+		return ""
 	var all_level_lists: = get_list_of_level_lists()
 	var from_index: = all_level_lists.find(from_list_name)
 	var to_index: = clampi(from_index + delta, 0, all_level_lists.size() - 1)
 	if to_index == from_index:
-		return
+		return ""
 	move_level_to_level_list(level_name, all_level_lists[to_index], from_list_name)
+	return all_level_lists[to_index]
 
 
 func move_level_list_to_top_bottom(level_list_name: String, to_top: bool) -> void:
@@ -2956,7 +2963,7 @@ func move_level_list_relative(level_list_name: String, delta: int) -> void:
 		update_non_bundled_level_lists_order(all_relevant_lists)
 
 
-func add_level_to_list_index(level_name: String, is_bundled_lists: bool, to_index: int) -> void:
+func add_level_to_list_index(level_name: String, is_bundled_lists: bool, to_index: int) -> String:
 	var all_level_infos: Array
 	if is_bundled_lists:
 		all_level_infos = get_all_level_list_infos(true)
@@ -2966,7 +2973,9 @@ func add_level_to_list_index(level_name: String, is_bundled_lists: bool, to_inde
 	if to_index < 0:
 		to_index = all_level_infos.size() + to_index
 	to_index = clampi(to_index, 0, all_level_infos.size() - 1)
-	add_level_to_level_list(level_name, all_level_infos[to_index]["name"])
+	var list_name: String = all_level_infos[to_index]["name"]
+	add_level_to_level_list(level_name, list_name)
+	return list_name
 
 
 func get_next_level_to_auto_load_code(after_level: String, current_level_as_complete: bool) -> String:
@@ -2976,11 +2985,14 @@ func get_next_level_to_auto_load_code(after_level: String, current_level_as_comp
 		return ""
 	
 	var level_list_info: = _get_level_list(current_level_list)
-	if not level_list_info.get("auto_load_next", true):
+	if not level_list_info.get("auto_advance_enabled", true):
 		return ""
 	var next_level_in_list: = get_next_level_in_list(current_level_list, after_level, true, current_level_as_complete)
 	if next_level_in_list:
 		return _level_code(current_level_list, next_level_in_list)
+
+	if not level_list_info.get("auto_advance_to_next_list", true):
+		return ""
 
 	var next_list_name: = get_advance_to_list_after_list(current_level_list)
 	if not next_list_name:
@@ -3314,14 +3326,15 @@ func _move_to_level_by_code_with_delay(level_code: String, with_delay: float, al
 
 func get_advance_to_code_or_special(with_current_level_as_complete: bool = true) -> Array:
 	if not loaded_level_name or not current_level_list or current_level_is_museum:
-		return []
+		return ["", ""]
 	
 	var auto_load_code: String = get_next_level_to_auto_load_code(loaded_level_name, with_current_level_as_complete)
 	if auto_load_code:
 		return ["", auto_load_code]
 	
 	if not has_any_unlocked_levels():
-		return ["end", ""]
+		push_warning("No unlocked levels")
+		return ["select", ""]
 	else:
 		return ["select", ""]
 	

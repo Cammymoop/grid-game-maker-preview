@@ -8,12 +8,13 @@
 
 [sub_resource type="ButtonGroup" id="ButtonGroup_gs7i2"]
 
-[node name="LevelSelectUI" type="VBoxContainer" unique_id=1015399753 node_paths=PackedStringArray("level_list_container", "tabs_container", "bundled_levels_tab_button", "custom_levels_tab_button", "edit_lists_button_container", "add_new_list_button", "rearrange_lists_button", "import_levels_button", "import_levels_button_container", "level_list_settings", "rearrange_lists_back_container", "rearrange_lists_back_button", "list_scroll_container", "no_web_container", "open_levels_folder_button", "edit_autosave_container", "edit_autosave_button", "edit_intermissions_button")]
+[node name="LevelSelectUI" type="VBoxContainer" unique_id=1015399753 node_paths=PackedStringArray("level_select_header_label", "level_list_container", "tabs_container", "bundled_levels_tab_button", "custom_levels_tab_button", "edit_lists_button_container", "add_new_list_button", "rearrange_lists_button", "import_levels_button", "import_levels_button_container", "level_list_settings", "rearrange_lists_back_container", "rearrange_lists_back_button", "expand_all_container", "expand_all_button", "list_scroll_container", "no_web_container", "open_levels_folder_button", "edit_autosave_container", "edit_autosave_button", "edit_intermissions_button", "rearrange_add_list_container", "rearrange_add_list_button")]
 custom_minimum_size = Vector2(440, 300)
 offset_right = 327.0
 offset_bottom = 163.0
 theme_override_constants/separation = 12
 script = ExtResource("1_o0n7n")
+level_select_header_label = NodePath("LevelSelectHeaderLabel")
 level_list_container = NodePath("Lists/ScrollContainer/MarginContainer/ListOfListsOfLevels")
 tabs_container = NodePath("TabsContainer")
 bundled_levels_tab_button = NodePath("TabsContainer/BundledListsRadioButton")
@@ -26,12 +27,16 @@ import_levels_button_container = NodePath("Lists/ImportButtonContainer")
 level_list_settings = NodePath("LevelListSettings")
 rearrange_lists_back_container = NodePath("Lists/RerrangeBackContainer")
 rearrange_lists_back_button = NodePath("Lists/RerrangeBackContainer/RearrangeBackButton")
+expand_all_container = NodePath("Lists/ExpandAllContainer")
+expand_all_button = NodePath("Lists/ExpandAllContainer/ExpandAllButton")
 list_scroll_container = NodePath("Lists/ScrollContainer")
 no_web_container = NodePath("Lists/ImportButtonContainer/HBoxContainer/NoWeb")
 open_levels_folder_button = NodePath("Lists/ImportButtonContainer/HBoxContainer/NoWeb/OpenLevelsFolderButton")
 edit_autosave_container = NodePath("Lists/EditAutosavedLevelContainer")
 edit_autosave_button = NodePath("Lists/EditAutosavedLevelContainer/EditAutosavedLevelButton")
 edit_intermissions_button = NodePath("Lists/EditListsButtonsContainer/HBoxContainer2/EditIntermissionsButton")
+rearrange_add_list_container = NodePath("Lists/RerrangeAddListContainer")
+rearrange_add_list_button = NodePath("Lists/RerrangeAddListContainer/AddListButton2")
 
 [node name="TabsContainer" type="HBoxContainer" parent="." unique_id=1098569195]
 layout_mode = 2
@@ -53,7 +58,7 @@ toggle_mode = true
 button_group = SubResource("ButtonGroup_gs7i2")
 text = "Custom Levels"
 
-[node name="Label" type="Label" parent="." unique_id=1517417791]
+[node name="LevelSelectHeaderLabel" type="Label" parent="." unique_id=1517417791]
 layout_mode = 2
 theme_override_font_sizes/font_size = 22
 text = "Select Level:"
@@ -75,12 +80,25 @@ text = "Edit Autosaved level"
 
 [node name="RerrangeBackContainer" type="HBoxContainer" parent="Lists" unique_id=1031636159]
 visible = false
+custom_minimum_size = Vector2(0, 40)
 layout_mode = 2
 alignment = 2
 
 [node name="RearrangeBackButton" type="Button" parent="Lists/RerrangeBackContainer" unique_id=17766171]
 layout_mode = 2
+size_flags_vertical = 0
 text = "Back"
+
+[node name="ExpandAllContainer" type="HBoxContainer" parent="Lists" unique_id=1080931729]
+layout_mode = 2
+
+[node name="ExpandAllButton" type="Button" parent="Lists/ExpandAllContainer" unique_id=1687036968]
+layout_mode = 2
+size_flags_horizontal = 0
+size_flags_vertical = 0
+tooltip_text = "Expand All"
+icon = ExtResource("2_gs7i2")
+flat = true
 
 [node name="ScrollContainer" type="ScrollContainer" parent="Lists" unique_id=1575701036]
 layout_mode = 2
@@ -99,6 +117,19 @@ theme_override_constants/margin_bottom = 4
 [node name="ListOfListsOfLevels" type="VBoxContainer" parent="Lists/ScrollContainer/MarginContainer" unique_id=1969060177]
 layout_mode = 2
 theme_override_constants/separation = 16
+
+[node name="RerrangeAddListContainer" type="HBoxContainer" parent="Lists" unique_id=916705879]
+visible = false
+custom_minimum_size = Vector2(0, 40)
+layout_mode = 2
+alignment = 1
+
+[node name="AddListButton2" type="Button" parent="Lists/RerrangeAddListContainer" unique_id=354584658]
+layout_mode = 2
+size_flags_horizontal = 4
+text = "Add New List"
+icon = ExtResource("2_gs7i2")
+icon_alignment = 2
 
 [node name="EditListsButtonsContainer" type="VBoxContainer" parent="Lists" unique_id=1884090066]
 layout_mode = 2

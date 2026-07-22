@@ -398,7 +398,6 @@ func refresh_assignment_lists() -> void:
         after_complete_assignment_list.load_assignments(game_intermission_assignments.get("game_complete", []))
         after_last_level_assignment_list.load_assignments(game_intermission_assignments.get("all_levels_complete", []))
         game_fail_assignment_list.load_assignments(game_intermission_assignments.get("fail_state", []))
-        prints("game fail state assignments: %s" % [game_intermission_assignments.get("fail_state", [])])
 
 func update_and_save_current() -> void:
     var current_mode: = get_current_mode()
@@ -429,7 +428,6 @@ func update_and_save_current() -> void:
         _set_or_erase_assignment_list(game_intermission_assignments, "game_complete", after_complete_assignment_list.get_assignments())
         _set_or_erase_assignment_list(game_intermission_assignments, "all_levels_complete", after_last_level_assignment_list.get_assignments())
         _set_or_erase_assignment_list(game_intermission_assignments, "fail_state", game_fail_assignment_list.get_assignments())
-        prints("saving game intermission assignments: %s" % game_intermission_assignments)
         GameManager.set_game_setting("default_intermissions", game_intermission_assignments)
         GameManager.save_current_definition_if_auto_enabled()
     elif current_mode == Modes.LEVELS:

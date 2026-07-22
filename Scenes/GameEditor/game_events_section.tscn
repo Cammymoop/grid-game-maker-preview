@@ -4,8 +4,10 @@
 [ext_resource type="Script" uid="uid://c5lkcj675uoc" path="res://Scenes/GameEditor/game_events_section.gd" id="1_ugw3o"]
 [ext_resource type="PackedScene" uid="uid://c3qvpvu2m643d" path="res://Scenes/GameEditor/list_and_level_input.tscn" id="3_8f0of"]
 [ext_resource type="PackedScene" uid="uid://cvcvtgiapcwew" path="res://Scenes/GameEditor/ConditionalEditor/level_list_name_input.tscn" id="4_dvar1"]
+[ext_resource type="Script" uid="uid://bq446sgdivroo" path="res://ButtonContainer.gd" id="5_rrij6"]
+[ext_resource type="Texture2D" uid="uid://bruxxxosd2tqa" path="res://assets/img/button_icons/intermission.png" id="6_xfo6o"]
 
-[node name="GameEventsSection" type="FoldableContainer" unique_id=1914446224 node_paths=PackedStringArray("game_end_has_transition_toggle", "game_end_transition_option", "game_end_code_input", "game_completion_mode_selector", "specific_completion_level_option", "specific_completion_level_code_input", "specific_completion_list_option", "specific_completion_list_input")]
+[node name="GameEventsSection" type="FoldableContainer" unique_id=1914446224 node_paths=PackedStringArray("game_end_has_transition_toggle", "game_end_transition_option", "game_end_code_input", "game_completion_mode_selector", "specific_completion_level_option", "specific_completion_level_code_input", "specific_completion_list_option", "specific_completion_list_input", "to_intermission_assignments_button")]
 offset_right = 799.0
 offset_bottom = 51.0
 theme = ExtResource("1_a4dd1")
@@ -20,6 +22,7 @@ specific_completion_level_option = NodePath("MarginContainer/HFlowContainer/VBox
 specific_completion_level_code_input = NodePath("MarginContainer/HFlowContainer/VBoxContainer2/SpecificCompletionLevelOption/PanelContainer/SpecificCompletionLevel")
 specific_completion_list_option = NodePath("MarginContainer/HFlowContainer/VBoxContainer2/SpecificCompletionListOption")
 specific_completion_list_input = NodePath("MarginContainer/HFlowContainer/VBoxContainer2/SpecificCompletionListOption/PanelContainer/SpecificCompletionList")
+to_intermission_assignments_button = NodePath("MarginContainer/HFlowContainer/VBoxContainer3/ToIntermissionAssignments")
 
 [node name="MarginContainer" type="MarginContainer" parent="." unique_id=518200642]
 layout_mode = 2
@@ -98,8 +101,8 @@ layout_mode = 2
 size_flags_horizontal = 4
 tooltip_text = "When the game is first completed,
 unlock and send the player to a specific level
-after they view the ending sequence"
-text = "Enable Post-End Level"
+after they view the ending sequence."
+text = "Enable Post-Ending Level"
 alignment = 2
 
 [node name="PostEndLevelOption" type="HBoxContainer" parent="MarginContainer/HFlowContainer/VBoxContainer" unique_id=1676946606]
@@ -126,12 +129,35 @@ theme_override_font_sizes/font_size = 14
 text = "Other:"
 horizontal_alignment = 1
 
-[node name="Button" type="Button" parent="MarginContainer/HFlowContainer/VBoxContainer3" unique_id=809589865]
+[node name="ToIntermissionAssignments" type="Container" parent="MarginContainer/HFlowContainer/VBoxContainer3" unique_id=564158567]
 layout_mode = 2
-size_flags_horizontal = 4
-size_flags_vertical = 4
-theme_override_font_sizes/font_size = 14
+script = ExtResource("5_rrij6")
+metadata/_custom_type_script = "uid://bq446sgdivroo"
+
+[node name="MarginContainer" type="MarginContainer" parent="MarginContainer/HFlowContainer/VBoxContainer3/ToIntermissionAssignments" unique_id=1916003432]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/margin_left = 4
+theme_override_constants/margin_top = 12
+theme_override_constants/margin_right = 4
+theme_override_constants/margin_bottom = 12
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/HFlowContainer/VBoxContainer3/ToIntermissionAssignments/MarginContainer" unique_id=946253235]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 8
+
+[node name="Label" type="Label" parent="MarginContainer/HFlowContainer/VBoxContainer3/ToIntermissionAssignments/MarginContainer/VBoxContainer" unique_id=1967638944]
+layout_mode = 2
 text = "Edit Event Intermissions
 in level editor"
+horizontal_alignment = 1
+
+[node name="TextureRect" type="TextureRect" parent="MarginContainer/HFlowContainer/VBoxContainer3/ToIntermissionAssignments/MarginContainer/VBoxContainer" unique_id=1977614045]
+layout_mode = 2
+size_flags_horizontal = 4
+mouse_filter = 2
+texture = ExtResource("6_xfo6o")
+stretch_mode = 2
 
 [editable path="MarginContainer/HFlowContainer/VBoxContainer2/SpecificCompletionListOption/PanelContainer/SpecificCompletionList"]

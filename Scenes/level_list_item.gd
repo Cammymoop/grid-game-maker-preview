@@ -9,6 +9,8 @@ signal request_edit_level(level_name: String, as_autosave: bool)
 
 signal focus_up_down_attempted(level_item: LevelListItem, direction: int)
 
+signal focus_gotten(level_item: LevelListItem)
+
 @export var locked_color: Color
 @export var completed_color: Color
 @export var current_level_font: Font
@@ -196,6 +198,7 @@ func focus_level_list_item() -> void:
 func on_gui_focus_changed(new_focus_owner: Control) -> void:
     if new_focus_owner == self or is_ancestor_of(new_focus_owner):
         focus_panel.show()
+        focus_gotten.emit(self)
     else:
         focus_panel.hide()
 
