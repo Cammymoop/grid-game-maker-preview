@@ -288,6 +288,8 @@ func swap_colors() -> void:
 
 func update_picked_brush() -> void:
 	picked_brush_image = picked_brush_tex.get_image()
+	if picked_brush_image.get_format() != edited_image.get_format():
+		picked_brush_image.convert(edited_image.get_format())
 	update_picked_colored_brush()
 
 func update_picked_colored_brush() -> void:

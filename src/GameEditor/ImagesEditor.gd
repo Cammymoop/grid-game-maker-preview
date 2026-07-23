@@ -227,7 +227,7 @@ func import_image_from_web() -> void:
 	if not OS.has_feature("web"):
 		return
 	var as_shared: = true
-	if Input.is_action_pressed("&editor_alt_mode_hold"):
+	if Input.is_action_pressed(&"editor_alt_mode_hold"):
 		as_shared = false
 	GameManager.file_access_web = FileAccessWeb.new()
 	GameManager.file_access_web.loaded.connect(got_web_import_image.bind(as_shared))
@@ -235,7 +235,6 @@ func import_image_from_web() -> void:
 
 func got_web_import_image(file_name: String, _file_type: String, b64_data: String, as_shared: bool) -> void:
 	if GameManager.file_access_web:
-		GameManager.file_access_web.queue_free()
 		GameManager.file_access_web = null
 	var png_data_bytes: PackedByteArray = Marshalls.base64_to_raw(b64_data)
 	var image: Image = Image.new()

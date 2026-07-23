@@ -8,6 +8,8 @@ const TilePicker = preload("res://src/GameEditor/TilePicker.gd")
 
 @export var tile_picker: TilePicker
 
+@export var picker_target_size: Vector2 = Vector2(400, 300)
+
 var select_menu: PopupMenu
 
 var selected_texture: int
@@ -17,10 +19,21 @@ var raw_texture_info: Dictionary
 
 var HEIGHT_ADD = 110
 
+var _ignore_size_changed: bool = false
+
 func _ready() -> void:
 	select_menu = find_child("TextureSelector").get_popup()
 	confirmed.connect(emit_picked_texture)
 	hidden.connect(queue_free)
+	
+	tile_picker.set_target_size(picker_target_size)
+	tile_picker.size_changed.connect(on_tile_picker_size_changed)
+	size_changed.connect(on_resized)
+
+func on_resized() -> void:
+	_ignore_size_changed = true
+	tile_picker.update_target_size()
+	_ignore_size_changed = false
 
 func setup(texture_id, sub_index):
 	raw_mode = false
@@ -167,3 +180,7 @@ func emit_picked_texture() -> void:
 func _on_tile_picker_confirmed() -> void:
 	confirmed.emit()
 	hide()
+
+func on_tile_picker_size_changed() -> void:
+	if not _ignore_size_changed:
+		child_controls_changed()

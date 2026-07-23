@@ -1,6 +1,7 @@
 extends TextureRect
 
 signal confirmed
+signal size_changed
 
 @export var confirm_on_dbl_click: = true
 
@@ -12,7 +13,7 @@ var separation: Vector2
 var rows: int
 var tpr: int
 
-var view_scale: = 1
+var view_scale: float = 1.0
 
 var raw_mode = false
 
@@ -21,13 +22,18 @@ var selected_sub_index = 0
 var NO_DARKEN = Color(1, 1, 1)
 var DARKEN = Color(.7, .7, .7)
 
+var has_target_size: bool = false
+var target_size: Vector2 = Vector2.ZERO
+
+var has_loaded: bool = false
+
 func _gui_input(event):
 	if event is InputEventMouseMotion:
 		var index = get_tile_index_from_scaled_pos(event.position)
 		if is_index_in_bounds(index):
 			highlight_index(index)
 	elif event is InputEventMouseButton:
-		if event.is_pressed():
+		if event.button_index == MOUSE_BUTTON_LEFT and event.is_pressed():
 			var index = get_tile_index_from_scaled_pos(event.position)
 			if is_index_in_bounds(index):
 				set_selected_index(index)
@@ -45,9 +51,29 @@ func set_view_scale(new_scale) -> void:
 	make_atlas_tex()
 	set_minsize()
 
+func set_target_size(new_size: Vector2) -> void:
+	if new_size == Vector2.ZERO:
+		has_target_size = false
+		return
+	target_size = new_size
+	has_target_size = true
+	update_target_size()
+
+func update_target_size() -> void:
+	if has_target_size and has_loaded and texture and texture.get_size().length() > 2:
+		var texture_size: = texture.get_size()
+		var max_int_scale: = Utility.max_integer_scale_in(texture_size, target_size)
+		if max_int_scale == 0:
+			var scale_granular: float = Utility.max_integer_scale_in(texture_size, target_size * 4) / 4.0
+			scale_granular = maxf(0.25, scale_granular)
+			set_view_scale(scale_granular)
+		else:
+			set_view_scale(max_int_scale)
+
 func set_minsize() -> void:
 	custom_minimum_size = texture.get_size() * view_scale
 	update_minimum_size()
+	size_changed.emit()
 
 func local_pos_to_tile_pos(pos: Vector2) -> Vector2:
 	pos /= view_scale
@@ -75,10 +101,14 @@ func set_raw_texture(tex: Texture2D, metadata: Dictionary) -> void:
 	texture = tex
 
 	raw_mode = true
-	
+	has_loaded = true
+
 	make_atlas_tex()
 	custom_minimum_size = tex.get_size() * view_scale
-	update_minimum_size()
+	if has_target_size:
+		update_target_size()
+	else:
+		set_minsize()
 
 func get_raw_texture() -> Texture2D:
 	if not raw_mode:
@@ -97,9 +127,15 @@ func set_picking_texture(texture_id: int) -> void:
 	tpr = grid_cells.x
 	rows = grid_cells.y
 	texture = tex
+
+	raw_mode = false
+	has_loaded = true
 	
 	make_atlas_tex()
-	set_minsize()
+	if has_target_size:
+		update_target_size()
+	else:
+		set_minsize()
 	
 func make_atlas_tex() -> void:
 	var atlas = AtlasTexture.new()
