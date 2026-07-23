@@ -90,6 +90,11 @@ func _on_import_new_game_button_pressed() -> void:
 		file_dialog.file_selected.connect(GameManager.import_and_load_game_zip)
 		file_dialog.close_requested.connect(file_dialog.queue_free)
 		file_dialog.canceled.connect(file_dialog.queue_free)
+		
+		if Utility.is_mobile():
+			file_dialog.use_native_dialog = true
+			file_dialog.current_dir = OS.get_system_dir(OS.SYSTEM_DIR_DOWNLOADS)
+		
 		add_child(file_dialog)
 		file_dialog.popup_file_dialog()
 
@@ -144,7 +149,7 @@ func check_if_has_game_save() -> void:
 	play_game_button_label.remove_theme_color_override("font_color")
 	play_game_button_label.remove_theme_font_override("font")
 	play_game_button.tooltip_text = ""
-	if GameManager.has_saved_data_for_current_game():
+	if GameManager.has_save_data_for_current_game():
 		play_game_button_label.text = "Play"
 		if GameManager.is_game_completed():
 			play_game_button_label.add_theme_font_override("font", bold_font)

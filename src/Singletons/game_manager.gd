@@ -273,8 +273,24 @@ func _ready():
 	load_last_loaded_or_new_player_profile()
 	# Automatically use the display scaling from the OS if it's detected, because of how the gameplay display auto scales this mainly affects UI
 	var cur_screen_scale: float = DisplayServer.screen_get_scale()
+	var min_screen_height: = 700.0
+	var screen_size: = DisplayServer.screen_get_size()
+	var min_screen_dimension: = minf(screen_size.x, screen_size.y)
+	
+	var screen_height: = min_screen_dimension / cur_screen_scale
+
+	if screen_height < min_screen_height:
+		prints("screen is too small when taking reported scale into account:", screen_size, cur_screen_scale)
+		cur_screen_scale = snappedf(min_screen_dimension / min_screen_height, 0.25)
+		cur_screen_scale = maxf(cur_screen_scale, 0.5)
+		prints("ui scale combined with screen size is not enough space, overriding ui scale to %s" % [cur_screen_scale])
+
 	if cur_screen_scale != get_window().content_scale_factor:
 		get_window().content_scale_factor = cur_screen_scale
+	
+	#if Utility.is_mobile():
+		#get_window().content_scale_factor = 1.0
+
 	# run _process even when the game is paused
 	process_mode = PROCESS_MODE_ALWAYS
 	cur_scene = get_tree().current_scene.name
@@ -312,7 +328,11 @@ func _ready():
 	if not loaded_default_game:
 		if builtin_default_game_file:
 			builtin_default_game_definition = FilesManager._get_dict_from_json_file(builtin_default_game_file)
-			load_game_definition_data(builtin_default_game_definition, false)
+			prints("using builtin defintion: %s" % [JSON.stringify(builtin_default_game_definition, "\t", false)])
+			if builtin_default_game_definition:
+				load_game_definition_data(builtin_default_game_definition, false)
+			else:
+				new_empty_game_definition()
 			start_managers()
 		else:
 			new_empty_game_definition(FilesManager.get_unique_game_name(Utility.random_animal() + " Game"))
@@ -3752,6 +3772,11 @@ func start_import_levels() -> void:
 		file_dialog.canceled.connect(file_dialog.queue_free)
 		
 		file_dialog.current_dir = OS.get_system_dir(OS.SYSTEM_DIR_DESKTOP)
+		
+		if Utility.is_mobile():
+			file_dialog.use_native_dialog = true
+			file_dialog.current_dir = OS.get_system_dir(OS.SYSTEM_DIR_DOWNLOADS)
+
 		add_child(file_dialog)
 		file_dialog.popup_file_dialog()
 
@@ -3860,6 +3885,11 @@ func export_level_list(list_name: String) -> void:
 	
 	file_dialog.current_dir = OS.get_system_dir(OS.SYSTEM_DIR_DESKTOP)
 	file_dialog.current_file = list_filename
+	
+	if Utility.is_mobile():
+		file_dialog.use_native_dialog = true
+		file_dialog.current_dir = OS.get_system_dir(OS.SYSTEM_DIR_DOWNLOADS)
+
 	add_child(file_dialog)
 	file_dialog.popup_file_dialog()
 
@@ -4405,6 +4435,11 @@ func show_save_game_zip_dialog(zip_file_path: String) -> void:
 	
 	file_dialog.current_dir = OS.get_system_dir(OS.SYSTEM_DIR_DESKTOP)
 	file_dialog.current_file = zip_file_path.get_file()
+
+	if Utility.is_mobile():
+		file_dialog.use_native_dialog = true
+		file_dialog.current_dir = OS.get_system_dir(OS.SYSTEM_DIR_DOWNLOADS)
+
 	add_child(file_dialog)
 	file_dialog.popup_file_dialog()
 
@@ -5505,3 +5540,11 @@ func is_intermission_id_reserved(intermission_id: String) -> bool:
 
 func get_all_reserved_intermission_flags() -> Array[String]:
 	return RESERVED_INTERMISSION_IDS.duplicate()
+
+
+func has_save_data_for_current_game() -> bool:
+	return true
+
+func ____clear_all_local_data() -> void:
+	FilesManager.___clear_local_data()
+	GlobalToaster.show_toast_message("All local data has been cleared\ncurrent game will not function properly if not saved again")

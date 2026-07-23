@@ -1509,3 +1509,9 @@ func dict_get_vector2i(dictionary: Dictionary, key: String, default_value: Vecto
 	if not dictionary.has(key) or not typeof(dictionary[key]) in [TYPE_VECTOR2, TYPE_VECTOR2I]:
 		return default_value
 	return Vector2i(dictionary[key])
+
+func is_web_or_mobile() -> bool:
+	return OS.has_feature("web") or Utility.is_mobile()
+
+func is_mobile() -> bool:
+	return OS.has_feature("mobile")

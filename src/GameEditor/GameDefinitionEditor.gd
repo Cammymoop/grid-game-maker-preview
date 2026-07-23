@@ -568,6 +568,14 @@ func do_export_zip(no_bundle_pls: bool = false, is_release_export: bool = false)
 	file_dialog.dir_selected.connect(_export_destination_picked.bind(export_location, file_dialog))
 	file_dialog.close_requested.connect(file_dialog.queue_free)
 	file_dialog.canceled.connect(file_dialog.queue_free)
+
+	if Utility.is_mobile():
+		file_dialog.use_native_dialog = true
+		file_dialog.current_dir = OS.get_system_dir(OS.SYSTEM_DIR_DOWNLOADS)
+		file_dialog.file_mode = FileDialog.FILE_MODE_SAVE_FILE
+		file_dialog.filters = ["*.zip"]
+		file_dialog.current_file = ImporterExporter._game_name_to_zip_name(GameManager.get_identified_game_name()) + "_export.zip"
+
 	add_child(file_dialog)
 	file_dialog.popup_file_dialog()
 
@@ -588,13 +596,17 @@ func export_web_mode(export_location: String = "") -> void:
 	JavaScriptBridge.download_buffer(zip_byte_array, zip_path.get_file(), "application/zip")
 
 func _export_destination_picked(path: String, export_location: String, file_dialog: FileDialog) -> void:
+	prints("export destination picked: ", path)
 	file_dialog.queue_free()
 	var prefer_skip_date_stamp: bool = export_location != ""
 	var zip_path: String = ImporterExporter.export_game_zip(GameManager.get_identified_game_name(), export_location, "export", prefer_skip_date_stamp)
 	if zip_path:
-		var error: = DirAccess.rename_absolute(zip_path, path.path_join(zip_path.get_file()))
+		var save_to_path: = path
+		if not Utility.is_mobile():
+			save_to_path = path.path_join(zip_path.get_file())
+		var error: = DirAccess.rename_absolute(zip_path, save_to_path)
 		if error != OK:
-			push_error("Failed to rename zip file to %s: %s" % [path, error_string(error)])
+			push_error("Failed to rename zip file to %s: %s (from %s)" % [save_to_path, error_string(error), zip_path])
 			GlobalToaster.show_toast_message("Failed to copy exported Game .zip to destination folder", 2.0)
 			return
 		else:

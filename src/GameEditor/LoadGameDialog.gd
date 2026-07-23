@@ -1,7 +1,7 @@
 extends ConfirmationDialog
 
 func _ready():
-	if OS.has_feature("web"):
+	if OS.has_feature("web") or Utility.is_mobile():
 		find_child("WebClearLocalDataButton").visible = true
 	var games: Array[Dictionary] = FilesManager.get_game_list_with_titles()
 	
@@ -53,6 +53,10 @@ func _on_import_game_zip_button_pressed() -> void:
 	file_dialog.close_requested.connect(file_dialog.queue_free)
 	file_dialog.canceled.connect(file_dialog.queue_free)
 	
+	if Utility.is_mobile():
+		file_dialog.use_native_dialog = true
+		file_dialog.current_dir = OS.get_system_dir(OS.SYSTEM_DIR_DOWNLOADS)
+	
 	get_parent().add_child(file_dialog)
 	var popup_call: = file_dialog.popup_file_dialog
 	get_tree().create_timer(0.02).timeout.connect(popup_call)
@@ -70,13 +74,13 @@ func import_game_zip_web_mode() -> void:
 
 func _on_web_clear_local_data_button_pressed() -> void:
 	var confirmation_dialog: ConfirmationDialog = ConfirmationDialog.new()
+	var device: = "browser" if OS.has_feature("web") else "device"
 	confirmation_dialog.title = "Clear All Local Data"
-	confirmation_dialog.dialog_text = "This will delete all local data saved in this browser for Grid Game Maker.\nAre you sure you want to do that?"
-	confirmation_dialog.confirmed.connect(actually_clear_local_data)
+	confirmation_dialog.dialog_text = "This will delete all local data saved in this %s for Grid Game Maker.\nAre you sure you want to do that?" % [device]
+	confirmation_dialog.confirmed.connect(GameManager.____clear_all_local_data)
+	confirmation_dialog.confirmed.connect(confirmation_dialog.queue_free)
+	confirmation_dialog.canceled.connect(confirmation_dialog.queue_free)
+	hide()
 	get_parent().add_child(confirmation_dialog)
 	confirmation_dialog.popup_centered()
-
-func actually_clear_local_data() -> void:
 	close_dialog()
-	FilesManager.___clear_local_data()
-	GlobalToaster.show_toast_message("All local data has been cleared\ncurrent game will not function properly if not saved again")

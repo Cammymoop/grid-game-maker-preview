@@ -84,11 +84,12 @@ func ___clear_local_data() -> void:
 			recurse.call(dir_path.path_join(subdirectory), recurse)
 		for file_name in DirAccess.get_files_at(dir_path):
 			DirAccess.remove_absolute(dir_path.path_join(file_name))
+		DirAccess.remove_absolute(dir_path)
 	for data_dir in [games_subdir, shared_assets_subdir, local_data_subdir]:
-		var data_dir_path: = _data_path(data_dir)
-		if not smarter_dir_exists(data_dir_path):
+		var data_subdir_path: = _data_path(data_dir)
+		if not smarter_dir_exists(data_subdir_path):
 			continue
-		recursive_delete.call(data_dir_path, recursive_delete)
+		recursive_delete.call(data_subdir_path, recursive_delete)
 	DirAccess.remove_absolute(_data_path("default_game"))
 	auto_import_all_example_games_if_first_run = false
 	init_folders()
@@ -733,6 +734,8 @@ func import_example_game_levels_and_assets(example_game_dir_path: String, target
 	var IMAGES: = "game_data/assets/images"
 	var AUDIO: = "game_data/assets/audio"
 	
+	prints("importing assets and levels from %s to %s" % [example_game_dir_path, target_game_dir])
+	
 	var warnings: Array[String] = []
 	
 	for subdir: String in [LEVELS, IMAGES, AUDIO]:
@@ -743,14 +746,29 @@ func import_example_game_levels_and_assets(example_game_dir_path: String, target
 		for a_file: String in _iter_directory_flat_filtered(from_dir, [], true, false):
 			if a_file == "editor_autosave.json":
 				continue
-			var from_absolute_path: = ProjectSettings.globalize_path(from_dir.path_join(a_file))
+			var from_absolute_path: = smarter_globalize_res_path(from_dir.path_join(a_file))
 			if OS.has_feature("web"):
 				from_absolute_path = from_dir.path_join(a_file)
 			var to_absolute_path: = ProjectSettings.globalize_path(to_dir.path_join(a_file))
-			var error: = DirAccess.copy_absolute(from_absolute_path, to_absolute_path)
-			if error != OK:
-				push_warning("Error copying example game asset/level file %s to %s: %s" % [a_file, to_absolute_path, error_string(error)])
-				warnings.append("Failed to copy %s" % [subdir + "/" + a_file])
+
+			if Utility.is_mobile():
+				to_absolute_path = to_dir.path_join(a_file)
+
+			if Utility.is_mobile():
+				var file_bytes: = FileAccess.get_file_as_bytes(from_absolute_path)
+				var f_write: = FileAccess.open(to_absolute_path, FileAccess.WRITE)
+				if not f_write:
+					push_error("Error opening file for writing during example import: %s" % [to_absolute_path])
+					warnings.append("Failed to copy %s because the file could not be opened for writing" % [subdir + "/" + a_file])
+				else:
+					if not f_write.store_buffer(file_bytes):
+						push_error("Error writing file bytes to file during example import: %s" % [to_absolute_path])
+						warnings.append("Failed to copy %s because the file could not be written to" % [subdir + "/" + a_file])
+			else:
+				var error: = DirAccess.copy_absolute(from_absolute_path, to_absolute_path)
+				if error != OK:
+					push_warning("Error copying example game asset/level file %s from ''%s'' to ''%s'': %s" % [a_file, from_absolute_path, to_absolute_path, error_string(error)])
+					warnings.append("Failed to copy %s" % [subdir + "/" + a_file])
 	return warnings
 
 func copy_assets_and_levels_to(from_game_name: String, to_game_name: String) -> void:
@@ -844,12 +862,12 @@ func _fix_name_in_game_definition(game_definition: Dictionary, correct_name: Str
 		return
 
 func smarter_dir_exists(dir_path: String) -> bool:
-	if OS.has_feature("web"):
-		return web_dir_exists(dir_path)
+	if Utility.is_web_or_mobile():
+		return web_mobile_dir_exists(dir_path)
 	var path_abs: = ProjectSettings.globalize_path(dir_path)
 	return DirAccess.dir_exists_absolute(path_abs)
 
-func web_dir_exists(dir_path: String) -> bool:
+func web_mobile_dir_exists(dir_path: String) -> bool:
 	var path_localized: = ProjectSettings.localize_path(dir_path)
 	if path_localized.begins_with("user://"):
 		return DirAccess.dir_exists_absolute(path_localized)
@@ -1178,3 +1196,19 @@ func get_non_bundled_level_info(for_game_name: String) -> Dictionary:
 	if not level_list_info:
 		return {}
 	return level_list_info
+
+
+func smarter_globalize_res_path(res_path: String) -> String:
+	if not res_path.begins_with("res://"):
+		push_error("passed a non-res:// path to smarter_globalize_res_path: %s" % [res_path])
+		return ""
+	
+	if Utility.is_web_or_mobile():
+		return res_path
+
+	if OS.has_feature("editor"):
+		return ProjectSettings.globalize_path(res_path)
+	
+	var path_without_res: = res_path.trim_prefix("res://")
+	return OS.get_executable_path().get_base_dir().path_join(path_without_res)
+
