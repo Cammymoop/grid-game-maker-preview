@@ -148,26 +148,34 @@ func refresh_icons_and_text() -> void:
     title_label.remove_theme_color_override("font_color")
     title_label.remove_theme_font_override("font")
     title_label.remove_theme_font_size_override("font_size")
+
+    if _is_current_level:
+        title_label.add_theme_font_override("font", current_level_font)
+        title_label.add_theme_font_size_override("font_size", current_level_font_size)
+
+    start_level_button.visible = false
+    if _is_edit_mode:
+        dot_icon.visible = false
+        check_icon.visible = false
+        locked_icon.visible = false
+        return
+
     dot_icon.visible = is_unlocked and is_played and not is_completed
     check_icon.visible = is_unlocked and is_completed
     locked_icon.visible = not is_unlocked
     
     if is_completed:
         title_label.add_theme_color_override("font_color", completed_color)
-        title_label.add_theme_font_override("font", completed_font)
+        if not _is_current_level:
+            title_label.add_theme_font_override("font", completed_font)
     elif not is_unlocked:
         title_label.add_theme_color_override("font_color", locked_color)
     elif is_played:
         title_label.add_theme_color_override("font_color", dot_icon.self_modulate)
-    elif start_level_button.visible:
+    else:
         title_label.add_theme_color_override("font_color", unplayed_color)
-
-    if _is_current_level:
-        title_label.add_theme_font_override("font", current_level_font)
-        title_label.add_theme_font_size_override("font_size", current_level_font_size)
     
-    if not _is_edit_mode and not is_unlocked:
-        start_level_button.visible = false
+    start_level_button.visible = is_unlocked
 
 func on_start_level_button_pressed() -> void:
     if not level_name:

@@ -792,4 +792,5 @@ func set_expand_all_lists(new_is_expanded: bool) -> void:
     for list in all_lists:
         list.set_expanded(focused_list == list, false)
     
+    await get_tree().process_frame
     set_level_list_container_min_height()

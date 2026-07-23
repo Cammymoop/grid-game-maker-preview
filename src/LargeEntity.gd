@@ -59,8 +59,8 @@ func _deserialize_shape_mask(serialized_shape_mask: Dictionary) -> Dictionary[Ve
 		deserialized_shape_mask[offset] = serialized_shape_mask[offset_key]
 	return deserialized_shape_mask
 
-func serialize() -> Dictionary:
-	var serialized = super.serialize()
+func serialize(static_mode: bool = false) -> Dictionary:
+	var serialized = super.serialize(static_mode)
 	serialized["can_be_large"] = true
 	serialized["entity_size"] = Utility.get_arr_from_vector2(entity_size)
 	serialized["use_mask"] = use_mask

@@ -116,7 +116,7 @@ theme_override_constants/margin_bottom = 4
 
 [node name="ListOfListsOfLevels" type="VBoxContainer" parent="Lists/ScrollContainer/MarginContainer" unique_id=1969060177]
 layout_mode = 2
-theme_override_constants/separation = 16
+theme_override_constants/separation = 6
 
 [node name="RerrangeAddListContainer" type="HBoxContainer" parent="Lists" unique_id=916705879]
 visible = false

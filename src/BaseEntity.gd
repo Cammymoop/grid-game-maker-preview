@@ -210,10 +210,10 @@ func _handle_removed_entities() -> void:
 	if friend_instance_id > -1 and not EntityManager.has_instance(friend_instance_id):
 		friend_instance_id = -1
 
-func serialize() -> Dictionary:
+func serialize(static_mode: bool = false) -> Dictionary:
 	var important_stuff = {}
 	important_stuff['entity_index'] = entity_index
-	important_stuff['active'] = active
+	important_stuff['active'] = (active or static_mode)
 	important_stuff['instance_id'] = instance_id
 	important_stuff['facing'] = facing
 	important_stuff['position'] = Utility.get_arr_from_vector2(position)
@@ -233,7 +233,7 @@ func serialize() -> Dictionary:
 		important_stuff['_this_move_is_teleport'] = _this_move_is_teleport
 		important_stuff['_from_tile_pos'] = Utility.get_arr_from_vector2(_from_tile_pos)
 	
-	if tailing and is_instance_valid(tailing):
+	if not static_mode and tailing and is_instance_valid(tailing):
 		important_stuff['tailing'] = tailing.instance_id
 	
 	if is_move_interp_override:
@@ -249,9 +249,11 @@ func serialize() -> Dictionary:
 	if subordinate_entities.size() > 0:
 		important_stuff['subordinate_entities'] = subordinate_entities
 	
-	var serialized_sprite: Dictionary = sprite.get_serialized_info()
-	if serialized_sprite:
-		important_stuff['serialized_sprite'] = serialized_sprite
+	if not static_mode:
+		var default_rotation: float = Utility.facing_rotation(facing)
+		var serialized_sprite: Dictionary = sprite.get_serialized_info(default_rotation)
+		if serialized_sprite:
+			important_stuff['serialized_sprite'] = serialized_sprite
 	
 	return important_stuff
 
@@ -315,8 +317,9 @@ func deserialize(data: Dictionary) -> void:
 		set_tailing(EntityManager.get_instance(data['tailing']))
 
 func deserialize_sprite(data: Dictionary) -> void:
+	var default_rotation: float = Utility.facing_rotation(facing)
 	if "serialized_sprite" in data:
-		sprite.deserialize_sprite_info(data['serialized_sprite'].duplicate_deep())
+		sprite.deserialize_sprite_info(data['serialized_sprite'].duplicate_deep(), default_rotation)
 
 func set_active(new_active: bool) -> void:
 	EntityManager.set_entity_active(self, new_active)

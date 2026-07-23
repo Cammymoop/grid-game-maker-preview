@@ -390,10 +390,11 @@ func clear_modifiers() -> void:
     _animation_timers.clear()
     refresh_layers()
 
-func get_serialized_info() -> Dictionary:
-    var serialized_info: Dictionary = {
-        "current_rotation": current_rotation,
-    }
+func get_serialized_info(default_rotation: float = 0.0) -> Dictionary:
+    var serialized_info: Dictionary = {}
+    if not is_equal_approx(current_rotation, default_rotation):
+        serialized_info["current_rotation"] = current_rotation
+
     if not _all_modifiers.is_empty():
         serialized_info["modifiers"] = _all_modifiers.duplicate_deep()
         serialized_info["animation_timers"] = _animation_timers.duplicate()
@@ -403,10 +404,13 @@ func get_serialized_info() -> Dictionary:
         serialized_info["spawning_with_animated_mod"] = _spawning_with_animated_mod
     return serialized_info
 
-func deserialize_sprite_info(info: Dictionary) -> void:
+func deserialize_sprite_info(info: Dictionary, default_rotation: float = 0.0) -> void:
     clear_modifiers()
     if info.has("current_rotation"):
         current_rotation = info["current_rotation"]
+    else:
+        current_rotation = default_rotation
+
     var animation_timers: Dictionary = info.get("animation_timers", {})
     for modifier_name in info.get("modifiers", {}):
         apply_modifier_info(info["modifiers"][modifier_name])

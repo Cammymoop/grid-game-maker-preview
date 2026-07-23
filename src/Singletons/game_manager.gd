@@ -4059,9 +4059,67 @@ func ensure_level_has_name(level_data: Dictionary, fallback_name: String) -> voi
 	else:
 		level_data["name"] = Utility.random_animal()
 
+func _level_data_has_any_entities(level_data: Dictionary) -> bool:
+	if not level_data.has("state"):
+		return false
+	if not level_data["state"].has("entities"):
+		return false
+	if not level_data["state"]["entities"].get("entity_list", []).size() > 0:
+		return false
+	return true
+
+func _make_entity_data_short(level_data: Dictionary) -> Dictionary:
+	level_data = level_data.duplicate_deep()
+	if not _level_data_has_any_entities(level_data):
+		return level_data
+	
+	var template_entity: BaseEntity = BaseEntity.new()
+	var default_template_data: Dictionary = template_entity.serialize(true)
+	
+	var old_entity_list: Array = level_data["state"]["entities"]["entity_list"]
+	level_data["state"]["entities"]["entity_list"] = []
+	for entity_data in old_entity_list:
+		if not typeof(entity_data) == TYPE_DICTIONARY:
+			continue
+		var minified_entity: Dictionary = {}
+		for key in entity_data.keys():
+			if key not in default_template_data:
+				minified_entity[key] = entity_data[key]
+			elif default_template_data[key] != entity_data[key]:
+				minified_entity[key] = entity_data[key]
+		if minified_entity["next_tile_pos"] == minified_entity["tile_position"]:
+			minified_entity.erase("next_tile_pos")
+		level_data["state"]["entities"]["entity_list"].append(minified_entity)
+	return level_data
+
+func _expand_entity_data(level_data: Dictionary) -> Dictionary:
+	level_data = level_data.duplicate_deep()
+	if not _level_data_has_any_entities(level_data):
+		return level_data
+	
+	var template_entity: BaseEntity = BaseEntity.new()
+	var default_template_data: Dictionary = template_entity.serialize(true)
+	
+	var old_entity_list: Array = level_data["state"]["entities"]["entity_list"]
+	level_data["state"]["entities"]["entity_list"] = []
+	for compressed_entity in old_entity_list:
+		if not typeof(compressed_entity) == TYPE_DICTIONARY:
+			continue
+		if not compressed_entity.has("next_tile_pos"):
+			compressed_entity["next_tile_pos"] = compressed_entity["tile_position"].duplicate()
+
+		var expanded_entity: Dictionary = default_template_data.duplicate_deep()
+		expanded_entity.merge(compressed_entity, true)
+		level_data["state"]["entities"]["entity_list"].append(expanded_entity)
+	return level_data
+	
+	
+
 
 func clipboardify_level_data(level_data: Dictionary) -> String:
-	var stringified: = JSON.stringify(level_data, "", false)
+	var with_short_entities: = _make_entity_data_short(level_data)
+
+	var stringified: = JSON.stringify(with_short_entities, "", false)
 	var uncompressed_data: = stringified.to_utf8_buffer()
 	var compressed_b64: = Marshalls.raw_to_base64(uncompressed_data.compress(FileAccess.COMPRESSION_ZSTD))
 	if not compressed_b64:
@@ -4094,7 +4152,8 @@ func declipboardify_level_data(clipboard_data: String) -> Dictionary:
 	if not parsed_data is Dictionary:
 		push_error("Parsed level data from clipboard is not a dictionary: %s" % parsed_data)
 		return {}
-	return parsed_data
+	return _expand_entity_data(parsed_data)
+	#return parsed_data
 
 func load_level_from_clipboard_string(clipboard_data: String) -> bool:
 	if cur_scene != "Play" or queued_level_load:

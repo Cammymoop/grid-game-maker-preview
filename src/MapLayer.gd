@@ -58,12 +58,27 @@ func serialize() -> Dictionary:
 	var x_range = range(start_x, rect.end.x)
 	for y in range(start_y, rect.end.y):
 		var row = []
+		var skip: int = 0
+		var max_index: int = 0
+		var has_any_tile: bool = false
 		for x in x_range:
 			var coords: = Vector2i(x, y)
-			row.append([get_cell_s(coords), get_cell_alternative_tile(coords)])
+			var tile_id: = get_cell_s(coords)
+			if tile_id == -1:
+				if not has_any_tile:
+					skip += 1
+					continue
+			else:
+				max_index = maxi(max_index, row.size())
+				has_any_tile = true
+			var facing: int = get_cell_facing(coords)
+			row.append(tile_id << 2 | facing)
+			#row.append([get_cell_s(coords), get_cell_alternative_tile(coords)])
+		row.resize(max_index)
+		row.push_front(skip)
 		rows.append(row)
 	
-	return {"start_x": start_x, "start_y": start_y, "has_alt_ids": true, "tiles": rows}
+	return {"start_x": start_x, "start_y": start_y, "small": true, "tiles": rows}
 
 func deserialize(data: Dictionary) -> void:
 	clear()
@@ -73,15 +88,31 @@ func deserialize(data: Dictionary) -> void:
 	var sy: = int(data['start_y'])
 	
 	var has_alt_ids: bool = data.get("has_alt_ids", false)
-	
-	for y in tile_data.size():
-		var row = tile_data[y]
-		for x in row.size():
-			var coords: = Vector2i(x + sx, y + sy)
-			var tile_source_id: int = int(row[x][0]) if has_alt_ids else int(row[x])
-			if not tile_set.has_source(tile_source_id):
-				continue
-			if has_alt_ids:
-				set_cell_s(coords, int(row[x][0]), Utility.facing_from_tile_alt_id(int(row[x][1])))
-			else:
-				set_cell_s(coords, int(row[x]))
+	var small: bool = data.get("small", false)
+
+	if has_alt_ids:
+		for y in tile_data.size():
+			var row = tile_data[y]
+			for x in row.size():
+				var coords: = Vector2i(x + sx, y + sy)
+				var tile_source_id: int = int(row[x][0])
+				if not tile_set.has_source(tile_source_id):
+					continue
+				set_cell_s(coords, tile_source_id, Utility.facing_from_tile_alt_id(int(row[x][1])))
+	else:
+		for y in tile_data.size():
+			var row = tile_data[y]
+			var skip: int = 0
+			if small:
+				skip = int(row.pop_front())
+			for x in row.size():
+				var coords: = Vector2i(x + sx + skip, y + sy)
+				var int_val: = int(row[x])
+				if small:
+					if not tile_set.has_source(int_val >> 2):
+						continue
+					set_cell_s(coords, int_val >> 2, int_val & 3)
+				else:
+					if not tile_set.has_source(int_val):
+						continue
+					set_cell_s(coords, int_val)

@@ -25,6 +25,7 @@ var is_editing_locked: bool = false
 var level_item_scene: = preload("res://Scenes/level_list_item.tscn")
 
 @export var list_name_label: Label
+@export var empty_list_label: Label
 @export var list_completion_label: Label
 @export var level_item_container: Container
 @export var edit_settings_icon_button: ButtonContainer
@@ -65,6 +66,8 @@ const CTX_MOVE_TO_LAST_LIST = 17
 const CTX_REMOVE_FROM_LIST = 21 
 const CTX_REMOVE_FROM_ALL_LISTS = 22 
 
+
+const CTX_SUBMENU = 999
 
 func _ready() -> void:
     if not GameManager.is_in_level_edit_mode:
@@ -202,7 +205,10 @@ func set_level_list_name(new_level_list_name: String) -> void:
         list_name_label.text = ["??", "Elsewhere"].pick_random()
 
 func refresh_expand_stuff() -> void:
-    levels_section.visible = is_expanded
+    var has_any_levels: = level_item_container.get_child_count() > 0
+    expand_collapse_texture_button.visible = has_any_levels
+
+    levels_section.visible = is_expanded and has_any_levels
     
     if is_expanded:
         expand_collapse_texture_button.texture = collapse_icon
@@ -213,17 +219,21 @@ func refresh_expand_stuff() -> void:
         expand_collapse_texture_button.modulate = Color(darker, 1.0)
 
 func refresh_list() -> void:
-    refresh_expand_stuff()
 
     clear_level_items()
     var levels_with_info: Array[Dictionary] = GameManager.get_levels_to_show_in_level_list(level_list_name, _is_in_edit_mode(), is_list_of_unlisted_levels)
+    var has_any_levels: = false
     for level_info in levels_with_info:
         if not _is_in_edit_mode() and is_hidden_list and not level_info["is_current_level"]:
             continue
         elif level_info["is_hidden"]:
             continue
+        has_any_levels = true
         _add_level_item(level_info)
+    
+    empty_list_label.visible = not has_any_levels
 
+    refresh_expand_stuff()
     refresh_all_items_move_buttons()
 
 #func _add_level_item(with_level_name: String, with_level_title: String, as_played: bool, as_completed: bool) -> LevelListItem:
@@ -282,9 +292,29 @@ func on_level_item_request_context_menu(level_item: LevelListItem) -> void:
             Utility.popupmenu_set_enabled_for_id(context_menu, CTX_MOVE_DOWN, false)
             Utility.popupmenu_set_enabled_for_id(context_menu, CTX_MOVE_TO_BOTTOM, false)
     
-    var total_lists: int = get_total_list_count()
+    if context_menu.item_count > 0:
+        context_menu.add_separator()
 
-    context_menu.add_separator()
+    var game_is_locked: = GameManager.current_game_is_release_locked
+    var is_custom: = not is_list_of_unlisted_levels and level_list_name and not GameManager.is_level_list_bundled(level_list_name)
+    var move_to_list_targets: Array[String] = []
+    if not game_is_locked:
+        for list_name in GameManager.get_list_of_level_lists(true):
+            if not list_name == level_list_name and not list_name in move_to_list_targets:
+                move_to_list_targets.append(list_name)
+    if not game_is_locked or is_list_of_unlisted_levels or is_custom:
+        for list_name in GameManager.get_list_of_non_bundled_level_lists():
+            if not list_name == level_list_name and not list_name in move_to_list_targets:
+                move_to_list_targets.append(list_name)
+    
+    if move_to_list_targets.size() > 0:
+        var submenu: = PopupMenu.new()
+        for list_name in move_to_list_targets:
+            submenu.add_item(list_name)
+        
+        submenu.index_pressed.connect(on_move_to_list_ctx_menu_pressed.bind(submenu, level_item))
+        context_menu.add_submenu_node_item("Move to list", submenu)
+
     if not is_list_of_unlisted_levels:
         context_menu.add_item("Move to previous list", CTX_MOVE_TO_LIST_ABOVE)
         if not has_list_above:
@@ -293,13 +323,13 @@ func on_level_item_request_context_menu(level_item: LevelListItem) -> void:
         if not has_list_below:
             context_menu.set_item_disabled(context_menu.item_count - 1, true)
 
-    if total_lists >= 1:
-        context_menu.add_item("Move to first list", CTX_MOVE_TO_FIRST_LIST)
-        if not has_list_above and not is_list_of_unlisted_levels:
-            context_menu.set_item_disabled(context_menu.item_count - 1, true)
-        context_menu.add_item("Move to last list", CTX_MOVE_TO_LAST_LIST)
-        if not has_list_below and not is_list_of_unlisted_levels:
-            context_menu.set_item_disabled(context_menu.item_count - 1, true)
+    #if total_lists >= 1:
+    #    context_menu.add_item("Move to first list", CTX_MOVE_TO_FIRST_LIST)
+    #    if not has_list_above and not is_list_of_unlisted_levels:
+    #        context_menu.set_item_disabled(context_menu.item_count - 1, true)
+    #    context_menu.add_item("Move to last list", CTX_MOVE_TO_LAST_LIST)
+    #    if not has_list_below and not is_list_of_unlisted_levels:
+    #        context_menu.set_item_disabled(context_menu.item_count - 1, true)
 
     if not is_list_of_unlisted_levels:
         context_menu.add_item("Remove from this list", CTX_REMOVE_FROM_LIST)
@@ -409,6 +439,16 @@ func on_context_menu_id_pressed(context_menu_id: int, for_list_item: LevelListIt
                 to_list_name = all_lists[idx]
                 GameManager.move_level_to_level_list(for_list_item.level_name, all_lists[idx], level_list_name)
         list_membership_changed.emit(level_name, to_list_name)
+
+func on_move_to_list_ctx_menu_pressed(index: int, move_to_list_menu: PopupMenu, for_list_item: LevelListItem) -> void:
+    var to_list_name: String = move_to_list_menu.get_item_text(index)
+    GameManager.move_level_to_level_list(for_list_item.level_name, to_list_name)
+
+    var is_list_bundled: = GameManager.is_level_list_bundled(to_list_name)
+    if is_list_bundled != not is_showing_custom_levels():
+        list_membership_changed.emit("", level_list_name)
+    else:
+        list_membership_changed.emit(for_list_item.level_name, to_list_name)
 
 func get_first_focusable_list_item() -> LevelListItem:
     for list_item in level_item_container.get_children():
