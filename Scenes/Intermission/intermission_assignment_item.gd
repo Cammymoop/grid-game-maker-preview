@@ -79,7 +79,7 @@ func on_down_button_pressed() -> void:
     _move_pressed(1)
 
 func _move_pressed(direction: int) -> void:
-    if Input.is_action_pressed("editor_alt_mode_hold"):
+    if Utility.is_holding_alt_mode():
         request_move_top_bottom.emit(direction)
     else:
         request_move_relative.emit(direction)

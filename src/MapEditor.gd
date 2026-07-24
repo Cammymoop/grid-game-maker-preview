@@ -352,7 +352,7 @@ func pick_entity(entity: BaseEntity) -> void:
 	has_copied_properties = entity.has_any_local_properties() or not entity.active
 	if entity is LargeEntity and not entity.is_default_size():
 		has_copied_properties = true
-	if is_alt_mode_active():
+	if Utility.is_holding_alt_mode():
 		has_copied_properties = false
 
 	if has_copied_properties:
@@ -589,7 +589,7 @@ func _standard_delete_at_cursor(force_everything: bool = false, force_only_entit
 		MapManager.erase_tiles_and_effects_at(cursor_tile_pos)
 
 	if entities_here.size() > 0:
-		if not is_alt_mode_active():
+		if not Utility.is_holding_alt_mode():
 			entities_here = [entities_here[0]]
 		for e in entities_here:
 			EntityManager.remove_entity(e)
@@ -717,7 +717,7 @@ func process_new_mouse_position() -> void:
 	move_cursor(tile_pos)
 	if cursor_mode == "text":
 		var snapped_mouse_pos: = new_mouse_pos
-		if not is_alt_mode_active():
+		if not Utility.is_holding_alt_mode():
 			snapped_mouse_pos = snapped_mouse_pos.snapped(text_place_snap)
 		var tile_center_pos: = MapManager.tile_to_world_position_centered(tile_pos)
 		set_placing_text_offset(snapped_mouse_pos - tile_center_pos)
@@ -785,7 +785,7 @@ func forwarded_gui_input(event: InputEvent, viewport: Viewport) -> void:
 	var scroll_down: = Utility.fixed_just_pressed_by_event("scroll_down", event)
 	if scroll_up or scroll_down:
 		var direction = 1 if scroll_up else -1
-		if is_alt_mode_active():
+		if Utility.is_holding_alt_mode():
 			if cursor_mode == "entity" or cursor_mode == "tile":
 				set_current_facing(posmod(get_current_facing() + direction, 4))
 		else:
@@ -804,7 +804,7 @@ func forwarded_gui_input(event: InputEvent, viewport: Viewport) -> void:
 		return
 	
 	if Utility.fixed_just_pressed_by_event("editor_do_text", event, false):
-		var alt_mode: = is_alt_mode_active()
+		var alt_mode: = Utility.is_holding_alt_mode()
 		if cursor_mode == "text" and not alt_mode:
 			set_cursor_mode(_last_tile_entity_mode)
 		else:
@@ -955,13 +955,6 @@ func set_current_facing(facing: int) -> void:
 		current_tile_facing = facing
 	preview.rotation = Utility.facing_rotation(facing)
 
-func is_alt_mode_active() -> bool:
-	if Input.is_key_pressed(KEY_SHIFT):
-		return true
-	if Input.is_action_pressed("editor_alt_mode_hold"):
-		return true
-	return false
-
 func on_visibility_changed() -> void:
 	map_editor_overlay.visible = visible
 
@@ -1038,7 +1031,7 @@ func on_placeable_text_input_panel_text_picked(text: String) -> void:
 
 func hold_show_add_placeable_text_panel() -> void:
 	var use_text: = ""
-	if Input.is_action_pressed("editor_alt_mode_hold"):
+	if Utility.is_holding_alt_mode():
 		use_text = _placing_text_string
 	show_add_placeable_text_panel(use_text)
 

@@ -40,6 +40,8 @@ var texture_dialog = preload("res://Scenes/GameEditor/BetterTextureDialog.tscn")
 @export var brush_secondary_color_picker: ColorPickerButton
 @export var swap_colors_button: ButtonContainer
 
+@export var tile_canvas: TextureRect
+
 var save_as_name: = ""
 
 var edited_is_bundled: bool = false
@@ -368,8 +370,21 @@ func color_brush() -> void:
 				lightness_max = maxf(lightness_max, source_lightness)
 				lightness_min = minf(lightness_min, source_lightness)
 		var lightness_normalized_span: = lightness_max - lightness_min
-		lightness_normalized_scale = 1.0 / lightness_normalized_span
 		lightness_bright_factor = (1 - lightness_min) / lightness_normalized_span
+		if not is_zero_approx(lightness_normalized_span):
+			lightness_normalized_scale = 1.0 / lightness_normalized_span
+		else:
+			# if there's only one lightness value then set up params to always get a lerp factor of 1 (primary color)
+			if is_zero_approx(lightness_max):
+				lightness_min = -1
+				lightness_normalized_scale = 1
+			else:
+				lightness_normalized_scale = 1.0 / lightness_min
+				lightness_min = 0.0
+			
+			if mode_colorize:
+				lightness_min = 1.0
+				lightness_bright_factor = 0.0
 	
 	for x in range(img.get_width()):
 		for y in range(img.get_height()):
@@ -438,6 +453,7 @@ func do_corner_paint(corner: Rect2i, dest_image: Image) -> void:
 	if brush_creator_mode == "erase":
 		dest_image.blit_rect(transparent_img, corner, corner.position)
 	elif brush_creator_mode == "replace":
+		dest_image.blit_rect(transparent_img, corner, corner.position)
 		dest_image.blit_rect(picked_colored_brush_image, src_rect, corner.position)
 	elif brush_creator_mode == "over":
 		dest_image.blend_rect(picked_colored_brush_image, src_rect, corner.position)
@@ -489,6 +505,67 @@ func _rect_mode_paint(src_rect: Rect2i, dest_image: Image, dest_rect: Rect2i, co
 	elif brush_creator_mode == "hole cut":
 		alpha_subtract(picked_colored_brush_image, dest_image, expanded_src_rect, expanded_dest_rect.position)
 
+func _single_pixel_paint_mode(dest_image: Image, dest_pos: Vector2i) -> void:
+	if brush_creator_mode == "erase":
+		dest_image.set_pixelv(dest_pos, Color.TRANSPARENT)
+		return
+	elif brush_creator_mode == "replace":
+		dest_image.set_pixelv(dest_pos, brush_color)
+		return
+
+	var paint_color: = Color.WHITE
+	var dest_color: = dest_image.get_pixelv(dest_pos)
+	if brush_creator_mode == "over":
+		paint_color = dest_color.blend(brush_color)
+	elif brush_creator_mode == "under":
+		paint_color = brush_color.blend(dest_color)
+	elif brush_creator_mode == "stamp":
+		paint_color = Color(dest_color.blend(brush_color), dest_color.a)
+	elif brush_creator_mode == "cut":
+		paint_color = Color(dest_color, minf(brush_color.a, dest_color.a))
+	elif brush_creator_mode == "hole cut":
+		paint_color = Color(dest_color, maxf(0, dest_color.a - brush_color.a))
+
+	dest_image.set_pixelv(dest_pos, paint_color)
+
+func flood_fill_paint_mode(dest_image: Image, start_pos: Vector2i) -> void:
+	var image_rect: = Rect2i(Vector2i.ZERO, dest_image.get_size())
+	if not image_rect.has_point(start_pos):
+		return
+	
+	var visited_positions: Array[Vector2i] = []
+	var outer_edges: Array[Vector2i] = []
+	var fill_on_color: = dest_image.get_pixelv(start_pos)
+	
+	var difference_threshold: = 0.01 * 0.01
+	
+	outer_edges.append(start_pos)
+	visited_positions.append(start_pos)
+
+	var safety: = 100000
+	while outer_edges.size() > 0 and safety > 0:
+		safety -= 1
+		
+		var at_pos: = outer_edges.pop_front() as Vector2i
+		_single_pixel_paint_mode(dest_image, at_pos)
+		for adjacent_pos in _get_new_positions_around(at_pos, visited_positions, image_rect):
+			var color_here: = dest_image.get_pixelv(adjacent_pos)
+			var difference: = Utility.color_ok_hsl_difference(color_here, fill_on_color).length_squared()
+			if difference < difference_threshold:
+				outer_edges.append(adjacent_pos)
+				visited_positions.append(adjacent_pos)
+	
+
+func _get_new_positions_around(from_pos: Vector2i, cur_pos_list: Array[Vector2i], clip_rect: Rect2i) -> Array[Vector2i]:
+	var new_positions: Array[Vector2i] = []
+	for pos: Vector2i in [Vector2i.UP, Vector2i.DOWN, Vector2i.LEFT, Vector2i.RIGHT]:
+		var new_pos: = from_pos + pos
+		if not clip_rect.has_point(new_pos) or new_pos in cur_pos_list:
+			continue
+		new_positions.append(new_pos)
+	return new_positions
+
+
 func get_positioned_corner(corner_index: int, in_size: Vector2i, at_position: Vector2i) -> Rect2i:
 	if corner_index == -1:
 		return Rect2i(Vector2i.ZERO, in_size)
@@ -519,13 +596,17 @@ func alpha_subtract(from_image: Image, to_image, src_rect: Rect2i, dest_offset: 
 	var w = src_rect.size.x
 	var h = src_rect.size.y
 	var src_offset = src_rect.position
+	var to_image_rect: = Rect2i(Vector2i.ZERO, to_image.get_size())
 	
 	for x in range(w):
 		for y in range(h):
+			var dest_pos: = Vector2i(dest_offset.x + x, dest_offset.y + y)
+			if not to_image_rect.has_point(dest_pos):
+				continue
 			var alpha: = _extended_get_pixel_alpha8(from_image, src_offset.x + x, src_offset.y + y)
-			var cur_pixel: Color = to_image.get_pixel(dest_offset.x + x, dest_offset.y + y)
+			var cur_pixel: Color = to_image.get_pixelv(dest_pos)
 			cur_pixel.a8 = int(max(0, cur_pixel.a8 - alpha))
-			to_image.set_pixel(dest_offset.x + x, dest_offset.y + y, cur_pixel)
+			to_image.set_pixelv(dest_pos, cur_pixel)
 
 func _extended_get_pixel_alpha8(image: Image, x: int, y: int) -> int:
 	if x < 0 or y < 0 or x >= image.get_width() or y >= image.get_height():
@@ -536,13 +617,17 @@ func alpha_min(from_image: Image, to_image: Image, src_rect: Rect2i, dest_offset
 	var w = src_rect.size.x
 	var h = src_rect.size.y
 	var src_offset = src_rect.position
+	var to_image_rect: = Rect2i(Vector2i.ZERO, to_image.get_size())
 	
 	for x in range(w):
 		for y in range(h):
+			var dest_pos: = Vector2i(dest_offset.x + x, dest_offset.y + y)
+			if not to_image_rect.has_point(dest_pos):
+				continue
 			var brush_alpha: = _extended_get_pixel_alpha8(from_image, src_offset.x + x, src_offset.y + y)
-			var cur_pixel: Color = to_image.get_pixel(dest_offset.x + x, dest_offset.y + y)
+			var cur_pixel: Color = to_image.get_pixelv(dest_pos)
 			cur_pixel.a8 = int(min(cur_pixel.a8, brush_alpha))
-			to_image.set_pixel(dest_offset.x + x, dest_offset.y + y, cur_pixel)
+			to_image.set_pixelv(dest_pos, cur_pixel)
 
 # paints the specified region onto to_image, while leaving the alpha channel unmodified
 func stamp_blit(from_image: Image, to_image: Image, src_rect: Rect2i, dest_offset: Vector2) -> void:
@@ -1056,24 +1141,46 @@ func _on_vis_changed():
 var click_paint_holding_click: bool = false
 var click_paint_last_pos: Vector2 = Vector2.ZERO
 var click_paint_last_was_in_bounds: bool = false
-func start_click_paint() -> void:
+func start_click_paint(at_pos: Vector2) -> void:
 	undoer.save_current_image("tile_brush", tile_brush_image)
 	click_paint_holding_click = true
-	click_paint_last_was_in_bounds = false
+	click_paint_last_pos = at_pos
+	click_paint_last_was_in_bounds = true
+
+func set_primary_color(color: Color) -> void:
+	brush_color = color
+	brush_color_picker.color = color
+	update_picked_colored_brush()
 
 func _on_brush_view_gui_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_MASK_LEFT:
 		if click_paint_holding_click and not event.is_pressed():
 			click_paint_holding_click = false
 		if event.is_pressed():
-			if toggled_corner_index == -2:
-				start_click_paint()
-			else:
-				var at_pixel_pos: Vector2 = event.position / tile_brush_canvas.size * Vector2(tile_brush_image.get_size())
-				paint_positioned_corner_at_pos(at_pixel_pos)
+			var at_pixel_pos: Vector2 = event.position / tile_brush_canvas.size * Vector2(tile_brush_image.get_size())
+			var clip_rect: = Rect2i(Vector2i.ZERO, tile_brush_image.get_size())
+			if clip_rect.has_point(at_pixel_pos.floor()):
+				if Utility.is_holding_alt_mode():
+					var picked_color: = tile_brush_image.get_pixelv(at_pixel_pos.floor())
+					set_primary_color(picked_color)
+				else:
+					if toggled_corner_index == -2:
+						start_click_paint(at_pixel_pos)
+						_single_pixel_paint_mode(tile_brush_image, at_pixel_pos.floor())
+						update_tile_brush_preview()
+					else:
+						paint_positioned_corner_at_pos(at_pixel_pos)
+	
+	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_MASK_RIGHT:
+		if event.is_pressed() and toggled_corner_index == -2 and not click_paint_holding_click:
+			var at_pixel_pos: Vector2 = event.position / tile_brush_canvas.size * Vector2(tile_brush_image.get_size())
+			undoer.save_current_image("tile_brush", tile_brush_image)
+			flood_fill_paint_mode(tile_brush_image, at_pixel_pos.floor())
+			update_tile_brush_preview()
 	
 	if event is InputEventMouseMotion:
 		var cur_pos: Vector2 = event.position / tile_brush_canvas.size * Vector2(tile_brush_image.get_size())
+		var set_cross_cursor: = false
 		if click_paint_holding_click:
 			var prev_pos: = click_paint_last_pos
 			click_paint_last_pos = cur_pos
@@ -1084,19 +1191,29 @@ func _on_brush_view_gui_input(event: InputEvent) -> void:
 
 			if click_paint_last_was_in_bounds:
 				for pixel_pos in bresenham_line(prev_pos, cur_pos):
-					tile_brush_image.set_pixelv(pixel_pos, brush_color)
+					_single_pixel_paint_mode(tile_brush_image, pixel_pos)
 			else:
-				tile_brush_image.set_pixelv(cur_pos.floor(), brush_color)
+				_single_pixel_paint_mode(tile_brush_image, cur_pos.floor())
 			update_tile_brush_preview()
 			
 			click_paint_last_was_in_bounds = true
+		elif Utility.is_holding_alt_mode():
+			set_cross_cursor = true
+			update_tile_brush_preview()
 		elif toggled_corner_index != -2:
 			preview_positioned_corner_at_pos(cur_pos)
+
+		if set_cross_cursor:
+			tile_canvas.mouse_default_cursor_shape = Control.CURSOR_CROSS
+		else:
+			tile_canvas.mouse_default_cursor_shape = Control.CURSOR_ARROW
 
 func _on_brush_view_mouse_exited() -> void:
 	if showing_tile_brush_preview:
 		showing_tile_brush_preview = false
 		update_tile_brush_preview()
+	
+	tile_canvas.mouse_default_cursor_shape = Control.CURSOR_ARROW
 
 func bresenham_line(start_pos: Vector2, end_pos: Vector2) -> Array[Vector2i]:
 	var start_pixel_pos: Vector2i = Vector2i(start_pos.floor())

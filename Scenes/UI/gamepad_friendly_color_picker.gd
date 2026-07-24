@@ -66,7 +66,7 @@ func _update_hsv_rect(delta: float, left_stick: Vector2, right_stick: Vector2) -
 
     if left_stick.length() > 0.01:
         var factor: float = move_sensitivity
-        if Input.is_action_pressed("editor_alt_mode_hold"):
+        if Input.is_action_pressed(&"editor_alt_mode_hold"):
             factor = low_sensitivity
         sv_coordinate += left_stick * base_move_speed * factor * delta
         sv_coordinate = sv_coordinate.clampf(0.0, 1.0)
@@ -78,7 +78,7 @@ func _update_hsv_rect(delta: float, left_stick: Vector2, right_stick: Vector2) -
     var alpha: float = color.a
     if is_rotating_hue:
         var angle_factor: float = angle_sensitivity
-        if Input.is_action_pressed("editor_alt_mode_hold"):
+        if Input.is_action_pressed(&"editor_alt_mode_hold"):
             angle_factor = low_angle_sensitivity
         var angle_delta: float = angle_difference(hue_angle, right_stick.angle()) * angle_factor
         

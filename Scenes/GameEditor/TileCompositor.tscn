@@ -100,7 +100,7 @@ default_font = ExtResource("19")
 
 [sub_resource type="ButtonGroup" id="ButtonGroup_63ggb"]
 
-[node name="TileCompositor" type="Window" unique_id=1495846052 node_paths=PackedStringArray("local_tile_picker", "title_label", "local_toaster", "tl_paint_btn", "tr_paint_btn", "bl_paint_btn", "br_paint_btn", "whole_brush_paint_btn", "rotate_brush_ccw_button", "rotate_brush_cw_button", "shift_brush_button", "flip_brush_button", "brush_color_picker", "brush_secondary_color_picker", "swap_colors_button", "hold_corner_button_timer")]
+[node name="TileCompositor" type="Window" unique_id=1495846052 node_paths=PackedStringArray("local_tile_picker", "title_label", "local_toaster", "tl_paint_btn", "tr_paint_btn", "bl_paint_btn", "br_paint_btn", "whole_brush_paint_btn", "rotate_brush_ccw_button", "rotate_brush_cw_button", "shift_brush_button", "flip_brush_button", "brush_color_picker", "brush_secondary_color_picker", "swap_colors_button", "tile_canvas", "hold_corner_button_timer")]
 oversampling_override = 1.0
 title = "Tile Compositor"
 position = Vector2i(2, 26)
@@ -123,6 +123,7 @@ flip_brush_button = NodePath("PanelContainer/MarginContainer/VBoxContainer/HBoxC
 brush_color_picker = NodePath("PanelContainer/MarginContainer/VBoxContainer/CollapsableSection/HBoxContainer5/PanelContainer2/MarginContainer/HBoxContainer/VBoxContainer2/HBoxContainer/BrushColorPicker")
 brush_secondary_color_picker = NodePath("PanelContainer/MarginContainer/VBoxContainer/CollapsableSection/HBoxContainer5/PanelContainer2/MarginContainer/HBoxContainer/VBoxContainer2/HBoxContainer/SecondaryBrushColor")
 swap_colors_button = NodePath("PanelContainer/MarginContainer/VBoxContainer/CollapsableSection/HBoxContainer5/PanelContainer2/MarginContainer/HBoxContainer/VBoxContainer2/HBoxContainer/FlipColorsButton")
+tile_canvas = NodePath("PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/Panel/VBoxContainer/MarginContainer/AspectRatioContainer/BrushView")
 picked_brush_tex = SubResource("3")
 hold_corner_button_timer = NodePath("HoldPaintButtonTimer")
 

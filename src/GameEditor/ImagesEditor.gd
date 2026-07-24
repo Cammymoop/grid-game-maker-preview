@@ -227,7 +227,7 @@ func import_image_from_web() -> void:
 	if not OS.has_feature("web"):
 		return
 	var as_shared: = true
-	if Input.is_action_pressed(&"editor_alt_mode_hold"):
+	if Utility.is_holding_alt_mode():
 		as_shared = false
 	GameManager.file_access_web = FileAccessWeb.new()
 	GameManager.file_access_web.loaded.connect(got_web_import_image.bind(as_shared))

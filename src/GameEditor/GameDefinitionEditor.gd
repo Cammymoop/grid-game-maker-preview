@@ -536,7 +536,7 @@ func open_export_release_dialog() -> void:
 	export_release_dialog.popup_centered()
 
 func do_export_zip(no_bundle_pls: bool = false, is_release_export: bool = false) -> void:
-	if not no_bundle_pls and Input.is_action_pressed(&"editor_alt_mode_hold"):
+	if not no_bundle_pls and Utility.is_holding_alt_mode():
 		no_bundle_pls = true
 
 	if not no_bundle_pls and TextureManager.has_enabled_shared_images():

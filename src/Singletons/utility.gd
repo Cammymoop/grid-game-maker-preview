@@ -935,6 +935,14 @@ func lerp_ok_hsl_color(from_color: Color, to_color: Color, factor: float) -> Col
 func color_to_ok_hsl_vector4(color: Color) -> Vector4:
 	return Vector4(color.ok_hsl_h, color.ok_hsl_s, color.ok_hsl_l, color.a)
 
+func color_ok_hsl_difference(a: Color, b: Color) -> Vector4:
+	var a_vec: = color_to_ok_hsl_vector4(a)
+	var b_vec: = color_to_ok_hsl_vector4(b)
+	var abs_difference: = (a_vec - b_vec).abs()
+	var hue_difference: = absf(angle_difference(a_vec.x * TAU, b_vec.x * TAU) / TAU)
+	abs_difference.x = hue_difference
+	return abs_difference
+
 func rect2i_iter(rect: Rect2i) -> Array[Vector2i]:
 	rect = rect2i_pos_inclusive_abs(rect)
 	var positions: Array[Vector2i] = []
@@ -1515,3 +1523,6 @@ func is_web_or_mobile() -> bool:
 
 func is_mobile() -> bool:
 	return OS.has_feature("mobile")
+
+func is_holding_alt_mode() -> bool:
+	return Input.is_key_pressed(KEY_SHIFT) or Input.is_action_pressed(&"editor_alt_mode_hold")
