@@ -5,10 +5,10 @@ func _ready() -> void:
     meta_hover_started.connect(on_meta_hover_started)
     meta_hover_ended.connect(on_meta_hover_ended)
 
-func on_meta_hover_started(meta: Variant) -> void:
+func on_meta_hover_started(_meta: Variant) -> void:
     meta_underlined = true
 
-func on_meta_hover_ended(meta: Variant) -> void:
+func on_meta_hover_ended(_meta: Variant) -> void:
     meta_underlined = false
 
 func set_link_url(url: String) -> void:

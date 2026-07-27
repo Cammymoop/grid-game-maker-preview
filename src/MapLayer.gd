@@ -26,6 +26,7 @@ func set_cell_facing(at_coord: Vector2i, facing: int):
 	# NOTE: Currently doesn't use regular alt IDs, this would be needed if they were ever non-zero
 	#var old_alt_id: = get_cell_alternative_tile(at_coord) & ~Utility.TILE_TANSFORM_MASK
 	# ... and pass `old_alt_id | transform_val` instead of just `transform_val`
+	# NOTE: That note is old, the small map format uses just the 2 bits of facing and discards the rest of alt id so it wouldn't support other alt id info
 	set_cell(at_coord, old_source, old_atlas_coords, transform_val)
 
 func get_cell_s(at_coord: Vector2i) -> int:

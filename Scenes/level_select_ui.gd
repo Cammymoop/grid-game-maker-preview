@@ -677,7 +677,7 @@ func scroll_to_current_level(with_grab_focus: bool) -> void:
 
 func scroll_to_control(to_control: Control) -> void:
     if not to_control.is_visible_in_tree():
-        push_warning("Control %s is not visible in tree" % [to_control.get_path()])
+        #push_warning("Control %s is not visible in tree" % [to_control.get_path()])
         return
     list_scroll_container.ensure_control_visible(to_control)
     var scroll_container_global_rect: = list_scroll_container.get_global_rect()

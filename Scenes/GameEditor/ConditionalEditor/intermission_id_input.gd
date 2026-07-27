@@ -35,9 +35,12 @@ func set_input_args(new_args: Array) -> void:
             setup_intermission_id_selector()
 
 func set_value(value: String) -> void:
+    prints("set_value: %s" % [value])
     if _setup_with_list != include_from_custom_list:
         setup_intermission_id_selector()
-    if not Utility.opbtn_has_text(intermission_id_selector, value):
+    if value == "":
+        Utility.opbtn_select_id(intermission_id_selector, NO_INTERMISSION_ID)
+    elif not Utility.opbtn_has_text(intermission_id_selector, value):
         Utility.opbtn_select_id(intermission_id_selector, NO_INTERMISSION_ID)
     else:
         Utility.opbtn_select_text(intermission_id_selector, value)

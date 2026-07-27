@@ -96,6 +96,7 @@ func on_game_end_has_transition_toggled(toggled_on: bool) -> void:
     GameManager.set_game_setting(SettingsKeys.game_end_transition, toggled_on)
     if toggled_on:
         save_game_end_code()
+    refresh_ui()
     settings_updated.emit()
 
 func on_game_end_code_input_value_changed() -> void:
@@ -103,7 +104,7 @@ func on_game_end_code_input_value_changed() -> void:
 
 func save_game_end_code() -> void:
     var game_end_code: String = game_end_code_input.get_value()
-    if GameManager.is_valid_level_code(game_end_code):
+    if GameManager.is_level_code_valid(game_end_code):
         GameManager.set_game_setting(SettingsKeys.game_end_code, game_end_code)
     else:
         GameManager.set_game_setting(SettingsKeys.game_end_code, "")
@@ -121,7 +122,7 @@ func on_game_completion_mode_selected(index: int) -> void:
 
 func on_completion_code_value_changed() -> void:
     var completion_code: String = specific_completion_level_code_input.get_value()
-    if GameManager.is_valid_level_code(completion_code):
+    if GameManager.is_level_code_valid(completion_code):
         GameManager.set_game_setting(SettingsKeys.specific_completion_key, completion_code)
     else:
         GameManager.set_game_setting(SettingsKeys.specific_completion_key, "")

@@ -3126,6 +3126,7 @@ func _complete_level(level_list_name: String, level_name: String) -> Dictionary:
 	var ret: Dictionary = {
 		"is_complete": true,
 		"completed": false,
+		"game_was_completed": false,
 		"intermissions": Array([], TYPE_STRING, "", null),
 	}
 	var level_code: String = _level_code(level_list_name, level_name)
@@ -3159,6 +3160,7 @@ func _complete_level(level_list_name: String, level_name: String) -> Dictionary:
 	if not was_game_complete:
 		var game_is_now_complete: bool = check_for_game_completion()
 		if game_is_now_complete:
+			ret["game_was_completed"] = true
 			intermissions.append_array(get_intermissions_for_game_event(IntermissionEvents.GAME_COMPLETE))
 			
 	if not was_every_level_complete and is_every_level_completed():
@@ -3204,6 +3206,7 @@ func _complete_current_level() -> Dictionary:
 	return {
 		"is_complete": result.get("is_complete", false),
 		"completed": result.get("completed", false),
+		"game_was_completed": result.get("game_was_completed", false),
 		"intermissions": intermissions,
 	}
 
@@ -3397,6 +3400,7 @@ func get_after_game_level_code() -> String:
 
 func _go_to_game_end(with_delay: float = 0, interm_q: Array[String] = []) -> void:
 	var post_end_level_code: String = get_after_game_level_code()
+	prints("go to game end, code: %s" % [post_end_level_code])
 	if not post_end_level_code:
 		_go_to_level_select(with_delay, interm_q)
 		return

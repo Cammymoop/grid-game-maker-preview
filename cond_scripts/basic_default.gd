@@ -1194,11 +1194,11 @@ func cmd_load_next_level(slots: Dictionary, _slot: int, delay: Dictionary = {"ty
 
 func desc_advance_to_next_level() -> Dictionary:
 	return {
-		"name": "advance_level",
+		"name": "advance_to_next_level",
 		"display_name": "Advance to Next Level",
 		"slot_type_hint": "none",
 		"template_text": "Advance to the next level, with a [delay:ComplexScalarInput:default=1,step=0.1] second delay\n" \
-			+ "[complete_current:BoolChoice:true,Complete,Do not complete] the current level\n" \
+			+ "[do_complete:BoolChoice:true,Complete,Do not complete] the current level\n" \
 			+ "Extra transition intermission: [with_intermission_id:IntermissionIdInput]",
 	}
 func cmd_advance_to_next_level(_slots: Dictionary, _slot: int, delay: Dictionary, do_complete: bool, with_intermission_id: String) -> void:

@@ -138,9 +138,9 @@ metadata/_custom_type_script = "uid://bq446sgdivroo"
 layout_mode = 2
 mouse_filter = 2
 theme_override_constants/margin_left = 4
-theme_override_constants/margin_top = 12
+theme_override_constants/margin_top = 6
 theme_override_constants/margin_right = 4
-theme_override_constants/margin_bottom = 12
+theme_override_constants/margin_bottom = 6
 
 [node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/HFlowContainer/VBoxContainer3/ToIntermissionAssignments/MarginContainer" unique_id=946253235]
 layout_mode = 2
@@ -149,7 +149,7 @@ theme_override_constants/separation = 8
 
 [node name="Label" type="Label" parent="MarginContainer/HFlowContainer/VBoxContainer3/ToIntermissionAssignments/MarginContainer/VBoxContainer" unique_id=1967638944]
 layout_mode = 2
-text = "Edit Event Intermissions
+text = "Assign Event Intermissions
 in level editor"
 horizontal_alignment = 1
 
