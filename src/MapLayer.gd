@@ -69,12 +69,12 @@ func serialize() -> Dictionary:
 					skip += 1
 					continue
 			else:
-				max_index = maxi(max_index, row.size())
+				max_index = row.size()#maxi(max_index, row.size())
 				has_any_tile = true
 			var facing: int = get_cell_facing(coords)
 			row.append(tile_id << 2 | facing)
 			#row.append([get_cell_s(coords), get_cell_alternative_tile(coords)])
-		row.resize(max_index)
+		row.resize(max_index + 1)
 		row.push_front(skip)
 		rows.append(row)
 	

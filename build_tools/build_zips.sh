@@ -81,7 +81,7 @@ if [[ "${#EXPORTED_SUBDIRS[@]}" -eq 0 ]]; then
 fi
 
 for OUT_SUBDIR in "${EXPORTED_SUBDIRS[@]}"; do
-  ZIP_NAME="ggm_${VERSION}_${OUT_SUBDIR}.zip"
+  ZIP_NAME="ggm_preview_${OUT_SUBDIR}.zip"
   ZIP_PATH="${BUILD_DIR}/${ZIP_NAME}"
   EXPORT_DIR="${BUILD_DIR}/${OUT_SUBDIR}"
 
