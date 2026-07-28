@@ -187,8 +187,12 @@ func current_tileset() -> TileSet:
     return preview_tileset if is_tile_preview_mode else tileset
 
 func create_empty_layer():
-    var map_layer = map_layer_template.instantiate()
+    var map_layer = map_layer_template.instantiate() as MapLayer
     var ents = Utility.get_world().get_node("Entities")
+
+    var is_y_sort_tiles: bool = GameManager.get_game_setting("y_sort_tiles", false)
+    map_layer.y_sort_enabled = is_y_sort_tiles
+
     ents.add_sibling.bind(map_layer, true).call_deferred()
     map_layer.tile_set = current_tileset()
     layers.append(map_layer)

@@ -66,6 +66,8 @@ var invalid_field_color = Color(0.7, 0.4, 0.4)
 
 @export var section_container: Control
 
+@export var y_sort_enable_toggle: CheckButton
+
 var _save_as_dialog_open: bool = false
 
 static var expanded_sections: Array[String] = []
@@ -250,6 +252,12 @@ func _ready():
 	else:
 		camera_no_focus_action_picker.selected = 0
 	camera_no_focus_action_picker.item_selected.connect(on_camera_no_focus_action_option_picked)
+	
+	var is_y_sort_entities: bool = GameManager.get_game_setting("y_sort_entities", false)
+	var is_y_sort_tiles: bool = GameManager.get_game_setting("y_sort_tiles", false)
+	y_sort_enable_toggle.set_pressed_no_signal(is_y_sort_entities and is_y_sort_tiles)
+	
+	y_sort_enable_toggle.toggled.connect(on_y_sort_enable_toggle_toggled)
 
 
 func refresh_expanded_sections() -> void:
@@ -680,4 +688,9 @@ func on_camera_no_focus_action_option_picked(index: int) -> void:
 	var set_reload: bool = index == 2
 	GameManager.set_game_setting("auto_fail_if_no_cam_focus", set_fail)
 	GameManager.set_game_setting("auto_reload_checkpoint_for_no_cam_focus", set_reload)
+	GameManager.game_settings_changed.emit()
+
+func on_y_sort_enable_toggle_toggled(button_pressed: bool) -> void:
+	GameManager.set_game_setting("y_sort_entities", button_pressed)
+	GameManager.set_game_setting("y_sort_tiles", button_pressed)
 	GameManager.game_settings_changed.emit()

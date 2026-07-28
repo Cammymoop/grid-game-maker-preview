@@ -621,6 +621,11 @@ func entity_order(a, b) -> bool:
 func refresh_entity_list():
     entity_instance_map = {}
     entity_list = get_tree().get_nodes_in_group("_entity_")
+    var is_y_sort_enabled: bool = GameManager.get_game_setting("y_sort_entities", false)
+    var entity_container: = Utility.get_world().get_node("Entities") as Node2D
+    if entity_container:
+        entity_container.y_sort_enabled = is_y_sort_enabled
+
     resort_entity_list()
     for e in entity_list:
         entity_instance_map[e.instance_id] = e
