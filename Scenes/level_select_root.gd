@@ -78,7 +78,7 @@ func close_level_select() -> void:
     if GameManager.is_in_level_edit_mode and level_select_ui.any_edited:
         GameManager.save_current_definition_if_auto_enabled()
         level_select_ui.any_edited = false
-        #GlobalToaster.show_toast_message("Saved Changes")
+        #GlobalToaster.show_toast_message("Saved Def")
     if background_editor_container.visible:
         hide_background_editor()
     game_view_container.show()

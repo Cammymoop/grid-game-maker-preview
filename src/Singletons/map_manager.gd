@@ -217,8 +217,8 @@ func create_tileset():
         new_tileset.add_source(atlas_source, tile_index)
         new_preview_tileset.add_source(preview_atlas_source, tile_index)
         
-        if tile_info['name'] in tile_index_map:
-            print_debug("WARNING: tile name already in use: " + tile_info['name'])
+        #if tile_info['name'] in tile_index_map:
+            #print_debug("WARNING: tile name already in use: " + tile_info['name'])
         tile_index_map[tile_info['name']] = tile_index
         
         var tile_native_size = TextureManager.get_texture_tile_size(tile_info['texture'])
@@ -244,8 +244,8 @@ func update_index_map() -> void:
     tile_index_map = {}
     for tile_index in tile_defs:
         var tname = tile_defs[tile_index]['name']
-        if tname in tile_index_map:
-            push_warning("WARNING: tile name already in use: " + tname)
+        #if tname in tile_index_map:
+            #push_warning("WARNING: tile name already in use: " + tname)
         tile_index_map[tname] = tile_index
 
 func get_tile_texture(tile_index, preview: bool = false) -> Texture2D:

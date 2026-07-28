@@ -285,14 +285,15 @@ func on_show() -> void:
 		credits_button.disabled = is_intermission
 		level_select_button.disabled = is_intermission
 		
-		var no_resume_allowed: = GameManager.is_pause_no_current_level()
-		resume_button.disabled = no_resume_allowed
-		if no_resume_allowed:
-			resume_button.tooltip_text = "Select a level to play"
+		resume_button.disabled = false
+		restart_level_button.tooltip_text = ""
+		var no_current_level: = GameManager.is_pause_no_current_level()
+		if no_current_level:
+			if not GameManager.is_intermission_mode:
+				resume_button.disabled = true
+				resume_button.tooltip_text = "Select a level to play"
 			restart_level_button.visible = false
 			reload_checkpoint_button.visible = false
-		else:
-			resume_button.tooltip_text = ""
 
 	
 	refresh_level_settings()
@@ -356,9 +357,15 @@ func level_was_saved(level_name: String, old_level_name: String) -> void:
 		var current_selected_list: String = Utility.opbtn_get_selected_text(level_list_picker)
 		if current_selected_list == "[No List]":
 			current_selected_list = ""
-		if GameManager.current_game_is_release_locked:
-			current_selected_list = ""
-		set_current_level_list_to(current_selected_list, false)
+
+		if not GameManager.is_level_in_list(level_name, current_selected_list):
+			current_selected_list = GameManager.get_list_containing_level(level_name)
+		
+		GameManager.current_level_list = current_selected_list
+		if current_selected_list:
+			Utility.opbtn_select_text(level_list_picker, current_selected_list)
+		else:
+			level_list_picker.selected = 0
 
 func _on_new_level_button_pressed() -> void:
 	if not GameManager.is_in_level_edit_mode:
@@ -424,8 +431,15 @@ func refresh_level_list_picker(list_of_current_level: String) -> void:
 	level_list_picker.add_item("[No List]")
 	if GameManager.current_game_is_release_locked:
 		return
-	for list_name in GameManager.get_list_of_level_lists():
+
+	for list_name in GameManager.get_list_of_level_lists(true):
 		level_list_picker.add_item(list_name)
+	
+	var all_custom_lists: Array[String] = GameManager.get_list_of_non_bundled_level_lists()
+	if all_custom_lists.size() > 0:
+		level_list_picker.add_separator("Custom Level Lists")
+		for list_name in all_custom_lists:
+			level_list_picker.add_item(list_name)
 
 	if not list_of_current_level:
 		level_list_picker.selected = 0
@@ -500,36 +514,40 @@ func hide_background_editor() -> void:
 	background_editor_container.hide()
 
 func level_list_picked(index: int) -> void:
-	if not GameManager.loaded_level_name:
-		# the current level isn't saved, still allow choosing the list which it will be added to once saved
-		return
 	var list_name = level_list_picker.get_item_text(index)
 	if list_name == "[No List]":
 		list_name = ""
 	
-	set_current_level_list_to(list_name, true)
+	set_current_level_list_to(list_name)
 
-func set_current_level_list_to(list_name: String, show_toast: bool) -> void:
-	if GameManager.current_game_is_release_locked:
+func set_current_level_list_to(list_name: String) -> void:
+	if GameManager.current_game_is_release_locked and list_name in GameManager.get_list_of_level_lists(true):
 		return
-	if not list_name:
-		GameManager._remove_level_from_all_lists(GameManager.loaded_level_name)
-		GameManager.current_level_list = ""
+	
+	if GameManager.loaded_level_name and GameManager.loaded_level_is_saved:
+		if not GameManager.is_level_in_list(GameManager.loaded_level_name, list_name):
+			if not list_name:
+				GameManager._remove_level_from_all_lists(GameManager.loaded_level_name)
+				GameManager.current_level_list = ""
+			else:
+				GameManager.move_level_to_level_list(GameManager.loaded_level_name, list_name)
+				GameManager.current_level_list = list_name
+			GameManager.save_current_definition_if_auto_enabled()
+		level_metadata_changed.emit()
 	else:
-		GameManager.move_level_to_level_list(GameManager.loaded_level_name, list_name)
 		GameManager.current_level_list = list_name
-	GameManager.save_current_game_definition()
-	if show_toast:
-		GlobalToaster.show_toast_message("Saved Level List")
-	level_metadata_changed.emit()
 
 func on_web_export_level_button_pressed() -> void:
 	if not GameManager.is_in_level_edit_mode:
 		return
-	if not FilesManager.level_exists(GameManager.get_identified_game_name(), GameManager.loaded_level_name):
-		GlobalToaster.show_toast_message("Saved level not found")
-		return
-	GameManager.web_export_level_json(GameManager.loaded_level_name)
+	var map_editor: = Utility.get_map_editor()
+	var save_name: String = GameManager.loaded_level_name
+	if map_editor and map_editor.has_edited_something:
+		GameManager.web_export_current_edited_level_json(save_name)
+	elif FilesManager.level_exists(GameManager.get_identified_game_name(), save_name):
+		GameManager.web_export_level_json(save_name)
+	else:
+		GameManager.web_export_current_edited_level_json()
 
 func on_copy_to_clipboard_button_pressed() -> void:
 	var cur_level_base64: = GameManager.clipboardify_level_data(GameManager.get_edited_as_level_data())

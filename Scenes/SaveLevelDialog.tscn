@@ -2,14 +2,18 @@
 
 [ext_resource type="FontFile" uid="uid://biuf4hpin33j3" path="res://assets/font/medium_font.tres" id="1"]
 [ext_resource type="Script" uid="uid://b8h1mkvkgija5" path="res://src/SaveLevelDialog.gd" id="2"]
+[ext_resource type="PackedScene" uid="uid://cvcvtgiapcwew" path="res://Scenes/GameEditor/ConditionalEditor/level_list_name_input.tscn" id="2_jedsr"]
 
-[node name="SaveLevelDialog" type="Window" unique_id=842653498]
+[node name="SaveLevelDialog" type="Window" unique_id=842653498 node_paths=PackedStringArray("level_name_input", "save_level_button", "level_list_name_input")]
 oversampling_override = 1.0
 title = "Save Level"
 position = Vector2i(0, 36)
-size = Vector2i(450, 117)
+size = Vector2i(450, 140)
 wrap_controls = true
 script = ExtResource("2")
+level_name_input = NodePath("MarginContainer/PanelContainer/HBoxContainer/LevelNameInput")
+save_level_button = NodePath("MarginContainer/PanelContainer/HBoxContainer2/SaveFileButton")
+level_list_name_input = NodePath("MarginContainer/PanelContainer/HBoxContainer4/LevelListNameInput")
 
 [node name="MarginContainer" type="MarginContainer" parent="." unique_id=1862138852]
 anchors_preset = 10
@@ -47,6 +51,24 @@ text = "Level Filename:"
 custom_minimum_size = Vector2(240, 0)
 layout_mode = 2
 
+[node name="HBoxContainer4" type="HBoxContainer" parent="MarginContainer/PanelContainer" unique_id=1561821198]
+layout_mode = 2
+alignment = 1
+
+[node name="Label" type="Label" parent="MarginContainer/PanelContainer/HBoxContainer4" unique_id=7292031]
+layout_mode = 2
+text = "In Level List:"
+
+[node name="LevelListNameInput" parent="MarginContainer/PanelContainer/HBoxContainer4" unique_id=995722546 instance=ExtResource("2_jedsr")]
+layout_mode = 2
+disable_bundled_lists_if_locked = true
+plain_value_only = true
+no_level = true
+no_list_text = "[NO LIST]"
+
+[node name="SlotSelectorButton" parent="MarginContainer/PanelContainer/HBoxContainer4/LevelListNameInput" index="0" unique_id=1264497244]
+visible = false
+
 [node name="HBoxContainer2" type="HBoxContainer" parent="MarginContainer/PanelContainer" unique_id=1898577205]
 layout_mode = 2
 alignment = 1
@@ -69,3 +91,5 @@ text = "Cancel"
 
 [connection signal="pressed" from="MarginContainer/PanelContainer/HBoxContainer2/SaveFileButton" to="." method="_on_SaveFileButton_pressed"]
 [connection signal="pressed" from="MarginContainer/PanelContainer/HBoxContainer2/CancelButton" to="." method="_on_cancel_button_pressed"]
+
+[editable path="MarginContainer/PanelContainer/HBoxContainer4/LevelListNameInput"]

@@ -8,6 +8,9 @@
 
 [sub_resource type="ButtonGroup" id="ButtonGroup_gs7i2"]
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_cg3hx"]
+bg_color = Color(0.89, 0.89, 0.89, 0.05882353)
+
 [node name="LevelSelectUI" type="VBoxContainer" unique_id=1015399753 node_paths=PackedStringArray("level_select_header_label", "level_list_container", "tabs_container", "bundled_levels_tab_button", "custom_levels_tab_button", "edit_lists_button_container", "add_new_list_button", "rearrange_lists_button", "import_levels_button", "import_levels_button_container", "level_list_settings", "rearrange_lists_back_container", "rearrange_lists_back_button", "expand_all_container", "expand_all_button", "list_scroll_container", "no_web_container", "open_levels_folder_button", "edit_autosave_container", "edit_autosave_button", "edit_intermissions_button", "rearrange_add_list_container", "rearrange_add_list_button")]
 custom_minimum_size = Vector2(440, 300)
 offset_right = 327.0
@@ -33,7 +36,7 @@ list_scroll_container = NodePath("Lists/ScrollContainer")
 no_web_container = NodePath("Lists/ImportButtonContainer/HBoxContainer/NoWeb")
 open_levels_folder_button = NodePath("Lists/ImportButtonContainer/HBoxContainer/NoWeb/OpenLevelsFolderButton")
 edit_autosave_container = NodePath("Lists/EditAutosavedLevelContainer")
-edit_autosave_button = NodePath("Lists/EditAutosavedLevelContainer/EditAutosavedLevelButton")
+edit_autosave_button = NodePath("Lists/EditAutosavedLevelContainer/PanelContainer/HBoxContainer/EditAutosavedLevelButton")
 edit_intermissions_button = NodePath("Lists/EditListsButtonsContainer/HBoxContainer2/EditIntermissionsButton")
 rearrange_add_list_container = NodePath("Lists/RerrangeAddListContainer")
 rearrange_add_list_button = NodePath("Lists/RerrangeAddListContainer/AddListButton2")
@@ -44,14 +47,16 @@ theme_override_constants/separation = 2
 alignment = 1
 
 [node name="BundledListsRadioButton" type="Button" parent="TabsContainer" unique_id=1978021955]
+custom_minimum_size = Vector2(122, 0)
 layout_mode = 2
 theme_override_font_sizes/font_size = 20
 toggle_mode = true
 button_pressed = true
 button_group = SubResource("ButtonGroup_gs7i2")
-text = "Game"
+text = "Main Game"
 
 [node name="CustomLevelsRadioButton" type="Button" parent="TabsContainer" unique_id=1964954133]
+custom_minimum_size = Vector2(150, 0)
 layout_mode = 2
 theme_override_font_sizes/font_size = 20
 toggle_mode = true
@@ -69,11 +74,20 @@ layout_mode = 2
 size_flags_vertical = 3
 theme_override_constants/separation = 12
 
-[node name="EditAutosavedLevelContainer" type="HBoxContainer" parent="Lists" unique_id=1304746148]
+[node name="EditAutosavedLevelContainer" type="MarginContainer" parent="Lists" unique_id=199605650]
+layout_mode = 2
+theme_override_constants/margin_left = 4
+theme_override_constants/margin_right = 4
+
+[node name="PanelContainer" type="PanelContainer" parent="Lists/EditAutosavedLevelContainer" unique_id=1496014771]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_cg3hx")
+
+[node name="HBoxContainer" type="HBoxContainer" parent="Lists/EditAutosavedLevelContainer/PanelContainer" unique_id=1304746148]
 layout_mode = 2
 alignment = 1
 
-[node name="EditAutosavedLevelButton" type="Button" parent="Lists/EditAutosavedLevelContainer" unique_id=442048908]
+[node name="EditAutosavedLevelButton" type="Button" parent="Lists/EditAutosavedLevelContainer/PanelContainer/HBoxContainer" unique_id=442048908]
 layout_mode = 2
 size_flags_horizontal = 4
 text = "Edit Autosaved level"

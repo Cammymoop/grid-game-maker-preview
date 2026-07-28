@@ -40,6 +40,7 @@ var level_item_scene: = preload("res://Scenes/level_list_item.tscn")
 
 @export var completed_list_label_color: Color = Color.GREEN
 @export var completed_icon: Control
+@export var locked_icon: Control
 
 var is_expanded: bool = false
 
@@ -74,6 +75,7 @@ func _ready() -> void:
         remove_list_button.visible = false
     
     completed_icon.hide()
+    locked_icon.hide()
 
     export_list_button.pressed.connect(on_export_list_button_pressed)
     remove_list_button.pressed.connect(on_remove_list_button_pressed)
@@ -168,7 +170,16 @@ func load_level_list_named(with_level_list_name: String) -> void:
     export_list_button.visible = is_edit
     remove_list_button.visible = is_edit
     refresh_list()
-    update_list_completion_label(GameManager.is_level_list_complete(with_level_list_name))
+
+    var is_complete: = GameManager.is_level_list_complete(with_level_list_name)
+    update_list_completion_label(is_complete)
+    
+    if not _is_in_edit_mode():
+        if not is_complete:
+            if not GameManager.is_level_list_unlocked(with_level_list_name):
+                locked_icon.visible = true
+            elif not GameManager.list_has_any_unlocked_levels(with_level_list_name):
+                locked_icon.visible = true
 
 func load_unlisted_levels() -> void:
     is_hidden_list = false
@@ -181,20 +192,21 @@ func load_unlisted_levels() -> void:
     is_bundled_list = false
     refresh_list()
     list_completion_label.visible = false
-    completed_icon.visible = false
+
+    locked_icon.visible = false
 
 func hide_completed_list_stuff() -> void:
     completed_icon.hide()
     list_name_label.remove_theme_color_override("font_color")
 
 func update_list_completion_label(is_complete: bool) -> void:
-    var show_completion: bool = GameManager.should_show_list_completion(level_list_name)
+    var show_completion: bool = GameManager.should_show_list_completion(level_list_name) and not _is_in_edit_mode()
     list_completion_label.visible = show_completion
     if show_completion:
         list_completion_label.text = GameManager.get_list_completion_text(level_list_name)
         list_completion_label.tooltip_text = GameManager.get_list_completion_tooltip(level_list_name)
     
-    completed_icon.visible = is_complete
+    completed_icon.visible = is_complete and not _is_in_edit_mode()
 
 func set_level_list_name(new_level_list_name: String) -> void:
     level_list_name = new_level_list_name

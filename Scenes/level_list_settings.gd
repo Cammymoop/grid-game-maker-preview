@@ -77,6 +77,7 @@ const CompletionModeDisplayTexts: Dictionary = {
     COMPLETION_MODE_COUNT: "(X) Levels Complete",
     COMPLETION_MODE_INVERSE_COUNT: "All But (X) Levels Complete",
     COMPLETION_MODE_PERCENTAGE: "(X)% of Levels Complete",
+    COMPLETION_MODE_UNCOMPLETABLE: "Not Completable",
 }
 
 const WHEN_COMPLETED_UNLOCK_NEXT = "unlock_next"
@@ -189,9 +190,12 @@ func on_do_progressive_unlock_toggled(toggled_on: bool) -> void:
 
 func on_show_locked_levels_toggled(toggled_on: bool) -> void:
     GameManager.set_level_list_data(editing_list_name, "show_locked_levels", toggled_on)
+    refresh_ui()
+    list_settings_edited.emit()
 
 func on_show_locked_titles_toggled(toggled_on: bool) -> void:
     GameManager.set_level_list_data(editing_list_name, "show_locked_titles", toggled_on)
+    list_settings_edited.emit()
 
 func prop_unlock_num_changed(_new_value: float) -> void:
     set_prog_unlock_num()
@@ -201,24 +205,30 @@ func set_prog_unlock_num() -> void:
     var num_input_number: = int(progressive_unlock_num_input.get_value())
     GameManager.set_level_list_data(editing_list_name, "progressive_locked_levels", num_input_number)
 
-
 func on_name_input_text_changed(new_text: String) -> void:
-    if new_text == editing_list_name:
-        return
+    var exact_input_text: String = new_text
     new_text = new_text.strip_edges()
     while new_text.contains("??"):
         new_text = new_text.replace("??", "?")
     if new_text.ends_with("?"):
         new_text += "%"
+    
+    if editing_list_name.ends_with("?%") and editing_list_name.trim_suffix("?%") == new_text.trim_suffix("%"):
+        new_text = new_text.trim_suffix("%")
+
+    if new_text == editing_list_name:
+        name_input.remove_theme_color_override("font_color")
+        return
         
-    if GameManager.level_list_name_exists(new_text):
+    if GameManager.level_list_name_exists(new_text) or not new_text:
         name_input.add_theme_color_override("font_color", Color.RED)
         return
 
     if GameManager.rename_level_list(editing_list_name, new_text):
         name_input.remove_theme_color_override("font_color")
         editing_list_name = new_text
-        refresh_ui()
+        if exact_input_text != new_text:
+            refresh_ui()
         list_settings_edited.emit()
 
 func refresh_ui() -> void:
@@ -243,7 +253,7 @@ func refresh_ui() -> void:
     always_hidden_container.visible = not is_custom_level_list
     var is_always_hidden: bool = list_info.get("always_hidden", false) and not is_first_bundled_list
     always_hidden_toggle.set_pressed_no_signal(is_always_hidden)
-    always_hidden_toggle.disabled = is_first_bundled_list
+    #always_hidden_toggle.disabled = is_first_bundled_list
 
     if is_custom_level_list:
         is_always_hidden = false

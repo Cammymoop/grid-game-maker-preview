@@ -33,3 +33,8 @@ func refresh_ui() -> void:
     level_subtitle_label.visible = level_subtitle != ""
     
     level_info_subpanel.visible = GameManager.get_game_setting("level_info_above_pause", true)
+    
+    if level_title_label.text + level_subtitle == "":
+        level_info_subpanel.visible = false
+    elif GameManager.is_pause_no_current_level():
+        level_info_subpanel.visible = false

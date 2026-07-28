@@ -21,7 +21,7 @@ is_hidden_container = NodePath("WhenNotAlwaysHidden/ListIsHiddenOption")
 is_hidden_toggle = NodePath("WhenNotAlwaysHidden/ListIsHiddenOption/ListIsHiddenToggle")
 default_is_unlocked_container = NodePath("WhenNotAlwaysHidden/DefaultUnlockedOption")
 default_is_unlocked_toggle = NodePath("WhenNotAlwaysHidden/DefaultUnlockedOption/DefaultAllUnlockedToggle")
-show_locked_levels_toggle = NodePath("HBoxContainer3/AlwaysHiddenToggle")
+show_locked_levels_toggle = NodePath("WhenNotAlwaysHidden/HBoxContainer4/ShowLockedEnable")
 show_locked_titles_container = NodePath("WhenNotAlwaysHidden/ShowLockedLevelTitlesOption")
 show_locked_titles_toggle = NodePath("WhenNotAlwaysHidden/ShowLockedLevelTitlesOption/ShowLockedLevelTitlesToggle")
 completion_mode_selector = NodePath("CompletionCriteriaOption/HBoxContainer/CompletionCriteriaSelector")
@@ -90,8 +90,11 @@ tooltip_text = "With this option:
 * Never shows name or levels in Level Select, except to show current level.
 * All levels start locked, regardless of list position nothing will auto advance to levels in this list. Levels in this list have no auto advance target.
 * Levels can still be played and completed if the player is manually sent there."
-toggle_mode = false
-text = "Always Hidden List"
+theme_override_font_sizes/font_size = 12
+text = "This List is Always Hidden"
+
+[node name="HSeparator4" type="HSeparator" parent="." unique_id=1189210927]
+layout_mode = 2
 
 [node name="CountLevelsForCompletionOption" type="HBoxContainer" parent="." unique_id=1605837016]
 visible = false
@@ -100,7 +103,7 @@ alignment = 2
 
 [node name="CountLevelsForCompletionToggle" type="CheckButton" parent="CountLevelsForCompletionOption" unique_id=3869657]
 layout_mode = 2
-tooltip_text = "If the list is Always Hidden, enable this if contained levels should be
+tooltip_text = "If the list is \"Always Hidden\", enable this if contained levels should be
 counted toward completing the game or completing all levels.
 (default off)"
 theme_override_font_sizes/font_size = 14
@@ -185,6 +188,7 @@ alignment = 2
 
 [node name="DefaultAllUnlockedToggle" type="CheckButton" parent="WhenNotAlwaysHidden/DefaultUnlockedOption" unique_id=1510437156]
 layout_mode = 2
+tooltip_text = "If disabled, the first level can be unlocked by unlocking the list. Further levels will have to be unlocked manually."
 button_pressed = true
 text = "All Levels In List Start Unlocked"
 
@@ -194,13 +198,15 @@ alignment = 2
 
 [node name="Label" type="Label" parent="WhenNotAlwaysHidden/ProgressUnlockAmount" unique_id=1343583928]
 layout_mode = 2
-tooltip_text = "How many levels ahead of the furthest completed level should be unlocked?"
+tooltip_text = "How many levels ahead of the furthest completed level should be unlocked?
+1 = only 1 level available until it is beaten."
 mouse_filter = 1
 text = "Levels Unlocked Ahead of Completion:"
 
 [node name="ProgUnlockAmountInput" parent="WhenNotAlwaysHidden/ProgressUnlockAmount" unique_id=1458729988 instance=ExtResource("2_xli71")]
 layout_mode = 2
-tooltip_text = "How many levels ahead of the furthest completed level should be unlocked?"
+tooltip_text = "How many levels ahead of the furthest completed level should be unlocked?
+1 = only 1 level available until it is beaten."
 is_int_type = true
 default_value = 1.0
 min_value = 1.0
@@ -225,6 +231,7 @@ alignment = 2
 
 [node name="AutoAdvanceListToggle" type="CheckButton" parent="WhenNotAlwaysHidden/AutoAdvanceList" unique_id=1618868150]
 layout_mode = 2
+tooltip_text = "\"Next\" list determined by the option below"
 button_pressed = true
 text = "\"Next Level\" Continues Into Next List"
 
@@ -241,13 +248,14 @@ layout_mode = 2
 
 [node name="Label" type="Label" parent="CompletionCriteriaOption/HBoxContainer" unique_id=1310662065]
 layout_mode = 2
-tooltip_text = "How many levels ahead of the furthest completed level should be unlocked?"
+tooltip_text = "How to determine if the level list has been \"Completed\""
 mouse_filter = 1
 theme_override_font_sizes/font_size = 14
 text = "Completion Criteria:"
 
 [node name="CompletionCriteriaSelector" type="OptionButton" parent="CompletionCriteriaOption/HBoxContainer" unique_id=567195168]
 layout_mode = 2
+tooltip_text = "How to determine if the level list has been \"Completed\""
 theme_override_font_sizes/font_size = 12
 alignment = 1
 selected = 3
@@ -271,7 +279,6 @@ text = "X:"
 
 [node name="CompletionCriteriaScalarInput" parent="CompletionCriteriaOption/CompletionCriteriaNumberContainer" unique_id=1655371800 instance=ExtResource("2_xli71")]
 layout_mode = 2
-tooltip_text = "How many levels ahead of the furthest completed level should be unlocked?"
 is_int_type = true
 default_value = 1.0
 min_value = 1.0
@@ -318,13 +325,14 @@ alignment = 2
 
 [node name="Label" type="Label" parent="HBoxContainer7" unique_id=72743009]
 layout_mode = 2
-tooltip_text = "How many levels ahead of the furthest completed level should be unlocked?"
+tooltip_text = "Auto = Next non-empty, non-hidden list in displayed order."
 mouse_filter = 1
 theme_override_font_sizes/font_size = 14
 text = "Which List Is Next:"
 
 [node name="CustomNextListSelector" type="OptionButton" parent="HBoxContainer7" unique_id=1522402460]
 layout_mode = 2
+tooltip_text = "Auto = Next non-empty, non-hidden list in displayed order."
 theme_override_font_sizes/font_size = 12
 alignment = 1
 selected = 0
@@ -341,7 +349,6 @@ alignment = 2
 
 [node name="Label" type="Label" parent="HBoxContainer6" unique_id=1948304813]
 layout_mode = 2
-tooltip_text = "How many levels ahead of the furthest completed level should be unlocked?"
 mouse_filter = 1
 theme_override_font_sizes/font_size = 14
 text = "When Completed:"

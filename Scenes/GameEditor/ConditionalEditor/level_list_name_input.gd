@@ -9,6 +9,7 @@ const LevelNameInput = preload("res://Scenes/GameEditor/ConditionalEditor/level_
 @export var list_name_selector: OptionButton
 
 @export var bundled_only: bool = false
+@export var disable_bundled_lists_if_locked: bool = false
 
 @export var plain_value_only: bool = false
 
@@ -17,6 +18,8 @@ var current_slot_id: int = SlotSelectorButton.TEXT_VALUE
 
 @export var no_level: = false
 @export var _level_name_input_sibling: LevelNameInput
+
+@export var no_list_text: String = "(Any)"
 
 const OPTION_NO_VALUE: int = 99999
 const TEMPORARY_OPTION_ID: int = 99998
@@ -56,14 +59,29 @@ func setup_level_name_input_sibling() -> void:
     on_level_name_input_updated(false)
 
 func setup_list_name_selector(filter_using_level_name: String = "") -> void:
+    var disable_bundled: bool = disable_bundled_lists_if_locked and GameManager.current_game_is_release_locked
+
     list_name_selector.clear()
-    list_name_selector.add_item("(Any)", OPTION_NO_VALUE)
+    list_name_selector.add_item(no_list_text, OPTION_NO_VALUE)
     list_name_selector.add_separator()
-    for level_list_name in GameManager.get_list_of_level_lists(bundled_only):
+    for level_list_name in GameManager.get_list_of_level_lists(true):
         if filter_using_level_name:
             if not filter_using_level_name in GameManager.get_levels_in_level_list(level_list_name):
                 continue
         list_name_selector.add_item(level_list_name)
+        if disable_bundled:
+            var idx: int = list_name_selector.item_count - 1
+            list_name_selector.set_item_disabled(idx, true)
+    
+    if not bundled_only:
+        var all_non_bundled_lists: Array[String] = GameManager.get_list_of_non_bundled_level_lists()
+        if all_non_bundled_lists.size() > 0:
+            list_name_selector.add_separator("Custom Lists")
+        for level_list_name in GameManager.get_list_of_non_bundled_level_lists():
+            if filter_using_level_name:
+                if not filter_using_level_name in GameManager.get_levels_in_level_list(level_list_name):
+                    continue
+            list_name_selector.add_item(level_list_name)
 
 func set_arg_name(new_arg_name: String) -> void:
     arg_name = new_arg_name

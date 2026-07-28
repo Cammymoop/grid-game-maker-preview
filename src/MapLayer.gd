@@ -102,7 +102,7 @@ func deserialize(data: Dictionary) -> void:
 				set_cell_s(coords, tile_source_id, Utility.facing_from_tile_alt_id(int(row[x][1])))
 	else:
 		for y in tile_data.size():
-			var row = tile_data[y]
+			var row = tile_data[y].duplicate()
 			var skip: int = 0
 			if small:
 				skip = int(row.pop_front())

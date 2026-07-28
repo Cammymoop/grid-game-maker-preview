@@ -1204,12 +1204,11 @@ func load_quicksave() -> void:
 		if FilesManager.level_exists(get_identified_game_name(), quicksave_level_name):
 			loaded_level_is_saved = true
 			var level_data: = FilesManager.get_level_data(get_identified_game_name(), quicksave_level_name)
-			if level_data:
-				editor_save = level_data["state"]
-			else:
-				editor_save = {}
+			editor_save = level_data.get("state", {})
 		else:
+			loaded_level_is_saved = false
 			editor_save = {}
+			loaded_level = {}
 	else:
 		clear_undo_stack()
 		push_undo_state(true)
@@ -1253,6 +1252,7 @@ func load_editor_autosave() -> void:
 	load_level_data(autosave_data)
 	loaded_level_is_saved = false
 	loaded_is_autosave = true
+	loaded_level = editor_save
 	
 	if FilesManager.level_exists(get_identified_game_name(), loaded_level_name):
 		current_level_list = get_list_containing_level(loaded_level_name)
@@ -1320,6 +1320,7 @@ func try_load_level(level_name: String, as_queued_load: bool = false):
 		the_level_data["name"] = level_name
 	load_level_data(the_level_data, as_queued_load)
 	loaded_level_is_saved = true
+	loaded_level = editor_save
 
 func edit_level_named(level_name: String, auto_list: bool = false) -> bool:
 	if not FilesManager.level_exists(get_identified_game_name(), level_name):
@@ -1332,6 +1333,7 @@ func edit_level_named(level_name: String, auto_list: bool = false) -> bool:
 		current_level_list = get_list_containing_level(level_name)
 	load_level_data(the_level_data)
 	loaded_level_is_saved = true
+	loaded_level = editor_save
 	return true
 
 func edit_level_in_list(level_list_name: String, level_name: String) -> void:
@@ -1361,6 +1363,8 @@ func new_empty_level():
 	EntityManager.create_defaults()
 	
 	cleanup_new_level()
+	save_edited()
+	loaded_level = editor_save
 	new_level_edited_state_and_emit()
 	
 func new_level_edited_state_and_emit() -> void:
@@ -1391,6 +1395,8 @@ func new_museum_level():
 	MapManager.set_level_subtitle("Auto-generated showcase")
 	
 	cleanup_new_level()
+	save_edited()
+	loaded_level = editor_save
 	
 	new_level_edited_state_and_emit()
 
@@ -1412,7 +1418,7 @@ func change_scene(new_scene: String, skip_autosave: bool = false, request_tab: S
 	if cur_scene == "Play":
 		cancel_queued_level_load()
 		transition_left = true
-		if editor_save:
+		if editor_save and not loaded_level:
 			loaded_level = editor_save
 		EntityManager.clear()
 		MapManager.clear()
@@ -1480,10 +1486,7 @@ func post_scene_change() -> void:
 		EffectsHelper._fetch_effects_holder()
 		if is_in_level_edit_mode:
 			if loaded_level:
-				if current_game_is_release_locked and loaded_level_name in get_list_of_all_bundled_levels():
-					new_empty_level()
-				else:
-					load_serialized_play_state(loaded_level)
+				load_serialized_play_state(loaded_level)
 			elif has_editor_autosave():
 				var autosave_level_name: String = FilesManager.get_editor_autosave_level_name(get_identified_game_name())
 				if current_game_is_release_locked and autosave_level_name in get_list_of_all_bundled_levels():
@@ -1698,8 +1701,15 @@ func save_edited_level_as(as_level_filename: String, no_toast: bool = false) -> 
 	if not editor_save:
 		return
 	var level_data: = get_play_state_as_level_data(editor_save, as_level_filename)
+	as_level_filename = level_data["name"]
 	if not level_data:
 		return
+
+	if current_game_is_release_locked:
+		if is_level_bundled(as_level_filename):
+			if not no_toast:
+				GlobalToaster.show_toast_message("Cannot overwrite this level")
+			return
 	
 	var saved_successfully: = FilesManager.save_level(get_identified_game_name(), level_data)
 	if saved_successfully:
@@ -1709,8 +1719,15 @@ func save_edited_level_as(as_level_filename: String, no_toast: bool = false) -> 
 		if not no_toast:
 			GlobalToaster.show_toast_message("Failed to save level")
 		return
+
+	loaded_level = editor_save
 	
 	loaded_level_name = level_data["name"]
+	if current_level_list:
+		if current_game_is_release_locked and current_level_list in get_list_of_level_lists(true):
+			current_level_list = ""
+		else:
+			add_level_to_level_list(as_level_filename, current_level_list)
 	loaded_level_is_saved = true
 	loaded_is_autosave = false
 	current_level_is_museum = false
@@ -2052,11 +2069,28 @@ func _get_non_bundled_level_list(level_list_name: String) -> Dictionary:
 			return level_list_info
 	return {}
 
-func _remove_level_from_all_lists(level_name: String) -> void:
+func remove_level_from_all_editable_lists(level_name: String) -> void:
+	if not current_game_is_release_locked:
+		_remove_level_from_all_bundled_lists(level_name)
+
+	if _remove_level_from_all_non_bundled_lists(level_name):
+		non_bundled_lists_updated()
+
+func _remove_level_from_all_lists(level_name: String, dont_break_release_lock: bool = true) -> bool:
+	if not dont_break_release_lock or not current_game_is_release_locked:
+		_remove_level_from_all_bundled_lists(level_name)
+	return _remove_level_from_all_non_bundled_lists(level_name)
+
+func _remove_level_from_all_bundled_lists(level_name: String) -> void:
 	for level_list_info in game_definition.get("level_lists", []):
 		level_list_info["level_names"].erase(level_name)
+
+func _remove_level_from_all_non_bundled_lists(level_name: String) -> bool:
+	var removed: bool = false
 	for non_bundled_info in non_bundled_level_lists:
 		non_bundled_info["level_names"].erase(level_name)
+		removed = true
+	return removed
 
 func _is_list_info_valid_next_list(list_info: Dictionary) -> bool:
 	if list_info.get("always_hidden", false):
@@ -2108,6 +2142,9 @@ func change_level_list_is_bundled(level_list_name: String, new_is_bundled: bool)
 		if non_bundled_info.get("name", "") == level_list_name:
 			exists_in_non_bundled = true
 			break
+	
+	if new_is_bundled and level_list_name == "Imported Levels":
+		return
 	
 	if exists_in_bundled and exists_in_non_bundled:
 		return
@@ -2184,16 +2221,22 @@ func _remap_intermission_ids_in_level_list_info(level_list_info: Dictionary, int
 	level_list_info["intermissions"] = intermissions
 
 
-func add_empty_level_list(level_list_name: String, is_bundled: bool) -> void:
+func add_empty_level_list(level_list_name: String, is_bundled: bool, dont_break_release_lock: bool = true) -> void:
 	level_list_name = make_new_list_name_unique(level_list_name)
 	var new_list_info: Dictionary = {
 		"name": level_list_name,
 		"level_names": [],
 		"completion_mode": DEFAULT_LIST_COMPLETION_MODE,
 	}
+	if is_bundled and level_list_name == "Imported Levels":
+		is_bundled = false
+
 	if DEFAULT_LIST_COMPLETION_MODE == "percentage":
 		new_list_info["required_percentage"] = DEFAULT_LIST_COMPLETION_PERCENT
 	if is_bundled:
+		if dont_break_release_lock and current_game_is_release_locked:
+			return
+		
 		if not game_definition.get("level_lists", []):
 			game_definition["level_lists"] = []
 		game_definition["level_lists"].append(new_list_info)
@@ -2272,6 +2315,12 @@ func has_any_unlocked_levels() -> bool:
 	for level_list_name in get_list_of_level_lists():
 		total_unlocked_levels += get_unlocked_levels_in_level_list(level_list_name).size()
 	return total_unlocked_levels > 0
+
+func list_has_any_unlocked_levels(level_list_name: String) -> bool:
+	var level_list_info: = _get_level_list(level_list_name)
+	if not level_list_info:
+		return false
+	return get_unlocked_levels_in_level_list(level_list_name).size() > 0
 
 func get_list_of_level_lists(only_bundled: bool = false) -> Array:
 	var ll_names: Array[String] = []
@@ -2435,15 +2484,15 @@ func is_list_completable(level_list_name: String) -> bool:
 	if not level_list_exists(level_list_name):
 		return false
 	var list_info: = _get_level_list(level_list_name)
-	if not list_info:
-		return false
+
 	if list_info.get("always_hidden", false):
 		if not list_info.get("always_hidden_levels_completable", false):
 			return false
-	if get_levels_in_level_list(level_list_name).size() <= 0:
-		return false
 	var completion_mode: String = list_info.get("completion_mode", "")
 	if completion_mode == LevelListSettings.COMPLETION_MODE_UNCOMPLETABLE:
+		return false
+
+	if get_levels_in_level_list(level_list_name).size() <= 0:
 		return false
 	return true
 
@@ -2695,6 +2744,8 @@ func is_level_completed_in_any_list(level_name: String) -> bool:
 
 func is_every_level_completed() -> bool:
 	for level_list_name in get_list_of_level_lists(true):
+		if not is_list_completable(level_list_name):
+			continue
 		if not is_level_list_fully_completed(level_list_name):
 			return false
 	return true
@@ -2841,15 +2892,31 @@ func add_level_to_level_list(level_name: String, level_list_name: String) -> voi
 	if not level_name in level_list_info.get("level_names", []):
 		if not level_list_info.has("level_names"):
 			level_list_info["level_names"] = []
+		if level_list_info["level_names"].has(level_name):
+			return
 		level_list_info["level_names"].append(level_name)
 	if not is_bundled:
 		non_bundled_lists_updated()
 
 func move_level_to_level_list(level_name: String, level_list_name: String, from_list_name: String = "") -> void:
-	if not from_list_name:
-		_remove_level_from_all_lists(level_name)
-	else:
-		_remove_level_from_list(level_name, from_list_name)
+	var is_locked: bool = current_game_is_release_locked
+
+	if not FilesManager.level_exists(get_identified_game_name(), level_name):
+		return
+	if not level_list_exists(level_list_name) or from_list_name and not level_list_exists(from_list_name):
+		return
+	if from_list_name and level_name not in get_levels_in_level_list(from_list_name):
+		return
+	
+	if is_locked and is_level_list_bundled(level_list_name):
+		return
+
+	if from_list_name:
+		if not is_locked or not is_level_list_bundled(from_list_name):
+			_remove_level_from_list(level_name, from_list_name)
+	elif not is_locked:
+		_remove_level_from_all_lists(level_name, true)
+
 	add_level_to_level_list(level_name, level_list_name)
 	non_bundled_lists_updated()
 
@@ -3560,6 +3627,15 @@ func get_game_bg_info() -> Dictionary:
 func get_current_bg_info() -> Dictionary:
 	if cur_scene != "Play":
 		return get_game_bg_info()
+	
+	if is_intermission_mode:
+		var showing_intermission_id: String = intermission_state.get("showing_id", "")
+		if has_tagged_intermission_id(showing_intermission_id):
+			var intermission_bg_info: Dictionary = get_tagged_intermission_info(showing_intermission_id).get("bg_style", {})
+			if not intermission_bg_info:
+				return get_game_bg_info()
+			else:
+				return intermission_bg_info.merged(get_game_bg_info())
 
 	var game_bg_info: Dictionary = get_game_bg_info().duplicate_deep()
 	var level_list_bg_info: Dictionary = {}
@@ -3761,6 +3837,17 @@ func web_export_level_json(level_name: String) -> void:
 	var level_filename: = FilesManager.sanitize_level_filename(level_name) + ".json"
 	JavaScriptBridge.download_buffer(level_bytes, level_filename, "application/json")
 
+func web_export_current_edited_level_json(with_filename: String = "") -> void:
+	if not editor_save:
+		return
+	if not with_filename or with_filename == "LEVEL" or with_filename == "OOPS":
+		with_filename = "Unsaved_" + Utility.random_animal()
+	var level_data: = get_play_state_as_level_data(editor_save, with_filename)
+	if not level_data:
+		return
+	var level_bytes: PackedByteArray = JSON.stringify(level_data, "", false).to_utf8_buffer()
+	var level_filename: = FilesManager.sanitize_level_filename(level_data["name"]) + ".json"
+	JavaScriptBridge.download_buffer(level_bytes, level_filename, "application/json")
 
 func start_import_levels() -> void:
 	if OS.has_feature("web"):
@@ -4170,6 +4257,8 @@ func load_level_from_clipboard_string(clipboard_data: String) -> bool:
 	ensure_level_has_name(parsed, "Pasted Level")
 	load_level_data(parsed)
 	loaded_level_is_saved = false
+	save_edited()
+	loaded_level = editor_save
 	return true
 
 func add_imported_level_data(level_data: Dictionary) -> String:
@@ -4549,7 +4638,7 @@ func get_all_existing_levels_sorted_by_chronology() -> Array[String]:
 			all_levels.append(unlisted_level)
 	return all_levels
 
-func get_list_completion_style(list_name: String) -> String:
+func get_list_show_completion_style(list_name: String) -> String:
 	var list_info: = _get_level_list(list_name)
 	if not list_info:
 		return LevelListSettings.SHOWCOMP_STYLE_HIDE
@@ -4559,19 +4648,13 @@ func get_list_completion_style(list_name: String) -> String:
 	return show_completion_style
 
 func should_show_list_completion(list_name: String) -> bool:
-	var list_info: = _get_level_list(list_name)
-	if not list_info:
+	if not is_list_completable(list_name):
 		return false
-	var completion_mode: String = list_info.get("completion_mode", "")
-	if completion_mode == LevelListSettings.COMPLETION_MODE_UNCOMPLETABLE:
-		return false
-	if list_info.get("always_hidden", false) and not list_info.get("always_hidden_levels_completable", false):
-		return false
-	var show_completion_style: = get_list_completion_style(list_name)
+	var show_completion_style: = get_list_show_completion_style(list_name)
 	return show_completion_style != LevelListSettings.SHOWCOMP_STYLE_HIDE
 
 func get_list_completion_text(list_name: String) -> String:
-	var show_completion_style: = get_list_completion_style(list_name)
+	var show_completion_style: = get_list_show_completion_style(list_name)
 	if show_completion_style == LevelListSettings.SHOWCOMP_STYLE_HIDE:
 		return ""
 
@@ -4588,7 +4671,7 @@ func get_list_completion_text(list_name: String) -> String:
 	return ""
 
 func get_list_completion_tooltip(list_name: String) -> String:
-	var show_completion_style: = get_list_completion_style(list_name)
+	var show_completion_style: = get_list_show_completion_style(list_name)
 	if show_completion_style == LevelListSettings.SHOWCOMP_STYLE_HIDE:
 		return ""
 	elif show_completion_style == LevelListSettings.SHOWCOMP_STYLE_COMP_REQ_TOTAL:
@@ -4653,6 +4736,8 @@ func _get_all_intermission_ids_from(intermissions: Array) -> Array[String]:
 func has_tagged_intermission_id(intermission_id: String, for_custom_list: String = "") -> bool:
 	if is_intermission_id_reserved(intermission_id):
 		return true
+	if not intermission_id:
+		return false
 	if not for_custom_list:
 		for_custom_list = current_level_list
 
@@ -5274,6 +5359,7 @@ func show_intermission(intermission_info: Dictionary, tagged_intermission_id: St
 			return false
 
 	intermission_state["showing_id"] = tagged_intermission_id
+	bg_style_changed.emit()
 	
 	save_intermission_id_viewed(tagged_intermission_id)
 	var intermission_type: String = intermission_info.get("type", "")
@@ -5478,10 +5564,9 @@ func is_pause_no_current_level() -> bool:
 		return false
 	if is_in_level_edit_mode:
 		return false
+	if is_intermission_mode:
+		return true
 	if not loaded_level_name:
-		var first_level_and_list: Array = get_starting_level_and_list()
-		if first_level_and_list.size() < 2 or not first_level_and_list[1]:
-			return false
 		return true
 	return false
 
@@ -5583,7 +5668,7 @@ func check_for_game_completion() -> bool:
 			if not is_level_bundled(level_name):
 				# invalid level, default to all levels complete
 				is_completed = is_every_level_completed()
-			elif is_level_completed_in_any_list(specific_key):
+			elif is_level_completed_in_any_list(level_name):
 				is_completed = true
 		else:
 			if not is_level_code_valid_and_bundled(specific_key):

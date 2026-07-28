@@ -187,8 +187,16 @@ func is_showing_custom_levels() -> bool:
 func refresh(scroll_to_level_name: String = "", scroll_to_level_list_name: String = "") -> void:
     is_editing_locked = not GameManager.is_in_level_edit_mode or GameManager.current_game_is_release_locked
     refresh_editing_locked()
+    
+    var is_settings_mode: = is_in_list_settings_mode()
+    level_list_settings.visible = is_settings_mode
 
-    if is_editing_locked or (editing_settings_of_list == "" and not is_rearranging_lists):
+    if is_settings_mode:
+        enable_background_editor()
+    else:
+        disable_background_editor()
+
+    if not is_rearranging_lists and not is_settings_mode:
         editing_settings_of_list = ""
         is_rearranging_lists = false
         refresh_level_lists(scroll_to_level_name, scroll_to_level_list_name)
@@ -201,8 +209,10 @@ func refresh(scroll_to_level_name: String = "", scroll_to_level_list_name: Strin
         fresh_open = false
 
 func refresh_editing_locked() -> void:
-    rearrange_lists_button.disabled = is_editing_locked
-    add_new_list_button.disabled = is_editing_locked
+    var is_custom: = is_showing_custom_levels()
+    var editable_order: = not (is_editing_locked and not is_custom)
+    rearrange_lists_button.disabled = editable_order
+    add_new_list_button.disabled = editable_order
 
 func refresh_list_settings() -> void:
     rearrange_lists_button.hide()
@@ -211,19 +221,19 @@ func refresh_list_settings() -> void:
     rearrange_lists_back_container.hide()
     rearrange_add_list_container.hide()
     edit_autosave_container.hide()
-    
+
+    level_select_header_label.hide()
     expand_all_container.hide()
 
     tabs_container.hide()
     import_levels_button_container.hide()
+    
+    prints("showing settings for list: %s" % [editing_settings_of_list])
 
     level_list_settings.show()
-    if level_list_settings.editing_list_name != editing_settings_of_list:
-        level_list_settings.load_list_info(editing_settings_of_list)
-    return
+    level_list_settings.load_list_info(editing_settings_of_list)
 
 func refresh_level_lists(scroll_to_level: String = "", scroll_to_list: String = "") -> void:
-    prints("refresh list start")
     tabs_container.show()
     list_scroll_container.show()
     rearrange_lists_button.show()
@@ -355,6 +365,7 @@ func refresh_rearrangable_lists() -> void:
     rearrange_add_list_container.show()
     edit_autosave_container.hide()
     import_levels_button_container.hide()
+
     level_select_header_label.hide()
     expand_all_container.hide()
 
@@ -486,26 +497,12 @@ func return_to_level_select_mode() -> void:
     refresh()
 
 func do_edit_settings_for_list(list_name: String) -> void:
-    if level_list_settings.visible:
-        return
-    any_edited = true
+    is_rearranging_lists = false
     editing_settings_of_list = list_name
-    level_list_settings.load_list_info(list_name)
-    level_list_settings.show()
-    list_scroll_container.hide()
-    edit_lists_button_container.hide()
-    if level_select_root:
-        level_select_root.show_background_editor()
+    refresh()
 
 func back_to_select_from_list_settings() -> void:
-    if not level_list_settings.visible:
-        return
     editing_settings_of_list = ""
-    level_list_settings.hide()
-    list_scroll_container.show()
-    edit_lists_button_container.show()
-    if level_select_root:
-        level_select_root.hide_background_editor()
     is_rearranging_lists = false
     refresh()
 
@@ -577,6 +574,8 @@ func _get_list_context_menu_common() -> PopupMenu:
             context_menu.set_item_disabled(idx, true)
     context_menu.add_separator()
     context_menu.add_item("Remove List", CTX_REMOVE_LIST)
+    
+    # Disable all options for bundled lists if release locked
     if is_editing_locked and not is_showing_custom_levels():
         for idx in context_menu.get_item_count():
             context_menu.set_item_disabled(idx, true)
@@ -599,9 +598,10 @@ func on_list_context_menu_id_pressed(context_menu_id: int, is_rearrangable: bool
         GameManager.remove_level_list(list_item.get_list_name())
         refresh("", scroll_to_list_name)
     elif context_menu_id in [CTX_MAKE_LIST_CUSTOM, CTX_MAKE_LIST_BUNDLED]:
-        var to_bundled: = context_menu_id == CTX_MAKE_LIST_BUNDLED
-        GameManager.change_level_list_is_bundled(list_item.get_list_name(), to_bundled)
-        refresh()
+        if not is_editing_locked:
+            var to_bundled: = context_menu_id == CTX_MAKE_LIST_BUNDLED
+            GameManager.change_level_list_is_bundled(list_item.get_list_name(), to_bundled)
+            refresh()
     elif context_menu_id in [CTX_MOVE_UP, CTX_MOVE_DOWN]:
         var rel_index: = 1 if context_menu_id == CTX_MOVE_DOWN else -1
         if is_rearrangable:
@@ -768,29 +768,24 @@ func set_expand_all_lists(new_is_expanded: bool) -> void:
     for child in level_list_container.get_children():
         if child is SingleLevelList:
             all_lists.append(child)
-
-    if all_lists.size() == 0:
-        return
     
     if new_is_expanded:
         for list in all_lists:
             list.set_expanded(true, false)
-        return
-    
-    var focused_control: Control = get_viewport().gui_get_focus_owner()
-    if focused_control and is_ancestor_of(focused_control):
-        for list in all_lists:
-            if list.is_ancestor_of(focused_control):
-                focused_list = list
-                break
-        if not focused_list:
+    else:
+        var focused_control: Control = get_viewport().gui_get_focus_owner()
+        if focused_control and is_ancestor_of(focused_control):
             for list in all_lists:
-                if list.has_current_level():
+                if list.is_ancestor_of(focused_control):
                     focused_list = list
                     break
+            if not focused_list:
+                for list in all_lists:
+                    if list.has_current_level():
+                        focused_list = list
+                        break
 
-    for list in all_lists:
-        list.set_expanded(focused_list == list, false)
+        for list in all_lists:
+            list.set_expanded(focused_list == list, false)
     
-    await get_tree().process_frame
     set_level_list_container_min_height()
