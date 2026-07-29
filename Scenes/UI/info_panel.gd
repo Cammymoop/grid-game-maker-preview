@@ -12,7 +12,12 @@ var items_by_id: Dictionary = {}
 
 var info_panel_enabled: bool = false
 
+var entity_flag_counts_dirty: bool = true
+
 func _ready() -> void:
+    MapManager.persist_on_completion_changed.connect(map_persist_on_completion_changed)
+    GameManager.any_state_loaded.connect(on_any_state_loaded)
+    GameManager.flag_counts_changed.connect(on_flag_counts_changed)
     hide()
     info_panel_enabled = GameManager.get_game_setting("info_panel_enabled", false)
     var game_info_panel_settings: Dictionary = GameManager.get_game_setting("info_panel_items", {})
@@ -30,6 +35,8 @@ func make_items_from_info(new_items: Dictionary) -> void:
     for key in new_items:
         var item_data: Dictionary = new_items[key]
         make_item_from_data(item_data)
+    
+    
 
 func clear_all() -> void:
     items_by_id.clear()
@@ -75,7 +82,13 @@ func make_item_from_data(item_data: Dictionary) -> InfoItem:
                 _set_filtered_property_item(new_item, filter_prop, filter_truthy, item_data["value_prop"])
     else:
         var entity_id: int = item_data.get("entity_id", -1)
-        _set_entity_count_item(new_item, entity_id, filter_prop, filter_truthy)
+        if item_data.get("type", "property") == "entity_count":
+            _set_entity_count_item(new_item, entity_id, filter_prop, filter_truthy)
+        else:
+            var include_pending: bool = item_data.get("include_pending", true)
+            var separate_pending: bool = item_data.get("separate_pending", false)
+            var always_separate: bool = item_data.get("always_separate", false)
+            _set_entity_flag_count_item(new_item, entity_id, include_pending, separate_pending, always_separate)
     
     if item_data.has("entity_icon"):
         tracking_items[new_item.item_id]["entity_icon"] = item_data["entity_icon"]
@@ -104,6 +117,8 @@ func make_item_from_data(item_data: Dictionary) -> InfoItem:
     new_item.hide_zero_value = item_data.get("hide_zero_value", true)
     new_item.hide_empty_value = item_data.get("hide_empty_value", true)
     
+    new_item.refresh_ui()
+    
     return new_item
 
 func _physics_process(_delta: float) -> void:
@@ -131,7 +146,7 @@ func update_items() -> void:
                 filter_props_truthy.append(filter_prop)
             elif not filter_truthy and filter_prop not in filter_props_falsey:
                 filter_props_falsey.append(filter_prop)
-        if tracking_items[item_id].get("type", "property") == "entity_count":
+        if tracking_items[item_id].get("type", "property") in ["entity_count", "entity_flag_count"]:
             var filter_id: int = item_data.get("entity_id", -1)
             if filter_id > -1 and filter_id not in filter_ids:
                 filter_ids.append(filter_id)
@@ -194,6 +209,29 @@ func update_items() -> void:
                     item_enabled = false
             else:
                 item_enabled = false
+        elif type == "entity_flag_count":
+            var entity_id: int = item_data.get("entity_id", -1)
+            if entity_id == -1:
+                item_enabled = false
+                continue
+            if not entity_flag_counts_dirty:
+                continue
+            var include_pending: bool = item_data.get("include_pending", true)
+            var separate_pending: bool = item_data.get("separate_pending", false)
+            var always_separate: bool = item_data.get("always_separate", false)
+            
+            if not include_pending or not separate_pending:
+                var count: int = GameManager.count_entity_flags_by_entity_id(entity_id, include_pending)
+                prints("count for flags for entity %d: %d" % [entity_id, count])
+                item.set_item_number(count, true)
+            elif separate_pending:
+                var without_pending: int = GameManager.count_entity_flags_by_entity_id(entity_id, false)
+                var with_pending: int = GameManager.count_entity_flags_by_entity_id(entity_id, true)
+                if not always_separate and with_pending == without_pending:
+                    item.set_item_number(without_pending, true)
+                else:
+                    var pending_additional: int = maxi(0, with_pending - without_pending)
+                    item.set_item_text("%d +%d" % [without_pending, pending_additional])
         else:
             var entity_id: int = item_data.get("entity_id", -1)
             var included_entities: Array[BaseEntity] = []
@@ -214,6 +252,7 @@ func update_items() -> void:
         
         if item.enabled != item_enabled:
             item.set_enabled(item_enabled)
+    entity_flag_counts_dirty = false
     on_info_updated()
 
                 
@@ -232,6 +271,18 @@ func _set_entity_count_item(item: InfoItem, entity_id: int, prop_name: String, p
         "filtered": true,
         "filter_prop": prop_name,
         "filter_truthy": prop_truthy,
+    }
+
+func _set_entity_flag_count_item(item: InfoItem, entity_id: int, include_pending: bool, separate_pending: bool, always_separate: bool) -> void:
+    item.set_item_number(0, true)
+    if entity_id > -1:
+        item.set_icon_as_entity(entity_id)
+    tracking_items[item.item_id] = {
+        "type": "entity_flag_count",
+        "entity_id": entity_id,
+        "include_pending": include_pending,
+        "separate_pending": separate_pending,
+        "always_separate": always_separate,
     }
 
 func _set_camera_tracked_property_item(item: InfoItem, prop_name: String) -> void:
@@ -253,3 +304,12 @@ func _set_filtered_property_item(item: InfoItem, filter_prop: String, filter_tru
         "filter_truthy": filter_truthy,
         "value_prop": value_prop,
     }
+
+func map_persist_on_completion_changed() -> void:
+    entity_flag_counts_dirty = true
+
+func on_any_state_loaded() -> void:
+    entity_flag_counts_dirty = true
+
+func on_flag_counts_changed() -> void:
+    entity_flag_counts_dirty = true

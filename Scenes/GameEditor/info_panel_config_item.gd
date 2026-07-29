@@ -36,6 +36,9 @@ signal request_duplicate()
 
 @export var tracking_type_picker: OptionButton
 
+@export var entity_name_label_1: Label
+@export var entity_name_label_2: Label
+
 @export var value_prop_input: FuzzyAutocompleteInput
 @export var entity_filter_input: FuzzyAutocompleteInput
 @export var prop_filter_input: FuzzyAutocompleteInput
@@ -43,6 +46,9 @@ signal request_duplicate()
 
 @export var hide_zero_toggle: CheckButton
 @export var hide_empty_toggle: CheckButton
+
+@export var include_pending_option: Control
+@export var include_pending_mode_select: OptionButton
 
 
 const CTX_MOVE_UP = 1
@@ -54,6 +60,12 @@ const CTX_MOVE_TO_BOTTOM = 11
 const CTX_DUPLICATE = 20
 
 const CTX_REMOVE = 30
+
+
+const PENDING_MODE_EXCLUDE = 0
+const PENDING_MODE_INCLUDE_NO_SEPARATE = 1
+const PENDING_MODE_INCLUDE_SMART_SEPARATE = 2
+const PENDING_MODE_INCLUDE_ALWAYS_SEPARATE = 3
 
 
 var icon_image_texture_id: int = -1
@@ -82,6 +94,16 @@ func _ready() -> void:
     hide_empty_toggle.toggled.connect(_some_button_toggled)
     
     pick_image_button.pressed.connect(show_image_picker)
+    
+    setup_pending_mode_select()
+
+func setup_pending_mode_select() -> void:
+    include_pending_mode_select.clear()
+    include_pending_mode_select.add_item("Exclude", PENDING_MODE_EXCLUDE)
+    include_pending_mode_select.add_item("Include", PENDING_MODE_INCLUDE_NO_SEPARATE)
+    include_pending_mode_select.add_item("Set +Pending", PENDING_MODE_INCLUDE_SMART_SEPARATE)
+    include_pending_mode_select.add_item("Set +Pending (Even if 0)", PENDING_MODE_INCLUDE_ALWAYS_SEPARATE)
+    include_pending_mode_select.selected = PENDING_MODE_INCLUDE_NO_SEPARATE
 
 
 func show_image_picker() -> void:
@@ -125,9 +147,12 @@ func _some_text_updated(_text: String) -> void:
 
 func load_config_data(config_data: Dictionary) -> void:
     var is_entity_count: bool = config_data.get("type", "property") == "entity_count"
+    var is_entity_flag_count: bool = config_data.get("type", "property") == "entity_flag_count"
     var is_filtered: bool = config_data.get("filtered", false)
     
-    if not is_entity_count and is_filtered:
+    if is_entity_flag_count:
+        tracking_type_picker.select(3)
+    elif not is_entity_count and is_filtered:
         tracking_type_picker.select(1)
     elif not is_entity_count:
         tracking_type_picker.select(0)
@@ -166,6 +191,19 @@ func load_config_data(config_data: Dictionary) -> void:
     
     hide_zero_toggle.set_pressed_no_signal(config_data.get("hide_zero_value", true))
     hide_empty_toggle.set_pressed_no_signal(config_data.get("hide_empty_value", true))
+    
+    if is_entity_flag_count:
+        var is_include_pending: bool = config_data.get("include_pending", true)
+        var is_separate_pending: bool = config_data.get("separate_pending", false)
+        var is_always_separate: bool = config_data.get("always_separate", false)
+        if not is_include_pending:
+            Utility.opbtn_select_id(include_pending_mode_select, PENDING_MODE_EXCLUDE)
+        elif not is_separate_pending:
+            Utility.opbtn_select_id(include_pending_mode_select, PENDING_MODE_INCLUDE_NO_SEPARATE)
+        elif not is_always_separate:
+            Utility.opbtn_select_id(include_pending_mode_select, PENDING_MODE_INCLUDE_SMART_SEPARATE)
+        else:
+            Utility.opbtn_select_id(include_pending_mode_select, PENDING_MODE_INCLUDE_ALWAYS_SEPARATE)
 
     refresh_ui()
 
@@ -173,15 +211,19 @@ func load_config_data(config_data: Dictionary) -> void:
 func get_config_data() -> Dictionary:
     var config_data: Dictionary = {}
     var is_entity_count: bool = tracking_type_picker.selected == 2
-    config_data["type"] = "entity_count" if is_entity_count else "property"
+    var is_entity_flag_count: bool = tracking_type_picker.selected == 3
 
-    var is_filtered: bool = tracking_type_picker.selected != 0
+    config_data["type"] = "entity_count" if is_entity_count else "property"
+    if is_entity_flag_count:
+        config_data["type"] = "entity_flag_count"
+
+    var is_filtered: bool = tracking_type_picker.selected in [1, 2]
     config_data["filtered"] = is_filtered
     if is_filtered:
         config_data["filter_prop"] = prop_filter_input.text.strip_edges()
         config_data["filter_truthy"] = prop_truthy_picker.selected == 0
 
-    if is_entity_count:
+    if is_entity_count or is_entity_flag_count:
         var entity_name: = entity_filter_input.text.strip_edges()
         if EntityManager.entity_name_exists(entity_name):
             config_data["entity_id"] = EntityManager.get_entity_index(entity_name)
@@ -209,17 +251,36 @@ func get_config_data() -> Dictionary:
     
     config_data["hide_zero_value"] = hide_zero_toggle.button_pressed
     config_data["hide_empty_value"] = hide_empty_toggle.button_pressed
+    if is_entity_count or is_entity_flag_count:
+        config_data.erase("hide_empty_value")
+    
+    if is_entity_flag_count:
+        var pending_mode_id: int = Utility.opbtn_get_selected_id(include_pending_mode_select)
+        config_data["include_pending"] = is_pending_mode_include_pending(pending_mode_id)
+        config_data["separate_pending"] = is_pending_mode_separate_pending(pending_mode_id)
+        config_data["always_separate"] = is_pending_mode_always_separate(pending_mode_id)
 
     return config_data
     
 func refresh_ui() -> void:
     var is_entity_count: bool = tracking_type_picker.selected == 2
-    var is_filtered: bool = tracking_type_picker.selected != 0
+    var is_entity_flag_count: bool = tracking_type_picker.selected == 3
+    var is_filtered: bool = tracking_type_picker.selected in [1, 2]
     
-    entity_filter_option.visible = is_entity_count
-    value_prop_option.visible = not is_entity_count
+    if is_entity_count:
+        entity_filter_input.placeholder_text = "<Any type>"
+    else:
+        entity_filter_input.placeholder_text = "[entity name]"
+    
+    entity_filter_option.visible = is_entity_count or is_entity_flag_count
+    value_prop_option.visible = not (is_entity_count or is_entity_flag_count)
     prop_filter_option.visible = is_filtered
-    hide_zero_value_option.visible = not is_entity_count
+    hide_empty_toggle.visible = not (is_entity_count or is_entity_flag_count)
+    
+    include_pending_option.visible = is_entity_flag_count
+    
+    entity_name_label_1.visible = is_entity_count
+    entity_name_label_2.visible = is_entity_flag_count
     
     if is_filtered:
         prop_truthy_suboption.visible = prop_filter_input.text.strip_edges().length() > 0
@@ -289,3 +350,14 @@ func on_context_menu_id_pressed(context_menu_id: int) -> void:
 func _gui_input(event: InputEvent) -> void:
     if event is InputEventMouseButton and event.is_pressed() and event.button_index == MOUSE_BUTTON_RIGHT:
         show_context_menu()
+
+func is_pending_mode_include_pending(pending_mode_id: int) -> bool:
+    return pending_mode_id != PENDING_MODE_EXCLUDE
+
+func is_pending_mode_separate_pending(pending_mode_id: int) -> bool:
+    if not is_pending_mode_include_pending(pending_mode_id):
+        return false
+    return pending_mode_id != PENDING_MODE_INCLUDE_NO_SEPARATE
+
+func is_pending_mode_always_separate(pending_mode_id: int) -> bool:
+    return pending_mode_id == PENDING_MODE_INCLUDE_ALWAYS_SEPARATE

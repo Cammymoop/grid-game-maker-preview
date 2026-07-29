@@ -642,6 +642,22 @@ func check_comparison(value_a: float, value_b: float, comparison: String) -> boo
 		return value_a <= value_b
 	return false
 
+func check_alphanum_comparison(value_a: String, value_b: String, comparison: String) -> bool:
+	var cmp_result: = value_a.naturalnocasecmp_to(value_b)
+	if comparison == ">":
+		return cmp_result > 0
+	elif comparison == "<":
+		return cmp_result < 0
+	elif comparison == "=":
+		return cmp_result == 0
+	elif comparison == "!=":
+		return cmp_result != 0
+	elif comparison == ">=":
+		return cmp_result >= 0
+	elif comparison == "<=":
+		return cmp_result <= 0
+	return false
+
 func sanitize_for_filename(the_str: String, allow_uppercase: bool = false, allow_spaces: bool = false) -> String:
 	the_str = the_str.strip_edges()
 	if not allow_uppercase:

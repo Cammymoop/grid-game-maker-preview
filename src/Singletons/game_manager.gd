@@ -12,6 +12,8 @@ signal bg_style_changed
 signal level_edit_mode_changed()
 signal profile_switched()
 
+signal flag_counts_changed()
+
 const CreditsUI = preload("res://Scenes/credits_ui.gd")
 const BGTileHolder = preload("res://Scenes/bg_tile_holder.gd")
 
@@ -59,6 +61,8 @@ var has_new_undo_since_checkpoint: bool = false
 var previous_checkpoint_save: = {}
 var editor_save: = {}
 var loaded_level: = {}
+
+var dummy_save_data: = {}
 
 var undo_stack: Array[Dictionary] = []
 var undo_checkpoints: Dictionary[int, Dictionary] = {}
@@ -233,11 +237,20 @@ const INTERM_FULL_COMPLETE_FLAG = "_FULL_COMPLETE_"
 const RESERVED_INTERMISSION_IDS: Array[String] = [
 	INTERM_GAME_STARTED_FLAG,
 	INTERM_GAME_COMLETE_FLAG,
+	INTERM_FULL_COMPLETE_FLAG,
 ]
 
 const RESERVED_INTERMISSIONS: Dictionary[String, Dictionary] = {
+	INTERM_GAME_STARTED_FLAG: {
+		"id": INTERM_GAME_STARTED_FLAG,
+		"type": "flag",
+	},
 	INTERM_GAME_COMLETE_FLAG: {
 		"id": INTERM_GAME_COMLETE_FLAG,
+		"type": "flag",
+	},
+	INTERM_FULL_COMPLETE_FLAG: {
+		"id": INTERM_FULL_COMPLETE_FLAG,
 		"type": "flag",
 	},
 }
@@ -539,6 +552,7 @@ func load_game_definition_data(definition_data: Dictionary, from_file: bool) -> 
 	clear_checkpoint()
 	clear_quicksave()
 	clear_undo_stack()
+	reset_dummy_save_data()
 	
 	# compatibility
 	if "window_width" in definition_data and "window_height" in definition_data:
@@ -1481,6 +1495,7 @@ func post_scene_change() -> void:
 	await get_tree().process_frame
 	await get_tree().process_frame
 	if cur_scene == "Play":
+		reset_dummy_save_data()
 		update_game_viewport()
 		create_game_camera()
 		EffectsHelper._fetch_effects_holder()
@@ -3603,6 +3618,66 @@ func set_game_save_data(data_key: String, value: Variant, flush: bool = true) ->
 		push_warning("Trying to set game save data but no current game")
 		return
 	player_profile.set_game_save_data(get_identified_game_name(), data_key, value, flush)
+	flag_counts_changed.emit()
+
+func clear_game_save_data(data_key: String) -> void:
+	if not player_profile:
+		push_error("No player profile loaded")
+		return
+	if not get_identified_game_name():
+		push_warning("Trying to clear game save data but no current game")
+		return
+	player_profile.clear_game_save_data(get_identified_game_name(), data_key)
+	flag_counts_changed.emit()
+
+func has_game_save_data(data_key: String) -> bool:
+	if not player_profile:
+		push_error("No player profile loaded")
+		return false
+	if not get_identified_game_name():
+		push_warning("Trying to check if game save data exists but no current game")
+		return false
+	return player_profile.has_game_save_data(get_identified_game_name(), data_key)
+
+
+func get_dummy_save_data(data_key: String, default_value: Variant = null) -> Variant:
+	return dummy_save_data.get(data_key, default_value)
+
+func set_dummy_save_data(data_key: String, value: Variant) -> void:
+	dummy_save_data[data_key] = value
+	flag_counts_changed.emit()
+
+func clear_dummy_save_data(data_key: String) -> void:
+	dummy_save_data.erase(data_key)
+	flag_counts_changed.emit()
+
+func has_dummy_save_data(data_key: String) -> bool:
+	return dummy_save_data.has(data_key)
+
+func get_game_save_data_or_dummy(data_key: String, default_value: Variant = null) -> Variant:
+	if is_in_level_edit_mode:
+		return get_dummy_save_data(data_key, default_value)
+	else:
+		return get_game_save_data(data_key, default_value)
+
+func set_game_save_data_or_dummy(data_key: String, value: Variant, flush: bool = true) -> void:
+	if is_in_level_edit_mode:
+		set_dummy_save_data(data_key, value)
+	else:
+		set_game_save_data(data_key, value, flush)
+
+func clear_game_save_data_or_dummy(data_key: String) -> void:
+	if is_in_level_edit_mode:
+		clear_dummy_save_data(data_key)
+	else:
+		clear_game_save_data(data_key)
+
+func has_game_save_data_or_dummy(data_key: String) -> bool:
+	if is_in_level_edit_mode:
+		return has_dummy_save_data(data_key)
+	else:
+		return has_game_save_data(data_key)
+
 
 func get_profile_name() -> String:
 	if not player_profile:
@@ -5589,6 +5664,8 @@ func is_game_completed() -> bool:
 	return save_completed_val
 
 func _save_game_completion() -> void:
+	if is_in_level_edit_mode:
+		return
 	set_game_save_data("game_completed", true)
 
 func has_viewed_game_completion() -> bool:
@@ -5707,3 +5784,41 @@ func get_feature_category_filter() -> Array:
 
 func update_feature_category_filter(excluded_feature_categories: Array) -> void:
 	set_current_game_profile_setting_1("feature_category_filter", excluded_feature_categories)
+
+func reset_dummy_save_data() -> void:
+	dummy_save_data = {}
+
+
+func get_current_level_code() -> String:
+	if not loaded_level_name:
+		return _level_code(current_level_list, "_UNKNOWN_")
+	return _level_code(current_level_list, loaded_level_name)
+
+func count_dummy_entity_flags_by_entity_id(entity_id: int, _include_pending: bool) -> int:
+	var count: int = 0
+	var key_prefix: String = "::cmd-flag::entity-flag-%s::" % str(entity_id)
+	for key_name in dummy_save_data.keys():
+		if key_name.begins_with(key_prefix):
+			count += 1
+	return count
+
+func count_entity_flags_by_entity_id(entity_id: int, include_pending: bool, skip_dummy: bool = false) -> int:
+	if is_in_level_edit_mode and not skip_dummy:
+		return count_dummy_entity_flags_by_entity_id(entity_id, include_pending)
+
+	var key_prefix: String = "::cmd-flag::entity-flag-%s::" % str(entity_id)
+	var game_save_root_dict: = player_profile.get_game_save_data_root(GameManager.get_identified_game_name())
+	var flags: Array[String] = []
+	for key_name in game_save_root_dict.keys():
+		if key_name.begins_with(key_prefix):
+			if include_pending:
+				if not (cur_scene == "Play" and MapManager.is_flag_cleared_on_completion(key_name)):
+					flags.append(key_name)
+			else:
+				flags.append(key_name)
+	if include_pending:
+		for new_flag_key in MapManager.get_new_flags_on_completion():
+			if new_flag_key.begins_with(key_prefix) and new_flag_key not in flags:
+				flags.append(new_flag_key)
+
+	return flags.size()

@@ -249,10 +249,9 @@ func apply_text_filter(list: Array, filter_str: String) -> Array[String]:
 				var kw_lower: String = kw.to_lower()
 				var this_kw_score: int = 0
 				for i in range(len(filter_str)-1, -1, -1):
-					if kw_lower.contains(filter_str.substr(0, i+1)):
+					if kw_lower.begins_with(filter_str.substr(0, i+1)):
 						this_kw_score = i + 1
-						if kw_lower.begins_with(filter_str.substr(0, i+1)):
-							this_kw_score += 50
+						this_kw_score += 50
 						break
 				kw_score = maxi(kw_score, this_kw_score)
 

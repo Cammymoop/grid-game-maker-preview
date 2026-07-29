@@ -101,6 +101,11 @@ func get_game_save_data(for_game_name: String, data_key: String, default_value: 
         return default_value
     return game_saves[for_game_name].get(data_key, default_value)
 
+func get_game_save_data_root(for_game_name: String) -> Dictionary:
+    if not for_game_name or not game_saves.has(for_game_name):
+        return {}
+    return game_saves[for_game_name]
+
 func set_game_save_data(for_game_name: String, data_key: String, value: Variant, flush: bool = true) -> void:
     if data_key in GAME_SAVE_DEFAULT_KEYS:
         return
@@ -110,6 +115,11 @@ func set_game_save_data(for_game_name: String, data_key: String, value: Variant,
     game_saves[for_game_name][data_key] = value
     if flush:
         write_game_save(for_game_name)
+
+func has_game_save_data(for_game_name: String, data_key: String) -> bool:
+    if not for_game_name or not game_saves.has(for_game_name):
+        return false
+    return data_key in game_saves[for_game_name]
 
 func write_current_game_save() -> void:
     var current_game: String = GameManager.get_identified_game_name()

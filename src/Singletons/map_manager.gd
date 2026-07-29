@@ -10,6 +10,8 @@ const IntermissionEvents = EditIntermissionAssignments.Events
 signal level_size_changed
 signal map_cleared
 
+signal persist_on_completion_changed
+
 var map_layer_template: = preload("res://Scenes/MapLayer.tscn")
 
 var layers: Array = []
@@ -1523,6 +1525,17 @@ func set_save_persist_on_completion(save_key: String, value: Variant, allow_in_l
         map_metadata["save_persist_on_completion"] = {}
     map_metadata["save_persist_on_completion"][save_key] = value
 
+    if map_metadata.get("save_clear_persist_on_completion", []).has(save_key):
+        map_metadata["save_clear_persist_on_completion"].erase(save_key)
+    persist_on_completion_changed.emit()
+
+func set_clear_save_persist_on_completion(save_key: String) -> void:
+    if not map_metadata.has("save_clear_persist_on_completion"):
+        map_metadata["save_clear_persist_on_completion"] = []
+    if not save_key in map_metadata["save_clear_persist_on_completion"]:
+        map_metadata["save_clear_persist_on_completion"].append(save_key)
+    persist_on_completion_changed.emit()
+
 func add_save_persist_on_completion(save_key: String, to_add: float, default_start: float = 0, allow_in_level_edit: bool = false) -> void:
     if not allow_in_level_edit and GameManager.is_in_level_edit_mode:
         return
@@ -1531,20 +1544,67 @@ func add_save_persist_on_completion(save_key: String, to_add: float, default_sta
     if not map_metadata["save_increment_on_completion"].has(save_key):
         map_metadata["save_increment_on_completion"][save_key] = default_start
     map_metadata["save_increment_on_completion"][save_key] += to_add
+    
+    if map_metadata.get("save_clear_persist_on_completion", {}).has(save_key):
+        set_save_persist_on_completion(save_key, 0.0, allow_in_level_edit) 
+        map_metadata["save_clear_persist_on_completion"].erase(save_key)
+    persist_on_completion_changed.emit()
 
 func clear_save_adds_for(save_key: String) -> void:
     if not map_metadata.get("save_increment_on_completion", {}).has(save_key):
         return
     map_metadata["save_increment_on_completion"].erase(save_key)
+    persist_on_completion_changed.emit()
 
 func get_save_adds_for(save_key: String) -> float:
     if not map_metadata.get("save_increment_on_completion", {}).has(save_key):
         return 0
     return map_metadata["save_increment_on_completion"][save_key]
 
+func is_flag_persist_on_completion(save_key: String) -> bool:
+    if map_metadata.get("save_clear_persist_on_completion", []).has(save_key):
+        return false
+
+    if map_metadata.get("save_persist_on_completion", {}).has(save_key):
+        return true
+    if map_metadata.get("save_increment_on_completion", {}).has(save_key):
+        return true
+    return false
+
+func is_flag_cleared_on_completion(save_key: String) -> bool:
+    if map_metadata.get("save_clear_persist_on_completion", []).has(save_key):
+        return true
+    return false
+
+func get_new_flags_on_completion() -> Array[String]:
+    var flags: Array[String] = []
+    for save_key in map_metadata.get("save_persist_on_completion", {}).keys():
+        flags.append(save_key)
+    for save_key in map_metadata.get("save_increment_on_completion", {}).keys():
+        if not save_key in flags:
+            flags.append(save_key)
+
+    for save_key in map_metadata.get("save_clear_persist_on_completion", []):
+        flags.erase(save_key)
+    return flags
+
+func clear_any_persist_on_completion_for(save_key: String) -> void:
+    if map_metadata.get("save_persist_on_completion", {}).has(save_key):
+        map_metadata["save_persist_on_completion"].erase(save_key)
+    if map_metadata.get("save_increment_on_completion", {}).has(save_key):
+        map_metadata["save_increment_on_completion"].erase(save_key)
+    if map_metadata.get("save_clear_persist_on_completion", []).has(save_key):
+        map_metadata["save_clear_persist_on_completion"].erase(save_key)
+    persist_on_completion_changed.emit()
+
 func clear_save_persist_on_completion() -> void:
+    _clear_save_persist_on_completion()
+    persist_on_completion_changed.emit()
+
+func _clear_save_persist_on_completion() -> void:
     map_metadata.erase("save_persist_on_completion")
     map_metadata.erase("save_increment_on_completion")
+    map_metadata.erase("save_clear_persist_on_completion")
 
 func flush_save_persist_on_completion() -> void:
     if GameManager.is_in_level_edit_mode:
@@ -1560,7 +1620,7 @@ func flush_save_persist_on_completion() -> void:
         else:
             var existing_scalar: float = float(exisiting_val)
             GameManager.set_game_save_data(save_key, existing_scalar + to_add)
-    clear_save_persist_on_completion()
+    _clear_save_persist_on_completion()
 
 func is_level_start_paused() -> bool:
     if not map_metadata.has("start_level_paused"):

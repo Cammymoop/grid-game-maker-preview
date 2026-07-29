@@ -45,7 +45,7 @@ func cmd_if_entity_is_starting_to_move(slots: Dictionary, chosen_slot: int) -> b
 	return slots[chosen_slot]._currently_starting_move and not slots[chosen_slot].moving
 
 func desc_if_entity_is_moving_or_starting_to_move() -> String:
-	return "entity|If the entity is currently moving or starting to move"
+	return "entity|If the entity is currently moving or currently checking if it can move"
 func cmd_if_entity_is_moving_or_starting_to_move(slots: Dictionary, chosen_slot: int) -> bool:
 	if not Commands.slot_is_entity(chosen_slot):
 		push_error("Invalid slot or empty slot to check if entity is moving: %s" % chosen_slot)
@@ -59,7 +59,7 @@ func cmd_if_entity_is_moving_or_starting_to_move(slots: Dictionary, chosen_slot:
 	return false
 
 func desc_if_entity_is_half_done_moving() -> String:
-	return "entity|If the entity is moving and is at least halfway through the move"
+	return "entity|If the entity is moving (or teleporting) and is at least halfway through the move"
 func cmd_if_entity_is_half_done_moving(slots: Dictionary, chosen_slot: int) -> bool:
 	if not Commands.slot_is_entity(chosen_slot):
 		push_error("Invalid slot or empty slot to check if entity is half done moving: %s" % chosen_slot)
@@ -652,9 +652,13 @@ func cmd_select_random_direction(slots: Dictionary, chosen_slot: int, dir_option
 			choose_from.append(exclude_dir_val)
 	set_value_slot_as_number(slots, chosen_slot, Utility.random_list_element(choose_from))
 
-func desc_add_text() -> String:
-	return "string|<= Add [inserted_text:ComplexStringInput] to the [is_end:BoolChoice:true,end,beginning] of the slot\n" + \
-	       "Separated by [separator:StringInput]"
+func desc_add_text() -> Dictionary:
+	return {
+		"slot_type_hint": "string",
+		"template_text": "<= Add [inserted_text:ComplexStringInput] to the [is_end:BoolChoice:true,end,beginning] of the slot\n" + \
+		       "Separated by [separator:StringInput]",
+		"extra_keywords": ["string", "concatenate"],
+	}
 func cmd_add_text(slots: Dictionary, chosen_slot: int, inserted_text: Dictionary, separator: String, is_end: bool) -> void:
 	if not Commands.slot_is_string(chosen_slot):
 		push_error("Invalid slot to add text into: %s" % chosen_slot)
@@ -667,6 +671,34 @@ func cmd_add_text(slots: Dictionary, chosen_slot: int, inserted_text: Dictionary
 		slots[chosen_slot] = text + separator + resolved_insert
 	else:
 		slots[chosen_slot] = resolved_insert + separator + text
+
+func desc_add_text_property() -> Dictionary:
+	return {
+		"slot_type_hint": "string",
+		"template_text": "<= Add the text value of [target_slot:SlotInput:entity,pos]'s [property_name:PropertyInput] property\n" \
+		       + "to the [is_end:BoolChoice:true,end,beginning] of the slot, separated by [separator:StringInput]",
+		"extra_keywords": ["string", "concatenate"],
+	}
+func cmd_add_text_property(slots: Dictionary, chosen_slot: int, target_slot: int, property_name: String, separator: String, is_end: bool) -> void:
+	if not Commands.slot_is_string(chosen_slot) or (not Commands.slot_is_positions(target_slot) and not Commands.slot_is_entity(target_slot)):
+		push_error("Invalid slots to add text property into: %s and %s" % [chosen_slot, target_slot])
+		return
+	var text: String = slots[chosen_slot]
+	var resolved_insert: String = ""
+	if Commands.slot_is_entity(target_slot):
+		if slots[target_slot]:
+			resolved_insert = EntityManager.get_entity_prop_text_value(slots[target_slot], property_name)
+	elif Commands.slot_is_positions(target_slot):
+		if slots[target_slot]:
+			resolved_insert = MapManager.get_tile_prop_text_value_at(slots[target_slot], property_name)
+
+	if not text.strip_edges():
+		slots[chosen_slot] = resolved_insert
+	elif is_end:
+		slots[chosen_slot] = text + separator + resolved_insert
+	else:
+		slots[chosen_slot] = resolved_insert + separator + text
+
 
 func desc_add_number_to_text() -> String:
 	return "string|<= Add [inserted_num:ComplexScalarInput] to the [is_end:BoolChoice:true,end,beginning] of the slot\n" + \
@@ -683,6 +715,21 @@ func cmd_add_number_to_text(slots: Dictionary, chosen_slot: int, inserted_num: D
 		slots[chosen_slot] = text + separator + inserted_text
 	else:
 		slots[chosen_slot] = inserted_text + separator + text
+
+func desc_select_combined_text() -> Dictionary:
+	return {
+		"slot_type_hint": "string",
+		"template_text": "<= Select the textual result of joining/combining [text_a:ComplexPropValueInput] and [text_b:ComplexPropValueInput]\n" \
+			+ "Sepearated by [separator:StringInput]",	
+		"extra_keywords": ["string", "concatenate", "add", "join"],
+	}
+func cmd_select_combined_text(slots: Dictionary, chosen_slot: int, text_a: Dictionary, text_b: Dictionary, separator: String) -> void:
+	if not Commands.slot_is_string(chosen_slot):
+		push_error("Invalid slot to combine text into: %s" % chosen_slot)
+	
+	var text_a_val: String = resolve_complex_prop_value(text_a, slots)
+	var text_b_val: String = resolve_complex_prop_value(text_b, slots)
+	slots[chosen_slot] = text_a_val + separator + text_b_val
 
 func desc_is_entity_at() -> String:
 	return "pos|If there is an active entity (ignoring self) at this location [invert:InvertInput:with,without] a [prop_name:PropertyInput] property"
@@ -1365,6 +1412,19 @@ func cmd_compare_values(slots: Dictionary, chosen_slot: int, compl_scalar: Dicti
 	var compare_to_val: float = resolve_complex_scalar(compl_scalar, slots)
 	var slot_value: = get_value_slot_as_float(slots, chosen_slot)
 	return Utility.check_comparison(slot_value, compare_to_val, comparison)
+
+func desc_compare_text() -> Dictionary:
+	return {
+		"slot_type_hint": "string,number",
+		"template_text": "If the textual value in this slot is [comparison:OrderComparison] [compl_text:ComplexStringInput] (alphabetically)",
+		"extra_keywords": ["text", "compare"],
+	}
+func cmd_compare_text(slots: Dictionary, chosen_slot: int, compl_text: Dictionary, comparison: String) -> bool:
+	if not Commands.slot_is_value(chosen_slot):
+		push_error("Invalid slot to compare text: %s" % chosen_slot)
+	var slot_value: String = get_value_slot_as_string(slots, chosen_slot)
+	var compare_to_val: String = resolve_complex_string(compl_text, slots)
+	return Utility.check_alphanum_comparison(slot_value, compare_to_val, comparison)
 
 func desc_exists() -> Dictionary:
 	return {
@@ -2996,7 +3056,7 @@ func cmd_select_save_file_value(slots: Dictionary, chosen_slot: int, key_val: Di
 		push_error("Invalid slot to select save file value into: %s" % chosen_slot)
 		return
 	var key_str: String = resolve_complex_string(key_val, slots)
-	var value: Variant = GameManager.get_game_save_data("::cmd::%s" % key_str, "")
+	var value: Variant = GameManager.get_game_save_data_or_dummy("::cmd::%s" % key_str, "")
 	if typeof(value) in [TYPE_ARRAY, TYPE_DICTIONARY]:
 		if Commands.slot_is_scalar(chosen_slot):
 			set_value_slot_as_number(slots, chosen_slot, 0)
@@ -3010,20 +3070,31 @@ func cmd_select_save_file_value(slots: Dictionary, chosen_slot: int, key_val: Di
 	else:
 		set_value_slot_as_number(slots, chosen_slot, float(value))
 
+func desc_if_save_file_value_is_set() -> String:
+	return "none|If the save file value [key_val:ComplexStringInput] is set to [truthy_option:CustomStringEnum:anything,true or non-zero,false or zero]"
+func cmd_if_save_file_value_is_set(slots: Dictionary, _slot: int, key_val: Dictionary, truthy_option: String) -> bool:
+	var key_str: String = resolve_complex_string(key_val, slots)
+	if truthy_option == "anything":
+		return GameManager.has_game_save_data_or_dummy("::cmd::%s" % key_str)
+	else:
+		var check_truthy: bool = truthy_option.contains("true")
+		var truthy_result: = Utility.property_value_bool(GameManager.get_game_save_data_or_dummy("::cmd::%s" % key_str, false), false)
+		return truthy_result == check_truthy
+
 
 func desc_set_save_file_value() -> String:
 	return "none|Set the save file value [key_val:ComplexStringInput] to [val:MultiTypeInput]"
 func cmd_set_save_file_value(slots: Dictionary, _slot: int, key_val: Dictionary, val: Dictionary) -> void:
 	var key_str: String = resolve_complex_string(key_val, slots)
 	var value: Variant = resolve_complex_multi_type_val(val, slots)
-	GameManager.set_game_save_data("::cmd::%s" % key_str, value)
+	GameManager.set_game_save_data_or_dummy("::cmd::%s" % key_str, value)
 
 func desc_add_to_save_file_value() -> String:
 	return "none|Add [to_add:ComplexScalarInput] to the save file value [key_val:ComplexStringInput]"
 func cmd_add_to_save_file_value(slots: Dictionary, _slot: int, key_val: Dictionary, to_add: Dictionary) -> void:
 	var key_str: String = resolve_complex_string(key_val, slots)
 	var to_add_val: float = resolve_complex_scalar(to_add, slots)
-	GameManager.add_game_save_data("::cmd::%s" % key_str, to_add_val)
+	GameManager.add_game_save_data_or_dummy("::cmd::%s" % key_str, to_add_val)
 
 func desc_set_save_file_value_on_level_completed() -> String:
 	return "none|Set the save file value [key_val:ComplexStringInput] to [val:MultiTypeInput] once the current level is completed"
@@ -3054,6 +3125,146 @@ func cmd_select_level_complete_save_file_adds(slots: Dictionary, chosen_slot: in
 	var key_str: String = resolve_complex_string(key_val, slots)
 	var adds: float = MapManager.get_save_adds_for("::cmd::%s" % key_str)
 	set_value_slot_as_number(slots, chosen_slot, adds)
+
+func desc_if_save_file_flag_is_set() -> String:
+	return "none|If the save file flag [key_val:ComplexStringInput] is set [or_persist:BoolChoice:true,or will be set once level is completed,now]"
+func cmd_if_save_file_flag_is_set(slots: Dictionary, _slot: int, key_val: Dictionary, or_persist: bool) -> bool:
+	var key_str: String = resolve_complex_string(key_val, slots)
+	var is_persist_set: bool = false
+	if or_persist:
+		is_persist_set = MapManager.is_flag_persist_on_completion("::cmd-flag::%s" % key_str)
+	return is_persist_set or GameManager.has_game_save_data_or_dummy("::cmd-flag::%s" % key_str)
+
+func desc_if_save_file_flag_is_waiting_on_completion() -> String:
+	return "none|If the save file flag [key_val:ComplexStringInput] is not currently set, but will be once this level is completed"
+func cmd_if_save_file_flag_is_waiting_on_completion(slots: Dictionary, _slot: int, key_val: Dictionary) -> bool:
+	var key_str: String = resolve_complex_string(key_val, slots)
+	if MapManager.is_flag_persist_on_completion("::cmd-flag::%s" % key_str):
+		return not GameManager.has_game_save_data_or_dummy("::cmd-flag::%s" % key_str)
+	return false
+
+func desc_set_save_file_flag() -> String:
+	return "none|Set the save file flag [key_val:ComplexStringInput] right now"
+func cmd_set_save_file_flag(slots: Dictionary, _slot: int, key_val: Dictionary) -> void:
+	var key_str: String = resolve_complex_string(key_val, slots)
+	GameManager.set_game_save_data_or_dummy("::cmd-flag::%s" % key_str, true)
+	MapManager.clear_any_persist_on_completion_for("::cmd-flag::%s" % key_str)
+
+func desc_clear_save_file_flag() -> String:
+	return "none|Clear the save file flag [key_val:ComplexStringInput] right now"
+func cmd_clear_save_file_flag(slots: Dictionary, _slot: int, key_val: Dictionary) -> void:
+	var key_str: String = resolve_complex_string(key_val, slots)
+	GameManager.clear_game_save_data_or_dummy("::cmd-flag::%s" % key_str)
+	MapManager.clear_any_persist_on_completion_for("::cmd-flag::%s" % key_str)
+
+func desc_set_or_clear_save_file_flag_on_level_completed() -> String:
+	return "none|[is_set:BoolChoice:true,Set,Clear] the save file flag [key_val:ComplexStringInput] once the current level is completed"
+func cmd_set_save_file_flag_on_level_completed(slots: Dictionary, _slot: int, key_val: Dictionary, is_set: bool) -> void:
+	var key_str: String = resolve_complex_string(key_val, slots)
+	if is_set:
+		MapManager.set_save_persist_on_completion("::cmd-flag::%s" % key_str, true)
+	else:
+		MapManager.set_clear_save_persist_on_completion("::cmd-flag::%s" % key_str)
+
+
+func _unique_flag_for_entity(entity: BaseEntity) -> String:
+	if not entity:
+		return ""
+	var unique_id: String = str(entity.instance_id)
+	if EntityManager.entity_has_property(entity, "id"):
+		var prop_id: String = Utility.property_value_to_string(EntityManager.get_entity_prop_with_default(entity, "id", ""))
+		if prop_id:
+			unique_id = prop_id
+	return "::cmd-flag::entity-flag-%s::_LEV_%s_ENT_%s" % [entity.entity_index, GameManager.get_current_level_code(), unique_id]
+
+func desc_select_unique_flag_for_entity() -> Dictionary:
+	return {
+		"slot_type_hint": "string",
+		"template_text": "<= Select a unique flag name for this entity [entity_slot:SlotInput:entity]",
+		"extra_keywords": ["save file"],
+		"feature_tags": ["game save data"],
+		"tooltip": "If the entity is created after the level starts, set the 'id' property to a consistent, unique value in order for this to work.",
+	}
+func cmd_select_unique_flag_for_entity(slots: Dictionary, chosen_slot: int, entity_slot: int) -> void:
+	if not Commands.slot_is_entity(entity_slot):
+		push_error("Invalid slot to select unique flag for entity: %s" % entity_slot)
+		return
+	if not slots[entity_slot]:
+		slots[chosen_slot] = ""
+		return
+	slots[chosen_slot] = _unique_flag_for_entity(slots[entity_slot]).trim_prefix("::cmd-flag::")
+
+func if_unique_save_file_flag_is_set() -> Dictionary:
+	return {
+		"slot_type_hint": "entity",
+		"template_text": "If the unique flag for this entity is set [or_persist:BoolChoice:true,or will be once level is completed,now]",
+		"feature_tags": ["game save data"],
+		"tooltip": "If the entity is created after the level starts, set the 'id' property to a consistent, unique value in order for this to work.",
+	}
+func cmd_if_unique_save_file_flag_is_set(slots: Dictionary, chosen_slot: int, or_persist: bool) -> bool:
+	if not Commands.slot_is_entity(chosen_slot):
+		push_error("Invalid slot to check if unique save file flag is set: %s" % chosen_slot)
+		return false
+	if not slots[chosen_slot]:
+		return false
+	var unique_flag: String = _unique_flag_for_entity(slots[chosen_slot])
+	if not unique_flag:
+		return false
+	var is_persist_on_complete: bool = false
+	if or_persist:
+		is_persist_on_complete = MapManager.is_flag_persist_on_completion(unique_flag)
+	return is_persist_on_complete or GameManager.has_game_save_data_or_dummy(unique_flag)
+
+func desc_set_or_clear_unique_save_file_flag() -> String:
+	return "entity|[is_set:BoolChoice:true,Set,Clear] the unique save file flag for this entity [on_completed:BoolChoice:false,once the current level is completed,now]"
+func cmd_set_or_clear_unique_save_file_flag(slots: Dictionary, chosen_slot: int, is_set: bool, on_completed: bool) -> void:
+	if not Commands.slot_is_entity(chosen_slot):
+		push_error("Invalid slot to set unique save file flag: %s" % chosen_slot)
+		return
+	var unique_flag: String = _unique_flag_for_entity(slots[chosen_slot])
+	if not unique_flag:
+		return
+	if is_set:
+		if on_completed:
+			MapManager.set_save_persist_on_completion(unique_flag, true)
+		else:
+			GameManager.set_game_save_data_or_dummy(unique_flag, true)
+			MapManager.clear_any_persist_on_completion_for(unique_flag)
+	else:
+		if on_completed:
+			MapManager.set_clear_save_persist_on_completion(unique_flag)
+		else:
+			GameManager.clear_game_save_data_or_dummy(unique_flag)
+			MapManager.clear_any_persist_on_completion_for(unique_flag)
+
+
+func desc_select_number_of_saved_flags_for_entity_type() -> String:
+	return "number,string|<= Select the number of set, unique save file flags for entities of the same type as [ref_entity:SlotInput:entity]\n" \
+		+ "[include_pending:BoolChoice:true,Including flags pending level completion,Excluding flags pending level completion]"
+func cmd_select_number_of_saved_flags_for_entity_type(slots: Dictionary, chosen_slot: int, ref_entity: int, include_pending: bool) -> void:
+	if not Commands.slot_is_entity(ref_entity):
+		push_error("Invalid slot to select number of saved flags for entity type: %s" % ref_entity)
+		return
+	if not slots[ref_entity]:
+		set_value_slot_as_number(slots, chosen_slot, 0)
+		return
+	var count: int = _get_unique_flag_count_for_entity_id(slots[ref_entity].entity_index, include_pending)
+	set_value_slot_as_number(slots, chosen_slot, count)
+
+func desc_select_number_of_saved_flags_for_named_entity() -> String:
+	return "number,string|<= Select the number of set, unique save file flags for entities of the type named [entity_name:ComplexStringInput]\n" \
+		+ "[include_pending:BoolChoice:true,Including flags pending level completion,Excluding flags pending level completion]"
+func cmd_select_number_of_saved_flags_for_named_entity(slots: Dictionary, chosen_slot: int, entity_name: Dictionary, include_pending: bool) -> void:
+	var entity_name_str: String = resolve_complex_string(entity_name, slots)
+	if not EntityManager.entity_name_exists(entity_name_str):
+		set_value_slot_as_number(slots, chosen_slot, 0)
+		return
+	var count: = _get_unique_flag_count_for_entity_id(EntityManager.get_entity_index(entity_name_str), include_pending)
+	set_value_slot_as_number(slots, chosen_slot, count)
+
+func _get_unique_flag_count_for_entity_id(entity_id: int, include_pending: bool) -> int:
+	return GameManager.count_entity_flags_by_entity_id(entity_id, include_pending)
+
 
 func desc_toggle_property() -> String:
 	return "entity,pos|Toggle the entity or tile's [property_name:PropertyInput] property between true and false"

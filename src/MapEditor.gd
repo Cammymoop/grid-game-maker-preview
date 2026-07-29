@@ -230,6 +230,8 @@ func switch_edit_mode(edit_enabled: bool, do_save_state: bool = true) -> void:
 	edit_mode = edit_enabled
 	visible = edit_enabled
 	process_mode = PROCESS_MODE_ALWAYS if edit_enabled else PROCESS_MODE_DISABLED
+	
+	GameManager.reset_dummy_save_data()
 
 	GameManager.set_pause("map_editor", edit_enabled)
 	if not edit_enabled:

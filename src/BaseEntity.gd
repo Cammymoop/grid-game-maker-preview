@@ -129,7 +129,8 @@ func update_cached_special_props(prop_name: String = "") -> void:
 	if not prop_name or prop_name == "teleport-duration":
 		update_cached_tele_steps()
 	if not prop_name or prop_name == "turn-animation":
-		update_sprite_rotate_interpolate_enabled()
+		if sprite:
+			update_sprite_rotate_interpolate_enabled()
 
 func update_sprite_rotate_interpolate_enabled() -> void:
 	var turn_anim: String = "quick"

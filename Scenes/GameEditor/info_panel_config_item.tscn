@@ -13,7 +13,7 @@
 atlas = ExtResource("6_q6bcp")
 region = Rect2(0, 0, 32, 32)
 
-[node name="InfoPanelConfigItem" type="HBoxContainer" unique_id=129416809 node_paths=PackedStringArray("order_button_up", "order_button_down", "remove_button", "icon_mode_picker", "pick_image_button", "icon_entity_name_input", "label_input", "separator_input", "value_prop_option", "entity_filter_option", "prop_filter_option", "hide_zero_value_option", "prop_truthy_suboption", "tracking_type_picker", "value_prop_input", "entity_filter_input", "prop_filter_input", "prop_truthy_picker", "hide_zero_toggle", "hide_empty_toggle")]
+[node name="InfoPanelConfigItem" type="HBoxContainer" unique_id=129416809 node_paths=PackedStringArray("order_button_up", "order_button_down", "remove_button", "icon_mode_picker", "pick_image_button", "icon_entity_name_input", "label_input", "separator_input", "value_prop_option", "entity_filter_option", "prop_filter_option", "hide_zero_value_option", "prop_truthy_suboption", "tracking_type_picker", "entity_name_label_1", "entity_name_label_2", "value_prop_input", "entity_filter_input", "prop_filter_input", "prop_truthy_picker", "hide_zero_toggle", "hide_empty_toggle", "include_pending_option", "include_pending_mode_select")]
 offset_right = 863.0
 offset_bottom = 102.0
 script = ExtResource("1_sni1q")
@@ -32,12 +32,16 @@ prop_filter_option = NodePath("InfoPanelConfigItem/TrackingConfig/PropFilterConf
 hide_zero_value_option = NodePath("InfoPanelConfigItem/TrackingConfig/ShowZeroOption")
 prop_truthy_suboption = NodePath("InfoPanelConfigItem/TrackingConfig/PropFilterConfig/PropFilterTruthy")
 tracking_type_picker = NodePath("InfoPanelConfigItem/TrackingConfig/TypeConfig/OptionButton")
+entity_name_label_1 = NodePath("InfoPanelConfigItem/TrackingConfig/EntityFilterConfig/CountEntLabel")
+entity_name_label_2 = NodePath("InfoPanelConfigItem/TrackingConfig/EntityFilterConfig/CountEntLabel2")
 value_prop_input = NodePath("InfoPanelConfigItem/TrackingConfig/ValuePropConfig/PropNameInput")
 entity_filter_input = NodePath("InfoPanelConfigItem/TrackingConfig/EntityFilterConfig/EntityNameInput")
 prop_filter_input = NodePath("InfoPanelConfigItem/TrackingConfig/PropFilterConfig/PropNameInput")
 prop_truthy_picker = NodePath("InfoPanelConfigItem/TrackingConfig/PropFilterConfig/PropFilterTruthy/OptionButton")
 hide_zero_toggle = NodePath("InfoPanelConfigItem/TrackingConfig/ShowZeroOption/HideZeroToggle")
 hide_empty_toggle = NodePath("InfoPanelConfigItem/TrackingConfig/ShowZeroOption/HideEmptyToggle")
+include_pending_option = NodePath("InfoPanelConfigItem/TrackingConfig/FlagPendingOption")
+include_pending_mode_select = NodePath("InfoPanelConfigItem/TrackingConfig/FlagPendingOption/PendingModeSelect")
 
 [node name="OrderButtons" type="VBoxContainer" parent="." unique_id=321230846]
 layout_mode = 2
@@ -126,14 +130,18 @@ text = "Show:"
 layout_mode = 2
 size_flags_vertical = 4
 theme_override_font_sizes/font_size = 12
+alignment = 1
 selected = 0
-item_count = 3
+fit_to_longest_item = false
+item_count = 4
 popup/item_0/text = "property (only camera target)"
 popup/item_0/id = 1
 popup/item_1/text = "property"
 popup/item_1/id = 0
 popup/item_2/text = "entity count"
 popup/item_2/id = 2
+popup/item_3/text = "entity flag saved count"
+popup/item_3/id = 3
 
 [node name="ValuePropConfig" type="HBoxContainer" parent="InfoPanelConfigItem/TrackingConfig" unique_id=795863329]
 layout_mode = 2
@@ -151,16 +159,36 @@ script = ExtResource("8_0wj8y")
 [node name="EntityFilterConfig" type="HBoxContainer" parent="InfoPanelConfigItem/TrackingConfig" unique_id=886634858]
 layout_mode = 2
 
-[node name="Label" type="Label" parent="InfoPanelConfigItem/TrackingConfig/EntityFilterConfig" unique_id=1083694170]
+[node name="CountEntLabel" type="Label" parent="InfoPanelConfigItem/TrackingConfig/EntityFilterConfig" unique_id=1083694170]
 layout_mode = 2
 theme_override_font_sizes/font_size = 14
 text = "Count Entities of Type:"
+
+[node name="CountEntLabel2" type="Label" parent="InfoPanelConfigItem/TrackingConfig/EntityFilterConfig" unique_id=1152399612]
+visible = false
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "Count Flags Set for Type:"
 
 [node name="EntityNameInput" type="LineEdit" parent="InfoPanelConfigItem/TrackingConfig/EntityFilterConfig" unique_id=1111589951]
 custom_minimum_size = Vector2(120, 0)
 layout_mode = 2
 placeholder_text = "<any type>"
 script = ExtResource("5_f54oc")
+
+[node name="FlagPendingOption" type="HBoxContainer" parent="InfoPanelConfigItem/TrackingConfig" unique_id=761806089]
+layout_mode = 2
+
+[node name="CountEntLabel" type="Label" parent="InfoPanelConfigItem/TrackingConfig/FlagPendingOption" unique_id=1639012436]
+layout_mode = 2
+tooltip_text = "Should the count include flags set \"once current level is completed\"?"
+theme_override_font_sizes/font_size = 12
+text = "Flags Pending Level Completed:"
+
+[node name="PendingModeSelect" type="OptionButton" parent="InfoPanelConfigItem/TrackingConfig/FlagPendingOption" unique_id=1922918788]
+layout_mode = 2
+alignment = 1
+fit_to_longest_item = false
 
 [node name="PropFilterConfig" type="HBoxContainer" parent="InfoPanelConfigItem/TrackingConfig" unique_id=508970585]
 layout_mode = 2

@@ -69,13 +69,15 @@ func set_item_separator_string(separator: String) -> void:
     separator_label.text = separator
 
 func set_item_number(value: float, non_negative: bool) -> void:
+    var old_text: String = value_label.text
     if non_negative and value < 0.0:
         value = 0.0
     if Utility.is_float_integer(value):
         value_label.text = str(int(value))
     else:
         value_label.text = str(value)
-    if enabled:
+
+    if enabled and old_text != value_label.text:
         updated()
 
 func get_item_number() -> float:
@@ -84,6 +86,9 @@ func get_item_number() -> float:
     return float(value_label.text)
 
 func set_item_value_string(value: String) -> void:
+    if value_label.text == value:
+        return
+
     value_label.text = value
     if enabled:
         updated()
@@ -105,9 +110,22 @@ func refresh_ui() -> void:
     if hide_empty_value and not has_value:
         hide()
         return
-    if hide_zero_value and value_label.text.is_valid_float() and float(value_label.text) == 0.0:
-        hide()
-        return
+    if hide_zero_value:
+        if value_label.text.is_valid_float() and float(value_label.text) == 0.0:
+            hide()
+            return
+        if value_label.text.contains("+"):
+            var split_text: = value_label.text.split("+")
+            var is_zero: bool = true
+            for i in 2:
+                if split_text.size() > i:
+                    if not split_text[i].is_valid_float() or float(split_text[i]) != 0.0:
+                        is_zero = false
+            
+            if is_zero:
+                hide()
+                return
+
     if not show_icon and not has_text and not has_value:
         hide()
         return
