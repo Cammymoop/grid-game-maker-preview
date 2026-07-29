@@ -90,6 +90,8 @@ func set_v3_data(qualified_name: String, short_name: String, new_command_info: D
         ui_data = {"display_name": qualified_name.capitalize()}
     else:
         ui_data = {"display_name": command_info.get("display_name", qualified_name.capitalize())}
+    
+    tooltip_text = command_info.get("tooltip", "")
 
 func set_disabled_slots(disabled_slots: Array) -> void:
     var command_slot_selector: Control = find_child("CommandSlot")

@@ -1108,6 +1108,32 @@ func popupmenu_set_enabled_for_id(popupmenu: PopupMenu, id: int, is_enabled: boo
 	if index >= 0:
 		popupmenu.set_item_disabled(index, not is_enabled)
 
+
+func itemlist_get_single_selected_index(itemlist: ItemList) -> int:
+	if itemlist.get_selected_items().size() < 1:
+		return -1
+	return itemlist.get_selected_items()[0]
+
+func itemlist_get_single_selected_text(itemlist: ItemList) -> String:
+	var index: int = itemlist_get_single_selected_index(itemlist)
+	if index == -1:
+		return ""
+	return itemlist.get_item_text(index)
+
+func itemlist_get_single_selected_metadata(itemlist: ItemList) -> Variant:
+	var index: int = itemlist_get_single_selected_index(itemlist)
+	if index == -1:
+		return null
+	return itemlist.get_item_metadata(index)
+
+func itemlist_select_metadata(itemlist: ItemList, metadata: Variant, single_select: bool = true) -> void:
+	for i in itemlist.item_count:
+		if itemlist.get_item_metadata(i) == metadata:
+			itemlist.select(i, single_select)
+			return
+	itemlist.deselect_all()
+
+
 func normalize_angle(angle_radians: float) -> float:
 	return fposmod(angle_radians, TAU)
 

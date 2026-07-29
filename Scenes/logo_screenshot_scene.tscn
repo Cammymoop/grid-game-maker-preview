@@ -1,0 +1,449 @@
+[gd_scene format=3 uid="uid://berubcitfqsk4"]
+
+[ext_resource type="Theme" uid="uid://cqgddn3sedqqw" path="res://src/UI/MainMenuTheme.tres" id="1_c8oc0"]
+[ext_resource type="FontFile" uid="uid://ctnllh13x3iqi" path="res://assets/font/NotoSans-Bold.ttf" id="2_x8spd"]
+[ext_resource type="FontFile" uid="uid://cxxr3l22y0327" path="res://assets/font/NotoSans-Regular.ttf" id="3_vge2s"]
+[ext_resource type="Script" uid="uid://bc85celttigae" path="res://src/MainMenu.gd" id="6_x73pw"]
+[ext_resource type="Script" uid="uid://ddo0ls2dlbc30" path="res://Scenes/UI/version_switcher_panel.gd" id="7_qtofw"]
+[ext_resource type="PackedScene" uid="uid://cc83bbyk0k4ka" path="res://Scenes/UI/game_selector.tscn" id="8_j87ru"]
+[ext_resource type="Script" uid="uid://bq446sgdivroo" path="res://ButtonContainer.gd" id="9_nu8tk"]
+[ext_resource type="Texture2D" uid="uid://b4q7u3xbkyj45" path="res://assets/img/button_icons/gear_small.png" id="10_ky3uu"]
+[ext_resource type="PackedScene" uid="uid://4a4bn5o1go4a" path="res://Scenes/user_settings_panel.tscn" id="11_h4qnb"]
+[ext_resource type="PackedScene" uid="uid://cbpf7ehql8tby" path="res://Scenes/UI/version_chooser_panel.tscn" id="12_kh8hq"]
+[ext_resource type="PackedScene" uid="uid://csm4i61la0olb" path="res://Scenes/FallingEntitiesEffects.tscn" id="13_ory4r"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_syfuq"]
+content_margin_left = 16.0
+content_margin_top = 8.0
+content_margin_right = 16.0
+content_margin_bottom = 8.0
+bg_color = Color(0, 0, 0, 0.6431373)
+border_width_left = 20
+border_width_top = 20
+border_width_right = 20
+border_width_bottom = 20
+border_color = Color(0, 0, 0, 0)
+border_blend = true
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+expand_margin_left = 16.0
+expand_margin_top = 16.0
+expand_margin_right = 16.0
+expand_margin_bottom = 16.0
+
+[sub_resource type="GDScript" id="GDScript_idohh"]
+script/source = "extends RichTextLabel
+
+func _gui_input(event: InputEvent) -> void:
+	var mbe: = event as InputEventMouseButton
+	if mbe and mbe.button_index == MOUSE_BUTTON_LEFT:
+		hide()
+		get_node(\"../GGMLabel\").show()
+		queue_free()
+"
+
+[sub_resource type="DPITexture" id="DPITexture_10xkc"]
+_source = "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"14\" height=\"14\"><path d=\"M12 0A2 2 0 0114 2V12A2 2 0 0112 14H2A2 2 0 010 12V2A2 2 0 012 0Z\"/><path d=\"M0 4.5Q7.53-1.84 13 14H2A2 2 0 010 12\" fill=\"#3698d8\"/><circle r=\"2\" cx=\"3.06\" cy=\"5.97\" fill=\"#040724\"/><path d=\"M13.48 2.7 6.44 5.16A.8 1-35 0010.12 9.36\" fill=\"#e17726\"/></svg>"
+base_scale = 8.0
+
+[sub_resource type="Theme" id="Theme_byewe"]
+Label/colors/font_color = Color(0.8745098, 0.8745098, 0.8745098, 1)
+
+[node name="LogoScreenshotScene" type="Control" unique_id=151932809]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+focus_neighbor_left = NodePath("MarginContainer/MainMenu/MarginContainer/VBoxContainer/HBoxContainer/EditButton")
+focus_neighbor_right = NodePath("MarginContainer/MainMenu/MarginContainer/VBoxContainer/HBoxContainer/PlayButton")
+focus_next = NodePath("MarginContainer/MainMenu/MarginContainer/VBoxContainer/HBoxContainer/PlayButton")
+theme = ExtResource("1_c8oc0")
+
+[node name="MarginContainer" type="MarginContainer" parent="." unique_id=1103174107]
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+theme_override_constants/margin_left = 50
+theme_override_constants/margin_top = 50
+theme_override_constants/margin_right = 50
+theme_override_constants/margin_bottom = 50
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer" unique_id=1881286868]
+layout_mode = 2
+mouse_filter = 2
+alignment = 1
+
+[node name="PanelContainer" type="PanelContainer" parent="MarginContainer/VBoxContainer" unique_id=89228053]
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_styles/panel = SubResource("StyleBoxFlat_syfuq")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/VBoxContainer/PanelContainer" unique_id=714919006]
+layout_mode = 2
+
+[node name="HBoxContainer2" type="HBoxContainer" parent="MarginContainer/VBoxContainer/PanelContainer/VBoxContainer" unique_id=1765183926]
+layout_mode = 2
+
+[node name="GGMLabel" type="Label" parent="MarginContainer/VBoxContainer/PanelContainer/VBoxContainer/HBoxContainer2" unique_id=160729093]
+visible = false
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_fonts/font = ExtResource("2_x8spd")
+theme_override_font_sizes/font_size = 17
+text = "Grid Game Maker Preview"
+
+[node name="GGMLabel2" type="RichTextLabel" parent="MarginContainer/VBoxContainer/PanelContainer/VBoxContainer/HBoxContainer2" unique_id=1954693297]
+clip_contents = false
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_default_cursor_shape = 2
+theme_override_fonts/normal_font = ExtResource("3_vge2s")
+theme_override_fonts/bold_font = ExtResource("2_x8spd")
+theme_override_font_sizes/normal_font_size = 17
+theme_override_font_sizes/bold_font_size = 40
+bbcode_enabled = true
+text = "[b]Grid Game Maker [rainbow sat=0.7 freq=0.3 speed=1.8][wave freq=3.6 amp=70 connected=0]Preview[/wave][/rainbow][/b]"
+fit_content = true
+scroll_active = false
+autowrap_mode = 0
+shortcut_keys_enabled = false
+script = SubResource("GDScript_idohh")
+
+[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer/PanelContainer/VBoxContainer" unique_id=1227890265]
+visible = false
+layout_mode = 2
+alignment = 2
+
+[node name="GGMLabel2" type="Label" parent="MarginContainer/VBoxContainer/PanelContainer/VBoxContainer/HBoxContainer" unique_id=447752656]
+visible = false
+layout_mode = 2
+size_flags_horizontal = 0
+theme_override_font_sizes/font_size = 11
+text = "by Cammymoop Games"
+
+[node name="TextureRect" type="TextureRect" parent="MarginContainer/VBoxContainer/PanelContainer/VBoxContainer/HBoxContainer" unique_id=274197294]
+custom_minimum_size = Vector2(56, 56)
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+texture = SubResource("DPITexture_10xkc")
+expand_mode = 1
+stretch_mode = 5
+flip_h = true
+
+[node name="Spacer3" type="Control" parent="MarginContainer/VBoxContainer" unique_id=1208867656]
+custom_minimum_size = Vector2(0, 28)
+layout_mode = 2
+mouse_filter = 2
+
+[node name="PanelContainer2" type="PanelContainer" parent="MarginContainer/VBoxContainer" unique_id=971039491]
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_styles/panel = SubResource("StyleBoxFlat_syfuq")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/VBoxContainer/PanelContainer2" unique_id=2085275307]
+layout_mode = 2
+
+[node name="HBoxContainer2" type="HBoxContainer" parent="MarginContainer/VBoxContainer/PanelContainer2/VBoxContainer" unique_id=1421868679]
+visible = false
+layout_mode = 2
+
+[node name="GGMLabel" type="Label" parent="MarginContainer/VBoxContainer/PanelContainer2/VBoxContainer/HBoxContainer2" unique_id=1283488106]
+visible = false
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_fonts/font = ExtResource("2_x8spd")
+theme_override_font_sizes/font_size = 17
+text = "Grid Game Maker Preview"
+
+[node name="GGMLabel2" type="RichTextLabel" parent="MarginContainer/VBoxContainer/PanelContainer2/VBoxContainer/HBoxContainer2" unique_id=1546514055]
+clip_contents = false
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_default_cursor_shape = 2
+theme_override_fonts/normal_font = ExtResource("3_vge2s")
+theme_override_fonts/bold_font = ExtResource("2_x8spd")
+theme_override_font_sizes/normal_font_size = 17
+theme_override_font_sizes/bold_font_size = 40
+bbcode_enabled = true
+text = "[b]Grid Game Maker [rainbow sat=0.7 freq=0.3 speed=1.8][wave freq=3.6 amp=70 connected=0]Preview[/wave][/rainbow][/b]"
+fit_content = true
+scroll_active = false
+autowrap_mode = 0
+shortcut_keys_enabled = false
+script = SubResource("GDScript_idohh")
+
+[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer/PanelContainer2/VBoxContainer" unique_id=1298903260]
+layout_mode = 2
+alignment = 2
+
+[node name="GGMLabel2" type="Label" parent="MarginContainer/VBoxContainer/PanelContainer2/VBoxContainer/HBoxContainer" unique_id=1699756983]
+visible = false
+layout_mode = 2
+size_flags_horizontal = 0
+theme_override_font_sizes/font_size = 11
+text = "by Cammymoop Games"
+
+[node name="TextureRect" type="TextureRect" parent="MarginContainer/VBoxContainer/PanelContainer2/VBoxContainer/HBoxContainer" unique_id=1166370104]
+custom_minimum_size = Vector2(56, 56)
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+texture = SubResource("DPITexture_10xkc")
+expand_mode = 1
+stretch_mode = 5
+flip_h = true
+
+[node name="Spacer2" type="Control" parent="MarginContainer/VBoxContainer" unique_id=971559223]
+visible = false
+layout_mode = 2
+size_flags_vertical = 3
+size_flags_stretch_ratio = 8.0
+mouse_filter = 2
+
+[node name="MainMenu" type="PanelContainer" parent="MarginContainer" unique_id=1211793288 node_paths=PackedStringArray("quit_button", "game_selector", "bg_entity_effect", "play_game_button", "play_game_button_label", "play_game_progress_label", "edit_game_button", "profile_picker", "show_more_buttons_button", "more_buttons_container", "create_new_game_button", "settings_panel_layer", "user_settings_panel", "version_chooser_panel_layer", "version_chooser_panel", "version_switcher_panel")]
+visible = false
+custom_minimum_size = Vector2(450, 160)
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+script = ExtResource("6_x73pw")
+bold_font = ExtResource("2_x8spd")
+quit_button = NodePath("MarginContainer/VBoxContainer/QuitButton")
+game_selector = NodePath("MarginContainer/VBoxContainer/GameSelector")
+bg_entity_effect = NodePath("../../FallingEntities/CanvasLayer2/Effects")
+play_game_button = NodePath("MarginContainer/VBoxContainer/HBoxContainer/NewPlayButton")
+play_game_button_label = NodePath("MarginContainer/VBoxContainer/HBoxContainer/NewPlayButton/VBoxContainer2/PlayLabel")
+play_game_progress_label = NodePath("MarginContainer/VBoxContainer/HBoxContainer/NewPlayButton/MarginContainer/VBoxContainer/CompletionLabel")
+edit_game_button = NodePath("MarginContainer/VBoxContainer/HBoxContainer/EditButton")
+profile_picker = NodePath("../../../../../../../../../../../../../../../../DockVSplitRightL/DockSlotRightUL/Inspector/@VBoxContainer@6869/@MarginContainer@7170/@EditorInspector@7181/@VBoxContainer@7173/@VBoxContainer@7180/@VBoxContainer@55818/@EditorPropertyNodePath@55872/@HBoxContainer@55860/@MenuButton@55870/@PopupMenu@55869/@PanelContainer@55862/@ScrollContainer@55865/@TextureRect@55863")
+show_more_buttons_button = NodePath("MarginContainer/VBoxContainer/VBoxContainer/ShowMoreButtonsButton")
+more_buttons_container = NodePath("MarginContainer/VBoxContainer/MoreMenuButtons")
+create_new_game_button = NodePath("MarginContainer/VBoxContainer/MoreMenuButtons/CreateNewGameButton")
+settings_panel_layer = NodePath("SettingsPanelLayer")
+user_settings_panel = NodePath("SettingsPanelLayer/CenterContainer/UserSettingsPanel")
+version_chooser_panel_layer = NodePath("VersionChooserLayer")
+version_chooser_panel = NodePath("VersionChooserLayer/CenterContainer/VersionChooserPanel")
+version_switcher_panel = NodePath("Anchor/CenterContainer/VersionSwitcherPanel")
+game_completed_text_color = Color(0.7490196, 1, 0.5803922, 1)
+
+[node name="Anchor" type="Control" parent="MarginContainer/MainMenu" unique_id=1418169266]
+layout_mode = 2
+mouse_filter = 2
+
+[node name="CenterContainer" type="CenterContainer" parent="MarginContainer/MainMenu/Anchor" unique_id=252170177]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_top = 20.0
+offset_bottom = 80.0
+grow_horizontal = 2
+grow_vertical = 0
+
+[node name="VersionSwitcherPanel" type="PanelContainer" parent="MarginContainer/MainMenu/Anchor/CenterContainer" unique_id=592929116 node_paths=PackedStringArray("version_label", "switch_version_button")]
+layout_mode = 2
+size_flags_horizontal = 4
+script = ExtResource("7_qtofw")
+version_label = NodePath("HBoxContainer/VersionLabel")
+switch_version_button = NodePath("HBoxContainer/SwitchVersionsButton")
+
+[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/MainMenu/Anchor/CenterContainer/VersionSwitcherPanel" unique_id=513318608]
+layout_mode = 2
+theme_override_constants/separation = 8
+alignment = 1
+
+[node name="VersionLabel" type="Label" parent="MarginContainer/MainMenu/Anchor/CenterContainer/VersionSwitcherPanel/HBoxContainer" unique_id=1794910036]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.5568628, 0.5568628, 0.5568628, 1)
+theme_override_fonts/font = ExtResource("2_x8spd")
+theme_override_font_sizes/font_size = 14
+text = "GGM/Basic 1.0"
+
+[node name="SwitchVersionsButton" type="Button" parent="MarginContainer/MainMenu/Anchor/CenterContainer/VersionSwitcherPanel/HBoxContainer" unique_id=1562950801]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "Change Version"
+
+[node name="MarginContainer" type="MarginContainer" parent="MarginContainer/MainMenu" unique_id=1377947446]
+layout_mode = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 12
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 12
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/MainMenu/MarginContainer" unique_id=734175218]
+layout_mode = 2
+size_flags_vertical = 4
+theme_override_constants/separation = 18
+alignment = 1
+
+[node name="GameSelector" parent="MarginContainer/MainMenu/MarginContainer/VBoxContainer" unique_id=1841651763 node_paths=PackedStringArray("_root_container") instance=ExtResource("8_j87ru")]
+layout_mode = 2
+is_main_menu_selector = true
+_root_container = NodePath("../../..")
+
+[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/MainMenu/MarginContainer/VBoxContainer" unique_id=1147939781]
+custom_minimum_size = Vector2(0, 50)
+layout_mode = 2
+size_flags_vertical = 4
+theme_override_constants/separation = 12
+alignment = 1
+
+[node name="PlayButton" type="Button" parent="MarginContainer/MainMenu/MarginContainer/VBoxContainer/HBoxContainer" unique_id=1539786938]
+visible = false
+custom_minimum_size = Vector2(164, 62)
+layout_mode = 2
+theme_type_variation = &"BigTextButton"
+theme_override_font_sizes/font_size = 30
+text = "Play"
+icon_alignment = 2
+
+[node name="NewPlayButton" type="Container" parent="MarginContainer/MainMenu/MarginContainer/VBoxContainer/HBoxContainer" unique_id=1956266971]
+custom_minimum_size = Vector2(164, 62)
+layout_mode = 2
+script = ExtResource("9_nu8tk")
+metadata/_custom_type_script = "uid://bq446sgdivroo"
+
+[node name="MarginContainer" type="MarginContainer" parent="MarginContainer/MainMenu/MarginContainer/VBoxContainer/HBoxContainer/NewPlayButton" unique_id=1522509468]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/margin_bottom = 5
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/MainMenu/MarginContainer/VBoxContainer/HBoxContainer/NewPlayButton/MarginContainer" unique_id=2060936388]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 0
+alignment = 2
+
+[node name="CompletionLabel" type="Label" parent="MarginContainer/MainMenu/MarginContainer/VBoxContainer/HBoxContainer/NewPlayButton/MarginContainer/VBoxContainer" unique_id=1329183927]
+visible = false
+layout_mode = 2
+theme_override_colors/font_color = Color(0.51718444, 0.5171845, 0.51718444, 1)
+theme_override_font_sizes/font_size = 12
+text = "100%"
+horizontal_alignment = 1
+
+[node name="VBoxContainer2" type="VBoxContainer" parent="MarginContainer/MainMenu/MarginContainer/VBoxContainer/HBoxContainer/NewPlayButton" unique_id=1880810245]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 0
+alignment = 1
+
+[node name="PlayLabel" type="Label" parent="MarginContainer/MainMenu/MarginContainer/VBoxContainer/HBoxContainer/NewPlayButton/VBoxContainer2" unique_id=1089088432]
+layout_mode = 2
+theme = SubResource("Theme_byewe")
+theme_override_font_sizes/font_size = 30
+text = "Play"
+horizontal_alignment = 1
+
+[node name="SpaceMaker" type="Control" parent="MarginContainer/MainMenu/MarginContainer/VBoxContainer/HBoxContainer/NewPlayButton/VBoxContainer2" unique_id=151264927]
+custom_minimum_size = Vector2(0, 4)
+layout_mode = 2
+mouse_filter = 2
+
+[node name="EditButton" type="Button" parent="MarginContainer/MainMenu/MarginContainer/VBoxContainer/HBoxContainer" unique_id=284899672]
+custom_minimum_size = Vector2(164, 62)
+layout_mode = 2
+theme_type_variation = &"BigTextButton"
+theme_override_font_sizes/font_size = 24
+text = "Edit Game"
+icon_alignment = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/MainMenu/MarginContainer/VBoxContainer" unique_id=1793785358]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="SettingsButton" type="Button" parent="MarginContainer/MainMenu/MarginContainer/VBoxContainer/VBoxContainer" unique_id=916998221]
+layout_mode = 2
+size_flags_horizontal = 4
+text = "Settings"
+icon = ExtResource("10_ky3uu")
+icon_alignment = 2
+
+[node name="ShowMoreButtonsButton" type="Button" parent="MarginContainer/MainMenu/MarginContainer/VBoxContainer/VBoxContainer" unique_id=719891676]
+layout_mode = 2
+size_flags_horizontal = 4
+text = "Create or Import"
+icon_alignment = 2
+
+[node name="Spacer" type="Control" parent="MarginContainer/MainMenu/MarginContainer/VBoxContainer" unique_id=1191951721]
+layout_mode = 2
+
+[node name="MoreMenuButtons" type="VBoxContainer" parent="MarginContainer/MainMenu/MarginContainer/VBoxContainer" unique_id=1795824773]
+visible = false
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+theme_override_constants/separation = 12
+alignment = 1
+
+[node name="CreateNewGameButton" type="Button" parent="MarginContainer/MainMenu/MarginContainer/VBoxContainer/MoreMenuButtons" unique_id=1804754194]
+custom_minimum_size = Vector2(0, 27)
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "Create New Empty Game"
+
+[node name="ImportNewGameButton" type="Button" parent="MarginContainer/MainMenu/MarginContainer/VBoxContainer/MoreMenuButtons" unique_id=1756290664]
+layout_mode = 2
+text = "Import Game .zip"
+
+[node name="ImportLevelsButton" type="Button" parent="MarginContainer/MainMenu/MarginContainer/VBoxContainer/MoreMenuButtons" unique_id=1753228737]
+layout_mode = 2
+text = "Import Levels"
+
+[node name="Spacer2" type="Control" parent="MarginContainer/MainMenu/MarginContainer/VBoxContainer/MoreMenuButtons" unique_id=1817573619]
+layout_mode = 2
+
+[node name="QuitButton" type="Button" parent="MarginContainer/MainMenu/MarginContainer/VBoxContainer" unique_id=1411082331]
+layout_mode = 2
+size_flags_horizontal = 4
+theme_type_variation = &"BigTextButton"
+text = "Quit"
+
+[node name="SettingsPanelLayer" type="CanvasLayer" parent="MarginContainer/MainMenu" unique_id=76735397]
+visible = false
+
+[node name="CenterContainer" type="CenterContainer" parent="MarginContainer/MainMenu/SettingsPanelLayer" unique_id=173547606]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="UserSettingsPanel" parent="MarginContainer/MainMenu/SettingsPanelLayer/CenterContainer" unique_id=1234442601 instance=ExtResource("11_h4qnb")]
+layout_mode = 2
+
+[node name="VersionChooserLayer" type="CanvasLayer" parent="MarginContainer/MainMenu" unique_id=117092507]
+visible = false
+
+[node name="CenterContainer" type="CenterContainer" parent="MarginContainer/MainMenu/VersionChooserLayer" unique_id=1939970860]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="VersionChooserPanel" parent="MarginContainer/MainMenu/VersionChooserLayer/CenterContainer" unique_id=189189383 instance=ExtResource("12_kh8hq")]
+layout_mode = 2
+
+[node name="FallingEntities" parent="." unique_id=1839494414 instance=ExtResource("13_ory4r")]
+
+[node name="ColorRect" parent="FallingEntities/CanvasLayer" parent_id_path=PackedInt32Array(1839494414, 996671454) index="0" unique_id=1372251819]
+metadata/_edit_lock_ = true
+
+[node name="Effects" parent="FallingEntities/CanvasLayer2" parent_id_path=PackedInt32Array(1839494414, 1037858481) index="0" unique_id=477139096]
+metadata/_edit_lock_ = true
+
+[connection signal="pressed" from="MarginContainer/MainMenu/MarginContainer/VBoxContainer/HBoxContainer/EditButton" to="MarginContainer/MainMenu" method="_on_EditButton_pressed"]
+[connection signal="pressed" from="MarginContainer/MainMenu/MarginContainer/VBoxContainer/VBoxContainer/SettingsButton" to="MarginContainer/MainMenu" method="show_user_settings_panel"]
+[connection signal="pressed" from="MarginContainer/MainMenu/MarginContainer/VBoxContainer/MoreMenuButtons/ImportNewGameButton" to="MarginContainer/MainMenu" method="_on_import_new_game_button_pressed"]
+[connection signal="pressed" from="MarginContainer/MainMenu/MarginContainer/VBoxContainer/MoreMenuButtons/ImportLevelsButton" to="MarginContainer/MainMenu" method="_on_import_levels_button_pressed"]
+
+[editable path="FallingEntities"]

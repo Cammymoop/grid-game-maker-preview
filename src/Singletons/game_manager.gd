@@ -5696,3 +5696,14 @@ func has_save_data_for_current_game() -> bool:
 func ____clear_all_local_data() -> void:
 	FilesManager.___clear_local_data()
 	GlobalToaster.show_toast_message("All local data has been cleared\ncurrent game will not function properly if not saved again")
+
+
+
+func get_feature_category_filter() -> Array:
+	var filter: Variant = get_current_game_profile_setting_1("feature_category_filter", [])
+	if typeof(filter) != TYPE_ARRAY:
+		return []
+	return filter.duplicate()
+
+func update_feature_category_filter(excluded_feature_categories: Array) -> void:
+	set_current_game_profile_setting_1("feature_category_filter", excluded_feature_categories)

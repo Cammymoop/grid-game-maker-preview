@@ -18,8 +18,8 @@ func desc_quit() -> Dictionary:
 		"display_name": "Quit Conditional",
 		"slot_type_hint": "none",
 		"template_text": "Stop evaluating the rest of the conditional",
-		"tooltip": "Commands below in this list or in other lists will be skipped, all later steps will not be run.\n" \
-					+ "The result of this conditional will be whatever the result of this step is regardless of if there are later steps."
+		"tooltip": "All remaining Commands in this step will be skipped, including Commands below in this list, all later steps will be skipped and not run.\n" \
+					+ "The result of this conditional event will be the result of this step ignoring later steps."
 	}
 func cmd_quit(_slots: Dictionary) -> Dictionary:
 	return {"result": true, "quit": true}
@@ -925,9 +925,10 @@ func cmd_select_direction_to_position(slots: Dictionary, chosen_slot: int, to_po
 
 func desc_a_die() -> Dictionary:
 	return {
-		"display_name": "Destroy entity (die)",
+		"display_name": "Destroy entity",
 		"slot_type_hint": "entity",
 		"template_text": "The entity dies now. (Uses default dying effect) [dying_eff_dir:DefaultableDirectionInput]",
+		"extra_keywords": ["die"],
 	}
 func cmd_a_die(slots: Dictionary, chosen_slot: int, dying_eff_dir: Dictionary = {}) -> void:
 	if Commands.slot_is_entity(chosen_slot) and slots[chosen_slot]:
@@ -1108,8 +1109,13 @@ func cmd_select_created_entity(slots: Dictionary, chosen_slot: int, entity_name:
 	slots[chosen_slot] = created
 
 
-func desc_a_turn() -> String:
-	return "entity,pos|Turn the entity/tile to face this way [complex_dir:DirectionInput:1]"
+func desc_a_turn() -> Dictionary:
+	return {
+		"display_name": "Change Entity or Tile Facing Direction",
+		"slot_type_hint": "entity,pos",
+		"template_text": "Turn the entity/tile to face this way [complex_dir:DirectionInput:1]",
+		"extra_keywords": ["turn"],
+	}
 func cmd_a_turn(slots: Dictionary, chosen_slot: int, complex_dir: Dictionary) -> void:
 	if Commands.slot_is_entity(chosen_slot):
 		if not slots[chosen_slot]:
@@ -1182,7 +1188,6 @@ func cmd_next_level_exists(_slots: Dictionary) -> bool:
 
 func desc_load_next_level() -> Dictionary:
 	return {
-		"name": "load_next_level",
 		"display_name": "Complete and Advance Level (Deprecated)",
 		"is_deprecated": true,
 		"slot_type_hint": "none",
@@ -1194,7 +1199,6 @@ func cmd_load_next_level(slots: Dictionary, _slot: int, delay: Dictionary = {"ty
 
 func desc_advance_to_next_level() -> Dictionary:
 	return {
-		"name": "advance_to_next_level",
 		"display_name": "Advance to Next Level",
 		"slot_type_hint": "none",
 		"template_text": "Advance to the next level, with a [delay:ComplexScalarInput:default=1,step=0.1] second delay\n" \
@@ -1362,8 +1366,13 @@ func cmd_compare_values(slots: Dictionary, chosen_slot: int, compl_scalar: Dicti
 	var slot_value: = get_value_slot_as_float(slots, chosen_slot)
 	return Utility.check_comparison(slot_value, compare_to_val, comparison)
 
-func desc_exists() -> String:
-	return "entity,pos,string|If there is any entities/tiles/text selected in the slot"
+func desc_exists() -> Dictionary:
+	return {
+		"display_name": "If Slot Contains Anything",
+		"slot_type_hint": "entity,pos,string",
+		"template_text": "If there is any entities/tiles/text selected in the slot",
+		"extra_keywords": ["exists"],
+	}
 func cmd_exists(slots: Dictionary, chosen_slot: int) -> bool:
 	var selected = slots[chosen_slot]
 	if Commands.slot_is_entity(chosen_slot):
@@ -1396,9 +1405,13 @@ func cmd_override_move_animation(slots: Dictionary, chosen_slot: int, anim_style
 	if Commands.slot_is_entity(chosen_slot) and slots[chosen_slot]:
 		slots[chosen_slot].set_move_interp_override(BaseEntity.read_move_interp_style_string(anim_style))
 
-func desc_if_custom_conditional_event_result() -> String:
-	return "entity,pos|If the result of triggering the [event_name:PropertyInput] custom event of the entity/tile is [truthy:BoolChoice:true,true or non-zero,false or zero]\n" \
-			+ "with [blue_entity_slot:SlotInput:entity,none] as the *blue entity"
+func desc_if_custom_conditional_event_result() -> Dictionary:
+	return {
+		"slot_type_hint": "entity,pos",
+		"template_text": "If the result of triggering the [event_name:PropertyInput] custom event of the entity/tile is [truthy:BoolChoice:true,true or non-zero,false or zero]\n" \
+			+ "with [blue_entity_slot:SlotInput:entity,none] as the *blue entity",
+		"feature_tags": ["custom event"],
+	}
 func cmd_if_custom_conditional_event_result(slots: Dictionary, chosen_slot: int, event_name: String, blue_entity_slot: int, truthy: bool) -> bool:
 	if not Commands.slot_is_entity(chosen_slot) and not Commands.slot_is_positions(chosen_slot):
 		push_error("Invalid slot (entity/pos) for custom conditional event result: %s" % chosen_slot)
@@ -1418,10 +1431,10 @@ func cmd_if_custom_conditional_event_result(slots: Dictionary, chosen_slot: int,
 
 func desc_trigger_custom_event() -> Dictionary:
 	return {
-		"name": "trigger_custom_event",
 		"slot_type_hint": "entity,pos",
 		"template_text": "(deprecated) Trigger the [event_name:PropertyInput] custom event of the entity/tiles",
 		"tooltip": "deprecated: use trigger_custom_event_immediate instead",
+		"feature_tags": ["custom event"],
 		"is_deprecated": true,
 	}
 func cmd_trigger_custom_event(slots: Dictionary, chosen_slot: int, event_name: String) -> void:
@@ -1437,8 +1450,12 @@ func cmd_trigger_custom_event(slots: Dictionary, chosen_slot: int, event_name: S
 	
 	event_call.call()
 
-func desc_trigger_custom_event_immediate() -> String:
-	return "entity,pos|Trigger the [event_name:PropertyInput] custom event of the entity/tiles [is_immediate:BoolChoice:true,now,immediately after this event]"
+func desc_trigger_custom_event_immediate() -> Dictionary:
+	return {
+		"slot_type_hint": "entity,pos",
+		"template_text": "Trigger the [event_name:PropertyInput] custom event of the entity/tiles [is_immediate:BoolChoice:true,now,immediately after this event]",
+		"feature_tags": ["custom event"],
+	}
 func cmd_trigger_custom_event_immediate(slots: Dictionary, chosen_slot: int, event_name: String, is_immediate: bool = true) -> void:
 	var pass_blue_entity: BaseEntity = null if chosen_slot == Slot.RED else slots[Slot.RED]
 	if not pass_blue_entity:
@@ -1455,9 +1472,13 @@ func cmd_trigger_custom_event_immediate(slots: Dictionary, chosen_slot: int, eve
 	else:
 		ConditionalsV3.add_deferred_call(event_call)
 
-func desc_trigger_custom_event_for_each_entity() -> String:
-	return "entity,pos|Trigger the [event_name:PropertyInput] custom event of the entity/tile for each entity ([include_self:InvertInput:excluding,including] self)\n" \
-			+ "at [pos_filter_slot:SlotInput:pos] with a [truthy:BoolChoice:true,true or non-zero,false or zero] [prop_name:PropertyInput] property, [is_immediate:BoolChoice:true,now,immediately after this event]"
+func desc_trigger_custom_event_for_each_entity() -> Dictionary:
+	return {
+		"slot_type_hint": "entity,pos",
+		"template_text": "Trigger the [event_name:PropertyInput] custom event of the entity/tile for each entity ([include_self:InvertInput:excluding,including] self)\n" \
+			+ "at [pos_filter_slot:SlotInput:pos] with a [truthy:BoolChoice:true,true or non-zero,false or zero] [prop_name:PropertyInput] property, [is_immediate:BoolChoice:true,now,immediately after this event]",
+		"feature_tags": ["custom event"],
+	}
 func cmd_trigger_custom_event_for_each_entity(
 		slots: Dictionary, chosen_slot: int, event_name: String,
 		pos_filter_slot: int, include_self: bool, truthy: bool, prop_name: String,
@@ -1498,9 +1519,13 @@ func cmd_trigger_custom_event_for_each_entity(
 	for c in deferred_calls:
 		ConditionalsV3.add_deferred_call(c)
 
-func desc_trigger_custom_event_for_each_bonded_entity() -> String:
-	return "entity,pos|Trigger the [event_name:PropertyInput] custom event of the entity/tile\n" \
-			+ "for each entity bonded to [bonded_ref_slot:SlotInput:entity] ([include_self:BoolChoice:true,including,excluding] itself), [is_immediate:BoolChoice:true,now,immediately after this event]"
+func desc_trigger_custom_event_for_each_bonded_entity() -> Dictionary:
+	return {
+		"slot_type_hint": "entity,pos",
+		"template_text": "Trigger the [event_name:PropertyInput] custom event of the entity/tile\n" \
+			+ "for each entity bonded to [bonded_ref_slot:SlotInput:entity] ([include_self:BoolChoice:true,including,excluding] itself), [is_immediate:BoolChoice:true,now,immediately after this event]",
+		"feature_tags": ["custom event"],
+	}
 func cmd_trigger_custom_event_for_each_bonded_entity(slots: Dictionary, chosen_slot: int, event_name: String, bonded_ref_slot: int, include_self: bool, is_immediate: bool) -> void:
 	if not Commands.slot_is_entity(chosen_slot) and not Commands.slot_is_positions(chosen_slot):
 		push_error("Invalid slot to trigger custom event for each bonded entity: %s" % chosen_slot)
@@ -1536,9 +1561,13 @@ func cmd_trigger_custom_event_for_each_bonded_entity(slots: Dictionary, chosen_s
 	for c in deferred_calls:
 		ConditionalsV3.add_deferred_call(c)
 
-func desc_trigger_custom_event_for_each_tailing_entity() -> String:
-	return "entity,pos|Trigger the [event_name:PropertyInput] custom event of the entity/tile\n" \
-			+ "for each entity tailing [tail_dir:TailDirInput] [tail_ref_slot:SlotInput:entity] ([include_self:BoolChoice:true,including,excluding] itself), [is_immediate:BoolChoice:true,now,immediately after this event]"
+func desc_trigger_custom_event_for_each_tailing_entity() -> Dictionary:
+	return {
+		"slot_type_hint": "entity,pos",
+		"template_text": "Trigger the [event_name:PropertyInput] custom event of the entity/tile\n" \
+			+ "for each entity tailing [tail_dir:TailDirInput] [tail_ref_slot:SlotInput:entity] ([include_self:BoolChoice:true,including,excluding] itself), [is_immediate:BoolChoice:true,now,immediately after this event]",
+		"feature_tags": ["tailing", "custom event"],
+	}
 func cmd_trigger_custom_event_for_each_tailing_entity(slots: Dictionary, chosen_slot: int, event_name: String, tail_dir: String, tail_ref_slot: int, include_self: bool, is_immediate: bool) -> void:
 	if not Commands.slot_is_entity(chosen_slot) and not Commands.slot_is_positions(chosen_slot):
 		push_error("Invalid slot to trigger custom event for each bonded entity: %s" % chosen_slot)
@@ -1578,8 +1607,12 @@ func cmd_trigger_custom_event_for_each_tailing_entity(slots: Dictionary, chosen_
 	for c in deferred_calls:
 		ConditionalsV3.add_deferred_call(c)
 
-func desc_trigger_custom_event_for_each_position() -> String:
-	return "entity|Trigger the [event_name:PropertyInput] custom event of the entity at each position in [in_positions_slot:SlotInput:pos], [is_immediate:BoolChoice:true,now,immediately after this event]"
+func desc_trigger_custom_event_for_each_position() -> Dictionary:
+	return {
+		"slot_type_hint": "entity",
+		"template_text": "Trigger the [event_name:PropertyInput] custom event of the entity at each position in [in_positions_slot:SlotInput:pos], [is_immediate:BoolChoice:true,now,immediately after this event]",
+		"feature_tags": ["custom event"],
+	}
 func cmd_trigger_custom_event_for_each_position(slots: Dictionary, chosen_slot: int, event_name: String, in_positions_slot: int, is_immediate: bool) -> void:
 	if not Commands.slot_is_entity(chosen_slot) or not Commands.slot_is_positions(in_positions_slot):
 		push_error("Invalid slots to trigger custom event for each position: %s and %s" % [chosen_slot, in_positions_slot])
@@ -1600,9 +1633,13 @@ func cmd_trigger_custom_event_for_each_position(slots: Dictionary, chosen_slot: 
 	for c in deferred_calls:
 		ConditionalsV3.add_deferred_call(c)
 
-func desc_trigger_custom_event_for_tile_at_each_position() -> String:
-	return "pos|Trigger the [event_name:PropertyInput] custom event of the each tile at the positions in this slot,\n" \
-			+ "with the entity [blue_entity_slot:SlotInput:entity,none] as the *blue entity, [is_immediate:BoolChoice:true,now,immediately after this event]"
+func desc_trigger_custom_event_for_tile_at_each_position() -> Dictionary:
+	return {
+		"slot_type_hint": "pos",
+		"template_text": "Trigger the [event_name:PropertyInput] custom event of the each tile at the positions in this slot,\n" \
+			+ "with the entity [blue_entity_slot:SlotInput:entity,none] as the *blue entity, [is_immediate:BoolChoice:true,now,immediately after this event]",
+		"feature_tags": ["custom event"],
+	}
 func cmd_trigger_custom_event_for_tile_at_each_position(slots: Dictionary, chosen_slot: int, event_name: String, blue_entity_slot: int, is_immediate: bool) -> void:
 	if not Commands.slot_is_positions(chosen_slot) or (blue_entity_slot != SlotSelectorButton.NONE_SLOTS and not Commands.slot_is_entity(blue_entity_slot)):
 		push_error("Invalid slots to trigger custom event for each position: %s" % [chosen_slot])
@@ -1620,9 +1657,13 @@ func cmd_trigger_custom_event_for_tile_at_each_position(slots: Dictionary, chose
 	else:
 		ConditionalsV3.add_deferred_call(MapManager.resolve_tile_individual_events.bind(positions, event_name, blue_entity))
 
-func desc_delayed_custom_entity_event() -> String:
-	return "entity|Trigger the [event_name:PropertyInput] custom event of the entity after a [delay:ComplexScalarInput:default=0.5,step=0.1] second delay\n" \
-			+ "(If the entity is still active at that time)"
+func desc_delayed_custom_entity_event() -> Dictionary:
+	return {
+		"slot_type_hint": "entity",
+		"template_text": "Trigger the [event_name:PropertyInput] custom event of the entity after a [delay:ComplexScalarInput:default=0.5,step=0.1] second delay\n" \
+			+ "(If the entity is still active at that time)",
+		"feature_tags": ["custom event"],
+	}
 func cmd_delayed_custom_entity_event(slots: Dictionary, chosen_slot: int, event_name: String, delay: Dictionary) -> void:
 	if not Commands.slot_is_entity(chosen_slot):
 		push_error("Invalid slot or empty slot to trigger delayed custom entity event: %s" % chosen_slot)
@@ -1631,8 +1672,12 @@ func cmd_delayed_custom_entity_event(slots: Dictionary, chosen_slot: int, event_
 		return
 	EntityManager.add_delayed_entity_prop_event(slots[chosen_slot], event_name, resolve_complex_scalar(delay, slots))
 
-func desc_cancel_delayed_custom_entity_event() -> String:
-	return "entity|Cancel all delayed [event_name:PropertyInput] custom events of the entity that haven't triggered yet"
+func desc_cancel_delayed_custom_entity_event() -> Dictionary:
+	return {
+		"slot_type_hint": "entity",
+		"template_text": "Cancel all delayed [event_name:PropertyInput] custom events of the entity that haven't triggered yet",
+		"feature_tags": ["custom event"],
+	}
 func cmd_cancel_delayed_custom_entity_event(slots: Dictionary, chosen_slot: int, event_name: String) -> void:
 	if not Commands.slot_is_entity(chosen_slot):
 		push_error("Invalid slot or empty slot to cancel delayed custom entity event: %s" % chosen_slot)
@@ -2416,8 +2461,12 @@ func cmd_select_random_tile_name_prop_filtered(slots: Dictionary, chosen_slot: i
 	slots[chosen_slot] = MapManager.get_tile_name(Utility.random_list_element(filtered_tile_ids))
 
 
-func desc_is_entity_tailing() -> String:
-	return "entity|If the entity is currently [tailing:BoolChoice:true,tailing another entity,being tailed by another entity]"
+func desc_is_entity_tailing() -> Dictionary:
+	return {
+		"slot_type_hint": "entity",
+		"template_text": "If the entity is currently [tailing:BoolChoice:true,tailing another entity,being tailed by another entity]",
+		"feature_tags": ["tailing"],
+	}
 func cmd_is_entity_tailing(slots: Dictionary, chosen_slot: int, tailing: bool) -> bool:
 	if not Commands.slot_is_entity(chosen_slot):
 		push_error("Invalid slot or empty slot to check if entity is tailing: %s" % chosen_slot)
@@ -2429,8 +2478,12 @@ func cmd_is_entity_tailing(slots: Dictionary, chosen_slot: int, tailing: bool) -
 	else:
 		return EntityManager.get_direct_tailing_entities(slots[chosen_slot]).size() > 0
 
-func desc_select_tailing_entity() -> String:
-	return "entity|<= Select an entity [tail_parent:BoolChoice:true,being tailed by,that is tailing] [ref_entity_slot:SlotInput:entity]"
+func desc_select_tailing_entity() -> Dictionary:
+	return {
+		"slot_type_hint": "entity",
+		"template_text": "Select an entity [tail_parent:BoolChoice:true,being tailed by,that is tailing] [ref_entity_slot:SlotInput:entity]",
+		"feature_tags": ["tailing"],
+	}
 func cmd_select_tailing_entity(slots: Dictionary, chosen_slot: int, tail_parent: bool, ref_entity_slot: int) -> void:
 	if not Commands.slot_is_entity(chosen_slot):
 		push_error("Invalid slot or empty slot to select tailing entity: %s" % chosen_slot)
@@ -2449,9 +2502,13 @@ func cmd_select_tailing_entity(slots: Dictionary, chosen_slot: int, tail_parent:
 			return
 		slots[chosen_slot] = tailing_entities[0]
 
-func desc_select_tailing_positions() -> String:
-	return "pos|<= Select the positions of all entities tailing [tail_dir:TailDirInput:behind,ahead of] [ref_entity_slot:SlotInput:entity]\n" \
-			+ "([include_self:BoolChoice:true,including,excluding] itself)"
+func desc_select_tailing_positions() -> Dictionary:
+	return {
+		"slot_type_hint": "pos",
+		"template_text": "Select the positions of all entities tailing [tail_dir:TailDirInput:behind,ahead of] [ref_entity_slot:SlotInput:entity]\n" \
+			+ "([include_self:BoolChoice:true,including,excluding] itself)",
+		"feature_tags": ["tailing"],
+	}
 func cmd_select_tailing_positions(slots: Dictionary, chosen_slot: int, tail_dir: String, ref_entity_slot: int, include_self: bool) -> void:
 	if not Commands.slot_is_entity(ref_entity_slot) or not Commands.slot_is_positions(chosen_slot):
 		push_error("Invalid slots to select tailing positions: %s and %s" % [chosen_slot, ref_entity_slot])
@@ -2469,8 +2526,12 @@ func cmd_select_tailing_positions(slots: Dictionary, chosen_slot: int, tail_dir:
 	for e in tailing_entities:
 		slots[chosen_slot].append(e.get_moving_position())
 
-func desc_start_tailing() -> String:
-	return "entity|The entity starts tailing behind this entity [head_entity:SlotInput:entint]"
+func desc_start_tailing() -> Dictionary:
+	return {
+		"slot_type_hint": "entity",
+		"template_text": "The entity starts tailing behind this entity [head_entity:SlotInput:entity]",
+		"feature_tags": ["tailing"],
+	}
 func cmd_start_tailing(slots: Dictionary, chosen_slot: int, head_entity: int) -> void:
 	if not Commands.slot_is_entity(chosen_slot) or not Commands.slot_is_entity(head_entity):
 		push_error("Invalid slots to start tailing: %s and %s" % [chosen_slot, head_entity])
@@ -2481,8 +2542,12 @@ func cmd_start_tailing(slots: Dictionary, chosen_slot: int, head_entity: int) ->
 		slots[chosen_slot].untail()
 	slots[chosen_slot].set_tailing(slots[head_entity])
 
-func desc_stop_tailling() -> String:
-	return "entity|The entity stops tailing the entity ahead of it"
+func desc_stop_tailling() -> Dictionary:
+	return {
+		"slot_type_hint": "entity",
+		"template_text": "The entity stops tailing the entity ahead of it in the tailing chain",
+		"feature_tags": ["tailing"],
+	}
 func cmd_stop_tailling(slots: Dictionary, chosen_slot: int) -> void:
 	if not Commands.slot_is_entity(chosen_slot):
 		push_error("Invalid slot or empty slot to stop tailing: %s" % chosen_slot)
@@ -2491,8 +2556,12 @@ func cmd_stop_tailling(slots: Dictionary, chosen_slot: int) -> void:
 		return
 	slots[chosen_slot].untail()
 
-func desc_remove_tail() -> String:
-	return "entity|Cut off entities tailing behind the entity"
+func desc_remove_tail() -> Dictionary:
+	return {
+		"slot_type_hint": "entity",
+		"template_text": "Cut off entities tailing behind the entity",
+		"feature_tags": ["tailing"],
+	}
 func cmd_remove_tail(slots: Dictionary, chosen_slot: int) -> void:
 	if not Commands.slot_is_entity(chosen_slot):
 		push_error("Invalid slot or empty slot to remove tail: %s" % chosen_slot)
@@ -2503,8 +2572,12 @@ func cmd_remove_tail(slots: Dictionary, chosen_slot: int) -> void:
 	for e in tailing_entities:
 		e.untail()
 
-func select_tail_size() -> String:
-	return "number|<= Select the total number of entities in the tailing chain of [entity_slot:SlotInput:entity]"
+func select_tail_size() -> Dictionary:
+	return {
+		"slot_type_hint": "number",
+		"template_text": "Select the total number of entities in the tailing chain of [entity_slot:SlotInput:entity]",
+		"feature_tags": ["tailing"],
+	}
 func cmd_select_tail_size(slots: Dictionary, chosen_slot: int, entity_slot: int) -> void:
 	if not Commands.slot_is_value(chosen_slot) or not Commands.slot_is_entity(entity_slot):
 		push_error("Invalid slot or empty slot to select tail size: %s" % chosen_slot)
@@ -2515,8 +2588,12 @@ func cmd_select_tail_size(slots: Dictionary, chosen_slot: int, entity_slot: int)
 	var all_tailing_entities: = EntityManager.get_entity_tailing_chain(slots[entity_slot], true, true)
 	set_value_slot_as_number(slots, chosen_slot, all_tailing_entities.size())
 
-func desc_convert_tailing_chain_to_bond_group() -> String:
-	return "entity|Convert the tailing chain of [entity_slot:SlotInput:entity] to a bond group"
+func desc_convert_tailing_chain_to_bond_group() -> Dictionary:
+	return {
+		"slot_type_hint": "entity",
+		"template_text": "Convert the tailing chain of [entity_slot:SlotInput:entity] to a bond group",
+		"feature_tags": ["tailing", "bond groups"],
+	}
 func cmd_convert_tailing_chain_to_bond_group(slots: Dictionary, chosen_slot: int, entity_slot: int) -> void:
 	if not Commands.slot_is_entity(chosen_slot) or not Commands.slot_is_entity(entity_slot):
 		push_error("Invalid slots to convert tailing chain to bond group: %s and %s" % [chosen_slot, entity_slot])
@@ -2531,8 +2608,12 @@ func cmd_convert_tailing_chain_to_bond_group(slots: Dictionary, chosen_slot: int
 			EntityManager.unbond_entity(e, false)
 	EntityManager.create_bond_group(all_tailing_entities)
 
-func desc_convert_bond_group_to_tailing_chain() -> String:
-	return "entity|Convert the bond group of [entity_slot:SlotInput:entity] to a tailing chain"
+func desc_convert_bond_group_to_tailing_chain() -> Dictionary:
+	return {
+		"slot_type_hint": "entity",
+		"template_text": "Convert the bond group of [entity_slot:SlotInput:entity] to a tailing chain",
+		"feature_tags": ["tailing", "bond groups"],
+	}
 func cmd_convert_bond_group_to_tailing_chain(slots: Dictionary, chosen_slot: int, entity_slot: int) -> void:
 	if not Commands.slot_is_entity(chosen_slot) or not Commands.slot_is_entity(entity_slot):
 		push_error("Invalid slots to convert bond group to tailing chain: %s and %s" % [chosen_slot, entity_slot])

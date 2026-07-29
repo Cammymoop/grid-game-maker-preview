@@ -27,11 +27,33 @@ func list_commands() -> Array[Dictionary]:
 				"default_args": get_command_def_arg_list(cmd_name, method_info),
 				"template_text": "",
 				"slot_type_hint": "all",
+				"tooltip": "",
+				"extra_keywords": [],
+				"feature_tags": [],
 			}
+
 			meta_info.merge(custom_meta_info, true)
+			#if not meta_info.has("tooltip") and meta_info.get("template_text", ""):
+				#meta_info["tooltip"] = _convert_template_to_tooltip(meta_info["template_text"])
+
 			meta_info["display_name"] = get_command_display_name(cmd_name, custom_meta_info)
-			if not meta_info.has("tooltip") and meta_info.get("template_text", ""):
-				meta_info["tooltip"] = _convert_template_to_tooltip(meta_info["template_text"])
+			
+			if meta_info.get("feature_tags", []).size() == 0:
+				var lower_display_name: String = meta_info["display_name"].to_lower()
+				if lower_display_name.contains("teleport"):
+					meta_info["feature_tags"].append("teleporting")
+				if lower_display_name.contains("random"):
+					meta_info["feature_tags"].append("randomization")
+				if lower_display_name.contains("large"):
+					meta_info["feature_tags"].append("large entities")
+				if lower_display_name.contains("save file"):
+					meta_info["feature_tags"].append("game save data")
+
+				if lower_display_name.contains("bond"):
+					meta_info["feature_tags"].append("bond groups")
+				if lower_display_name.contains("camera"):
+					meta_info["feature_tags"].append("camera target")
+
 			cmd_infos.append(meta_info)
 	return cmd_infos
 

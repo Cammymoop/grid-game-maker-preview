@@ -105,6 +105,8 @@ enum ScriptType { GDSCRIPT, ORCHESTRATOR }
 var scripts: Array[Dictionary] = []
 var all_commands: Dictionary[String, Dictionary] = {}
 
+var all_feature_categories: Array[String] = []
+
 const DEFAULT_SCRIPTS: = [ "basic_default" ]
 
 # orchestrator expirement disabled atm
@@ -234,12 +236,19 @@ func register_script_commands(script_index: int) -> void:
     if script_inst.has_method("set_cond_resolver"):
         script_inst.set_cond_resolver(self)
     var script_name = scripts[script_index]["name"]
-    for command in script_inst.list_commands():
-        var qualified_name = script_name + "." + command["name"]
+    for command_info in script_inst.list_commands():
+        var qualified_name = script_name + "." + command_info["name"]
         if qualified_name in all_commands:
             push_warning("Overriding registered command: %s" % [qualified_name])
-        all_commands[qualified_name] = command.duplicate()
+        all_commands[qualified_name] = command_info.duplicate_deep()
         all_commands[qualified_name]["script_index"] = script_index
+        
+        for feature_category in command_info.get("feature_tags", []):
+            if not feature_category in all_feature_categories:
+                all_feature_categories.append(feature_category)
+    
+    all_feature_categories.sort()
+        
 
 func conditions_collapse(condition_stack: Array) -> bool:
     var result = true

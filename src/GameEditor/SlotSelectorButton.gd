@@ -90,10 +90,10 @@ var slot_ids: = {
 }
 
 const SPECIAL_SLOT_TOOLTIPS: = {
-    Commands.Slot.RED: "The \"Self\" entity",
-    Commands.Slot.BLUE: "The interacting entity",
-    Commands.Slot.PINK: "The remembered entity (of this event's entity)",
-    Commands.Slot.GREY: "The position(s) of the current event",
+    Commands.Slot.RED: "The \"Self\" or \"Me\" entity",
+    Commands.Slot.BLUE: "The \"Other\" interacting entity",
+    Commands.Slot.PINK: "Remembered entity (remembered by the entity who's event this is)",
+    Commands.Slot.GREY: "The \"Here\" position(s) of the current event",
 }
 
 var disabled_slots: Array = []
