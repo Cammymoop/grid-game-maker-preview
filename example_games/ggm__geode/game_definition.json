@@ -111,7 +111,19 @@
           }
         ],
         "cutter": true,
-        "blocks": true
+        "blocks": true,
+        "spawn-effect": "Spin In",
+        "spawn-anim-delay": 1,
+        "z-index": 1,
+        "do_action_3": {
+          "v": "3",
+          "conditions": [],
+          "when true": [
+            "basic_default.advance_to_next_level::[\"i:-1\",{\"args\":[\"s:type\",\"s:plain\",\"s:value\",\"f:0.5\"],\"type\":\"Dictionary\"},true,\"s:LevelComplete\"]"
+          ],
+          "when false": [],
+          "when always": []
+        }
       },
       "groups": [
         "Player"
@@ -242,7 +254,7 @@
           ],
           "when true": [],
           "when false": [
-            "basic_default.load_next_level::[\"i:-1\",{\"args\":[\"s:type\",\"s:plain\",\"s:value\",\"f:0.7\"],\"type\":\"Dictionary\"}]"
+            "basic_default.advance_to_next_level::[\"i:-1\",{\"args\":[\"s:type\",\"s:plain\",\"s:value\",\"f:0.5\"],\"type\":\"Dictionary\"},true,\"s:LevelComplete\"]"
           ],
           "when always": []
         },
@@ -274,7 +286,10 @@
         "breaker": true,
         "cutter": true,
         "blocks": true,
-        "player": true
+        "player": true,
+        "spawn-effect": "Grow In",
+        "spawn-anim-delay": 1,
+        "z-index": 1
       },
       "controller": "InputController",
       "controller_options": {
@@ -374,18 +389,31 @@
     },
     "action_signal_sent_to": "camera_target",
     "movement_mode": 2.0,
-    "entity_move_speed": 9.0
+    "entity_move_speed": 9.0,
+    "level_start_entity_spawn_effect_enabled": true,
+    "default_spawn_effect": "Grow In",
+    "level_start_entity_spawn_effect_duration": 1.1,
+    "game_completion_mode": "specific_list_complete",
+    "specific_completion_key": "Part 2",
+    "game_end_replace_transition": true,
+    "game_end_transition_level_code": "Part Cammymoop??Cammy 1"
   },
   "game_metadata": {
     "credits": {
       "credits_list": [
         {
-          "role": "Recreation",
-          "name": "Cammymoop"
+          "type": "role_name",
+          "role": "Original Game",
+          "name": "Neonesque"
         },
         {
-          "role": "PuzzleScript Original",
-          "name": "Neonesque"
+          "type": "link",
+          "url": "https://neonesque.itch.io/geode"
+        },
+        {
+          "type": "role_name",
+          "role": "GGM Re-Creation",
+          "name": "Cammymoop"
         }
       ]
     }
@@ -408,7 +436,64 @@
         "Level 12",
         "Level 13",
         "Level 14"
-      ]
+      ],
+      "completion_mode": "all",
+      "show_completion_style": "completed_total",
+      "bg_style": {
+        "background_color": "#191b1e",
+        "bg_gradient_color": "#272725bb",
+        "dusty_particles_color": "#57575214",
+        "dusty_particles_amount": 2.2,
+        "dusty_particles_speed": 0.0,
+        "bg_gradient_above": "between",
+        "pointy_particles_on": true,
+        "pointy_particles_speed": 0.5,
+        "pointy_particles_dark_mode": false,
+        "pointy_particles_color": "#360e6f5a",
+        "pointy_particles_rainbow_on": false,
+        "pointy_particles_amount": 0.1,
+        "lines_solid_on": true,
+        "lines_above": "below",
+        "lines_solid_color": "#5454540d",
+        "lines_scroll_speed": 0.0,
+        "lines_warp_scroll_speed": 0.02,
+        "lines_scroll_angle": 308.0,
+        "bg_gradient_on": true,
+        "bg_gradient_rotation": 0.5,
+        "bg_gradient_cover_amount": 0.8,
+        "bg_tile_on": false,
+        "bg_tile_color": "#47387aff",
+        "bg_tile_camera_scroll_factor": 0.5,
+        "bg_tile_angle": 0.0,
+        "bg_tile_texture_id": -1.0,
+        "bg_tile_texture_index": 0.0,
+        "bg_tile_scale": 1.0,
+        "bg_tile_smooth_scale": false,
+        "bg_tile_above": "below",
+        "bg_tile_below_gradient": true,
+        "bg_tile_spacing": [
+          0.0,
+          0.0
+        ],
+        "bg_tile_base_offset": [
+          0.0,
+          0.0
+        ],
+        "bg_tile_scale_with_camera": true,
+        "bg_tile_auto_scroll_on": false,
+        "bg_tile_auto_scroll_speed": 0.5,
+        "bg_tile_auto_scroll_angle": 0.0,
+        "dusty_particles_on": true,
+        "dusty_particles_camera_scroll_factor": 0.5,
+        "pointy_particles_camera_scroll_factor": 0.0,
+        "lines_on": false,
+        "lines_color": "#ffffff40",
+        "lines_warp_strength": 1.30000001937156,
+        "lines_warp_scroll_angle": 197.999995574304,
+        "lines_camera_scroll_factor": 0.0,
+        "lines_solid_camera_scroll_factor": 0.0
+      },
+      "progressive_locked_levels": 2.0
     },
     {
       "name": "Part 2",
@@ -432,7 +517,7 @@
         "dusty_particles_speed": 0.0,
         "bg_gradient_above": "between",
         "pointy_particles_on": true,
-        "pointy_particles_speed": 0.5,
+        "pointy_particles_speed": 0.4,
         "pointy_particles_dark_mode": false,
         "pointy_particles_color": "#360e6f9d",
         "pointy_particles_rainbow_on": false,
@@ -449,10 +534,18 @@
         "lines_color": "#fada7927",
         "lines_warp_strength": 1.30000001937156,
         "lines_warp_scroll_angle": 197.999995574304
-      }
+      },
+      "completion_mode": "all",
+      "show_completion_style": "completed_total",
+      "intermission_assignments": {
+        "before_start": [
+          "Part2Intro"
+        ]
+      },
+      "progressive_locked_levels": 2.0
     },
     {
-      "name": "Cammy Expansion",
+      "name": "Part Cammymoop",
       "level_names": [
         "Cammy 1",
         "Cammy 2"
@@ -482,7 +575,14 @@
         "lines_color": "#ecc56a40",
         "lines_warp_strength": 0.8,
         "lines_warp_scroll_angle": 0.0333333333333333
-      }
+      },
+      "completion_mode": "all",
+      "show_completion_style": "completed_total",
+      "default_locked": true,
+      "hide_when_locked": true,
+      "progressive_locked_levels": 1.0,
+      "auto_advance_to_next_list": false,
+      "when_completed_action": "do_nothing"
     },
     {
       "name": "Bonus",
@@ -514,7 +614,13 @@
         "lines_color": "#ffffff40",
         "lines_warp_strength": 1.30000001937156,
         "lines_warp_scroll_angle": 197.999995574304
-      }
+      },
+      "default_individual_locked": false,
+      "completion_mode": "all",
+      "show_completion_style": "completed_total",
+      "when_completed_action": "do_nothing",
+      "default_locked": true,
+      "hide_when_locked": true
     }
   ],
   "sfx_definitions": [
@@ -585,7 +691,173 @@
       0,
       1
     ],
-    "release_hash": ""
+    "release_hash": "",
+    "release_created_utc": "",
+    "release_created_local_date": "",
+    "release_created_zone_offset": ""
   },
-  "game_identifier": "GGM"
+  "game_identifier": "GGM",
+  "intermissions": [
+    {
+      "id": "LevelComplete",
+      "type": "intermission",
+      "content_items": [
+        {
+          "type": "text",
+          "text": "Level Complete",
+          "font_size": 60.0,
+          "text_color": "#cf8cf4ff",
+          "text_outline_enabled": true,
+          "text_outline_color": "#640f7cff",
+          "light_background": false,
+          "dark_background": false
+        }
+      ],
+      "bg_style": {
+
+      },
+      "show_continue": false,
+      "expire_time": 2.2,
+      "light_background": false,
+      "dark_background": true
+    },
+    {
+      "id": "Part2Intro",
+      "type": "intermission",
+      "content_items": [
+        {
+          "type": "text",
+          "text": "Caution!",
+          "font_size": 70.0,
+          "text_color": "#fff964ff",
+          "text_outline_enabled": true,
+          "text_outline_color": "#000000ff",
+          "light_background": false,
+          "dark_background": false
+        },
+        {
+          "type": "text",
+          "text": "There is tectonic activity in this area",
+          "font_size": 30.0,
+          "text_color": "#ffffffff",
+          "text_outline_enabled": false,
+          "light_background": false,
+          "dark_background": false
+        }
+      ],
+      "bg_style": {
+
+      },
+      "show_continue": true
+    },
+    {
+      "id": "YouWin",
+      "type": "intermission",
+      "content_items": [
+        {
+          "type": "text",
+          "text": "Congratulations!",
+          "font_size": 60.0,
+          "text_color": "#e542f7ff",
+          "text_outline_enabled": true,
+          "text_outline_color": "#303858ff",
+          "light_background": false,
+          "dark_background": false
+        },
+        {
+          "type": "text",
+          "text": "You now have the largest\ngeode collection in the world!",
+          "font_size": 24.0,
+          "text_color": "#cf5bf4ff",
+          "text_outline_enabled": false,
+          "light_background": false,
+          "dark_background": false
+        }
+      ],
+      "bg_style": {
+
+      },
+      "light_background": false,
+      "dark_background": true,
+      "show_continue": false
+    },
+    {
+      "id": "PartCammUnlock",
+      "type": "intermission",
+      "content_items": [
+        {
+          "type": "text",
+          "text": "Unlocked Part Cammymoop",
+          "font_size": 24.0,
+          "text_color": "#ffffffff",
+          "text_outline_enabled": false,
+          "light_background": false,
+          "dark_background": false
+        }
+      ],
+      "bg_style": {
+
+      },
+      "show_continue": true
+    },
+    {
+      "id": "PartCammIntro",
+      "type": "intermission",
+      "content_items": [
+        {
+          "type": "text",
+          "text": "Here are some bonus levels",
+          "font_size": 30.0,
+          "text_color": "#ffffffff",
+          "text_outline_enabled": false,
+          "light_background": false,
+          "dark_background": false
+        },
+        {
+          "type": "text",
+          "text": "Something here is different...",
+          "font_size": 18.0,
+          "text_color": "#ffffffff",
+          "text_outline_enabled": false,
+          "light_background": false,
+          "dark_background": false
+        },
+        {
+          "type": "text",
+          "text": "- Cammymoop",
+          "font_size": 18.0,
+          "text_color": "#416becff",
+          "text_outline_enabled": true,
+          "text_outline_color": "#000000ff",
+          "light_background": false,
+          "dark_background": false
+        }
+      ],
+      "bg_style": {
+
+      },
+      "show_continue": true,
+      "light_background": false,
+      "dark_background": true
+    },
+    {
+      "id": "ExtraChallengeIntro",
+      "type": "intermission",
+      "content_items": [
+        {
+          "type": "text",
+          "text": "You found the secret challenge!",
+          "font_size": 30,
+          "text_color": "#ffffffff",
+          "text_outline_enabled": false,
+          "light_background": false,
+          "dark_background": false
+        }
+      ],
+      "bg_style": {
+
+      },
+      "show_continue": false
+    }
+  ]
 }

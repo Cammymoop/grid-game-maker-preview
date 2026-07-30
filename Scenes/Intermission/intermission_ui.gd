@@ -39,7 +39,7 @@ var is_setup: = false
 var fade_in_duration: = 0.45
 var fade_in_timer: = Timer.new()
 
-var fade_in_ease_param: float = 2.5
+var fade_in_ease_param: float = 0.5
 var scale_from: float = 0.86
 
 func _ready() -> void:

@@ -148,10 +148,11 @@ mouse_filter = 2
 theme_override_constants/separation = 8
 
 [node name="Label" type="Label" parent="MarginContainer/HFlowContainer/VBoxContainer3/ToIntermissionAssignments/MarginContainer/VBoxContainer" unique_id=1967638944]
+custom_minimum_size = Vector2(160, 0)
 layout_mode = 2
-text = "Assign Event Intermissions
-in level editor"
+text = "Assign Event Intermissions in level editor"
 horizontal_alignment = 1
+autowrap_mode = 2
 
 [node name="TextureRect" type="TextureRect" parent="MarginContainer/HFlowContainer/VBoxContainer3/ToIntermissionAssignments/MarginContainer/VBoxContainer" unique_id=1977614045]
 layout_mode = 2

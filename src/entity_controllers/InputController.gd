@@ -176,20 +176,16 @@ func get_move(attempt_num: int = 0):
 	if input_dir == "none":
 		is_repeat = false
 
-	if not auto_req_turn and not EntityManager.controller_frame and input_dir != "none":
-		prints("moving when I'm not allowed to")
 	return input_dir
 
 func got_blocked() -> void:
 	if not _during_movment_phase:
-		prints("got blocked but not during movement phase")
 		return
 	if stop_repeat_after_bonk or lock_for_idle_delay_after_bonk:
 		cancelled = true
 		if lock_for_idle_delay_after_bonk:
 			is_delay_locked = true
 			idle_delays_left = maxi(idle_delay_multiplier - 1, 1)
-			prints("locking for", idle_delays_left, "idle delays")
 
 func on_start_move(_facing_dir) -> void:
 	if load_delay_left > 0:

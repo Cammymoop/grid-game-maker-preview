@@ -60,7 +60,7 @@ func serialize() -> Dictionary:
 	for y in range(start_y, rect.end.y):
 		var row = []
 		var skip: int = 0
-		var max_index: int = 0
+		var max_index: int = -1 
 		var has_any_tile: bool = false
 		for x in x_range:
 			var coords: = Vector2i(x, y)
@@ -75,8 +75,9 @@ func serialize() -> Dictionary:
 			var facing: int = get_cell_facing(coords)
 			row.append(tile_id << 2 | facing)
 			#row.append([get_cell_s(coords), get_cell_alternative_tile(coords)])
-		row.resize(max_index + 1)
-		row.push_front(skip)
+		if row:
+			row.resize(max_index + 1)
+			row.push_front(skip)
 		rows.append(row)
 	
 	return {"start_x": start_x, "start_y": start_y, "small": true, "tiles": rows}
@@ -102,12 +103,16 @@ func deserialize(data: Dictionary) -> void:
 				set_cell_s(coords, tile_source_id, Utility.facing_from_tile_alt_id(int(row[x][1])))
 	else:
 		for y in tile_data.size():
+			if not tile_data[y]:
+				continue
 			var row = tile_data[y].duplicate()
 			var skip: int = 0
 			if small:
 				skip = int(row.pop_front())
 			for x in row.size():
 				var coords: = Vector2i(x + sx + skip, y + sy)
+				if typeof(row[x]) not in [TYPE_INT, TYPE_FLOAT]:
+					continue
 				var int_val: = int(row[x])
 				if small:
 					if not tile_set.has_source(int_val >> 2):

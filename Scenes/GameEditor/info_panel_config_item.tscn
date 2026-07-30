@@ -75,6 +75,7 @@ text = "Icon:"
 [node name="OptionButton" type="OptionButton" parent="InfoPanelConfigItem/DisplayConfig/IconConfig" unique_id=963594468]
 layout_mode = 2
 size_flags_vertical = 4
+alignment = 1
 selected = 0
 item_count = 3
 popup/item_0/text = "none"
@@ -215,6 +216,7 @@ text = "is"
 layout_mode = 2
 size_flags_vertical = 4
 theme_override_font_sizes/font_size = 14
+alignment = 1
 selected = 0
 item_count = 2
 popup/item_0/text = "true or non-zero"

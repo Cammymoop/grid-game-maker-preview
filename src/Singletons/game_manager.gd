@@ -1350,16 +1350,23 @@ func edit_level_named(level_name: String, auto_list: bool = false) -> bool:
 	loaded_level = editor_save
 	return true
 
-func edit_level_in_list(level_list_name: String, level_name: String) -> void:
+func edit_level_code(level_code: String) -> bool:
+	if is_level_code_valid(level_code):
+		return edit_level_in_list(_level_list_from_code(level_code), _level_name_from_code(level_code))
+	return false
+
+func edit_level_in_list(level_list_name: String, level_name: String) -> bool:
 	var level_lists: = get_list_of_level_lists()
 	if not level_list_name in level_lists:
 		push_error("Level list %s does not exist" % [level_list_name])
-		return
+		return false
 
 	var was_level_list: = current_level_list
 	current_level_list = level_list_name
 	if not edit_level_named(level_name, false):
 		current_level_list = was_level_list
+		return false
+	return true
 
 func cleanup_new_level() -> void:
 	clear_checkpoint()
@@ -1504,21 +1511,29 @@ func post_scene_change() -> void:
 				load_serialized_play_state(loaded_level)
 			elif has_editor_autosave():
 				var autosave_level_name: String = FilesManager.get_editor_autosave_level_name(get_identified_game_name())
-				if current_game_is_release_locked and autosave_level_name in get_list_of_all_bundled_levels():
-					new_empty_level()
+				if FilesManager.get_editor_autosave_is_newer(get_identified_game_name()):
+					GlobalToaster.show_toast_message("Loaded level autosave", 1.2)
+					load_editor_autosave()
 				else:
-					if FilesManager.get_editor_autosave_is_newer(get_identified_game_name()):
+					if autosave_level_name:
+						edit_level_named(autosave_level_name, true)
+						#load_level_data(FilesManager.get_level_data(get_identified_game_name(), autosave_level_name))
+					else:
 						GlobalToaster.show_toast_message("Loaded level autosave", 1.2)
 						load_editor_autosave()
-					else:
-						if autosave_level_name:
-							edit_level_named(autosave_level_name, true)
-							#load_level_data(FilesManager.get_level_data(get_identified_game_name(), autosave_level_name))
-						else:
-							GlobalToaster.show_toast_message("Loaded level autosave", 1.2)
-							load_editor_autosave()
 			else:
-				new_empty_level()
+				var current_save_level_code: = get_game_save_current_level_code()
+				var loaded_current_level: = false
+				if current_save_level_code:
+					loaded_current_level = edit_level_code(current_save_level_code)
+				
+				if not loaded_current_level:
+					var starting_level_and_list: = get_starting_level_and_list()
+					if starting_level_and_list.size() == 2 and starting_level_and_list[1] != "":
+						edit_level_in_list(starting_level_and_list[1], starting_level_and_list[0])
+					else:
+						new_empty_level()
+
 			if _requested_tab:
 				var requested_tab: = _requested_tab
 				_requested_tab = ""
@@ -1691,7 +1706,7 @@ func get_edited_as_level_data() -> Dictionary:
 	if not editor_save:
 		push_error("No level to get level data of")
 		return {}
-	var level_name: = loaded_level_name if loaded_level_name else level_data_get_title(editor_save, "");
+	var level_name: = loaded_level_name if loaded_level_name else level_data_get_title(editor_save, "")
 	if not level_name:
 		level_name = Utility.random_animal()
 	return get_play_state_as_level_data(editor_save, level_name)
@@ -3259,6 +3274,9 @@ func complete_current_level_for_transition() -> Dictionary:
 
 # Make sure to show the intermissions for completing the level and list, since we're not leaving the level, they show as overlay
 func complete_current_level_without_transition(extra_intermissions: Array = []) -> void:
+	if is_in_level_edit_mode:
+		GlobalToaster.show_toast_message("Level Complete")
+		return
 	var result: Dictionary = _complete_current_level()
 	var intermissions: Array[String] = []
 	intermissions.append_array(extra_intermissions)
@@ -3294,6 +3312,8 @@ func _complete_current_level() -> Dictionary:
 
 func move_to_next_level(with_delay: float = 0, extra_intermissions: Array = []) -> void:
 	if cur_scene != "Play" or is_in_level_edit_mode:
+		if is_in_level_edit_mode:
+			GlobalToaster.show_toast_message("Level Advance")
 		return
 	if not current_level_list and get_list_containing_level(loaded_level_name):
 		current_level_list = get_list_containing_level(loaded_level_name)
@@ -3320,6 +3340,8 @@ func move_to_next_level(with_delay: float = 0, extra_intermissions: Array = []) 
 
 func advance_level(with_delay: float = 0, advance_to_code: String = "", extra_intermissions: Array = []) -> void:
 	if cur_scene != "Play" or is_in_level_edit_mode:
+		if is_in_level_edit_mode:
+			GlobalToaster.show_toast_message("Level Advance")
 		return
 	if not current_level_list and get_list_containing_level(loaded_level_name):
 		current_level_list = get_list_containing_level(loaded_level_name)
@@ -3369,10 +3391,16 @@ func move_to_level_code(level_code: String, with_delay: float = 0) -> void:
 
 
 func complete_and_move_to_level(level_list_name: String, level_name: String, with_delay: float = 0, extra_intermissions: Array = []) -> void:
+	if is_in_level_edit_mode:
+		GlobalToaster.show_toast_message("Advance to level: %s" % [level_name])
+		return
 	var to_level_code: String = _level_code(level_list_name, level_name)
 	advance_level(with_delay, to_level_code, extra_intermissions)
 
 func complete_and_move_to_level_select(with_delay: float = 0, extra_intermissions: Array = []) -> void:
+	if is_in_level_edit_mode:
+		GlobalToaster.show_toast_message("Level Complete")
+		return
 	var result: Dictionary = complete_current_level_for_transition()
 	var intermissions: Array[String] = []
 	intermissions.append_array(extra_intermissions)
@@ -3386,12 +3414,16 @@ func move_to_level_select(with_delay: float = 0, with_intermissions: Array = [])
 # External API for gameplay/level select level transition without completing current level
 func move_to_level(level_list_name: String, level_name: String, with_delay: float = 0, extra_intermissions: Array = []) -> void:
 	if cur_scene != "Play" or is_in_level_edit_mode:
+		if is_in_level_edit_mode:
+			GlobalToaster.show_toast_message("Advance to level: %s" % [level_name])
 		return
 	var level_code: String = _level_code(level_list_name, level_name)
 	_move_to_code_with_delay(level_code, with_delay, true, extra_intermissions)
 
 func move_to_level_list_start(level_list_name: String, with_delay: float = 0, complete_current: bool = false, extra_intermissions: Array = []) -> void:
 	if cur_scene != "Play" or is_in_level_edit_mode:
+		if is_in_level_edit_mode:
+			GlobalToaster.show_toast_message("Advance to list: %s" % [level_list_name])
 		return
 	var existing_levels: = get_levels_in_level_list(level_list_name)
 	if not existing_levels.size() > 0:
@@ -4253,8 +4285,9 @@ func _make_entity_data_short(level_data: Dictionary) -> Dictionary:
 				minified_entity[key] = entity_data[key]
 			elif default_template_data[key] != entity_data[key]:
 				minified_entity[key] = entity_data[key]
-		if minified_entity["next_tile_pos"] == minified_entity["tile_position"]:
-			minified_entity.erase("next_tile_pos")
+		if minified_entity.has("tile_position"):
+			if minified_entity.get("next_tile_pos", []) == minified_entity["tile_position"]:
+				minified_entity.erase("next_tile_pos")
 		level_data["state"]["entities"]["entity_list"].append(minified_entity)
 	return level_data
 
@@ -5279,7 +5312,6 @@ func show_overlay_intermissions(intermission_id_list: Array[String]) -> void:
 	intermission_state["is_overlaying"] = true
 	set_overlay_intermission_state()
 	show_next_intermission()
-	start_intermission_expire_timer(2000)
 
 func _queue_goto_level_with_intermissions(to_level_code: String, intermission_id_list: Array[String], with_delay: float = 0.0) -> void:
 	if with_delay <= 0:
@@ -5458,6 +5490,9 @@ func show_intermission(intermission_info: Dictionary, tagged_intermission_id: St
 		push_error("sequence info passed to show_intermission, should have been queued and called with show_next_intermission")
 		return false
 
+	if intermission_info.get("expire_time", 0.0) > 0:
+		start_intermission_expire_timer(intermission_info.get("expire_time", 0.0))
+
 	var intermission_ui: = intermission_ui_scn.instantiate() as IntermissionUI
 	intermission_ui.advancable = intermission_state.get("advancable", true)
 	intermission_root.add_child(intermission_ui)
@@ -5532,6 +5567,7 @@ func _clear_intermission_root() -> void:
 		child.queue_free()
 
 func clear_intermission_state() -> void:
+	intermission_expire_timer.stop()
 	EntityManager.stop_pause_for_intermission_overlay()
 	is_intermission_mode = false
 	intermission_state = {}
@@ -5541,7 +5577,7 @@ func set_overlay_intermission_state() -> void:
 	EntityManager.start_pause_for_intermission_overlay(false)
 
 func is_showing_advancable_intermission() -> bool:
-	if not is_intermission_mode and not is_showing_intermission_overlay():
+	if not is_showing_intermission_mode_or_overlay():
 		return false
 	if not is_intermission_advancable():
 		return false
@@ -5550,11 +5586,16 @@ func is_showing_advancable_intermission() -> bool:
 func is_showing_intermission_overlay() -> bool:
 	return intermission_state.get("is_overlaying", false)
 
+func is_showing_intermission_mode_or_overlay() -> bool:
+	return is_intermission_mode or is_showing_intermission_overlay()
+
 func show_next_intermission(depth: int = 0) -> void:
 	if depth > 400:
 		push_error("Intermission sequence depth too deep, probably infinite sequence loop")
 		skip_all_queued_intermissions()
 		return
+	
+	intermission_state["expire_time"] = 0.0
 
 	if not cur_scene == "Play":
 		prints("next intermission not in play scene")
@@ -5617,18 +5658,20 @@ func skip_all_queued_intermissions() -> void:
 
 
 func is_intermission_advancable() -> bool:
-	if not is_intermission_mode and not is_showing_intermission_overlay():
+	if not is_showing_intermission_mode_or_overlay():
 		return false
 	if not intermission_state.get("advancable", true):
 		return false
-	return intermission_advancable_timer.is_stopped()
+	if not intermission_advancable_timer.is_stopped():
+		return false
+	return true
 
 func start_intermission_expire_timer(for_seconds: float) -> void:
 	intermission_state["expire_time"] = for_seconds
 	intermission_expire_timer.start(for_seconds)
 
 func is_intermission_advance_timeout() -> bool:
-	if not is_intermission_mode or not is_showing_intermission_overlay():
+	if not is_showing_intermission_mode_or_overlay():
 		return false
 	if not intermission_state.get("expire_time", 0.0) > 0:
 		return false

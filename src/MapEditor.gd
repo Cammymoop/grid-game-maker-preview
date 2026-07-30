@@ -290,6 +290,7 @@ func on_edit_mode_enabled() -> void:
 	editor_cam.make_current()
 	_refresh_edited_entity_indicators()
 	after_edit_mode_switched()
+	await get_tree().process_frame
 	request_grab_gui_focus.emit()
 
 func get_new_edited_entity_indicator() -> Sprite2D:
@@ -908,8 +909,9 @@ func forwarded_shortcut_input(event: InputEvent) -> void:
 func save_current_or_save_as(after_save_callable: Callable = Callable(), no_toast: bool = false) -> bool:
 	if GameManager.loaded_level_name:
 		if GameManager.loaded_is_autosave and not _confirming_save_autosave:
-			_confirming_save_autosave = true
+			#_confirming_save_autosave = true
 			if not FilesManager.get_editor_autosave_is_newer(GameManager.get_identified_game_name()):
+				_confirming_save_autosave = true
 				var callable: = after_save_callable if after_save_callable.is_valid() else Callable()
 				if not _confirm_save_autosave_over_newer_level(callable):
 					return false
@@ -1068,48 +1070,44 @@ func _confirm_save_autosave_over_newer_level(then_callable: Callable) -> bool:
 		then_callable.call()
 		return true
 	
-	if GameManager.player_profile.get_profile_setting("skip_critical_save_dialogs", false):
-		then_callable.call()
-		return true
+	#if GameManager.player_profile.get_profile_setting("skip_critical_save_dialogs", false):
+		#then_callable.call()
+		#return true
 
-	var confirm_text: = ""
-	if not GameManager.loaded_level_is_saved:
-		confirm_text = "This is an autosaved version of the level. Saving will overwrite the newer non-autosave version."
-		confirm_text += "Do you want to save over the existing level?"
+	var confirm_text: = "This is an autosaved version of the level. Saving will overwrite the newer non-autosave version."
+	confirm_text += "Do you want to save over the existing level?"
 	
-	if confirm_text:
-		_show_save_confirm_dialog(then_callable, confirm_text, false)
-		return false
-	
-	then_callable.call()
-	return true
+	_show_save_confirm_dialog(then_callable, confirm_text, false)
+	return false
 
 func _confirm_save_changes_then(then_callable: Callable, is_discard: bool) -> void:
 	if not has_edited_something:
+		prints("no edits, skipping save confirm")
 		then_callable.call()
 		return
 	
 	if not is_discard and GameManager.player_profile.get_profile_setting("skip_non_critical_save_dialogs", false):
+		prints("skipping non critical save dialog")
 		then_callable.call()
 		return
 	elif is_discard and GameManager.player_profile.get_profile_setting("skip_critical_save_dialogs", false):
+		prints("skipping critical save dialog")
 		then_callable.call()
 		return
 
 	var confirm_text: = ""
-	if not GameManager.loaded_level_is_saved:
-		if is_discard:
-			confirm_text = "Unsaved changes to this level will be lost. Save changes now?"
-		else:
-			confirm_text = "Changes to this level may be lost if not saved. Save now?"
-	
-	if confirm_text:
-		_show_save_confirm_dialog(then_callable, confirm_text, is_discard)
-		return
-	
-	then_callable.call()
+	if is_discard:
+		confirm_text = "Unsaved changes to this level will be lost. Save changes now?"
+	else:
+		confirm_text = "Changes to this level may be lost if not saved. Save now?"
+
+	_show_save_confirm_dialog(then_callable, confirm_text, is_discard)
+	#then_callable.call()
 
 func _show_save_confirm_dialog(then_callable: Callable, confirm_text: String, is_discard: bool) -> void:
+	if edit_mode:
+		GameManager.save_edited()
+
 	var confirm_dialog: = ConfirmationDialog.new()
 	confirm_dialog.process_mode = Node.PROCESS_MODE_ALWAYS
 	confirm_dialog.title = "Save Changes?"
@@ -1130,8 +1128,10 @@ func _show_save_confirm_dialog(then_callable: Callable, confirm_text: String, is
 		func(action: String):
 			if action == "no_save_continue":
 				then_callable.call()
+				confirm_dialog.hide()
 	)
 	confirm_dialog.visibility_changed.connect(_closed_save_confirm_dialog.bind(confirm_dialog))
+	#confirm_dialog.canceled.connect(confirm_dialog.hide)
 	add_child(confirm_dialog)
 	confirm_dialog.popup_centered()
 
