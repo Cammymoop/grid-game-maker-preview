@@ -4,6 +4,7 @@
 [ext_resource type="Texture2D" uid="uid://dbewldhewludm" path="res://assets/img/button_icons/prev_small.png" id="2_at44a"]
 [ext_resource type="FontFile" uid="uid://ctnllh13x3iqi" path="res://assets/font/NotoSans-Bold.ttf" id="3_16i1u"]
 [ext_resource type="Texture2D" uid="uid://c8uoricgpavvk" path="res://assets/img/button_icons/next_small.png" id="4_68hsf"]
+[ext_resource type="Script" uid="uid://cgiw43hwkjhu0" path="res://Scenes/UI/game_identifier_label.gd" id="5_at44a"]
 [ext_resource type="Texture2D" uid="uid://rj1klhsd1xaj" path="res://assets/img/button_icons/game_list.png" id="5_ckuke"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ab40c"]
@@ -48,7 +49,7 @@ theme_override_styles/panel = SubResource("StyleBoxFlat_ab40c")
 
 [node name="VBoxContainer" type="VBoxContainer" parent="VBoxContainer2/MarginContainer" unique_id=746683942]
 layout_mode = 2
-theme_override_constants/separation = -1
+theme_override_constants/separation = 1
 
 [node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer2/MarginContainer/VBoxContainer" unique_id=1682490140]
 layout_mode = 2
@@ -109,17 +110,20 @@ stretch_mode = 2
 
 [node name="AttributionLineLabel" type="Label" parent="VBoxContainer2/MarginContainer/VBoxContainer" unique_id=678359122]
 layout_mode = 2
-theme_override_font_sizes/font_size = 14
+theme_override_font_sizes/font_size = 13
 text = "by Somebody"
 horizontal_alignment = 1
 
 [node name="GameIdentifierLabel" type="Label" parent="VBoxContainer2" unique_id=2016198375]
 layout_mode = 2
+tooltip_text = "Current Loaded Version"
+mouse_filter = 1
 theme_override_colors/font_color = Color(0.556953, 0.556953, 0.556953, 1)
 theme_override_fonts/font = ExtResource("3_16i1u")
 theme_override_font_sizes/font_size = 14
 text = "GGM"
 horizontal_alignment = 1
+script = ExtResource("5_at44a")
 
 [node name="GameListTexBtn" type="TextureRect" parent="." unique_id=973432654]
 layout_mode = 2
