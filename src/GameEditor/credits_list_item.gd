@@ -8,6 +8,9 @@ signal changed
 signal type_changed
 signal request_remove
 
+signal request_move_relative(direction: int)
+signal request_move_top_bottom(direction: int)
+
 @export var type_picker: OptionButton
 @export var input_1: LineEdit
 @export var input_2: LineEdit
@@ -18,6 +21,10 @@ signal request_remove
 @export var relative_scale_input: ScalarValueInput
 @export var with_dark_bg_toggle: CheckButton
 @export var smooth_scale_toggle: CheckButton
+
+@export var up_down_buttons: Control
+@export var up_button: ButtonContainer
+@export var down_button: ButtonContainer
 
 const TYPE_ROLE_NAME: String = "role_name"
 const TYPE_JUST_NAME: String = "just_name"
@@ -52,6 +59,9 @@ func _ready() -> void:
     
     input_1.text_changed.connect(on_text_changed)
     input_2.text_changed.connect(on_text_changed)
+    
+    up_button.pressed.connect(on_order_button_pressed.bind(-1))
+    down_button.pressed.connect(on_order_button_pressed.bind(1))
 
 func on_text_changed(_new_text: String) -> void:
     changed.emit()
@@ -212,3 +222,14 @@ func on_smooth_scale_toggled(new_pressed: bool) -> void:
     if type_str == TYPE_IMAGE:
         entry["sharp_scale"] = not new_pressed
         changed.emit()
+
+func on_order_button_pressed(direction: int) -> void:
+    if Utility.is_holding_alt_mode():
+        request_move_top_bottom.emit(direction)
+    else:
+        request_move_relative.emit(direction)
+
+func update_up_down_buttons(max_index: int) -> void:
+    var my_index: = get_index()
+    up_button.disabled = my_index == 0
+    down_button.disabled = my_index == max_index

@@ -358,7 +358,6 @@ func is_showing_custom_levels() -> bool:
         return not GameManager.is_level_list_bundled(level_list_name)
     var level_select_ui: = find_parent("LevelSelectUI") as LevelSelectUI
     if level_select_ui:
-        prints("asking level select ui for custom levels")
         return level_select_ui.is_showing_custom_levels()
     prints("unable to find level select ui")
     return false

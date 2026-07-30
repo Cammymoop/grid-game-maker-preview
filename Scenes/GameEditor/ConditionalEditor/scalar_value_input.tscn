@@ -21,7 +21,10 @@ offset_bottom = 23.0
 theme = SubResource("Theme_oofn6")
 script = ExtResource("1_8ivw8")
 value_input = NodePath("Value")
+min_value = -100.0
 
 [node name="Value" type="SpinBox" parent="." unique_id=1193418551]
 layout_mode = 2
+allow_greater = true
+allow_lesser = true
 alignment = 2

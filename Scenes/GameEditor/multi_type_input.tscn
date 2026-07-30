@@ -41,6 +41,8 @@ size_flags_vertical = 4
 visible = false
 custom_minimum_size = Vector2(90, 0)
 layout_mode = 2
+min_value = -100.0
+custom_step_value = 0.01
 
 [node name="BoolToggleInput" parent="." unique_id=546195378 instance=ExtResource("3_ql4rr")]
 visible = false

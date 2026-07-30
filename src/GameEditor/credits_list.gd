@@ -43,6 +43,7 @@ func load_credits_list() -> void:
     else:
         for entry in credits_list:
             append_new_credit_item(entry)
+    update_up_down_buttons()
     refresh_add_new_item_buttons()
 
 func refresh_add_new_item_buttons() -> void:
@@ -67,6 +68,7 @@ func _on_new_credit_item_pressed(add_before_node: Node = null) -> void:
     if add_before_node and add_before_node.get_parent() == self:
         add_before_idx = add_before_node.get_index()
     append_new_credit_item({}, add_before_idx)
+    update_up_down_buttons()
     
 func append_new_credit_item(with_entry: Dictionary, add_before_idx: int = -1) -> void:
     var new_credit_item = credits_list_item_scene.instantiate()
@@ -82,6 +84,8 @@ func append_new_credit_item(with_entry: Dictionary, add_before_idx: int = -1) ->
     new_credit_item.changed.connect(on_credit_changed)
     new_credit_item.type_changed.connect(on_credit_item_type_changed.bind(new_credit_item))
     new_credit_item.request_remove.connect(remove_credit_item.bind(new_credit_item))
+    new_credit_item.request_move_relative.connect(on_credit_item_move_relative.bind(new_credit_item))
+    new_credit_item.request_move_top_bottom.connect(on_credit_item_move_top_bottom.bind(new_credit_item))
 
 func num_credit_items() -> int:
     var count: int = 0
@@ -114,4 +118,37 @@ func remove_credit_item(credit_item: CreditsListItem) -> void:
     remove_child(credit_item)
     credit_item.queue_free()
     update_credits_list()
+    update_up_down_buttons()
     refresh_add_new_item_buttons()
+
+func _get_max_credit_item_index() -> int:
+    var max_index: int = -1
+    for child in get_children():
+        if child is CreditsListItem:
+            max_index = max(max_index, child.get_index())
+    return max_index
+
+func on_credit_item_move_relative(direction: int, credit_item: CreditsListItem) -> void:
+    var current_index: int = credit_item.get_index()
+    var new_index: int = clampi(current_index + direction, 0, _get_max_credit_item_index())
+    if new_index == current_index:
+        return
+    move_child(credit_item, new_index)
+    update_credits_list()
+    update_up_down_buttons()
+
+func on_credit_item_move_top_bottom(direction: int, credit_item: CreditsListItem) -> void:
+    var max_index: int = _get_max_credit_item_index()
+    var new_index: int = 0 if direction < 0 else max_index
+    if new_index == credit_item.get_index():
+        return
+    move_child(credit_item, new_index)
+    update_credits_list()
+    update_up_down_buttons()
+
+func update_up_down_buttons() -> void:
+    var max_index: = _get_max_credit_item_index()
+    if max_index >= 0:
+        for child in get_children():
+            if child is CreditsListItem:
+                child.update_up_down_buttons(max_index)

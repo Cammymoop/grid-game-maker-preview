@@ -18,10 +18,16 @@ signal focus_out()
 
 @export var is_expand_to_text: bool = true
 
+@export var update_precision_on_text_input: bool = true
+
+var smallest_step: float = 0.00001
+
 var arg_name: String = ""
 var _value_set: bool = false
 
 var _double_focus: bool = false
+
+var _ignore_value_changed: bool = false
 
 func _ready() -> void:
     if not _value_set:
@@ -29,6 +35,8 @@ func _ready() -> void:
     value_input.value_changed.connect(on_value_changed)
     update_input_settings()
     value_input.get_line_edit().gui_input.connect(on_line_edit_gui_input)
+    
+    value_input.get_line_edit().editing_toggled.connect(on_input_text_editing_change)
     
     value_input.tooltip_text = tooltip_text
     
@@ -75,6 +83,8 @@ func set_value(new_val: Variant) -> void:
     value_input.set_value_no_signal(float(new_val))
 
 func on_value_changed(new_value: float) -> void:
+    if _ignore_value_changed:
+        return
     value_changed.emit(new_value)
 
 func set_expand_to_text(expand_to_text: bool) -> void:
@@ -147,3 +157,40 @@ func on_line_edit_gui_input(event: InputEvent) -> void:
 func on_value_input_focus_out() -> void:
     disable_double_focus()
 
+
+func on_input_text_editing_change(is_editing: bool) -> void:
+    if not is_editing:
+        on_input_text_done_editing()
+
+func on_input_text_done_editing() -> void:
+    if not update_precision_on_text_input:
+        return
+    var text_val: String = value_input.get_line_edit().text.strip_edges()
+    if text_val.is_valid_float() and not text_val.contains("e"):
+        if _set_input_precision_from_trailing_zeros(text_val):
+            return
+        _set_input_precision_from_float(float(text_val))
+        return
+    _ignore_value_changed = true
+    # Allow the SPinBox code to process the expression with the smallest possible step and update the value
+    # then choose an appropriate step based on the result
+    change_precision(smallest_step)
+    value_input.apply()
+    _ignore_value_changed = false
+    _set_input_precision_from_float(value_input.value)
+
+func _set_input_precision_from_float(float_val: float) -> void:
+    var inferred_step: float = Utility.get_float_step_from_float(float_val, smallest_step)
+    change_precision(inferred_step)
+
+func _set_input_precision_from_trailing_zeros(text_val: String) -> bool:
+    var trailing_zeros: int = Utility.count_trailing_digits_with_zeros(text_val)
+    if trailing_zeros == 0:
+        return false
+    change_precision(maxf(pow(10, -trailing_zeros), smallest_step))
+    return true
+
+func change_precision(new_step: float, base_step: float = 0) -> void:
+    if not base_step:
+        base_step = new_step
+    set_step_and_arrow_step(base_step, new_step)

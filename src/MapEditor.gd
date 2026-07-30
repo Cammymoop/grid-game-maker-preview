@@ -1199,6 +1199,7 @@ func _confirmed_load_level_in_list(level_name: String, level_list_name: String) 
 		GameManager.edit_level_named(level_name)
 	else:
 		GameManager.edit_level_in_list(level_list_name, level_name)
+	request_grab_gui_focus.emit()
 
 func load_editor_autosave() -> void:
 	_confirm_save_changes_then(GameManager.load_editor_autosave, true)

@@ -58,8 +58,9 @@
           "when true": [
             "basic_default.play_named_sfx::[\"i:-1\",{\"args\":[\"s:type\",\"s:plain\",\"s:value\",\"s:Burn\"],\"type\":\"Dictionary\"},false]",
             "basic_default.play_named_sfx::[\"i:-1\",{\"args\":[\"s:type\",\"s:plain\",\"s:value\",\"s:Ow\"],\"type\":\"Dictionary\"},false]",
-            "basic_default.move_facing::[\"i:1\",{\"args\":[\"s:type\",\"s:plain\",\"s:direction\",\"i:30\"],\"type\":\"Dictionary\"},{\"args\":[\"s:type\",\"s:plain\",\"s:direction\",\"i:28\"],\"type\":\"Dictionary\"}]",
-            "basic_default.override_move_speed::[\"i:1\",{\"args\":[\"s:type\",\"s:plain\",\"s:value\",\"f:12.0\"],\"type\":\"Dictionary\"}]"
+            "basic_default.move_facing::[\"i:1\",{\"args\":[\"s:type\",\"s:plain\",\"s:direction\",\"i:30\"],\"type\":\"Dictionary\"},{\"args\":[\"s:type\",\"s:plain\",\"s:direction\",\"i:28\"],\"type\":\"Dictionary\"},true]",
+            "basic_default.override_move_speed::[\"i:1\",{\"args\":[\"s:type\",\"s:plain\",\"s:value\",\"f:12.0\"],\"type\":\"Dictionary\"}]",
+            "basic_default.trigger_custom_event_immediate::[\"i:1\",\"s:start_smoking\",true]"
           ],
           "when false": [],
           "when always": []
@@ -120,6 +121,26 @@
           "conditions": [],
           "when true": [
             "basic_default.advance_to_next_level::[\"i:-1\",{\"args\":[\"s:type\",\"s:plain\",\"s:value\",\"f:0.5\"],\"type\":\"Dictionary\"},true,\"s:LevelComplete\"]"
+          ],
+          "when false": [],
+          "when always": []
+        },
+        "start_smoking": {
+          "v": "3",
+          "conditions": [],
+          "when true": [
+            "basic_default.apply_effect_to_entity::[\"i:0\",{\"args\":[\"s:effect\",\"s:Smoking\"],\"type\":\"Dictionary\"}]",
+            "basic_default.cancel_delayed_custom_entity_event::[\"i:0\",\"s:stop_smoking\"]",
+            "basic_default.delayed_custom_entity_event::[\"i:0\",\"s:stop_smoking\",{\"args\":[\"s:type\",\"s:plain\",\"s:value\",\"f:0.3\"],\"type\":\"Dictionary\"}]"
+          ],
+          "when false": [],
+          "when always": []
+        },
+        "stop_smoking": {
+          "v": "3",
+          "conditions": [],
+          "when true": [
+            "basic_default.remove_effects_from_entity::[\"i:0\"]"
           ],
           "when false": [],
           "when always": []
@@ -289,7 +310,27 @@
         "player": true,
         "spawn-effect": "Grow In",
         "spawn-anim-delay": 1,
-        "z-index": 1
+        "z-index": 1,
+        "start_smoking": {
+          "v": "3",
+          "conditions": [],
+          "when true": [
+            "basic_default.apply_effect_to_entity::[\"i:0\",{\"args\":[\"s:effect\",\"s:Smoking\"],\"type\":\"Dictionary\"}]",
+            "basic_default.cancel_delayed_custom_entity_event::[\"i:0\",\"s:stop_smoking\"]",
+            "basic_default.delayed_custom_entity_event::[\"i:0\",\"s:stop_smoking\",{\"args\":[\"s:type\",\"s:plain\",\"s:value\",\"f:0.3\"],\"type\":\"Dictionary\"}]"
+          ],
+          "when false": [],
+          "when always": []
+        },
+        "stop_smoking": {
+          "v": "3",
+          "conditions": [],
+          "when true": [
+            "basic_default.remove_effects_from_entity::[\"i:0\"]"
+          ],
+          "when false": [],
+          "when always": []
+        }
       },
       "controller": "InputController",
       "controller_options": {
@@ -350,6 +391,10 @@
           "when always": []
         },
         "move-speed": 10
+      },
+      "preview_variant": {
+        "texture": 2.0,
+        "tex_index": 68.0
       }
     }
   },
@@ -877,6 +922,27 @@
 
       },
       "show_continue": true
+    },
+    {
+      "id": "Lvl4Hint",
+      "type": "intermission",
+      "content_items": [
+        {
+          "type": "text",
+          "text": "Rocks can only be pushed when you\nare not encumbered by the pickaxe",
+          "font_size": 36,
+          "text_color": "#ffffffff",
+          "text_outline_enabled": false,
+          "light_background": false,
+          "dark_background": false
+        }
+      ],
+      "bg_style": {
+
+      },
+      "show_continue": true,
+      "light_background": false,
+      "dark_background": true
     }
   ]
 }

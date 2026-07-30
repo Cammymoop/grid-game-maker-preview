@@ -2142,12 +2142,21 @@ var special_effects: Dictionary = {
         "effects": { "modulate": { "color": "#FFFFFFFF" } },
     },
     "Sparkling": {
-        "name": "bump-sparkle",
+        "name": "effect-sparkle",
         "layers": [{
             "mode": "particles",
             "particles_type": "sparkles",
             "receives_effects": false,
             "mod_color": "#FFFFFFFF",
+        }],
+    },
+    "Smoking": {
+        "name": "effect-smoking",
+        "layers": [{
+            "mode": "particles",
+            "particles_type": "burning_smoke",
+            "receives_effects": false,
+            "sort_priority": -2,
         }],
     },
 }

@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" uid="uid://uay87omxrsio" path="res://Scenes/GameEditor/static_sprite_effect_input.gd" id="1_cn5i6"]
 [ext_resource type="Script" uid="uid://b2e3vs73ts471" path="res://Scenes/GameEditor/ConditionalEditor/generic_option_button_input.gd" id="2_tx4cj"]
-[ext_resource type="Script" path="res://Scenes/GameEditor/remembering_color_picker_button.gd" id="3_i8il7"]
+[ext_resource type="Script" uid="uid://dpuajjdauwd7f" path="res://Scenes/GameEditor/remembering_color_picker_button.gd" id="3_i8il7"]
 [ext_resource type="PackedScene" uid="uid://bleyoj5f36kfy" path="res://Scenes/GameEditor/ConditionalEditor/scalar_value_input.tscn" id="3_tx4cj"]
 
 [node name="StaticEffectInput" type="HBoxContainer" unique_id=790260579 node_paths=PackedStringArray("effect_picker_input", "color_picker", "amount_container", "amount_input")]
@@ -26,7 +26,7 @@ size_flags_vertical = 4
 alignment = 1
 selected = 0
 fit_to_longest_item = false
-item_count = 5
+item_count = 6
 popup/item_0/text = "Shrink"
 popup/item_0/id = 0
 popup/item_1/text = "Grow"
@@ -37,6 +37,8 @@ popup/item_3/text = "Multiplied Color"
 popup/item_3/id = 3
 popup/item_4/text = "Sparkling"
 popup/item_4/id = 4
+popup/item_5/text = "Smoking"
+popup/item_5/id = 5
 script = ExtResource("2_tx4cj")
 
 [node name="ColorPickerButton" type="ColorPickerButton" parent="." unique_id=627619670]

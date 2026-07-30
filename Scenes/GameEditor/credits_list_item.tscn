@@ -5,10 +5,14 @@
 [ext_resource type="PackedScene" uid="uid://cemds60k8ytal" path="res://Scenes/UI/icon_button.tscn" id="2_48v4u"]
 [ext_resource type="PackedScene" uid="uid://bleyoj5f36kfy" path="res://Scenes/GameEditor/ConditionalEditor/scalar_value_input.tscn" id="2_evahj"]
 [ext_resource type="Texture2D" uid="uid://cfokfsynll5sp" path="res://assets/img/err_small.png" id="3_blqha"]
+[ext_resource type="Texture2D" uid="uid://tpslcq3ccosh" path="res://assets/img/button_icons/up_small.png" id="3_s6c4y"]
+[ext_resource type="Texture2D" uid="uid://c1h0arduxil1j" path="res://assets/img/button_icons/down_small.png" id="4_brb2k"]
+[ext_resource type="StyleBox" uid="uid://ch63py1vky05t" path="res://assets/ui/plain_input_bg.tres" id="5_brb2k"]
 
-[node name="CreditsListItem" type="HBoxContainer" unique_id=647526226 node_paths=PackedStringArray("type_picker", "input_1", "input_2", "image_options", "texture_picker_button", "relative_scale_input", "with_dark_bg_toggle", "smooth_scale_toggle")]
-offset_right = 178.0
+[node name="CreditsListItem" type="HBoxContainer" unique_id=647526226 node_paths=PackedStringArray("type_picker", "input_1", "input_2", "image_options", "texture_picker_button", "relative_scale_input", "with_dark_bg_toggle", "smooth_scale_toggle", "up_down_buttons", "up_button", "down_button")]
+offset_right = 688.0
 offset_bottom = 31.0
+theme_override_constants/separation = 8
 script = ExtResource("1_2c1en")
 type_picker = NodePath("HBoxContainer/OptionButton")
 input_1 = NodePath("HBoxContainer/RoleInput")
@@ -18,6 +22,21 @@ texture_picker_button = NodePath("HBoxContainer/ImageOptions/TexturePickerButton
 relative_scale_input = NodePath("HBoxContainer/ImageOptions/ScaleOption/RelativeScaleInput")
 with_dark_bg_toggle = NodePath("HBoxContainer/ImageOptions/DarkBGToggle")
 smooth_scale_toggle = NodePath("HBoxContainer/ImageOptions/ScaleSmoothToggle")
+up_down_buttons = NodePath("MoveButtons")
+up_button = NodePath("MoveButtons/MoveUpButton")
+down_button = NodePath("MoveButtons/MoveDownButton")
+
+[node name="MoveButtons" type="HBoxContainer" parent="." unique_id=1642444517]
+layout_mode = 2
+theme_override_constants/separation = 0
+
+[node name="MoveUpButton" parent="MoveButtons" unique_id=451892711 instance=ExtResource("2_48v4u")]
+layout_mode = 2
+icon = ExtResource("3_s6c4y")
+
+[node name="MoveDownButton" parent="MoveButtons" unique_id=396094399 instance=ExtResource("2_48v4u")]
+layout_mode = 2
+icon = ExtResource("4_brb2k")
 
 [node name="HBoxContainer" type="HBoxContainer" parent="." unique_id=992293189]
 layout_mode = 2
@@ -44,21 +63,24 @@ popup/item_4/id = 4
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 4
+theme_override_styles/normal = ExtResource("5_brb2k")
 placeholder_text = "Role"
 
 [node name="NameInput" type="LineEdit" parent="HBoxContainer" unique_id=1378843724]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 4
+theme_override_styles/normal = ExtResource("5_brb2k")
 placeholder_text = "Name"
 
 [node name="ImageOptions" type="HBoxContainer" parent="HBoxContainer" unique_id=941007994]
+visible = false
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_constants/separation = 12
 alignment = 1
 
-[node name="TexturePickerButton" parent="HBoxContainer/ImageOptions" unique_id=451892711 instance=ExtResource("2_48v4u")]
+[node name="TexturePickerButton" parent="HBoxContainer/ImageOptions" unique_id=232664904 instance=ExtResource("2_48v4u")]
 layout_mode = 2
 icon = ExtResource("3_blqha")
 
