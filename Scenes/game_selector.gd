@@ -23,6 +23,8 @@ signal changed_game(game_name: String)
 
 @export var edited_title_outline_color: Color = Color.ORANGE
 
+@export var attribution_subtitle_label: Label
+
 var game_list: Array[String] = []
 var game_is_release_hashed: Dictionary[String, bool] = {}
 var game_titles: Dictionary[String, String] = {}
@@ -88,6 +90,13 @@ func update_title_text() -> void:
     game_identifier_label.text = GameManager.get_identified_game_name(true)
     var current_version: = GameManager.get_current_game_current_version()
     game_identifier_label.text += " " + Utility.version_vec_to_string(current_version)
+    
+    var attribution_subtitle: String = GameManager.get_game_setting("attribution_subtitle", "")
+    if not attribution_subtitle:
+        attribution_subtitle_label.visible = false
+    else:
+        attribution_subtitle_label.visible = true
+        attribution_subtitle_label.text = attribution_subtitle
 
 func update_title_non_main_menu() -> void:
     game_title_label.text = get_display_title(current_selected, false)
@@ -111,6 +120,14 @@ func update_title_non_main_menu() -> void:
     
     game_identifier_label.text = current_selected
     # note, not loading version info, probably unnecessary for now
+    
+    var game_data: = FilesManager.get_game_definition(current_selected)
+    var attribution_subtitle: String = game_data.get("game_settings", {}).get("attribution_subtitle", "")
+    if not attribution_subtitle:
+        attribution_subtitle_label.visible = false
+    else:
+        attribution_subtitle_label.visible = true
+        attribution_subtitle_label.text = attribution_subtitle
 
 func get_name_with_identifier_or_question_mark(game_name: String) -> String:
     if not game_name.contains("/"):

@@ -228,8 +228,6 @@ func refresh_list_settings() -> void:
     tabs_container.hide()
     import_levels_button_container.hide()
     
-    prints("showing settings for list: %s" % [editing_settings_of_list])
-
     level_list_settings.show()
     level_list_settings.load_list_info(editing_settings_of_list)
 
@@ -332,7 +330,6 @@ func refresh_level_lists(scroll_to_level: String = "", scroll_to_list: String = 
             scroll_to_current_level(true)
 
     elif scroll_to_item:
-        prints("scroll to control: %s" % [get_path_to(scroll_to_item)])
         scroll_to_control.bind(scroll_to_item).call_deferred()
     
     #if fresh_open:

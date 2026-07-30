@@ -75,6 +75,12 @@ func build_credits_list() -> void:
     
     var title_label: Label = _get_centered_label(GameManager.get_game_title(), "TitleText")
     credits_container.add_child(title_label)
+    var attribution_subtitle: String = GameManager.get_game_setting("attribution_subtitle", "")
+    if attribution_subtitle:
+        var attribution_label: Label = _get_centered_label(attribution_subtitle, "SubtitleText")
+        credits_container.add_child(attribution_label)
+        _add_space(10)
+
     var subtitle_label: Label = _get_centered_label("Credits", "SubtitleText")
     credits_container.add_child(subtitle_label)
     _add_space(space_after_title)

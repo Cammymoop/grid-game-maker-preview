@@ -6,7 +6,7 @@
       "follow_entity": "player",
       "follow_entity_by": "property"
     },
-    "title": "Chip Challonge",
+    "title": "Chippy Challonge",
     "show_level_title": "At Level Start",
     "game_view_size": [
       22.0,
@@ -81,7 +81,8 @@
     "default_dying_effect": "Shrink Out",
     "level_start_entity_spawn_effect_enabled": true,
     "default_spawn_effect": "Slide In",
-    "level_start_entity_spawn_effect_duration": 0.6
+    "level_start_entity_spawn_effect_duration": 0.6,
+    "attribution_subtitle": "Based on Chip's Challenge by Chuck Sommerville"
   },
   "textures": [
     {
@@ -2958,13 +2959,34 @@
     "credits": {
       "credits_list": [
         {
-          "role": "Original Game",
-          "name": "Chuck Sommerville"
+          "type": "role_name",
+          "role": "GGM Port",
+          "name": "Cammymoop"
         },
         {
-          "role": "Re-Creation",
+          "type": "section",
+          "text": "Including Levels By"
+        },
+        {
+          "type": "just_name",
+          "name": "Joshua Bone"
+        },
+        {
+          "type": "just_name",
+          "name": "VT"
+        },
+        {
+          "type": "just_name",
+          "name": "Ida R."
+        },
+        {
+          "type": "just_name",
+          "name": "J. B. Lewis"
+        },
+        {
+          "type": "just_name",
           "name": "Cammymoop"
-        }
+        },
       ]
     }
   },
@@ -3199,7 +3221,11 @@
       0,
       1
     ],
-    "release_hash": ""
+    "release_hash": "",
+    "release_created_utc": "",
+    "release_created_local_date": "",
+    "release_created_zone_offset": ""
   },
-  "game_identifier": "GGM"
+  "game_identifier": "GGM",
+  "intermissions": []
 }

@@ -396,7 +396,16 @@
     "game_completion_mode": "specific_list_complete",
     "specific_completion_key": "Part 2",
     "game_end_replace_transition": true,
-    "game_end_transition_level_code": "Part Cammymoop??Cammy 1"
+    "game_end_transition_level_code": "Part Cammymoop??Cammy 1",
+    "default_intermissions": {
+      "game_complete": [
+        "YouWin",
+        "Credits",
+        "PartCammUnlock"
+      ]
+    },
+    "title": "Geode",
+    "attribution_subtitle": "by Neonesque"
   },
   "game_metadata": {
     "credits": {
@@ -542,7 +551,8 @@
           "Part2Intro"
         ]
       },
-      "progressive_locked_levels": 2.0
+      "progressive_locked_levels": 1.0,
+      "auto_advance_to_next_list": false
     },
     {
       "name": "Part Cammymoop",
@@ -553,11 +563,11 @@
       "bg_style": {
         "background_color": "#360316",
         "bg_gradient_color": "#702d0fbb",
-        "dusty_particles_color": "#57575214",
-        "dusty_particles_amount": 2.2,
+        "dusty_particles_color": "#afaf6714",
+        "dusty_particles_amount": 2.3,
         "dusty_particles_speed": 0.0,
         "bg_gradient_above": "between",
-        "pointy_particles_on": true,
+        "pointy_particles_on": false,
         "pointy_particles_speed": 1.3,
         "pointy_particles_dark_mode": false,
         "pointy_particles_color": "#6f0e0e5a",
@@ -570,11 +580,13 @@
         "lines_warp_scroll_speed": 0.08,
         "lines_scroll_angle": 0.763888888888889,
         "bg_gradient_on": true,
-        "dusty_particles_on": false,
+        "dusty_particles_on": true,
         "lines_on": true,
         "lines_color": "#ecc56a40",
         "lines_warp_strength": 0.8,
-        "lines_warp_scroll_angle": 0.0333333333333333
+        "lines_warp_scroll_angle": 0.0333333333333333,
+        "lines_camera_scroll_factor": 0.94,
+        "lines_solid_camera_scroll_factor": 0.94
       },
       "completion_mode": "all",
       "show_completion_style": "completed_total",
@@ -582,7 +594,12 @@
       "hide_when_locked": true,
       "progressive_locked_levels": 1.0,
       "auto_advance_to_next_list": false,
-      "when_completed_action": "do_nothing"
+      "when_completed_action": "unlock_next",
+      "intermission_assignments": {
+        "before_start": [
+          "PartCammIntro"
+        ]
+      }
     },
     {
       "name": "Bonus",
@@ -620,7 +637,10 @@
       "show_completion_style": "completed_total",
       "when_completed_action": "do_nothing",
       "default_locked": true,
-      "hide_when_locked": true
+      "hide_when_locked": true,
+      "intermission_assignments": {
+
+      }
     }
   ],
   "sfx_definitions": [
@@ -779,7 +799,8 @@
       },
       "light_background": false,
       "dark_background": true,
-      "show_continue": false
+      "show_continue": false,
+      "expire_time": 0.0
     },
     {
       "id": "PartCammUnlock",
@@ -821,16 +842,6 @@
           "text_outline_enabled": false,
           "light_background": false,
           "dark_background": false
-        },
-        {
-          "type": "text",
-          "text": "- Cammymoop",
-          "font_size": 18.0,
-          "text_color": "#416becff",
-          "text_outline_enabled": true,
-          "text_outline_color": "#000000ff",
-          "light_background": false,
-          "dark_background": false
         }
       ],
       "bg_style": {
@@ -847,7 +858,7 @@
         {
           "type": "text",
           "text": "You found the secret challenge!",
-          "font_size": 30,
+          "font_size": 30.0,
           "text_color": "#ffffffff",
           "text_outline_enabled": false,
           "light_background": false,
@@ -858,6 +869,14 @@
 
       },
       "show_continue": false
+    },
+    {
+      "id": "Credits",
+      "type": "credits",
+      "bg_style": {
+
+      },
+      "show_continue": true
     }
   ]
 }

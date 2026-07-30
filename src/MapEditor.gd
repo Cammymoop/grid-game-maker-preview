@@ -1082,16 +1082,13 @@ func _confirm_save_autosave_over_newer_level(then_callable: Callable) -> bool:
 
 func _confirm_save_changes_then(then_callable: Callable, is_discard: bool) -> void:
 	if not has_edited_something:
-		prints("no edits, skipping save confirm")
 		then_callable.call()
 		return
 	
 	if not is_discard and GameManager.player_profile.get_profile_setting("skip_non_critical_save_dialogs", false):
-		prints("skipping non critical save dialog")
 		then_callable.call()
 		return
 	elif is_discard and GameManager.player_profile.get_profile_setting("skip_critical_save_dialogs", false):
-		prints("skipping critical save dialog")
 		then_callable.call()
 		return
 

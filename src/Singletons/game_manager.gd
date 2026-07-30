@@ -3514,7 +3514,6 @@ func get_after_game_level_code() -> String:
 
 func _go_to_game_end(with_delay: float = 0, interm_q: Array[String] = []) -> void:
 	var post_end_level_code: String = get_after_game_level_code()
-	prints("go to game end, code: %s" % [post_end_level_code])
 	if not post_end_level_code:
 		_go_to_level_select(with_delay, interm_q)
 		return

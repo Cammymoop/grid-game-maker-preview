@@ -110,7 +110,7 @@ theme = ExtResource("3_qrjoe")
 current_tab = 0
 tab_0/title = "Game"
 
-[node name="GameDefinition" type="VBoxContainer" parent="MarginContainer/UIRoot/TabContainer" unique_id=1146228055 node_paths=PackedStringArray("show_level_title_option_picker", "movement_mode_picker", "game_identifier_label", "game_identifier_panel", "game_identifier_input", "game_identifier_input_panel", "game_identifier_set_button", "game_identifier_cancel_button", "name_input", "edit_game_dir_button", "last_release_version_label", "next_release_version_input", "move_interp_option_picker", "tele_interp_option_picker", "action_signal_sent_to_option_picker", "turn_animation_option_picker", "def_dying_eff_picker", "def_spawn_eff_picker", "use_spawn_effect_at_level_start_toggle", "level_start_anim_duration_option", "level_start_animation_duration_input", "default_move_speed_input", "default_teleport_duration_input", "camera_no_focus_action_picker", "follow_by_controller_picker", "auto_undo_option", "auto_undo_toggle", "action_1_is_undo_toggle", "start_paused_option", "start_level_paused_toggle", "export_release_button", "section_container", "y_sort_enable_toggle")]
+[node name="GameDefinition" type="VBoxContainer" parent="MarginContainer/UIRoot/TabContainer" unique_id=1146228055 node_paths=PackedStringArray("show_level_title_option_picker", "movement_mode_picker", "game_identifier_label", "game_identifier_panel", "game_identifier_input", "game_identifier_input_panel", "game_identifier_set_button", "game_identifier_cancel_button", "name_input", "edit_game_dir_button", "last_release_version_label", "next_release_version_input", "move_interp_option_picker", "tele_interp_option_picker", "action_signal_sent_to_option_picker", "turn_animation_option_picker", "def_dying_eff_picker", "def_spawn_eff_picker", "use_spawn_effect_at_level_start_toggle", "level_start_anim_duration_option", "level_start_animation_duration_input", "default_move_speed_input", "default_teleport_duration_input", "camera_no_focus_action_picker", "follow_by_controller_picker", "auto_undo_option", "auto_undo_toggle", "action_1_is_undo_toggle", "start_paused_option", "start_level_paused_toggle", "export_release_button", "section_container", "y_sort_enable_toggle", "attribution_subtitle_input")]
 layout_mode = 2
 script = ExtResource("6")
 show_level_title_option_picker = NodePath("ScrollContainer/SectionContainer/GameSettingsSection/MarginContainer/HFlowContainer/HFlowContainer/HBoxContainer11/OptionButton")
@@ -146,6 +146,7 @@ start_level_paused_toggle = NodePath("ScrollContainer/SectionContainer/GameSetti
 export_release_button = NodePath("HBoxContainer5/HBoxContainer/ExportReleaseButton")
 section_container = NodePath("ScrollContainer/SectionContainer")
 y_sort_enable_toggle = NodePath("ScrollContainer/SectionContainer/GameSettingsSection/MarginContainer/HFlowContainer/HFlowContainer/HBoxContainer16/YSortEnableToggle")
+attribution_subtitle_input = NodePath("ScrollContainer/SectionContainer/CreditsSection/MarginContainer/VBoxContainer/HBoxContainer/AttributionSubtitleInput")
 metadata/_tab_index = 0
 metadata/_tab_name = "Game"
 
@@ -262,10 +263,12 @@ size_flags_vertical = 3
 
 [node name="GameSettingsSection" type="FoldableContainer" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/SectionContainer" unique_id=531323634]
 layout_mode = 2
+folded = true
 title = "Game Settings:"
 title_alignment = 1
 
 [node name="MarginContainer" type="MarginContainer" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/SectionContainer/GameSettingsSection" unique_id=1633020872]
+visible = false
 layout_mode = 2
 theme_override_constants/margin_bottom = 4
 
@@ -624,6 +627,7 @@ text = "Vertical Depth Sort"
 
 [node name="GameEventsSection" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/SectionContainer" unique_id=1914446224 instance=ExtResource("6_beh5u")]
 layout_mode = 2
+folded = true
 
 [node name="VersionSettingsSection" type="FoldableContainer" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/SectionContainer" unique_id=1694859046]
 layout_mode = 2
@@ -846,16 +850,35 @@ layout_mode = 2
 
 [node name="CreditsSection" type="FoldableContainer" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/SectionContainer" unique_id=809496993]
 layout_mode = 2
-folded = true
 title = "Credits:"
 title_alignment = 1
 
 [node name="MarginContainer" type="MarginContainer" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/SectionContainer/CreditsSection" unique_id=1970330076]
-visible = false
 layout_mode = 2
 theme_override_constants/margin_bottom = 4
 
-[node name="CreditsList" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/SectionContainer/CreditsSection/MarginContainer" unique_id=493844250 instance=ExtResource("6_qrjoe")]
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/SectionContainer/CreditsSection/MarginContainer" unique_id=657832624]
+layout_mode = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/SectionContainer/CreditsSection/MarginContainer/VBoxContainer" unique_id=1005464512]
+layout_mode = 2
+alignment = 1
+
+[node name="Label" type="Label" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/SectionContainer/CreditsSection/MarginContainer/VBoxContainer/HBoxContainer" unique_id=1041653415]
+layout_mode = 2
+text = "Title Screen Attribution Line:"
+
+[node name="AttributionSubtitleInput" type="LineEdit" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/SectionContainer/CreditsSection/MarginContainer/VBoxContainer/HBoxContainer" unique_id=1498001397]
+custom_minimum_size = Vector2(180, 0)
+layout_mode = 2
+
+[node name="Label2" type="Label" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/SectionContainer/CreditsSection/MarginContainer/VBoxContainer" unique_id=1319625377]
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "Full Credits:"
+horizontal_alignment = 1
+
+[node name="CreditsList" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/SectionContainer/CreditsSection/MarginContainer/VBoxContainer" unique_id=493844250 instance=ExtResource("6_qrjoe")]
 layout_mode = 2
 
 [node name="Spacer" type="Control" parent="MarginContainer/UIRoot/TabContainer/GameDefinition" unique_id=1500377608]

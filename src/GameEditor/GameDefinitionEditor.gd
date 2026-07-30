@@ -68,6 +68,8 @@ var invalid_field_color = Color(0.7, 0.4, 0.4)
 
 @export var y_sort_enable_toggle: CheckButton
 
+@export var attribution_subtitle_input: LineEdit
+
 var _save_as_dialog_open: bool = false
 
 static var expanded_sections: Array[String] = []
@@ -89,6 +91,9 @@ func _ready():
 	var title_input: LineEdit = find_child("TitleInput")
 	title_input.text = GameManager.get_game_setting("title", "")
 	title_input.placeholder_text = GameManager.get_game_implicit_title()
+	
+	attribution_subtitle_input.text = GameManager.get_game_setting("attribution_subtitle", "")
+	attribution_subtitle_input.text_changed.connect(on_attribution_subtitle_input_text_changed)
 	
 	game_identifier_panel.gui_input.connect(on_game_identifier_panel_gui_input)
 	game_identifier_input.text_submitted.connect(on_game_identifier_input_text_submitted)
@@ -693,4 +698,8 @@ func on_camera_no_focus_action_option_picked(index: int) -> void:
 func on_y_sort_enable_toggle_toggled(button_pressed: bool) -> void:
 	GameManager.set_game_setting("y_sort_entities", button_pressed)
 	GameManager.set_game_setting("y_sort_tiles", button_pressed)
+	GameManager.game_settings_changed.emit()
+
+func on_attribution_subtitle_input_text_changed(new_text: String) -> void:
+	GameManager.set_game_setting("attribution_subtitle", new_text)
 	GameManager.game_settings_changed.emit()
