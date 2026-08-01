@@ -359,6 +359,10 @@ func handle_movement_mode_stuff() -> void:
     if movement_mode == GameManager.MovementMode.MOVEMENT_CONTINUOUS:
         return
     
+    var single_frame_detected: bool = false
+    if movement_mode == GameManager.MovementMode.MOVEMENT_DISCRETE_WAIT and controller_frame:
+        single_frame_detected = true
+
     controller_frame = false
     if movements_enabled:
         if movement_mode == GameManager.MovementMode.MOVEMENT_DISCRETE:
@@ -372,11 +376,16 @@ func handle_movement_mode_stuff() -> void:
         turn_frames_remaining = requested_turn_frames
         movements_enabled = true
         controller_frame = true
+        single_frame_detected = false
     
     if was_movement_enabled and not movements_enabled:
         handle_turn_end_events()
         if GameManager.is_auto_undo_enabled():
             _undo_create_requested = true
+            
+            # turn lasted for a single frame, for now not doing automatic undo for this as it was most likely just the player bumping into a wall and causing no change
+            if single_frame_detected:
+                _undo_create_requested = false
 
     if _undo_create_requested:
         GameManager.push_undo_state(true)

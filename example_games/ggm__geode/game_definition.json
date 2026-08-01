@@ -413,8 +413,8 @@
     "window_width": 16.0,
     "window_height": 12.0,
     "bg_style": {
-      "background_color": "#191b1e",
-      "bg_gradient_color": "#272725bb",
+      "background_color": "#0b0b0b",
+      "bg_gradient_color": "#2a2f33bb",
       "dusty_particles_color": "#57575214",
       "dusty_particles_amount": 2.2,
       "dusty_particles_speed": 0.0,
@@ -430,7 +430,19 @@
       "lines_solid_color": "#5454540d",
       "lines_scroll_speed": 0.0,
       "lines_warp_scroll_speed": 0.02,
-      "lines_scroll_angle": 308.0
+      "lines_scroll_angle": 308.0,
+      "bg_tile_on": true,
+      "bg_tile_color": "#3f3f3fff",
+      "bg_tile_scale": 5.0,
+      "bg_tile_texture_id": 1.0,
+      "bg_tile_texture_index": 34.0,
+      "bg_tile_angle": 0.125,
+      "bg_tile_smooth_scale": true,
+      "bg_tile_spacing": [
+        0.0,
+        0.0
+      ],
+      "pointy_particles_camera_scroll_factor": 1.0
     },
     "action_signal_sent_to": "camera_target",
     "movement_mode": 2.0,
@@ -493,61 +505,7 @@
       ],
       "completion_mode": "all",
       "show_completion_style": "completed_total",
-      "bg_style": {
-        "background_color": "#191b1e",
-        "bg_gradient_color": "#272725bb",
-        "dusty_particles_color": "#57575214",
-        "dusty_particles_amount": 2.2,
-        "dusty_particles_speed": 0.0,
-        "bg_gradient_above": "between",
-        "pointy_particles_on": true,
-        "pointy_particles_speed": 0.5,
-        "pointy_particles_dark_mode": false,
-        "pointy_particles_color": "#360e6f5a",
-        "pointy_particles_rainbow_on": false,
-        "pointy_particles_amount": 0.1,
-        "lines_solid_on": true,
-        "lines_above": "below",
-        "lines_solid_color": "#5454540d",
-        "lines_scroll_speed": 0.0,
-        "lines_warp_scroll_speed": 0.02,
-        "lines_scroll_angle": 308.0,
-        "bg_gradient_on": true,
-        "bg_gradient_rotation": 0.5,
-        "bg_gradient_cover_amount": 0.8,
-        "bg_tile_on": false,
-        "bg_tile_color": "#47387aff",
-        "bg_tile_camera_scroll_factor": 0.5,
-        "bg_tile_angle": 0.0,
-        "bg_tile_texture_id": -1.0,
-        "bg_tile_texture_index": 0.0,
-        "bg_tile_scale": 1.0,
-        "bg_tile_smooth_scale": false,
-        "bg_tile_above": "below",
-        "bg_tile_below_gradient": true,
-        "bg_tile_spacing": [
-          0.0,
-          0.0
-        ],
-        "bg_tile_base_offset": [
-          0.0,
-          0.0
-        ],
-        "bg_tile_scale_with_camera": true,
-        "bg_tile_auto_scroll_on": false,
-        "bg_tile_auto_scroll_speed": 0.5,
-        "bg_tile_auto_scroll_angle": 0.0,
-        "dusty_particles_on": true,
-        "dusty_particles_camera_scroll_factor": 0.5,
-        "pointy_particles_camera_scroll_factor": 0.0,
-        "lines_on": false,
-        "lines_color": "#ffffff40",
-        "lines_warp_strength": 1.30000001937156,
-        "lines_warp_scroll_angle": 197.999995574304,
-        "lines_camera_scroll_factor": 0.0,
-        "lines_solid_camera_scroll_factor": 0.0
-      },
-      "progressive_locked_levels": 2.0
+      "progressive_locked_levels": 1.0
     },
     {
       "name": "Part 2",
@@ -587,7 +545,19 @@
         "lines_on": true,
         "lines_color": "#fada7927",
         "lines_warp_strength": 1.30000001937156,
-        "lines_warp_scroll_angle": 197.999995574304
+        "lines_warp_scroll_angle": 197.999995574304,
+        "bg_tile_on": true,
+        "bg_tile_above": "between",
+        "bg_tile_spacing": [
+          0.5,
+          0.5
+        ],
+        "bg_tile_scale": 3.1,
+        "bg_tile_camera_scroll_factor": 1.0,
+        "bg_tile_angle": 0.125,
+        "bg_tile_color": "#4a4a4aff",
+        "bg_tile_smooth_scale": false,
+        "bg_tile_scale_with_camera": false
       },
       "completion_mode": "all",
       "show_completion_style": "completed_total",
@@ -596,7 +566,7 @@
           "Part2Intro"
         ]
       },
-      "progressive_locked_levels": 1.0,
+      "progressive_locked_levels": 1,
       "auto_advance_to_next_list": false
     },
     {
@@ -930,7 +900,7 @@
         {
           "type": "text",
           "text": "Rocks can only be pushed when you\nare not encumbered by the pickaxe",
-          "font_size": 36,
+          "font_size": 36.0,
           "text_color": "#ffffffff",
           "text_outline_enabled": false,
           "light_background": false,

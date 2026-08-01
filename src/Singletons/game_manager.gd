@@ -4474,7 +4474,7 @@ func pop_and_load_undo_state() -> void:
 	else:
 		clear_undo_checkpoints_after(undo_stack.size() - 1)
 	
-	print_debug("popped undo state, %d undos remain" % undo_stack.size())
+	#print_debug("popped undo state, %d undos remain" % undo_stack.size())
 
 	load_serialized_play_state(popped_state, false)
 	if popped_state.get("is_reset_point", false):
@@ -5815,7 +5815,7 @@ func has_save_data_for_current_game() -> bool:
 
 func ____clear_all_local_data() -> void:
 	FilesManager.___clear_local_data()
-	GlobalToaster.show_toast_message("All local data has been cleared\ncurrent game will not function properly if not saved again")
+	GlobalToaster.show_toast_message("All local data has been cleared\ncurrent game will not function properly if not saved again", 2.2)
 
 
 
