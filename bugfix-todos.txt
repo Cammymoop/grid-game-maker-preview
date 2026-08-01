@@ -1,0 +1,8 @@
+
+Back button on options (main menu) goes back but doesn't hide menu
+
+Back button (controller) in pause menu unpauses and also does gameplay action
+
+Extra undos registered when InputController is blocked
+
+Geode needs to explain that you can reset or undo
