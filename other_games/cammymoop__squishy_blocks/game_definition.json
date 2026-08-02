@@ -41,9 +41,34 @@
       "enable_limits": true
     },
     "default_move_interp": "stepped",
-    "movement_mode": 1.0,
+    "movement_mode": 2.0,
     "default_dying_effect": "Shrink Out",
-    "entity_move_speed": 10.0
+    "entity_move_speed": 10.0,
+    "bg_style": {
+      "bg_tile_on": true,
+      "bg_tile_texture_id": 1.0,
+      "bg_tile_texture_index": 57.0,
+      "bg_tile_scale": 1.6,
+      "bg_tile_angle": 0.163888888888889,
+      "bg_tile_color": "#8524004d",
+      "bg_tile_above": "between",
+      "bg_tile_smooth_scale": true,
+      "bg_tile_spacing": [
+        0.0,
+        0.0
+      ],
+      "background_color": "#a53504",
+      "bg_gradient_color": "#9272069d",
+      "dusty_particles_on": true,
+      "bg_gradient_rotation": 0.419444444444444,
+      "dusty_particles_color": "#6d211013",
+      "dusty_particles_amount": 8.40000000000001,
+      "dusty_particles_speed": 5.0,
+      "pointy_particles_on": false,
+      "pointy_particles_rainbow_on": false,
+      "bg_tile_below_gradient": true,
+      "bg_gradient_above": "below"
+    }
   },
   "entity_definitions": {
     "1": {
@@ -160,7 +185,7 @@
       "controller": "InputController",
       "controller_options": {
         "stop_repeat_after_bonk": false,
-        "lock_for_idle_delay_after_bonk": false,
+        "lock_for_idle_delay_after_bonk": true,
         "auto_req_turn": true,
         "allow_wait": false,
         "only_rcv_when_cam": false
@@ -512,5 +537,22 @@
         "Extra Extra"
       ]
     }
-  ]
+  ],
+  "release_info": {
+    "edited": true,
+    "release_created_utc": "",
+    "release_created_local_date": "",
+    "release_created_zone_offset": "",
+    "base_version": [
+      0,
+      0
+    ],
+    "next_version": [
+      0,
+      1
+    ],
+    "release_hash": ""
+  },
+  "game_identifier": "Cammymoop",
+  "intermissions": []
 }

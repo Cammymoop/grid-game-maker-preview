@@ -5528,7 +5528,6 @@ func has_saved_intermission_id_viewed(intermission_id: String) -> bool:
 		else:
 			check_id = _make_combined_intermission_id(inner_id, current_level_list)
 	var viewed_intermissions: Array = get_game_save_data("viewed_intermissions", [])
-	prints("checking for intermission id viewed: ", check_id, ", in: ", viewed_intermissions)
 	return check_id in viewed_intermissions
 
 func has_intermission_flag(flag_id: String) -> bool:

@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dq5qrykoayak3"
-path="res://.godot/imported/tiles.png-79d4d03375d24729bde8f73dbee16217.ctex"
+path="res://.godot/imported/tiles.png-a65e1b407211aa11029209f4806094d1.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://other_games/squishy_blocks/game_data/assets/images/tiles.png"
-dest_files=["res://.godot/imported/tiles.png-79d4d03375d24729bde8f73dbee16217.ctex"]
+source_file="res://other_games/cammymoop__squishy_blocks/game_data/assets/images/tiles.png"
+dest_files=["res://.godot/imported/tiles.png-a65e1b407211aa11029209f4806094d1.ctex"]
 
 [params]
 

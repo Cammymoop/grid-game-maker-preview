@@ -81,7 +81,6 @@ func _spawn_entity_layer_effect(effect_node: Node2D, at_pos: Vector2, use_id: in
     effects_holder.add_child(effect_node)
     effect_node.position = at_pos
     effect_id_references[effect_id] = effect_node
-    prints("created text effect: %s" % [effect_node.get_path()])
     return effect_id
 
 func clear_all_effects() -> void:
@@ -107,7 +106,6 @@ func _cleanup_effect_ids() -> void:
         new_id_references[effect_id] = effect_node
 
 func remove_effect_by_id(effect_id: int) -> void:
-    prints("removing effect by id: %s" % [effect_id])
     if not effect_id_references.has(effect_id):
         return
     if is_instance_valid(effect_id_references[effect_id]):

@@ -1,3 +1,4 @@
+Options menu doesn't grab focus for controller compatibility
 
 Geode needs to explain that you can reset or undo
 
