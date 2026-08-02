@@ -30,6 +30,8 @@ func _ready() -> void:
     refresh_ui()
 
 func _shortcut_input(event: InputEvent) -> void:
+    if not is_visible_in_tree():
+        return
     if Utility.event_is_menu_back_just_pressed(event):
         request_back.emit()
         accept_event()

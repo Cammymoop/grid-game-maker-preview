@@ -1,8 +1,11 @@
 
-Back button on options (main menu) goes back but doesn't hide menu
-
-Back button (controller) in pause menu unpauses and also does gameplay action
-
 Geode needs to explain that you can reset or undo
 
+
+Stop repeat after bonk prevents further movement at all in discrete mode
+
+Extra undos still created in Discrete mode (not Discrete+) when InputController creates undos automatically and bumps into a wall
+
+
+(low priority)
 Some bug causing bg style edits being made on the current list not updating realtime background info (but still saving??)

@@ -39,6 +39,13 @@ func _ready() -> void:
 
     refresh_ui()
 
+func _shortcut_input(event: InputEvent) -> void:
+    if not is_visible_in_tree():
+        return
+    if Utility.event_is_menu_back_just_pressed(event):
+        request_back.emit()
+        accept_event()
+
 func on_visibility_changed() -> void:
     if is_visible_in_tree():
         danger_zone_container.fold()
@@ -97,7 +104,6 @@ func on_erase_game_save_progress_button_pressed() -> void:
 func on_erase_profile_button_pressed() -> void:
     if confirm_dialog_open:
         return
-    prints("opening confirm for erase profile")
 
     var profile_name: String = GameManager.get_profile_name()
     var confirm_dialog: = ConfirmationDialog.new()
@@ -126,7 +132,6 @@ func erase_progress_confirmed(dialog: ConfirmationDialog, game_name: String) -> 
 func erase_profile_confirmed(dialog: ConfirmationDialog) -> void:
     dialog_closing(dialog)
     
-    prints("erasing profile confirmed")
     GameManager.delete_current_profile()
     if GameManager.cur_scene == "Play":
         GameManager.change_scene("Menu")

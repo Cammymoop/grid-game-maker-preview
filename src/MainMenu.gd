@@ -62,6 +62,18 @@ func _ready():
 	
 	refresh_show_version_switcher()
 
+func _unhandled_input(event: InputEvent) -> void:
+	if not is_visible_in_tree():
+		return
+
+	var gui_focus_owner: = get_viewport().gui_get_focus_owner()
+	if not gui_focus_owner:
+		for ui_move in ["ui_up", "ui_down", "ui_left", "ui_right"]:
+			if Utility.fixed_just_pressed_by_event(ui_move, event):
+				play_game_button.grab_focus()
+				accept_event()
+				break
+
 func refresh_show_version_switcher() -> void:
 	var is_show_version_switcher: bool = GameManager.player_profile.get_profile_setting("main_menu_version_switcher", false)
 	version_switcher_panel.visible = is_show_version_switcher

@@ -93,6 +93,8 @@ var _undo_create_requested: bool = false
 var _undo_pop_requested: bool = false
 var _input_action_ignore_frame: bool = true
 
+var _pause_menu_closed_this_frame: bool = false
+
 func paused_visual_process(delta_time: float) -> void:
     for e in entity_list:
         e.sprite_process(delta_time, true)
@@ -340,6 +342,9 @@ func should_bump_move() -> bool:
     #return process_phase >= 3
 
 func _physics_process(delta: float) -> void:
+    if _pause_menu_closed_this_frame:
+        _pause_menu_closed_this_frame = false
+        return
     if GameManager.is_intermission_mode:
         return
     entity_list_process(delta)
@@ -408,6 +413,11 @@ func _ready():
     GameManager.game_settings_changed.connect(on_game_settings_changed)
     
     GameManager.any_state_loaded.connect(on_any_state_loaded)
+    
+    GameManager.pause_menu_closed.connect(on_pause_menu_closed)
+
+func on_pause_menu_closed() -> void:
+    _pause_menu_closed_this_frame = true
 
 func on_any_state_loaded() -> void:
     paused_at_start = false

@@ -11,6 +11,7 @@ signal bg_style_changed
 @warning_ignore("unused_signal")
 signal level_edit_mode_changed()
 signal profile_switched()
+signal pause_menu_closed()
 
 signal flag_counts_changed()
 
@@ -1545,7 +1546,14 @@ func post_scene_change() -> void:
 			play_current_save_level()
 		if not is_in_level_edit_mode:
 			activate_gameplay_camera()
+		
+		var pause_menu: = get_tree().get_first_node_in_group("PauseMenu")
+		if pause_menu:
+			pause_menu.pause_menu_closed.connect(on_pause_menu_closed)
 	scene_changed.emit(cur_scene)
+
+func on_pause_menu_closed() -> void:
+	pause_menu_closed.emit()
 
 func update_game_viewport() -> void:
 	var vp = Utility.get_world().get_viewport()
