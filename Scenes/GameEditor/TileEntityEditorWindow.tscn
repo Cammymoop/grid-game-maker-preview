@@ -169,6 +169,7 @@ text = "Image Style:"
 [node name="SpriteStylePicker" type="OptionButton" parent="PanelContainer/VBoxContainer/ImageSection/VBoxContainer/HBoxContainer2/SpriteStyleOption" unique_id=2093749690]
 layout_mode = 2
 size_flags_vertical = 4
+alignment = 1
 selected = 0
 item_count = 1
 popup/item_0/text = "Simple"

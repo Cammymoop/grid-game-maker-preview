@@ -6,11 +6,12 @@ signal dying_animation_finished
 const DigitDisplay = preload("res://Scenes/digit_display.gd")
 
 static var particle_types: Dictionary[String, PackedScene] = {
+    "sparkles": preload("res://Scenes/Particles/sparkles.tscn"),
+    "cloudy": preload("res://Scenes/Particles/cloudy_particles.tscn"),
     "burning_smoke": preload("res://Scenes/Particles/burning_smoke.tscn"),
     "flames": preload("res://Scenes/Particles/flames.tscn"),
-    "sparkles": preload("res://Scenes/Particles/sparkles.tscn"),
 
-    "explode": preload("res://Scenes/Particles/explode_particles.tscn"),
+    "explosion": preload("res://Scenes/Particles/explode_particles.tscn"),
     "dust_poof": preload("res://Scenes/Particles/dust_poof_particles.tscn"),
 }
 
@@ -117,7 +118,6 @@ func particle_process(delta: float) -> void:
     for lingering_particle_layer in _lingering_particle_lifetimes.keys():
         _lingering_particle_lifetimes[lingering_particle_layer] -= delta
         if _lingering_particle_lifetimes[lingering_particle_layer] <= 0.0:
-            prints("lingering particle layer %s is expiring" % lingering_particle_layer.name)
             lingering_particle_layer.queue_free()
             _lingering_particle_lifetimes.erase(lingering_particle_layer)
 
@@ -320,6 +320,7 @@ func refresh_layers() -> void:
         do_base_prop_update(base_entity_id)
     
     if _lingering_particle_lifetimes.size() > 0:
+        prints("sorting layers in place so lingering particle layers are sorted")
         resort_lingering_particle_layers()
 
 func clear() -> void:
@@ -628,6 +629,8 @@ func create_and_add_nodes_for_layer(layer_info: Dictionary, layer_index: int) ->
 
     if not main_layer_node.get_parent() == layer_root:
         layer_root.add_child(main_layer_node, true)
+    else:
+        layer_root.move_child(main_layer_node, layer_root.get_child_count() - 1)
     var layer_scale: Vector2 = Utility.get_vector2_from_arr(layer_info.get("scale", [1,1]))
     main_layer_node.set_meta("static_scale", layer_scale)
     main_layer_node.scale = layer_scale
@@ -668,6 +671,7 @@ func create_and_add_nodes_for_layer(layer_info: Dictionary, layer_index: int) ->
 func get_or_recycle_particle_layer(particles_type: String) -> Node2D:
     for layer in _lingering_particle_lifetimes.keys():
         if layer.get_meta("particles_type") == particles_type:
+            _lingering_particle_lifetimes.erase(layer)
             resume_particle_layer(layer)
             return layer
     return particle_types[particles_type].instantiate()
@@ -684,8 +688,14 @@ func make_particle_layer_stop_emitting(particle_layer: Node2D) -> void:
     elif particle_layer is GPUParticles2D:
         particle_layer.emitting = false
 
-func apply_particle_layer_info(_layer_info: Dictionary, _particle_layer: Node2D) -> void:
-    pass
+func apply_particle_layer_info(layer_info: Dictionary, particle_layer: Node2D) -> void:
+    if layer_info.get("particles_have_color", false) and layer_info.has("particles_color"):
+        var particles_color: Color = Utility.get_dict_color(layer_info, "particles_color", Color.WHITE)
+        if particle_layer.has_method("set_particles_color"):
+            particle_layer.set_particles_color(particles_color)
+    else:
+        if particle_layer.has_method("set_default_color"):
+            particle_layer.set_default_color()
 
 func check_register_cam_focus_updates() -> void:
     if not GameManager.game_camera_target_changed.is_connected(refresh_cam_focus):
@@ -1242,10 +1252,7 @@ func get_particle_layer_remaining_linger_time(particle_layer: Node2D) -> float:
         return _lingering_particle_lifetimes[particle_layer]
     
     if particle_layer is GPUParticles2D:
-        prints("particle layer %s is a GPUParticles2D, lifetime: %s, speed_scale: %s" % [particle_layer.name, particle_layer.lifetime, particle_layer.speed_scale])
         return particle_layer.lifetime / particle_layer.speed_scale
     elif particle_layer.has_method("get_linger_time"):
-        prints("particle layer %s has get_linger_time method, returning %s" % [particle_layer.name, particle_layer.get_linger_time()])
         return particle_layer.get_linger_time()
-    prints("particle layer %s has no linger time, returning 0.0" % particle_layer.name)
     return 0.0

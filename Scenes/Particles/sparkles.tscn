@@ -1,6 +1,7 @@
 [gd_scene format=3 uid="uid://1aefu14s8s3j"]
 
 [ext_resource type="Texture2D" uid="uid://m28hpb2qnjcw" path="res://assets/img/particle_textures/diamond.png" id="1_lsqog"]
+[ext_resource type="Script" uid="uid://db4qrrfsf0ibx" path="res://Scenes/Particles/sparkles_particles.gd" id="1_ykumq"]
 
 [sub_resource type="Curve" id="Curve_lsqog"]
 _data = [Vector2(0, 0), 0.0, 0.0, 0, 0, Vector2(0.32476634, 1), 0.0, 0.0, 0, 0, Vector2(0.7172897, 1), 0.0, 0.0, 0, 0, Vector2(1, 1), 0.0, 0.0, 0, 0]
@@ -31,15 +32,9 @@ scale_min = 0.049999997
 scale_max = 0.089999996
 scale_curve = SubResource("CurveXYZTexture_08ld4")
 
-[node name="Sparkles" type="Node2D" unique_id=1360383814]
-
-[node name="ColorRect" type="ColorRect" parent="." unique_id=346605300]
-visible = false
-offset_left = -16.0
-offset_top = -16.0
-offset_right = 16.0
-offset_bottom = 16.0
-color = Color(0.17641911, 0.17641908, 0.17641908, 1)
+[node name="Sparkles" type="Node2D" unique_id=1360383814 node_paths=PackedStringArray("emitter")]
+script = ExtResource("1_ykumq")
+emitter = NodePath("GPUParticles2D")
 
 [node name="GPUParticles2D" type="GPUParticles2D" parent="." unique_id=2143296186]
 amount = 10

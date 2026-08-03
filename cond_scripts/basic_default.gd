@@ -242,8 +242,12 @@ func cmd_filter_tiles_named(slots: Dictionary, chosen_slot: Slot, tile_name: Str
 			filtered_positions.append(current_pos)
 	slots[chosen_slot] = filtered_positions
 
-func desc_select_tiles_rect() -> String:
-	return "pos|<= Select positions within a rectangle\nstarting at [top_left:PositionInput:0,0]\nwith size [size:PositionInput:1,1]"
+func desc_select_tiles_rect() -> Dictionary:
+	return {
+		"slot_type_hint": "pos",
+		"template_text": "<= (deprecated) Select positions within a rectangle\nstarting at [top_left:PositionInput:0,0]\nwith size [size:PositionInput:1,1]",
+		"is_deprecated": true,
+	}
 func cmd_select_tiles_rect(slots: Dictionary, chosen_slot: Slot, top_left: Vector2i, size: Vector2i) -> void:
 	top_left = get_rel_position_arg(top_left, slots)
 	var positions: Array = []
@@ -251,6 +255,47 @@ func cmd_select_tiles_rect(slots: Dictionary, chosen_slot: Slot, top_left: Vecto
 		for yi in range(size.y):
 			positions.append(top_left + Vector2i(xi, yi))
 	slots[chosen_slot] = positions
+
+func desc_select_rectangular_region() -> Dictionary:
+	return {
+		"slot_type_hint": "pos",
+		"template_text": "<= Select positions within a rectangle starting at [top_left:PositionInput:0,0] from the single position in [relative_to_slot:SlotInput:pos,entity]\n"
+			+ "with a width of [width:ComplexScalarInput:int] and height of [height:ComplexScalarInput:int]",
+	}
+func cmd_select_rectangular_region(slots: Dictionary, chosen_slot: Slot, top_left: Vector2i, width: Dictionary, height: Dictionary, relative_to_slot: int) -> void:
+	if not Commands.slot_is_positions(chosen_slot) or not Commands.slot_has_position(relative_to_slot):
+		push_error("Invalid slots to select rectangular region: %s, %s" % [chosen_slot, relative_to_slot])
+		return
+	var relative_to_pos: = Vector2i.ZERO
+	if _slot_has_single_tile_position(slots, relative_to_slot):
+		relative_to_pos = _single_tile_position_from_slot(slots, relative_to_slot)
+	var width_int: = roundi(resolve_complex_scalar(width, slots))
+	var height_int: = roundi(resolve_complex_scalar(height, slots))
+	var size: = Vector2i(width_int, height_int)
+	slots[chosen_slot] = Utility.positions_rect_iter(relative_to_pos + top_left, size)
+
+func desc_select_centered_rectangular_region() -> Dictionary:
+	return {
+		"slot_type_hint": "pos",
+		"template_text": "<= Select positions within a rectangle centered on the single position in [relative_to_slot:SlotInput:pos,entity]\n" \
+			+ "with a width of [width:ComplexScalarInput:int] and height of [height:ComplexScalarInput:int]\n" \
+			+ "left/right center bias: [bias_left:BoolChoice:true,left,right] up/down bias: [bias_up:BoolChoice:true,up,down]"
+	}
+func cmd_select_centered_rectangular_region(slots: Dictionary, chosen_slot: Slot, width: Dictionary, height: Dictionary, relative_to_slot: int, bias_left: bool, bias_up: bool) -> void:
+	if not Commands.slot_is_positions(chosen_slot) or not Commands.slot_has_position(relative_to_slot):
+		push_error("Invalid slots to select rectangular region: %s, %s" % [chosen_slot, relative_to_slot])
+		return
+	var relative_to_pos: = Vector2i.ZERO
+	if _slot_has_single_tile_position(slots, relative_to_slot):
+		relative_to_pos = _single_tile_position_from_slot(slots, relative_to_slot)
+	var width_int: = maxi(1, roundi(resolve_complex_scalar(width, slots)))
+	var height_int: = maxi(1, roundi(resolve_complex_scalar(height, slots)))
+	var size: = Vector2i(width_int, height_int)
+	# use (size - 1)/2 to center the rectangle on the discrete position
+	var top_left: = Vector2(relative_to_pos) - (Vector2(size - Vector2i.ONE) / 2.0)
+	top_left.x = floorf(top_left.x) if bias_left else ceilf(top_left.x)
+	top_left.y = floorf(top_left.y) if bias_up else ceilf(top_left.y)
+	slots[chosen_slot] = Utility.positions_rect_iter(Vector2i(top_left), size)
 
 func desc_select_tiles_in_direction() -> String:
 	return "pos|<= Select the position(s) [dist:ComplexScalarInput:int] spaces in this direction [compl_dir:DirectionInput:1] from [from_slot:SlotInput:pos,entity]"

@@ -4,6 +4,8 @@ Geode needs to explain that you can reset or undo
 
 Cannot add particle layers in fancy sprite editor
 
+Fail State intermission blocking undo and reset inputs
+
 
 Stop repeat after bonk prevents further movement at all in discrete mode
 

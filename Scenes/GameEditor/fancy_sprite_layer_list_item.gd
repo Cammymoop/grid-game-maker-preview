@@ -18,12 +18,13 @@ static var texture_picker_scene: = preload("res://Scenes/GameEditor/BetterTextur
 
 const MODE_NORMAL: = "normal"
 const MODE_DIGITS: = "digits"
-#const MODE_PARTICLES: = "particles"
+const MODE_PARTICLES: = "particles"
 const MODE_EMPTY: = "empty"
 
 const LayerModeOptions: Dictionary[String, String] = {
     MODE_NORMAL: "normal",
     MODE_DIGITS: "digits",
+    MODE_PARTICLES: "particles",
     MODE_EMPTY: "empty",
 }
 
@@ -88,6 +89,11 @@ const CamFocusOptions: Array[String] = [CAM_FOCUS_IGNORE, CAM_FOCUS_SHOW, CAM_FO
 @export var digits_number_input: ScalarValueInput
 @export var digits_property_input: LineEdit
 
+@export var particle_settings: Control
+@export var particle_type_selector: OptionButton
+@export var particle_color_enable_toggle: CheckButton
+@export var particle_color_picker: ColorPickerButton
+
 @export var visibility_property_input: FuzzyAutocompleteInput
 @export var vis_prop_comparison_selector: OrderComparisonInput
 @export var vis_prop_compare_number_input: ScalarValueInput
@@ -145,6 +151,12 @@ func _ready() -> void:
     for mode_name in LayerModeOptions:
         mode_selector.add_item(LayerModeOptions[mode_name])
     mode_selector.item_selected.connect(on_mode_selected)
+    
+    setup_particle_selector()
+    particle_type_selector.item_selected.connect(on_particle_type_selected)
+    
+    particle_color_enable_toggle.toggled.connect(on_particle_toggle_color)
+    particle_color_picker.color_changed.connect(on_particle_color_changed)
     
     z_offset_input.value_changed.connect(on_z_offset_changed)
     
@@ -274,6 +286,14 @@ func on_mode_selected(_index: int) -> void:
         layer_info.erase('pad_zeros')
         layer_info.erase('max_digits')
         layer_info.erase('property')
+    
+    if layer_info['mode'] == MODE_PARTICLES:
+        if particle_type_selector.item_count > 0:
+            if particle_type_selector.selected < 0:
+                particle_type_selector.selected = 0
+            layer_info['particles_type'] = particle_type_selector.get_item_metadata(particle_type_selector.selected)
+    else:
+        layer_info.erase('particles_type')
 
     refresh_ui()
     changed.emit()
@@ -345,6 +365,18 @@ func refresh_ui() -> void:
         
         digits_number_input.visible = digits_source == DIGITS_SOURCE_NUMBER
         digits_property_input.visible = digits_source == DIGITS_SOURCE_PROPERTY
+    elif layer_info['mode'] == MODE_PARTICLES:
+        if not particle_type_selector.item_count > 0:
+            setup_particle_selector()
+        var type_capitalized: String = layer_info['particles_type'].capitalize()
+        Utility.opbtn_select_text(particle_type_selector, type_capitalized)
+        
+        if layer_info.has("particles_color"):
+            var particles_color: Color = Utility.get_dict_color(layer_info, "particles_color", Color.WHITE)
+            particle_color_picker.color = particles_color
+        
+        particle_color_enable_toggle.set_pressed_no_signal(layer_info.get("particles_have_color", false))
+        particle_color_picker.visible = particle_color_enable_toggle.button_pressed
     
     z_offset_input.set_value(layer_info.get("z_offset", 0))
     
@@ -378,7 +410,8 @@ func refresh_ui() -> void:
     _update_vis_prop_inputs_from_layer_info()
     
     digits_settings.visible = layer_info['mode'] == MODE_DIGITS
-    layer_image_button.visible = layer_info['mode'] != MODE_DIGITS
+    particle_settings.visible = layer_info['mode'] == MODE_PARTICLES
+    layer_image_button.visible = layer_info['mode'] not in [MODE_DIGITS, MODE_PARTICLES]
     update_image_button_texture()
 
 func refresh_spin_speed_input() -> void:
@@ -722,3 +755,34 @@ func on_nine_patch_center_repeat_selected(index: int) -> void:
         return
     layer_info['9_patch_center_repeat'] = true if index > 0 else false
     changed.emit()
+
+
+func setup_particle_selector() -> void:
+    particle_type_selector.clear()
+    
+    for i in MaskLayerSprite.particle_types.size():
+        var particle_type_key: String = MaskLayerSprite.particle_types.keys()[i]
+        particle_type_selector.add_item(particle_type_key.capitalize())
+        particle_type_selector.set_item_metadata(i, particle_type_key)
+
+func on_particle_type_selected(index: int) -> void:
+    if layer_info["mode"] != MODE_PARTICLES:
+        return
+    var particle_type_key: String = particle_type_selector.get_item_metadata(index)
+    layer_info['particles_type'] = particle_type_key
+    changed.emit()
+
+func on_particle_toggle_color(is_enabled: bool) -> void:
+    if is_enabled:
+        layer_info['particles_have_color'] = true
+        layer_info['particles_color'] = Utility.color_string(particle_color_picker.color)
+    else:
+        layer_info.erase('particles_have_color')
+        layer_info.erase('particles_color')
+    particle_color_picker.visible = is_enabled
+    changed.emit()
+
+func on_particle_color_changed(new_color: Color) -> void:
+    if particle_color_enable_toggle.button_pressed:
+        layer_info['particles_color'] = Utility.color_string(new_color)
+        changed.emit()

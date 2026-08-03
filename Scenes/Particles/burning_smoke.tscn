@@ -13,7 +13,7 @@ curve = SubResource("Curve_jwi5v")
 
 [sub_resource type="Gradient" id="Gradient_we8kr"]
 offsets = PackedFloat32Array(0, 0.728022, 1)
-colors = PackedColorArray(0.22670737, 0.22670755, 0.2267074, 1, 0.19793701, 0.19793734, 0.1979371, 1, 0.525101, 0.5251014, 0.5251012, 1)
+colors = PackedColorArray(0.46618086, 0.4661808, 0.4661808, 1, 0.5163938, 0.5163938, 0.5163937, 1, 1, 1, 1, 1)
 
 [sub_resource type="GradientTexture1D" id="GradientTexture1D_2n4xf"]
 gradient = SubResource("Gradient_we8kr")
@@ -82,6 +82,7 @@ offset_right = 20.0
 offset_bottom = 24.0
 
 [node name="Smoke" type="GPUParticles2D" parent="." unique_id=926810221]
+modulate = Color(0.48617345, 0.4861734, 0.4861734, 1)
 show_behind_parent = true
 emitting = false
 amount = 60
