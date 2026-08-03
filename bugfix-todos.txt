@@ -2,6 +2,8 @@ Options menu doesn't grab focus for controller compatibility
 
 Geode needs to explain that you can reset or undo
 
+Cannot add particle layers in fancy sprite editor
+
 
 Stop repeat after bonk prevents further movement at all in discrete mode
 

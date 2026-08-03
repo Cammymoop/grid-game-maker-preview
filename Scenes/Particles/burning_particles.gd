@@ -21,3 +21,22 @@ func set_flames_z_offset(z_offset: int) -> void:
 
 func set_smoke_z_offset(z_offset: int) -> void:
     smoke_particles.z_index = z_offset
+
+
+func get_linger_time() -> float:
+    var linger_time: float = 0
+    if show_flames:
+        linger_time = flames_particles.lifetime / flames_particles.speed_scale
+    if show_smoke:
+        linger_time = maxf(linger_time, smoke_particles.lifetime / smoke_particles.speed_scale)
+    return linger_time
+
+func stop_emitting() -> void:
+    flames_particles.emitting = false
+    smoke_particles.emitting = false
+
+func continue_emitting() -> void:
+    if show_flames:
+        flames_particles.emitting = true
+    if show_smoke:
+        smoke_particles.emitting = true

@@ -80,6 +80,8 @@ var _moving: bool = false
 var _has_alternate_texture_source: bool = false
 var _alternate_texture_source: Object = null
 
+var _lingering_particle_lifetimes: Dictionary[Node2D, float] = {}
+
 var rotation_prop: float = 0:
     get:
         return current_rotation
@@ -107,6 +109,17 @@ func ensure_layer_root() -> void:
 
 func _notify_local_prop_updated() -> void:
     _local_prop_updated = true
+
+func _process(delta: float) -> void:
+    particle_process(delta)
+
+func particle_process(delta: float) -> void:
+    for lingering_particle_layer in _lingering_particle_lifetimes.keys():
+        _lingering_particle_lifetimes[lingering_particle_layer] -= delta
+        if _lingering_particle_lifetimes[lingering_particle_layer] <= 0.0:
+            prints("lingering particle layer %s is expiring" % lingering_particle_layer.name)
+            lingering_particle_layer.queue_free()
+            _lingering_particle_lifetimes.erase(lingering_particle_layer)
 
 func sprite_process(delta_time: float, is_frozen: bool = false) -> void:
     elapsed_time += delta_time
@@ -287,11 +300,11 @@ func refresh_layers() -> void:
     if not parent_entity and is_inside_tree():
         parent_entity = get_parent() as BaseEntity
     ensure_layer_root()
-    resort_layers()
     clear_children()
     prop_update_response.clear()
     
     _track_layer_angles()
+    resort_layer_infos()
     if preview_info and is_preview_mode:
         create_and_add_nodes_for_layer(preview_info, 0)
     else:
@@ -305,6 +318,9 @@ func refresh_layers() -> void:
         on_local_prop_update_frame(parent_entity)
     elif base_entity_id != -1:
         do_base_prop_update(base_entity_id)
+    
+    if _lingering_particle_lifetimes.size() > 0:
+        resort_lingering_particle_layers()
 
 func clear() -> void:
     modifier_masks.clear()
@@ -318,8 +334,25 @@ func _layer_sort_compare(layer_a: Dictionary, layer_b: Dictionary) -> bool:
         return layer_a["order_id"] < layer_b["order_id"]
     return layer_a.get("sort_priority", 0) < layer_b.get("sort_priority", 0)
 
-func resort_layers() -> void:
+func _layer_node_sort_compare(layer_a: Node2D, layer_b: Node2D) -> bool:
+    var a_sort_priority: int = layer_a.get_meta("sort_priority", 0)
+    var b_sort_priority: int = layer_b.get_meta("sort_priority", 0)
+    if a_sort_priority == b_sort_priority:
+        return layer_a.get_meta("order_id", -1) < layer_b.get_meta("order_id", -1)
+    return a_sort_priority < b_sort_priority
+
+func resort_layer_infos() -> void:
     layers.sort_custom(_layer_sort_compare)
+
+func resort_lingering_particle_layers() -> void:
+    if not layer_root:
+        return
+    
+    var sorted_layers: Array[Node2D] = []
+    sorted_layers.assign(layer_root.get_children())
+    sorted_layers.sort_custom(_layer_node_sort_compare)
+    for dest_index in sorted_layers.size():
+        layer_root.move_child(sorted_layers[dest_index], dest_index)
 
 func apply_modifier_info(modifier_info: Dictionary) -> void:
     modifier_info = modifier_info.duplicate_deep()
@@ -516,7 +549,12 @@ func create_and_add_nodes_for_layer(layer_info: Dictionary, layer_index: int) ->
         if not particles_type in particle_types:
             push_warning("Invalid particles type: %s" % particles_type)
             return
-        main_layer_node = particle_types[particles_type].instantiate()
+
+        main_layer_node = get_or_recycle_particle_layer(particles_type)
+        apply_particle_layer_info(layer_info, main_layer_node)
+        #main_layer_node = particle_types[particles_type].instantiate()
+
+        main_layer_node.set_meta("particles_type", particles_type)
     
     # now setup pivot indirection so the main layer node will be able to get all the meta info properly later
     var offset_degrees: float = layer_info.get("offset_degrees", 0)
@@ -546,9 +584,14 @@ func create_and_add_nodes_for_layer(layer_info: Dictionary, layer_index: int) ->
             main_layer_node = pivot_node
             main_layer_node.set_meta("offset_degrees", 0)
             main_layer_node.set_meta("is_pivot_dummy", true)
+    
+    main_layer_node.set_meta("is_particle_layer", layer_info.get("mode") == "particles")
 
     main_layer_node.name = layer_info.get("mode", "MODE") + str(layer_index)
     main_layer_node.set_meta("unscaled_static_pos", main_layer_node.position)
+    
+    main_layer_node.set_meta("order_id", layer_info.get("order_id", -1))
+    main_layer_node.set_meta("sort_priority", layer_info.get("sort_priority", 0))
     
     if layer_info.get("when_property", ""):
         var when_property_name: String = layer_info["when_property"]
@@ -583,7 +626,8 @@ func create_and_add_nodes_for_layer(layer_info: Dictionary, layer_index: int) ->
     
     main_layer_node.z_index = int(layer_info.get("z_offset", 0))
 
-    layer_root.add_child(main_layer_node, true)
+    if not main_layer_node.get_parent() == layer_root:
+        layer_root.add_child(main_layer_node, true)
     var layer_scale: Vector2 = Utility.get_vector2_from_arr(layer_info.get("scale", [1,1]))
     main_layer_node.set_meta("static_scale", layer_scale)
     main_layer_node.scale = layer_scale
@@ -620,6 +664,28 @@ func create_and_add_nodes_for_layer(layer_info: Dictionary, layer_index: int) ->
     if main_layer_node.get_meta("scale_as_9_patch", false):
         var shader_mat: = get_layer_node_material(main_layer_node)
         shader_mat.set_shader_parameter("cur_scale_for_patch", main_layer_node.scale * scale)
+
+func get_or_recycle_particle_layer(particles_type: String) -> Node2D:
+    for layer in _lingering_particle_lifetimes.keys():
+        if layer.get_meta("particles_type") == particles_type:
+            resume_particle_layer(layer)
+            return layer
+    return particle_types[particles_type].instantiate()
+
+func resume_particle_layer(particle_layer: Node2D) -> void:
+    if particle_layer.has_method("continue_emitting"):
+        particle_layer.continue_emitting()
+    elif particle_layer is GPUParticles2D:
+        particle_layer.emitting = true
+
+func make_particle_layer_stop_emitting(particle_layer: Node2D) -> void:
+    if particle_layer.has_method("stop_emitting"):
+        particle_layer.stop_emitting()
+    elif particle_layer is GPUParticles2D:
+        particle_layer.emitting = false
+
+func apply_particle_layer_info(_layer_info: Dictionary, _particle_layer: Node2D) -> void:
+    pass
 
 func check_register_cam_focus_updates() -> void:
     if not GameManager.game_camera_target_changed.is_connected(refresh_cam_focus):
@@ -715,7 +781,19 @@ func clear_children() -> void:
     if not layer_root:
         return
     for child in layer_root.get_children():
+        if child.get_meta("is_particle_layer", false):
+            linger_or_remove_particle_layer(child)
+            continue
         child.queue_free()
+        layer_root.remove_child(child)
+
+func linger_or_remove_particle_layer(particle_layer: Node2D) -> void:
+    var linger_time: float = get_particle_layer_remaining_linger_time(particle_layer)
+    if linger_time < 0.0:
+        particle_layer.queue_free()
+        return
+    make_particle_layer_stop_emitting(particle_layer)
+    _lingering_particle_lifetimes[particle_layer] = linger_time
 
 func set_sprite_facing(facing: int, immediate: bool = false) -> void:
     if interpolate_facing_enabled and not immediate:
@@ -1157,3 +1235,17 @@ func set_alternate_texture_source(new_alternate_texture_source: Object) -> void:
         return
     _has_alternate_texture_source = true
     _alternate_texture_source = new_alternate_texture_source
+
+
+func get_particle_layer_remaining_linger_time(particle_layer: Node2D) -> float:
+    if particle_layer in _lingering_particle_lifetimes:
+        return _lingering_particle_lifetimes[particle_layer]
+    
+    if particle_layer is GPUParticles2D:
+        prints("particle layer %s is a GPUParticles2D, lifetime: %s, speed_scale: %s" % [particle_layer.name, particle_layer.lifetime, particle_layer.speed_scale])
+        return particle_layer.lifetime / particle_layer.speed_scale
+    elif particle_layer.has_method("get_linger_time"):
+        prints("particle layer %s has get_linger_time method, returning %s" % [particle_layer.name, particle_layer.get_linger_time()])
+        return particle_layer.get_linger_time()
+    prints("particle layer %s has no linger time, returning 0.0" % particle_layer.name)
+    return 0.0

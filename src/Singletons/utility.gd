@@ -842,6 +842,25 @@ func input_vector_by_prefix(prefix: String) -> Vector2:
 	prefix = prefix.trim_suffix("_")
 	return Input.get_vector(prefix + "_left", prefix + "_right", prefix + "_up", prefix + "_down")
 
+func input_just_pressed_vector_by_prefix(prefix: String) -> Vector2:
+	prefix = prefix.trim_suffix("_")
+	var x_axis: = Input.get_axis(prefix + "_left", prefix + "_right")
+	if x_axis > 0 and not Input.is_action_just_pressed(prefix + "_right"):
+		x_axis = 0
+	elif x_axis < 0 and not Input.is_action_just_pressed(prefix + "_left"):
+		x_axis = 0
+	var y_axis: = Input.get_axis(prefix + "_up", prefix + "_down")
+	if y_axis > 0 and not Input.is_action_just_pressed(prefix + "_up"):
+		y_axis = 0
+	elif y_axis < 0 and not Input.is_action_just_pressed(prefix + "_down"):
+		y_axis = 0
+	return Vector2(x_axis, y_axis)
+
+func is_input_direction_just_pressed(dir: int, action_prefix: String) -> bool:
+	var facing_vec: = facing_vector(dir)
+	var input_vec: = input_just_pressed_vector_by_prefix(action_prefix)
+	return facing_vec.dot(input_vec) > 0
+
 func input_event_is_dir_action(event: InputEvent, dir_actions_prefix: String) -> bool:
 	if event.is_action(dir_actions_prefix + "_left"):
 		return true

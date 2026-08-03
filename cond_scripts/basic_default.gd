@@ -13,6 +13,55 @@ func desc_select_defaults() -> String:
 func cmd_select_defaults(slots: Dictionary) -> void:
 	cond_resolver.select_reset(slots)
 
+func desc_select_same_thing() -> String:
+	return "pos,entity,number,string|<= Copy the selection from [source_slot:SlotInput] to this slot"
+func cmd_select_same_thing(slots: Dictionary, chosen_slot: int, source_slot: int) -> void:
+	if Commands.slot_is_value(chosen_slot) and Commands.slot_is_value(source_slot):
+		_copy_value_slot_to_value_slot(slots, source_slot, chosen_slot)
+	elif Commands.slot_is_value(chosen_slot) or Commands.slot_is_value(source_slot):
+		return
+	
+	if Commands.slot_is_positions(chosen_slot) and Commands.slot_is_positions(source_slot):
+		slots[chosen_slot] = slots[source_slot].duplicate()
+	elif Commands.slot_is_entity(chosen_slot) and Commands.slot_is_entity(source_slot):
+		slots[chosen_slot] = slots[source_slot]
+
+func _copy_value_slot_to_value_slot(slots: Dictionary, from_slot: int, to_slot: int) -> void:
+	if Commands.slot_is_string(from_slot) and Commands.slot_is_string(to_slot):
+		slots[to_slot] = slots[from_slot]
+		return
+	var from_numeric: = get_value_slot_as_float(slots, from_slot)
+	set_value_slot_as_number(slots, to_slot, from_numeric)
+
+func desc_swap_slots() -> String:
+	return "pos,entity,number,string|<=> [slot_b:SlotInput] Swap the selection of these slots"
+func cmd_swap_slots(slots: Dictionary, chosen_slot: int, slot_b: int) -> void:
+	if Commands.slot_is_value(chosen_slot) and Commands.slot_is_value(slot_b):
+		_swap_value_slots(slots, chosen_slot, slot_b)
+	elif Commands.slot_is_value(chosen_slot) or Commands.slot_is_value(slot_b):
+		return
+	
+	if Commands.slot_is_positions(chosen_slot) and Commands.slot_is_positions(slot_b):
+		var temp_positions: Array = slots[chosen_slot]
+		slots[chosen_slot] = slots[slot_b]
+		slots[slot_b] = temp_positions
+	elif Commands.slot_is_entity(chosen_slot) and Commands.slot_is_entity(slot_b):
+		var temp_entity: BaseEntity = slots[chosen_slot]
+		slots[chosen_slot] = slots[slot_b]
+		slots[slot_b] = temp_entity
+
+func _swap_value_slots(slots: Dictionary, slot_a: int, slot_b: int) -> void:
+	if Commands.slot_is_string(slot_a) and Commands.slot_is_string(slot_b):
+		var temp: String = slots[slot_a]
+		slots[slot_a] = slots[slot_b]
+		slots[slot_b] = temp
+		return
+
+	var temp_numeric: = get_value_slot_as_float(slots, slot_a)
+	set_value_slot_as_number(slots, slot_a, get_value_slot_as_float(slots, slot_b))
+	set_value_slot_as_number(slots, slot_b, temp_numeric)
+
+
 func desc_quit() -> Dictionary:
 	return {
 		"display_name": "Quit Conditional",
@@ -156,9 +205,9 @@ func cmd_select_named_entity_positions(slots: Dictionary, chosen_slot: Slot, e_n
 	filtered_entities = filtered_entities.filter(func(e: BaseEntity) -> bool: return e.entity_index == e_id)
 	slots[chosen_slot] = []
 	for entity in filtered_entities:
-		var at_pos: Vector2i = entity.get_moving_position()
-		if not at_pos in slots[chosen_slot]:
-			slots[chosen_slot].append(at_pos)
+		for pos in EntityManager.get_all_positions_of_entity(entity):
+			if not pos in slots[chosen_slot]:
+				slots[chosen_slot].append(pos)
 
 func desc_select_entity_positions() -> String:
 	return "pos|<= Select all positions within [pos_filter:SlotInput:pos] where an active entity\n" \
@@ -176,9 +225,9 @@ func cmd_select_entity_positions(slots: Dictionary, chosen_slot: Slot, prop_name
 	filtered_entities = EntityManager.filter_entities_by_property(prop_name, filtered_entities, not truthy)
 	slots[chosen_slot] = []
 	for entity in filtered_entities:
-		var at_pos: Vector2i = entity.get_moving_position()
-		if not at_pos in slots[chosen_slot]:
-			slots[chosen_slot].append(at_pos)
+		for pos in EntityManager.get_all_positions_of_entity(entity):
+			if not pos in slots[chosen_slot]:
+				slots[chosen_slot].append(pos)
 
 func desc_filter_tiles_named() -> String:
 	return "pos|<= Filter the positions to those where a tile named [tile_name:TileNameInput] [invert:InvertInput:is,is not] found"
@@ -209,13 +258,45 @@ func cmd_select_tiles_in_direction(slots: Dictionary, chosen_slot: int, compl_di
 	if not Commands.slot_is_positions(chosen_slot) or not Commands.slot_has_position(from_slot):
 		push_error("Invalid slots to select tile in direction: %s, %s" % [chosen_slot, from_slot])
 		return
-	var distance_int: = int(resolve_complex_scalar(dist, slots))
+	var distance_int: = roundi(resolve_complex_scalar(dist, slots))
 	var facing_vec: = Utility.facing_vector_i(resolve_complex_direction(compl_dir, slots))
-	var from_positions: Array = slots[from_slot] if Commands.slot_is_positions(from_slot) else [slots[from_slot].get_moving_position()]
+	var from_positions: Array = slots[from_slot] if Commands.slot_is_positions(from_slot) else EntityManager.get_all_positions_of_entity(slots[from_slot])
 	var moved_positions: Array[Vector2i] = []
 	var delta: = facing_vec * distance_int
 	for from_pos in from_positions:
 		moved_positions.append(from_pos + delta)
+	slots[chosen_slot] = moved_positions
+
+func desc_select_positions_moved_in_direction() -> String:
+	return "pos|<= move the selection of positions in this slot [dist:ComplexScalarInput:int] grid spaces in this direction [compl_dir:DirectionInput:1]"
+func cmd_select_positions_moved_in_direction(slots: Dictionary, chosen_slot: int, dist: Dictionary, compl_dir: Dictionary) -> void:
+	if not Commands.slot_is_positions(chosen_slot):
+		push_error("Invalid slots to move pos selection in direction: %s" % chosen_slot)
+		return
+	if not slots[chosen_slot]:
+		return
+	var distance_int: = roundi(resolve_complex_scalar(dist, slots))
+	var facing_vec: = Utility.facing_vector_i(resolve_complex_direction(compl_dir, slots))
+	var moved_positions: Array[Vector2i] = []
+	var delta: = facing_vec * distance_int
+	for from_pos in slots[chosen_slot]:
+		moved_positions.append(from_pos + delta)
+	slots[chosen_slot] = moved_positions
+
+func desc_select_positions_moved_by_x_y() -> String:
+	return "pos|<= move the selection of positions in this slot by [x:ComplexScalarInput:int] in the x axis and [y:ComplexScalarInput:int] in the y axis"
+func cmd_select_positions_moved_by_x_y(slots: Dictionary, chosen_slot: int, x: Dictionary, y: Dictionary) -> void:
+	if not Commands.slot_is_positions(chosen_slot):
+		push_error("Invalid slots to move pos selection in direction: %s" % chosen_slot)
+		return
+	if not slots[chosen_slot]:
+		return
+	var x_int: = roundi(resolve_complex_scalar(x, slots))
+	var y_int: = roundi(resolve_complex_scalar(y, slots))
+	var delta_vec: = Vector2i(x_int, y_int)
+	var moved_positions: Array[Vector2i] = []
+	for from_pos in slots[chosen_slot]:
+		moved_positions.append(from_pos + delta_vec)
 	slots[chosen_slot] = moved_positions
 
 func desc_select_next_tile_after() -> String:
@@ -321,6 +402,43 @@ func _single_tile_position_from_slot(slots: Dictionary, slot: int) -> Vector2i:
 	else:
 		return slots[slot].get_moving_position()
 
+func desc_select_single_position_from_x_y() -> String:
+	return "pos|<= Select the single tile position from absolute x: [x:ComplexScalarInput] and y: [y:ComplexScalarInput] coordinates"
+func cmd_select_single_position_from_x_y(slots: Dictionary, chosen_slot: int, x: Dictionary, y: Dictionary) -> void:
+	if not Commands.slot_is_positions(chosen_slot):
+		push_error("Invalid slot to select single position from x and y: %s" % chosen_slot)
+		return
+	var x_int: = roundi(resolve_complex_scalar(x, slots))
+	var y_int: = roundi(resolve_complex_scalar(y, slots))
+	slots[chosen_slot] = Vector2i(x_int, y_int)
+
+func desc_include_exclude_position_from_x_y() -> String:
+	return "pos|<= [is_include:BoolChoice:true,Include,Exclude] the single tile position (x: [x:ComplexScalarInput], y: [y:ComplexScalarInput]) from the positions in this slot"
+func cmd_include_exclude_position_from_x_y(slots: Dictionary, chosen_slot: int, x: Dictionary, y: Dictionary, pos_slot: int, is_include: bool) -> void:
+	if not Commands.slot_is_positions(chosen_slot):
+		push_error("Invalid slot to include exclude position from x and y: %s" % chosen_slot)
+		return
+	var x_int: = roundi(resolve_complex_scalar(x, slots))
+	var y_int: = roundi(resolve_complex_scalar(y, slots))
+	var single_pos: Vector2i = Vector2i(x_int, y_int)
+	if is_include:
+		if single_pos in slots[pos_slot]:
+			slots[chosen_slot].append(single_pos)
+	else:
+		slots[chosen_slot].erase(single_pos)
+
+func desc_select_x_y_coordinate_of_position() -> String:
+	return "number,string|<= Select the [is_x:BoolChoice:true,x,y] coordinate of the single tile position in [pos_slot:SlotInput:pos]"
+func cmd_select_x_y_coordinate_of_position(slots: Dictionary, chosen_slot: int, pos_slot: int, is_x: bool) -> void:
+	if not Commands.slot_is_int(chosen_slot) or not Commands.slot_has_position(pos_slot):
+		push_error("Invalid slots to select x coordinate of position: %s, %s" % [chosen_slot, pos_slot])
+		return
+	if not _slot_has_single_tile_position(slots, pos_slot):
+		set_value_slot_as_number(slots, chosen_slot, 0)
+		return
+	var single_pos: Vector2i = _single_tile_position_from_slot(slots, pos_slot)
+	set_value_slot_as_number(slots, chosen_slot, single_pos[0 if is_x else 1])
+
 func desc_select_adjacent_tile() -> String:
 	return "pos|<= Select the single position adjacent to [from_slot:SlotInput:pos,entity] in this direction [compl_dir:DirectionInput:1]"
 func cmd_select_adjacent_tile(slots: Dictionary, chosen_slot: int, from_slot: int, compl_dir: Dictionary) -> void:
@@ -334,21 +452,23 @@ func cmd_select_adjacent_tile(slots: Dictionary, chosen_slot: int, from_slot: in
 	slots[chosen_slot] = [from_pos + Utility.facing_vector_i(resolve_complex_direction(compl_dir, slots))]
 
 func desc_if_position_is_adjacent() -> String:
-	return "pos,entity|If the entity/tile is adjacent to [single_pos_slot:SlotInput:pos] [with_diagonal:BoolChoice:true,including,excluding] diagonally"
+	return "pos,entity|If the entity or tile position is adjacent to the single position in [single_pos_slot:SlotInput:pos] [with_diagonal:BoolChoice:true,including,excluding] diagonally"
 func cmd_if_position_is_adjacent(slots: Dictionary, chosen_slot: int, single_pos_slot: int, with_diagonal: bool) -> bool:
 	if not Commands.slot_has_position(chosen_slot) or not Commands.slot_has_position(single_pos_slot):
 		push_error("Invalid slots to check if position is adjacent: %s, %s" % [chosen_slot, single_pos_slot])
 		return false
-	if not _slot_has_single_tile_position(slots, chosen_slot):
+	if not _slot_has_single_tile_position(slots, single_pos_slot):
 		return false
+
 	var ref_positions: Array = []
 	if Commands.slot_is_entity(chosen_slot):
 		if not slots[chosen_slot]:
 			return false
-		ref_positions = [slots[chosen_slot].get_moving_position()]
+		ref_positions = EntityManager.get_all_positions_of_entity(slots[chosen_slot])
 	else:
 		ref_positions = slots[chosen_slot]
-	var checking_pos: = _single_tile_position_from_slot(slots, chosen_slot)
+
+	var checking_pos: = _single_tile_position_from_slot(slots, single_pos_slot)
 	for ref_pos in ref_positions:
 		if Utility.is_vec2i_adjacent(ref_pos, checking_pos, with_diagonal):
 			return true
@@ -701,7 +821,7 @@ func cmd_add_text_property(slots: Dictionary, chosen_slot: int, target_slot: int
 
 
 func desc_add_number_to_text() -> String:
-	return "string|<= Add [inserted_num:ComplexScalarInput] to the [is_end:BoolChoice:true,end,beginning] of the slot\n" + \
+	return "string|<= Add [inserted_num:ComplexScalarInput] to the [is_end:BoolChoice:true,end,beginning] of the text in this slot\n" + \
 	       "Separated by [separator:StringInput]"
 func cmd_add_number_to_text(slots: Dictionary, chosen_slot: int, inserted_num: Dictionary, separator: String, is_end: bool) -> void:
 	if not Commands.slot_is_string(chosen_slot):
@@ -2009,7 +2129,7 @@ func cmd_set_entity_as_active(slots: Dictionary, chosen_slot: int, is_active: bo
 		slots[chosen_slot].set_active(is_active)
 
 func desc_apply_effect_to_entity() -> String:
-	return "entity|Apply the effect [effect_info:SpecialEffectInput] to the entity"
+	return "entity|Apply the (ongoing) effect [effect_info:SpecialEffectInput] to the entity"
 func cmd_apply_effect_to_entity(slots: Dictionary, chosen_slot: int, effect_info: Dictionary) -> void:
 	if not Commands.slot_is_entity(chosen_slot) or not slots[chosen_slot]:
 		push_error("Invalid slot or empty slot to apply effect to entity: %s" % chosen_slot)
@@ -2017,6 +2137,24 @@ func cmd_apply_effect_to_entity(slots: Dictionary, chosen_slot: int, effect_info
 	if slots[chosen_slot]:
 		var effect_color: Color = Utility.get_dict_color(effect_info, "color", Color.WHITE)
 		EntityManager.apply_special_effect(slots[chosen_slot], effect_info["effect"], effect_color, effect_info.get("amount", 0.0))
+
+func desc_remove_effects_from_entity() -> String:
+	return "entity|Remove all (ongoing) sprite effects from the entity"
+func cmd_remove_effects_from_entity(slots: Dictionary, chosen_slot: int) -> void:
+	if not Commands.slot_is_entity(chosen_slot) or not slots[chosen_slot]:
+		push_error("Invalid slot or empty slot to remove effects from entity: %s" % chosen_slot)
+		return
+	if slots[chosen_slot] and not slots[chosen_slot].dying:
+		EntityManager.clear_entity_special_effects(slots[chosen_slot])
+
+func desc_remove_sprite_effect_from_entity() -> String:
+	return "entity|Remove the (ongoing) sprite effect [effect_name:SpecialEffectInput] from the entity"
+func cmd_remove_sprite_effect_from_entity(slots: Dictionary, chosen_slot: int, effect_name: String) -> void:
+	if not Commands.slot_is_entity(chosen_slot) or not slots[chosen_slot]:
+		push_error("Invalid slot or empty slot to remove sprite effect from entity: %s" % chosen_slot)
+		return
+	if slots[chosen_slot] and not slots[chosen_slot].dying:
+		EntityManager.remove_special_effect(slots[chosen_slot], effect_name)
 
 func desc_entity_play_bump_effect() -> String:
 	return "entity|The entity plays the short \"bump\" effect [effect_info:BumpEffectInput]"
@@ -2026,15 +2164,6 @@ func cmd_entity_play_bump_effect(slots: Dictionary, chosen_slot: int, effect_inf
 		return
 	if slots[chosen_slot]:
 		slots[chosen_slot].do_named_bump_effect(effect_info)
-
-func desc_remove_effects_from_entity() -> String:
-	return "entity|Remove all sprite effects from the entity"
-func cmd_remove_effects_from_entity(slots: Dictionary, chosen_slot: int) -> void:
-	if not Commands.slot_is_entity(chosen_slot) or not slots[chosen_slot]:
-		push_error("Invalid slot or empty slot to remove effects from entity: %s" % chosen_slot)
-		return
-	if slots[chosen_slot] and not slots[chosen_slot].dying:
-		EntityManager.clear_entity_special_effects(slots[chosen_slot])
 
 
 func desc_do_screen_shake() -> String:
@@ -2053,25 +2182,36 @@ func cmd_stop_screen_shake(_slots: Dictionary) -> void:
 		GameManager.game_camera.stop_screen_shake()
 
 func desc_if_action_1_is_held() -> String:
-	return "none|If the input action 1 is currently held down"
-func cmd_if_action_1_is_held(_slots: Dictionary) -> bool:
-	return Input.is_action_pressed(&"input_action_1")
+	return "none|If the input action 1 [is_just_pressed:BoolChoice:false,was just pressed,is currently held down]"
+func cmd_if_action_1_is_held(_slots: Dictionary, _slot: int, is_just_pressed: bool) -> bool:
+	if is_just_pressed:
+		return Input.is_action_just_pressed(&"input_action_1")
+	else:
+		return Input.is_action_pressed(&"input_action_1")
 
 func desc_if_action_2_is_held() -> String:
-	return "none|If the input action 2 is currently held down"
-func cmd_if_action_2_is_held(_slots: Dictionary) -> bool:
-	return Input.is_action_pressed(&"input_action_2")
+	return "none|If the input action 2 [is_just_pressed:BoolChoice:false,was just pressed,is currently held down]"
+func cmd_if_action_2_is_held(_slots: Dictionary, _slot: int, is_just_pressed: bool) -> bool:
+	if is_just_pressed:
+		return Input.is_action_just_pressed(&"input_action_2")
+	else:
+		return Input.is_action_pressed(&"input_action_2")
 
 func desc_if_action_3_is_held() -> String:
-	return "none|If the input action 3 is currently held down"
-func cmd_if_action_3_is_held(_slots: Dictionary) -> bool:
-	return Input.is_action_pressed(&"input_action_3")
+	return "none|If the input action 3 [is_just_pressed:BoolChoice:false,was just pressed,is currently held down]"
+func cmd_if_action_3_is_held(_slots: Dictionary, _slot: int, is_just_pressed: bool) -> bool:
+	if is_just_pressed:
+		return Input.is_action_just_pressed(&"input_action_3")
+	else:
+		return Input.is_action_pressed(&"input_action_3")
 
-func _get_directional_input_vector() -> Vector2:
+func _get_directional_input_vector(just_pressed_only: bool = false) -> Vector2:
+	if just_pressed_only:
+		return Utility.input_just_pressed_vector_by_prefix("move_")
 	return Utility.input_vector_by_prefix("move_")
 
 func _direction_approximately_matches(check_vec: Vector2, input_vec: Vector2) -> bool:
-	if input_vec.length() < 0.2:
+	if input_vec.length_squared() < 0.04: # 0.2 * 0.2
 		return false
 	if check_vec.abs().max_axis_index() != input_vec.abs().max_axis_index():
 		return false
@@ -2087,11 +2227,43 @@ func cmd_if_direction_is_held(slots: Dictionary, _slot: int, compl_dir: Dictiona
 		return false
 	return _direction_approximately_matches(Utility.facing_vector(direction), _get_directional_input_vector())
 
-func desc_if_direction_is_not_held() -> String:
-	return "none|If the directional input is not currently held"
-func cmd_if_direction_is_not_held(_slots: Dictionary) -> bool:
+func desc_if_direction_was_just_pressed() -> String:
+	return "none|If the directional input just started to be held this way [compl_dir:DirectionInput:1]"
+func cmd_if_direction_was_just_pressed(slots: Dictionary, _slot: int, compl_dir: Dictionary) -> bool:
+	var direction: int = resolve_complex_direction(compl_dir, slots)
+	if direction == -1:
+		return false
+	return Utility.is_input_direction_just_pressed(direction, "move_")
+
+func desc_if_any_direction_is_held() -> String:
+	return "none|If the directional input is currently held in any direction"
+func cmd_if_any_direction_is_held(_slots: Dictionary) -> bool:
 	var directional_vec: = _get_directional_input_vector()
-	return directional_vec.length() < 0.2
+	return directional_vec.length() >= 0.2
+
+func desc_if_any_direction_was_just_pressed() -> String:
+	return "none|If the directional input just started to be held in any direction"
+func cmd_if_any_direction_was_just_pressed(_slots: Dictionary) -> bool:
+	var just_pressed_vec_abs: = _get_directional_input_vector(true).abs()
+	return just_pressed_vec_abs.x + just_pressed_vec_abs.y > 0.0
+
+func desc_select_held_direction() -> String:
+	return "int|<= Select the direction that is currently being held, biased [bias_vertical:BoolChoice:true,vertically,horizontally]"
+func cmd_select_held_direction(slots: Dictionary, chosen_slot: int, bias_vertical: bool) -> void:
+	if not Commands.slot_is_int(chosen_slot):
+		push_error("Invalid slot or empty slot to select held direction: %s" % chosen_slot)
+		return
+	var held_vec: = _get_directional_input_vector()
+	slots[chosen_slot] = Utility.biased_vector_to_facing(held_vec, bias_vertical)
+
+func desc_select_just_pressed_direction() -> String:
+	return "int|<= Select the direction that just started to become held, biased [bias_vertical:BoolChoice:true,vertically,horizontally]"
+func cmd_select_just_pressed_direction(slots: Dictionary, chosen_slot: int, bias_vertical: bool) -> void:
+	if not Commands.slot_is_int(chosen_slot):
+		push_error("Invalid slot or empty slot to select just pressed direction: %s" % chosen_slot)
+		return
+	var held_vec: = _get_directional_input_vector(true)
+	slots[chosen_slot] = Utility.biased_vector_to_facing(held_vec, bias_vertical)
 
 
 func desc_camera_next_focus() -> String:
