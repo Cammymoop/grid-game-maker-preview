@@ -222,7 +222,7 @@ func cmd_select_entity_positions(slots: Dictionary, chosen_slot: Slot, prop_name
 		filtered_entities = EntityManager.get_entities_at_multiple(slots[pos_filter], exclude_entity, [])
 	else:
 		filtered_entities = EntityManager.get_all_active_entities()
-	filtered_entities = EntityManager.filter_entities_by_property(prop_name, filtered_entities, not truthy)
+	filtered_entities = EntityManager.filter_entities_by_property(prop_name, filtered_entities, [], not truthy)
 	slots[chosen_slot] = []
 	for entity in filtered_entities:
 		for pos in EntityManager.get_all_positions_of_entity(entity):
@@ -565,8 +565,23 @@ func cmd_select_entity_at(slots: Dictionary, chosen_slot: int, at_pos_slot: int,
 		return
 	var filtered_entities: Array = EntityManager.get_entities_at_multiple(at_positions, slots[Slot.RED], [], true, false)
 	if prop_name:
-		filtered_entities = EntityManager.filter_entities_by_property(prop_name, filtered_entities, invert)
+		filtered_entities = EntityManager.filter_entities_by_property(prop_name, filtered_entities, [], invert)
 	slots[chosen_slot] = filtered_entities[0] if filtered_entities else null
+
+func desc_select_entity_with_property() -> String:
+	return "entity|<= Select the [is_first:BoolChoice:true,first,last] active entity with a [truthy:BoolChoice:true,true or non-zero,false or zero] [prop_name:PropertyInput] property ignoring [ignore_slot:SlotInput:entity,none]"
+func cmd_select_entity_with_property(slots: Dictionary, chosen_slot: int, truthy: bool, prop_name: String, ignore_slot: int, is_first: bool) -> void:
+	if not Commands.slot_is_entity(chosen_slot) or not (ignore_slot == SlotSelectorButton.NONE_SLOTS or Commands.slot_is_entity(ignore_slot)):
+		push_error("Invalid slots to select entity with property: %s and %s" % [chosen_slot, ignore_slot])
+		return
+	if not prop_name:
+		slots[chosen_slot] = null
+		return
+	var ignore_list: Array[int] = []
+	if ignore_slot != SlotSelectorButton.NONE_SLOTS and slots[ignore_slot]:
+		ignore_list.append(slots[ignore_slot].instance_id)
+	var found: = EntityManager.find_entity_with_truthy_property(prop_name, is_first, ignore_list, not truthy)
+	slots[chosen_slot] = found
 
 func desc_select_named_entity_at() -> String:
 	return "entity|<= Select an active entity (ignoring self) named [e_name:EntityNameInput] at [at_pos_slot:SlotInput:pos]"
@@ -576,7 +591,7 @@ func cmd_select_named_entity_at(slots: Dictionary, chosen_slot: int, at_pos_slot
 		return
 	var e_id: = get_id_of_complex_entity_name(e_name, slots)
 	var at_positions: Array = slots[at_pos_slot]
-	if not at_positions:
+	if not at_positions or e_id < 0:
 		slots[chosen_slot] = null
 		return
 	var filtered_entities: Array = EntityManager.get_entities_at_multiple(at_positions, slots[Slot.RED], [], false, false)
@@ -585,6 +600,21 @@ func cmd_select_named_entity_at(slots: Dictionary, chosen_slot: int, at_pos_slot
 			slots[chosen_slot] = e
 			return
 	slots[chosen_slot] = null
+
+func desc_select_named_entity() -> String:
+	return "entity|<= Select the [is_first:BoolChoice:true,first,last] active entity named [e_name:EntityNameInput] ignoring [ignore_slot:SlotInput:entity,none]"
+func cmd_select_named_entity(slots: Dictionary, chosen_slot: int, e_name: Dictionary, ignore_slot: int, is_first: bool) -> void:
+	if not Commands.slot_is_entity(chosen_slot) or not (ignore_slot == SlotSelectorButton.NONE_SLOTS or Commands.slot_is_entity(ignore_slot)):
+		push_error("Invalid slots to select named entity: %s and %s" % [chosen_slot, ignore_slot])
+		return
+	var e_id: = get_id_of_complex_entity_name(e_name, slots)
+	if e_id < 0:
+		slots[chosen_slot] = null
+		return
+	var ignore_list: Array[int] = []
+	if ignore_slot != SlotSelectorButton.NONE_SLOTS and slots[ignore_slot]:
+		ignore_list.append(slots[ignore_slot].instance_id)
+	slots[chosen_slot] = EntityManager.find_entity_by_index(e_id, is_first, ignore_list)
 
 func desc_select_nearest_entity() -> String:
 	return "entity|<= Select the nearest entity to [ref_entity_slot:SlotInput:entity] (ignoring itself) with a [truthy:BoolChoice:true,true or non-zero,false or zero] [prop_name:PropertyInput] property"
@@ -905,7 +935,7 @@ func cmd_is_entity_at(slots: Dictionary, chosen_slot: int, prop_name: String, in
 	if not at_positions:
 		return false
 	var entities_here: Array = EntityManager.get_entities_at_multiple(at_positions, slots[Slot.RED], [], false, false)
-	entities_here = EntityManager.filter_entities_by_property(prop_name, entities_here, invert)
+	entities_here = EntityManager.filter_entities_by_property(prop_name, entities_here, [], invert)
 	return entities_here.size() > 0
 
 func desc_c_has_property() -> String:
@@ -992,7 +1022,7 @@ func cmd_if_any_entity_exists(slots: Dictionary, chosen_slot: int, exclude_slot:
 		exclude_entity = slots[exclude_slot]
 	var tile_positions: Array = slots[chosen_slot]
 	if not tile_positions:
-		var found_entities: Array = EntityManager.find_all_entities_with_truthy_property(prop_name, true, invert)
+		var found_entities: Array = EntityManager.find_all_entities_with_truthy_property(prop_name, true, [], invert)
 		found_entities.erase(exclude_entity)
 		return found_entities.size() > 0
 
@@ -1009,7 +1039,7 @@ func cmd_if_entity_exists_at_all_positions(slots: Dictionary, chosen_slot: int, 
 		return false
 	if not slots[chosen_slot]:
 		return false
-	var all_valid_entities: Array[BaseEntity] = EntityManager.find_all_entities_with_truthy_property(prop_name, true, not truthy)
+	var all_valid_entities: Array[BaseEntity] = EntityManager.find_all_entities_with_truthy_property(prop_name, true, [], not truthy)
 	var entities_cur_positions: Dictionary[BaseEntity, Array] = {}
 	for pos in slots[chosen_slot]:
 		if EntityManager.process_phase != 0:
@@ -2666,7 +2696,7 @@ func cmd_select_random_filtered_entity(slots: Dictionary, chosen_slot: int, from
 	else:
 		all_entities = EntityManager.get_entities_at_multiple(from_positions)
 	all_entities.erase(slots[ignore_entity_slot])
-	all_entities = EntityManager.filter_entities_by_property(prop_name, all_entities, not truthy)
+	all_entities = EntityManager.filter_entities_by_property(prop_name, all_entities, [], not truthy)
 	if all_entities.size() == 0:
 		slots[chosen_slot] = null
 	else:

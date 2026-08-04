@@ -1455,8 +1455,10 @@ func get_entities_next_to_multiple_move_from(tile_positions: Array, move_directi
             adjacent_entities.append(e)
     return adjacent_entities
 
-func find_entity_by_index(entity_index: int, first: bool = true) -> BaseEntity:
+func find_entity_by_index(entity_index: int, first: bool = true, ignore_list: Array = []) -> BaseEntity:
     for i in Utility.array_iter(entity_list, not first):
+        if ignore_list and entity_list[i].instance_id in ignore_list:
+            continue
         if entity_list[i].entity_index == entity_index:
             return entity_list[i]
     return null
@@ -1468,15 +1470,19 @@ func find_all_entities_by_index(entity_index: int, active_only: bool = false) ->
             entities.append(i)
     return entities
 
-func find_entity_with_property(prop_name: String, first: bool = true) -> BaseEntity:
+func find_entity_with_property(prop_name: String, first: bool = true, ignore_list: Array = []) -> BaseEntity:
     for i in Utility.array_iter(entity_list, not first):
+        if ignore_list and entity_list[i].instance_id in ignore_list:
+            continue
         if entity_has_property(entity_list[i], prop_name):
             return entity_list[i]
     return null
 
-func filter_entities_by_property(prop_name: String, entities: Array, invert: bool = false) -> Array:
+func filter_entities_by_property(prop_name: String, entities: Array, ignore_list: Array = [], invert: bool = false) -> Array:
     var filtered_entities: Array = []
     for i in entities.size():
+        if ignore_list and entities[i].instance_id in ignore_list:
+            continue
         if entity_has_property(entities[i], prop_name) != invert:
             filtered_entities.append(entities[i])
     return filtered_entities
@@ -1501,15 +1507,19 @@ func entity_def_has_truthy_property_no_conditional(e_id: int, prop_name: String)
         return true
     return false
 
-func find_entity_with_truthy_property(prop_name: String, first: bool = true) -> BaseEntity:
+func find_entity_with_truthy_property(prop_name: String, first: bool = true, ignore_list: Array = [], invert: bool = false) -> BaseEntity:
     for i in Utility.array_iter(entity_list, not first):
-        if get_entity_prop_with_default(entity_list[i], prop_name, false):
+        if ignore_list and entity_list[i].instance_id in ignore_list:
+            continue
+        if get_entity_prop_with_default(entity_list[i], prop_name, false) != invert:
             return entity_list[i]
     return null
 
-func find_all_entities_with_truthy_property(prop_name: String, active_only: bool = false, invert: bool = false) -> Array[BaseEntity]:
+func find_all_entities_with_truthy_property(prop_name: String, active_only: bool = false, ignore_list: Array = [], invert: bool = false) -> Array[BaseEntity]:
     var found_entities: Array[BaseEntity] = []
     for i in entity_list:
+        if ignore_list and i.instance_id in ignore_list:
+            continue
         if (not active_only or i.active) and get_entity_prop_with_default(i, prop_name, false) != invert:
             found_entities.append(i)
     return found_entities

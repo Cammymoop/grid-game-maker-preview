@@ -320,7 +320,6 @@ func refresh_layers() -> void:
         do_base_prop_update(base_entity_id)
     
     if _lingering_particle_lifetimes.size() > 0:
-        prints("sorting layers in place so lingering particle layers are sorted")
         resort_lingering_particle_layers()
 
 func clear() -> void:

@@ -157,10 +157,10 @@ func update_items() -> void:
     
     var entities_by_truthy: = {}
     for prop in filter_props_truthy:
-        entities_by_truthy[prop] = EntityManager.find_all_entities_with_truthy_property(prop, true, false)
+        entities_by_truthy[prop] = EntityManager.find_all_entities_with_truthy_property(prop, true, [], false)
     var entities_by_falsey: = {}
     for prop in filter_props_falsey:
-        entities_by_falsey[prop] = EntityManager.find_all_entities_with_truthy_property(prop, true, true)
+        entities_by_falsey[prop] = EntityManager.find_all_entities_with_truthy_property(prop, true, [], true)
     
     for item_id in tracking_items:
         var item_data: Dictionary = tracking_items[item_id]
