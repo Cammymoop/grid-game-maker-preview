@@ -120,6 +120,7 @@ const CamFocusOptions: Array[String] = [CAM_FOCUS_IGNORE, CAM_FOCUS_SHOW, CAM_FO
 @export var subsection_nav_forward: ButtonContainer
 @export var subsection_nav_back: ButtonContainer
 
+@export var scale_input: ScalarValueInput
 
 @export var large_scale_mode_select: OptionButton
 @export var nine_patch_corner_size_input: Vec2IInput
@@ -235,6 +236,8 @@ func _ready() -> void:
         moving_visibility_select.add_item(cam_focus_option)
     moving_visibility_select.selected = 0
     moving_visibility_select.item_selected.connect(on_moving_visibility_selected)
+    
+    scale_input.value_changed.connect(on_scale_changed)
     
     large_scale_mode_select.item_selected.connect(on_large_scale_mode_selected)
     
@@ -426,6 +429,10 @@ func refresh_ui() -> void:
         var cur_rotates_mode: = _current_rotates_mode()
         Utility.opbtn_select_id(rotates_mode_select, cur_rotates_mode)
         refresh_spin_speed_input()
+    
+    var scale_vec: = Utility.get_vector2_from_arr(layer_info.get("scale", [1,1]))
+    var scale_value: float = scale_vec[scale_vec.max_axis_index()]
+    scale_input.set_value(scale_value)
     
     large_scale_mode_select.visible = layer_info['mode'] == MODE_NORMAL
     var is_nine_patch: bool = layer_info.get("scale_as_9_patch", false)
@@ -915,3 +922,7 @@ func on_angle_offset_four_way_selected(index: int) -> void:
         changed.emit()
 
     refresh_ui()
+
+func on_scale_changed(new_value: float) -> void:
+    layer_info['scale'] = Utility.vector_to_list(Vector2(new_value, new_value))
+    changed.emit()
