@@ -200,6 +200,14 @@ func facing_opposite(what_facing: int) -> int:
 func facing_rotation(what_facing: int) -> float:
 	return (what_facing * PI) / 2.0
 
+# radians to facing (0-3)
+func rotation_to_facing(rotation: float, is_closest: bool = true) -> int:
+	if is_closest:
+		return posmod(roundi(rotation / (TAU / 4)), 4)
+	else:
+		#floored
+		return posmod(floori(rotation / (TAU / 4)), 4)
+
 func direction_to_facing(direction: String) -> int:
 	if direction == "up" or direction == "forward":
 		return 0
@@ -1171,6 +1179,15 @@ func itemlist_select_metadata(itemlist: ItemList, metadata: Variant, single_sele
 
 func normalize_angle(angle_radians: float) -> float:
 	return fposmod(angle_radians, TAU)
+
+func normalize_angle_degrees(angle_degrees: float) -> float:
+	return fposmod(angle_degrees, 360.0)
+
+func smallize_angle_degrees(angle_degrees: float) -> float:
+	var normalized: = normalize_angle_degrees(angle_degrees)
+	if normalized > 180:
+		return normalized - 360
+	return normalized
 
 func valid_direction_or(direction: int, default_val: int = -1) -> int:
 	if direction >= 0 and direction < 4:

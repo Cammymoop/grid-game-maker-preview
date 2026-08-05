@@ -18,6 +18,7 @@
 [ext_resource type="StyleBox" uid="uid://cu78oa72kple8" path="res://assets/ui/button_styles/thin_button_normal.tres" id="9_vov2b"]
 [ext_resource type="StyleBox" uid="uid://cf4b0mxp54ien" path="res://assets/ui/button_styles/thin_button_pressed.tres" id="10_jq3ql"]
 [ext_resource type="StyleBox" uid="uid://ch63py1vky05t" path="res://assets/ui/plain_input_bg.tres" id="15_5xfb3"]
+[ext_resource type="FontFile" uid="uid://ctnllh13x3iqi" path="res://assets/font/NotoSans-Bold.ttf" id="15_tghr5"]
 [ext_resource type="PackedScene" uid="uid://b0nx61j31pwcv" path="res://Scenes/GameEditor/ConditionalEditor/order_comparison_input.tscn" id="17_vov2b"]
 [ext_resource type="Script" uid="uid://dpuajjdauwd7f" path="res://Scenes/GameEditor/remembering_color_picker_button.gd" id="18_jq3ql"]
 
@@ -41,7 +42,7 @@ vertical = true
 atlas = ExtResource("3_jxcnp")
 region = Rect2(0, 64, 32, 32)
 
-[node name="FancySpriteLayerListItem" type="MarginContainer" unique_id=1110623540 node_paths=PackedStringArray("remove_button", "layer_image_button", "offset_type_selector", "offset_input", "mode_selector", "reorder_buttons", "rotates_option", "rotates_mode_select", "spin_speed_input", "offset_degrees_input", "z_offset_input", "digits_settings", "digits_max_digits_input", "digits_color_picker", "digits_pad_zeros_toggle", "digits_source_selector", "digits_number_input", "digits_property_input", "particle_settings", "particle_type_selector", "particle_color_enable_toggle", "particle_color_picker", "visibility_property_input", "vis_prop_comparison_selector", "vis_prop_compare_number_input", "vis_prop_type_selector", "mod_color_input", "cam_focus_visibility_select", "moving_visibility_select", "subsection_container", "subsection_nav_forward", "subsection_nav_back", "large_scale_mode_select", "nine_patch_corner_size_input", "nine_patch_edge_repeat_select", "nine_patch_center_repeat_select", "nine_patch_corner_option", "nine_patch_repeats_option")]
+[node name="FancySpriteLayerListItem" type="MarginContainer" unique_id=1110623540 node_paths=PackedStringArray("remove_button", "offset_type_selector", "offset_input", "mode_selector", "reorder_buttons", "rotates_option", "rotates_mode_select", "spin_speed_input", "angle_offset_four_way_select", "offset_degrees_input", "layer_image_button", "four_way_image_pickers", "four_way_picker_up", "four_way_picker_down", "four_way_picker_left", "four_way_picker_right", "z_offset_input", "digits_settings", "digits_max_digits_input", "digits_color_picker", "digits_pad_zeros_toggle", "digits_source_selector", "digits_number_input", "digits_property_input", "particle_settings", "particle_type_selector", "particle_color_enable_toggle", "particle_color_picker", "visibility_property_input", "vis_prop_comparison_selector", "vis_prop_compare_number_input", "vis_prop_type_selector", "mod_color_input", "cam_focus_visibility_select", "moving_visibility_select", "subsection_container", "subsection_nav_forward", "subsection_nav_back", "large_scale_mode_select", "nine_patch_corner_size_input", "nine_patch_edge_repeat_select", "nine_patch_center_repeat_select", "nine_patch_corner_option", "nine_patch_repeats_option")]
 offset_right = 652.0
 offset_bottom = 71.0
 theme = ExtResource("1_pj4t0")
@@ -52,7 +53,6 @@ theme_override_constants/margin_bottom = 2
 script = ExtResource("1_ya7sx")
 empty_layer_button_icon = ExtResource("2_x76fy")
 remove_button = NodePath("HBoxContainer/RemoveLayerButton")
-layer_image_button = NodePath("HBoxContainer/PanelContainer/HBoxContainer/HBoxContainer/LayerImageButton")
 offset_type_selector = NodePath("HBoxContainer/PanelContainer/HBoxContainer/SubsectionContainer/MainSubsection/VBoxContainer/HBoxContainer2/OffsetTypeSelect")
 offset_input = NodePath("HBoxContainer/PanelContainer/HBoxContainer/SubsectionContainer/MainSubsection/VBoxContainer/HBoxContainer2/OffsetInput")
 mode_selector = NodePath("HBoxContainer/PanelContainer/HBoxContainer/SubsectionContainer/MainSubsection/VBoxContainer/HBoxContainer/HBoxContainer2/OptionButton")
@@ -60,7 +60,14 @@ reorder_buttons = NodePath("HBoxContainer/OrderButtons")
 rotates_option = NodePath("HBoxContainer/PanelContainer/HBoxContainer/SubsectionContainer/MainSubsection/VBoxContainer2/RotatesOption")
 rotates_mode_select = NodePath("HBoxContainer/PanelContainer/HBoxContainer/SubsectionContainer/MainSubsection/VBoxContainer2/RotatesOption/RotatesModeSelect")
 spin_speed_input = NodePath("HBoxContainer/PanelContainer/HBoxContainer/SubsectionContainer/MainSubsection/VBoxContainer2/RotatesOption/SpinSpeedInput")
+angle_offset_four_way_select = NodePath("HBoxContainer/PanelContainer/HBoxContainer/SubsectionContainer/MainSubsection/VBoxContainer2/AngleOffsetOption/AngleOffsetFourWayDirSelector")
 offset_degrees_input = NodePath("HBoxContainer/PanelContainer/HBoxContainer/SubsectionContainer/MainSubsection/VBoxContainer2/AngleOffsetOption/OffsetDegreesInput")
+layer_image_button = NodePath("HBoxContainer/PanelContainer/HBoxContainer/HBoxContainer/LayerImageButton")
+four_way_image_pickers = NodePath("HBoxContainer/PanelContainer/HBoxContainer/HBoxContainer/FourWayImagePickerButtons")
+four_way_picker_up = NodePath("HBoxContainer/PanelContainer/HBoxContainer/HBoxContainer/FourWayImagePickerButtons/VBoxContainer/FourWayUpImagePickerBtn")
+four_way_picker_down = NodePath("HBoxContainer/PanelContainer/HBoxContainer/HBoxContainer/FourWayImagePickerButtons/VBoxContainer/FourWayDownImagePickerBtn")
+four_way_picker_left = NodePath("HBoxContainer/PanelContainer/HBoxContainer/HBoxContainer/FourWayImagePickerButtons/FourWayLeftImagePickerBtn")
+four_way_picker_right = NodePath("HBoxContainer/PanelContainer/HBoxContainer/HBoxContainer/FourWayImagePickerButtons/FourWayRightImagePickerBtn")
 z_offset_input = NodePath("HBoxContainer/PanelContainer/HBoxContainer/SubsectionContainer/MainSubsection/VBoxContainer/HBoxContainer/HBoxContainer/ZOffsetInput")
 digits_settings = NodePath("HBoxContainer/PanelContainer/HBoxContainer/HBoxContainer/DigitSettings")
 digits_max_digits_input = NodePath("HBoxContainer/PanelContainer/HBoxContainer/HBoxContainer/DigitSettings/HBoxContainer2/DigitCountInput")
@@ -136,6 +143,7 @@ alignment = 1
 
 [node name="MainSubsection" type="HBoxContainer" parent="HBoxContainer/PanelContainer/HBoxContainer/SubsectionContainer" unique_id=1247727667]
 layout_mode = 2
+theme_override_constants/separation = 8
 
 [node name="VBoxContainer" type="VBoxContainer" parent="HBoxContainer/PanelContainer/HBoxContainer/SubsectionContainer/MainSubsection" unique_id=860413154]
 layout_mode = 2
@@ -143,6 +151,7 @@ alignment = 1
 
 [node name="HBoxContainer" type="HBoxContainer" parent="HBoxContainer/PanelContainer/HBoxContainer/SubsectionContainer/MainSubsection/VBoxContainer" unique_id=1551424300]
 layout_mode = 2
+theme_override_constants/separation = 8
 
 [node name="HBoxContainer2" type="HBoxContainer" parent="HBoxContainer/PanelContainer/HBoxContainer/SubsectionContainer/MainSubsection/VBoxContainer/HBoxContainer" unique_id=1109487204]
 layout_mode = 2
@@ -240,6 +249,28 @@ layout_mode = 2
 [node name="Label" type="Label" parent="HBoxContainer/PanelContainer/HBoxContainer/SubsectionContainer/MainSubsection/VBoxContainer2/AngleOffsetOption" unique_id=2122565688]
 layout_mode = 2
 text = "Angle Offset:"
+
+[node name="AngleOffsetFourWayDirSelector" type="OptionButton" parent="HBoxContainer/PanelContainer/HBoxContainer/SubsectionContainer/MainSubsection/VBoxContainer2/AngleOffsetOption" unique_id=295774149]
+custom_minimum_size = Vector2(21, 0)
+layout_mode = 2
+theme_override_fonts/font = ExtResource("15_tghr5")
+theme_override_font_sizes/font_size = 14
+alignment = 1
+selected = 0
+fit_to_longest_item = false
+item_count = 6
+popup/item_0/text = "⭡"
+popup/item_0/id = 0
+popup/item_1/text = "⭢"
+popup/item_1/id = 2
+popup/item_2/text = "⭣"
+popup/item_2/id = 3
+popup/item_3/text = "⭠"
+popup/item_3/id = 1
+popup/item_4/text = "set to unrotated"
+popup/item_4/id = 4
+popup/item_5/text = "set to rotated"
+popup/item_5/id = 5
 
 [node name="OffsetDegreesInput" parent="HBoxContainer/PanelContainer/HBoxContainer/SubsectionContainer/MainSubsection/VBoxContainer2/AngleOffsetOption" unique_id=880956066 instance=ExtResource("7_101gm")]
 custom_minimum_size = Vector2(60, 0)
@@ -535,6 +566,7 @@ script = ExtResource("7_d3nlp")
 override_default_min_size = Vector2(100, -1)
 
 [node name="VBoxContainer" type="VBoxContainer" parent="HBoxContainer/PanelContainer/HBoxContainer/HBoxContainer" unique_id=854503460]
+visible = false
 layout_mode = 2
 
 [node name="Label" type="Label" parent="HBoxContainer/PanelContainer/HBoxContainer/HBoxContainer/VBoxContainer" unique_id=1924908009]
@@ -598,6 +630,194 @@ theme_override_constants/margin_bottom = 2
 texture_filter = 1
 custom_minimum_size = Vector2(56, 56)
 layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+mouse_filter = 2
+texture = SubResource("AtlasTexture_mwfft")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="FourWayImagePickerButtons" type="HBoxContainer" parent="HBoxContainer/PanelContainer/HBoxContainer/HBoxContainer" unique_id=162848212]
+layout_mode = 2
+
+[node name="Spacer" type="Control" parent="HBoxContainer/PanelContainer/HBoxContainer/HBoxContainer/FourWayImagePickerButtons" unique_id=1169556912]
+visible = false
+layout_mode = 2
+mouse_filter = 2
+
+[node name="FourWayLeftImagePickerBtn" type="Container" parent="HBoxContainer/PanelContainer/HBoxContainer/HBoxContainer/FourWayImagePickerButtons" unique_id=825740910]
+layout_mode = 2
+size_flags_vertical = 4
+script = ExtResource("2_ya7sx")
+disabled_child_modulate = Color(1, 1, 1, 1)
+metadata/_custom_type_script = "uid://bq446sgdivroo"
+metadata/_edit_group_ = true
+
+[node name="MarginContainer" type="MarginContainer" parent="HBoxContainer/PanelContainer/HBoxContainer/HBoxContainer/FourWayImagePickerButtons/FourWayLeftImagePickerBtn" unique_id=1406617715]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/margin_left = 2
+theme_override_constants/margin_top = 2
+theme_override_constants/margin_right = 2
+theme_override_constants/margin_bottom = 2
+
+[node name="SpaceHolder" type="Control" parent="HBoxContainer/PanelContainer/HBoxContainer/HBoxContainer/FourWayImagePickerButtons/FourWayLeftImagePickerBtn/MarginContainer" unique_id=109679307]
+custom_minimum_size = Vector2(24, 24)
+layout_mode = 2
+mouse_filter = 2
+
+[node name="TextureRect" type="TextureRect" parent="HBoxContainer/PanelContainer/HBoxContainer/HBoxContainer/FourWayImagePickerButtons/FourWayLeftImagePickerBtn/MarginContainer/SpaceHolder" unique_id=1630959638]
+texture_filter = 1
+custom_minimum_size = Vector2(24, 24)
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -12.0
+offset_top = -12.0
+offset_right = 12.0
+offset_bottom = 12.0
+grow_horizontal = 2
+grow_vertical = 2
+pivot_offset_ratio = Vector2(0.5, 0.5)
+size_flags_horizontal = 4
+size_flags_vertical = 4
+mouse_filter = 2
+texture = SubResource("AtlasTexture_mwfft")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="VBoxContainer" type="VBoxContainer" parent="HBoxContainer/PanelContainer/HBoxContainer/HBoxContainer/FourWayImagePickerButtons" unique_id=515291469]
+layout_mode = 2
+alignment = 1
+
+[node name="FourWayUpImagePickerBtn" type="Container" parent="HBoxContainer/PanelContainer/HBoxContainer/HBoxContainer/FourWayImagePickerButtons/VBoxContainer" unique_id=906718587]
+layout_mode = 2
+size_flags_vertical = 4
+script = ExtResource("2_ya7sx")
+disabled_child_modulate = Color(1, 1, 1, 1)
+metadata/_custom_type_script = "uid://bq446sgdivroo"
+metadata/_edit_group_ = true
+
+[node name="MarginContainer" type="MarginContainer" parent="HBoxContainer/PanelContainer/HBoxContainer/HBoxContainer/FourWayImagePickerButtons/VBoxContainer/FourWayUpImagePickerBtn" unique_id=1524145908]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/margin_left = 2
+theme_override_constants/margin_top = 2
+theme_override_constants/margin_right = 2
+theme_override_constants/margin_bottom = 2
+
+[node name="SpaceHolder" type="Control" parent="HBoxContainer/PanelContainer/HBoxContainer/HBoxContainer/FourWayImagePickerButtons/VBoxContainer/FourWayUpImagePickerBtn/MarginContainer" unique_id=1588511056]
+custom_minimum_size = Vector2(24, 24)
+layout_mode = 2
+mouse_filter = 2
+
+[node name="TextureRect" type="TextureRect" parent="HBoxContainer/PanelContainer/HBoxContainer/HBoxContainer/FourWayImagePickerButtons/VBoxContainer/FourWayUpImagePickerBtn/MarginContainer/SpaceHolder" unique_id=1645471983]
+texture_filter = 1
+custom_minimum_size = Vector2(24, 24)
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -12.0
+offset_top = -12.0
+offset_right = 12.0
+offset_bottom = 12.0
+grow_horizontal = 2
+grow_vertical = 2
+pivot_offset_ratio = Vector2(0.5, 0.5)
+size_flags_horizontal = 4
+size_flags_vertical = 4
+mouse_filter = 2
+texture = SubResource("AtlasTexture_mwfft")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="FourWayDownImagePickerBtn" type="Container" parent="HBoxContainer/PanelContainer/HBoxContainer/HBoxContainer/FourWayImagePickerButtons/VBoxContainer" unique_id=1936284215]
+layout_mode = 2
+size_flags_vertical = 4
+script = ExtResource("2_ya7sx")
+disabled_child_modulate = Color(1, 1, 1, 1)
+metadata/_custom_type_script = "uid://bq446sgdivroo"
+metadata/_edit_group_ = true
+
+[node name="MarginContainer" type="MarginContainer" parent="HBoxContainer/PanelContainer/HBoxContainer/HBoxContainer/FourWayImagePickerButtons/VBoxContainer/FourWayDownImagePickerBtn" unique_id=1181059915]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/margin_left = 2
+theme_override_constants/margin_top = 2
+theme_override_constants/margin_right = 2
+theme_override_constants/margin_bottom = 2
+
+[node name="SpaceHolder" type="Control" parent="HBoxContainer/PanelContainer/HBoxContainer/HBoxContainer/FourWayImagePickerButtons/VBoxContainer/FourWayDownImagePickerBtn/MarginContainer" unique_id=926603355]
+custom_minimum_size = Vector2(24, 24)
+layout_mode = 2
+mouse_filter = 2
+
+[node name="TextureRect" type="TextureRect" parent="HBoxContainer/PanelContainer/HBoxContainer/HBoxContainer/FourWayImagePickerButtons/VBoxContainer/FourWayDownImagePickerBtn/MarginContainer/SpaceHolder" unique_id=1535608262]
+texture_filter = 1
+custom_minimum_size = Vector2(24, 24)
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -12.0
+offset_top = -12.0
+offset_right = 12.0
+offset_bottom = 12.0
+grow_horizontal = 2
+grow_vertical = 2
+pivot_offset_ratio = Vector2(0.5, 0.5)
+size_flags_horizontal = 4
+size_flags_vertical = 4
+mouse_filter = 2
+texture = SubResource("AtlasTexture_mwfft")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="FourWayRightImagePickerBtn" type="Container" parent="HBoxContainer/PanelContainer/HBoxContainer/HBoxContainer/FourWayImagePickerButtons" unique_id=1348075216]
+layout_mode = 2
+size_flags_vertical = 4
+script = ExtResource("2_ya7sx")
+disabled_child_modulate = Color(1, 1, 1, 1)
+metadata/_custom_type_script = "uid://bq446sgdivroo"
+metadata/_edit_group_ = true
+
+[node name="MarginContainer" type="MarginContainer" parent="HBoxContainer/PanelContainer/HBoxContainer/HBoxContainer/FourWayImagePickerButtons/FourWayRightImagePickerBtn" unique_id=781212182]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/margin_left = 2
+theme_override_constants/margin_top = 2
+theme_override_constants/margin_right = 2
+theme_override_constants/margin_bottom = 2
+
+[node name="SpaceHolder" type="Control" parent="HBoxContainer/PanelContainer/HBoxContainer/HBoxContainer/FourWayImagePickerButtons/FourWayRightImagePickerBtn/MarginContainer" unique_id=1493168306]
+custom_minimum_size = Vector2(24, 24)
+layout_mode = 2
+mouse_filter = 2
+
+[node name="TextureRect" type="TextureRect" parent="HBoxContainer/PanelContainer/HBoxContainer/HBoxContainer/FourWayImagePickerButtons/FourWayRightImagePickerBtn/MarginContainer/SpaceHolder" unique_id=948368039]
+texture_filter = 1
+custom_minimum_size = Vector2(24, 24)
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -12.0
+offset_top = -12.0
+offset_right = 12.0
+offset_bottom = 12.0
+grow_horizontal = 2
+grow_vertical = 2
+pivot_offset_ratio = Vector2(0.5, 0.5)
 size_flags_horizontal = 4
 size_flags_vertical = 4
 mouse_filter = 2

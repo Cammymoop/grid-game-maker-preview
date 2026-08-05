@@ -486,14 +486,19 @@ func create_and_add_nodes_for_layer(layer_info: Dictionary, layer_index: int) ->
     var main_layer_node: Node2D = null
     var is_masked: bool = false
 
-    if layer_info.get("mode") == "normal":
+    if layer_info.get("mode") == "normal" or layer_info.get("mode") == "4-way":
         var layer_texture_id: int = int(layer_info.get("texture", -1))
         if layer_texture_id == -1:
             return
         
         var layer_tex: Texture = _get_texture_by_id(layer_texture_id)
         var layer_tex_rect: Rect2 = _get_texture_sub_index_rect(layer_texture_id, layer_info.get("tex_index", 0))
-    
+        
+        var is_four_way: bool = layer_info.get("mode") == "4-way"
+        if not layer_info.get("four_way_texture_ids", []).size() == 4:
+            is_four_way = false
+        if not layer_info.get("four_way_sub_indices", []).size() == 4:
+            is_four_way = false
         
         is_masked = layer_info.get("masked", false)
         var mask_texture_id: int = -1
@@ -504,9 +509,6 @@ func create_and_add_nodes_for_layer(layer_info: Dictionary, layer_index: int) ->
 
         if is_masked:
             var clipping_spr: = clipping_spr_scn.instantiate()
-            clipping_spr.texture = layer_tex
-            clipping_spr.region_rect = layer_tex_rect
-            clipping_spr.region_enabled = true
             main_layer_node = clipping_spr
 
             var mask_src_tex: Texture = _get_texture_by_id(mask_texture_id)
@@ -520,9 +522,6 @@ func create_and_add_nodes_for_layer(layer_info: Dictionary, layer_index: int) ->
             mask_spr.texture = create_bw_mask_from_texture_region(mask_src_tex, mask_tex_rect, mask_is_bw, mask_clip_outer)
         else:
             var layer_spr: = _get_new_unmasked_sprite()
-            layer_spr.texture = layer_tex
-            layer_spr.region_rect = layer_tex_rect
-            layer_spr.region_enabled = true
             main_layer_node = layer_spr
 
             var scale_as_9_patch: bool = layer_info.get("scale_as_9_patch", false)
@@ -532,6 +531,30 @@ func create_and_add_nodes_for_layer(layer_info: Dictionary, layer_index: int) ->
                 var layer_corner_size: Vector2 = Utility.get_vector2_from_arr(layer_info.get("9_patch_corner_size", [0.375, 0.375]))
                 main_layer_node.set_meta("nine_patch_corner_size", layer_corner_size)
                 shader_mat.set_shader_parameter("patch_size", Vector2.ONE - (layer_corner_size * 2.0));
+
+        main_layer_node.texture = layer_tex
+        main_layer_node.region_rect = layer_tex_rect
+        main_layer_node.region_enabled = true
+        
+        if is_four_way:
+            var four_way_texture_ids: Array[int] = []
+            four_way_texture_ids.assign(layer_info["four_way_texture_ids"])
+            var four_way_rects: Array[Rect2] = []
+            for i in 4:
+                var texture_id: int = four_way_texture_ids[i]
+                var sub_index: int = layer_info["four_way_sub_indices"][i]
+                four_way_rects.append(_get_texture_sub_index_rect(texture_id, sub_index))
+            var four_way_angle_offsets: Array[float] = []
+            for offset_degrees in layer_info.get("four_way_angle_offsets", []):
+                four_way_angle_offsets.append(deg_to_rad(offset_degrees))
+            if four_way_angle_offsets.size() < 4:
+                for i in 4 - four_way_angle_offsets.size():
+                    four_way_angle_offsets.append(0.0)
+            main_layer_node.set_meta("four_way_angle_offsets", four_way_angle_offsets)
+
+            main_layer_node.set_meta("four_way_texture_ids", four_way_texture_ids)
+            main_layer_node.set_meta("four_way_rects", four_way_rects)
+            main_layer_node.set_meta("is_four_way", true)
 
     elif layer_info.get("mode") == "digits":
         var digit_display: = digit_display_scn.instantiate() as DigitDisplay
@@ -558,7 +581,9 @@ func create_and_add_nodes_for_layer(layer_info: Dictionary, layer_index: int) ->
     
     # now setup pivot indirection so the main layer node will be able to get all the meta info properly later
     var offset_degrees: float = layer_info.get("offset_degrees", 0)
-    main_layer_node.set_meta("offset_degrees", offset_degrees)
+    if layer_info.get("mode") == "4-way" and layer_info.get("four_way_angle_offsets", []).size() == 4:
+        offset_degrees = layer_info.get("four_way_angle_offsets")[0]
+    main_layer_node.set_meta("offset_angle", deg_to_rad(offset_degrees))
     
     var layer_offset: Vector2 = Utility.get_vector2_from_arr(layer_info.get("offset", [0,0]))
     var layer_pivot_offset: Vector2 = Utility.get_vector2_from_arr(layer_info.get("pivot", [0,0]))
@@ -574,6 +599,8 @@ func create_and_add_nodes_for_layer(layer_info: Dictionary, layer_index: int) ->
         else:
             var pivot_node: Node2D = Node2D.new()
             pivot_node.add_child(main_layer_node)
+            if main_layer_node.get_meta("is_four_way", false):
+                pivot_node.set_meta("is_four_way", true)
             main_layer_node.position = relative_offset
             main_layer_node.rotation = deg_to_rad(offset_degrees)
             pivot_node.position = layer_pivot_offset
@@ -582,8 +609,10 @@ func create_and_add_nodes_for_layer(layer_info: Dictionary, layer_index: int) ->
                 pivot_node.set_meta("scale_as_9_patch", main_layer_node.get_meta("scale_as_9_patch"))
                 pivot_node.set_meta("nine_patch_corner_size", main_layer_node.get_meta("nine_patch_corner_size", Vector2.ONE * 0.25))
             main_layer_node = pivot_node
-            main_layer_node.set_meta("offset_degrees", 0)
+            main_layer_node.set_meta("offset_angle", 0.0)
             main_layer_node.set_meta("is_pivot_dummy", true)
+    else:
+        main_layer_node.position = layer_pivot_offset
     
     main_layer_node.set_meta("is_particle_layer", layer_info.get("mode") == "particles")
 
@@ -826,8 +855,21 @@ func set_sprite_rotation(new_rotation: float, setting_anim_spin_rotation: bool =
 func _set_sprite_layer_rotation(layer_node: Node2D, new_rotation: float) -> void:
     if layer_node.get_meta("faces_head", false):
         return
+    var is_four_way: bool = layer_node.get_meta("is_four_way", false)
+    var four_way_dir: int = 0
+    if is_four_way:
+        four_way_dir = Utility.rotation_to_facing(new_rotation)
+        _update_layer_four_way_sprite(layer_node, four_way_dir)
+
     var layer_rotates: bool = layer_node.get_meta("rotates_with_sprite", true)
-    var offset_rotation: float = deg_to_rad(layer_node.get_meta("offset_degrees", 0))
+    var offset_rotation: float = 0
+    if is_four_way and not layer_node.get_meta("is_pivot_dummy"):
+        offset_rotation = _get_layer_four_way_angle_offset(layer_node, four_way_dir)
+        if not layer_rotates:
+            offset_rotation += Utility.facing_rotation(four_way_dir)
+    else:
+        offset_rotation = layer_node.get_meta("offset_angle", 0.0)
+
     if layer_rotates:
         new_rotation += offset_rotation
     else:
@@ -840,7 +882,7 @@ func _set_sprite_layer_rotation(layer_node: Node2D, new_rotation: float) -> void
 func update_spinning_layers() -> void:
     if _animated_spinning:
         return
-    for layer_node in get_children():
+    for layer_node in layer_root.get_children():
         if layer_node.get_meta("spins", false):
             _update_spinning_layer(layer_node)
 
@@ -855,8 +897,17 @@ func update_head_facing_layers() -> void:
 
 func _update_spinning_layer(layer_node: Node2D) -> void:
     var spin_speed: float = layer_node.get_meta("spinning_speed", 0.0)
-    var offset_rotation: float = deg_to_rad(layer_node.get_meta("offset_degrees", 0))
-    layer_node.rotation = _spin_angle(spin_speed, layer_node.get_meta("spin_zero_time")) + offset_rotation
+    
+    var base_spin_angle: float = _spin_angle(spin_speed, layer_node.get_meta("spin_zero_time"))
+    var offset_rotation: float = layer_node.get_meta("offset_angle", 0.0)
+
+    if layer_node.get_meta("is_four_way", false):
+        var four_way_dir: int = Utility.rotation_to_facing(base_spin_angle)
+        if not layer_node.get_meta("is_pivot_dummy"):
+            offset_rotation = _get_layer_four_way_angle_offset(layer_node, four_way_dir)
+        _update_layer_four_way_sprite(layer_node, four_way_dir)
+
+    layer_node.rotation = base_spin_angle + offset_rotation
     if layer_node.get_child_count() > 0:
         if layer_node.get_meta("sub_layer_rotates") == false:
             layer_node.get_child(0).rotation = -(layer_node.rotation - offset_rotation)
@@ -1220,7 +1271,7 @@ func set_large_size_with_position_and_interpolation(new_size: Vector2, tile_pos_
     set_sprite_size(new_size * MapManager.tile_width, false)
 
 func get_layer_node_material(layer_node: Node2D) -> ShaderMaterial:
-    if layer_node.get_meta("is_pivot_dummy"):
+    if layer_node.get_meta("is_pivot_dummy", false):
         return layer_node.get_child(0).material as ShaderMaterial
     return layer_node.material as ShaderMaterial
 
@@ -1255,3 +1306,40 @@ func get_particle_layer_remaining_linger_time(particle_layer: Node2D) -> float:
     elif particle_layer.has_method("get_linger_time"):
         return particle_layer.get_linger_time()
     return 0.0
+
+func _get_layer_four_way_angle_offset(layer_node: Node2D, for_direction: int) -> float:
+    if not layer_node.get_meta("is_four_way", false):
+        return 0.0
+    var real_layer_node: Node2D = layer_node
+    if layer_node.get_meta("is_pivot_dummy"):
+        real_layer_node = layer_node.get_child(0)
+
+    var four_way_angle_offsets: Array[float] = real_layer_node.get_meta("four_way_angle_offsets", [])
+    if four_way_angle_offsets.size() - 1 < for_direction:
+        return 0.0
+    return four_way_angle_offsets[for_direction]
+
+func _update_layer_four_way_sprite(layer_node: Node2D, use_direction: int) -> void:
+    if not layer_node.get_meta("is_four_way", false):
+        return
+    var real_layer_node: Node2D = layer_node
+    if layer_node.get_meta("is_pivot_dummy"):
+        real_layer_node = layer_node.get_child(0)
+        
+        # set the before-pivot angle offset here, it's not updated by _set_sprite_layer_rotation
+        var dir_offset_angle: = 0.0
+        if not layer_node.get_meta("rotates_with_sprite", true):
+            dir_offset_angle = Utility.facing_rotation(use_direction)
+
+        if real_layer_node.get_meta("four_way_angle_offsets", []).size() == 4:
+            dir_offset_angle += real_layer_node.get_meta("four_way_angle_offsets")[use_direction]
+        real_layer_node.rotation = dir_offset_angle
+
+    var layer_texture_ids: Array[int] = real_layer_node.get_meta("four_way_texture_ids", [])
+    var cur_id: int = real_layer_node.get_meta("cur_texture_id", -1)
+    
+    if layer_texture_ids[use_direction] != cur_id:
+        real_layer_node.texture = TextureManager.get_texture(layer_texture_ids[use_direction])
+    
+    var rects: Array[Rect2] = real_layer_node.get_meta("four_way_rects", [])
+    real_layer_node.region_rect = rects[use_direction]

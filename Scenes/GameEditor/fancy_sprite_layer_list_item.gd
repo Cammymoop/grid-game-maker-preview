@@ -17,12 +17,14 @@ const OrderComparisonInput: = preload("res://src/GameEditor/ConditionalEditor/or
 static var texture_picker_scene: = preload("res://Scenes/GameEditor/BetterTextureDialog.tscn")
 
 const MODE_NORMAL: = "normal"
+const MODE_FOUR_WAY: = "4-way"
 const MODE_DIGITS: = "digits"
 const MODE_PARTICLES: = "particles"
 const MODE_EMPTY: = "empty"
 
 const LayerModeOptions: Dictionary[String, String] = {
     MODE_NORMAL: "normal",
+    MODE_FOUR_WAY: "4-way",
     MODE_DIGITS: "digits",
     MODE_PARTICLES: "particles",
     MODE_EMPTY: "empty",
@@ -69,7 +71,6 @@ const CamFocusOptions: Array[String] = [CAM_FOCUS_IGNORE, CAM_FOCUS_SHOW, CAM_FO
 @export var empty_layer_button_icon: Texture2D
 
 @export var remove_button: ButtonContainer
-@export var layer_image_button: ButtonContainer
 @export var offset_type_selector: OptionButton
 @export var offset_input: Vec2IInput
 @export var mode_selector: OptionButton
@@ -77,7 +78,15 @@ const CamFocusOptions: Array[String] = [CAM_FOCUS_IGNORE, CAM_FOCUS_SHOW, CAM_FO
 @export var rotates_option: Control
 @export var rotates_mode_select: OptionButton
 @export var spin_speed_input: ScalarValueInput
+@export var angle_offset_four_way_select: OptionButton
 @export var offset_degrees_input: ScalarValueInput
+
+@export var layer_image_button: ButtonContainer
+@export var four_way_image_pickers: Control
+@export var four_way_picker_up: ButtonContainer
+@export var four_way_picker_down: ButtonContainer
+@export var four_way_picker_left: ButtonContainer
+@export var four_way_picker_right: ButtonContainer
 
 @export var z_offset_input: ScalarValueInput
 
@@ -177,6 +186,8 @@ func _ready() -> void:
     Utility.opbtn_select_id(rotates_mode_select, ROTATES_ROTATES)
     rotates_mode_select.item_selected.connect(on_rotates_mode_selected)
     
+    angle_offset_four_way_select.item_selected.connect(on_angle_offset_four_way_selected)
+
     offset_degrees_input.value_changed.connect(on_offset_degrees_changed)
     
     digits_source_selector.clear()
@@ -195,6 +206,11 @@ func _ready() -> void:
     digits_color_picker.color_changed.connect(on_digits_color_changed)
     
     layer_image_button.pressed.connect(on_layer_image_button_pressed)
+    
+    var dir_picker_buttons: Array[ButtonContainer] = [four_way_picker_up, four_way_picker_right, four_way_picker_down, four_way_picker_left]
+    for i in 4:
+        var dir_picker_button: ButtonContainer = dir_picker_buttons[i]
+        dir_picker_button.pressed.connect(on_four_way_picker_pressed.bind(i))
     
     visibility_property_input.text_changed.connect(on_visibility_prop_changed)
     mod_color_input.color_changed.connect(on_mod_color_changed)
@@ -294,6 +310,29 @@ func on_mode_selected(_index: int) -> void:
             layer_info['particles_type'] = particle_type_selector.get_item_metadata(particle_type_selector.selected)
     else:
         layer_info.erase('particles_type')
+    
+    if layer_info['mode'] == MODE_FOUR_WAY:
+        if not layer_info.has("four_way_texture_ids"):
+            var cur_texture_id: int = TextureManager.get_fallback_texture_id()
+            var cur_sub_index: int = 0
+            if layer_info.has("texture") and layer_info.has("tex_index"):
+                cur_texture_id = int(layer_info['texture'])
+                cur_sub_index = int(layer_info['tex_index'])
+            layer_info["four_way_texture_ids"] = []
+            layer_info["four_way_texture_ids"].resize(4)
+            layer_info["four_way_texture_ids"].fill(cur_texture_id)
+            layer_info["four_way_sub_indices"] = []
+            layer_info["four_way_sub_indices"].resize(4)
+            layer_info["four_way_sub_indices"].fill(cur_sub_index)
+        
+        if not layer_info.has("four_way_angle_offsets"):
+            layer_info["four_way_angle_offsets"] = []
+            for i in 4:
+                layer_info["four_way_angle_offsets"].append(Utility.normalize_angle_degrees(i * -90))
+    else:
+        layer_info.erase("four_way_texture_ids")
+        layer_info.erase("four_way_sub_indices")
+        layer_info.erase("four_way_angle_offsets")
 
     refresh_ui()
     changed.emit()
@@ -405,13 +444,22 @@ func refresh_ui() -> void:
     nine_patch_corner_option.visible = is_nine_patch and layer_info['mode'] == MODE_NORMAL
     nine_patch_repeats_option.visible = is_nine_patch and layer_info['mode'] == MODE_NORMAL
     
-    offset_degrees_input.set_value(layer_info.get("offset_degrees", 0))
+    if layer_info['mode'] == MODE_FOUR_WAY:
+        if not layer_info.has("four_way_angle_offsets"):
+            offset_degrees_input.set_value(0)
+        else:
+            var cur_four_way_angle_dir: int = angle_offset_four_way_select.selected
+            offset_degrees_input.set_value(layer_info.get("four_way_angle_offsets")[cur_four_way_angle_dir])
+    else:
+        offset_degrees_input.set_value(layer_info.get("offset_degrees", 0))
     
     _update_vis_prop_inputs_from_layer_info()
     
+    four_way_image_pickers.visible = layer_info['mode'] == MODE_FOUR_WAY
+    angle_offset_four_way_select.visible = layer_info['mode'] == MODE_FOUR_WAY
     digits_settings.visible = layer_info['mode'] == MODE_DIGITS
     particle_settings.visible = layer_info['mode'] == MODE_PARTICLES
-    layer_image_button.visible = layer_info['mode'] not in [MODE_DIGITS, MODE_PARTICLES]
+    layer_image_button.visible = layer_info['mode'] in [MODE_NORMAL, MODE_EMPTY]
     update_image_button_texture()
 
 func refresh_spin_speed_input() -> void:
@@ -427,13 +475,30 @@ func update_image_button_texture() -> void:
     elif layer_info['mode'] == MODE_NORMAL:
         button_texture = Utility.atlas_texture_from_texture_index(layer_info['texture'], layer_info['tex_index'])
 
-    var layer_image_button_tex: TextureRect = layer_image_button.find_child("TextureRect")
-    if layer_image_button_tex:
-        layer_image_button_tex.texture = button_texture
-        if layer_info.has("mod_color") and not is_empty:
-            layer_image_button_tex.self_modulate = Utility.get_dict_color(layer_info, "mod_color", Color.WHITE)
-        else:
-            layer_image_button_tex.self_modulate = Color.WHITE
+    if layer_info['mode'] != MODE_FOUR_WAY:
+        var layer_image_button_tex: TextureRect = layer_image_button.find_child("TextureRect")
+        if layer_image_button_tex:
+            layer_image_button_tex.texture = button_texture
+            if is_empty:
+                layer_image_button_tex.self_modulate = Color.WHITE
+            else:
+                layer_image_button_tex.self_modulate = Utility.get_dict_color(layer_info, "mod_color", Color.WHITE)
+    else:
+        var dir_picker_buttons: Array[ButtonContainer] = [four_way_picker_up, four_way_picker_right, four_way_picker_down, four_way_picker_left]
+        for i in 4:
+            var picker_button: ButtonContainer = dir_picker_buttons[i]
+            var tex_rect: TextureRect = picker_button.find_child("TextureRect")
+            
+            var tex_id: int = layer_info["four_way_texture_ids"][i]
+            var sub_index: int = layer_info["four_way_sub_indices"][i]
+            var offset_angle: float = 0
+            if layer_info.get("four_way_angle_offsets", []).size() == 4:
+                offset_angle = deg_to_rad(layer_info["four_way_angle_offsets"][i])
+            offset_angle += i * (TAU / 4)
+            
+            tex_rect.texture = Utility.atlas_texture_from_texture_index(tex_id, sub_index)
+            tex_rect.rotation = offset_angle
+            tex_rect.self_modulate = Utility.get_dict_color(layer_info, "mod_color", Color.WHITE)
 
 
 func move_up_button_pressed() -> void:
@@ -446,16 +511,47 @@ func move_down_button_pressed() -> void:
 func on_layer_image_button_pressed() -> void:
     open_texture_picker()
 
-func open_texture_picker() -> void:
+func on_four_way_picker_pressed(dir: int) -> void:
+    open_texture_picker(dir)
+
+func open_texture_picker(for_direction: int = -1) -> void:
+    var cur_mode: String = layer_info['mode']
+    if cur_mode != MODE_NORMAL and cur_mode != MODE_FOUR_WAY:
+        return
+
     var tex_picker: = texture_picker_scene.instantiate()
     add_child(tex_picker)
-    tex_picker.setup(layer_info['texture'], layer_info['tex_index'])
-    tex_picker.confirmed.connect(_on_tex_picker_confirmed.bind(tex_picker))
+
+    var tex_id: int = -1
+    var sub_index: int = 0
+    if cur_mode == MODE_NORMAL:
+        tex_id = layer_info['texture']
+        sub_index = layer_info['tex_index']
+    elif cur_mode == MODE_FOUR_WAY:
+        tex_id = layer_info["four_way_texture_ids"][for_direction]
+        sub_index = layer_info["four_way_sub_indices"][for_direction]
+
+    tex_picker.setup(tex_id, sub_index)
+    tex_picker.confirmed.connect(_on_tex_picker_confirmed.bind(for_direction, tex_picker))
     tex_picker.popup_centered()
 
-func _on_tex_picker_confirmed(tex_picker: BetterTextureDialog) -> void:
-    layer_info['texture'] = tex_picker.get_selected_texture()
-    layer_info['tex_index'] = tex_picker.get_selected_sub_index()
+func _on_tex_picker_confirmed(for_direction: int, tex_picker: BetterTextureDialog) -> void:
+    var cur_mode: String = layer_info['mode']
+    var selected_texture_id: int = tex_picker.get_selected_texture()
+    var selected_sub_index: int = tex_picker.get_selected_sub_index()
+
+    if cur_mode == MODE_NORMAL:
+        layer_info['texture'] = selected_texture_id
+        layer_info['tex_index'] = selected_sub_index
+    elif cur_mode == MODE_FOUR_WAY:
+        if for_direction == -1:
+            for_direction = 0
+        layer_info["four_way_texture_ids"][for_direction] = selected_texture_id
+        layer_info["four_way_sub_indices"][for_direction] = selected_sub_index
+        if for_direction == 0:
+            layer_info["texture"] = selected_texture_id
+            layer_info["tex_index"] = selected_sub_index
+
     tex_picker.queue_free()
     update_image_button_texture()
     changed.emit()
@@ -552,6 +648,7 @@ func _on_mod_color_picked(new_color: Color) -> void:
         layer_info.erase('mod_color')
     else:
         layer_info['mod_color'] = Utility.color_string(new_color)
+    update_image_button_texture()
     changed.emit()
 
 
@@ -564,16 +661,20 @@ func on_rotates_mode_selected(index: int) -> void:
     if new_rotates_mode == ROTATES_ROTATES:
         layer_info['rotates'] = true
         layer_info.erase('spinning')
+        layer_info.erase('rotates_to_head')
     elif new_rotates_mode == ROTATES_FIXED:
         layer_info['rotates'] = false
         layer_info.erase('spinning')
+        layer_info.erase('rotates_to_head')
     elif new_rotates_mode == ROTATES_SPINS:
         layer_info['rotates'] = true
         layer_info['spinning'] = last_spinning_value
+        layer_info.erase('rotates_to_head')
     elif new_rotates_mode == ROTATES_TO_HEAD:
         layer_info['rotates'] = true
         layer_info['rotates_to_head'] = true
         layer_info.erase('spinning')
+
     refresh_spin_speed_input()
     changed.emit()
 
@@ -605,16 +706,26 @@ func on_navigate_subsection(direction: int) -> void:
     height_changed.emit()
 
 func on_offset_degrees_changed(new_value: float) -> void:
-    var wrapped_value: = fposmod(new_value, 360)
+    var wrapped_value: = Utility.normalize_angle_degrees(new_value)
     if wrapped_value == 360:
         wrapped_value = 0
     if wrapped_value != new_value:
         offset_degrees_input.set_value(wrapped_value)
 
-    if new_value == 0:
-        layer_info.erase('offset_degrees')
+    var cur_mode: String = layer_info['mode']
+    if cur_mode == MODE_FOUR_WAY:
+        var cur_four_way_angle_dir: int = angle_offset_four_way_select.selected
+        if not layer_info.has("four_way_angle_offsets"):
+            layer_info["four_way_angle_offsets"] = []
+            for i in 4:
+                layer_info["four_way_angle_offsets"].append(Utility.normalize_angle_degrees(i * -90))
+        layer_info["four_way_angle_offsets"][cur_four_way_angle_dir] = wrapped_value
     else:
-        layer_info['offset_degrees'] = new_value
+        if new_value == 0:
+            layer_info.erase('offset_degrees')
+        else:
+            layer_info['offset_degrees'] = wrapped_value
+    update_image_button_texture()
     changed.emit()
 
 func on_z_offset_changed(new_value: float) -> void:
@@ -786,3 +897,21 @@ func on_particle_color_changed(new_color: Color) -> void:
     if particle_color_enable_toggle.button_pressed:
         layer_info['particles_color'] = Utility.color_string(new_color)
         changed.emit()
+
+func on_angle_offset_four_way_selected(index: int) -> void:
+    if not layer_info['mode'] == MODE_FOUR_WAY:
+        return
+    if index == 4:
+        layer_info["four_way_angle_offsets"] = []
+        for i in 4:
+            layer_info["four_way_angle_offsets"].append(Utility.normalize_angle_degrees(i * -90))
+        angle_offset_four_way_select.selected = 0
+        changed.emit()
+    elif index == 5:
+        layer_info["four_way_angle_offsets"] = []
+        for i in 4:
+            layer_info["four_way_angle_offsets"].append(0.0)
+        angle_offset_four_way_select.selected = 0
+        changed.emit()
+
+    refresh_ui()
