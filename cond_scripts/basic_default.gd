@@ -223,7 +223,6 @@ func cmd_select_entity_positions(slots: Dictionary, chosen_slot: Slot, prop_name
 	else:
 		filtered_entities = EntityManager.get_all_active_entities()
 	filtered_entities = EntityManager.filter_entities_by_property(prop_name, filtered_entities, [], truthy)
-	prints("filtered_entities: ", filtered_entities)
 	slots[chosen_slot] = []
 	for entity in filtered_entities:
 		for pos in EntityManager.get_all_positions_of_entity(entity):
@@ -564,9 +563,9 @@ func cmd_select_entity_at(slots: Dictionary, chosen_slot: int, at_pos_slot: int,
 	if not at_positions:
 		slots[chosen_slot] = null
 		return
-	var filtered_entities: Array = EntityManager.get_entities_at_multiple(at_positions, slots[Slot.RED], [], true, false)
+	var filtered_entities: Array = EntityManager.get_entities_at_multiple(at_positions, slots[Slot.RED], [], false)
 	if prop_name:
-		filtered_entities = EntityManager.filter_entities_by_property(prop_name, filtered_entities, [], invert)
+		filtered_entities = EntityManager.filter_entities_by_property(prop_name, filtered_entities, [], true, invert)
 	slots[chosen_slot] = filtered_entities[0] if filtered_entities else null
 
 func desc_select_entity_with_property() -> String:
@@ -718,18 +717,15 @@ func cmd_select_position_of_first_tile_or_entity_in_direction(slots: Dictionary,
 	for i in 10000:
 		var next_pos: = cur_pos + delta
 		if MapManager.is_empty_blocking_at(next_pos) or not map_bounds.has_point(next_pos):
-			prints("blocked by empty or oob", next_pos)
 			slots[chosen_slot] = [cur_pos]
 			return
 		if MapManager.conditional_tile_event([next_pos], prop_name, null, false) == truthy:
-			prints("blocked by tile property", next_pos)
 			slots[chosen_slot] = [cur_pos if before else next_pos]
 			return
 		var entities_here: = EntityManager.get_entities_half_at(next_pos)
 		var stopped: = false
 		for e in entities_here:
 			if EntityManager.get_entity_prop_is_truthy(e, prop_name, false) == truthy:
-				prints("blocked by entity property on entity", e.entity_name, next_pos)
 				stopped = true
 		if stopped:
 			slots[chosen_slot] = [cur_pos if before else next_pos]
@@ -1719,14 +1715,16 @@ func cmd_trigger_custom_event_immediate(slots: Dictionary, chosen_slot: int, eve
 	
 	var event_call: Callable = Callable()
 	if Commands.slot_is_entity(chosen_slot):
-		event_call = EntityManager.resolve_entity_interaction_event.bind(event_name, slots[chosen_slot], pass_blue_entity, [slots[chosen_slot].get_moving_position()])
+		if slots[chosen_slot]:
+			event_call = EntityManager.resolve_entity_interaction_event.bind(event_name, slots[chosen_slot], pass_blue_entity, [slots[chosen_slot].get_moving_position()])
 	elif Commands.slot_is_positions(chosen_slot):
 		event_call = MapManager.resolve_tiles_events.bind(slots[chosen_slot], event_name, pass_blue_entity)
 	
-	if is_immediate:
-		event_call.call()
-	else:
-		ConditionalsV3.add_deferred_call(event_call)
+	if event_call.is_valid():
+		if is_immediate:
+			event_call.call()
+		else:
+			ConditionalsV3.add_deferred_call(event_call)
 
 func desc_trigger_custom_event_for_each_entity() -> Dictionary:
 	return {
@@ -3187,7 +3185,6 @@ func cmd_select_distance_between(slots: Dictionary, chosen_slot: int, pos1_slot:
 		push_error("Invalid slots to select distance between: %s and %s" % [pos1_slot, pos2_slot])
 		return
 	if not _slot_has_single_tile_position(slots, pos1_slot) or not _slot_has_single_tile_position(slots, pos2_slot):
-		prints("invalid distance")
 		set_value_slot_as_number(slots, chosen_slot, 0)
 		return
 	var pos1: Vector2i = get_single_position_from_slot(pos1_slot, slots)
@@ -3560,7 +3557,6 @@ func cmd_custom_failure_intermission(_slots: Dictionary, _slot: int, intermissio
 func desc_show_intermission_overlay() -> String:
 	return "none|Show the intermission [intermission_id:IntermissionIdInput] overlaying the current level"
 func cmd_show_intermission_overlay(_slots: Dictionary, _slot: int, intermission_id: String) -> void:
-	prints("showing intermission overlay: %s" % [intermission_id])
 	GameManager.show_overlay_intermissions(Array([intermission_id], TYPE_STRING, "", null))
 
 func desc_if_has_viewed_intermission() -> String:

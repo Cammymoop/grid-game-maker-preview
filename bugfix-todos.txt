@@ -18,9 +18,16 @@ Can't set input controller to None
 
 First new level in empty game not assigned to 'Levels' list by default
 
+Add level list button disabled when no lists?
+
+fix select_entity_at command
+
+
 
 missing commands:
   is tile named (tile with name exists in positions)
+  select first tile from a set of multiple (or nearest?)
+  create entity using spawn effect/play spawn effect on already created entity
 
 
 for large-entities broken abacus:
@@ -33,3 +40,4 @@ Stop repeat after bonk prevents further movement at all in discrete mode
 
 (low priority)
 Some bug causing bg style edits being made on the current list not updating realtime background info (but still saving??)
+Large entity 9-patch from non 32x32 px image scales weird

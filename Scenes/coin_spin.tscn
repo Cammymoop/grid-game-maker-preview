@@ -1,0 +1,124 @@
+[gd_scene format=3 uid="uid://8lkj3jb2cjjd"]
+
+[sub_resource type="Gradient" id="Gradient_ckan5"]
+offsets = PackedFloat32Array(0, 0.9680451, 1)
+colors = PackedColorArray(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_dmkso"]
+gradient = SubResource("Gradient_ckan5")
+fill = 1
+fill_from = Vector2(0.5, 0.5)
+fill_to = Vector2(1, 0.5)
+metadata/_snap_enabled = true
+
+[sub_resource type="Gradient" id="Gradient_w6gkd"]
+offsets = PackedFloat32Array(0, 0.5054348, 0.6539855, 0.9547101)
+colors = PackedColorArray(0.760893, 0.32574767, 0.69554126, 1, 0.8062332, 0.35919708, 0.5763326, 1, 0.89827526, 0.42710042, 0.3343355, 1, 0.976157, 0.4845571, 0.1295687, 1)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_xxha4"]
+gradient = SubResource("Gradient_w6gkd")
+
+[sub_resource type="Animation" id="Animation_h18ke"]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Sprite2D:scale")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector2(1, 1)]
+}
+
+[sub_resource type="Animation" id="Animation_5d2fu"]
+resource_name = "flipping"
+loop_mode = 1
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Sprite2D:scale")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.23336665, 0.4666667, 0.7, 0.93333334),
+"transitions": PackedFloat32Array(2.0000005, 0.49999997, 2, 0.5, 1),
+"update": 0,
+"values": [Vector2(1, 1), Vector2(1e-05, 1), Vector2(-1, 1), Vector2(0, 1), Vector2(1, 1)]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_iusvg"]
+_data = {
+&"RESET": SubResource("Animation_h18ke"),
+&"flipping": SubResource("Animation_5d2fu")
+}
+
+[sub_resource type="Animation" id="Animation_4aytf"]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Sprite2D:rotation")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [0.0]
+}
+
+[sub_resource type="Animation" id="Animation_bto73"]
+resource_name = "spin"
+length = 1.3
+loop_mode = 1
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Sprite2D:rotation")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.6, 1.3),
+"transitions": PackedFloat32Array(1, 1, 1),
+"update": 0,
+"values": [0.0, 3.1415927, 6.2831855]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_ail4c"]
+_data = {
+&"RESET": SubResource("Animation_4aytf"),
+&"spin": SubResource("Animation_bto73")
+}
+
+[sub_resource type="Gradient" id="Gradient_fgto0"]
+colors = PackedColorArray(0, 0, 0, 1, 0, 0, 0, 1)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_hmcjp"]
+gradient = SubResource("Gradient_fgto0")
+
+[node name="Node2D" type="Node2D" unique_id=1488174443]
+position = Vector2(218, 203)
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=1498905097]
+clip_children = 1
+texture = SubResource("GradientTexture2D_dmkso")
+
+[node name="Sprite2D" type="Sprite2D" parent="Sprite2D" unique_id=1101036985]
+texture = SubResource("GradientTexture2D_xxha4")
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="." unique_id=484989636]
+libraries/ = SubResource("AnimationLibrary_iusvg")
+autoplay = &"flipping"
+
+[node name="AnimationPlayer2" type="AnimationPlayer" parent="." unique_id=268773904]
+libraries/ = SubResource("AnimationLibrary_ail4c")
+autoplay = &"spin"
+speed_scale = 0.77
+
+[node name="Sprite2D2" type="Sprite2D" parent="." unique_id=840975898]
+z_index = -2
+scale = Vector2(20, 20)
+texture = SubResource("GradientTexture2D_hmcjp")
