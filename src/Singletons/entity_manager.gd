@@ -353,10 +353,17 @@ func _physics_process(delta: float) -> void:
 
 func handle_movement_mode_stuff() -> void:
     var all_settled: = false
+    var discrete_nothing_happening: = false
+
     if movement_mode == GameManager.MovementMode.MOVEMENT_DISCRETE_WAIT and movements_enabled:
         if all_entities_settled():
             handle_pre_turn_end_events()
             all_settled = all_entities_settled()
+
+    # for fixed discrete mode, detect nothing happening on first tick to end turn early and avoid creating extra undos
+    if movement_mode == GameManager.MovementMode.MOVEMENT_DISCRETE and controller_frame:
+        if all_entities_settled():
+            discrete_nothing_happening = true
 
     animation_frame_counter += 1
     var was_movement_enabled: = movements_enabled
@@ -373,6 +380,8 @@ func handle_movement_mode_stuff() -> void:
     if movements_enabled:
         if movement_mode == GameManager.MovementMode.MOVEMENT_DISCRETE:
             turn_frames_remaining -= 1
+            if discrete_nothing_happening:
+                turn_frames_remaining = 0
             if turn_frames_remaining <= 0:
                 movements_enabled = false
         elif movement_mode == GameManager.MovementMode.MOVEMENT_DISCRETE_WAIT and all_settled:
@@ -390,7 +399,7 @@ func handle_movement_mode_stuff() -> void:
             _undo_create_requested = true
             
             # turn lasted for a single frame, for now not doing automatic undo for this as it was most likely just the player bumping into a wall and causing no change
-            if single_frame_detected:
+            if single_frame_detected or discrete_nothing_happening:
                 _undo_create_requested = false
 
     if _undo_create_requested:
@@ -3071,3 +3080,15 @@ func stop_pause_for_intermission_overlay() -> void:
 
 func starting_test_from_editor(is_start_of_level: bool) -> void:
     do_level_state_load_events(is_start_of_level)
+
+func get_controller_default_options(controller_instance: Node) -> Dictionary:
+    if controller_instance.has_method("get_default_options"):
+        return controller_instance.get_default_options()
+    elif controller_instance.has_method("get_option_values"):
+        var controller_script: Script = controller_instance.get_script()
+        if not controller_script:
+            return {}
+        var new_controller_instance: Node = controller_script.new()
+        return new_controller_instance.get_option_values()
+
+    return {}

@@ -9,9 +9,9 @@ var stop_repeat_after_bonk: = true
 var lock_for_idle_delay_after_bonk: = true
 var idle_delay_multiplier: int = 1
 var auto_req_turn: = true
-var allow_wait: = true
+var allow_wait: = false
 
-var only_receive_when_camera_target: = true
+var only_receive_when_camera_target: = false
 
 var is_wait: = false
 var is_repeat: = false
@@ -39,7 +39,7 @@ var available_options = {
 	"stop_repeat_after_bonk": {"display_name": "Stop repeating movement after being blocked", "type": "bool"},
 	"lock_for_idle_delay_after_bonk": {"display_name": "Prevent movement briefly after being blocked", "type": "bool"},
 	"idle_delay_multiplier": {"display_name": "Multiply bonk delay", "type": "int", "min_value": 1, "max_value": 10},
-	"auto_req_turn": {"display_name": "In Discrete mode, automatically take turns", "type": "bool"},
+	"auto_req_turn": {"display_name": "(In Discrete modes) automatically take turns", "type": "bool"},
 	"allow_wait": {"display_name": "Press a key to wait a turn", "type": "bool"},
 	"only_rcv_when_cam": {"display_name": "Only receive input when camera is following", "type": "bool"},
 }
@@ -133,23 +133,24 @@ func _physics_process(_delta):
 	is_repeat = not is_pressed
 	
 	if not EntityManager.movements_enabled and parent_entity and not parent_entity.moving:
+		var requested: bool = false
 		if auto_req_turn:
 			var left_xor_right: = (left_held or right_held) and not (left_held and right_held)
 			var up_xor_down: = (up_held or down_held) and not (up_held and down_held)
 			if up_xor_down or left_xor_right or not is_repeat:
+				requested = true
 				EntityManager.request_move(parent_entity)
-			elif allow_wait and Input.is_action_just_pressed("wait_turn"):
-				EntityManager.request_move(parent_entity)
-		elif allow_wait and Input.is_action_just_pressed("wait_turn"):
+
+		if not requested and allow_wait and Input.is_action_just_pressed("wait_turn"):
 			is_wait = true
 			EntityManager.request_move(parent_entity)
 
 func get_move(attempt_num: int = 0):
 	if not ignore_discrete_turns and not EntityManager.controller_frame:
 		return "none"
-	if only_receive_when_camera_target and not GameManager.is_entity_followed_by_camera(parent_entity):
+	if is_wait or attempt_num > 0:
 		return "none"
-	if is_wait or attempt_num > 0 or (auto_req_turn and not EntityManager.controller_frame):
+	if only_receive_when_camera_target and not GameManager.is_entity_followed_by_camera(parent_entity):
 		return "none"
 	var input_dir = "none"
 	var h_input_dir = "none"

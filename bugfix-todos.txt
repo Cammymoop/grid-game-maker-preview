@@ -3,12 +3,8 @@ Options menu doesn't grab focus for controller compatibility
 
 Geode needs to explain that you can reset or undo
 
-Fail State intermission blocking undo and reset inputs
-
 
 Stop repeat after bonk prevents further movement at all in discrete mode
-
-Extra undos still created in Discrete mode (not Discrete+) when InputController creates undos automatically and bumps into a wall
 
 
 (low priority)
