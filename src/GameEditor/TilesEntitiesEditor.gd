@@ -388,7 +388,7 @@ func reorder_item_relative(is_entity: bool, item_id: int, delta: int) -> void:
 
 func on_open_clone_panel_button_pressed() -> void:
 	clone_items_layer.show()
-	clone_items_panel.show()
+	clone_items_panel.show_and_refresh()
 
 func on_clone_items_panel_request_back() -> void:
 	clone_items_layer.hide()

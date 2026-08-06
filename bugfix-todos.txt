@@ -1,8 +1,7 @@
+
 Options menu doesn't grab focus for controller compatibility
 
 Geode needs to explain that you can reset or undo
-
-Cannot add particle layers in fancy sprite editor
 
 Fail State intermission blocking undo and reset inputs
 

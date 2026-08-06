@@ -259,6 +259,8 @@ func on_edit_mode_disabled(do_save_state: bool) -> void:
 			_auto_save(GameManager.editor_save)
 	#GameManager.position_gameplay_camera(editor_cam.position)
 	GameManager.activate_gameplay_camera()
+	var is_start_of_level: = not GameManager.is_live_edit()
+	EntityManager.starting_test_from_editor(is_start_of_level)
 	after_edit_mode_switched()
 
 func on_edit_mode_enabled() -> void:

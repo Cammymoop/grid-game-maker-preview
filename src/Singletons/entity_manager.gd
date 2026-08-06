@@ -140,6 +140,7 @@ func entity_list_process(delta_time: float) -> void:
                 new_action_activations.append("do_action_" + action_num)
                 if action_num == "1" and GameManager.action_1_does_undo() and not any_press_started:
                     if GameManager.has_undo_state():
+                        _undo_pop_requested = false
                         do_pop_undo()
                         return
         if not GameManager.is_in_level_edit_mode and Input.is_action_just_pressed("input_action_3_no_editor"):
@@ -432,7 +433,17 @@ func on_any_state_loaded() -> void:
             if GameManager.get_game_setting("level_start_entity_spawn_effect_enabled", false):
                 apply_level_start_entity_spawn_animation()
 
-    if GameManager._state_load_is_start_of_level:
+    var map_editor: = Utility.get_map_editor()
+    var is_editing: bool = GameManager.is_in_level_edit_mode and map_editor
+    if map_editor:
+        if not map_editor.edit_mode:
+            is_editing = false
+
+    if not is_editing:
+        do_level_state_load_events(GameManager._state_load_is_start_of_level)
+
+func do_level_state_load_events(is_start_of_level: bool) -> void:
+    if is_start_of_level:
         starting_event("level_start")
     starting_event("level_refresh")
 
@@ -2420,6 +2431,13 @@ func _remap_texture_id_in_dict(dict: Dictionary, from_texture_id: int, into_text
         dict["texture"] = into_texture_id
         if overwrite_index_with >= 0 and "tex_index" in dict:
                 dict["tex_index"] = overwrite_index_with
+    if "four_way_texture_ids" in dict:
+        for i in dict["four_way_texture_ids"].size():
+            if int(dict["four_way_texture_ids"][i]) == from_texture_id:
+                dict["four_way_texture_ids"][i] = into_texture_id
+                if overwrite_index_with >= 0 and dict.has("four_way_sub_indices"):
+                    if i < dict["four_way_sub_indices"].size():
+                        dict["four_way_sub_indices"][i] = overwrite_index_with
     if "mask_texture" in dict and int(dict["mask_texture"]) == from_texture_id:
         dict["mask_texture"] = into_texture_id
         if overwrite_index_with >= 0 and "mask_tex_index" in dict:
@@ -2428,6 +2446,10 @@ func _remap_texture_id_in_dict(dict: Dictionary, from_texture_id: int, into_text
 func _is_dict_using_texture_id(dict: Dictionary, texture_id: int) -> bool:
     if int(dict.get("texture", -1)) == texture_id or int(dict.get("mask_texture", -1)) == texture_id:
         return true
+    if "four_way_texture_ids" in dict:
+        for t_id in dict["four_way_texture_ids"]:
+            if int(t_id) == texture_id:
+                return true
     return false
 
 func _is_entity_using_texture_id(entity_id: int, texture_id: int) -> bool:
@@ -2446,18 +2468,17 @@ func accumulate_used_texture_ids_from_dict(dict: Dictionary, texture_ids: Array[
         accumulate_used_texture_ids_from_dict(dict["preview_variant"], texture_ids)
     if "sprite_config" in dict:
         accumulate_used_texture_ids_from_sprite_config(dict["sprite_config"], texture_ids)
-    if "texture" in dict:
-        if typeof(dict["texture"]) not in [TYPE_INT, TYPE_FLOAT]:
-            return
-        var texture_id: int = int(dict["texture"])
-        if texture_id < 0:
-            return
-        if not texture_id in texture_ids:
-            texture_ids.append(texture_id)
+    if "texture" in dict and typeof(dict["texture"]) in [TYPE_INT, TYPE_FLOAT]:
+        if dict["texture"] >= 0:
+            texture_ids.append(int(dict["texture"]))
+    if "four_way_texture_ids" in dict:
+        for texture_id in dict["four_way_texture_ids"]:
+            if texture_id >= 0:
+                texture_ids.append(int(texture_id))
 
 func accumulate_used_texture_ids_from_sprite_config(sprite_config: Dictionary, texture_ids: Array[int]) -> void:
     for layer_dict in sprite_config.get("layers", []):
-        if "texture" in layer_dict:
+        if "texture" in layer_dict or "four_way_texture_ids" in layer_dict:
             accumulate_used_texture_ids_from_dict(layer_dict, texture_ids)
 
 func get_used_texture_ids_from_defs(some_entity_defintions: Dictionary) -> Array[int]:
@@ -3047,3 +3068,6 @@ func start_pause_for_intermission_overlay(undoable: bool) -> void:
 func stop_pause_for_intermission_overlay() -> void:
     intermission_overlay_paused = false
     intermission_overlay_undoable = false
+
+func starting_test_from_editor(is_start_of_level: bool) -> void:
+    do_level_state_load_events(is_start_of_level)

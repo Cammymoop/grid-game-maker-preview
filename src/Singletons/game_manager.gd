@@ -1656,7 +1656,7 @@ func _process(_delta):
 		if not EntityManager.intermission_overlay_paused or EntityManager.intermission_overlay_undoable:
 			if _queued_lack_of_cam_target_action:
 				cancel_queued_level_load()
-			if not cur_undo_is_current_state:
+			if not cur_undo_is_current_state and not EntityManager.intermission_overlay_paused:
 				push_undo_state(false)
 			load_checkpoint()
 
@@ -5307,7 +5307,7 @@ func _show_fail_state_overlay_info(intermission_info: Dictionary) -> void:
 	intermission_info["show_undo"] = undo_stack.size() > 1 and action_1_does_undo()
 	intermission_info["show_reload_checkpoint"] = true
 	
-	show_single_overlay_intermission(intermission_info)
+	show_single_overlay_intermission(intermission_info, false, true)
 
 
 func show_overlay_intermissions(intermission_id_list: Array[String]) -> void:
@@ -5445,7 +5445,7 @@ func _get_intermission_root() -> Node:
 	return get_tree().current_scene.intermission_root
 
 
-func show_single_overlay_intermission(intermission_info: Dictionary, advancable: bool = false) -> bool:
+func show_single_overlay_intermission(intermission_info: Dictionary, advancable: bool = false, undoable: bool = false) -> bool:
 	if is_intermission_mode:
 		return false
 	var intermission_id: String = intermission_info.get("id", "")
@@ -5456,7 +5456,7 @@ func show_single_overlay_intermission(intermission_info: Dictionary, advancable:
 		return false
 
 	clear_intermission_state()
-	set_overlay_intermission_state()
+	set_overlay_intermission_state(undoable and not advancable)
 	intermission_state["advancable"] = advancable
 
 	if not show_intermission(intermission_info, intermission_id):
@@ -5579,9 +5579,9 @@ func clear_intermission_state() -> void:
 	is_intermission_mode = false
 	intermission_state = {}
 
-func set_overlay_intermission_state() -> void:
+func set_overlay_intermission_state(undoable: bool = false) -> void:
 	intermission_state["is_overlaying"] = true
-	EntityManager.start_pause_for_intermission_overlay(false)
+	EntityManager.start_pause_for_intermission_overlay(undoable)
 
 func is_showing_advancable_intermission() -> bool:
 	if not is_showing_intermission_mode_or_overlay():

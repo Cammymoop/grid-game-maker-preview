@@ -49,8 +49,17 @@ func _ready() -> void:
 func show_and_refresh() -> void:
 	show()
 	if not cloning_from_game_name:
-		cloning_from_game_name = GameManager.get_identified_game_name()
-		game_selector.change_game(1)
+		var last_clone_from_game: String = GameManager.player_profile.get_profile_setting("last_clone_from_game", "")
+		if not last_clone_from_game or not FilesManager.game_exists(last_clone_from_game):
+			game_selector.refresh_game_list()
+			if game_selector.game_list.size() < 1:
+				return
+			cloning_from_game_name = game_selector.game_list[0]
+			save_last_clone_from_game(cloning_from_game_name)
+		else:
+			cloning_from_game_name = last_clone_from_game
+		game_selector.select_game(cloning_from_game_name)
+		reload_items()
 	else:
 		reload_items()
 
@@ -135,7 +144,11 @@ func done_rendering_sprite_snapshots(snapshots: Dictionary, for_game_name: Strin
 func on_chose_game(game_name: String) -> void:
 	cloning_from_game_name = game_name
 	cloning_from_game_definition = FilesManager.get_game_definition(game_name)
+	save_last_clone_from_game(game_name)
 	reload_items()
+
+func save_last_clone_from_game(game_name: String) -> void:
+	GameManager.player_profile.set_profile_setting("last_clone_from_game", game_name)
 
 
 func on_clone_button_pressed() -> void:
