@@ -527,7 +527,7 @@ func _on_ControllerOptionsShow_pressed():
         controller_popup.hidden.connect(Callable(self, "update_controller_options").bind(controller_popup))
         controller_popup.popup_centered()
     else:
-        find_parent("UIRoot").show_message(the_definition["controller"] + " has no options")
+        pass#find_parent("UIRoot").show_message(the_definition["controller"] + " has no options")
 
 
 func _on_ControllerOptionsReset_pressed():

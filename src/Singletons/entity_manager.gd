@@ -1501,12 +1501,17 @@ func find_entity_with_property(prop_name: String, first: bool = true, ignore_lis
             return entity_list[i]
     return null
 
-func filter_entities_by_property(prop_name: String, entities: Array, ignore_list: Array = [], invert: bool = false) -> Array:
+func filter_entities_by_property(prop_name: String, entities: Array, ignore_list: Array = [], truthy: bool = true, invert: bool = false) -> Array:
     var filtered_entities: Array = []
     for i in entities.size():
         if ignore_list and entities[i].instance_id in ignore_list:
             continue
-        if entity_has_property(entities[i], prop_name) != invert:
+        if not entity_has_property(entities[i], prop_name):
+            if invert:
+                filtered_entities.append(entities[i])
+            continue
+
+        if get_entity_prop_is_truthy(entities[i], prop_name, false) == truthy:
             filtered_entities.append(entities[i])
     return filtered_entities
 

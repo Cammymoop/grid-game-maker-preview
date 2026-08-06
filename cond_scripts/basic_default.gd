@@ -222,7 +222,8 @@ func cmd_select_entity_positions(slots: Dictionary, chosen_slot: Slot, prop_name
 		filtered_entities = EntityManager.get_entities_at_multiple(slots[pos_filter], exclude_entity, [])
 	else:
 		filtered_entities = EntityManager.get_all_active_entities()
-	filtered_entities = EntityManager.filter_entities_by_property(prop_name, filtered_entities, [], not truthy)
+	filtered_entities = EntityManager.filter_entities_by_property(prop_name, filtered_entities, [], truthy)
+	prints("filtered_entities: ", filtered_entities)
 	slots[chosen_slot] = []
 	for entity in filtered_entities:
 		for pos in EntityManager.get_all_positions_of_entity(entity):
@@ -2087,7 +2088,7 @@ func _create_text_effect(slots: Dictionary, pos_slot: int, is_above: bool, args:
 			"h_align": HORIZONTAL_ALIGNMENT_CENTER if args["is_center"] else HORIZONTAL_ALIGNMENT_LEFT,
 		}
 		if popup_time > 0:
-			var global_pos: Vector2 = MapManager.world_to_tile_position(pos)
+			var global_pos: Vector2 = pos
 			global_pos += pixel_offset
 			EffectsHelper.spawn_text_effect(global_pos, popup_msg_options)
 		else:
