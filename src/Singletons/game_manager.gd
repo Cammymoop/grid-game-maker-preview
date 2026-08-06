@@ -4404,8 +4404,7 @@ func is_auto_undo_enabled() -> bool:
 	return get_game_setting("auto_undo", true)
 
 func action_1_does_undo() -> bool:
-	var is_continuous: bool = get_game_setting("movement_mode", MovementMode.MOVEMENT_CONTINUOUS) == GameManager.MovementMode.MOVEMENT_CONTINUOUS
-	return get_game_setting("action_1_does_undo", not is_continuous)
+	return get_game_setting("action_1_does_undo", not is_continuous_movement_mode())
 
 func has_undo_state() -> bool:
 	if undo_stack.size() == 1:

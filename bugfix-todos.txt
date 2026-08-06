@@ -1,7 +1,11 @@
+new popup text position is not at slot entity position
 
 Options menu doesn't grab focus for controller compatibility
 
 Geode needs to explain that you can reset or undo
+
+missing commands:
+  is tile named (tile with name exists in positions)
 
 
 Stop repeat after bonk prevents further movement at all in discrete mode

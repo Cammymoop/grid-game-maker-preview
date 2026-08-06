@@ -55,9 +55,11 @@
       "lines_on": true,
       "lines_warp_scroll_speed": 0.02,
       "lines_scroll_speed": 0.04,
-      "lines_color": "#d6f0fd31"
+      "lines_color": "#d6f0fd31",
+      "pointy_particles_camera_scroll_factor": 1.0
     },
-    "default_move_interp": "stepped"
+    "default_move_interp": "stepped",
+    "action_1_does_undo": true
   },
   "entity_definitions": {
     "1": {
@@ -96,7 +98,28 @@
           "when false": [],
           "when always": []
         },
-        "can-resave": true
+        "can-resave": true,
+        "i_finish_move_onto_tile": {
+          "v": "3",
+          "conditions": [
+            "basic_default.select_same_thing::[\"i:20\",\"i:4\"]",
+            "basic_default.filter_tiles_named::[\"i:20\",\"s:water\",false]",
+            "basic_default.exists::[\"i:20\"]",
+            "and",
+            "and",
+            "basic_default.select_same_thing::[\"i:20\",\"i:4\"]",
+            "basic_default.filter_tiles_named::[\"i:20\",\"s:checkpoint\",false]",
+            "basic_default.exists::[\"i:20\"]",
+            "and",
+            "and",
+            "or"
+          ],
+          "when true": [],
+          "when false": [
+            "basic_default.create_undo_point::[\"i:-1\"]"
+          ],
+          "when always": []
+        }
       },
       "controller": "InputController",
       "controller_options": {
@@ -1481,7 +1504,11 @@
       0,
       1
     ],
-    "release_hash": ""
+    "release_hash": "",
+    "release_created_utc": "",
+    "release_created_local_date": "",
+    "release_created_zone_offset": ""
   },
-  "game_identifier": "GGM"
+  "game_identifier": "GGM",
+  "intermissions": []
 }

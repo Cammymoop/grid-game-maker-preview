@@ -150,7 +150,7 @@ func _ready():
 	auto_undo_toggle.set_pressed_no_signal(game_settings.get("auto_undo", true) if not is_continuous else true)
 	auto_undo_toggle.toggled.connect(on_auto_undo_toggled)
 	
-	action_1_is_undo_toggle.set_pressed_no_signal(game_settings.get("action_1_does_undo", true))
+	action_1_is_undo_toggle.set_pressed_no_signal(GameManager.action_1_does_undo())
 	action_1_is_undo_toggle.toggled.connect(on_action_1_is_undo_toggled)
 	
 	var show_lvl_title_opt: String = GameManager.get_game_setting("show_level_title", "At Level Start").to_lower()
@@ -672,6 +672,7 @@ func on_auto_undo_toggled(button_pressed: bool) -> void:
 	GameManager.game_settings_changed.emit()
 
 func on_action_1_is_undo_toggled(button_pressed: bool) -> void:
+	prints("on_action_1_is_undo_toggled: ", button_pressed)
 	GameManager.set_game_setting("action_1_does_undo", button_pressed)
 	GameManager.game_settings_changed.emit()
 

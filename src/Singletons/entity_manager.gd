@@ -370,6 +370,9 @@ func handle_movement_mode_stuff() -> void:
     if movements_enabled:
         frame_counter += 1
     if movement_mode == GameManager.MovementMode.MOVEMENT_CONTINUOUS:
+        if _undo_create_requested:
+            GameManager.push_undo_state(true)
+            _undo_create_requested = false
         return
     
     var single_frame_detected: bool = false
