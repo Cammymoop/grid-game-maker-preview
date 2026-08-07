@@ -7,14 +7,9 @@ Geode needs to explain that you can reset or undo
 duplicate image (make bundled duplicate) does not get a copy of the metadata
 
 After saving level, still complains about needing to save changes when exiting
-
-Some way of having entity manager still showing preview mode entities in play mode (happened when I switched games after using level editor)
-
-Play button doesn't update when navigating back to main menu (before switching games)
+Save confirm when leaving a level while testing saves current state of level not edited state
 
 Cloning entity with bundled image fails to copy metadata from image over and dies horribly
-
-Can't set input controller to None
 
 First new level in empty game not assigned to 'Levels' list by default
 

@@ -1382,6 +1382,8 @@ func switch_tiles_preview_mode(enable_preview: bool) -> void:
     if enable_preview == is_tile_preview_mode:
         return
     is_tile_preview_mode = enable_preview
+    if not GameManager.cur_scene == "Play":
+        return
     
     for tilemap_layer in layers:
         tilemap_layer.tile_set = current_tileset()

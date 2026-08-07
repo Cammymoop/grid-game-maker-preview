@@ -131,6 +131,9 @@ func update_cached_special_props(prop_name: String = "") -> void:
 	if not prop_name or prop_name == "turn-animation":
 		if sprite:
 			update_sprite_rotate_interpolate_enabled()
+	if not prop_name or prop_name == "size-animation":
+		if sprite:
+			update_sprite_size_interpolate_enabled()
 
 func update_sprite_rotate_interpolate_enabled() -> void:
 	var turn_anim: String = "quick"
@@ -141,6 +144,14 @@ func update_sprite_rotate_interpolate_enabled() -> void:
 		if not turn_anim:
 			turn_anim = GameManager.get_game_setting("default_turn_animation", "quick")
 	sprite.interpolate_facing_enabled = turn_anim != "none"
+
+func update_sprite_size_interpolate_enabled() -> void:
+	var is_interp: = true
+	if not EntityManager.entity_has_property(self, "size-animation"):
+		is_interp = GameManager.get_game_setting("default_is_size_interpolate", true)
+	else:
+		is_interp = EntityManager.get_entity_prop_is_truthy(self, "size-animation", true)
+	sprite.interpolate_size_change_enabled = is_interp
 
 func update_z():
 	var z = EntityManager.get_entity_property(self, "z-index")

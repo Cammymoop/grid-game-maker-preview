@@ -61,6 +61,7 @@ func _ready():
 	EntityManager.initial_sprite_previews_finished.connect(on_initial_sprite_previews_finished)
 	
 	refresh_show_version_switcher()
+	check_if_has_game_save()
 
 func _unhandled_input(event: InputEvent) -> void:
 	if not is_visible_in_tree():

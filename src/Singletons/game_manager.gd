@@ -123,6 +123,7 @@ const SPECIAL_PROPS: Array[String] = [
 	"no-museum", "museum-active",
 	"move-animation", "controller-disabled",
 	"turn-animation",
+	"size-animation",
 	"actions-disabled",
 	"no-rotate",
 	"teleport-duration", "move-speed",
@@ -143,6 +144,7 @@ const SPECIAL_PROPS_DEFAULTS: Dictionary[String, Variant] = {
 
 	"move-animation": "smooth",
 	"turn-animation": "none",
+	"size-animation": false,
 	
 	"museum-active": false,
 	"no-rotate": true,
@@ -170,6 +172,7 @@ static var SPECIAL_PROPS_HINT_TEXT: Dictionary[String, String] = {
 	"move-animation": "Set this to define the animation style for when this entity moves (see valid options in the Game tab)\n" +
 		'Can be overridden for a single movement by the "Override Move Animation" Conditional command or automatically by the "Get Pushed" command.',
 	"turn-animation": "Set this to define the animation style for when this entity turns (see valid options in the Game tab)",
+	"size-animation": "Set this to true or false to override the default setting for whether or not LARGE entities size changes are animated",
 	"controller-disabled": "While this property is true the entity will ignore intended moves from it's controller",
 	"actions-disabled": "While this property is true the entity will ignore action events e.g. do_action_1",
 	"no-rotate": "If true, the entity's sprite will not rotate regardless of which way the entity is facing (or moving).\n" +
@@ -1500,6 +1503,9 @@ func scene_transition_clear() -> void:
 	transitioning = false
 
 func post_scene_change() -> void:
+	if cur_scene != "Play":
+		EntityManager.switch_entities_preview_mode(false)
+		MapManager.switch_tiles_preview_mode(false)
 	await get_tree().process_frame
 	await get_tree().process_frame
 	if cur_scene == "Play":

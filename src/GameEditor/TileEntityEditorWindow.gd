@@ -69,7 +69,7 @@ func _ready():
     for controller in EntityManager.get_all_controllers():
         controller_list.add_item(controller)
     
-    controller_list.connect("index_pressed", Callable(self, "set_controller"))
+    controller_list.index_pressed.connect(set_controller)
     
     var terrain_spr_mod_switch: CheckButton = find_child("TestTerrainSprMod")
     if terrain_spr_mod_switch:
@@ -147,16 +147,12 @@ func set_controller(list_index) -> void:
     var controller_button = find_child("EditController")
     var controller_list: PopupMenu = controller_button.get_popup()
     var controller_name: = controller_list.get_item_text(list_index)
-    if controller_name == "None":
-        if the_definition.has("controller"):
-            the_definition.erase("controller")
+    if the_definition.has("controller") and controller_name == the_definition["controller"]:
         return
-    elif the_definition.has("controller") and controller_name == the_definition["controller"]:
+    elif not the_definition.has("controller") and controller_name == "None":
         return
     
-    if "controller_options" in the_definition:
-        the_definition.erase("controller_options")
-    
+    the_definition.erase("controller_options")
     if controller_name != "None":
         the_definition['controller'] = controller_name
         find_child("ControllerOpContainer").visible = true
