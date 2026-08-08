@@ -778,7 +778,6 @@ func get_native_steps_per_tile() -> int:
 func get_teleport_steps() -> int:
 	if is_spt_override:
 		return override_steps_per_tile
-	prints("returning cached tele steps:", _cached_tele_steps)
 	return _cached_tele_steps
 
 func get_moving_steps_per_tile() -> int:

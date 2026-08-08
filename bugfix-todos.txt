@@ -13,6 +13,10 @@ Add level list button disabled when no lists?
 
 fix select_entity_at command
 
+make default relative dir be red facing except for get pushed command
+
+duplicate bundled copy uses name OOPS
+
 
 
 missing commands:

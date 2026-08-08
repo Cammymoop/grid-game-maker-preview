@@ -858,9 +858,9 @@ func input_just_pressed_vector_by_prefix(prefix: String) -> Vector2:
 	elif x_axis < 0 and not Input.is_action_just_pressed(prefix + "_left"):
 		x_axis = 0
 	var y_axis: = Input.get_axis(prefix + "_up", prefix + "_down")
-	if y_axis > 0 and not Input.is_action_just_pressed(prefix + "_up"):
+	if y_axis < 0 and not Input.is_action_just_pressed(prefix + "_up"):
 		y_axis = 0
-	elif y_axis < 0 and not Input.is_action_just_pressed(prefix + "_down"):
+	elif y_axis > 0 and not Input.is_action_just_pressed(prefix + "_down"):
 		y_axis = 0
 	return Vector2(x_axis, y_axis)
 
