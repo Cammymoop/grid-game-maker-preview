@@ -402,17 +402,21 @@ func save_loaded_texture_metadata(texture_id: int, is_builtin: bool = false, is_
     var local_meta: = get_texture_metadata(texture_id)
     FilesManager.update_local_image_metadata(texture_name, _convert_texture_meta_for_saving(local_meta), for_game_name)
 
-func set_texture_meta_by_name(texture_name: String, is_builtin: bool, is_shared: bool, new_meta: Dictionary) -> void:
+func set_texture_meta_by_name(texture_name: String, is_builtin: bool, is_shared: bool, new_meta: Dictionary, for_game_name: String = "") -> void:
     if is_builtin:
         push_error("Can't change builtin texture metadata")
         return
+    prints("setting texture meta by name: ", texture_name, "is_builtin: ", is_builtin, "is_shared: ", is_shared, "new_meta: ", new_meta)
     new_meta = new_meta.duplicate_deep()
     var texture_id: = get_loaded_texture_id(texture_name, is_builtin, is_shared)
     if texture_id >= 0:
         texture_meta[texture_id] = new_meta
         save_loaded_texture_metadata(texture_id, is_builtin, is_shared)
         refresh_textures()
-    var for_game_name: String = "" if is_shared else GameManager.get_identified_game_name()
+    if is_shared:
+        for_game_name = ""
+    if not is_shared and not for_game_name:
+        for_game_name = GameManager.get_identified_game_name()
     FilesManager.update_local_image_metadata(texture_name, _convert_texture_meta_for_saving(new_meta), for_game_name)
 
 func get_texture_metadata_by_name(texture_name: String, is_builtin: bool, is_shared: bool, containing_game_name: String = "") -> Dictionary:
@@ -557,7 +561,7 @@ func make_shared_image_bundled(shared_texture_name: String) -> bool:
 func save_local_copy_of_local_image(from_name: String, from_shared: bool, to_name: String, to_shared: bool, from_game_name: String = "", to_game_name: String = "") -> String:
     if (not from_shared or not to_shared) and not GameManager.get_identified_game_name():
         return ""
-    to_name = _unique_image_name(Utility.sanitize_for_filename(to_name, true, true), not to_shared)
+    to_name = _unique_image_name_for_game(Utility.sanitize_for_filename(to_name, true, true), not to_shared, to_game_name)
     
     var from_g: String = ""
     if not from_shared:
@@ -580,8 +584,8 @@ func save_local_copy_of_local_image(from_name: String, from_shared: bool, to_nam
     if not success:
         return ""
     
-    var tex_meta: = get_texture_metadata_by_name(from_name, false, from_shared)
-    set_texture_meta_by_name(to_name, false, to_shared, tex_meta)
+    var tex_meta: = get_texture_metadata_by_name(from_name, false, from_shared, from_g)
+    set_texture_meta_by_name(to_name, false, to_shared, tex_meta, to_g)
     return to_name
 
 func save_bundled_image_between_games(image_name: String, from_game_name: String, to_game_name: String) -> String:
@@ -596,14 +600,14 @@ func _get_builtin_texture_as_image(texture_name: String) -> Image:
 func save_builtin_copy_to_local(builtin_image_name: String, to_game_name: String = "", convert_texture_id: bool = true) -> String:
     if not builtin_image_name in builtin_textures:
         return ""
-    var local_image_name: = _unique_image_name(builtin_image_name, to_game_name != "")
+    var local_image_name: = _unique_image_name_for_game(builtin_image_name, to_game_name != "", to_game_name)
     if not FilesManager.save_local_image(_get_builtin_texture_as_image(builtin_image_name), local_image_name, to_game_name):
         return ""
     
     if not builtin_meta:
         grab_builtin_metadata()
     var tex_meta: Dictionary = builtin_meta[builtin_image_name].duplicate_deep()
-    set_texture_meta_by_name(local_image_name, false, to_game_name != "", tex_meta)
+    set_texture_meta_by_name(local_image_name, false, to_game_name == "", tex_meta, to_game_name)
     
     # convert the usage of that builtin image in the current game to use the local copy
     if convert_texture_id and to_game_name == GameManager.get_identified_game_name():
@@ -613,7 +617,7 @@ func save_builtin_copy_to_local(builtin_image_name: String, to_game_name: String
             tex_spec_item['type'] = 'local_file'
             tex_spec_item['image_name'] = local_image_name
             tex_spec_item.erase('name')
-            tex_spec_item['is_shared'] = to_game_name != ""
+            tex_spec_item['is_shared'] = to_game_name == ""
         refresh_textures()
 
     return local_image_name

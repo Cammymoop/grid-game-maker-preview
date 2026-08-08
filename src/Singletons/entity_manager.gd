@@ -2487,11 +2487,11 @@ func accumulate_used_texture_ids_from_dict(dict: Dictionary, texture_ids: Array[
         accumulate_used_texture_ids_from_sprite_config(dict["sprite_config"], texture_ids)
     if "texture" in dict and typeof(dict["texture"]) in [TYPE_INT, TYPE_FLOAT]:
         if dict["texture"] >= 0:
-            texture_ids.append(int(dict["texture"]))
+            Utility.arr_add_if_not_included(texture_ids, int(dict["texture"]))
     if "four_way_texture_ids" in dict:
         for texture_id in dict["four_way_texture_ids"]:
             if texture_id >= 0:
-                texture_ids.append(int(texture_id))
+                Utility.arr_add_if_not_included(texture_ids, int(texture_id))
 
 func accumulate_used_texture_ids_from_sprite_config(sprite_config: Dictionary, texture_ids: Array[int]) -> void:
     for layer_dict in sprite_config.get("layers", []):

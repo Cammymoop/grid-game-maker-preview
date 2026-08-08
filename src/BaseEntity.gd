@@ -327,6 +327,7 @@ func deserialize(data: Dictionary) -> void:
 
 	if data.get('tailing', -1) > -1:
 		set_tailing(EntityManager.get_instance(data['tailing']))
+		sprite.update_head_facing_layers()
 
 func deserialize_sprite(data: Dictionary) -> void:
 	var default_rotation: float = Utility.facing_rotation(facing)

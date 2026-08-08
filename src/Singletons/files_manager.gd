@@ -375,6 +375,7 @@ func _get_all_game_definitions() -> Array[Dictionary]:
 	return game_definitions
 
 func update_local_image_metadata(local_image_name: String, data: Dictionary, for_game_name: String = "") -> void:
+	prints("saving local image metadata: ", local_image_name, "for game: ", for_game_name, "data: ", data)
 	var local_images_meta = _get_local_images_metadata(for_game_name)
 	local_images_meta[local_image_name] = Utility.dict_vectors_to_lists(data)
 	_save_local_images_metadata(local_images_meta, for_game_name)
