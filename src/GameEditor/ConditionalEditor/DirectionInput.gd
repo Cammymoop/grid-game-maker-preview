@@ -54,7 +54,10 @@ func get_complex_value() -> Dictionary:
 	var value: int = $DirectionSelectorButton.get_direction()
 	var slot_id: int = $DirectionSelectorButton.get_slot_id()
 	if slot_id == -1:
-		return {"type": "plain", "direction": _relativify(value)}
+		if is_rotation_mode:
+			return {"type": "plain", "direction": value}
+		else:
+			return {"type": "plain", "direction": _relativify(value)}
 	else:
 		var relative_info: int = 0 if is_rotation_mode else _relativify(0)
 		return {"type": "slot_reference", "slot_id": slot_id, "direction": relative_info}

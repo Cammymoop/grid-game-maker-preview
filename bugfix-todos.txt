@@ -17,6 +17,13 @@ make default relative dir be red facing except for get pushed command
 
 duplicate bundled copy uses name OOPS
 
+line/solid scroll and warp scroll angles in style editor are huge???
+
+paste sprite context menu option missing
+
+
+background falling sprites not notified properly when deleting entity
+
 
 
 missing commands:

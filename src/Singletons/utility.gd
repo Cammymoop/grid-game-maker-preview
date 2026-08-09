@@ -192,6 +192,8 @@ func facing_vector_i(what_facing: int) -> Vector2i:
 	return Vector2i(facing_vector(what_facing))
 
 func facing_rotated(what_facing: int, what_rotation: int) -> int:
+	if what_facing == -1 or what_rotation == -1:
+		return -1
 	return posmod(what_facing + what_rotation, 4)
 
 func facing_opposite(what_facing: int) -> int:
@@ -551,7 +553,7 @@ func resolve_full_direction_to_facing(full_direction: int, slots: Dictionary) ->
 		var positions: Array = slots[relative_to_slot_id]
 		if not positions:
 			push_warning("Slot for relative direction (tile positions) is empty")
-			facing = 0
+			return get_full_direction_absolute(full_direction)
 		else:
 			facing = MapManager.get_tile_facing_at(positions[0])
 	

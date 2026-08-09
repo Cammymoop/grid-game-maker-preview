@@ -166,7 +166,7 @@ func cmd_include_positions(slots: Dictionary, chosen_slot: int, inclusion_slot: 
 			slots[chosen_slot].append(extra_pos)
 
 func desc_select_overlapping_positions() -> String:
-	return "pos|<= Select only the positions that are also selected in [overlap_slot:SlotInput:pos] (Intersection)"
+	return "pos|<= Select only the positions in this slot that are also selected in [overlap_slot:SlotInput:pos] (Intersection)"
 func cmd_select_overlapping_positions(slots: Dictionary, chosen_slot: int, overlap_slot: int) -> void:
 	if not Commands.slot_is_positions(chosen_slot) or not Commands.slot_is_positions(overlap_slot):
 		push_error("Invalid slots to select overlapping positions: %s and %s" % [chosen_slot, overlap_slot])
@@ -185,6 +185,42 @@ func desc_select_tiles_named() -> String:
 func cmd_select_tiles_named(slots: Dictionary, chosen_slot: Slot, tile_name: String) -> void:
 	var tindex = MapManager.get_tile_index(tile_name)
 	slots[chosen_slot] = MapManager.get_all_positions_of_tile(tindex)
+
+func desc_if_non_empty_tiles_at_positions() -> String:
+	return "pos|If there is a tile (not empty) at [is_all:BoolChoice:false,all,any] of the positions in this slot"
+func cmd_if_non_empty_tiles_at_positions(slots: Dictionary, chosen_slot: int, is_all: bool) -> bool:
+	if not Commands.slot_is_positions(chosen_slot):
+		push_error("Invalid slot to check if tile is at position: %s" % chosen_slot)
+		return false
+	var positions: Array = slots[chosen_slot]
+	if positions.size() == 0:
+		return false
+	for pos in positions:
+		var tile_here: int = MapManager.get_tile_index_at(pos)
+		if tile_here == -1 and is_all:
+			return false
+		elif tile_here != -1 and not is_all:
+			return true
+	
+	return is_all
+
+func desc_if_empty_tiles_at_positions() -> String:
+	return "pos|If there are no tiles at [is_all:BoolChoice:false,all,any] of the positions in this slot"
+func cmd_if_empty_tiles_at_positions(slots: Dictionary, chosen_slot: int, is_all: bool) -> bool:
+	if not Commands.slot_is_positions(chosen_slot):
+		push_error("Invalid slot to check if tile is at position: %s" % chosen_slot)
+		return false
+	var positions: Array = slots[chosen_slot]
+	if positions.size() == 0:
+		return false
+	for pos in positions:
+		var tile_here: int = MapManager.get_tile_index_at(pos)
+		if tile_here != -1 and is_all:
+			return false
+		elif tile_here == -1 and not is_all:
+			return true
+	
+	return is_all
 
 func desc_select_named_entity_positions() -> String:
 	return "pos|<= Select all positions where an active entity named [e_name:EntityNameInput] is found within [pos_filter:SlotInput:pos]\n" \
@@ -1067,6 +1103,8 @@ func cmd_c_get_pushed(slots: Dictionary, chosen_slot: int, direction: Variant, k
 	if not Commands.slot_is_entity(chosen_slot):
 		return false
 	var selected: BaseEntity = slots[chosen_slot]
+	if not selected:
+		return true
 	if selected.moving:
 		return false
 	var blue_entity: BaseEntity = slots[Slot.BLUE]
@@ -1112,6 +1150,7 @@ func desc_c_is_facing() -> Dictionary:
 		"display_name": "If entity facing direction",
 		"slot_type_hint": "entity",
 		"template_text": "If the entity [invert:InvertInput:is,is not] facing this way [direction:DirectionInput]",
+		"is_deprecated": true,
 	}
 func cmd_c_is_facing(slots: Dictionary, chosen_slot: int, invert: bool, direction: int) -> bool:
 	if not Commands.slot_is_entity(chosen_slot):
@@ -1121,11 +1160,27 @@ func cmd_c_is_facing(slots: Dictionary, chosen_slot: int, invert: bool, directio
 	var result = selected.facing == resolve_direction_value(direction, slots)
 	return not result if invert else result
 
+func desc_if_entity_facing_direction_matches() -> Dictionary:
+	return {
+		"display_name": "If entity facing direction matches",
+		"slot_type_hint": "entity",
+		"template_text": "If the entity [invert:InvertInput:is,is not] facing this way [compl_dir:DirectionInput:1]",
+	}
+func cmd_if_entity_facing_direction_matches(slots: Dictionary, chosen_slot: int, invert: bool, compl_dir: Dictionary) -> bool:
+	if not Commands.slot_is_entity(chosen_slot):
+		return false
+	var selected = slots[chosen_slot]
+
+	var direction: int = resolve_complex_direction(compl_dir, slots)
+	var result = selected.facing != -1 and selected.facing == direction
+	return not result if invert else result
+
 func desc_c_is_moving() -> Dictionary:
 	return {
 		"display_name": "If entity moving direction",
 		"slot_type_hint": "entity",
 		"template_text": "If the entity [invert:InvertInput:is,is not] moving this way [direction:DirectionInput]",
+		"is_deprecated": true,
 	}
 func cmd_c_is_moving(slots: Dictionary, chosen_slot: int, invert: bool, direction: int) -> bool:
 	if not Commands.slot_is_entity(chosen_slot):
@@ -1197,7 +1252,9 @@ func desc_a_move() -> String:
 func cmd_a_move(slots: Dictionary, chosen_slot: int, complex_dir: Dictionary) -> void:
 	if Commands.slot_is_entity(chosen_slot):
 		var selected: BaseEntity = slots[chosen_slot]
-		selected.start_move(resolve_complex_direction(complex_dir, slots))
+		var move_facing: int = resolve_complex_direction(complex_dir, slots)
+		if Utility.is_valid_facing(move_facing):
+			selected.start_move(resolve_complex_direction(complex_dir, slots))
 
 func desc_move_facing() -> String:
 	return "entity|The entity starts moving this way [compl_move:DirectionInput:1] while facing this way [compl_face:DirectionInput:1]\n" \
@@ -2337,7 +2394,9 @@ func cmd_select_just_pressed_direction(slots: Dictionary, chosen_slot: int, bias
 		push_error("Invalid slot or empty slot to select just pressed direction: %s" % chosen_slot)
 		return
 	var held_vec: = _get_directional_input_vector(true)
-	slots[chosen_slot] = Utility.biased_vector_to_facing(held_vec, bias_vertical)
+	var biased_dir: = Utility.biased_vector_to_facing(held_vec, bias_vertical)
+
+	slots[chosen_slot] = biased_dir
 
 
 func desc_camera_next_focus() -> String:
@@ -2617,6 +2676,22 @@ func desc_break_all_bond_groups_into_connected() -> String:
 	return "none|Split all bonded groups of entities into connected groups of adjacent entities [with_diagonal:BoolChoice:false,including,ignoring] diagonal connections"
 func cmd_break_all_bond_groups_into_connected(_slots: Dictionary, _slot: int, with_diagonal: bool) -> void:
 	EntityManager.break_all_bond_groups_into_connected(with_diagonal)
+
+func desc_select_positions_of_bonded_entities() -> String:
+	return "pos|<= Select the positions of all entities bonded to [entity_slot:SlotInput:entity]"
+func cmd_select_positions_of_bonded_entities(slots: Dictionary, chosen_slot: int, entity_slot: int) -> void:
+	if not Commands.slot_is_entity(entity_slot):
+		push_error("Invalid slot to select positions of bonded entities: %s" % entity_slot)
+		return
+	slots[chosen_slot] = []
+	if not slots[entity_slot] or not slots[entity_slot].bond_group:
+		return
+	for instance_id in slots[entity_slot].bond_group:
+		var entity: BaseEntity = EntityManager.get_instance(instance_id)
+		if entity:
+			for new_pos in EntityManager.get_all_positions_of_entity(entity):
+				if not new_pos in slots[chosen_slot]:
+					slots[chosen_slot].append(new_pos)
 
 func desc_select_math() -> String:
 	return "number|<= Select the numerical result of [a:ComplexScalarInput] [operator:BinaryMathOperatorInput] [b:ComplexScalarInput]"

@@ -672,7 +672,6 @@ func on_auto_undo_toggled(button_pressed: bool) -> void:
 	GameManager.game_settings_changed.emit()
 
 func on_action_1_is_undo_toggled(button_pressed: bool) -> void:
-	prints("on_action_1_is_undo_toggled: ", button_pressed)
 	GameManager.set_game_setting("action_1_does_undo", button_pressed)
 	GameManager.game_settings_changed.emit()
 
