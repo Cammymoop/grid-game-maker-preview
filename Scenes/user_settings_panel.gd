@@ -8,6 +8,7 @@ signal request_back()
 @export var erase_profile_button: ButtonContainer
 
 @export var auto_save_definition_toggle: CheckButton
+@export var resize_window_on_game_load_toggle: CheckButton
 @export var skip_non_critical_confirm_toggle: CheckButton
 @export var show_version_switcher_toggle: CheckButton
 
@@ -29,6 +30,7 @@ func _ready() -> void:
     mute_audio_toggle.toggled.connect(on_mute_audio_toggle_toggled)
     
     auto_save_definition_toggle.toggled.connect(on_auto_save_definition_toggle_toggled)
+    resize_window_on_game_load_toggle.toggled.connect(on_resize_window_on_game_load_toggle_toggled)
     skip_non_critical_confirm_toggle.toggled.connect(on_skip_non_critical_confirm_toggle_toggled)
     show_version_switcher_toggle.toggled.connect(on_show_version_switcher_toggle_toggled)
     
@@ -150,6 +152,9 @@ func on_profile_identifier_text_changed(text: String) -> void:
 
 func on_auto_save_definition_toggle_toggled(is_auto_saving: bool) -> void:
     GameManager.player_profile.set_profile_setting("auto_save_definition", is_auto_saving)
+
+func on_resize_window_on_game_load_toggle_toggled(is_resizing: bool) -> void:
+    GameManager.player_profile.set_profile_setting("resize_window_on_game_load", is_resizing)
 
 func on_show_version_switcher_toggle_toggled(is_showing: bool) -> void:
     GameManager.player_profile.set_profile_setting("main_menu_version_switcher", is_showing)

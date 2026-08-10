@@ -15,7 +15,7 @@ color = Color(0.33333334, 0.31764707, 0.44313726, 1)
 grow_begin = 18.0
 grow_end = 18.0
 
-[node name="UserSettingsPanel" type="PanelContainer" unique_id=1234442601 node_paths=PackedStringArray("mute_audio_toggle", "erase_game_save_progress_button", "erase_profile_button", "auto_save_definition_toggle", "skip_non_critical_confirm_toggle", "show_version_switcher_toggle", "profile_name_label", "profile_identifier_input", "danger_zone_container", "back_button")]
+[node name="UserSettingsPanel" type="PanelContainer" unique_id=1234442601 node_paths=PackedStringArray("mute_audio_toggle", "erase_game_save_progress_button", "erase_profile_button", "auto_save_definition_toggle", "resize_window_on_game_load_toggle", "skip_non_critical_confirm_toggle", "show_version_switcher_toggle", "profile_name_label", "profile_identifier_input", "danger_zone_container", "back_button")]
 size_flags_horizontal = 4
 theme_override_styles/panel = ExtResource("1_e7sck")
 script = ExtResource("2_2hlat")
@@ -23,6 +23,7 @@ mute_audio_toggle = NodePath("MarginContainer/VBoxContainer/ScrollContainer/Marg
 erase_game_save_progress_button = NodePath("MarginContainer/VBoxContainer/ScrollContainer/MarginContainer/VBoxContainer/DangerZoneContainer/MarginContainer/VBoxContainer/ResetProgressButton")
 erase_profile_button = NodePath("MarginContainer/VBoxContainer/ScrollContainer/MarginContainer/VBoxContainer/DangerZoneContainer/MarginContainer/VBoxContainer/EraseProfileButton")
 auto_save_definition_toggle = NodePath("MarginContainer/VBoxContainer/ScrollContainer/MarginContainer/VBoxContainer/AutoSaveDefinitionToggle")
+resize_window_on_game_load_toggle = NodePath("MarginContainer/VBoxContainer/ScrollContainer/MarginContainer/VBoxContainer/AutoSizeOnSwitchToggle")
 skip_non_critical_confirm_toggle = NodePath("MarginContainer/VBoxContainer/ScrollContainer/MarginContainer/VBoxContainer/SkipNonCriticalSaveConfirm")
 show_version_switcher_toggle = NodePath("MarginContainer/VBoxContainer/ScrollContainer/MarginContainer/VBoxContainer/VersionSwitcherToggle")
 profile_name_label = NodePath("MarginContainer/VBoxContainer/VBoxContainer2/ProfileNameLabel")
@@ -77,6 +78,15 @@ layout_mode = 2
 [node name="MuteAudioToggle" type="CheckButton" parent="MarginContainer/VBoxContainer/ScrollContainer/MarginContainer/VBoxContainer" unique_id=1524712014]
 layout_mode = 2
 text = "Mute:"
+alignment = 2
+
+[node name="AutoSizeOnSwitchToggle" type="CheckButton" parent="MarginContainer/VBoxContainer/ScrollContainer/MarginContainer/VBoxContainer" unique_id=1490082257]
+layout_mode = 2
+tooltip_text = "When switching from the level editor to Main Menu or Game Edit.
+Changes will not be lost immediately but will be if switching to another game."
+theme_override_font_sizes/font_size = 14
+button_pressed = true
+text = "Auto Size Window When Switching Games"
 alignment = 2
 
 [node name="AutoSaveDefinitionToggle" type="CheckButton" parent="MarginContainer/VBoxContainer/ScrollContainer/MarginContainer/VBoxContainer" unique_id=518658855]

@@ -38,6 +38,8 @@ const MAX_LEVEL_TEXT_SIZE: int = 1000000
 const DEFAULT_LIST_COMPLETION_MODE: String = "percentage"
 const DEFAULT_LIST_COMPLETION_PERCENT: float = 80
 
+var has_first_window_resized: bool = false
+
 var started = false
 var cur_scene = null
 
@@ -566,7 +568,12 @@ func load_game_definition_data(definition_data: Dictionary, from_file: bool) -> 
 		definition_data.erase('window_height')
 	
 	# Set the window size when loading a new game definition
-	rescale_window()
+	var do_resize: bool = player_profile.get_profile_setting("resize_window_on_game_load", true)
+	if not has_first_window_resized:
+		do_resize = true
+		has_first_window_resized = true
+	if do_resize:
+		rescale_window()
 	
 	TextureManager.clear()
 	if "textures" in definition_data:

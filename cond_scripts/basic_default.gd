@@ -1097,7 +1097,7 @@ func cmd_c_can_move(slots: Dictionary, chosen_slot: int, invert: bool, direction
 	return not result if invert else result
 
 func desc_c_get_pushed() -> String:
-	return "entity|If the entity successfully gets pushed this way [direction:DirectionInput:1]\n" \
+	return "entity|If the entity successfully gets pushed this way [direction:DirectionInput:1,alt_default]\n" \
 	     + "[keep_visual:BoolChoice:true,without turning,turning] to face that direction"
 func cmd_c_get_pushed(slots: Dictionary, chosen_slot: int, direction: Variant, keep_visual: bool) -> bool:
 	if not Commands.slot_is_entity(chosen_slot):
@@ -1122,7 +1122,7 @@ func cmd_c_get_pushed(slots: Dictionary, chosen_slot: int, direction: Variant, k
 	return got_pushed
 
 func desc_get_pushed_revertable() -> String:
-	return "entity|If the entity successfully gets pushed this way [direction:DirectionInput:1]\n" \
+	return "entity|If the entity successfully gets pushed this way [direction:DirectionInput:1,alt_default]\n" \
 	     + "(Reverted if the move that triggered this command fails)\n" \
 	     + "[keep_visual:BoolChoice:true,without turning,turning] to face that direction"
 func cmd_get_pushed_revertable(slots: Dictionary, chosen_slot: int, direction: Variant, keep_visual: bool) -> bool:

@@ -1324,8 +1324,8 @@ func half_moved_leaving_at(at_position: Vector2i, leaving_entities: Array) -> vo
         if ti != -1 and ti not in tile_indices_here:
             tile_indices_here.append(ti)
     
-    if not tile_indices_here:
-        return
+    #if not tile_indices_here:
+        #return
 
     for entity: BaseEntity in leaving_entities:
         EntityManager.resolve_entity_interaction_old("half_moved_off_of_tile", entity, null, at_position)
@@ -1339,8 +1339,8 @@ func half_moved_entering_at(at_position: Vector2i, entering_entities: Array) -> 
         if ti != -1 and ti not in tile_indices_here:
             tile_indices_here.append(ti)
     
-    if not tile_indices_here:
-        return
+    #if not tile_indices_here:
+        #return
 
     for entity: BaseEntity in entering_entities:
         EntityManager.resolve_entity_interaction_old("half_moved_onto_tile", entity, null, at_position)

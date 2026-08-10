@@ -8,6 +8,12 @@ var is_rotation_mode: = false
 
 var arg_name: String = ""
 
+@export var default_relative_to_facing: bool = true
+@export var default_relative_slot: int = Commands.Slot.RED
+
+var _alt_default: bool = false
+var _has_set_value: bool = false
+
 func _ready():
 	$AbsoluteModeSelect.set_items(["Absolute", "Relative to"])
 	$AbsoluteModeSelect.changed.connect(absolute_changed)
@@ -17,6 +23,23 @@ func _ready():
 	$SlotSelectorButton.slot_changed.connect(slot_changed)
 
 	$DirectionSelectorButton.set_slots_enabled(is_reference_position)
+	
+	update_default_relative_stuff(default_relative_slot, default_relative_to_facing)
+
+	if not is_absolute_mode or is_rotation_mode:
+		$DirectionSelectorButton.show_relative()
+	else:
+		$DirectionSelectorButton.show_absolute()
+	if _alt_default:
+		setup_alt_default()
+
+	$SlotSelectorButton.visible = not is_absolute_mode
+	$EntityRelativeMode.visible = not is_absolute_mode
+
+func update_default_relative_stuff(relative_slot: int, relative_to_facing: bool) -> void:
+	if not _has_set_value or is_absolute_mode:
+		$SlotSelectorButton.set_current_slot(relative_slot)
+		$EntityRelativeMode.select_index(1 if relative_to_facing else 0)
 
 func set_arg_name(new_arg_name: String) -> void:
 	arg_name = new_arg_name
@@ -35,9 +58,20 @@ func set_input_args(new_args: Array) -> void:
 		$AbsoluteModeSelect.select_index(0)
 	if new_args[0].strip_edges().length() > 0:
 		is_reference_position = true
+	if "alt_default" in new_args:
+		# defualt to blue moving instead of red facing (mostly for get pushed command)
+		_alt_default = true
+		if is_node_ready():
+			setup_alt_default()
 
 	$DirectionSelectorButton.set_slots_enabled(is_reference_position)
 	update_relative_selector()
+
+func setup_alt_default() -> void:
+	update_default_relative_stuff(Commands.Slot.BLUE, false)
+	if not _has_set_value:
+		$AbsoluteModeSelect.select_index(1)
+		absolute_changed($AbsoluteModeSelect.selected_value)
 
 # Return all the info about the selected direction and relativeness as a single int value if not in complex mode
 func get_value() -> Variant:
@@ -74,7 +108,10 @@ func _relativify(plain_value: int) -> int:
 	return modified_value
 
 
-func set_value(new_val) -> void:
+func set_value(new_val, is_default: bool = false) -> void:
+	prints("direction input set value:", new_val)
+	if not is_default:
+		_has_set_value = true
 	var facing_dir: int = -1
 
 	var set_direction_button_to_facing: bool = true
@@ -103,15 +140,13 @@ func absolute_changed(new_value: String) -> void:
 	if is_rotation_mode:
 		return
 	if new_value == "Absolute":
-		$SlotSelectorButton.visible = false
-		$EntityRelativeMode.visible = false
 		is_absolute_mode = true
 		$DirectionSelectorButton.show_absolute()
 	else:
-		$SlotSelectorButton.visible = true
-		$EntityRelativeMode.visible = true
 		is_absolute_mode = false
 		$DirectionSelectorButton.show_relative()
+	$SlotSelectorButton.visible = not is_absolute_mode
+	$EntityRelativeMode.visible = not is_absolute_mode
 
 func change_is_rotation_mode(new_is_rotation_mode: bool) -> void:
 	is_rotation_mode = new_is_rotation_mode
