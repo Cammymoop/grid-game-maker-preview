@@ -3153,8 +3153,8 @@ func _select_large_entity_size_axis(slots: Dictionary, select_into_slot: int, en
 	set_value_slot_as_number(slots, select_into_slot, oriented_size[axis])
 
 func desc_stretch_a_large_entity_to_position() -> String:
-	return "entity|Stretch the entity's LARGE size so that it [inclusive:BoolChoice:true,reaches,reaches up to] [target_pos_slot:SlotInput:pos,entity]\n" \
-			+ "(don't turn the entity)"
+	return "entity|Stretch the entity's LARGE size so that it [inclusive:BoolChoice:true,reaches,reaches up to] [target_pos_slot:SlotInput:pos,entity]" \
+			+ " (don't turn the entity)"
 func cmd_stretch_a_large_entity_to_position(slots: Dictionary, chosen_slot: int, inclusive: bool, target_pos_slot: int) -> void:
 	if not Commands.slot_is_entity(chosen_slot) or not Commands.slot_has_position(target_pos_slot):
 		push_error("Invalid slots to stretch a large entity to position: %s, %s and %s" % [chosen_slot, target_pos_slot])
@@ -3167,14 +3167,15 @@ func cmd_stretch_a_large_entity_to_position(slots: Dictionary, chosen_slot: int,
 		prints("no single tile position in slot", target_pos_slot)
 		return
 	var target_pos: Vector2i = get_single_position_from_slot(target_pos_slot, slots)
+	prints("target pos:", target_pos, "large entity positions:", EntityManager.get_all_positions_of_entity(the_entity))
 	#var original_target_pos: = target_pos
 	var entity_pos: Vector2i = the_entity.get_moving_position()
-	if the_entity.is_large():
-		var pos_rect: = the_entity.get_pos_rect_at(entity_pos)
-		if not pos_rect.has_point(target_pos):
-			var target_rect: = Rect2i(target_pos, Vector2i.ONE)
-			var combined: = pos_rect.merge(target_rect)
-			entity_pos = Utility.rect2i_opposite_inner_corner(combined, target_pos)
+	var pos_rect: = the_entity.get_pos_rect_at(entity_pos)
+	prints("pos rect:", pos_rect)
+	if not pos_rect.has_point(target_pos):
+		var target_rect: = Rect2i(target_pos, Vector2i.ONE)
+		var combined: = pos_rect.merge(target_rect)
+		entity_pos = Utility.rect2i_opposite_inner_corner(combined, target_pos)
 	
 	# pull target inward if not inclusive
 	var inclusive_size: Vector2i = Vector2i(entity_pos - target_pos).abs()
@@ -3186,7 +3187,7 @@ func cmd_stretch_a_large_entity_to_position(slots: Dictionary, chosen_slot: int,
 	
 	#prints("before stretching", the_entity.get_moving_position(), Vector2i(the_entity.entity_size), "inclusive:", inclusive, "orig target:", original_target_pos)
 	#prints("attempting to stretch", the_entity.entity_name, the_entity.instance_id, "corners:", entity_pos, target_pos)
-	the_entity.update_size_by_corners(entity_pos, target_pos)
+	the_entity.update_size_by_corners(entity_pos, target_pos, false)
 
 func desc_shrink_entity_in_direction_by() -> String:
 	return "entity|Shrink the entity's LARGE size from the direction [compl_dir:DirectionInput:1] by [amount:ComplexScalarInput:int]"

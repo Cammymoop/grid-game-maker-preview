@@ -1,4 +1,3 @@
-some tooltips (like slot buttons in conditional editor) have dark text on dark background
 
 Options menu doesn't grab focus for controller compatibility
 
@@ -11,10 +10,6 @@ First new level in empty game not assigned to 'Levels' list by default
 
 Add level list button disabled when no lists?
 
-fix select_entity_at command
-
-make default relative dir be red facing except for get pushed command
-
 duplicate bundled copy uses name OOPS
 
 line/solid scroll and warp scroll angles in style editor are huge???
@@ -24,6 +19,9 @@ paste sprite context menu option missing
 
 background falling sprites not notified properly when deleting entity
 
+fix select_entity_at command
+
+some tooltips (like slot buttons in conditional editor) have dark text on dark background
 
 
 missing commands:

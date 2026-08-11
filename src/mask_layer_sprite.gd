@@ -76,6 +76,8 @@ var layer_root: Node2D = null
 var large_auto_scale_enabled: bool = false
 var large_auto_scale_size: Vector2 = Vector2.ONE
 
+var current_large_scale: Vector2 = Vector2.ONE
+
 var _moving: bool = false
 
 var _has_alternate_texture_source: bool = false
@@ -152,7 +154,7 @@ func sprite_process(delta_time: float, is_frozen: bool = false) -> void:
                 var size_change_progress: float = 1 - (interp_size_change_timer / interp_size_change_duration)
                 var eased_progress: float = Utility.get_interp_factor(interp_size_change_mode, size_change_progress)
                 
-                scale = _size_interp_from_scale.lerp(large_auto_scale_size, eased_progress)
+                update_current_large_scale(_size_interp_from_scale.lerp(large_auto_scale_size, eased_progress))
                 var new_offset: Vector2 = _size_interp_from_offset.lerp(Vector2.ZERO, eased_progress)
                 _update_oriented_position(new_offset)
                 update_all_layers_shader_scale()
@@ -694,7 +696,7 @@ func create_and_add_nodes_for_layer(layer_info: Dictionary, layer_index: int) ->
     
     if main_layer_node.get_meta("scale_as_9_patch", false):
         var shader_mat: = get_layer_node_material(main_layer_node)
-        shader_mat.set_shader_parameter("cur_scale_for_patch", main_layer_node.scale * scale)
+        shader_mat.set_shader_parameter("cur_scale_for_patch", main_layer_node.scale * current_large_scale)
 
 func get_or_recycle_particle_layer(particles_type: String) -> Node2D:
     for layer in _lingering_particle_lifetimes.keys():
@@ -834,9 +836,9 @@ func linger_or_remove_particle_layer(particle_layer: Node2D) -> void:
     _lingering_particle_lifetimes[particle_layer] = linger_time
 
 func set_sprite_facing(facing: int, immediate: bool = false) -> void:
+    _current_facing = facing
     if interpolate_facing_enabled and not immediate:
         _facing_lerp_from_rotation = current_rotation
-        _current_facing = facing
         interp_facing_timer = facing_interp_duration
     else:
         set_sprite_rotation(Utility.facing_rotation(facing))
@@ -1061,7 +1063,7 @@ func _set_all_layers_replace_color(color: Color, amount: float) -> void:
 
 func _set_all_layers_anim_scale(anim_scale: Vector2) -> void:
     for layer_node in layer_root.get_children():
-        _update_layer_node_scale(layer_node, anim_scale * _get_layer_base_scale(layer_node))
+        _update_layer_node_scale(layer_node, anim_scale * _get_layer_base_scale(layer_node) * current_large_scale)
 
 func _update_layer_node_scale(layer_node: Node2D, new_scale: Vector2) -> void:
     layer_node.scale = new_scale
@@ -1069,7 +1071,13 @@ func _update_layer_node_scale(layer_node: Node2D, new_scale: Vector2) -> void:
     if layer_node.get_meta("scale_as_9_patch"):
         var shader_mat: = get_layer_node_material(layer_node)
         if shader_mat:
-            shader_mat.set_shader_parameter("cur_scale_for_patch", layer_node.scale * scale)
+            shader_mat.set_shader_parameter("cur_scale_for_patch", layer_node.scale)
+
+func refresh_all_layers_base_scale() -> void:
+    if not layer_root:
+        return
+    for layer_node in layer_root.get_children():
+        _update_layer_node_scale(layer_node, _get_layer_base_scale(layer_node) * current_large_scale)
 
 func update_all_layers_shader_scale() -> void:
     if not layer_root:
@@ -1078,7 +1086,7 @@ func update_all_layers_shader_scale() -> void:
         if layer_node.get_meta("scale_as_9_patch"):
             var shader_mat: = get_layer_node_material(layer_node)
             if shader_mat:
-                shader_mat.set_shader_parameter("cur_scale_for_patch", layer_node.scale * scale)
+                shader_mat.set_shader_parameter("cur_scale_for_patch", layer_node.scale)
 
 func _apply_mod_modulate_to(layer_node: Node2D) -> void:
     var modulate_effects: Dictionary = modifier_effects.get("modulate", {})
@@ -1232,29 +1240,37 @@ func set_sprite_size(new_unoriented_bounds: Vector2, update_pos_now: bool = true
     unoriented_center = unoriented_bounds / 2
     simple_rotate = unoriented_bounds.x == unoriented_bounds.y
     if update_pos_now:
+        prints("updating oriented position, cur unoriented center:", unoriented_center)
         _update_oriented_position()
 
 func _update_oriented_position(with_offset: Vector2 = Vector2.ZERO) -> void:
+    prints("current facing:", _current_facing)
     if simple_rotate or _current_facing % 2 == 0:
         position = unoriented_center
     else:
         position = Vector2(unoriented_center.y, unoriented_center.x)
+        prints("pos for alternate orientation:", position, "with offset:", position + with_offset)
     position += with_offset
 
 func set_large_auto_scale(enable: bool, new_size: Vector2 = Vector2.ONE) -> void:
     large_auto_scale_enabled = enable
     large_auto_scale_size = new_size
     if not large_auto_scale_enabled:
-        scale = Vector2.ONE
+        update_current_large_scale(Vector2.ONE)
     else:
-        scale = large_auto_scale_size
+        update_current_large_scale(large_auto_scale_size)
     update_all_layers_shader_scale()
+
+func update_current_large_scale(new_scale: Vector2) -> void:
+    current_large_scale = new_scale
+    refresh_all_layers_base_scale()
 
 func set_large_size_with_position_and_interpolation(new_size: Vector2, tile_pos_delta: Vector2i) -> void:
     if not interpolate_size_change_enabled:
         push_warning("Interpolate size change is disabled, but set_large_size_with_position_and_interpolation was called")
         set_large_auto_scale(true, new_size)
         return
+    prints("setting large size with position and interpolation, new size:", new_size)
 
     var old_center: Vector2 = large_auto_scale_size / 2
     var new_center: Vector2 = new_size / 2

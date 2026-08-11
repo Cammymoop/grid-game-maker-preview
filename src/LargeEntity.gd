@@ -41,9 +41,11 @@ func update_sprite_pos_scale(immediate: bool = true, tile_pos_delta: Vector2i = 
 	if not immediate and is_auto_scale and sprite.interpolate_size_change_enabled:
 		sprite.set_large_size_with_position_and_interpolation(entity_size, tile_pos_delta)
 		return
+	prints("immediate param:", immediate, "sprite interp enabled:", sprite.interpolate_size_change_enabled)
+	prints("updating sprite pos scale (immediate), size:", entity_size, "is auto scale:", is_auto_scale)
 
-	sprite.set_sprite_size(entity_size * MapManager.tile_width)
 	sprite.set_large_auto_scale(is_auto_scale, entity_size)
+	sprite.set_sprite_size(entity_size * MapManager.tile_width)
 
 func _serialize_shape_mask() -> Dictionary:
 	var serialized_shape_mask: Dictionary = {}
@@ -109,6 +111,7 @@ func _update_oriented_size(new_size: Vector2i, immediate: bool, tile_pos_delta: 
 		entity_size = Vector2(new_size)
 	else:
 		entity_size = Vector2(new_size.y, new_size.x)
+	prints("updated oriented size:", entity_size)
 	# TODO preserve mask more
 	use_mask = false
 	set_default_mask()
@@ -121,6 +124,7 @@ func update_size_by_corners(corner_a: Vector2i, corner_b: Vector2i, immediate: b
 	update_position_and_size(new_size_rect.position, new_size_rect.size, immediate)
 
 func update_position_and_size(new_position: Vector2i, new_size: Vector2i, immediate: bool = true) -> void:
+	prints("updating position and size, new position:", new_position, "new size:", new_size)
 	var delta_pos: = new_position - get_moving_position()
 	if delta_pos == Vector2i.ZERO:
 		update_size(new_size, true, immediate)
