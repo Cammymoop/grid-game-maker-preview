@@ -559,10 +559,6 @@ func make_shared_image_bundled(shared_texture_name: String) -> bool:
     return true
 
 func save_local_copy_of_local_image(from_name: String, from_shared: bool, to_name: String, to_shared: bool, from_game_name: String = "", to_game_name: String = "") -> String:
-    if (not from_shared or not to_shared) and not GameManager.get_identified_game_name():
-        return ""
-    to_name = _unique_image_name_for_game(Utility.sanitize_for_filename(to_name, true, true), not to_shared, to_game_name)
-    
     var from_g: String = ""
     if not from_shared:
         if not from_game_name:
@@ -576,7 +572,10 @@ func save_local_copy_of_local_image(from_name: String, from_shared: bool, to_nam
             to_g = GameManager.get_identified_game_name()
         else:
             to_g = to_game_name
-    
+
+    if (not from_shared and not from_g) or (not to_shared and not to_g):
+        return ""
+
     if FilesManager.local_image_file_exists(to_name, to_g):
         to_name = _unique_image_name_for_game(to_name, not to_shared, to_g)
 

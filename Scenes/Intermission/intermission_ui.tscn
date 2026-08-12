@@ -49,7 +49,7 @@ _data = {
 &"pulse": SubResource("Animation_ltj3f")
 }
 
-[node name="IntermissionUI" type="Control" unique_id=983985741 node_paths=PackedStringArray("dark_bg", "light_bg", "inner_container", "content_section", "prompt_section", "continue_prompt_section", "undo_or_reload_prompt_section", "undo_prompt", "reload_prompt")]
+[node name="IntermissionUI" type="Control" unique_id=983985741 node_paths=PackedStringArray("dark_bg", "light_bg", "inner_container", "content_section", "prompt_section", "continue_prompt_section", "undo_or_reload_prompt_section", "undo_prompt", "undo_prompt_label", "reload_prompt")]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -65,7 +65,8 @@ content_section = NodePath("MarginContainer/MainVbox/ContentSection")
 prompt_section = NodePath("MarginContainer/MainVbox/ContinueSection")
 continue_prompt_section = NodePath("MarginContainer/MainVbox/ContinueSection/HBoxContainer/ContinuePromptText")
 undo_or_reload_prompt_section = NodePath("MarginContainer/MainVbox/ContinueSection/HBoxContainer/UndoOrReloadPrompts")
-undo_prompt = NodePath("MarginContainer/MainVbox/ContinueSection/HBoxContainer/UndoOrReloadPrompts/MarginContainer/UndoOrReloadPrompts/HBoxContainer/UndoPromptText")
+undo_prompt = NodePath("MarginContainer/MainVbox/ContinueSection/HBoxContainer/UndoOrReloadPrompts/MarginContainer/UndoOrReloadPrompts/HBoxContainer")
+undo_prompt_label = NodePath("MarginContainer/MainVbox/ContinueSection/HBoxContainer/UndoOrReloadPrompts/MarginContainer/UndoOrReloadPrompts/HBoxContainer/UndoPromptText/Label")
 reload_prompt = NodePath("MarginContainer/MainVbox/ContinueSection/HBoxContainer/UndoOrReloadPrompts/MarginContainer/UndoOrReloadPrompts/ReloadCheckpointPromptText")
 
 [node name="MultiplyDarkenColor" type="ColorRect" parent="." unique_id=863641257]
@@ -166,7 +167,7 @@ mouse_filter = 2
 [node name="MarginContainer" type="MarginContainer" parent="MarginContainer/MainVbox/ContinueSection/HBoxContainer/UndoOrReloadPrompts" unique_id=96045932]
 layout_mode = 2
 theme_override_constants/margin_left = 0
-theme_override_constants/margin_right = 10
+theme_override_constants/margin_right = 22
 
 [node name="UndoOrReloadPrompts" type="VBoxContainer" parent="MarginContainer/MainVbox/ContinueSection/HBoxContainer/UndoOrReloadPrompts/MarginContainer" unique_id=1075204200]
 custom_minimum_size = Vector2(240, 0)

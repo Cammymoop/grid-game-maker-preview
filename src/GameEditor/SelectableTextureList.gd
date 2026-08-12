@@ -209,6 +209,7 @@ func handle_ctx_copy(id: int, img_item: SelectableTexture) -> void:
 		request_refresh_list.emit()
 	elif id in [CTX_DUPLICATE_AS_BUNDLED, CTX_DUPLICATE_AS_SHARED]:
 		var is_bundled_copy: = id == CTX_DUPLICATE_AS_BUNDLED
+		prints("making bundled copy of %s" % [img_item.get_texture_name()])
 		TextureManager.make_duplicate_of_image(not is_bundled_copy, img_item.get_texture_name(), img_item.get_is_builtin(), img_item.get_is_shared())
 		request_refresh_list.emit()
 

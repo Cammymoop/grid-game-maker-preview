@@ -10,8 +10,6 @@ First new level in empty game not assigned to 'Levels' list by default
 
 Add level list button disabled when no lists?
 
-duplicate bundled copy uses name OOPS
-
 line/solid scroll and warp scroll angles in style editor are huge???
 
 paste sprite context menu option missing
