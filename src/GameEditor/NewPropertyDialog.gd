@@ -5,6 +5,8 @@ signal hidden
 @export var events_menu_btn: MenuButton
 @export var special_props_menu_btn: MenuButton
 
+var duplicate_from_name: String = ""
+
 func _ready():
 	setup_menus()
 	visibility_changed.connect(Callable(self, "_on_vis_changed"))
@@ -12,6 +14,11 @@ func _ready():
 	var name_input: LineEdit = find_child("SetName")
 	name_input.grab_focus.call_deferred()
 	name_input.text_submitted.connect(on_name_submitted)
+
+func set_duplicate_from_name(new_duplicate_from_name: String) -> void:
+	duplicate_from_name = new_duplicate_from_name
+	var name_input: LineEdit = find_child("SetName")
+	name_input.text = new_duplicate_from_name
 	
 func on_name_submitted(_text: String) -> void:
 	get_ok_button().pressed.emit()

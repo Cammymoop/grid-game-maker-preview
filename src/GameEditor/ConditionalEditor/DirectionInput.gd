@@ -109,7 +109,6 @@ func _relativify(plain_value: int) -> int:
 
 
 func set_value(new_val, is_default: bool = false) -> void:
-	prints("direction input set value:", new_val)
 	if not is_default:
 		_has_set_value = true
 	var facing_dir: int = -1

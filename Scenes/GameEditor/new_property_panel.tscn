@@ -156,6 +156,7 @@ expand_to_text_length = true
 script = ExtResource("2_jrj38")
 include_events = true
 override_default_min_size = Vector2(180, -1)
+no_accept_on_submit = true
 highlight_unknown_color = Color(0.660753, 0.9219391, 0.48474276, 1)
 
 [node name="AddPropButton" type="Button" parent="VBoxContainer/HBoxContainer" unique_id=1229390824]

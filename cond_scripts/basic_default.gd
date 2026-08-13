@@ -3778,9 +3778,9 @@ func cmd_select_number_of_entities_at(slots: Dictionary, chosen_slot: int, prope
 
 
 
-func desc_if_all_named_entities_overlap_named_entity_or_tile() -> String:
-	return "none|If [is_all:BoolChoice:true,all,any] entities named [primary_name:EntityNameInput:1] [invert:InvertInput:overlap,do not overlap] positions with an entity or tile named [target_name:EntityTileNameInput]"
-func cmd_if_all_named_entities_overlap_named_entity_or_tile(slots: Dictionary, _slot: int, is_all: bool, primary_name: Dictionary, invert: bool, target_name: Dictionary) -> bool:
+func desc_if_all_entities_overlap_named_entity_or_tile() -> String:
+	return "none|If [is_all:BoolChoice:true,all,any] entities named [primary_name:EntityNameInput] [invert:InvertInput:overlap,do not overlap] positions with an entity or tile named [target_name:EntityTileNameInput]"
+func cmd_if_all_entities_overlap_named_entity_or_tile(slots: Dictionary, _slot: int, is_all: bool, primary_name: Dictionary, invert: bool, target_name: Dictionary) -> bool:
 	var primary_name_str: String = resolve_complex_string(primary_name, slots)
 	if not EntityManager.entity_name_exists(primary_name_str):
 		return false
@@ -3856,7 +3856,7 @@ func cmd_if_entity_overlaps_named_entity_or_tile(slots: Dictionary, chosen_slot:
 	return Utility.do_positions_intersect(entity_positions, target_positions) != invert
 
 func desc_select_number_of_entities_overlapping_named() -> String:
-	return "number,string|<= Select the number of active entities named [primary_name:EntityNameInput:1] which [invert:InvertInput:overlap,do not overlap] an entity or tile named [target_name:EntityTileNameInput]"
+	return "number,string|<= Select the number of active entities named [primary_name:EntityNameInput] which [invert:InvertInput:overlap,do not overlap] an entity or tile named [target_name:EntityTileNameInput]"
 func cmd_select_number_of_entities_overlapping_named(slots: Dictionary, chosen_slot: int, primary_name: Dictionary, invert: bool, target_name: Dictionary) -> void:
 	if not Commands.slot_is_value(chosen_slot):
 		push_error("Invalid slot to select count of entities overlapping: %s" % chosen_slot)

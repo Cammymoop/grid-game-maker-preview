@@ -87,6 +87,7 @@ func _ready():
     
     property_edit_list.properties_changed.connect(on_properties_changed)
     property_edit_list.request_conditional_editor.connect(on_conditional_editor_requested)
+    property_edit_list.request_duplicate_property.connect(on_duplicate_property_requested)
     
     large_toggle.toggled.connect(on_large_toggle_toggled)
     entity_size_input.value_changed.connect(on_entity_size_input_changed)
@@ -412,17 +413,23 @@ func show_alert(message, alert_title="Alert!"):
 
 
 func add_prop(new_prop_popup) -> void:
-    var new_prop_name: String = new_prop_popup.find_child("SetName").text
+    var new_prop_name: String = new_prop_popup.find_child("SetName").text.strip_edges()
+    var dup_from_name: String = new_prop_popup.duplicate_from_name
+    if not new_prop_name or (dup_from_name and new_prop_name == dup_from_name):
+        return
+
     if ":" in new_prop_name or " " in new_prop_name:
         show_alert('Property names cannot contain spaces or ":"')
-        new_prop_popup.queue_free()
         return
-    _add_new_prop(new_prop_name, GameManager.get_default_value_for_prop_name(new_prop_name), true)
+
+    if dup_from_name and the_definition['properties'].has(dup_from_name):
+        var old_prop_value: Variant = the_definition['properties'][dup_from_name]
+        if typeof(old_prop_value) in [TYPE_DICTIONARY, TYPE_ARRAY]:
+            old_prop_value = old_prop_value.duplicate_deep()
+        _add_new_prop(new_prop_name, old_prop_value, true)
+    else:
+        _add_new_prop(new_prop_name, GameManager.get_default_value_for_prop_name(new_prop_name), true)
     on_info_changed()
-    
-    await get_tree().process_frame
-    if new_prop_popup and not new_prop_popup.is_queued_for_deletion():
-        new_prop_popup.queue_free()
 
 func _add_new_prop(new_prop_name: String, new_prop_value: Variant, focus_in_edit_mode: bool = false) -> void:
     the_definition['properties'][new_prop_name] = new_prop_value
@@ -431,7 +438,11 @@ func _add_new_prop(new_prop_name: String, new_prop_value: Variant, focus_in_edit
         property_edit_list.focus_in_edit_mode(new_prop_name)
 
 func _on_AddPropertyButton_pressed():
+    show_add_property_popup()
+
+func show_add_property_popup(duplicate_prop_name: String = "") -> void:
     var new_prop_popup = new_prop_popup_scene.instantiate()
+    new_prop_popup.set_duplicate_from_name(duplicate_prop_name)
     
     new_prop_popup.confirmed.connect(add_prop.bind(new_prop_popup))
     new_prop_popup.hidden.connect(new_prop_popup.queue_free)
@@ -674,3 +685,7 @@ func on_entity_size_input_changed(new_value: Vector2i) -> void:
 
 func _image_section_toggled(folded: bool) -> void:
     image_section_is_expanded = not folded
+
+
+func on_duplicate_property_requested(property_name: String) -> void:
+    show_add_property_popup(property_name)

@@ -9,6 +9,7 @@ const MAX_SUGGESTIONS_VISIBLE := 20
 
 @export var override_default_min_size: Vector2 = Vector2(140, -1)
 
+@export var no_accept_on_submit: bool = true
 
 @export_group("highlight options")
 @export var do_highlight_unknown: bool = true
@@ -324,7 +325,7 @@ func _fuzzy_rank(query: String, cand: String) -> int:
 
 func _on_text_submitted(_text: String) -> void:
 	if _ac_list and _ac_list.visible:
-		if not Input.is_key_pressed(KEY_SHIFT):
+		if not Input.is_key_pressed(KEY_SHIFT) and not no_accept_on_submit:
 			_accept_highlighted_autocomplete()
 		else:
 			_ac_list.hide_list()
