@@ -1539,18 +1539,46 @@ func find_entity_with_truthy_property(prop_name: String, first: bool = true, ign
     for i in Utility.array_iter(entity_list, not first):
         if ignore_list and entity_list[i].instance_id in ignore_list:
             continue
-        if get_entity_prop_with_default(entity_list[i], prop_name, false) != invert:
+        if Utility.truthy(get_entity_prop_with_default(entity_list[i], prop_name, false)) != invert:
             return entity_list[i]
     return null
 
-func find_all_entities_with_truthy_property(prop_name: String, active_only: bool = false, ignore_list: Array = [], invert: bool = false) -> Array[BaseEntity]:
+func find_all_entities_with_truthy_property(prop_name: String, active_only: bool = false, ignore_list: Array = [], is_truthy: bool = true, invert: bool = false) -> Array[BaseEntity]:
     var found_entities: Array[BaseEntity] = []
+    var check_for: = not is_truthy if invert else is_truthy
     for i in entity_list:
         if ignore_list and i.instance_id in ignore_list:
             continue
-        if (not active_only or i.active) and get_entity_prop_with_default(i, prop_name, false) != invert:
+        if active_only and not i.active:
+            continue
+        if not entity_has_property(i, prop_name):
+            if invert:
+                found_entities.append(i)
+            continue
+        if Utility.truthy(get_entity_prop_with_default(i, prop_name, false)) != check_for:
             found_entities.append(i)
     return found_entities
+
+func find_entities_by_truthy_property_at_multiple(prop_name: String, tile_positions: Array[Vector2i], is_truthy: bool = true, invert: bool = false, ignore_list: Array = [], active_only: bool = true) -> Array[BaseEntity]:
+    var found_entities: Array[BaseEntity] = []
+    var entities_here: = get_entities_at_multiple(tile_positions, null, ignore_list, false, not active_only)
+    var check_for: = not is_truthy if invert else is_truthy
+    for entity in entities_here:
+        if not entity_has_property(entity, prop_name):
+            if invert:
+                found_entities.append(entity)
+            continue
+        if Utility.truthy(get_entity_prop_with_default(entity, prop_name, false)) == check_for:
+            found_entities.append(entity)
+    return found_entities
+
+func find_entities_by_property(prop_name: String, is_truthy: bool = true, invert: bool = false, ignore_list: Array = [], with_pos_filter: bool = false, pos_filter: Array[Vector2i] = []) -> Array[BaseEntity]:
+    if with_pos_filter:
+        return find_entities_by_truthy_property_at_multiple(prop_name, pos_filter, is_truthy, invert, ignore_list)
+    else:
+        return find_all_entities_with_truthy_property(prop_name, true, ignore_list, is_truthy, invert)
+
+        
 
 func find_closest_entity_with_property(prop_name: String, from_position: Vector2i, exclude_list: Array = [], include_inactive: bool = false) -> BaseEntity:
     var closest_dist: float = -1
@@ -2180,6 +2208,13 @@ func get_all_active_entities() -> Array[BaseEntity]:
         if entity.active:
             active_entities.append(entity)
     return active_entities
+
+func get_all_entities_by_id(entity_id: int, active_only: bool = true) -> Array[BaseEntity]:
+    var entities: Array[BaseEntity] = []
+    for entity in entity_list:
+        if entity.entity_index == entity_id and (not active_only or entity.active):
+            entities.append(entity)
+    return entities
 
 var special_effects: Dictionary = {
     "Shrink": {
@@ -3100,3 +3135,25 @@ func get_controller_default_options(controller_instance: Node) -> Dictionary:
         return new_controller_instance.get_option_values()
 
     return {}
+
+func get_all_positions_of_active_entities_by_id(entity_id: int) -> Array[Vector2i]:
+    var entities: Array[BaseEntity] = get_all_entities_by_id(entity_id)
+    var positions: Array[Vector2i] = []
+    if can_entity_id_be_large(entity_id):
+        for entity in entities:
+            positions = Utility.arr_set_union(positions, get_all_positions_of_entity(entity))
+    else:
+        for entity in entities:
+            var pos: Vector2i = entity.get_moving_position()
+            if pos not in positions:
+                positions.append(pos)
+    return positions
+
+func can_entity_id_be_large(entity_id: int) -> bool:
+    if not entity_id in entity_defs:
+        return false
+    return entity_defs[entity_id].get("can_be_large", false)
+
+func get_entity_count_by_property(property_name: String, ignore_list: Array[int], truthy: bool, invert: bool) -> int:
+    var filtered_entities: Array[BaseEntity] = filter_entities_by_property(property_name, get_all_active_entities(), ignore_list, truthy, invert)
+    return filtered_entities.size()

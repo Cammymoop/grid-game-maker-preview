@@ -479,6 +479,15 @@ func get_positioned_property_at(at_pos: Vector2i, for_tile_index: int) -> Dictio
             return layer_pos_prop
     return {}
 
+# Assume at most 1 layer (currently no tile layers)
+func get_single_positioned_property_at(at_pos: Vector2i) -> Dictionary:
+    if not has_positioned_property_at(at_pos):
+        return {}
+    var pos_prop: = map_metadata["positioned_properties"].get(at_pos, {}) as Dictionary
+    if pos_prop["layers"].size() == 0:
+        return {}
+    return pos_prop["layers"][0]["local_properties"]
+
 func get_or_create_positioned_property_at(at_pos: Vector2i, for_tile_index: int) -> Dictionary:
     var existing: = get_positioned_property_at(at_pos, for_tile_index)
     if existing:
@@ -1150,6 +1159,14 @@ func resolve_tile_individual_events(at_tile_positions: Array, tile_event_name: S
             if event_property and event_property.is_conditional():
                 event_property.resolve(null, context_entity, [at_pos], [], extra_debug)
 
+# Get or resolve property at a specific tile position, with no context entity, ignoring positional property overrides
+func resolve_tile_base_event_only(at_tile_pos: Vector2i, tile_event_name: String) -> Variant:
+    var ti: = get_tile_index_at(at_tile_pos)
+    if ti == -1:
+        return null
+    var base_prop: = get_tile_index_property(ti, tile_event_name)
+    return base_prop.get_or_resolve(null, null, [at_tile_pos], [])
+
 func conditional_tile_event(at_tile_positions: Array, tile_event_name: String, context_entity: BaseEntity, is_all: bool = false, only_index: int = -1, extra_debug: bool = false) -> bool:
     var is_static: = is_prop_static(tile_event_name, only_index)
     for at_pos in at_tile_positions:
@@ -1708,3 +1725,76 @@ func get_intermission_assignements_for_event(event: IntermissionEvents) -> Array
     intermissions.append_array(intermission_assignments.get(event_key, []))
 
     return intermissions
+
+
+func is_base_tile_id_prop_conditional(tile_id: int, property_name: String) -> bool:
+    var prop: = get_tile_index_property(tile_id, property_name)
+    return prop and prop.is_conditional()
+
+func is_base_tile_id_static_prop_truthy(tile_id: int, property_name: String, truthy: bool, invert: bool = false) -> bool:
+    if is_base_tile_id_prop_conditional(tile_id, property_name):
+        push_error("called is_base_tile_id_static_prop_truthy with a conditional property: %s" % property_name)
+        return false
+
+    var tile_props: Dictionary = tile_defs[tile_id].get("properties", {})
+    if not tile_props.has(property_name):
+        return not invert
+    var property_value: Variant = tile_props[property_name]
+    return Utility.truthy(property_value)
+
+# Get filtered positions based on prop truthy condition excluding positional property overrides
+func get_tile_pos_by_id_and_base_prop_truthy(tile_id: int, property_name: String, truthy: bool, invert: bool = false, with_pos_filter: bool = false, pos_filter: Array = []) -> Array[Vector2i]:
+    if not is_base_tile_id_prop_conditional(tile_id, property_name):
+        var static_result: bool = is_base_tile_id_static_prop_truthy(tile_id, property_name, truthy, invert)
+        if not static_result:
+            return []
+        else:
+            if with_pos_filter:
+                return Utility.arr_set_intersection(get_all_positions_of_tile(tile_id), pos_filter)
+            else:
+                return get_all_positions_of_tile(tile_id)
+    else:
+        var positions: Array[Vector2i] = []
+        var check_for: = not truthy if invert else truthy
+        for pos in get_all_positions_of_tile(tile_id):
+            if with_pos_filter and not pos in pos_filter:
+                continue
+            var truthy_result: = Utility.truthy(resolve_tile_base_event_only(pos, property_name))
+            if truthy_result == check_for:
+                positions.append(pos)
+        return positions
+
+func get_positional_truthy_results_for_property(property_name: String, is_truthy: bool, with_pos_filter: bool = false, pos_filter: Array = []) -> Dictionary[Vector2i, bool]:
+    if not _positioned_props_set.has(property_name):
+        return {}
+    var positional_results: Dictionary[Vector2i, bool] = {}
+    var positioned_props: Dictionary = map_metadata.get("positioned_properties", {})
+    for pos in positioned_props.keys():
+        if with_pos_filter and not pos in pos_filter:
+            continue
+        var props_here: Dictionary = get_single_positioned_property_at(pos)
+        if not props_here.has(property_name):
+            continue
+        var prop: Property = Property.new()
+        prop.set_value(props_here[property_name])
+        prop.set_name(property_name)
+        positional_results[pos] = Utility.truthy(prop.get_or_resolve(null, null, [pos], [])) == is_truthy
+    return positional_results
+
+
+
+func get_all_positions_of_tile_by_property(property_name: String, truthy: bool, invert: bool, with_pos_filter: bool = false, pos_filter: Array = []) -> Array[Vector2i]:
+    var filtered_positions: Array[Vector2i] = []
+    
+    for tile_id in tile_defs.keys():
+        var base_pos_matching: = get_tile_pos_by_id_and_base_prop_truthy(tile_id, property_name, truthy, invert, with_pos_filter, pos_filter)
+        filtered_positions = Utility.arr_set_union(filtered_positions, base_pos_matching)
+    
+    var positional_results: Dictionary[Vector2i, bool] = get_positional_truthy_results_for_property(property_name, truthy, with_pos_filter, pos_filter)
+    for pos in positional_results.keys():
+        var add_me: = positional_results[pos] != invert
+        if add_me and pos not in filtered_positions:
+            filtered_positions.append(pos)
+        elif not add_me:
+            filtered_positions.erase(pos)
+    return filtered_positions

@@ -180,11 +180,43 @@ func cmd_select_overlapping_positions(slots: Dictionary, chosen_slot: int, overl
 		if pos in slots[overlap_slot]:
 			slots[chosen_slot].append(pos)
 
+func desc_select_number_of_positions() -> String:
+	return "number,string|<= Select the number of positions selected in [pos_slot:SlotInput:pos]"
+func cmd_select_number_of_positions(slots: Dictionary, chosen_slot: int, pos_slot: int) -> void:
+	if not Commands.slot_is_positions(pos_slot) or not Commands.slot_is_value(chosen_slot):
+		push_error("Invalid slots to select number of positions: %s, %s" % [pos_slot, chosen_slot])
+		return
+	set_value_slot_as_number(slots, chosen_slot, slots[pos_slot].size())
+
 func desc_select_tiles_named() -> String:
 	return "pos|<= Select all positions where the tile [tile_name:TileNameInput] is found"
 func cmd_select_tiles_named(slots: Dictionary, chosen_slot: Slot, tile_name: String) -> void:
 	var tindex = MapManager.get_tile_index(tile_name)
 	slots[chosen_slot] = MapManager.get_all_positions_of_tile(tindex)
+
+func _get_prop_filtered_tile_positions(slots: Dictionary, property_name: String, truthy: bool, invert: bool, pos_filter_slot: int = -1) -> Array[Vector2i]:
+	var with_pos_filter: bool = pos_filter_slot >= 0
+	var pos_filter: Array = []
+	if with_pos_filter:
+		pos_filter = slots[pos_filter_slot]
+	return MapManager.get_all_positions_of_tile_by_property(property_name, truthy, invert, with_pos_filter, pos_filter)
+
+func desc_select_tiles_with_property() -> String:
+	return "pos|<= Select the positions of all tiles [invert:InvertInput:with,without] a [truthy:BoolChoice:true,true or non-zero,false or zero] [property_name:PropertyInput] property"
+func cmd_select_tiles_with_property(slots: Dictionary, chosen_slot: int, property_name: String, truthy: bool, invert: bool) -> void:
+	if not Commands.slot_is_positions(chosen_slot):
+		push_error("Invalid slot to select tiles with property: %s" % chosen_slot)
+		return
+	slots[chosen_slot] = _get_prop_filtered_tile_positions(slots, property_name, truthy, invert)
+
+func desc_select_tiles_with_property_at() -> String:
+	return "pos|<= Select the positions of all tiles at [pos_filter_slot:SlotInput:pos] [invert:InvertInput:with,without] a [truthy:BoolChoice:true,true or non-zero,false or zero] " \
+		+ "[property_name:PropertyInput] property"
+func cmd_select_tiles_with_property_at(slots: Dictionary, chosen_slot: int, property_name: String, truthy: bool, invert: bool, pos_filter_slot: int) -> void:
+	if not Commands.slot_is_positions(chosen_slot):
+		push_error("Invalid slot to select tiles with property: %s" % chosen_slot)
+		return
+	slots[chosen_slot] = _get_prop_filtered_tile_positions(slots, property_name, truthy, invert, pos_filter_slot)
 
 func desc_if_non_empty_tiles_at_positions() -> String:
 	return "pos|If there is a tile (not empty) at [is_all:BoolChoice:false,all,any] of the positions in this slot"
@@ -589,8 +621,12 @@ func cmd_select_tiles_within_distance(slots: Dictionary, chosen_slot: int, dista
 			positions.append(pos)
 	slots[chosen_slot] = positions
 
-func desc_select_entity_at() -> String:
-	return "entity|<= Select an active entity (ignoring self) at [at_pos_slot:SlotInput:pos] [invert:InvertInput:with,without] a [prop_name:PropertyInput] property"
+func desc_select_entity_at() -> Dictionary:
+	return {
+		"template_text": "<= Select an active entity (ignoring self) at [at_pos_slot:SlotInput:pos] [invert:InvertInput:with,without] a [prop_name:PropertyInput] property",
+		"slot_type_hint": "entity",
+		"is_deprecated": true,
+	}
 func cmd_select_entity_at(slots: Dictionary, chosen_slot: int, at_pos_slot: int, prop_name: String, invert: bool) -> void:
 	if not Commands.slot_is_entity(chosen_slot) or not Commands.slot_is_positions(at_pos_slot):
 		push_error("Invalid slots to select entity at: %s and %s" % [chosen_slot, at_pos_slot])
@@ -604,11 +640,14 @@ func cmd_select_entity_at(slots: Dictionary, chosen_slot: int, at_pos_slot: int,
 		filtered_entities = EntityManager.filter_entities_by_property(prop_name, filtered_entities, [], true, invert)
 	slots[chosen_slot] = filtered_entities[0] if filtered_entities else null
 
-func desc_select_entity_with_property() -> String:
-	return "entity|<= Select the [is_first:BoolChoice:true,first,last] active entity with a [truthy:BoolChoice:true,true or non-zero,false or zero] [prop_name:PropertyInput] property ignoring [ignore_slot:SlotInput:entity,none]"
+func desc_select_entity_with_property() -> Dictionary:
+	return {
+		"template_text": "<= Select the [is_first:boolchoice:true,first,last] active entity with a [truthy:boolchoice:true,true or non-zero,false or zero] [prop_name:propertyinput] property ignoring [ignore_slot:slotinput:entity,none]",
+		"slot_type_hint": "entity",
+	}
 func cmd_select_entity_with_property(slots: Dictionary, chosen_slot: int, truthy: bool, prop_name: String, ignore_slot: int, is_first: bool) -> void:
 	if not Commands.slot_is_entity(chosen_slot) or not (ignore_slot == SlotSelectorButton.NONE_SLOTS or Commands.slot_is_entity(ignore_slot)):
-		push_error("Invalid slots to select entity with property: %s and %s" % [chosen_slot, ignore_slot])
+		push_error("invalid slots to select entity with property: %s and %s" % [chosen_slot, ignore_slot])
 		return
 	if not prop_name:
 		slots[chosen_slot] = null
@@ -618,6 +657,37 @@ func cmd_select_entity_with_property(slots: Dictionary, chosen_slot: int, truthy
 		ignore_list.append(slots[ignore_slot].instance_id)
 	var found: = EntityManager.find_entity_with_truthy_property(prop_name, is_first, ignore_list, not truthy)
 	slots[chosen_slot] = found
+
+func desc_select_entity_with_property_at() -> String:
+	return "entity|<= Select the [is_first:boolchoice:true,first,last] active entity [invert:InvertInput:with,without] a [truthy:boolchoice:true,true or non-zero,false or zero] [prop_name:propertyinput] property" \
+		+ "at [at_pos_slot:SlotInput:pos] ignoring [ignore_slot:slotinput:entity,none]"
+func cmd_select_entity_with_property_at(slots: Dictionary, chosen_slot: int, at_pos_slot: int, is_first: bool, prop_name: String, truthy: bool, invert: bool, ignore_slot: int) -> void:
+	if not Commands.slot_is_entity(chosen_slot) or not (ignore_slot == SlotSelectorButton.NONE_SLOTS or Commands.slot_is_entity(ignore_slot)):
+		push_error("invalid slots to select entity with property: %s and %s" % [chosen_slot, ignore_slot])
+		return
+	if not prop_name:
+		slots[chosen_slot] = null
+		return
+	var ignore_list: Array[int] = []
+	if ignore_slot != SlotSelectorButton.NONE_SLOTS and slots[ignore_slot]:
+		ignore_list.append(slots[ignore_slot].instance_id)
+	var at_positions: Array = slots[at_pos_slot]
+	var filtered_entities: Array = []
+	if at_positions:
+		filtered_entities = EntityManager.get_entities_at_multiple(at_positions, null, ignore_list, false)
+	else:
+		filtered_entities = EntityManager.get_all_active_entities()
+
+	if prop_name:
+		filtered_entities = EntityManager.filter_entities_by_property(prop_name, filtered_entities, [], truthy, invert)
+	if not filtered_entities:
+		slots[chosen_slot] = null
+		return
+	
+	if is_first:
+		slots[chosen_slot] = filtered_entities[0]
+	else:
+		slots[chosen_slot] = filtered_entities[-1]
 
 func desc_select_named_entity_at() -> String:
 	return "entity|<= Select an active entity (ignoring self) named [e_name:EntityNameInput] at [at_pos_slot:SlotInput:pos]"
@@ -1044,25 +1114,23 @@ func cmd_if_all_entities_property(slots: Dictionary, chosen_slot: int, entity_na
 	return is_all
 
 func desc_if_any_entity_exists() -> String:
-	return "pos|If any entity exists here with a [invert:InvertInput:true or non-zero,false or zero] [prop_name:PropertyInput] property\n" \
+	return "pos|If any entity exists here with a [is_falsey:BoolChoice:false,false or zero,true or non-zero] [prop_name:PropertyInput] property\n" \
 		+ "Excluding [exclude_slot:SlotInput:entity,none]"
-func cmd_if_any_entity_exists(slots: Dictionary, chosen_slot: int, exclude_slot: int, invert: bool, prop_name: String) -> bool:
+func cmd_if_any_entity_exists(slots: Dictionary, chosen_slot: int, exclude_slot: int, is_falsey: bool, prop_name: String) -> bool:
 	if not Commands.slot_is_positions(chosen_slot):
 		push_error("Slot for if any entity exists is not a positions slot: %s" % chosen_slot)
 		return false
-	var exclude_entity: BaseEntity = null
-	if exclude_slot != SlotSelectorButton.NONE_SLOTS:
-		exclude_entity = slots[exclude_slot]
 	var tile_positions: Array = slots[chosen_slot]
-	if not tile_positions:
-		var found_entities: Array = EntityManager.find_all_entities_with_truthy_property(prop_name, true, [], invert)
-		found_entities.erase(exclude_entity)
-		return found_entities.size() > 0
+	var ignore_list: Array = []
+	if exclude_slot != SlotSelectorButton.NONE_SLOTS:
+		ignore_list.append(slots[exclude_slot].instance_id)
 
-	for entity in EntityManager.get_entities_at_multiple(tile_positions, exclude_entity, [], false, false):
-		if EntityManager.get_entity_prop_is_truthy(entity, prop_name, false) != invert:
-			return true
-	return false
+	if not tile_positions:
+		var found_entities: Array = EntityManager.find_all_entities_with_truthy_property(prop_name, true, ignore_list, not is_falsey)
+		return found_entities.size() > 0
+	else:
+		var found_entities: Array = EntityManager.find_entities_by_truthy_property_at_multiple(prop_name, tile_positions, not is_falsey, false, ignore_list)
+		return found_entities.size() > 0
 
 func desc_if_entity_exists_at_all_positions() -> String:
 	return "pos|If at least one active entity with a [truthy:BoolChoice:true,true or non-zero,false or zero] [prop_name:PropertyInput] property exists at every position here"
@@ -1072,7 +1140,7 @@ func cmd_if_entity_exists_at_all_positions(slots: Dictionary, chosen_slot: int, 
 		return false
 	if not slots[chosen_slot]:
 		return false
-	var all_valid_entities: Array[BaseEntity] = EntityManager.find_all_entities_with_truthy_property(prop_name, true, [], not truthy)
+	var all_valid_entities: Array[BaseEntity] = EntityManager.find_all_entities_with_truthy_property(prop_name, true, [], truthy)
 	var entities_cur_positions: Dictionary[BaseEntity, Array] = {}
 	for pos in slots[chosen_slot]:
 		if EntityManager.process_phase != 0:
@@ -3660,3 +3728,462 @@ func desc_if_all_level_lists_are_completed() -> String:
 	return "none|If all completable, non-custom level lists in the game are completed"
 func cmd_if_all_level_lists_are_completed(_slots: Dictionary) -> bool:
 	return GameManager.is_every_bundled_completable_list_complete()
+
+
+func desc_select_number_of_named_entities() -> String:
+	return "number,string|<= Select the number of active entities named [entity_name:ComplexStringInput]"
+func cmd_select_number_of_named_entities(slots: Dictionary, chosen_slot: int, entity_name: Dictionary) -> void:
+	if not Commands.slot_is_value(chosen_slot):
+		push_error("Invalid slot to select count of named entities: %s" % chosen_slot)
+		return
+	var entity_name_str: String = resolve_complex_string(entity_name, slots)
+	if not EntityManager.entity_name_exists(entity_name_str):
+		set_value_slot_as_number(slots, chosen_slot, 0)
+		return
+	var count: int = EntityManager.get_entity_count_by_id(EntityManager.get_entity_index(entity_name_str))
+	set_value_slot_as_number(slots, chosen_slot, count)
+
+func desc_select_number_of_entities_with_property() -> String:
+	return "number,string|<= Select the number of active entities [invert:InvertInput:true,with,without] a [truthy:BoolChoice:true,true or non-zero,false or zero] " \
+		+ "[property_name:PropertyInput] property excluding [exclude_entity:SlotInput:entity,none]"
+func cmd_select_number_of_entities_with_property(slots: Dictionary, chosen_slot: int, property_name: String, truthy: bool, invert: bool, exclude_entity: int) -> void:
+	if not Commands.slot_is_value(chosen_slot):
+		push_error("Invalid slot to select count of entities with property: %s" % chosen_slot)
+		return
+	var ignore_list: Array = []
+	if exclude_entity != SlotSelectorButton.NONE_SLOTS and slots[exclude_entity]:
+		ignore_list.append(slots[exclude_entity].instance_id)
+	var count: int = EntityManager.get_entity_count_by_property(property_name, ignore_list, truthy, invert)
+	set_value_slot_as_number(slots, chosen_slot, count)
+
+func desc_select_number_of_entities_at() -> String:
+	return "number,string|<= Select the number of active entities [invert:InvertInput:true,with,without] a [truthy:BoolChoice:true,true or non-zero,false or zero] " \
+	+ "[property_name:PropertyInput] property at [pos_slot:SlotInput:pos] excluding [exclude_entity:SlotInput:entity,none]"
+func cmd_select_number_of_entities_at(slots: Dictionary, chosen_slot: int, property_name: String, truthy: bool, invert: bool, pos_slot: int, exclude_entity: int) -> void:
+	if not Commands.slot_is_value(chosen_slot):
+		push_error("Invalid slot to select count of entities with property: %s" % chosen_slot)
+		return
+	var ignore_list: Array = []
+	if exclude_entity != SlotSelectorButton.NONE_SLOTS and slots[exclude_entity]:
+		ignore_list.append(slots[exclude_entity].instance_id)
+
+	var filtered_entities: Array = []
+	if slots[pos_slot]:
+		filtered_entities = EntityManager.get_entities_at_multiple(slots[pos_slot], null, [])
+	else:
+		filtered_entities = EntityManager.get_all_active_entities()
+	filtered_entities = EntityManager.filter_entities_by_property(property_name, filtered_entities, ignore_list, truthy, invert)
+	set_value_slot_as_number(slots, chosen_slot, filtered_entities.size())
+
+
+
+
+func desc_if_all_named_entities_overlap_named_entity_or_tile() -> String:
+	return "none|If [is_all:BoolChoice:true,all,any] entities named [primary_name:EntityNameInput:1] [invert:InvertInput:overlap,do not overlap] positions with an entity or tile named [target_name:EntityTileNameInput]"
+func cmd_if_all_named_entities_overlap_named_entity_or_tile(slots: Dictionary, _slot: int, is_all: bool, primary_name: Dictionary, invert: bool, target_name: Dictionary) -> bool:
+	var primary_name_str: String = resolve_complex_string(primary_name, slots)
+	if not EntityManager.entity_name_exists(primary_name_str):
+		return false
+	var primary_entity_id: = EntityManager.get_entity_index(primary_name_str)
+	var large_check_required: bool = EntityManager.can_entity_id_be_large(primary_entity_id)
+
+	var target_name_str: String = resolve_complex_string(target_name, slots)
+	var target_entity_id: int = -1
+	var target_tile_id: int = -1
+	if EntityManager.entity_name_exists(target_name_str):
+		target_entity_id = EntityManager.get_entity_index(target_name_str)
+	if MapManager.tile_name_exists(target_name_str):
+		target_tile_id = MapManager.get_tile_index(target_name_str)
+	if target_entity_id == -1 and target_tile_id == -1:
+		return false
+	
+	var primary_positions: = EntityManager.get_all_positions_of_active_entities_by_id(primary_entity_id)
+	var target_intersection: Array[Vector2i] = []
+	if target_entity_id != -1:
+		var check_entity_pos: = EntityManager.get_all_positions_of_active_entities_by_id(target_entity_id)
+		target_intersection = Utility.intersect_positions(primary_positions, check_entity_pos)
+		if (is_all == invert) and target_intersection.size() > 0:
+			return not is_all
+
+	if target_tile_id != -1:
+		var check_tile_pos: = MapManager.get_all_positions_of_tile(target_tile_id)
+		var tile_intersection: = Utility.intersect_positions(primary_positions, check_tile_pos)
+		target_intersection = Utility.arr_set_union(target_intersection, tile_intersection)
+		if (is_all == invert) and target_intersection.size() > 0:
+			return not is_all
+	
+	if is_all != invert:
+		if not large_check_required:
+			for pos in primary_positions:
+				if pos not in target_intersection:
+					return not is_all
+		else:
+			for entity in EntityManager.get_all_active_entities_by_id(primary_entity_id):
+				var entity_positions: = EntityManager.get_all_positions_of_entity(entity)
+				if not Utility.do_positions_intersect(entity_positions, target_intersection):
+					return not is_all
+	return is_all
+
+func desc_if_entity_overlaps_named_entity_or_tile() -> String:
+	return "entity|If this entity [invert:InvertInput:overlaps,does not overlap] position with an entity or tile named [target_name:EntityTileNameInput]"
+func cmd_if_entity_overlaps_named_entity_or_tile(slots: Dictionary, chosen_slot: int, invert: bool, target_name: Dictionary) -> bool:
+	if not Commands.slot_is_entity(chosen_slot):
+		push_error("Invalid slot to check if entity overlaps named entity or tile: %s" % chosen_slot)
+		return false
+	if not slots[chosen_slot]:
+		return false
+	var target_name_str: String = resolve_complex_string(target_name, slots)
+	var target_entity_id: int = -1
+	var target_tile_id: int = -1
+	if EntityManager.entity_name_exists(target_name_str):
+		target_entity_id = EntityManager.get_entity_index(target_name_str)
+	if MapManager.tile_name_exists(target_name_str):
+		target_tile_id = MapManager.get_tile_index(target_name_str)
+	if target_entity_id == -1 and target_tile_id == -1:
+		return false
+	
+	var target_positions: Array[Vector2i] = []
+	if target_tile_id != -1:
+		target_positions = MapManager.get_all_positions_of_tile(target_tile_id)
+	if target_entity_id != -1:
+		for entity_pos in EntityManager.get_all_positions_of_active_entities_by_id(target_entity_id):
+			if not entity_pos in target_positions:
+				target_positions.append(entity_pos)
+	if target_positions.size() == 0:
+		return false
+	var entity_positions: = EntityManager.get_all_positions_of_entity(slots[chosen_slot])
+
+	return Utility.do_positions_intersect(entity_positions, target_positions) != invert
+
+func desc_select_number_of_entities_overlapping_named() -> String:
+	return "number,string|<= Select the number of active entities named [primary_name:EntityNameInput:1] which [invert:InvertInput:overlap,do not overlap] an entity or tile named [target_name:EntityTileNameInput]"
+func cmd_select_number_of_entities_overlapping_named(slots: Dictionary, chosen_slot: int, primary_name: Dictionary, invert: bool, target_name: Dictionary) -> void:
+	if not Commands.slot_is_value(chosen_slot):
+		push_error("Invalid slot to select count of entities overlapping: %s" % chosen_slot)
+		return
+	var target_name_str: String = resolve_complex_string(target_name, slots)
+	var target_entity_id: int = -1
+	var target_tile_id: int = -1
+	var primary_name_str: String = resolve_complex_string(primary_name, slots)
+	if not EntityManager.entity_name_exists(primary_name_str):
+		set_value_slot_as_number(slots, chosen_slot, 0)
+		return
+	var primary_entity_id: int = EntityManager.get_entity_index(primary_name_str)
+	var primary_entities: = EntityManager.find_all_entities_by_index(primary_entity_id, true)
+
+	if EntityManager.entity_name_exists(target_name_str):
+		target_entity_id = EntityManager.get_entity_index(target_name_str)
+	if MapManager.tile_name_exists(target_name_str):
+		target_tile_id = MapManager.get_tile_index(target_name_str)
+	if target_entity_id == -1 and target_tile_id == -1:
+		set_value_slot_as_number(slots, chosen_slot, primary_entities.size() if invert else 0)
+		return
+	
+	var count: int = primary_entities.size() if invert else 0
+	var target_positions: Array[Vector2i] = []
+	if target_tile_id != -1:
+		target_positions = MapManager.get_all_positions_of_tile(target_tile_id)
+	if target_entity_id != -1:
+		for entity_pos in EntityManager.get_all_positions_of_active_entities_by_id(target_entity_id):
+			if not entity_pos in target_positions:
+				target_positions.append(entity_pos)
+	if target_positions.size() == 0:
+		set_value_slot_as_number(slots, chosen_slot, count)
+		return
+	
+	for entity in primary_entities:
+		var entity_positions: = EntityManager.get_all_positions_of_entity(entity)
+		if Utility.do_positions_intersect(entity_positions, target_positions):
+			if invert:
+				count -= 1
+			else:
+				count += 1
+	set_value_slot_as_number(slots, chosen_slot, count)
+
+
+
+func desc_if_all_tiles_overlap_entity() -> String:
+	return "none|If [is_all:BoolChoice:true,all,any] tiles [invert_tile_prop:InvertInput:with,without] a [tile_truthy:BoolChoice:true,true or non-zero,false or zero] [tile_prop:PropertyInput] property [invert:InvertInput:overlap,do not overlap] an entity\n" \
+		+ "[invert_prop:InvertInput:with,without] a [ent_truthy:BoolChoice:true,true or non-zero,false or zero] [property_name:PropertyInput] property"
+func cmd_if_all_tiles_overlap_entity(
+		slots: Dictionary,
+		_slot: int,
+		is_all: bool,
+		invert: bool,
+		invert_tile_prop: bool, tile_truthy: bool, tile_prop: String,
+		invert_prop: bool, ent_truthy: bool, ent_prop: String) -> bool:
+	return _tile_overlap_ent_prop_check(
+		slots,
+		is_all,
+		invert,
+		SlotSelectorButton.NONE_SLOTS,
+		invert_tile_prop, tile_truthy, tile_prop,
+		invert_prop, ent_truthy, ent_prop
+	)
+
+func desc_if_all_tiles_overlap_entity_at() -> String:
+	return "none|If [is_all:BoolChoice:true,all,any] tiles at [pos_filter_slot:SlotInput:pos] [invert_tile_prop:InvertInput:with,without] a [tile_truthy:BoolChoice:true,true or non-zero,false or zero] [tile_prop:PropertyInput] property [invert:InvertInput:overlap,do not overlap] an entity\n" \
+		+ "[invert_prop:InvertInput:with,without] a [ent_truthy:BoolChoice:true,true or non-zero,false or zero] [property_name:PropertyInput] property"
+func cmd_if_all_tiles_overlap_entity_at(
+		slots: Dictionary,
+		_slot: int,
+		is_all: bool,
+		invert: bool,
+		pos_filter_slot: int,
+		invert_tile_prop: bool, tile_truthy: bool, tile_prop: String,
+		invert_prop: bool, ent_truthy: bool, ent_prop: String) -> bool:
+	return _tile_overlap_ent_prop_check(
+		slots,
+		is_all,
+		invert,
+		pos_filter_slot,
+		invert_tile_prop, tile_truthy, tile_prop,
+		invert_prop, ent_truthy, ent_prop
+	)
+
+func _tile_overlap_ent_prop_check(
+		slots: Dictionary,
+		is_all: bool,
+		invert: bool,
+		pos_filter_slot: int,
+		invert_tile_prop: bool, tile_truthy: bool, tile_prop: String,
+		invert_prop: bool, ent_truthy: bool, ent_prop: String) -> bool:
+	var tile_positions: Array[Vector2i] = _get_prop_filtered_tile_positions(slots, tile_prop, tile_truthy, invert_tile_prop, pos_filter_slot)
+
+	var with_pos_filter: bool = pos_filter_slot != SlotSelectorButton.NONE_SLOTS
+	var pos_filter: Array = slots[pos_filter_slot]
+
+	var filtered_entities: Array = []
+	if with_pos_filter:
+		filtered_entities = EntityManager.get_entities_at_multiple(pos_filter, null, [])
+	else:
+		filtered_entities = EntityManager.get_all_active_entities()
+	filtered_entities = EntityManager.filter_entities_by_property(ent_prop, filtered_entities, [], ent_truthy, invert_prop)
+	var all_entity_positions: Array[Vector2i] = []
+	for entity in filtered_entities:
+		all_entity_positions = Utility.arr_set_union(all_entity_positions, EntityManager.get_all_positions_of_entity(entity))
+	
+	for tile_pos in tile_positions:
+		if tile_pos not in all_entity_positions:
+			if is_all == invert:
+				return not is_all
+		elif is_all != invert:
+			return not is_all
+	return is_all
+
+func _get_tile_overlap_ent_prop_positions(
+		slots: Dictionary,
+		pos_filter_slot: int,
+		invert_tile_prop: bool, tile_truthy: bool, tile_prop: String,
+		invert_prop: bool, ent_truthy: bool, ent_prop: String) -> Array[Vector2i]:
+	var tile_positions: Array[Vector2i] = _get_prop_filtered_tile_positions(slots, tile_prop, tile_truthy, invert_tile_prop, pos_filter_slot)
+
+	var with_pos_filter: bool = pos_filter_slot != SlotSelectorButton.NONE_SLOTS
+	var pos_filter: Array = slots[pos_filter_slot]
+
+	var filtered_entities: Array = []
+	if with_pos_filter:
+		filtered_entities = EntityManager.get_entities_at_multiple(pos_filter, null, [])
+	else:
+		filtered_entities = EntityManager.get_all_active_entities()
+	filtered_entities = EntityManager.filter_entities_by_property(ent_prop, filtered_entities, [], ent_truthy, invert_prop)
+
+	var filtered_positions: Array[Vector2i] = []
+	for entity in filtered_entities:
+		for entity_pos in EntityManager.get_all_positions_of_entity(entity):
+			if entity_pos not in filtered_positions and entity_pos in tile_positions:
+				filtered_positions.append(entity_pos)
+	return filtered_positions
+
+func desc_select_tiles_overlapping_entity_with_property() -> String:
+	return "pos|<= Select the positions of all tiles [invert_tile_prop:InvertInput:with,without] a [tile_truthy:BoolChoice:true,true or non-zero,false or zero] [tile_prop:PropertyInput] property which [invert:InvertInput:overlap,do not overlap] an entity\n" \
+		+ "[invert_prop:InvertInput:with,without] a [ent_truthy:BoolChoice:true,true or non-zero,false or zero] [property_name:PropertyInput] property"
+func cmd_select_tiles_overlapping_entity_with_property(slots: Dictionary, chosen_slot: int, invert_tile_prop: bool, tile_truthy: bool, tile_prop: String, invert_prop: bool, ent_truthy: bool, ent_prop: String) -> void:
+	if not Commands.slot_is_positions(chosen_slot):
+		push_error("Invalid slot to select tiles overlapping entity with property: %s" % chosen_slot)
+		return
+	slots[chosen_slot] = _get_tile_overlap_ent_prop_positions(
+		slots,
+		SlotSelectorButton.NONE_SLOTS,
+		invert_tile_prop, tile_truthy, tile_prop,
+		invert_prop, ent_truthy, ent_prop
+	)
+	
+func desc_select_tiles_overlapping_entity_with_property_at() -> String:
+	return "pos|<= Select the positions of all tiles at [pos_filter_slot:SlotInput:pos] [invert_tile_prop:InvertInput:with,without] a [tile_truthy:BoolChoice:true,true or non-zero,false or zero] [tile_prop:PropertyInput] property which [invert:InvertInput:overlap,do not overlap] an entity\n" \
+		+ "[invert_prop:InvertInput:with,without] a [ent_truthy:BoolChoice:true,true or non-zero,false or zero] [property_name:PropertyInput] property"
+func cmd_select_tiles_overlapping_entity_with_property_at(slots: Dictionary, chosen_slot: int, invert_tile_prop: bool, tile_truthy: bool, tile_prop: String, invert_prop: bool, ent_truthy: bool, ent_prop: String, pos_filter_slot: int) -> void:
+	if not Commands.slot_is_positions(chosen_slot):
+		push_error("Invalid slot to select tiles overlapping entity with property: %s" % chosen_slot)
+		return
+	slots[chosen_slot] = _get_tile_overlap_ent_prop_positions(
+		slots,
+		pos_filter_slot,
+		invert_tile_prop, tile_truthy, tile_prop,
+		invert_prop, ent_truthy, ent_prop
+	)
+
+
+func desc_if_all_entities_overlap_by_property() -> String:
+	return "none|If [is_all:BoolChoice:true,all,any] entities [invert_primary:InvertInput:with,without] a [primary_truthy:BoolChoice:true,true or non-zero,false or zero] [primary_prop:PropertyInput] property [invert:InvertInput:overlap,do not overlap] another entity\n" \
+		+ "[invert_other:InvertInput:with,without] a [other_truthy:BoolChoice:true,true or non-zero,false or zero] [other_prop:PropertyInput] property"
+func cmd_if_all_entities_overlap_by_property(slots: Dictionary, _slot: int, is_all: bool, invert: bool, invert_primary: bool, primary_truthy: bool, primary_prop: String, invert_other: bool, other_truthy: bool, other_prop: String) -> bool:
+	return _ent_overlap_ent_prop_check(
+		slots,
+		is_all,
+		invert,
+		SlotSelectorButton.NONE_SLOTS,
+		invert_primary, primary_truthy, primary_prop,
+		invert_other, other_truthy, other_prop
+	)
+
+func desc_if_all_entities_overlap_by_property_at() -> String:
+	return "none|If [is_all:BoolChoice:true,all,any] entities at [pos_filter_slot:SlotInput:pos] [invert_primary:InvertInput:with,without] a [primary_truthy:BoolChoice:true,true or non-zero,false or zero] [primary_prop:PropertyInput] property [invert:InvertInput:overlap,do not overlap] another entity\n" \
+		+ "[invert_other:InvertInput:with,without] a [other_truthy:BoolChoice:true,true or non-zero,false or zero] [other_prop:PropertyInput] property"
+func cmd_if_all_entities_overlap_by_property_at(slots: Dictionary, _slot: int, is_all: bool, invert: bool, pos_filter_slot: int, invert_primary: bool, primary_truthy: bool, primary_prop: String, invert_other: bool, other_truthy: bool, other_prop: String) -> bool:
+	return _ent_overlap_ent_prop_check(
+		slots,
+		is_all,
+		invert,
+		pos_filter_slot,
+		invert_primary, primary_truthy, primary_prop,
+		invert_other, other_truthy, other_prop
+	)
+
+func desc_select_positions_where_entities_overlap() -> String:
+	return "pos|<= Select all the positions where an entity [invert_primary:InvertInput:with,without] a [primary_truthy:BoolChoice:true,true or non-zero,false or zero] [primary_prop:PropertyInput] property [invert:InvertInput:overlaps,does not overlap] another entity\n" \
+		+ "[invert_other:InvertInput:with,without] a [other_truthy:BoolChoice:true,true or non-zero,false or zero] [other_prop:PropertyInput] property"
+func cmd_select_positions_where_entities_overlap(slots: Dictionary, chosen_slot: int, invert: bool, invert_primary: bool, primary_truthy: bool, primary_prop: String, invert_other: bool, other_truthy: bool, other_prop: String) -> void:
+	if not Commands.slot_is_positions(chosen_slot):
+		push_error("Invalid slot to select positions where entities overlap: %s" % chosen_slot)
+		return
+	slots[chosen_slot] = _get_ent_overlap_ent_positions(
+		slots,
+		invert,
+		SlotSelectorButton.NONE_SLOTS,
+		invert_primary, primary_truthy, primary_prop,
+		invert_other, other_truthy, other_prop
+	)
+
+func desc_filter_selected_positions_where_entities_overlap() -> String:
+	return "pos|<= Select all the positions within [pos_filter_slot:SlotInput:pos] where an entity [invert_primary:InvertInput:with,without] a [primary_truthy:BoolChoice:true,true or non-zero,false or zero] [primary_prop:PropertyInput] property [invert:InvertInput:overlaps,does not overlap] another entity\n" \
+		+ "[invert_other:InvertInput:with,without] a [other_truthy:BoolChoice:true,true or non-zero,false or zero] [other_prop:PropertyInput] property"
+func cmd_filter_selected_positions_where_entities_overlap(slots: Dictionary, chosen_slot: int, invert: bool, pos_filter_slot: int, invert_primary: bool, primary_truthy: bool, primary_prop: String, invert_other: bool, other_truthy: bool, other_prop: String) -> void:
+	if not Commands.slot_is_positions(chosen_slot):
+		push_error("Invalid slot to filter selected positions where entities overlap: %s" % chosen_slot)
+		return
+	slots[chosen_slot] = _get_ent_overlap_ent_positions(
+		slots,
+		invert,
+		pos_filter_slot,
+		invert_primary, primary_truthy, primary_prop,
+		invert_other, other_truthy, other_prop
+	)
+
+func desc_select_number_of_overlapping_entities() -> String:
+	return "number,string|<= Select the number of entities [invert_primary:InvertInput:with,without] a [primary_truthy:BoolChoice:true,true or non-zero,false or zero] [primary_prop:PropertyInput] property which [invert:InvertInput:overlap,do not overlap] any other entity\n" \
+		+ "[invert_other:InvertInput:with,without] a [other_truthy:BoolChoice:true,true or non-zero,false or zero] [other_prop:PropertyInput] property"
+func cmd_select_number_of_overlapping_entities(slots: Dictionary, chosen_slot: int, invert: bool, invert_primary: bool, primary_truthy: bool, primary_prop: String, invert_other: bool, other_truthy: bool, other_prop: String) -> void:
+	if not Commands.slot_is_value(chosen_slot):
+		push_error("Invalid slot to select number of overlapping entities: %s" % chosen_slot)
+		return
+	slots[chosen_slot] = _get_ent_overlap_ent_count(
+		slots,
+		invert,
+		SlotSelectorButton.NONE_SLOTS,
+		invert_primary, primary_truthy, primary_prop,
+		invert_other, other_truthy, other_prop
+	)
+
+func desc_select_number_of_overlapping_entities_at() -> String:
+	return "number,string|<= Select the number of entities at [pos_filter_slot:SlotInput:pos] [invert_primary:InvertInput:with,without] a [primary_truthy:BoolChoice:true,true or non-zero,false or zero] [primary_prop:PropertyInput] property which [invert:InvertInput:overlap,do not overlap] any other entity\n" \
+		+ "[invert_other:InvertInput:with,without] a [other_truthy:BoolChoice:true,true or non-zero,false or zero] [other_prop:PropertyInput] property"
+func cmd_select_number_of_overlapping_entities_at(slots: Dictionary, chosen_slot: int, invert: bool, pos_filter_slot: int, invert_primary: bool, primary_truthy: bool, primary_prop: String, invert_other: bool, other_truthy: bool, other_prop: String) -> void:
+	if not Commands.slot_is_value(chosen_slot):
+		push_error("Invalid slot to select number of overlapping entities: %s" % chosen_slot)
+		return
+	slots[chosen_slot] = _get_ent_overlap_ent_count(
+		slots,
+		invert,
+		pos_filter_slot,
+		invert_primary, primary_truthy, primary_prop,
+		invert_other, other_truthy, other_prop
+	)
+
+func _ent_overlap_ent_prop_check(
+		slots: Dictionary,
+		is_all: bool,
+		invert: bool,
+		pos_filter_slot: int,
+		invert_primary: bool, primary_truthy: bool, primary_prop: String,
+		invert_other: bool, other_truthy: bool, other_prop: String) -> bool:
+	var with_pos_filter: bool = pos_filter_slot != SlotSelectorButton.NONE_SLOTS
+	var pos_filter: Array = slots[pos_filter_slot]
+
+	var primary_entities: Array = EntityManager.find_entities_by_property(primary_prop, primary_truthy, invert_primary, [], with_pos_filter, pos_filter)
+	var other_entities: Array = EntityManager.find_entities_by_property(other_prop, other_truthy, invert_other, [], with_pos_filter, pos_filter)
+	var other_positions: Array[Vector2i] = []
+	for other_entity in other_entities:
+		var positions: = EntityManager.get_all_positions_of_entity(other_entity)
+		other_positions = Utility.arr_set_union(other_positions, positions)
+	
+	for primary_entity in primary_entities:
+		var primary_positions: = EntityManager.get_all_positions_of_entity(primary_entity)
+		if not Utility.do_positions_intersect(primary_positions, other_positions):
+			if is_all == invert:
+				return not is_all
+		elif is_all != invert:
+			return not is_all
+	return is_all
+
+func _get_ent_overlap_ent_count(
+		slots: Dictionary,
+		invert: bool,
+		pos_filter_slot: int,
+		invert_primary: bool, primary_truthy: bool, primary_prop: String,
+		invert_other: bool, other_truthy: bool, other_prop: String) -> int:
+	var with_pos_filter: bool = pos_filter_slot != SlotSelectorButton.NONE_SLOTS
+	var pos_filter: Array = slots[pos_filter_slot]
+
+	var primary_entities: Array = EntityManager.find_entities_by_property(primary_prop, primary_truthy, invert_primary, [], with_pos_filter, pos_filter)
+	var other_entities: Array = EntityManager.find_entities_by_property(other_prop, other_truthy, invert_other, [], with_pos_filter, pos_filter)
+	var other_positions: Array[Vector2i] = []
+	for other_entity in other_entities:
+		var positions: = EntityManager.get_all_positions_of_entity(other_entity)
+		other_positions = Utility.arr_set_union(other_positions, positions)
+	
+	var count: int = 0
+	for primary_entity in primary_entities:
+		var primary_positions: = EntityManager.get_all_positions_of_entity(primary_entity)
+		if Utility.do_positions_intersect(primary_positions, other_positions):
+			count += 1
+	if invert:
+		return primary_entities.size() - count
+	else:
+		return count
+
+func _get_ent_overlap_ent_positions(
+		slots: Dictionary,
+		invert: bool,
+		pos_filter_slot: int,
+		invert_primary: bool, primary_truthy: bool, primary_prop: String,
+		invert_other: bool, other_truthy: bool, other_prop: String) -> Array[Vector2i]:
+	var with_pos_filter: bool = pos_filter_slot != SlotSelectorButton.NONE_SLOTS
+	var pos_filter: Array = slots[pos_filter_slot]
+
+	var primary_entities: Array = EntityManager.find_entities_by_property(primary_prop, primary_truthy, invert_primary, [], with_pos_filter, pos_filter)
+	var primary_positions: Array[Vector2i] = []
+	for primary_entity in primary_entities:
+		var positions: = EntityManager.get_all_positions_of_entity(primary_entity)
+		primary_positions = Utility.arr_set_union(primary_positions, positions)
+
+	var other_entities: Array = EntityManager.find_entities_by_property(other_prop, other_truthy, invert_other, [], with_pos_filter, pos_filter)
+	var other_positions: Array[Vector2i] = []
+	for other_entity in other_entities:
+		var positions: = EntityManager.get_all_positions_of_entity(other_entity)
+		other_positions = Utility.arr_set_union(other_positions, positions)
+	
+	if invert:
+		return Utility.inverse_intersect_positions(primary_positions, other_positions)
+	else:
+		return Utility.intersect_positions(primary_positions, other_positions)

@@ -10,13 +10,14 @@ var plain_value_as_string: bool = false
 @export var slot_selector: SlotSelectorButton
 @export var plain_value_input: FuzzyAutocompleteInput
 
-@export_enum("Entity Name", "Property Name", "SFX Name", "Level List Name", "Custom") var autocomplete_list: String = "Entity Name"
+@export_enum("Entity Name", "Property Name", "SFX Name", "Level List Name", "Entity or Tile Name", "Custom") var autocomplete_list: String = "Entity Name"
 
 var autocomplete_list_data_sources: Dictionary[String, Callable] = {
     "Entity Name": EntityManager.get_all_entity_names,
     "Property Name": GameManager.get_all_used_prop_names,
     "SFX Name": GameManager.get_used_sfx_names,
     "Level List Name": GameManager.get_list_of_level_lists,
+    "Entity or Tile Name": GameManager.get_all_item_names,
 }
 
 var VALUE_SLOTS: Array[int] = [

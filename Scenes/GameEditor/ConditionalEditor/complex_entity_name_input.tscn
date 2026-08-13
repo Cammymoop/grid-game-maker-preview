@@ -5,7 +5,7 @@
 [ext_resource type="StyleBox" uid="uid://ch63py1vky05t" path="res://assets/ui/plain_input_bg.tres" id="3_q0qfx"]
 [ext_resource type="Script" uid="uid://bgrcxdoa3c0cb" path="res://src/GameEditor/ConditionalEditor/entity_name_input.gd" id="4_occg8"]
 
-[node name="ComplexLevelNameInput" type="HBoxContainer" unique_id=1726993889 node_paths=PackedStringArray("slot_selector", "plain_value_input")]
+[node name="ComplexEntityNameInput" type="HBoxContainer" unique_id=1726993889 node_paths=PackedStringArray("slot_selector", "plain_value_input")]
 offset_right = 40.0
 offset_bottom = 40.0
 script = ExtResource("1_occg8")

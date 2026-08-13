@@ -1567,6 +1567,18 @@ func intersect_positions(pos_arr: Array, other_pos_arr: Array) -> Array[Vector2i
 			intersected.append(pos)
 	return intersected
 
+func inverse_intersect_positions(pos_arr: Array, other_pos_arr: Array) -> Array[Vector2i]:
+	var other_pos_copy: = other_pos_arr.duplicate()
+	var non_intersected: Array[Vector2i] = []
+	for pos in pos_arr:
+		if pos in other_pos_copy:
+			other_pos_copy.erase(pos)
+		else:
+			non_intersected.append(pos)
+	for other_pos in other_pos_copy:
+		non_intersected.append(other_pos)
+	return non_intersected
+
 func do_positions_intersect(pos_arr: Array, other_pos_arr: Array) -> bool:
 	for pos in pos_arr:
 		if pos in other_pos_arr:

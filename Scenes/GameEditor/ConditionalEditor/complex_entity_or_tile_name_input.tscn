@@ -1,0 +1,26 @@
+[gd_scene format=3 uid="uid://b8fksw732557j"]
+
+[ext_resource type="Script" uid="uid://bgdkkaju61w15" path="res://Scenes/GameEditor/ConditionalEditor/complex_autocomplete_input.gd" id="1_jclo3"]
+[ext_resource type="PackedScene" uid="uid://bh1w4w8i5hk66" path="res://Scenes/GameEditor/SlotSelectorButton.tscn" id="2_ajc8r"]
+[ext_resource type="StyleBox" uid="uid://ch63py1vky05t" path="res://assets/ui/plain_input_bg.tres" id="3_lmma6"]
+[ext_resource type="Script" uid="uid://bgrcxdoa3c0cb" path="res://src/GameEditor/ConditionalEditor/entity_name_input.gd" id="4_ly4nx"]
+
+[node name="ComplexEntityTileNameInput" type="HBoxContainer" unique_id=1726993889 node_paths=PackedStringArray("slot_selector", "plain_value_input")]
+offset_right = 40.0
+offset_bottom = 40.0
+script = ExtResource("1_jclo3")
+slot_selector = NodePath("SlotSelectorButton")
+plain_value_input = NodePath("PlainValueInput")
+autocomplete_list = "Entity or Tile Name"
+
+[node name="SlotSelectorButton" parent="." unique_id=1264497244 instance=ExtResource("2_ajc8r")]
+layout_mode = 2
+show_text_option = true
+default_slot_id = -4
+
+[node name="PlainValueInput" type="LineEdit" parent="." unique_id=1236016904]
+custom_minimum_size = Vector2(140, 0)
+layout_mode = 2
+theme_override_styles/normal = ExtResource("3_lmma6")
+placeholder_text = "item name"
+script = ExtResource("4_ly4nx")

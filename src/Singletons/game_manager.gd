@@ -5884,3 +5884,6 @@ func count_entity_flags_by_entity_id(entity_id: int, include_pending: bool, skip
 				flags.append(new_flag_key)
 
 	return flags.size()
+
+func get_all_item_names() -> Array[String]:
+	return Utility.arr_set_union(EntityManager.get_all_entity_names(), MapManager.get_all_tile_names())
