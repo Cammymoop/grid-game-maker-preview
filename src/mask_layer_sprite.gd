@@ -1240,16 +1240,13 @@ func set_sprite_size(new_unoriented_bounds: Vector2, update_pos_now: bool = true
     unoriented_center = unoriented_bounds / 2
     simple_rotate = unoriented_bounds.x == unoriented_bounds.y
     if update_pos_now:
-        prints("updating oriented position, cur unoriented center:", unoriented_center)
         _update_oriented_position()
 
 func _update_oriented_position(with_offset: Vector2 = Vector2.ZERO) -> void:
-    prints("current facing:", _current_facing)
     if simple_rotate or _current_facing % 2 == 0:
         position = unoriented_center
     else:
         position = Vector2(unoriented_center.y, unoriented_center.x)
-        prints("pos for alternate orientation:", position, "with offset:", position + with_offset)
     position += with_offset
 
 func set_large_auto_scale(enable: bool, new_size: Vector2 = Vector2.ONE) -> void:
@@ -1270,7 +1267,6 @@ func set_large_size_with_position_and_interpolation(new_size: Vector2, tile_pos_
         push_warning("Interpolate size change is disabled, but set_large_size_with_position_and_interpolation was called")
         set_large_auto_scale(true, new_size)
         return
-    prints("setting large size with position and interpolation, new size:", new_size)
 
     var old_center: Vector2 = large_auto_scale_size / 2
     var new_center: Vector2 = new_size / 2
