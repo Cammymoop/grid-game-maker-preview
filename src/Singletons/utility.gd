@@ -1531,8 +1531,8 @@ func arr_vec_multiplied(arr_vec: Array, multiply_by: float) -> Array:
 		arr_vec[i] *= multiply_by
 	return arr_vec
 
-func arr_vec_normal(arr_vec, multiply_by: float = 1) -> Array:
-	if arr_vec.size != 2:
+func arr_vec_normal(arr_vec: Array, multiply_by: float = 1) -> Array:
+	if arr_vec.size() != 2:
 		push_error("arr vec normal only supports vectors of size 2. Got arr sized: %s" % [arr_vec.size()])
 		return arr_vec.duplicate_deep()
 	var vec: = get_vector2_from_arr(arr_vec)

@@ -235,7 +235,7 @@ const DYING_EFFECTS: Dictionary[String, Dictionary] = {
         "animated_effects": {
             "offset": { "offset_to": [0, -100], "ease_param": 1.6 },
             "scale": { "scale_from": [1,1], "scale_to": [0,0], "ease_param": 0.5,
-                        "duration_factor": 0.5, "time_offset": 0.5 },
+                        "duration_factor": 0.2, "time_offset": 0.8 },
         },
     },
     
@@ -270,6 +270,10 @@ static func set_dying_effect_params(effect_name: String, effect_params: Dictiona
     if effect_params.has("amount"):
         var amt: float = effect_params["amount"]
         if effect_name.begins_with("Hit"):
+            var offset_effect: Dictionary = anim_eff.get("offset", {})
+            if offset_effect and offset_effect.has("offset_to"):
+                offset_effect["offset_to"] = Utility.arr_vec_normal(offset_effect["offset_to"], amt)
+        elif effect_name == "Fly Out":
             var offset_effect: Dictionary = anim_eff.get("offset", {})
             if offset_effect and offset_effect.has("offset_to"):
                 offset_effect["offset_to"] = Utility.arr_vec_normal(offset_effect["offset_to"], amt)

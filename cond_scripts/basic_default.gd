@@ -642,7 +642,7 @@ func cmd_select_entity_at(slots: Dictionary, chosen_slot: int, at_pos_slot: int,
 
 func desc_select_entity_with_property() -> Dictionary:
 	return {
-		"template_text": "<= Select the [is_first:boolchoice:true,first,last] active entity with a [truthy:boolchoice:true,true or non-zero,false or zero] [prop_name:propertyinput] property ignoring [ignore_slot:slotinput:entity,none]",
+		"template_text": "<= Select the [is_first:BoolChoice:true,first,last] active entity with a [truthy:BoolChoice:true,true or non-zero,false or zero] [prop_name:PropertyInput] property ignoring [ignore_slot:SlotInput:entity,none]",
 		"slot_type_hint": "entity",
 	}
 func cmd_select_entity_with_property(slots: Dictionary, chosen_slot: int, truthy: bool, prop_name: String, ignore_slot: int, is_first: bool) -> void:
@@ -659,8 +659,8 @@ func cmd_select_entity_with_property(slots: Dictionary, chosen_slot: int, truthy
 	slots[chosen_slot] = found
 
 func desc_select_entity_with_property_at() -> String:
-	return "entity|<= Select the [is_first:boolchoice:true,first,last] active entity [invert:InvertInput:with,without] a [truthy:boolchoice:true,true or non-zero,false or zero] [prop_name:propertyinput] property" \
-		+ "at [at_pos_slot:SlotInput:pos] ignoring [ignore_slot:slotinput:entity,none]"
+	return "entity|<= Select the [is_first:BoolChoice:true,first,last] active entity [invert:InvertInput:with,without] a [truthy:BoolChoice:true,true or non-zero,false or zero] [prop_name:PropertyInput] property" \
+		+ "at [at_pos_slot:SlotInput:pos] ignoring [ignore_slot:SlotInput:entity,none]"
 func cmd_select_entity_with_property_at(slots: Dictionary, chosen_slot: int, at_pos_slot: int, is_first: bool, prop_name: String, truthy: bool, invert: bool, ignore_slot: int) -> void:
 	if not Commands.slot_is_entity(chosen_slot) or not (ignore_slot == SlotSelectorButton.NONE_SLOTS or Commands.slot_is_entity(ignore_slot)):
 		push_error("invalid slots to select entity with property: %s and %s" % [chosen_slot, ignore_slot])

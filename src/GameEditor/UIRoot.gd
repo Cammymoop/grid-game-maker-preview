@@ -46,7 +46,7 @@ func _ready():
 func on_tab_changed(tab_index: int) -> void:
 	var tab_control: = tab_container.get_tab_control(tab_index)
 	if tab_control is ImagesEditor:
-		tab_control.refresh_list()
+		tab_control.images_updated()
 	elif tab_control == intermission_tab:
 		GameManager.create_default_credits_if_not_exists()
 
