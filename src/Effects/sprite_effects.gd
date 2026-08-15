@@ -246,7 +246,7 @@ const DYING_EFFECTS: Dictionary[String, Dictionary] = {
         "effects": {"modulate": {"color": "#ffffff00" } },
         "layers": [{
             "mode": "particles",
-            "particles_type": "explode",
+            "particles_type": "explosion",
             "z_offset": 2,
             "receives_effects": false,
         }],

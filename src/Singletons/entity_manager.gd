@@ -1559,7 +1559,7 @@ func find_all_entities_with_truthy_property(prop_name: String, active_only: bool
             found_entities.append(i)
     return found_entities
 
-func find_entities_by_truthy_property_at_multiple(prop_name: String, tile_positions: Array[Vector2i], is_truthy: bool = true, invert: bool = false, ignore_list: Array = [], active_only: bool = true) -> Array[BaseEntity]:
+func find_entities_by_truthy_property_at_multiple(prop_name: String, tile_positions: Array, is_truthy: bool = true, invert: bool = false, ignore_list: Array = [], active_only: bool = true) -> Array[BaseEntity]:
     var found_entities: Array[BaseEntity] = []
     var entities_here: = get_entities_at_multiple(tile_positions, null, ignore_list, false, not active_only)
     var check_for: = not is_truthy if invert else is_truthy
@@ -3157,3 +3157,7 @@ func can_entity_id_be_large(entity_id: int) -> bool:
 func get_entity_count_by_property(property_name: String, ignore_list: Array[int], truthy: bool, invert: bool) -> int:
     var filtered_entities: Array[BaseEntity] = filter_entities_by_property(property_name, get_all_active_entities(), ignore_list, truthy, invert)
     return filtered_entities.size()
+
+func get_entity_count_by_id(entity_id: int, active_only: bool = true) -> int:
+    var entities: Array[BaseEntity] = get_all_entities_by_id(entity_id, active_only)
+    return entities.size()

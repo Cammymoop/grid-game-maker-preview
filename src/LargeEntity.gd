@@ -41,8 +41,6 @@ func update_sprite_pos_scale(immediate: bool = true, tile_pos_delta: Vector2i = 
 	if not immediate and is_auto_scale and sprite.interpolate_size_change_enabled:
 		sprite.set_large_size_with_position_and_interpolation(entity_size, tile_pos_delta)
 		return
-	prints("immediate param:", immediate, "sprite interp enabled:", sprite.interpolate_size_change_enabled)
-	prints("updating sprite pos scale (immediate), size:", entity_size, "is auto scale:", is_auto_scale)
 
 	sprite.set_large_auto_scale(is_auto_scale, entity_size)
 	sprite.set_sprite_size(entity_size * MapManager.tile_width)

@@ -1122,7 +1122,7 @@ func cmd_if_any_entity_exists(slots: Dictionary, chosen_slot: int, exclude_slot:
 		return false
 	var tile_positions: Array = slots[chosen_slot]
 	var ignore_list: Array = []
-	if exclude_slot != SlotSelectorButton.NONE_SLOTS:
+	if exclude_slot != SlotSelectorButton.NONE_SLOTS and slots[exclude_slot]:
 		ignore_list.append(slots[exclude_slot].instance_id)
 
 	if not tile_positions:
