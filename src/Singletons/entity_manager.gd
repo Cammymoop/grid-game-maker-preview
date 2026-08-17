@@ -1760,23 +1760,20 @@ func attempt_move_leave(moving_entity: BaseEntity, leaving_ps: Array[Vector2i], 
 
     return result
 
-func attempt_move_overlapping(moving_entity: BaseEntity, leaving_ps: Array[Vector2i], entering_ps: Array[Vector2i], is_group_move: bool = false) -> bool:
+func attempt_move_overlapping(moving_entity: BaseEntity, leaving_ps: Array[Vector2i], _entering_ps: Array[Vector2i], is_group_move: bool = false) -> bool:
     if not moving_entity.is_large():
-        prints("attemp move overlapping: entity is not large")
         return true
     var result: = true
     var common_positions: Array[Vector2i] = get_all_positions_of_entity(moving_entity)
     for pos in leaving_ps:
         common_positions.erase(pos)
     if not common_positions:
-        prints("attemp move overlapping: no common positions", common_positions)
         return true
     
     if entity_has_property(moving_entity, "i_move_overlapping_tile"):
         if not conditional_entity_interaction("i_move_overlapping_tile", moving_entity, null, common_positions, true):
             result = false
     if not result:
-        prints("attemp move overlapping: i_move_overlapping_tile resulted in false")
         return false
     
     var skip_entity_inst_ids: Array[int] = []
@@ -1787,10 +1784,8 @@ func attempt_move_overlapping(moving_entity: BaseEntity, leaving_ps: Array[Vecto
     
     if entity_has_property(moving_entity, "i_move_overlapping"):
         for e in entities_overlapped:
-            if not conditional_entity_interaction("i_move_overlapping", moving_entity, e, common_positions, true, true):
+            if not conditional_entity_interaction("i_move_overlapping", moving_entity, e, common_positions, true):
                 result = false
-    else:
-        prints("entity of type", moving_entity.entity_name, "not checking i_move_overlapping")
     for e in entities_overlapped:
         if not conditional_entity_interaction("move_overlapping", e, moving_entity, common_positions, true):
             result = false
@@ -2964,6 +2959,7 @@ func just_finished_move_start(related_move_node: Dictionary, move_result: bool) 
     if move_result:
         _finished_related_move_node = related_move_node
     elif not related_move_node["group_move"]:
+        related_move_node["revertable"] = true
         _failed_move_start(related_move_node)
     
     # not ideal implementation, but should always need to set the parent of this move as the current move again
@@ -2987,6 +2983,7 @@ func failed_group_move_start(parent_related_move: Dictionary, instance_ids: Arra
     _cur_related_move_node = parent_related_move
 
 func _failed_move_start(related_move_node: Dictionary) -> void:
+    prints("move failed, related moves:", related_move_node)
     _revert_related_move_node(related_move_node)
     if not is_same(_nested_related_moves, related_move_node):
         var parent_node: = _get_parent_move_node(related_move_node)

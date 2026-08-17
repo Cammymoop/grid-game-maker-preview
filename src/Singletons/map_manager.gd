@@ -1259,7 +1259,6 @@ func attempt_move(moving_entity: BaseEntity, leaving_ps: Array[Vector2i], enteri
         return false
     
     if is_large_entity:
-        prints("large entity attempting to move, now checking for overlapping")
         if not EntityManager.attempt_move_overlapping(moving_entity, leaving_ps, entering_ps, is_group_move):
             result = false
         var overlapping_ps: Array[Vector2i] = Utility.intersect_positions(leaving_ps, entering_ps)

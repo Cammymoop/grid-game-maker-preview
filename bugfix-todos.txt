@@ -1,15 +1,13 @@
 Missing 'Duplicate Step' button
 
-Options menu doesn't grab focus for controller compatibility
-
-Geode needs to explain that you can reset or undo
+some tooltips (like slot buttons in conditional editor) have dark text on dark background
 
 After saving level, still complains about needing to save changes when exiting
 Save confirm when leaving a level while testing saves current state of level not edited state
 
 First new level in empty game not assigned to 'Levels' list by default
 
-Add level list button disabled when no lists?
+Add level list button disabled when no lists? (test on sandy or broken abacus)
 
 line/solid scroll and warp scroll angles in style editor are huge???
 
@@ -20,7 +18,7 @@ background falling sprites not notified properly when deleting entity
 
 fix select_entity_at command
 
-some tooltips (like slot buttons in conditional editor) have dark text on dark background
+Options menu doesn't grab focus for controller compatibility
 
 
 missing commands:
@@ -28,9 +26,6 @@ missing commands:
   select first tile from a set of multiple (or nearest?)
   create entity using spawn effect/play spawn effect on already created entity
 
-
-for large-entities broken abacus:
-  add events for move_over or move_overlapping
 
 
 
@@ -40,3 +35,5 @@ Stop repeat after bonk prevents further movement at all in discrete mode
 (low priority)
 Some bug causing bg style edits being made on the current list not updating realtime background info (but still saving??)
 Large entity 9-patch from non 32x32 px image scales weird
+
+Geode needs to explain that you can reset or undo
