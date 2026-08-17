@@ -17,6 +17,19 @@
       "image_name": "chest.png",
       "texture_id": 2.0,
       "filter": false
+    },
+    {
+      "type": "builtin",
+      "name": "shapes32x.png",
+      "texture_id": 3,
+      "filter": false
+    },
+    {
+      "type": "local_file",
+      "is_shared": false,
+      "image_name": "custom_key.png",
+      "texture_id": 4,
+      "filter": false
     }
   ],
   "game_settings": {
@@ -55,7 +68,7 @@
     },
     "y_sort_entities": true,
     "y_sort_tiles": true,
-    "movement_mode": 2
+    "movement_mode": 2.0
   },
   "entity_definitions": {
     "2": {
@@ -219,22 +232,22 @@
         "layers": [
           {
             "mode": "normal",
-            "texture": 2,
-            "tex_index": 4,
+            "texture": 2.0,
+            "tex_index": 4.0,
             "z_offset": -2.0
           },
           {
             "mode": "normal",
-            "texture": 2,
-            "tex_index": 5
+            "texture": 2.0,
+            "tex_index": 5.0
           }
         ]
       }
     },
     "1": {
       "name": "key",
-      "texture": 1,
-      "tex_index": 29,
+      "texture": 4,
+      "tex_index": 0,
       "properties": {
         "player": true,
         "move-turns": false,
@@ -315,13 +328,20 @@
         "layers": [
           {
             "mode": "normal",
-            "texture": 1.0,
-            "tex_index": 29.0,
-            "offset_degrees": 90.0,
+            "texture": 3,
+            "tex_index": 36,
             "offset": [
-              0.0,
-              2.0
-            ]
+              0,
+              7
+            ],
+            "mod_color": "#3c3c3cca",
+            "rotates": false,
+            "offset_degrees": 90.0
+          },
+          {
+            "mode": "normal",
+            "texture": 4,
+            "tex_index": 0
           }
         ]
       }
