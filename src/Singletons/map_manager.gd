@@ -1243,6 +1243,8 @@ func attempt_move(moving_entity: BaseEntity, leaving_ps: Array[Vector2i], enteri
     var tracked_result: = tracked_conditional_tile_event(leaving_ps, "move_off_of", moving_entity, true)
     var result: bool = tracked_result["overall"]
     #prints("tracked result: %s" % [tracked_result])
+    
+    var is_large_entity: = moving_entity.is_large()
 
     var skip_collection: Array[int] = []
     if not EntityManager.attempt_move_leave(moving_entity, leaving_ps, skip_collection, is_group_move):
@@ -1250,11 +1252,22 @@ func attempt_move(moving_entity: BaseEntity, leaving_ps: Array[Vector2i], enteri
     if _check_moving_away:
         var moving_away_from_ps: = get_positions_moving_away_from(leaving_ps, moving_entity.facing)
         for pos in moving_away_from_ps:
-            var tracked_away: = tracked_conditional_tile_event([pos], "move_away_from", moving_entity, false)
+            var tracked_away: = tracked_conditional_tile_event([pos], "move_away_from", moving_entity, true)
             if not tracked_away["overall"]:
                 result = false
     if not result:
         return false
+    
+    if is_large_entity:
+        prints("large entity attempting to move, now checking for overlapping")
+        if not EntityManager.attempt_move_overlapping(moving_entity, leaving_ps, entering_ps, is_group_move):
+            result = false
+        var overlapping_ps: Array[Vector2i] = Utility.intersect_positions(leaving_ps, entering_ps)
+        var tracked_overlapping_result: = tracked_conditional_tile_event(overlapping_ps, "move_overlapping", moving_entity, true)
+        if not tracked_overlapping_result["overall"]:
+            result = false
+        if not result:
+            return false
     
     # Move-dependent facing: Change facing dir in between leaving and entering
     var old_facing: int = moving_entity.facing

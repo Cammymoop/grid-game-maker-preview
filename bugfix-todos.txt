@@ -1,3 +1,4 @@
+Missing 'Duplicate Step' button
 
 Options menu doesn't grab focus for controller compatibility
 

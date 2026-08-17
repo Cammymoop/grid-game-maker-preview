@@ -1726,6 +1726,15 @@ func attempt_move_leave(moving_entity: BaseEntity, leaving_ps: Array[Vector2i], 
     
     if is_group_move:
         skip_entity_inst_ids.assign(moving_entity.bond_group.duplicate())
+    if moving_entity.is_large():
+        var other_positions: Array[Vector2i] = get_all_positions_of_entity(moving_entity)
+        for pos in leaving_ps:
+            other_positions.erase(pos)
+        if other_positions:
+            var entities_at_other_positions: = get_entities_at_multiple(other_positions, moving_entity, skip_entity_inst_ids)
+            for e in entities_at_other_positions:
+                if e.is_large() and not e.instance_id in skip_entity_inst_ids:
+                    skip_entity_inst_ids.append(e.instance_id)
     var entities_here: = get_entities_at_multiple(leaving_ps, moving_entity, skip_entity_inst_ids)
     
     if entity_has_property(moving_entity, "i_move_off_of"):
@@ -1750,6 +1759,43 @@ func attempt_move_leave(moving_entity: BaseEntity, leaving_ps: Array[Vector2i], 
                 result = false
 
     return result
+
+func attempt_move_overlapping(moving_entity: BaseEntity, leaving_ps: Array[Vector2i], entering_ps: Array[Vector2i], is_group_move: bool = false) -> bool:
+    if not moving_entity.is_large():
+        prints("attemp move overlapping: entity is not large")
+        return true
+    var result: = true
+    var common_positions: Array[Vector2i] = get_all_positions_of_entity(moving_entity)
+    for pos in leaving_ps:
+        common_positions.erase(pos)
+    if not common_positions:
+        prints("attemp move overlapping: no common positions", common_positions)
+        return true
+    
+    if entity_has_property(moving_entity, "i_move_overlapping_tile"):
+        if not conditional_entity_interaction("i_move_overlapping_tile", moving_entity, null, common_positions, true):
+            result = false
+    if not result:
+        prints("attemp move overlapping: i_move_overlapping_tile resulted in false")
+        return false
+    
+    var skip_entity_inst_ids: Array[int] = []
+    if is_group_move:
+        skip_entity_inst_ids.assign(moving_entity.bond_group.duplicate())
+    
+    var entities_overlapped: = get_entities_at_multiple(common_positions, moving_entity, skip_entity_inst_ids)
+    
+    if entity_has_property(moving_entity, "i_move_overlapping"):
+        for e in entities_overlapped:
+            if not conditional_entity_interaction("i_move_overlapping", moving_entity, e, common_positions, true, true):
+                result = false
+    else:
+        prints("entity of type", moving_entity.entity_name, "not checking i_move_overlapping")
+    for e in entities_overlapped:
+        if not conditional_entity_interaction("move_overlapping", e, moving_entity, common_positions, true):
+            result = false
+    return result
+
 
 func attempt_move_enter(moving_entity: BaseEntity, tile_move_allowed: bool, entering_ps: Array[Vector2i], skip_entity_inst_ids: Array[int]) -> bool:
     var result: = tile_move_allowed

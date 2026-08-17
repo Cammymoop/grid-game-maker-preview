@@ -10,6 +10,13 @@
       "type": "builtin",
       "texture_id": 1.0,
       "name": "entityTiles.png"
+    },
+    {
+      "type": "local_file",
+      "is_shared": false,
+      "image_name": "edited_tiles.png",
+      "texture_id": 3.0,
+      "filter": false
     }
   ],
   "game_settings": {
@@ -17,7 +24,7 @@
     "window_width": 18.0,
     "window_height": 14.0,
     "camera_settings": {
-      "follow_entity": "player"
+      "follow_entity": "InputController"
     },
     "game_view_size": [
       16.0,
@@ -34,12 +41,135 @@
       "lines_warp_scroll_speed": 0.0,
       "lines_color": "#ffffff0f",
       "dusty_particles_speed": 0.6,
-      "dusty_particles_amount": 2.1
-    }
+      "dusty_particles_amount": 1.5,
+      "bg_gradient_cover_amount": 1.2,
+      "dusty_particles_camera_scroll_factor": 1.0
+    },
+    "movement_mode": 2
   },
   "entity_definitions": {
-    "1": {
+    "5": {
       "name": "hbar",
+      "texture": 3,
+      "tex_index": 59,
+      "properties": {
+        "auto-bond": true,
+        "player": true,
+        "move-turns": false,
+        "i_move_onto": [
+          {
+            "v": "3",
+            "conditions": [
+              "basic_default.if_property_value::[\"i:1\",\"s:pushable\",true]"
+            ],
+            "when true": [],
+            "when false": [
+              "basic_default.true::[\"i:-1\"]",
+              "basic_default.quit::[\"i:-1\"]"
+            ],
+            "when always": []
+          },
+          {
+            "v": "3",
+            "conditions": [
+              "basic_default.if_property_value::[\"i:1\",\"s:draggable\",true]",
+              "basic_default.c_is_moving::[\"i:0\",false,\"i:13\"]",
+              "basic_default.c_is_moving::[\"i:0\",false,\"i:15\"]",
+              "or"
+            ],
+            "when true": [
+              "basic_default.quit::[\"i:-1\"]"
+            ],
+            "when false": [],
+            "when always": []
+          },
+          {
+            "v": "3",
+            "conditions": [
+              "basic_default.get_pushed_revertable::[\"i:1\",{\"args\":[\"s:type\",\"s:plain\",\"s:direction\",\"i:4\"],\"type\":\"Dictionary\"},true]"
+            ],
+            "when true": [],
+            "when false": [],
+            "when always": []
+          }
+        ],
+        "i_move_off_of": [
+          {
+            "v": "3",
+            "conditions": [
+              "basic_default.if_property_value::[\"i:1\",\"s:draggable\",false]"
+            ],
+            "when true": [
+              "basic_default.quit::[\"i:-1\"]"
+            ],
+            "when false": [],
+            "when always": []
+          },
+          {
+            "v": "3",
+            "conditions": [
+              "basic_default.get_pushed_revertable::[\"i:1\",{\"args\":[\"s:type\",\"s:plain\",\"s:direction\",\"i:4\"],\"type\":\"Dictionary\"},true]"
+            ],
+            "when true": [
+              "basic_default.quit::[\"i:-1\"]"
+            ],
+            "when false": [],
+            "when always": []
+          },
+          {
+            "v": "3",
+            "conditions": [
+              "basic_default.c_is_moving::[\"i:0\",false,\"i:13\"]",
+              "basic_default.c_is_moving::[\"i:0\",false,\"i:15\"]",
+              "or"
+            ],
+            "when true": [],
+            "when false": [],
+            "when always": []
+          }
+        ],
+        "i_move_overlapping": {
+          "v": "3",
+          "conditions": [
+            "basic_default.if_custom_conditional_event_result::[\"i:0\",\"s:i_move_off_of\",\"i:1\",true]"
+          ],
+          "when true": [],
+          "when false": [],
+          "when always": []
+        }
+      },
+      "controller": "InputController",
+      "controller_options": {
+        "stop_repeat_after_bonk": false,
+        "lock_for_idle_delay_after_bonk": true,
+        "allow_wait": false,
+        "only_rcv_when_cam": true,
+        "idle_delay_multiplier": 2.0
+      },
+      "sprite_config": {
+        "layers": [
+          {
+            "mode": "normal",
+            "texture": 3,
+            "tex_index": 59,
+            "scale_as_9_patch": true,
+            "9_patch_corner_size": [
+              0.375,
+              0.375
+            ],
+            "9_patch_edge_repeat": false,
+            "9_patch_center_repeat": false
+          }
+        ]
+      },
+      "can_be_large": true,
+      "default_size": [
+        2,
+        1
+      ]
+    },
+    "1": {
+      "name": "old-hbar",
       "texture": 1,
       "tex_index": 20,
       "properties": {
@@ -130,8 +260,8 @@
     },
     "2": {
       "name": "token",
-      "texture": 1,
-      "tex_index": 21,
+      "texture": 3,
+      "tex_index": 49,
       "properties": {
         "pushable": true,
         "draggable": true,
@@ -158,11 +288,27 @@
             "when false": [],
             "when always": []
           }
+        ],
+        "z-index": -1
+      },
+      "sprite_config": {
+        "layers": [
+          {
+            "mode": "normal",
+            "texture": 3,
+            "tex_index": 58
+          },
+          {
+            "mode": "normal",
+            "texture": 3,
+            "tex_index": 49,
+            "z_offset": 2.0
+          }
         ]
       }
     },
     "3": {
-      "name": "vbar",
+      "name": "old-vbar",
       "texture": 1,
       "tex_index": 22,
       "properties": {
@@ -315,17 +461,275 @@
         ],
         "auto-bond-adjacent": true
       }
+    },
+    "4": {
+      "name": "vbar",
+      "texture": 3,
+      "tex_index": 61,
+      "properties": {
+        "z-index": -1,
+        "move_off_of": [
+          {
+            "v": "3",
+            "conditions": [
+              "basic_default.if_property_value::[\"i:1\",\"s:draggable\",true]",
+              "basic_default.if_entity_is_moving_or_starting_to_move::[\"i:0\"]",
+              "not"
+            ],
+            "when true": [],
+            "when false": [
+              "basic_default.true::[\"i:-1\"]",
+              "basic_default.quit::[\"i:-1\"]"
+            ],
+            "when always": []
+          },
+          {
+            "v": "3",
+            "conditions": [
+              "basic_default.get_pushed_revertable::[\"i:0\",{\"args\":[\"s:type\",\"s:plain\",\"s:direction\",\"i:20\"],\"type\":\"Dictionary\"},true]",
+              "basic_default.c_is_moving::[\"i:1\",false,\"i:12\"]",
+              "basic_default.c_is_moving::[\"i:1\",false,\"i:14\"]",
+              "or",
+              "or"
+            ],
+            "when true": [],
+            "when false": [],
+            "when always": []
+          }
+        ],
+        "move-turns": false,
+        "move_onto": [
+          {
+            "v": "3",
+            "conditions": [
+              "basic_default.if_property_value::[\"i:1\",\"s:pushes\",true]",
+              "basic_default.if_entity_is_moving_or_starting_to_move::[\"i:0\"]",
+              "not"
+            ],
+            "when true": [],
+            "when false": [
+              "basic_default.true::[\"i:-1\"]",
+              "basic_default.quit::[\"i:-1\"]"
+            ],
+            "when always": []
+          },
+          {
+            "v": "3",
+            "conditions": [
+              "basic_default.if_property_value::[\"i:1\",\"s:draggable\",true]",
+              "basic_default.c_is_moving::[\"i:1\",false,\"i:12\"]",
+              "basic_default.c_is_moving::[\"i:1\",false,\"i:14\"]",
+              "or"
+            ],
+            "when true": [
+              "basic_default.quit::[\"i:-1\"]"
+            ],
+            "when false": [],
+            "when always": []
+          },
+          {
+            "v": "3",
+            "conditions": [
+              "basic_default.get_pushed_revertable::[\"i:0\",{\"args\":[\"s:type\",\"s:plain\",\"s:direction\",\"i:20\"],\"type\":\"Dictionary\"},true]"
+            ],
+            "when true": [],
+            "when false": [],
+            "when always": []
+          }
+        ],
+        "i_move_onto": [
+          {
+            "v": "3",
+            "conditions": [
+              "basic_default.if_property_value::[\"i:1\",\"s:pushable\",true]",
+              "basic_default.if_entity_is_moving_or_starting_to_move::[\"i:1\"]",
+              "not"
+            ],
+            "when true": [],
+            "when false": [
+              "basic_default.true::[\"i:-1\"]",
+              "basic_default.quit::[\"i:-1\"]"
+            ],
+            "when always": []
+          },
+          {
+            "v": "3",
+            "conditions": [
+              "basic_default.if_property_value::[\"i:1\",\"s:draggable\",true]",
+              "basic_default.c_is_moving::[\"i:0\",false,\"i:12\"]",
+              "basic_default.c_is_moving::[\"i:0\",false,\"i:14\"]",
+              "or"
+            ],
+            "when true": [
+              "basic_default.quit::[\"i:-1\"]"
+            ],
+            "when false": [],
+            "when always": []
+          },
+          {
+            "v": "3",
+            "conditions": [
+              "basic_default.get_pushed_revertable::[\"i:1\",{\"args\":[\"s:type\",\"s:plain\",\"s:direction\",\"i:4\"],\"type\":\"Dictionary\"},true]"
+            ],
+            "when true": [],
+            "when false": [],
+            "when always": []
+          }
+        ],
+        "i_move_off_of": [
+          {
+            "v": "3",
+            "conditions": [
+              "basic_default.if_property_value::[\"i:1\",\"s:draggable\",false]",
+              "basic_default.if_entity_is_moving_or_starting_to_move::[\"i:1\"]",
+              "or"
+            ],
+            "when true": [
+              "basic_default.quit::[\"i:-1\"]"
+            ],
+            "when false": [],
+            "when always": []
+          },
+          {
+            "v": "3",
+            "conditions": [
+              "basic_default.get_pushed_revertable::[\"i:1\",{\"args\":[\"s:type\",\"s:plain\",\"s:direction\",\"i:4\"],\"type\":\"Dictionary\"},true]"
+            ],
+            "when true": [
+              "basic_default.quit::[\"i:-1\"]"
+            ],
+            "when false": [],
+            "when always": []
+          },
+          {
+            "v": "3",
+            "conditions": [
+              "basic_default.c_is_moving::[\"i:0\",false,\"i:12\"]",
+              "basic_default.c_is_moving::[\"i:0\",false,\"i:14\"]",
+              "or"
+            ],
+            "when true": [],
+            "when false": [],
+            "when always": []
+          }
+        ],
+        "i_move_overlapping": {
+          "v": "3",
+          "conditions": [
+            "basic_default.if_custom_conditional_event_result::[\"i:0\",\"s:i_move_off_of\",\"i:1\",true]"
+          ],
+          "when true": [],
+          "when false": [],
+          "when always": []
+        }
+      },
+      "can_be_large": true,
+      "default_size": [
+        1.0,
+        2.0
+      ],
+      "sprite_config": {
+        "layers": [
+          {
+            "mode": "normal",
+            "texture": 3.0,
+            "tex_index": 61.0,
+            "scale_as_9_patch": true,
+            "9_patch_corner_size": [
+              0.375,
+              0.375
+            ],
+            "9_patch_edge_repeat": false,
+            "9_patch_center_repeat": false
+          }
+        ]
+      }
+    },
+    "6": {
+      "name": "target",
+      "texture": 3,
+      "tex_index": 55,
+      "properties": {
+        "z-index": -2
+      },
+      "sprite_config": {
+        "layers": [
+          {
+            "mode": "normal",
+            "texture": 3,
+            "tex_index": 55,
+            "mod_color": "#732a2c92"
+          }
+        ]
+      }
     }
   },
   "tile_definitions": {
     "1": {
-      "name": "tile",
-      "texture": 0,
-      "tex_index": 22,
+      "name": "floor",
+      "texture": 3,
+      "tex_index": 29,
       "properties": {
 
       }
+    },
+    "3": {
+      "name": "transition-left",
+      "texture": 3,
+      "tex_index": 28,
+      "properties": {
+
+      }
+    },
+    "4": {
+      "name": "transition-right",
+      "texture": 3,
+      "tex_index": 30,
+      "properties": {
+
+      }
+    },
+    "5": {
+      "name": "floor-empty",
+      "texture": 3,
+      "tex_index": 31,
+      "properties": {
+
+      }
+    },
+    "6": {
+      "name": "floor-variant",
+      "texture": 3,
+      "tex_index": 33,
+      "properties": {
+
+      }
+    },
+    "2": {
+      "name": "wall",
+      "texture": 3,
+      "tex_index": 27,
+      "properties": {
+        "blocks": true
+      }
     }
   },
-  "level_lists": []
+  "level_lists": [],
+  "release_info": {
+    "edited": true,
+    "release_created_utc": "",
+    "release_created_local_date": "",
+    "release_created_zone_offset": "",
+    "base_version": [
+      0,
+      0
+    ],
+    "next_version": [
+      0,
+      1
+    ],
+    "release_hash": ""
+  },
+  "game_identifier": "",
+  "intermissions": []
 }

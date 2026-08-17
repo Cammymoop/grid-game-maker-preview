@@ -43,6 +43,7 @@ const all_events: Array[String] = [
 	"move_onto", "move_off_of",
     "i_move_onto", "i_move_onto_tile",
     "i_move_off_of", "i_move_off_of_tile",
+    "move_overlapping", "i_move_overlapping", "i_move_overlapping_tile",
 
 	"finish_move_onto", "i_finish_move_onto",
 	"finish_move_onto_tile", "i_finish_move_onto_tile",
@@ -91,7 +92,7 @@ const all_events: Array[String] = [
 
 const NO_OTHER_EVENTS: = [
 	"i_finish_move_onto_tile", "i_move_off_of_tile", "i_move_onto_tile", "half_moved_off_of_tile", "half_moved_onto_tile",
-    "i_finish_move_next_to_tile", "i_move_away_from_tile",
+    "i_finish_move_next_to_tile", "i_move_away_from_tile", "i_move_overlapping_tile",
     "post_move", "idle_update", "every_tick",
     "joined_bond_group", "left_bond_group",
     "dying", "do_action_1", "do_action_2", "do_action_3",
@@ -532,6 +533,10 @@ const EVENT_HINT_TEXT: Dictionary[String, String] = {
     "i_move_off_of": "Conditional Event.\nEntities only. If false, this entity will not be allowed to move off of the other entity at this location",
     "i_move_off_of_tile": "Conditional Event.\nEntities only. If false, this entity will not be allowed to move off of the tile at this location",
     
+    "move_overlapping": "Conditional Event.\nEntities or Tiles. Resolved when another entity is attempting to move with both origin and destination overlapping this entity/tile. false = cancel move.",
+    "i_move_overlapping": "Conditional Event.\nEntities only. When this entity is attempting to move with both origin and destination overlapping another entity. false = cancel move.",
+    "i_move_overlapping_tile": "Conditional Event.\nEntities only. When this entity is attempting to move with both origin and destination overlapping a tile, resolved once per move with all positions. false = cancel move.",
+    
     "move_away_from": "Conditional Event.\nEntities or Tiles. Resolved when another entity is attempting to move from an adjacent position to this entity/tile.\n" \
         + "If false, the entity will not be allowed to move away.",
     "i_move_away_from": "Conditional Event.\nEntities only. Resolved when this entity attempts to move away from an entity at an adjacent position" \
@@ -602,6 +607,10 @@ const EVENT_CATEGORIES: Dictionary[String, String] = {
     "move_onto": "move events",
     "i_move_onto": "move events",
     "i_move_onto_tile": "move events",
+    
+    "move_overlapping": "move events",
+    "i_move_overlapping": "move events",
+    "i_move_overlapping_tile": "move events",
     
     "move_away_from": "move events",
     "i_move_away_from": "move events",
