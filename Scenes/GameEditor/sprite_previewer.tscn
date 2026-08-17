@@ -38,7 +38,7 @@ corner_detail = 7
 [node name="SpritePreviewer" type="MarginContainer" unique_id=84080552 node_paths=PackedStringArray("preview_bg_sprite", "preview_vp_container", "preview_subviewport", "the_sprite", "spin_sprite_toggle", "dark_bg_toggle")]
 size_flags_vertical = 3
 script = ExtResource("1_44mtw")
-preview_bg_sprite = NodePath("PreviewSection/HBoxContainer/VBoxContainer/PanelContainer/MarginContainer/SubViewportContainer/SubViewport/PreviewBG")
+preview_bg_sprite = NodePath("PreviewSection/HBoxContainer/VBoxContainer/PanelContainer/MarginContainer/SubViewportContainer/SubViewport/BGLayer/PreviewBG")
 preview_bg_dark = ExtResource("3_a1r42")
 preview_bg_light = ExtResource("3_l2fur")
 interp_duration = 0.12
@@ -93,7 +93,11 @@ size_2d_override_stretch = true
 render_target_update_mode = 4
 script = ExtResource("2_l2fur")
 
-[node name="PreviewBG" type="Sprite2D" parent="PreviewSection/HBoxContainer/VBoxContainer/PanelContainer/MarginContainer/SubViewportContainer/SubViewport" unique_id=1822691038]
+[node name="BGLayer" type="CanvasLayer" parent="PreviewSection/HBoxContainer/VBoxContainer/PanelContainer/MarginContainer/SubViewportContainer/SubViewport" unique_id=1773551967]
+layer = -4
+follow_viewport_enabled = true
+
+[node name="PreviewBG" type="Sprite2D" parent="PreviewSection/HBoxContainer/VBoxContainer/PanelContainer/MarginContainer/SubViewportContainer/SubViewport/BGLayer" unique_id=1822691038]
 texture_filter = 1
 texture_repeat = 2
 position = Vector2(-16, -16)
