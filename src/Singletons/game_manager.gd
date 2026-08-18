@@ -1544,7 +1544,7 @@ func post_scene_change() -> void:
 				if not loaded_current_level:
 					var starting_level_and_list: = get_starting_level_and_list()
 					if starting_level_and_list.size() == 2 and starting_level_and_list[1] != "":
-						edit_level_in_list(starting_level_and_list[1], starting_level_and_list[0])
+						edit_level_in_list(starting_level_and_list[0], starting_level_and_list[1])
 					else:
 						new_empty_level()
 
