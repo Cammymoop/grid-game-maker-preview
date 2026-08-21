@@ -2943,7 +2943,7 @@ func cmd_select_tailing_entity(slots: Dictionary, chosen_slot: int, tail_parent:
 		if not slots[ref_entity_slot].tailing or not EntityManager.has_instance(slots[ref_entity_slot].tailing.instance_id):
 			slots[chosen_slot] = null
 			return
-		slots[chosen_slot] = EntityManager.get_instance(slots[chosen_slot].tailing.instance_id)
+		slots[chosen_slot] = EntityManager.get_instance(slots[ref_entity_slot].tailing.instance_id)
 	else:
 		var tailing_entities: Array[BaseEntity] = EntityManager.get_direct_tailing_entities(slots[ref_entity_slot])
 		if tailing_entities.size() == 0:

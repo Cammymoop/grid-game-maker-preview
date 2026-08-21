@@ -134,6 +134,9 @@ func texture_item_order(item_a: SelectableTexture, item_b: SelectableTexture) ->
 	var score_a: int = 100 * int(item_a.is_enabled())
 	var score_b: int = 100 * int(item_b.is_enabled())
 	
+	score_a += 10 * int(not item_a.get_is_builtin() and item_a.get_is_shared())
+	score_b += 10 * int(not item_b.get_is_builtin() and item_b.get_is_shared())
+
 	score_a += int(item_a.get_is_builtin())
 	score_b += int(item_b.get_is_builtin())
 	

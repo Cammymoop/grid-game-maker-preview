@@ -1144,23 +1144,25 @@ func _closed_save_confirm_dialog(dialog: ConfirmationDialog) -> void:
 		request_grab_gui_focus.emit()
 
 	await get_tree().process_frame
+	if not is_inside_tree():
+		return
 	await get_tree().process_frame
+	if not is_inside_tree():
+		return
 	_confirming_save_autosave = false
 
 
 func quit_to_main_menu_with_confirm() -> void:
-	if has_edited_something:
-		# Save current state to temporary edited state
-		GameManager.save_edited()
 	_confirm_save_changes_then(GameManager.change_scene.bind("Menu"), false)
 
 func quit_to_game_edit_with_confirm() -> void:
-	if has_edited_something:
-		# Save current state to temporary edited state
-		GameManager.save_edited()
 	_confirm_save_changes_then(GameManager.change_scene.bind("GameEditor"), false)
 
 func switch_to_non_level_edit_mode() -> void:
+	if not GameManager.is_in_level_edit_mode:
+		return
+	if edit_mode:
+		GameManager.save_edited()
 	save_current_or_save_as(_switch_to_non_level_edit_mode_confirmed)
 
 func _switch_to_non_level_edit_mode_confirmed() -> void:

@@ -228,10 +228,11 @@ func on_show() -> void:
 				
 				save_button.disabled = true
 
-		var current_level_list: String = GameManager.current_level_list
-		if not current_level_list:
-			current_level_list = GameManager.get_list_containing_level(GameManager.loaded_level_name)
-		refresh_level_list_picker(current_level_list)
+		var editing_in_list: String = GameManager.current_level_list
+		prints("showing pause menu, editing in list: %s" % [editing_in_list])
+		if not editing_in_list and GameManager.loaded_level_name:
+			editing_in_list = GameManager.get_list_containing_level(GameManager.loaded_level_name)
+		refresh_level_list_picker(editing_in_list)
 		
 		var cur_level_base64: = GameManager.clipboardify_level_data(GameManager.get_edited_as_level_data())
 		copy_to_clipboard_button.disabled = cur_level_base64.length() > GameManager.MAX_LEVEL_TEXT_SIZE
@@ -420,6 +421,7 @@ func refresh_level_settings() -> void:
 		else:
 			list_of_current_level = GameManager.get_list_containing_level(GameManager.loaded_level_name)
 	else:
+		list_of_current_level = GameManager.current_level_list
 		level_title_edit.placeholder_text = ""
 	
 	level_subtitle_edit.text = MapManager.get_level_subtitle()
@@ -429,11 +431,13 @@ func refresh_level_settings() -> void:
 func refresh_level_list_picker(list_of_current_level: String) -> void:
 	level_list_picker.clear()
 	level_list_picker.add_item("[No List]")
-	if GameManager.current_game_is_release_locked:
-		return
+	#if GameManager.current_game_is_release_locked:
+		#return
 
 	for list_name in GameManager.get_list_of_level_lists(true):
 		level_list_picker.add_item(list_name)
+		if GameManager.current_game_is_release_locked:
+			level_list_picker.set_item_disabled(level_list_picker.item_count - 1, true)
 	
 	var all_custom_lists: Array[String] = GameManager.get_list_of_non_bundled_level_lists()
 	if all_custom_lists.size() > 0:
@@ -441,6 +445,7 @@ func refresh_level_list_picker(list_of_current_level: String) -> void:
 		for list_name in all_custom_lists:
 			level_list_picker.add_item(list_name)
 
+	prints("updated level list picker options, now attempt to select list for current edited:", list_of_current_level)
 	if not list_of_current_level:
 		level_list_picker.selected = 0
 	else:

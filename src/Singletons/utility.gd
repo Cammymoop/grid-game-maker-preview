@@ -980,7 +980,10 @@ func lerp_ok_hsl_color(from_color: Color, to_color: Color, factor: float) -> Col
 func color_to_ok_hsl_vector4(color: Color) -> Vector4:
 	return Vector4(color.ok_hsl_h, color.ok_hsl_s, color.ok_hsl_l, color.a)
 
-func color_ok_hsl_difference(a: Color, b: Color) -> Vector4:
+func color_ok_hsl_difference(a: Color, b: Color, premultiply_alpha: bool = true) -> Vector4:
+	if premultiply_alpha:
+		a = Color(a * a.a, a.a)
+		b = Color(b * b.a, b.a)
 	var a_vec: = color_to_ok_hsl_vector4(a)
 	var b_vec: = color_to_ok_hsl_vector4(b)
 	var abs_difference: = (a_vec - b_vec).abs()

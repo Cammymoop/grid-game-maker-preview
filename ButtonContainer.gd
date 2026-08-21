@@ -63,6 +63,9 @@ func _ready() -> void:
 func set_button_tooltip(new_tooltip_text: String) -> void:
 	button.tooltip_text = new_tooltip_text
 
+func set_button_theme_variant(new_variant: String) -> void:
+	button.theme_type_variation = new_variant
+
 func set_disabled(new_disabled: bool) -> void:
 	button.disabled = new_disabled
 

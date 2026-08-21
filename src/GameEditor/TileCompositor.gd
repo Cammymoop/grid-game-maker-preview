@@ -67,6 +67,8 @@ var picked_colored_brush_image: Image
 const MAX_TILE_BRUSH_UNDOS = 100
 const MAX_TEXTURE_UNDOS = 10
 
+var last_tile_brush_change_was_transform: bool = false
+
 @onready var tile_brush_canvas: TextureRect = find_child("BrushView")
 const TBC_MAX_WIDTH: = 128
 const TBC_MAX_HEIGHT: = 128
@@ -185,6 +187,8 @@ func _ready():
 	
 	local_tile_picker.set_raw_texture(edited_texture, image_meta)
 	
+	local_tile_picker.confirmed.connect(on_tile_picker_confirmed)
+	
 	rescale_tile_picker()
 	
 	var brushModes = find_child("BrushCreatorModes")
@@ -259,7 +263,11 @@ func set_tile_brush_size(tile_size: Vector2) -> void:
 	transparent_img = Image.create(tile_size.x, tile_size.y, false, Image.FORMAT_RGBA8)
 	transparent_img.fill(Color.TRANSPARENT)
 	
-	var preview_scale = Utility.max_integer_scale_in(tile_size, Vector2(TBC_MAX_WIDTH, TBC_MAX_HEIGHT))
+	var max_tile_brush_canvas: = Vector2(TBC_MAX_WIDTH, TBC_MAX_HEIGHT)
+	var preview_scale = Utility.max_integer_scale_in(tile_size, max_tile_brush_canvas)
+	if preview_scale < 2:
+		preview_scale = Utility.max_integer_scale_in(tile_size, max_tile_brush_canvas * 2)
+
 	print(tile_size * preview_scale)
 	tile_brush_canvas.custom_minimum_size = tile_size * preview_scale
 	tile_brush_canvas.size = tile_size * preview_scale
@@ -419,7 +427,7 @@ func repaint() -> void:
 	local_tile_picker.set_raw_texture(edited_texture, image_meta)
 
 func paint_corner_to_tile_brush(corner: Rect2i) -> void:
-	undoer.save_current_image("tile_brush", tile_brush_image)
+	save_tile_brush_undo_state()
 	do_corner_paint(corner, tile_brush_image)
 	showing_tile_brush_preview = false
 	
@@ -428,7 +436,7 @@ func paint_corner_to_tile_brush(corner: Rect2i) -> void:
 func paint_positioned_corner_at_pos(center_pos: Vector2) -> void:
 	if toggled_corner_index == -2:
 		return
-	undoer.save_current_image("tile_brush", tile_brush_image)
+	save_tile_brush_undo_state()
 	_paint_positioned_corner_at_pos(center_pos, tile_brush_image, toggled_corner_index)
 
 	showing_tile_brush_preview = false
@@ -541,6 +549,8 @@ func flood_fill_paint_mode(dest_image: Image, start_pos: Vector2i) -> void:
 	
 	outer_edges.append(start_pos)
 	visited_positions.append(start_pos)
+	
+	print("flood filling image, size:", dest_image.get_size(), "clip rect:", image_rect)
 
 	var safety: = 100000
 	while outer_edges.size() > 0 and safety > 0:
@@ -666,8 +676,13 @@ func paint_button_to_corner_index(button: ButtonContainer) -> int:
 		return -2
 
 func paint_button_gui_input(event: InputEvent, corner_button: ButtonContainer) -> void:
-	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_MASK_LEFT:
+	if event is InputEventMouseButton:
 		var corner_index: = paint_button_to_corner_index(corner_button)
+		if event.button_index == MOUSE_BUTTON_MASK_RIGHT and not event.is_pressed():
+			change_toggled_corner_index(corner_index)
+		if not event.button_index == MOUSE_BUTTON_MASK_LEFT:
+			return
+
 		if event.is_pressed():
 			hold_corner_index = corner_index
 			hold_corner_button_timer.start()
@@ -690,11 +705,13 @@ func paint_button_gui_input(event: InputEvent, corner_button: ButtonContainer) -
 
 func change_toggled_corner_index(toggled_index: int) -> void:
 	toggled_corner_index = toggled_index
+	var variant: = "HeldButton" if toggled_index != -2 else ""
 	for btn_idx in corner_buttons_by_index.keys():
 		var is_pressed: = int(btn_idx) == toggled_index
 		corner_buttons_by_index[btn_idx].toggle_mode = is_pressed
 		corner_buttons_by_index[btn_idx].button_pressed = is_pressed
 		corner_buttons_by_index[btn_idx].disabled = is_pressed
+		corner_buttons_by_index[btn_idx].set_button_theme_variant(variant)
 
 func hold_corner_button_timeout() -> void:
 	change_toggled_corner_index(hold_corner_index)
@@ -859,6 +876,8 @@ func _on_PaintButton_pressed():
 	undoer.save_current_image("texture", edited_image)
 	var src_rect: = Rect2i(Vector2.ZERO, tile_brush_image.get_size())
 	var dest = local_tile_picker.get_picked_offset()
+	if not Utility.is_holding_alt_mode():
+		edited_image.blit_rect(transparent_img, whole_brush, dest)
 	edited_image.blend_rect(tile_brush_image, src_rect, dest)
 	repaint()
 	
@@ -869,16 +888,28 @@ func _on_EraseButton_pressed():
 	repaint()
 
 func _on_PickFromEditedButton_pressed():
+	set_picked_brush_from_tile_picker()
+
+func set_picked_brush_from_tile_picker() -> void:
 	picked_brush_tex.atlas = edited_texture
 	picked_brush_tex.region = local_tile_picker.get_picked_region()
 	update_picked_brush()
 
 func _on_PickTileFromEditedButton_pressed():
+	set_tile_brush_from_tile_picker()
+
+func on_tile_picker_confirmed() -> void:
+	if Utility.is_holding_alt_mode():
+		set_picked_brush_from_tile_picker()
+	else:
+		set_tile_brush_from_tile_picker()
+
+func set_tile_brush_from_tile_picker() -> void:
 	var tex = AtlasTexture.new()
 	tex.atlas = edited_texture
 	tex.region.size = Vector2(tile_brush_image.get_size())
 	tex.region.position = local_tile_picker.get_picked_offset()
-	undoer.save_current_image("tile_brush", tile_brush_image)
+	save_tile_brush_undo_state()
 	tile_brush_image = tex.get_image()
 	update_tile_brush_preview()
 
@@ -889,29 +920,31 @@ func _on_TileToBrushButton_pressed():
 	update_picked_brush()
 
 func _on_CCWButton_pressed():
+	save_tile_brush_undo_state(true)
 	tile_brush_image = rotated_ccw(tile_brush_image)
 	update_tile_brush_preview()
 func _on_CWButton_pressed():
+	save_tile_brush_undo_state(true)
 	tile_brush_image = rotated_cw(tile_brush_image)
 	update_tile_brush_preview()
 func _on_HFlipButton_pressed():
+	save_tile_brush_undo_state(true)
 	tile_brush_image.flip_x()
 	tile_brush_image.copy_from(tile_brush_image)
 	update_tile_brush_preview()
 func _on_VFlipButton_pressed():
+	save_tile_brush_undo_state(true)
 	tile_brush_image.flip_y()
 	tile_brush_image.copy_from(tile_brush_image)
 	update_tile_brush_preview()
 
 
 func _on_ShiftDownButton_pressed():
-	if not brush_wrap:
-		undoer.save_current_image("tile_brush", tile_brush_image)
+	save_tile_brush_undo_state()
 	tile_brush_image = make_half_v_shifted_img(tile_brush_image, brush_wrap)
 	update_tile_brush_preview()
 func _on_ShiftRightButton_pressed():
-	if not brush_wrap:
-		undoer.save_current_image("tile_brush", tile_brush_image)
+	save_tile_brush_undo_state()
 	tile_brush_image = make_half_h_shifted_img(tile_brush_image, brush_wrap)
 	update_tile_brush_preview()
 
@@ -927,6 +960,11 @@ func shift_brush_right() -> void:
 func flip_brush_horizontal() -> void:
 	picked_brush_image.flip_x()
 	update_picked_colored_brush()
+
+func save_tile_brush_undo_state(is_transform: bool = false) -> void:
+	if not is_transform or not last_tile_brush_change_was_transform:
+		undoer.save_current_image("tile_brush", tile_brush_image)
+	last_tile_brush_change_was_transform = is_transform
 
 func _update_picked_brush_tex_from_image() -> void:
 	var image_tex = ImageTexture.create_from_image(picked_brush_image)
@@ -976,14 +1014,18 @@ func _on_PickBrushButton_pressed():
 
 func _on_BrushSlideH_mouse_pressed():
 	show_tile_brush_crosshair(true)
+	save_tile_brush_undo_state()
 	if not brush_wrap:
-		undoer.save_current_image("tile_brush", tile_brush_image)
 		temp_tile_brush_image = Image.new()
 		temp_tile_brush_image.copy_from(tile_brush_image)
 func _on_BrushSlideH_mouse_released():
 	show_tile_brush_crosshair(false)
 	brush_sliding_h = floor(tile_brush_image.get_width()/2.0)
-	find_child("BrushSlideH").value = brush_sliding_h
+	var slider: = find_child("BrushSlideH") as HSlider
+	if slider.value == brush_sliding_h:
+		# no change was made
+		undoer.drop_undo("tile_brush")
+	slider.value = brush_sliding_h
 func _on_BrushSlideH_value_changed(value):
 	var diff = value - brush_sliding_h
 	if diff == 0:
@@ -1001,15 +1043,19 @@ func _on_BrushSlideH_value_changed(value):
 
 func _on_BrushSlideV_mouse_pressed():
 	show_tile_brush_crosshair(true)
+	save_tile_brush_undo_state()
 	if not brush_wrap:
-		undoer.save_current_image("tile_brush", tile_brush_image)
 		temp_tile_brush_image = Image.new()
 		temp_tile_brush_image.copy_from(tile_brush_image)
 func _on_BrushSlideV_mouse_released():
 	show_tile_brush_crosshair(false)
 	brush_sliding_v = ceil(tile_brush_image.get_height()/2.0)
 	var alt = floor(tile_brush_image.get_height()/2.0)
-	find_child("BrushSlideV").value = alt
+	var slider: = find_child("BrushSlideV") as VSlider
+	if slider.value == alt:
+		# no change was made
+		undoer.drop_undo("tile_brush")
+	slider.value = alt
 func _on_BrushSlideV_value_changed(value):
 	# vertical slider has 0 at the bottom
 	value = tile_brush_image.get_height() - value
@@ -1142,7 +1188,7 @@ var click_paint_holding_click: bool = false
 var click_paint_last_pos: Vector2 = Vector2.ZERO
 var click_paint_last_was_in_bounds: bool = false
 func start_click_paint(at_pos: Vector2) -> void:
-	undoer.save_current_image("tile_brush", tile_brush_image)
+	save_tile_brush_undo_state()
 	click_paint_holding_click = true
 	click_paint_last_pos = at_pos
 	click_paint_last_was_in_bounds = true
@@ -1174,7 +1220,7 @@ func _on_brush_view_gui_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_MASK_RIGHT:
 		if event.is_pressed() and toggled_corner_index == -2 and not click_paint_holding_click:
 			var at_pixel_pos: Vector2 = event.position / tile_brush_canvas.size * Vector2(tile_brush_image.get_size())
-			undoer.save_current_image("tile_brush", tile_brush_image)
+			save_tile_brush_undo_state()
 			flood_fill_paint_mode(tile_brush_image, at_pixel_pos.floor())
 			update_tile_brush_preview()
 	

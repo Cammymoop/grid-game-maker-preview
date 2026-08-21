@@ -38,11 +38,13 @@ const ROTATES_ROTATES: = 0
 const ROTATES_FIXED: = 1
 const ROTATES_SPINS: = 2
 const ROTATES_TO_HEAD: = 3
+const ROTATES_TO_TAIL: = 4
 const RotatesModeNames: Dictionary[int, String] = {
     ROTATES_ROTATES: "rotates",
     ROTATES_FIXED: "fixed",
     ROTATES_SPINS: "spins",
     ROTATES_TO_HEAD: "faces head",
+    ROTATES_TO_TAIL: "faces tail",
 }
 static var rotates_modes: Dictionary[String, int] = {}
 const DEF_ROTATES_TEXT: = "rotates"
@@ -182,7 +184,7 @@ func _ready() -> void:
     #rotates_toggle.set_pressed_no_signal(layer_info.get("rotates", true))
     
     rotates_mode_select.clear()
-    for rotate_mode_id in [ROTATES_ROTATES, ROTATES_FIXED, ROTATES_SPINS, ROTATES_TO_HEAD]:
+    for rotate_mode_id in [ROTATES_ROTATES, ROTATES_FIXED, ROTATES_SPINS, ROTATES_TO_HEAD, ROTATES_TO_TAIL]:
         rotates_mode_select.add_item(RotatesModeNames[rotate_mode_id], rotate_mode_id)
     Utility.opbtn_select_id(rotates_mode_select, ROTATES_ROTATES)
     rotates_mode_select.item_selected.connect(on_rotates_mode_selected)
@@ -259,6 +261,8 @@ func _current_rotates_mode() -> int:
         return ROTATES_ROTATES
     if layer_info.get("rotates_to_head", false):
         return ROTATES_TO_HEAD
+    if layer_info.get("rotates_to_tail", false):
+        return ROTATES_TO_TAIL
     if not layer_info.get("rotates", true):
         return ROTATES_FIXED
     elif layer_info.has("spinning"):
@@ -665,22 +669,21 @@ func on_visibility_prop_changed(prop_name: String) -> void:
 
 func on_rotates_mode_selected(index: int) -> void:
     var new_rotates_mode: = rotates_mode_select.get_item_id(index)
+    layer_info.erase('rotates_to_head')
+    layer_info.erase('rotates_to_tail')
+    layer_info.erase('spinning')
+
     if new_rotates_mode == ROTATES_ROTATES:
         layer_info['rotates'] = true
-        layer_info.erase('spinning')
-        layer_info.erase('rotates_to_head')
     elif new_rotates_mode == ROTATES_FIXED:
         layer_info['rotates'] = false
-        layer_info.erase('spinning')
-        layer_info.erase('rotates_to_head')
     elif new_rotates_mode == ROTATES_SPINS:
         layer_info['rotates'] = true
         layer_info['spinning'] = last_spinning_value
-        layer_info.erase('rotates_to_head')
-    elif new_rotates_mode == ROTATES_TO_HEAD:
+    elif new_rotates_mode == ROTATES_TO_HEAD or new_rotates_mode == ROTATES_TO_TAIL:
         layer_info['rotates'] = true
-        layer_info['rotates_to_head'] = true
-        layer_info.erase('spinning')
+        layer_info['rotates_to_head'] = new_rotates_mode == ROTATES_TO_HEAD
+        layer_info['rotates_to_tail'] = new_rotates_mode == ROTATES_TO_TAIL
 
     refresh_spin_speed_input()
     changed.emit()

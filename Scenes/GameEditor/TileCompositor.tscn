@@ -3,6 +3,7 @@
 [ext_resource type="Script" uid="uid://d1lxr5mxngix7" path="res://src/GameEditor/TileCompositor.gd" id="1"]
 [ext_resource type="Texture2D" uid="uid://d0uyc2rshryrj" path="res://assets/img/entityTiles.png" id="2"]
 [ext_resource type="PackedScene" uid="uid://blgss0f2yjfjr" path="res://Scenes/GameEditor/TilePicker.tscn" id="3"]
+[ext_resource type="Texture2D" uid="uid://bnjifll7p0mfc" path="res://assets/ui/radio_unchecked_icon.tres" id="3_bhgq0"]
 [ext_resource type="PackedScene" path="res://Scenes/GameEditor/HSeparator.tscn" id="4"]
 [ext_resource type="Texture2D" uid="uid://lrqeyxjmk22w" path="res://assets/img/tile_composer_bg.png" id="4_63ggb"]
 [ext_resource type="PackedScene" uid="uid://cfehp8ycqn0du" path="res://Scenes/UI/ButtonContainer.tscn" id="5"]
@@ -31,6 +32,9 @@
 [sub_resource type="AtlasTexture" id="3"]
 atlas = ExtResource("2")
 region = Rect2(0, 0, 32, 32)
+
+[sub_resource type="Theme" id="Theme_7gqmh"]
+CheckBox/icons/radio_unchecked = ExtResource("3_bhgq0")
 
 [sub_resource type="StyleBoxTexture" id="StyleBoxTexture_fd7wg"]
 content_margin_left = 4.0
@@ -78,6 +82,84 @@ corner_radius_bottom_right = 4
 corner_radius_bottom_left = 4
 
 [sub_resource type="ButtonGroup" id="ButtonGroup_xpogs"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_hk5ar"]
+content_margin_left = 2.0
+content_margin_top = 0.0
+content_margin_right = 2.0
+content_margin_bottom = 4.0
+bg_color = Color(0.49304676, 0.17222309, 0.39155537, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 6
+border_color = Color(0.19671583, 0.12046408, 0.123178415, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+expand_margin_top = 2.0
+expand_margin_bottom = 2.0
+shadow_color = Color(0, 0, 0, 0.2901961)
+shadow_size = 2
+shadow_offset = Vector2(0, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_bhgq0"]
+content_margin_left = 2.0
+content_margin_top = 0.0
+content_margin_right = 2.0
+content_margin_bottom = 4.0
+bg_color = Color(0.38734388, 0.1225976, 0.15326262, 1)
+border_width_bottom = 4
+border_color = Color(0.7303936, 0.42427772, 0.44360274, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+expand_margin_top = 2.0
+expand_margin_bottom = 2.0
+shadow_size = 2
+shadow_offset = Vector2(0, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_7gqmh"]
+content_margin_left = 2.0
+content_margin_top = 0.0
+content_margin_right = 2.0
+content_margin_bottom = 4.0
+bg_color = Color(0.24483925, 0.11357985, 0.12279222, 1)
+border_width_bottom = 4
+border_color = Color(0.43032804, 0.22095475, 0.2353105, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+expand_margin_top = 2.0
+expand_margin_bottom = 2.0
+shadow_size = 2
+shadow_offset = Vector2(0, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_dnbum"]
+content_margin_left = 2.0
+content_margin_top = 4.0
+content_margin_right = 2.0
+content_margin_bottom = 0.0
+bg_color = Color(0.24483925, 0.11357985, 0.12279222, 1)
+border_width_top = 4
+border_color = Color(0.43032804, 0.22095475, 0.2353105, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+expand_margin_top = 2.0
+expand_margin_bottom = 2.0
+shadow_offset = Vector2(0, 1)
+
+[sub_resource type="Theme" id="Theme_7e565"]
+HeldButton/base_type = &"Button"
+HeldButton/styles/disabled = SubResource("StyleBoxFlat_hk5ar")
+HeldButton/styles/hover = SubResource("StyleBoxFlat_bhgq0")
+HeldButton/styles/normal = SubResource("StyleBoxFlat_7gqmh")
+HeldButton/styles/pressed = SubResource("StyleBoxFlat_dnbum")
 
 [sub_resource type="AtlasTexture" id="4"]
 atlas = ExtResource("14")
@@ -133,6 +215,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+theme = SubResource("Theme_7gqmh")
 theme_override_styles/panel = SubResource("StyleBoxTexture_fd7wg")
 
 [node name="MarginContainer" type="MarginContainer" parent="PanelContainer" unique_id=1516945752]
@@ -171,6 +254,7 @@ layout_mode = 2
 [node name="PaintButton" parent="PanelContainer/MarginContainer/VBoxContainer/TilePickerContainer/VBoxContainer" unique_id=418160410 instance=ExtResource("5")]
 layout_mode = 2
 size_flags_vertical = 3
+tooltip_text = "Hold shift to paint over without erasing."
 
 [node name="CenterContainer" type="CenterContainer" parent="PanelContainer/MarginContainer/VBoxContainer/TilePickerContainer/VBoxContainer/PaintButton" unique_id=1440451598]
 layout_mode = 2
@@ -489,6 +573,7 @@ text = "Hole Cut"
 [node name="ButtonGroup" type="MarginContainer" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/PanelContainer/MarginContainer/VBoxContainer2" unique_id=1787514242]
 layout_mode = 2
 size_flags_vertical = 3
+theme = SubResource("Theme_7e565")
 
 [node name="GridContainer" type="GridContainer" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer/PanelContainer/MarginContainer/VBoxContainer2/ButtonGroup" unique_id=803146631]
 custom_minimum_size = Vector2(60, 60)
@@ -805,33 +890,43 @@ columns = 2
 
 [node name="source" type="CheckBox" parent="PanelContainer/MarginContainer/VBoxContainer/CollapsableSection/HBoxContainer5/PanelContainer2/MarginContainer/HBoxContainer/VBoxContainer2/BrushColorModes" unique_id=682610527]
 layout_mode = 2
+tooltip_text = "Use color from the brush"
+theme_override_font_sizes/font_size = 14
 button_pressed = true
 button_group = SubResource("ButtonGroup_63ggb")
-text = "Source"
+text = "No Change"
 
 [node name="flat" type="CheckBox" parent="PanelContainer/MarginContainer/VBoxContainer/CollapsableSection/HBoxContainer5/PanelContainer2/MarginContainer/HBoxContainer/VBoxContainer2/BrushColorModes" unique_id=2011919235]
 layout_mode = 2
+tooltip_text = "Replace brush colors with selected color"
+theme_override_font_sizes/font_size = 15
 button_group = SubResource("ButtonGroup_63ggb")
-text = "Flat"
+text = "All One Color"
 
 [node name="colorize" type="CheckBox" parent="PanelContainer/MarginContainer/VBoxContainer/CollapsableSection/HBoxContainer5/PanelContainer2/MarginContainer/HBoxContainer/VBoxContainer2/BrushColorModes" unique_id=767266201]
 layout_mode = 2
+tooltip_text = "Colorize the brush based on a single color (normalized lightness)"
 button_group = SubResource("ButtonGroup_63ggb")
 text = "Colorize"
 
 [node name="colorize_2" type="CheckBox" parent="PanelContainer/MarginContainer/VBoxContainer/CollapsableSection/HBoxContainer5/PanelContainer2/MarginContainer/HBoxContainer/VBoxContainer2/BrushColorModes" unique_id=1096929801]
 layout_mode = 2
+tooltip_text = "Colorize the brush based on a single color (absolute lightness)"
 button_group = SubResource("ButtonGroup_63ggb")
 text = "Colorize (alt)"
 
 [node name="dual_colorize" type="CheckBox" parent="PanelContainer/MarginContainer/VBoxContainer/CollapsableSection/HBoxContainer5/PanelContainer2/MarginContainer/HBoxContainer/VBoxContainer2/BrushColorModes" unique_id=1469776351]
 layout_mode = 2
+tooltip_text = "Colorize the brush based on a gradient 
+defined by 2 colors (normalized lightness)"
 theme_override_font_sizes/font_size = 14
 button_group = SubResource("ButtonGroup_63ggb")
 text = "Dual Colorize"
 
 [node name="dual_colorize_2" type="CheckBox" parent="PanelContainer/MarginContainer/VBoxContainer/CollapsableSection/HBoxContainer5/PanelContainer2/MarginContainer/HBoxContainer/VBoxContainer2/BrushColorModes" unique_id=1261141676]
 layout_mode = 2
+tooltip_text = "Colorize the brush based on a gradient 
+defined by 2 colors (absolute lightness)"
 theme_override_font_sizes/font_size = 14
 button_group = SubResource("ButtonGroup_63ggb")
 text = "Dual Colorize (alt)"
@@ -912,7 +1007,7 @@ size_flags_horizontal = 3
 script = ExtResource("7")
 
 [node name="HoldPaintButtonTimer" type="Timer" parent="." unique_id=795254318]
-wait_time = 0.8
+wait_time = 0.65
 one_shot = true
 
 [node name="SaveAsDialog" type="FileDialog" parent="." unique_id=832475684]

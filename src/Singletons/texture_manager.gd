@@ -19,6 +19,7 @@ var builtin_textures: Array[String] = [
     "oversize_tiles.png",
     "oversize_tiles_2.png",
     "shapes32x.png",
+    "borders.png",
 ]
 var builtin_meta: = {}
 var default_textures: Array[String] = [

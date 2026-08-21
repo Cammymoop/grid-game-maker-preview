@@ -1548,6 +1548,12 @@ func post_scene_change() -> void:
 					if starting_level_and_list.size() == 2 and starting_level_and_list[1] != "":
 						edit_level_in_list(starting_level_and_list[0], starting_level_and_list[1])
 					else:
+						# Making a level in a game without any levels yet, try to put it in a bundled list
+						if not current_level_list:
+							if not current_game_is_release_locked:
+								var bundled_level_lists: = get_list_of_level_lists(true)
+								if bundled_level_lists.size() > 0:
+									current_level_list = bundled_level_lists[0]
 						new_empty_level()
 
 			if _requested_tab:

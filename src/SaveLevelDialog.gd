@@ -85,14 +85,30 @@ func _on_SaveFileButton_pressed():
 	if map_editor and map_editor.edit_mode:
 		GameManager.save_edited()
 	var level_name: String = level_name_input.text.strip_edges()
+	var level_current_list: String = current_list_of_saving_level()
+
+	var update_list: bool = false
+	var saving_to_list: String = level_current_list
+	var selected_list: String = get_list_selector_selected_list_name()
+	if selected_list != level_current_list:
+		update_list = true
+		saving_to_list = selected_list
+
 	if GameManager.current_game_is_release_locked:
 		if is_overwriting_bundled_level():
 			GlobalToaster.show_toast_message("Cannot overwrite bundled level, locked in released version")
 			close_dialog()
 			return
-		if GameManager.current_level_list and GameManager.current_level_list in GameManager.get_list_of_level_lists(true):
-			GameManager.current_level_list = ""
+		if saving_to_list and GameManager.is_level_list_bundled(saving_to_list):
+			update_list = true
+			saving_to_list = ""
+
 	GameManager.save_edited_level_as(level_name)
+	if update_list:
+		if saving_to_list:
+			GameManager.move_level_to_level_list(level_name, saving_to_list)
+		else:
+			GameManager.remove_level_from_all_editable_lists(level_name)
 	saved_level.emit(level_name)
 	close_dialog()
 
@@ -107,3 +123,10 @@ func close_dialog() -> void:
 func _on_vis_changed():
 	if not visible:
 		hidden.emit()
+
+func get_list_selector_selected_list_name() -> String:
+	var val: Dictionary = level_list_name_input.get_value()
+	if not val.get("type", "plain") == "plain":
+		push_warning("Invalid list selector value type: %s" % [val.get("type", "plain")])
+		return ""
+	return val.get("value", "")

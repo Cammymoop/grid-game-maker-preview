@@ -54,5 +54,11 @@
 			"size_in_tiles": [6, 6],
 			"border": [0, 0],
 			"separation": [0, 0]
+		},
+	"borders.png":
+		{
+			"tile_size": [44, 44],
+			"border": [0, 0],
+			"separation": [0, 0]
 		}
 }

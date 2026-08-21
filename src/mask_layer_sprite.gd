@@ -672,14 +672,19 @@ func create_and_add_nodes_for_layer(layer_info: Dictionary, layer_index: int) ->
     if is_masked:
         sub_layer_rotates = layer_info.get("mask_rotates", true)
     
+    main_layer_node.set_meta("faces_head", false)
+    main_layer_node.set_meta("faces_tail", false)
     if layer_info.get("rotates_to_head", false):
         main_layer_node.set_meta("rotates_with_sprite", false)
         main_layer_node.set_meta("sub_layer_rotates", sub_layer_rotates)
         main_layer_node.set_meta("faces_head", true)
+    elif layer_info.get("rotates_to_tail", false):
+        main_layer_node.set_meta("rotates_with_sprite", false)
+        main_layer_node.set_meta("sub_layer_rotates", sub_layer_rotates)
+        main_layer_node.set_meta("faces_tail", true)
     else:
         main_layer_node.set_meta("rotates_with_sprite", layer_rotates)
         main_layer_node.set_meta("sub_layer_rotates", sub_layer_rotates)
-        main_layer_node.set_meta("faces_head", false)
 
     main_layer_node.set_meta("spinning_speed", layer_info.get("spinning", 0.0))
     main_layer_node.set_meta("spins", layer_info.has("spinning"))
@@ -892,10 +897,17 @@ func update_head_facing_layers() -> void:
     var heading_to_head: float = 0
     if parent_entity and parent_entity.tailing and EntityManager.has_instance(parent_entity.tailing.instance_id):
         heading_to_head = (parent_entity.tailing.position - parent_entity.position).rotated(PI/2).angle()
+        if parent_entity.tailing.sprite:
+            parent_entity.tailing.sprite.set_tail_facing_layers_rotation(heading_to_head)
     for layer_node in layer_root.get_children():
         if not layer_node.get_meta("faces_head", false):
             continue
         layer_node.rotation = heading_to_head
+
+func set_tail_facing_layers_rotation(to_tail_rotation: float) -> void:
+    for layer_node in layer_root.get_children():
+        if layer_node.get_meta("faces_tail", false):
+            layer_node.rotation = to_tail_rotation
 
 func _update_spinning_layer(layer_node: Node2D) -> void:
     var spin_speed: float = layer_node.get_meta("spinning_speed", 0.0)
