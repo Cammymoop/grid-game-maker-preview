@@ -1059,10 +1059,12 @@ func auto_tail_handler(entity: BaseEntity) -> void:
     for e in entities_in_front:
         if typeof(auto_tail_val) == TYPE_STRING and get_entity_prop_with_default(e, auto_tail_val, false):
             entity.set_tailing(e)
+            entity.sprite.sprite_process(0)
             entity.add_deferred_event("started_tailing", e.instance_id)
             break
         elif auto_tail_val:
             entity.set_tailing(e)
+            entity.sprite.sprite_process(0)
             entity.add_deferred_event("started_tailing", e.instance_id)
             break
 
