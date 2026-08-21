@@ -118,7 +118,7 @@ var cameras = {
 }
 
 const SPECIAL_PROPS: Array[String] = [
-	"z-index", "move-turns", "inherit-properties",
+	"z-index", "move-turns", "turn-when-blocked", "inherit-properties",
 	"auto-bond", "auto-bond-adjacent", "auto-tail", "auto-scale",
 	"die-when-blocked",
 	"edit-place-multiple",
@@ -138,6 +138,7 @@ const SPECIAL_PROPS: Array[String] = [
 const SPECIAL_PROPS_DEFAULTS: Dictionary[String, Variant] = {
 	"z-index": 0,
 	"move-turns": false,
+	"turn-when-blocked": false,
 	
 	"auto-bond": true,
 	"auto-bond-adjacent": true,
@@ -161,6 +162,7 @@ const SPECIAL_PROPS_DEFAULTS: Dictionary[String, Variant] = {
 static var SPECIAL_PROPS_HINT_TEXT: Dictionary[String, String] = {
 	"z-index": "Relative sorting offset, Entities or tiles with a higher sorting offset will be shown over others, can be negative.\nBy default entities are 5 higher than tiles.",
 	"move-turns": "If false, the entity will not automatically turn it's facing direction to match it's moving direction when it moves.",
+	"turn-when-blocked": "If false and move-turns is enabled, the entity will not turn to face attempted move direction if they are blocked from moving in that direction.",
 	"inherit-properties": "[Experimental] If true, the entity will inherit properties it does not have from another entity type with this name.",
 	"auto-bond": "If true, this entity will automatically join a bond group with other entities of the same type when first created.\n" +
 		"If set to the name of a property, will instead automatically bond with any other entity type with that property set. see also auto-bond-adjacent.",

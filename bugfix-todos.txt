@@ -13,6 +13,8 @@ line/solid scroll and warp scroll angles in style editor are huge???
 
 paste sprite context menu option missing
 
+selecting sae to list in save level dialog has no effect
+
 
 background falling sprites not notified properly when deleting entity
 

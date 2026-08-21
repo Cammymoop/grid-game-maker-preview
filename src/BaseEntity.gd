@@ -22,6 +22,7 @@ var move_facing: = 0
 var facing: = 0
 
 var visual_turn_on_move: = true
+var no_visual_turn_on_bonk: = false
 
 var moving: = false
 var _pending_half_move: = false
@@ -114,6 +115,7 @@ func pre_init() -> void:
 func initialize() -> void:
 	check_for_idle_update_conditional()
 	check_visual_turn_on_move()
+	check_no_visual_turn_on_bonk()
 	EntityManager.setup_entity_controller(self)
 	
 	connect_to_signals()
@@ -134,6 +136,10 @@ func update_cached_special_props(prop_name: String = "") -> void:
 	if not prop_name or prop_name == "size-animation":
 		if sprite:
 			update_sprite_size_interpolate_enabled()
+	if not prop_name or prop_name == "move-turns":
+		check_visual_turn_on_move()
+	if not prop_name or prop_name == "turn-when-blocked":
+		check_no_visual_turn_on_bonk()
 
 func update_sprite_rotate_interpolate_enabled() -> void:
 	var turn_anim: String = "quick"
@@ -188,6 +194,9 @@ func check_visual_turn_on_move() -> void:
 			visual_turn_on_move = move_turn.resolve(self, null, tile_position)
 		else:
 			visual_turn_on_move = bool(move_turn.get_value())
+
+func check_no_visual_turn_on_bonk() -> void:
+	no_visual_turn_on_bonk = not EntityManager.get_entity_prop_is_truthy(self, "turn-when-blocked", true)
 
 func add_depends_on_entity(on_entity: BaseEntity) -> void:
 	if on_entity and on_entity.instance_id != instance_id:
@@ -358,6 +367,10 @@ func entity_process_starting_actions() -> void:
 			var start_move_facing: = move_facing
 			var first_attempt_v_facing: = -1
 			var first_attempt_move_facing: = -1
+
+			# dont set visual facing for each bonk, will set it afterward for the first attempted direction
+			var old_no_turn_on_bonk: = no_visual_turn_on_bonk
+			no_visual_turn_on_bonk = true
 			for attempt in max_intentions:
 				# if a previous attempt failed, reset the visual move_facing and move move_facing
 				if attempt > 0:
@@ -380,9 +393,10 @@ func entity_process_starting_actions() -> void:
 						if tailing:
 							untail()
 						break
+			no_visual_turn_on_bonk = old_no_turn_on_bonk
 			
 			if not moving and first_attempt_v_facing > -1:
-				if is_square_aspect():
+				if is_square_aspect() and not no_visual_turn_on_bonk:
 					set_facing(first_attempt_v_facing)
 				set_move_facing(first_attempt_move_facing)
 				if _skip_blocked_result:
@@ -575,15 +589,24 @@ func process_finish_move() -> void:
 func start_move(in_facing_dir: int, change_visual_facing: bool = true, group_move: bool = false, is_revertable: bool = false) -> bool:
 	if moving or get_steps_per_tile() <= 0:
 		return false
+	var old_facing: = facing
 	if change_visual_facing and visual_turn_on_move:
-		set_facing(in_facing_dir)
+		# set the facing value without rotating the sprite at first
+		set_facing_only(in_facing_dir)
 	set_move_facing(in_facing_dir)
 
 	if not group_move and bond_group:
 		return EntityManager.bond_group_start_move(bond_group, get_steps_per_tile(), in_facing_dir, is_revertable)
 	
 	var to_pos: = tile_position + Utility.facing_vector_i(in_facing_dir)
-	return _start_move_common(to_pos, group_move, false, is_revertable)
+	var result: = _start_move_common(to_pos, group_move, false, is_revertable)
+	if change_visual_facing and visual_turn_on_move:
+		if result or not no_visual_turn_on_bonk:
+			set_facing(in_facing_dir)
+		else:
+			# revert to old facing direction without ever rotating the sprite
+			set_facing_only(old_facing)
+	return result
 
 func start_teleport_to(from_pos: Vector2i, to_pos: Vector2i, override_move_facing: int = -1, override_facing: int = -1, group_move: bool = false, override_steps: int = -1, is_revertable: bool = false) -> bool:
 	if moving:
