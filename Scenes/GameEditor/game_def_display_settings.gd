@@ -1,9 +1,9 @@
 extends FoldableContainer
 
-const Vector2Input = preload("res://src/GameEditor/ConditionalEditor/vector2f_input.gd")
+const Vector2fInput = preload("res://src/GameEditor/ConditionalEditor/vector2f_input.gd")
 
 @export var expand_crop_option_picker: OptionButton
-@export var window_size_vec_input: Vector2Input
+@export var window_size_vec_input: Vector2fInput
 
 func _ready():
     expand_crop_option_picker.item_selected.connect(on_expand_crop_option_picked)

@@ -38,8 +38,18 @@ func _ready():
 	popup_menu.id_pressed.connect(on_category_filter_menu_id_pressed)
 	
 	excluded_feature_categories.assign(GameManager.get_feature_category_filter())
+	
+	filter_input.gui_input.connect(on_filter_input_gui_input)
 
 	build_v3_list()
+
+func on_filter_input_gui_input(event: InputEvent) -> void:
+	if Input.is_action_just_pressed_by_event("ui_down", event):
+		var list = find_child("AllCommands") as ItemList
+		if list and list.item_count > 0:
+			list.select(0)
+			list.grab_focus.call_deferred()
+		set_input_as_handled()
 
 func on_resized() -> void:
 	var col_size: = item_list.custom_minimum_size.x

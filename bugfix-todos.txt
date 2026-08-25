@@ -18,7 +18,7 @@ selecting sae to list in save level dialog has no effect
 
 background falling sprites not notified properly when deleting entity
 
-fix select_entity_at command
+fix is_entity_at command
 
 Options menu doesn't grab focus for controller compatibility
 
@@ -27,6 +27,7 @@ missing commands:
   is tile named (tile with name exists in positions)
   select first tile from a set of multiple (or nearest?)
   create entity using spawn effect/play spawn effect on already created entity
+  if entity with true property at
 
 
 

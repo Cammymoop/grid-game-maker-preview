@@ -682,6 +682,11 @@ func paint_button_gui_input(event: InputEvent, corner_button: ButtonContainer) -
 			change_toggled_corner_index(corner_index)
 		if not event.button_index == MOUSE_BUTTON_MASK_LEFT:
 			return
+		
+		if toggled_corner_index != -2 and event.is_pressed() and Utility.is_holding_alt_mode():
+			paint_corner_button_psuedo_pressed(corner_button)
+			hold_corner_index = -2
+			return
 
 		if event.is_pressed():
 			hold_corner_index = corner_index

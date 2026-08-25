@@ -229,7 +229,6 @@ func on_show() -> void:
 				save_button.disabled = true
 
 		var editing_in_list: String = GameManager.current_level_list
-		prints("showing pause menu, editing in list: %s" % [editing_in_list])
 		if not editing_in_list and GameManager.loaded_level_name:
 			editing_in_list = GameManager.get_list_containing_level(GameManager.loaded_level_name)
 		refresh_level_list_picker(editing_in_list)
@@ -367,6 +366,10 @@ func level_was_saved(level_name: String, old_level_name: String) -> void:
 			Utility.opbtn_select_text(level_list_picker, current_selected_list)
 		else:
 			level_list_picker.selected = 0
+	if GameManager.is_in_level_edit_mode:
+		var map_editor: = Utility.get_map_editor()
+		if map_editor:
+			map_editor.has_edited_something = false
 
 func _on_new_level_button_pressed() -> void:
 	if not GameManager.is_in_level_edit_mode:
@@ -445,7 +448,6 @@ func refresh_level_list_picker(list_of_current_level: String) -> void:
 		for list_name in all_custom_lists:
 			level_list_picker.add_item(list_name)
 
-	prints("updated level list picker options, now attempt to select list for current edited:", list_of_current_level)
 	if not list_of_current_level:
 		level_list_picker.selected = 0
 	else:

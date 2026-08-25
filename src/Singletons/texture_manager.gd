@@ -449,6 +449,16 @@ func get_fallback_texture_id() -> int:
         return -1
     return int(texture_spec[0]['texture_id'])
 
+func get_tile_texture_id_fallback() -> int:
+    if is_builtin_loaded("tiles.png"):
+        return get_loaded_texture_id("tiles.png", true, false)
+    return get_fallback_texture_id()
+
+func get_entity_texture_id_fallback() -> int:
+    if is_builtin_loaded("tiles.png"):
+        return get_loaded_texture_id("entityTiles.png", true, false)
+    return get_fallback_texture_id()
+
 func get_max_texture_index(texture_id: int) -> int:
     if not tiles_per_row.has(texture_id) or not texture_rows.has(texture_id):
         return 0

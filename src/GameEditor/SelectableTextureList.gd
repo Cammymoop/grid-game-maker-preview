@@ -131,8 +131,8 @@ func texture_item_order(item_a: SelectableTexture, item_b: SelectableTexture) ->
 	var name_a: = item_a.get_texture_name()
 	var name_b: = item_b.get_texture_name()
 	
-	var score_a: int = 100 * int(item_a.is_enabled())
-	var score_b: int = 100 * int(item_b.is_enabled())
+	var score_a: int = -1000 * int(item_a.is_enabled())
+	var score_b: int = -1000 * int(item_b.is_enabled())
 	
 	score_a += 10 * int(not item_a.get_is_builtin() and item_a.get_is_shared())
 	score_b += 10 * int(not item_b.get_is_builtin() and item_b.get_is_shared())
@@ -141,7 +141,7 @@ func texture_item_order(item_a: SelectableTexture, item_b: SelectableTexture) ->
 	score_b += int(item_b.get_is_builtin())
 	
 	if score_a != score_b:
-		return score_a > score_b
+		return score_a < score_b
 	return name_a.nocasecmp_to(name_b) < 0
 
 func on_item_request_context_menu(item: SelectableTexture) -> void:

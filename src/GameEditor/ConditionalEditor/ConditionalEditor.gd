@@ -114,6 +114,14 @@ func on_size_changed() -> void:
 func _shortcut_input(event: InputEvent) -> void:
     if Utility.event_is_menu_back_just_pressed(event):
         cancel()
+        set_input_as_handled()
+
+func _unhandled_input(event: InputEvent) -> void:
+    if Utility.fixed_just_pressed_by_event("ui_accept", event):
+        if Input.is_key_pressed(KEY_CTRL):
+            _on_SaveButton_pressed()
+            set_input_as_handled()
+
 
 func add_new_command(command_code: int, slot_id: int, destination: String) -> void:
     if use_conditionalv3:

@@ -1029,8 +1029,12 @@ func cmd_select_combined_text(slots: Dictionary, chosen_slot: int, text_a: Dicti
 	var text_b_val: String = resolve_complex_prop_value(text_b, slots)
 	slots[chosen_slot] = text_a_val + separator + text_b_val
 
-func desc_is_entity_at() -> String:
-	return "pos|If there is an active entity (ignoring self) at this location [invert:InvertInput:with,without] a [prop_name:PropertyInput] property"
+func desc_is_entity_at() -> Dictionary:
+	return {
+		"slot_type_hint": "pos",
+		"template_text": "If there is an active entity (ignoring self) at this location [invert:InvertInput:with,without] a [prop_name:PropertyInput] property",
+		"is_deprecated": true,
+	}
 func cmd_is_entity_at(slots: Dictionary, chosen_slot: int, prop_name: String, invert: bool) -> bool:
 	if not Commands.slot_is_positions(chosen_slot):
 		return false
@@ -1040,6 +1044,23 @@ func cmd_is_entity_at(slots: Dictionary, chosen_slot: int, prop_name: String, in
 	var entities_here: Array = EntityManager.get_entities_at_multiple(at_positions, slots[Slot.RED], [], false, false)
 	entities_here = EntityManager.filter_entities_by_property(prop_name, entities_here, [], invert)
 	return entities_here.size() > 0
+
+func desc_if_entity_with_property_at() -> String:
+	return "pos|If there is any active entity at this location [invert:InvertInput:with,without] a [is_truthy:BoolChoice:true,true or non-zero,false or zero] [prop_name:PropertyInput] property, excluding [exclude_slot:SlotInput:entity,none]"
+func cmd_if_entity_with_property_at(slots: Dictionary, chosen_slot: int, prop_name: String, is_truthy: bool, invert: bool, exclude_slot: int) -> bool:
+	if not Commands.slot_is_positions(chosen_slot):
+		return false
+	var ignore_list: Array = []
+	if exclude_slot != SlotSelectorButton.NONE_SLOTS and slots[exclude_slot]:
+		ignore_list.append(slots[exclude_slot].instance_id)
+
+	var at_positions: Array = slots[chosen_slot]
+	if not at_positions:
+		return false
+	var entities_here: Array = EntityManager.get_entities_at_multiple(at_positions, slots[Slot.RED], ignore_list, false, false)
+	entities_here = EntityManager.filter_entities_by_property(prop_name, entities_here, [], is_truthy, invert)
+	return entities_here.size() > 0
+
 
 func desc_c_has_property() -> String:
 	return "entity,pos|If the entity/tile [invert:InvertInput:has,doesn't have] a [property_name:PropertyInput] property"

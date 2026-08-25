@@ -112,8 +112,10 @@ func on_input_text_done_editing(the_input: SpinBox) -> void:
     if text_val.is_valid_float() and not text_val.contains("e"):
         if text_with_trailing_zeros_sets_precision:
             if _set_input_precision_from_trailing_zeros(the_input, text_val):
+                the_input.value = float(text_val)
                 return
         _set_input_precision_from_float(the_input, float(text_val))
+        the_input.value = float(text_val)
         return
     _ignore_value_changed = true
     # Allow the SPinBox code to process the expression with the smallest possible step and update the value
@@ -122,6 +124,7 @@ func on_input_text_done_editing(the_input: SpinBox) -> void:
     the_input.apply()
     _ignore_value_changed = false
     _set_input_precision_from_float(the_input, the_input.value)
+    value_changed.emit(get_value())
 
 func _set_input_precision_from_float(the_input: SpinBox, float_val: float) -> void:
     var inferred_step: float = Utility.get_float_step_from_float(float_val, smallest_step)

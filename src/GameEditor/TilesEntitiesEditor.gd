@@ -63,6 +63,7 @@ func _ready():
 
 	var editor_window: Window = ui_root.find_child("TileEntityEditorWindow")
 	editor_window.hidden.connect(update_all_grids)
+	editor_window.visuals_changed.connect(update_all_grids)
 	
 	var temp_grid_item = tile_entity_button.instantiate()
 	grid_item_width = temp_grid_item.get_combined_minimum_size().x
@@ -139,7 +140,7 @@ func _on_NewTileButton_pressed():
 		num += 1
 		try_name = "tile" + str(num)
 	
-	var default_texture = TextureManager.get_all_indexes()[0]
+	var default_texture = TextureManager.get_tile_texture_id_fallback()
 	var all_tile_ids: = MapManager.get_all_tile_indexes()
 	all_tile_ids.reverse()
 	for tile_id in all_tile_ids:
@@ -148,8 +149,11 @@ func _on_NewTileButton_pressed():
 			default_texture = tile_def["texture"]
 			break
 	var definition = {"name": try_name, "texture": default_texture, "tex_index": 0, "properties": {}}
-	var _new_index = MapManager.make_new_tile(definition)
+	var new_index = MapManager.make_new_tile(definition)
 	update_the_grid(true)
+	var editor_window: Window = ui_root.find_child("TileEntityEditorWindow")
+	if editor_window and editor_window.visible:
+		edit_new_item(false, new_index)
 
 
 func _on_NewEntityButton_pressed():
@@ -159,7 +163,7 @@ func _on_NewEntityButton_pressed():
 		num += 1
 		try_name = "entity" + str(num)
 	
-	var default_texture = TextureManager.get_all_indexes()[0]
+	var default_texture = TextureManager.get_entity_texture_id_fallback()
 	var all_entity_ids: = EntityManager.get_all_entity_indexes()
 	all_entity_ids.reverse()
 	for entity_id in all_entity_ids:
@@ -168,8 +172,17 @@ func _on_NewEntityButton_pressed():
 			default_texture = entity_def["texture"]
 			break
 	var definition = {"name": try_name, "texture": default_texture, "tex_index": 0, "properties": {}}
-	var _new_index = EntityManager.new_entity(definition)
+	var new_index = EntityManager.new_entity(definition)
 	update_the_grid(false)
+	var editor_window: Window = ui_root.find_child("TileEntityEditorWindow")
+	if editor_window and editor_window.visible:
+		edit_new_item(true, new_index)
+
+func edit_new_item(is_entity: bool, new_index: int) -> void:
+	if is_entity:
+		edit_entity(new_index)
+	else:
+		edit_tile(new_index)
 
 func _on_vis_changed():
 	if not is_visible_in_tree():

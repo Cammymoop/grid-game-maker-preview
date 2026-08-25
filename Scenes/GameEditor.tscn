@@ -484,6 +484,9 @@ max_value = 10.0
 custom_step = true
 custom_step_value = 0.01
 
+[node name="Value" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/SectionContainer/GameSettingsSection/MarginContainer/HFlowContainer/HFlowContainer/SpawnAnimDurationOption/SpawnAnimDurationInput" index="0" unique_id=1193418551]
+select_all_on_focus = true
+
 [node name="HBoxContainer10" type="HBoxContainer" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/SectionContainer/GameSettingsSection/MarginContainer/HFlowContainer/HFlowContainer" unique_id=96940792]
 layout_mode = 2
 alignment = 2
@@ -500,6 +503,9 @@ max_value = 30.0
 custom_step = true
 custom_step_value = 0.5
 
+[node name="Value" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/SectionContainer/GameSettingsSection/MarginContainer/HFlowContainer/HFlowContainer/HBoxContainer10/DefMoveSpeedInput" index="0" unique_id=1193418551]
+select_all_on_focus = true
+
 [node name="HBoxContainer14" type="HBoxContainer" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/SectionContainer/GameSettingsSection/MarginContainer/HFlowContainer/HFlowContainer" unique_id=1057815971]
 layout_mode = 2
 alignment = 2
@@ -514,6 +520,9 @@ default_value = 0.16
 max_value = 10.0
 custom_step = true
 custom_step_value = 0.01
+
+[node name="Value" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/SectionContainer/GameSettingsSection/MarginContainer/HFlowContainer/HFlowContainer/HBoxContainer14/DefTeleDurationInput" index="0" unique_id=1193418551]
+select_all_on_focus = true
 
 [node name="HBoxContainer12" type="HBoxContainer" parent="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/SectionContainer/GameSettingsSection/MarginContainer/HFlowContainer/HFlowContainer" unique_id=1992105014]
 layout_mode = 2
@@ -1213,6 +1222,9 @@ visible = false
 [connection signal="pressed" from="MarginContainer/UIRoot/HBoxContainer/TestPlayButton" to="MarginContainer/UIRoot" method="_on_test_play_button_pressed"]
 [connection signal="pressed" from="MarginContainer/UIRoot/HBoxContainer/BackButton" to="MarginContainer/UIRoot" method="_on_BackButton_pressed"]
 
+[editable path="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/SectionContainer/GameSettingsSection/MarginContainer/HFlowContainer/HFlowContainer/SpawnAnimDurationOption/SpawnAnimDurationInput"]
+[editable path="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/SectionContainer/GameSettingsSection/MarginContainer/HFlowContainer/HFlowContainer/HBoxContainer10/DefMoveSpeedInput"]
+[editable path="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/SectionContainer/GameSettingsSection/MarginContainer/HFlowContainer/HFlowContainer/HBoxContainer14/DefTeleDurationInput"]
 [editable path="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/SectionContainer/GameSettingsSection/MarginContainer/HFlowContainer/HFlowContainer/HBoxContainer13/VecInput"]
 [editable path="MarginContainer/UIRoot/TabContainer/GameDefinition/ScrollContainer/SectionContainer/VersionSettingsSection/MarginContainer/HFlowContainer/HBoxContainer2/NextVersionInput"]
 [editable path="FallingEntities"]

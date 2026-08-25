@@ -1,5 +1,6 @@
 extends Window
 
+signal visuals_changed
 signal hidden
 
 const ConditionalEditor: = preload("res://src/GameEditor/ConditionalEditor/ConditionalEditor.gd")
@@ -97,6 +98,7 @@ func _ready():
 func refresh_item_preview() -> void:
     var is_entity: bool = tile_entity_mode == "entity"
     item_preview_container.load_item_from_current_game(is_entity, the_index)
+    visuals_changed.emit()
 
 func on_properties_changed() -> void:
     the_definition["properties"] = property_edit_list.get_base_properties_dict()

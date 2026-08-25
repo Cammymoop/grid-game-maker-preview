@@ -472,18 +472,19 @@ func set_profile_identifier(new_identifier: String) -> void:
 	player_profile.set_profile_setting("default_identifier", sanitized_identifier)
 
 func new_empty_game_definition(with_name: String = "") -> void:
+	var profile_identifier: = get_profile_identifier()
 	if not with_name:
 		var safety: int = 10000
 		while true:
 			with_name = "%s Game" % Utility.random_animal()
-			if not FilesManager.game_exists(with_name):
+			if not FilesManager.game_exists(file_formatted_game_name_and_identifier(profile_identifier, with_name)):
 				break
 			safety -= 1
 			if safety <= 0:
 				break
 	var empty_game: = {
 		"game_name": with_name,
-		"game_identifier": get_profile_identifier(),
+		"game_identifier": profile_identifier,
 		"release_info": default_empty_release_info.duplicate_deep(),
 		"textures": TextureManager.get_default_texture_spec(),
 		"game_settings": {
@@ -984,6 +985,11 @@ func get_identified_game_name(visual_version: bool = false) -> String:
 func display_format_game_name_and_identifier(game_identifier: String, game_name: String) -> String:
 	if not game_identifier:
 		return "?/" + game_name
+	return game_identifier + "/" + game_name
+
+func file_formatted_game_name_and_identifier(game_identifier: String, game_name: String) -> String:
+	if not game_identifier:
+		return game_name
 	return game_identifier + "/" + game_name
 
 func get_game_implicit_title() -> String:
