@@ -5,10 +5,11 @@ signal textures_remapped
 
 var placeholder: = preload("res://assets/img/placeholder.png")
 var placeholder_metadata = {
-    tile_size= Vector2(32, 32),
-    size_in_tiles= Vector2(4, 4),
-    border= Vector2.ZERO,
-    separation= Vector2.ZERO,
+    'is_multiple_tiles': true,
+    'tile_size': Vector2(32, 32),
+    'size_in_tiles': Vector2(4, 4),
+    'border': Vector2.ZERO,
+    'separation': Vector2.ZERO,
 }
 
 var builtin_textures: Array[String] = [
@@ -196,11 +197,17 @@ func _set_texture(texture_id: int, texture: Texture, texture_name: String, metad
     texture_names[texture_id] = texture_name
     textures[texture_id] = texture
     texture_meta[texture_id] = metadata
-    var tile_size = metadata['tile_size']
-    tile_sizes[texture_id] = tile_size
     var border: Vector2 = metadata.get("border", Vector2.ZERO)
+    tile_sizes[texture_id] = metadata['tile_size']
+    var is_multiple_tiles: bool = metadata.get("is_multiple_tiles", true)
+    if not is_multiple_tiles:
+        var single_tile_rect: = Utility.get_rect_in_single_tile_texture_with_border(texture.get_size(), border)
+        prints("single tile size:", texture_name, ",", single_tile_rect.size)
+        tile_sizes[texture_id] = single_tile_rect.size
     var separation: Vector2 = metadata.get("separation", Vector2.ZERO)
-    var grid_cells: = Utility.get_tile_atlas_coords_size(texture.get_size(), tile_size, border, separation)
+    var grid_cells: Vector2i = Vector2i.ONE
+    if is_multiple_tiles:
+        grid_cells = Utility.get_tile_atlas_coords_size(texture.get_size(), tile_sizes[texture_id], border, separation)
     tiles_per_row[texture_id] = grid_cells.x
     texture_rows[texture_id] = grid_cells.y
 
@@ -288,9 +295,11 @@ func get_texture(texture_id: int) -> Texture:
     return textures[texture_id]
 
 func get_index_offset(texture_id: int, tile_index: int) -> Vector2:
+    var border: Vector2 = texture_meta[texture_id].get("border", Vector2.ZERO)
+    if not texture_meta[texture_id].get("is_multiple_tiles", true):
+        return Utility.get_rect_in_single_tile_texture_with_border(tile_sizes[texture_id], border).position
     var tpr: int = get_tiles_per_row(texture_id)
     var tsize = tile_sizes[texture_id]
-    var border: Vector2 = texture_meta[texture_id].get("border", Vector2.ZERO)
     var separation: Vector2 = texture_meta[texture_id].get("separation", Vector2.ZERO)
     return Utility.get_indexed_tile_offset_by_per_row(tile_index, tpr, tsize, border, separation)
 
@@ -301,6 +310,9 @@ func get_texture_metadata(texture_id: int) -> Dictionary:
     return texture_meta.get(texture_id, {})
 
 func get_index_rect(texture_id: int, tile_index: int) -> Rect2:
+    if not texture_meta[texture_id].get("is_multiple_tiles", true):
+        var border: Vector2 = texture_meta[texture_id].get("border", Vector2.ZERO)
+        return Utility.get_rect_in_single_tile_texture_with_border(tile_sizes[texture_id], border)
     return Rect2(get_index_offset(texture_id, tile_index), tile_sizes[texture_id])
 
 func get_texture_tile_size(texture_id: int) -> Vector2i:
@@ -319,10 +331,20 @@ func create_metadata_for_texture(texture: Texture2D, as_savable_format: bool = f
     if as_savable_format:
         new_meta["tile_size"] = Utility.vector_to_list(new_meta["tile_size"])
 
-    var size_tiles: Vector2 = (texture.get_size() / new_meta["tile_size"]).floor()
+    var size_tiles: Vector2i = (texture.get_size() / new_meta["tile_size"]).floor()
     new_meta["size_in_tiles"] = size_tiles
     if as_savable_format:
         new_meta["size_in_tiles"] = Utility.vector_to_list(new_meta["size_in_tiles"])
+    
+    new_meta["border"] = Vector2.ZERO
+    new_meta["separation"] = Vector2.ZERO
+    if as_savable_format:
+        new_meta["border"] = Utility.vector_to_list(new_meta["border"])
+        new_meta["separation"] = Utility.vector_to_list(new_meta["separation"])
+    
+    new_meta["is_multiple_tiles"] = true
+    if size_tiles == Vector2i.ONE:
+        new_meta["is_multiple_tiles"] = false
 
     return new_meta
 

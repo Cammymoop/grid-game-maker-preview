@@ -16,6 +16,8 @@ const Vector2iInput: = preload("res://src/GameEditor/ConditionalEditor/vector2i_
 
 const ItemPreviewContainer: = preload("res://Scenes/GameEditor/tile_entity_display_container.gd")
 
+const IMG_BUTTON_MAX_SIZE: = Vector2(128, 96)
+
 var conditional_editor_scene: = preload("res://Scenes/GameEditor/ConditionalEditor/ConditionalEditor.tscn")
 var tex_popup_scene: = preload("res://Scenes/GameEditor/BetterTextureDialog.tscn")
 var fancy_sprite_editor_scene: = preload("res://Scenes/GameEditor/fancy_sprite_editor.tscn")
@@ -271,6 +273,7 @@ func _set_img_button_texture(the_image_button: Control, with_texture: Texture2D,
     var image_tex_rect: = the_image_button.find_child("TextureRect") as TextureRect
     image_tex_rect.texture = with_texture
     image_tex_rect.custom_minimum_size = image_tex_rect.texture.get_size() * zoom_factor
+    image_tex_rect.custom_minimum_size = IMG_BUTTON_MAX_SIZE.min(image_tex_rect.custom_minimum_size)
 
 
 func set_tile_entity_mode(tile_or_entity: String) -> void:

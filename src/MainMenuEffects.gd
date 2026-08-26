@@ -124,7 +124,13 @@ func spawn_common(spr: VelocitySprite, fall_delta: float) -> void:
 	var depth_factor: = randf_range(0, 1)
 	var base_scale: float = 0.5 + (depth_factor * 1.5) * size_factor
 	spr.set_meta("base_scale", base_scale)
-	spr.scale *= base_scale
+
+	var sprite_scale: = base_scale
+	var cur_size: Vector2 = spr.texture.get_size() * base_scale
+	var max_axis_size: float = maxf(cur_size.x, cur_size.y)
+	if max_axis_size > MapManager.tile_width * 3:
+		sprite_scale *= MapManager.tile_width * 3 / max_axis_size
+	spr.scale *= sprite_scale
 	
 	spr.modulate = Utility.lerp_ok_hsl_color(bg_color, Color.WHITE, depth_factor) * max_brightness
 	

@@ -205,6 +205,7 @@ size_flags_horizontal = 4
 size_flags_vertical = 4
 mouse_filter = 2
 texture = SubResource("AtlasTexture_nnx4p")
+expand_mode = 1
 stretch_mode = 5
 
 [node name="PreviewVariantSettings" type="HBoxContainer" parent="PanelContainer/VBoxContainer/ImageSection/VBoxContainer/HBoxContainer2" unique_id=20317195]
@@ -240,6 +241,7 @@ size_flags_horizontal = 4
 size_flags_vertical = 4
 mouse_filter = 2
 texture = SubResource("AtlasTexture_nnx4p")
+expand_mode = 1
 stretch_mode = 5
 
 [node name="RemovePreviewVariantButton" type="Button" parent="PanelContainer/VBoxContainer/ImageSection/VBoxContainer/HBoxContainer2/PreviewVariantSettings" unique_id=255340188]

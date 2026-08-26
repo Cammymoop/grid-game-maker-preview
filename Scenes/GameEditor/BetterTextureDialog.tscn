@@ -4,20 +4,42 @@
 [ext_resource type="PackedScene" uid="uid://blgss0f2yjfjr" path="res://Scenes/GameEditor/TilePicker.tscn" id="2"]
 [ext_resource type="Script" uid="uid://bl7p864bv7xks" path="res://src/GameEditor/BetterTextureDialog.gd" id="3"]
 
+[sub_resource type="Theme" id="Theme_a07mw"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_a07mw"]
+content_margin_left = 8.0
+content_margin_top = 8.0
+content_margin_right = 8.0
+content_margin_bottom = 8.0
+bg_color = Color(0.49621612, 0.49621612, 0.49621612, 1)
+border_width_left = 6
+border_width_top = 6
+border_width_right = 6
+border_width_bottom = 6
+border_color = Color(0.21950102, 0.21950102, 0.21950093, 1)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+corner_detail = 7
+
 [node name="BetterTextureDialog" type="ConfirmationDialog" unique_id=17079518 node_paths=PackedStringArray("tile_picker")]
 oversampling_override = 1.0
-title = "Select Image"
+title = "Select Tile/Image"
 position = Vector2i(0, 25)
-size = Vector2i(200, 127)
+size = Vector2i(500, 400)
 visible = true
+theme = SubResource("Theme_a07mw")
 script = ExtResource("3")
-tile_picker = NodePath("VBoxContainer/TilePicker")
+tile_picker = NodePath("VBoxContainer/PanelContainer/TilePicker")
+picker_target_size = Vector2(400, 400)
+max_increase_ratio = 1.8
 
 [node name="VBoxContainer" type="VBoxContainer" parent="." unique_id=1626039057]
 offset_left = 8.0
 offset_top = 8.0
-offset_right = 192.0
-offset_bottom = 82.0
+offset_right = 492.0
+offset_bottom = 355.0
 
 [node name="HBoxContainer2" type="HBoxContainer" parent="VBoxContainer" unique_id=1856931541]
 layout_mode = 2
@@ -25,7 +47,7 @@ layout_mode = 2
 [node name="Label" type="Label" parent="VBoxContainer/HBoxContainer2" unique_id=242841878]
 layout_mode = 2
 size_flags_stretch_ratio = 0.4
-text = "Texture2D:"
+text = "From Texture:"
 horizontal_alignment = 2
 
 [node name="TextureSelector" type="MenuButton" parent="VBoxContainer/HBoxContainer2" unique_id=362343310]
@@ -41,10 +63,18 @@ layout_mode = 2
 
 [node name="Label2" type="Label" parent="VBoxContainer" unique_id=970904995]
 layout_mode = 2
-text = "Tile:"
+text = "Tile/Image:"
 horizontal_alignment = 1
 
-[node name="TilePicker" parent="VBoxContainer" unique_id=462342456 instance=ExtResource("2")]
+[node name="PanelContainer" type="PanelContainer" parent="VBoxContainer" unique_id=1113423367]
+custom_minimum_size = Vector2(20, 20)
 layout_mode = 2
+size_flags_horizontal = 4
+theme_override_styles/panel = SubResource("StyleBoxFlat_a07mw")
 
-[connection signal="confirmed" from="VBoxContainer/TilePicker" to="." method="_on_tile_picker_confirmed"]
+[node name="TilePicker" parent="VBoxContainer/PanelContainer" unique_id=462342456 instance=ExtResource("2")]
+layout_mode = 2
+max_tile_upscale_enabled = true
+max_tile_upscale = Vector2(88, 88)
+
+[connection signal="confirmed" from="VBoxContainer/PanelContainer/TilePicker" to="." method="_on_tile_picker_confirmed"]

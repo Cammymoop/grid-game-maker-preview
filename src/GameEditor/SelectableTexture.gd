@@ -47,6 +47,8 @@ func set_texture_metadata(new_metadata: Dictionary) -> void:
 	if tile_size == Vector2.ZERO:
 		tile_size = Vector2.ONE * MapManager.tile_width
 	tile_size_label.text = "%dx%d" % [int(tile_size.x), int(tile_size.y)]
+	if not new_metadata.get("is_multiple_tiles", true):
+		tile_size_label.text = "single"
 
 func set_name_bold(new_is_bold: bool) -> void:
 	if not new_is_bold:

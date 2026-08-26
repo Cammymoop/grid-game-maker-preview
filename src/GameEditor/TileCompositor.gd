@@ -42,6 +42,10 @@ var texture_dialog = preload("res://Scenes/GameEditor/BetterTextureDialog.tscn")
 
 @export var tile_canvas: TextureRect
 
+@export var force_transparent_format: bool = true
+
+var _skip_updating_tile_picker_view_scale: bool = false
+
 var save_as_name: = ""
 
 var edited_is_bundled: bool = false
@@ -70,8 +74,8 @@ const MAX_TEXTURE_UNDOS = 10
 var last_tile_brush_change_was_transform: bool = false
 
 @onready var tile_brush_canvas: TextureRect = find_child("BrushView")
-const TBC_MAX_WIDTH: = 128
-const TBC_MAX_HEIGHT: = 128
+const TBC_MAX_WIDTH: = 260
+const TBC_MAX_HEIGHT: = 152
 
 const PICKED_BRUSH_MAX: Vector2 = Vector2(70, 70)
 
@@ -113,6 +117,9 @@ var toggled_corner_index: int = -2
 
 func set_texture(tex: Texture2D) -> void:
 	loaded_texture = tex
+	if is_inside_tree():
+		prints("set texture after already inside tree, auto sizing")
+		auto_size()
 
 func set_new_texture_size(new_size: Vector2) -> void:
 	loaded_texture = null
@@ -176,12 +183,16 @@ func _ready():
 	
 	
 	var tile_size = image_meta['tile_size']
-	set_tile_brush_size(tile_size)
 	
 	if loaded_texture:
 		edited_image = loaded_texture.get_image()
+		var edited_format = edited_image.get_format()
+		if force_transparent_format and edited_format != Image.FORMAT_RGBA8:
+			edited_image.convert(Image.FORMAT_RGBA8)
 	else:
 		edited_image = Image.create(make_tex_with_size.x, make_tex_with_size.y, true, Image.FORMAT_RGBA8)
+
+	set_tile_brush_size(tile_size)
 	
 	edited_texture = ImageTexture.create_from_image(edited_image)
 	
@@ -189,7 +200,7 @@ func _ready():
 	
 	local_tile_picker.confirmed.connect(on_tile_picker_confirmed)
 	
-	rescale_tile_picker()
+	auto_size()
 	
 	var brushModes = find_child("BrushCreatorModes")
 	if brushModes and brushModes.get_child_count() > 0:
@@ -210,11 +221,16 @@ func secondary_color_changed(_color: Color) -> void:
 	update_picked_colored_brush()
 
 func _shortcut_input(event: InputEvent) -> void:
+	if Utility.fixed_just_pressed_by_event("save_file_as_shortcut", event):
+		_on_SaveAsFileButton_pressed()
+		set_input_as_handled()
+	elif Utility.fixed_just_pressed_by_event("save_file_shortcut", event):
+		_on_SaveFileButton_pressed()
+		set_input_as_handled()
+
 	if Utility.event_is_menu_back_just_pressed(event):
 		hide()
-
-func on_scale() -> void:
-	rescale_tile_picker()
+		set_input_as_handled()
 
 func rescale_tile_picker() -> void:
 	if not edited_image:
@@ -224,27 +240,57 @@ func rescale_tile_picker() -> void:
 	var picker_parent_height: int = int(local_tile_picker.get_parent().get_minimum_size().y)
 
 	var available_height: int = size.y - (content_minimum_height - picker_parent_height)
+	
+	var outer_window_available_height: int = get_parent().get_viewport().size.y - (content_minimum_height - picker_parent_height)
+	
+	if edited_image.get_size().y > outer_window_available_height:
+		var scale_down: = outer_window_available_height / float(edited_image.get_size().y)
+		local_tile_picker.set_target_size((edited_image.get_size() * scale_down).floor())
+	else:
+		var target_height: int = maxi(ltp_target_height, available_height)
+		var tp_scale = Utility.max_integer_scale_in(edited_image.get_size(), Vector2(size.x - ltp_margin, target_height))
+		if tp_scale == 0:
+			tp_scale = 1
+		local_tile_picker.set_view_scale(tp_scale)
+		#local_tile_picker.rect_min_size = edited_image.get_size() * tp_scale
+		#local_tile_picker.rect_size = local_tile_picker.rect_min_size
 
-	var target_height: int = maxi(ltp_target_height, available_height)
-	var tp_scale = Utility.max_integer_scale_in(edited_image.get_size(), Vector2(size.x - ltp_margin, target_height))
-	if tp_scale == 0:
-		tp_scale = 1
-	local_tile_picker.set_view_scale(tp_scale)
-#	local_tile_picker.rect_min_size = edited_image.get_size() * tp_scale
-#	local_tile_picker.rect_size = local_tile_picker.rect_min_size
+func auto_size() -> void:
+	if not is_inside_tree() or not local_tile_picker or not edited_image:
+		push_warning("Tile Compositor skipping auto size, image or tile picker not setup or tile compositor isn't shown")
+		return
+	await get_tree().process_frame
+	rescale_tile_picker()
+	var outer_window_size: Vector2 = Vector2(get_parent().get_viewport().size)
+
+	var content_min_size: = Vector2i(get_child(0).get_combined_minimum_size())
+	var tp_min_size: = Vector2i(local_tile_picker.get_combined_minimum_size())
+	var tpp: Control = local_tile_picker.get_parent()
+	var tpp_min_size: = Vector2i(tpp.get_combined_minimum_size())
+	var h_margin: = content_min_size.x - tpp_min_size.x
+	var tpp_h_extra: = tpp_min_size.x - tp_min_size.x
+
+	_skip_updating_tile_picker_view_scale = true
+	var target_height: = outer_window_size.y * 0.95
+	if size.y < outer_window_size.y * 0.95:
+		var new_available_height: = target_height - (content_min_size.y - tpp_min_size.y)
+		var upsize_factor: = new_available_height / float(tpp_min_size.y)
+		var new_tpp_width: = (tpp_min_size.x - tpp_h_extra) * upsize_factor + tpp_h_extra
+		size.y = target_height
+		size.x = mini(h_margin + new_tpp_width, outer_window_size.x * 0.95)
+		
+		await get_tree().process_frame
+		rescale_tile_picker()
+
+	content_min_size = Vector2i(get_child(0).get_combined_minimum_size())
+	size = Vector2(maxi(content_min_size.x, size.x), content_min_size.y)
+	_skip_updating_tile_picker_view_scale = false
+
+	move_to_center()
+
 
 func on_size_changed() -> void:
-	if local_tile_picker:
-		local_tile_picker.set_view_scale(1)
-		await get_tree().process_frame
-
-	var min_content_size: Vector2 = get_child(0).get_minimum_size()
-	if size.x < min_content_size.x:
-		size.x = min_content_size.x
-	if size.y < min_content_size.y:
-		size.y = min_content_size.y
-
-	if local_tile_picker:
+	if local_tile_picker and not _skip_updating_tile_picker_view_scale:
 		rescale_tile_picker()
 
 
@@ -258,17 +304,14 @@ func set_tile_brush_size(tile_size: Vector2) -> void:
 	bl_corner = Rect2i(Vector2(0, corner_size.y - odd_y), corner_size)
 	br_corner = Rect2i(Vector2(corner_size.x - odd_x, corner_size.y - odd_y), corner_size)
 	
-	tile_brush_image = Image.create(tile_size.x, tile_size.y, false, Image.FORMAT_RGBA8)
-	tile_brush_image.fill(Color.TRANSPARENT)
-	transparent_img = Image.create(tile_size.x, tile_size.y, false, Image.FORMAT_RGBA8)
-	transparent_img.fill(Color.TRANSPARENT)
+	tile_brush_image = Image.create_empty(tile_size.x, tile_size.y, false, edited_image.get_format())
+	transparent_img = Image.create_empty(tile_size.x, tile_size.y, false, edited_image.get_format())
 	
 	var max_tile_brush_canvas: = Vector2(TBC_MAX_WIDTH, TBC_MAX_HEIGHT)
 	var preview_scale = Utility.max_integer_scale_in(tile_size, max_tile_brush_canvas)
 	if preview_scale < 2:
 		preview_scale = Utility.max_integer_scale_in(tile_size, max_tile_brush_canvas * 2)
 
-	print(tile_size * preview_scale)
 	tile_brush_canvas.custom_minimum_size = tile_size * preview_scale
 	tile_brush_canvas.size = tile_size * preview_scale
 	
@@ -307,19 +350,30 @@ func update_picked_colored_brush() -> void:
 		picked_colored_brush_image = Image.new()
 	picked_colored_brush_image.copy_from(picked_brush_image)
 	color_brush()
-	picked_colored_preview = ImageTexture.create_from_image(picked_colored_brush_image) #,0
+	picked_colored_preview = ImageTexture.create_from_image(picked_colored_brush_image)
 	
 	var picked_size: = picked_brush_image.get_size()
-	for tex_rect in [find_child("BrushColorPreview"), find_child("PickBrushButton").find_child("Icon")]:
+	for tex_rect: TextureRect in [find_child("PickBrushButton").find_child("Icon")]:
 		tex_rect.texture = picked_colored_preview
 		#tex_rect.stretch_mode = TextureRect.STRETCH_KEEP
 		tex_rect.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
 		
-		var preview_scale = Utility.max_integer_scale_in(picked_size, PICKED_BRUSH_MAX)
-		tex_rect.custom_minimum_size = picked_size * preview_scale
-		tex_rect.size = picked_size * preview_scale
+		var preview_scale: float = float(Utility.max_integer_scale_in(picked_size, PICKED_BRUSH_MAX))
+		var clipped_size: = Vector2.ZERO
+		if picked_size.x > PICKED_BRUSH_MAX.x * 8 or picked_size.y > PICKED_BRUSH_MAX.y * 8:
+			var exact_scale: float = minf(PICKED_BRUSH_MAX.x / picked_size.x, PICKED_BRUSH_MAX.y / picked_size.y)
+			clipped_size = (picked_size * exact_scale).floor()
+		else:
+			if preview_scale == 0:
+				preview_scale = Utility.max_integer_scale_in(picked_size, PICKED_BRUSH_MAX * 8) / 8.0
+				if preview_scale == 0:
+					preview_scale = 0.125
+			clipped_size = (picked_size * preview_scale).min(PICKED_BRUSH_MAX)
+		tex_rect.custom_minimum_size = clipped_size
+		tex_rect.size = clipped_size
 	
 	var color_preview: = find_child("BrushColorPreview") as TextureRect
+	color_preview.texture = picked_colored_preview
 	color_preview.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT
 	var color_preview_scale: = Utility.max_integer_scale_in(picked_size, COLOR_PREVIEW_MAX)
 	if color_preview_scale == 0:
@@ -483,35 +537,41 @@ func do_positioned_corner_paint(corner: Rect2i, dest_image: Image, dest_center: 
 	
 	var dest_rect: = corner
 	dest_rect.position = Vector2i((dest_center - (Vector2(corner.size) / 2.0)).ceil())
-	_rect_mode_paint(src_rect, dest_image, dest_rect, corner_index)
+	_rect_mode_paint(src_rect, dest_image, dest_rect, corner_index, dest_center)
 
-func _rect_mode_paint(src_rect: Rect2i, dest_image: Image, dest_rect: Rect2i, corner_index: int) -> void:
-	var expanded_dest_rect: = get_expanded_corner(corner_index, dest_image.get_size(), dest_rect)
-	var expanded_src_rect: = Rect2i(src_rect.position + (expanded_dest_rect.position - dest_rect.position), expanded_dest_rect.size)
+func _rect_mode_paint(src_rect: Rect2i, dest_image: Image, dest_rect: Rect2i, corner_index: int, center_pos: Vector2) -> void:
+	var exp_dest_rect: = get_expanded_corner(corner_index, dest_image.get_size(), dest_rect)
+	exp_dest_rect = exp_dest_rect.intersection(Rect2i(Vector2i.ZERO, dest_image.get_size()))
+	var exp_clip_delta_pos: = exp_dest_rect.position - dest_rect.position
+
+	var exp_src_rect: = Rect2i(src_rect.position + exp_clip_delta_pos, exp_dest_rect.size)
+	var final_clipped_src_rect: = exp_src_rect.intersection(Rect2i(Vector2i.ZERO, picked_colored_brush_image.get_size()))
+	var missing_pixels: bool = final_clipped_src_rect.size != exp_src_rect.size
 
 	if brush_creator_mode == "erase":
 		# use center of dest rect in erase mode since brush size doesn't matter
-		var center_pos: = dest_rect.get_center()
 		var erase_rect: = get_positioned_corner(corner_index, dest_image.get_size(), center_pos)
 		dest_image.blit_rect(transparent_img, erase_rect, erase_rect.position)
 	elif brush_creator_mode == "replace":
 		# use expanded rect to erase stuff outside of the reach of src
-		dest_image.blit_rect(transparent_img, expanded_dest_rect, expanded_dest_rect.position)
-		dest_image.blit_rect(picked_colored_brush_image, src_rect, dest_rect.position)
+		if missing_pixels:
+			dest_image.blit_rect(transparent_img, exp_dest_rect, exp_dest_rect.position)
+		dest_image.blit_rect(picked_colored_brush_image, exp_src_rect, exp_dest_rect.position)
 	elif brush_creator_mode == "over":
-		dest_image.blend_rect(picked_colored_brush_image, src_rect, dest_rect.position)
+		dest_image.blend_rect(picked_colored_brush_image, exp_src_rect, exp_dest_rect.position)
 	elif brush_creator_mode == "under":
-		var old_dest = Image.new()
-		old_dest.copy_from(dest_image)
-		dest_image.fill(Color.TRANSPARENT)
-		dest_image.blit_rect(picked_colored_brush_image, src_rect, dest_rect.position)
-		dest_image.blend_rect(old_dest, Rect2i(Vector2i.ZERO, old_dest.get_size()), Vector2i.ZERO)
+		var old_dest = dest_image.get_region(exp_dest_rect)
+		#old_dest.copy_from(dest_image)
+		if missing_pixels:
+			dest_image.blit_rect(transparent_img, exp_dest_rect, exp_dest_rect.position)
+		dest_image.blit_rect(picked_colored_brush_image, exp_src_rect, exp_dest_rect.position)
+		dest_image.blend_rect(old_dest, Rect2i(Vector2i.ZERO, old_dest.get_size()), exp_dest_rect.position)
 	elif brush_creator_mode == "stamp":
-		stamp_blit(picked_colored_brush_image, dest_image, src_rect, dest_rect.position)
+		stamp_blit(picked_colored_brush_image, dest_image, exp_src_rect, exp_dest_rect.position)
 	elif brush_creator_mode == "cut":
-		alpha_min(picked_colored_brush_image, dest_image, expanded_src_rect, expanded_dest_rect.position)
+		alpha_min(picked_colored_brush_image, dest_image, exp_src_rect, exp_dest_rect.position)
 	elif brush_creator_mode == "hole cut":
-		alpha_subtract(picked_colored_brush_image, dest_image, expanded_src_rect, expanded_dest_rect.position)
+		alpha_subtract(picked_colored_brush_image, dest_image, exp_src_rect, exp_dest_rect.position)
 
 func _single_pixel_paint_mode(dest_image: Image, dest_pos: Vector2i) -> void:
 	if brush_creator_mode == "erase":
@@ -606,17 +666,52 @@ func alpha_subtract(from_image: Image, to_image, src_rect: Rect2i, dest_offset: 
 	var w = src_rect.size.x
 	var h = src_rect.size.y
 	var src_offset = src_rect.position
+	var src_image_rect: = Rect2i(Vector2i.ZERO, from_image.get_size())
 	var to_image_rect: = Rect2i(Vector2i.ZERO, to_image.get_size())
 	
 	for x in range(w):
 		for y in range(h):
 			var dest_pos: = Vector2i(dest_offset.x + x, dest_offset.y + y)
-			if not to_image_rect.has_point(dest_pos):
+			var src_pos: = Vector2i(src_offset.x + x, src_offset.y + y)
+			if not to_image_rect.has_point(dest_pos) or not src_image_rect.has_point(src_pos):
 				continue
-			var alpha: = _extended_get_pixel_alpha8(from_image, src_offset.x + x, src_offset.y + y)
+			var stencil_alpha: = from_image.get_pixelv(src_pos).a
 			var cur_pixel: Color = to_image.get_pixelv(dest_pos)
-			cur_pixel.a8 = int(max(0, cur_pixel.a8 - alpha))
-			to_image.set_pixelv(dest_pos, cur_pixel)
+			to_image.set_pixelv(dest_pos, Color(cur_pixel, maxf(0, cur_pixel.a - stencil_alpha)))
+
+func alpha_multiply(from_image: Image, to_image, src_rect: Rect2i, dest_offset: Vector2) -> void:
+	var w = src_rect.size.x
+	var h = src_rect.size.y
+	var src_offset = src_rect.position
+	var src_image_rect: = Rect2i(Vector2i.ZERO, from_image.get_size())
+	var to_image_rect: = Rect2i(Vector2i.ZERO, to_image.get_size())
+	
+	for x in range(w):
+		for y in range(h):
+			var dest_pos: = Vector2i(dest_offset.x + x, dest_offset.y + y)
+			var src_pos: = Vector2i(src_offset.x + x, src_offset.y + y)
+			if not to_image_rect.has_point(dest_pos) or not src_image_rect.has_point(src_pos):
+				continue
+			var stencil_alpha: = from_image.get_pixelv(src_pos).a
+			var cur_pixel: Color = to_image.get_pixelv(dest_pos)
+			to_image.set_pixelv(dest_pos, Color(cur_pixel, cur_pixel.a * stencil_alpha))
+
+func alpha_inverse_multiply(from_image: Image, to_image, src_rect: Rect2i, dest_offset: Vector2) -> void:
+	var w = src_rect.size.x
+	var h = src_rect.size.y
+	var src_offset = src_rect.position
+	var src_image_rect: = Rect2i(Vector2i.ZERO, from_image.get_size())
+	var to_image_rect: = Rect2i(Vector2i.ZERO, to_image.get_size())
+	
+	for x in range(w):
+		for y in range(h):
+			var dest_pos: = Vector2i(dest_offset.x + x, dest_offset.y + y)
+			var src_pos: = Vector2i(src_offset.x + x, src_offset.y + y)
+			if not to_image_rect.has_point(dest_pos) or not src_image_rect.has_point(src_pos):
+				continue
+			var stencil_alpha: = 1 - from_image.get_pixelv(src_pos).a
+			var cur_pixel: Color = to_image.get_pixelv(dest_pos)
+			to_image.set_pixelv(dest_pos, Color(cur_pixel, cur_pixel.a * stencil_alpha))
 
 func _extended_get_pixel_alpha8(image: Image, x: int, y: int) -> int:
 	if x < 0 or y < 0 or x >= image.get_width() or y >= image.get_height():
@@ -654,11 +749,18 @@ func stamp_blit(from_image: Image, to_image: Image, src_rect: Rect2i, dest_offse
 			if not src_image_rect.has_point(from_pos) or not dest_image_rect.has_point(dest_pos):
 				continue
 			var color: = from_image.get_pixelv(from_pos)
-			if color.a8 < 1:
-				# ignore completely transparent_img pixels from source
+			if is_zero_approx(color.a):
+				# ignore completely transparent pixels
 				continue
 			var dest_color: = to_image.get_pixelv(dest_pos)
-			var blended: = dest_color.blend(color)
+			if is_zero_approx(dest_color.a):
+				continue
+
+			# Style A: do a normal blend over, then keep the original dest alpha, slightly artificial
+			#var blended: = dest_color.blend(color)
+			# Style B: dest alpha is treated as if it is a mask that will be applied once dest is blended onto something else, 
+			#     and stamp color is blended over dest color before this mask has been applied
+			var blended: = Color(dest_color, 1).blend(color)
 			to_image.set_pixelv(dest_pos, Color(blended.r, blended.g, blended.b, dest_color.a))
 
 func paint_button_to_corner_index(button: ButtonContainer) -> int:

@@ -1,6 +1,7 @@
 {
 	"tiles.png":
 		{
+			"is_multiple_tiles": true,
 			"size": [288, 192],
 			"tile_size": [32, 32],
 			"size_in_tiles": [9, 6],
@@ -9,6 +10,7 @@
 		},
 	"entityTiles.png":
 		{
+			"is_multiple_tiles": true,
 			"size": [288, 224],
 			"tile_size": [32, 32],  
 			"size_in_tiles": [9, 7],
@@ -17,6 +19,7 @@
 		},
 	"shapes32x.png":
 		{
+			"is_multiple_tiles": true,
 			"size": [288, 288],
 			"tile_size": [32, 32],
 			"size_in_tiles": [9, 9],
@@ -25,6 +28,7 @@
 		},
 	"playerVariants.png":
 		{
+			"is_multiple_tiles": true,
 			"size": [288, 128],
 			"tile_size": [32, 32],
 			"size_in_tiles": [4, 4],
@@ -33,6 +37,7 @@
 		},
 	"frog.png":
 		{
+			"is_multiple_tiles": true,
 			"size": [128, 64],
 			"tile_size": [64, 64],
 			"size_in_tiles": [2, 1],
@@ -41,6 +46,7 @@
 		},
 	"oversize_tiles.png":
 		{
+			"is_multiple_tiles": true,
 			"size": [264, 264],
 			"tile_size": [44, 44],
 			"size_in_tiles": [6, 6],
@@ -49,6 +55,7 @@
 		},
 	"oversize_tiles_2.png":
 		{
+			"is_multiple_tiles": true,
 			"size": [264, 264],
 			"tile_size": [44, 44],
 			"size_in_tiles": [6, 6],
@@ -57,6 +64,7 @@
 		},
 	"borders.png":
 		{
+			"is_multiple_tiles": true,
 			"tile_size": [44, 44],
 			"border": [0, 0],
 			"separation": [0, 0]

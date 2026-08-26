@@ -8,6 +8,8 @@ signal meta_confirmed(texture_definition)
 @export var is_new_mode: bool = true
 @export var texture_name: String = ""
 
+@export var is_multiple_tiles_toggle: CheckButton
+
 @export var grid_size_input: Vector2iInput
 @export var image_size_in_tiles_input: Vector2iInput
 @export var border_width_input: Vector2iInput
@@ -42,9 +44,22 @@ func load_meta(metadata: Dictionary) -> void:
 		border_width_input.set_value(metadata["border"])
 	if metadata.has("separation"):
 		separation_input.set_value(metadata["separation"])
+	if metadata.get("is_multiple_tiles", true):
+		is_multiple_tiles_toggle.set_pressed_no_signal(true)
+	refresh_ui()
+
+func refresh_ui() -> void:
+	find_child("SharedImageWarning").visible = edit_shared_meta_warning
+	var is_multiple: = is_multiple_tiles_toggle.button_pressed
+	grid_size_input.disabled = not is_multiple
+	image_size_in_tiles_input.disabled = not is_multiple
+	#border_width_input.disabled = not is_multiple
+	separation_input.disabled = not is_multiple
+
 
 func _on_TextureMetaDialog_confirmed():
 	var edited_meta: = {
+		is_multiple_tiles = is_multiple_tiles_toggle.button_pressed,
 		tile_size = Vector2(grid_size_input.get_value()),
 		border = Vector2(border_width_input.get_value()),
 		separation = Vector2(separation_input.get_value()),

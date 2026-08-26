@@ -356,6 +356,9 @@ func get_raw_indexed_atlas_rect(texture_name: String, is_builtin: bool, is_share
 	var offset: = get_indexed_tile_offset(tile_index, texture.get_width(), tile_size, border, separation)
 	return Rect2(offset, tile_size)
 
+func get_rect_in_single_tile_texture_with_border(texture_size: Vector2, border: Vector2 = Vector2.ZERO) -> Rect2:
+	return Rect2(border, texture_size - border * 2)
+
 func get_tile_atlas_coords_size(pixel_size: Vector2, tile_size: Vector2, border: Vector2 = Vector2.ZERO, separation: Vector2 = Vector2.ZERO) -> Vector2i:
 	var eliminate_border: Vector2 = pixel_size - border * 2 + separation
 	var size_with_sep: Vector2 = tile_size + separation

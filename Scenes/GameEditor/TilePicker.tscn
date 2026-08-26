@@ -2,10 +2,48 @@
 
 [ext_resource type="Script" uid="uid://brwtwvfgwg2kd" path="res://src/GameEditor/TilePicker.gd" id="1"]
 [ext_resource type="Texture2D" uid="uid://b6lj5qghhre2t" path="res://assets/img/tiles.png" id="2"]
+[ext_resource type="Texture2D" uid="uid://bd17ecvj57if6" path="res://assets/img/transparency_help.png" id="3_nj5bs"]
 
 [sub_resource type="AtlasTexture" id="2"]
-atlas = ExtResource("2")
-region = Rect2(0, 0, 32, 32)
+atlas = ExtResource("3_nj5bs")
+region = Rect2(0, 0, 64, 64)
+
+[sub_resource type="Animation" id="Animation_nj5bs"]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:modulate")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Color(1, 1, 1, 1)]
+}
+
+[sub_resource type="Animation" id="Animation_urv4v"]
+resource_name = "pulse"
+loop_mode = 1
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:modulate")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.5, 1),
+"transitions": PackedFloat32Array(1, 1, 1),
+"update": 0,
+"values": [Color(1, 1, 1, 1), Color(0.5890956, 0.5890956, 0.5890956, 1), Color(1, 1, 1, 1)]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_s7mw2"]
+_data = {
+&"RESET": SubResource("Animation_nj5bs"),
+&"pulse": SubResource("Animation_urv4v")
+}
 
 [sub_resource type="StyleBoxFlat" id="3"]
 draw_center = false
@@ -13,14 +51,29 @@ border_width_left = 2
 border_width_top = 2
 border_width_right = 2
 border_width_bottom = 2
-border_color = Color(0, 0, 0, 1)
-expand_margin_left = 2.0
-expand_margin_top = 2.0
-expand_margin_right = 2.0
-expand_margin_bottom = 2.0
+border_color = Color(0.6708301, 0.16181558, 0.14868191, 1)
+expand_margin_left = 1.0
+expand_margin_top = 1.0
+expand_margin_right = 1.0
+expand_margin_bottom = 1.0
+shadow_color = Color(0.39015985, 0.10090513, 0.028648796, 0.6)
 shadow_size = 5
 
-[node name="TilePicker" type="TextureRect" unique_id=283623779]
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_nx7y3"]
+draw_center = false
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0, 0, 0, 0.84313726)
+expand_margin_left = 1.0
+expand_margin_top = 1.0
+expand_margin_right = 1.0
+expand_margin_bottom = 1.0
+shadow_color = Color(0.18730319, 0.12695163, 0.11736914, 0.7137255)
+shadow_size = 6
+
+[node name="TilePicker" type="TextureRect" unique_id=283623779 node_paths=PackedStringArray("sel_cursor", "hover_cursor", "transparency_cursor")]
 texture_filter = 1
 offset_left = 98.0
 offset_top = 54.0
@@ -33,6 +86,9 @@ texture = ExtResource("2")
 expand_mode = 1
 stretch_mode = 6
 script = ExtResource("1")
+sel_cursor = NodePath("Cursor")
+hover_cursor = NodePath("HoverCursor")
+transparency_cursor = NodePath("TransparencyCursor")
 
 [node name="HighlightedTile" type="TextureRect" parent="." unique_id=417421501]
 layout_mode = 0
@@ -41,12 +97,36 @@ texture = SubResource("2")
 expand_mode = 1
 stretch_mode = 6
 
+[node name="TransparencyCursor" type="TextureRect" parent="." unique_id=489065677]
+self_modulate = Color(1, 1, 1, 0.3372549)
+show_behind_parent = true
+texture_repeat = 2
+layout_mode = 0
+offset_right = 8.0
+offset_bottom = 8.0
+mouse_filter = 2
+texture = SubResource("2")
+expand_mode = 1
+stretch_mode = 6
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="TransparencyCursor" unique_id=104430948]
+libraries/ = SubResource("AnimationLibrary_s7mw2")
+autoplay = &"pulse"
+
 [node name="Cursor" type="Panel" parent="." unique_id=28308593]
+visible = false
 layout_mode = 0
 offset_right = 32.0
 offset_bottom = 32.0
 mouse_filter = 2
 theme_override_styles/panel = SubResource("3")
+
+[node name="HoverCursor" type="Panel" parent="." unique_id=156253625]
+layout_mode = 0
+offset_right = 8.0
+offset_bottom = 8.0
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_nx7y3")
 
 [connection signal="mouse_entered" from="." to="." method="_on_TilePicker_mouse_entered"]
 [connection signal="mouse_exited" from="." to="." method="_on_TilePicker_mouse_exited"]

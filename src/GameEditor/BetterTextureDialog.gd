@@ -9,6 +9,7 @@ const TilePicker = preload("res://src/GameEditor/TilePicker.gd")
 @export var tile_picker: TilePicker
 
 @export var picker_target_size: Vector2 = Vector2(400, 300)
+@export var max_increase_ratio: float = 2.5
 
 var select_menu: PopupMenu
 
@@ -26,7 +27,17 @@ func _ready() -> void:
 	confirmed.connect(emit_picked_texture)
 	hidden.connect(queue_free)
 	
-	tile_picker.set_target_size(picker_target_size)
+	var main_window: = get_tree().root
+	var max_allowed: Vector2 = Vector2(main_window.size) - Vector2(100, 100).min(main_window.size * 0.05)
+	var clamped_target_size: Vector2 = picker_target_size.min(max_allowed)
+	
+	var size_ratio: = max_allowed / clamped_target_size
+	var increase_by: = clampf(size_ratio[size_ratio.min_axis_index()], 1.0, max_increase_ratio)
+	
+	prints("clamped target size:", clamped_target_size, ", increase by:", increase_by)
+	prints("tile picker target size:", clamped_target_size * increase_by)
+
+	tile_picker.set_target_size(clamped_target_size * increase_by)
 	tile_picker.size_changed.connect(on_tile_picker_size_changed)
 	size_changed.connect(on_resized)
 
@@ -173,6 +184,8 @@ func emit_picked_texture() -> void:
 
 		var rect_for_index: = Utility.get_raw_indexed_atlas_rect(texture_name, is_builtin, is_shared, picked_index)
 		var tex: = get_picked_raw_texture()
+		if not tile_picker.is_multiple_tiles:
+			rect_for_index = tile_picker.get_picked_region()
 		picked_raw_texture.emit(tex, rect_for_index, picked_index, raw_texture_info)
 	else:
 		picked_texture.emit(get_selected_texture(), get_selected_sub_index())
@@ -183,4 +196,10 @@ func _on_tile_picker_confirmed() -> void:
 
 func on_tile_picker_size_changed() -> void:
 	if not _ignore_size_changed:
+		var center_at: Vector2i = position + Vector2i(size / 2.0)
+		var contents_min_size: = (get_child(0) as Control).get_combined_minimum_size()
+		if contents_min_size.x < size.x or contents_min_size.y < size.y:
+			size = contents_min_size
+			position = center_at - Vector2i(size / 2.0)
 		child_controls_changed()
+		
