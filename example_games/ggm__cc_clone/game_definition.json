@@ -116,6 +116,12 @@
       "name": "oversize_tiles_2.png",
       "texture_id": 5.0,
       "filter": false
+    },
+    {
+      "type": "builtin",
+      "name": "spinny_goal_parts.png",
+      "texture_id": 6.0,
+      "filter": false
     }
   ],
   "entity_definitions": {
@@ -1322,7 +1328,16 @@
           "when always": []
         },
         "blocking-clones": true,
-        "spawn-effect": "Grow In"
+        "spawn-effect": "Grow In",
+        "editor_placing": {
+          "v": "3",
+          "conditions": [],
+          "when true": [
+            "basic_default.a_set_tiles::[\"i:4\",\"s:floor\"]"
+          ],
+          "when false": [],
+          "when always": []
+        }
       },
       "sprite_config": {
         "layers": [
@@ -2026,6 +2041,70 @@
         "slapped-dir": true,
         "ghost": true
       }
+    },
+    "44": {
+      "name": "goal-entity",
+      "texture": 6,
+      "tex_index": 3,
+      "properties": {
+        "blocks": {
+          "v": "3",
+          "conditions": [
+            "basic_default.c_has_property::[\"i:1\",true,\"s:can-cross-goal\"]"
+          ],
+          "when true": [],
+          "when false": [],
+          "when always": []
+        },
+        "finish_move_onto": {
+          "v": "3",
+          "conditions": [
+            "basic_default.c_has_property::[\"i:1\",false,\"s:player\"]"
+          ],
+          "when true": [
+            "basic_default.remove_entity_controller::[\"i:1\"]",
+            "basic_default.create_popup_text::[\"i:1\",true,{\"args\":[\"s:type\",\"s:plain\",\"s:value\",\"s:Wowzer!\"],\"type\":\"Dictionary\"},{\"args\":[\"s:type\",\"s:plain\",\"s:value\",\"f:9.0\"],\"type\":\"Dictionary\"},{\"args\":[\"s:type\",\"s:plain\",\"s:color\",{\"args\":[1.0,1.0,1.0,1.0],\"type\":\"Color\"}],\"type\":\"Dictionary\"},{\"args\":[\"s:type\",\"s:plain\",\"s:color\",{\"args\":[0.0,0.0,0.0,1.0],\"type\":\"Color\"}],\"type\":\"Dictionary\"},{\"args\":[\"s:type\",\"s:plain\",\"s:value\",\"f:1.0\"],\"type\":\"Dictionary\"},{\"args\":[\"s:type\",\"s:plain\",\"s:value\",\"f:0.0\"],\"type\":\"Dictionary\"},true]",
+            "basic_default.advance_to_next_level::[\"i:-1\",{\"args\":[\"s:type\",\"s:plain\",\"s:value\",\"f:1.0\"],\"type\":\"Dictionary\"},true,\"s:\"]",
+            "basic_default.play_named_sfx::[\"i:-1\",{\"args\":[\"s:type\",\"s:plain\",\"s:value\",\"s:Win\"],\"type\":\"Dictionary\"},true]"
+          ],
+          "when false": [],
+          "when always": []
+        },
+        "z-index": -4
+      },
+      "sprite_config": {
+        "layers": [
+          {
+            "mode": "normal",
+            "texture": 6.0,
+            "tex_index": 7.0
+          },
+          {
+            "mode": "normal",
+            "texture": 6.0,
+            "tex_index": 5.0,
+            "rotates": true,
+            "spinning": -0.299999999999997
+          },
+          {
+            "mode": "normal",
+            "texture": 6.0,
+            "tex_index": 4.0
+          },
+          {
+            "mode": "normal",
+            "texture": 6.0,
+            "tex_index": 6.0,
+            "rotates": true,
+            "spinning": 0.5
+          },
+          {
+            "mode": "normal",
+            "texture": 6.0,
+            "tex_index": 3.0
+          }
+        ]
+      }
     }
   },
   "tile_definitions": {
@@ -2043,7 +2122,8 @@
       "texture": 0,
       "tex_index": 19,
       "properties": {
-        "blocks": true
+        "blocks": true,
+        "z-index": 1.0
       }
     },
     "2": {
@@ -2208,7 +2288,8 @@
       "texture": 0,
       "tex_index": 12,
       "properties": {
-        "blocks": true
+        "blocks": true,
+        "z-index": 1.0
       }
     },
     "8": {
@@ -2273,7 +2354,8 @@
             "when false": [],
             "when always": []
           }
-        ]
+        ],
+        "z-index": 1.0
       }
     },
     "11": {
@@ -2298,7 +2380,8 @@
           ],
           "when false": [],
           "when always": []
-        }
+        },
+        "z-index": 1.0
       },
       "preview_variant": {
         "texture": 0,
@@ -2531,7 +2614,8 @@
       "texture": 0,
       "tex_index": 38,
       "properties": {
-        "blocks": true
+        "blocks": true,
+        "z-index": 1.0
       }
     },
     "22": {
@@ -2825,7 +2909,8 @@
           ],
           "when false": [],
           "when always": []
-        }
+        },
+        "z-index": 1.0
       }
     },
     "24": {
@@ -2854,7 +2939,8 @@
           ],
           "when false": [],
           "when always": []
-        }
+        },
+        "z-index": 1.0
       }
     },
     "25": {
@@ -2883,7 +2969,8 @@
           ],
           "when false": [],
           "when always": []
-        }
+        },
+        "z-index": 1.0
       }
     },
     "26": {
@@ -2911,7 +2998,8 @@
           ],
           "when false": [],
           "when always": []
-        }
+        },
+        "z-index": 1.0
       }
     },
     "19": {
@@ -3009,7 +3097,8 @@
         "Block Around the Clock",
         "Closed Circuit",
         "Pipe Dream",
-        "Work Ethic"
+        "Work Ethic",
+        "Molecule"
       ]
     },
     {

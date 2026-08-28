@@ -691,13 +691,14 @@ func _process(delta: float) -> void:
 			last_zoom_amt = 1
 	
 	# camera scroll that doesn't interact with GUI can scroll regardless of input priority
+	var holding_modifier: bool = Input.is_key_pressed(KEY_SHIFT) or Input.is_key_pressed(KEY_CTRL)
 	var dedicated_scroll_input: = Utility.input_vector_by_prefix("editor_camera_dedicated")
 	var no_dedicated_scroll: bool = entity_instance_editor.is_conditional_editor_open()
 	no_dedicated_scroll = no_dedicated_scroll or placeable_text_input_panel.visible
-	if not no_dedicated_scroll:
+	if not no_dedicated_scroll and not holding_modifier:
 		_scroll_editor_camera(dedicated_scroll_input * delta * camera_move_speed)
 
-	if _input_priority:
+	if _input_priority and not holding_modifier:
 		var scroll_input: = Utility.input_vector_by_prefix("editor_camera")
 		_scroll_editor_camera(scroll_input * delta * camera_move_speed)
 
