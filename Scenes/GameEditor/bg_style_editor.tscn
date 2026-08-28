@@ -380,6 +380,7 @@ layout_mode = 2
 text = "Enable Noise Solids"
 
 [node name="NoiseSuboptions" type="VBoxContainer" parent="Noise" unique_id=109020447]
+visible = false
 layout_mode = 2
 
 [node name="HBoxContainer4" type="HBoxContainer" parent="Noise/NoiseSuboptions" unique_id=472606221]

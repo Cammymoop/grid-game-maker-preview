@@ -211,8 +211,8 @@ func refresh(scroll_to_level_name: String = "", scroll_to_level_list_name: Strin
 func refresh_editing_locked() -> void:
     var is_custom: = is_showing_custom_levels()
     var editable_order: = not (is_editing_locked and not is_custom)
-    rearrange_lists_button.disabled = editable_order
-    add_new_list_button.disabled = editable_order
+    rearrange_lists_button.disabled = not editable_order
+    add_new_list_button.disabled = not editable_order
 
 func refresh_list_settings() -> void:
     rearrange_lists_button.hide()

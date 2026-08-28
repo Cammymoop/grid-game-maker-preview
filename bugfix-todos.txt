@@ -1,10 +1,5 @@
 
 
-First new level in empty game not assigned to 'Levels' list by default
-
-Add level list button disabled when no lists? (test on sandy or broken abacus)
-
-
 Options menu doesn't grab focus for controller compatibility
 
 

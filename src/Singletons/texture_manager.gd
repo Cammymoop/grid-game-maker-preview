@@ -203,7 +203,6 @@ func _set_texture(texture_id: int, texture: Texture, texture_name: String, metad
     var is_multiple_tiles: bool = metadata.get("is_multiple_tiles", true)
     if not is_multiple_tiles:
         var single_tile_rect: = Utility.get_rect_in_single_tile_texture_with_border(texture.get_size(), border)
-        prints("single tile size:", texture_name, ",", single_tile_rect.size)
         tile_sizes[texture_id] = single_tile_rect.size
     var separation: Vector2 = metadata.get("separation", Vector2.ZERO)
     var grid_cells: Vector2i = Vector2i.ONE

@@ -34,9 +34,6 @@ func _ready() -> void:
 	var size_ratio: = max_allowed / clamped_target_size
 	var increase_by: = clampf(size_ratio[size_ratio.min_axis_index()], 1.0, max_increase_ratio)
 	
-	prints("clamped target size:", clamped_target_size, ", increase by:", increase_by)
-	prints("tile picker target size:", clamped_target_size * increase_by)
-
 	tile_picker.set_target_size(clamped_target_size * increase_by)
 	tile_picker.size_changed.connect(on_tile_picker_size_changed)
 	size_changed.connect(on_resized)
