@@ -410,20 +410,20 @@ func setup_default_bg_style() -> void:
 		"pointy_particles_rainbow_on": false,
 		"pointy_particles_color": Utility.color_string(customizable_bg.default_pointy_particles_color, true),
 		"pointy_particles_dark_mode": customizable_bg.pointy_particles_dark_mode,
-		"pointy_particles_camera_scroll_factor": 0.0,
+		"pointy_particles_camera_scroll_factor": 1.0,
 		
 		"lines_on": false,
 		"lines_solid_on": false,
 		"lines_color": Utility.color_string(customizable_bg.lines_color, true),
 		"lines_solid_color": Utility.color_string(customizable_bg.lines_solid_color, true),
 		"lines_scroll_speed": customizable_bg.lines_scroll_speed,
-		"lines_scroll_angle": rad_to_deg(customizable_bg.lines_scroll_angle * TAU),
+		"lines_scroll_angle": customizable_bg.lines_scroll_angle,
 		"lines_warp_strength": customizable_bg.lines_warp_strength,
 		"lines_warp_scroll_speed": customizable_bg.lines_warp_scroll_speed,
-		"lines_warp_scroll_angle": rad_to_deg(customizable_bg.lines_warp_scroll_angle * TAU),
+		"lines_warp_scroll_angle": customizable_bg.lines_warp_scroll_angle,
 		
-		"lines_camera_scroll_factor": 0.0,
-		"lines_solid_camera_scroll_factor": 0.0,
+		"lines_camera_scroll_factor": 1.0,
+		"lines_solid_camera_scroll_factor": 1.0,
 
 		"lines_above": "below",
 	}

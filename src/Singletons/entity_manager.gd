@@ -11,6 +11,8 @@ signal entity_list_updated
 signal entity_became_active(entity: BaseEntity)
 signal post_deserialize
 
+signal entity_defs_removed
+
 var entity_template: = preload("res://Scenes/BaseEntity.tscn")
 var large_entity_template: = preload("res://Scenes/LargeEntity.tscn")
 var controller_templates: = {
@@ -2104,6 +2106,7 @@ func remove_entity_definition(entity_index: int) -> void:
     var entity_name = entity_defs[entity_index]["name"]
     entity_index_map.erase(entity_name)
     entity_defs.erase(entity_index)
+    entity_defs_removed.emit()
 
 func erase_all_entities_with_id(entity_index: int) -> void:
     for entity in entity_list:
@@ -2614,7 +2617,7 @@ func get_basic_atlas_textures_for_foreign_game(foreign_game_def: Dictionary, gam
     return basic_atlas_textures
 
 func rerender_entity_sprite_preview(entity_id: int) -> void:
-    prints("rerendering entity sprite preview for entity %s" % get_entity_name(entity_id))
+    #prints("rerendering entity sprite preview for entity %s" % get_entity_name(entity_id))
     var entity_def: Dictionary = entity_defs[entity_id]
     if not entity_def.get("preview_variant", {}).is_empty():
         if entity_sprite_snapshots.has(entity_id):

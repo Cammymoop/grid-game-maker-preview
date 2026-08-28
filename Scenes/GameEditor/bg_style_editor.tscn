@@ -23,6 +23,7 @@ atlas = ExtResource("5_5n2ag")
 region = Rect2(160, 160, 32, 32)
 
 [node name="BGStyleEditor" type="VBoxContainer" unique_id=1622581633 node_paths=PackedStringArray("reset_button", "remove_override_button", "bg_color_picker", "bg_gradient_enable", "bg_gradient_suboptions", "bg_gradient_color_picker", "bg_gradient_sort_option", "bg_gradient_rotation_input", "bg_gradient_cover_amount_input", "dusty_particles_enable", "dusty_particles_suboptions", "dusty_particles_color_picker", "dusty_particles_speed_input", "dusty_particles_amount_input", "dusty_particles_camera_scroll_factor_input", "pointy_particles_enable", "pointy_particles_suboptions", "pointy_particles_color_picker", "pointy_particles_rainbow_enable", "pointy_particles_dark_mode_enable", "pointy_particles_speed_input", "pointy_particles_amount_input", "pointy_particles_camera_scroll_factor_input", "lines_enable", "solids_enable", "lines_suboptions", "lines_sort_option", "lines_color_picker", "solids_color_picker", "ln_scroll_speed_input", "ln_scroll_angle_input", "ln_warp_strength_input", "ln_warp_scroll_speed_input", "ln_warp_scroll_angle_input", "tile_enable", "tile_suboptions", "tile_texture_picker_button", "tile_color_picker", "tile_sort_option", "tile_below_gradient_toggle", "tile_base_offset_input", "tile_angle_input", "tile_scale_input", "tile_smooth_scale_toggle", "tile_scale_with_camera_toggle", "tile_spacing_input", "tile_camera_scroll_factor_input", "tile_auto_scroll_enable", "tile_auto_scroll_suboptions", "tile_auto_scroll_speed_input", "tile_auto_scroll_angle_input", "ln_cam_scroll_factor_input", "ln_solid_cam_scroll_factor_input")]
+rotation = 0.00029708294
 theme = SubResource("Theme_48hio")
 script = ExtResource("1_pxgli")
 reset_button = NodePath("HBoxContainer2/ResetButton")
@@ -379,7 +380,6 @@ layout_mode = 2
 text = "Enable Noise Solids"
 
 [node name="NoiseSuboptions" type="VBoxContainer" parent="Noise" unique_id=109020447]
-visible = false
 layout_mode = 2
 
 [node name="HBoxContainer4" type="HBoxContainer" parent="Noise/NoiseSuboptions" unique_id=472606221]

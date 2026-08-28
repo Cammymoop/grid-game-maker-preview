@@ -37,6 +37,8 @@ var dropping_allowed: = true
 
 func _ready() -> void:
 	TextureManager.textures_loaded.connect(on_textures_loaded)
+	EntityManager.entity_defs_removed.connect(on_items_removed)
+	MapManager.tile_defs_removed.connect(on_items_removed)
 	set_fall_direction(fall_direction)
 	set_process_input(changeable_direction)
 	tile_indexes = MapManager.get_all_tile_indexes()
@@ -141,7 +143,7 @@ func spawn_common(spr: VelocitySprite, fall_delta: float) -> void:
 		spr.position.x = randf_range(0, screen_size.x)
 		spr.position.y = -(MapManager.tile_width * 1.5 * base_scale)
 		if fall_delta:
-			spr.position.y += (screen_size.y * fall_delta) * spr.scale.x
+			spr.position.y += (screen_size.y * fall_delta) * base_scale
 		
 		if gravity_vector.y < 0:
 			spr.position.y = screen_size.y - spr.position.y
@@ -149,7 +151,7 @@ func spawn_common(spr: VelocitySprite, fall_delta: float) -> void:
 		spr.position.y = randf_range(0, screen_size.y)
 		spr.position.x = -(MapManager.tile_width * 1.5 * base_scale)
 		if fall_delta:
-			spr.position.x += (screen_size.x * fall_delta) * spr.scale.x
+			spr.position.x += (screen_size.x * fall_delta) * base_scale
 		
 		if gravity_vector.x < 0:
 			spr.position.x = screen_size.x - spr.position.x
@@ -219,4 +221,7 @@ func _on_NewObjTimer_timeout() -> void:
 	spawn_random_obj()
 
 func on_textures_loaded() -> void:
+	reload_definitions()
+
+func on_items_removed() -> void:
 	reload_definitions()

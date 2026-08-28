@@ -12,6 +12,8 @@ signal map_cleared
 
 signal persist_on_completion_changed
 
+signal tile_defs_removed
+
 var map_layer_template: = preload("res://Scenes/MapLayer.tscn")
 
 var layers: Array = []
@@ -843,6 +845,7 @@ func add_new_tile_definition(definition) -> int:
 func remove_tile_definition(tile_index) -> void:
     tile_defs.erase(tile_index)
     refresh_definition()
+    tile_defs_removed.emit()
 
 func check_multiple_pos_for_property_bool(tile_positions: Array, entity_asking: BaseEntity, property_name: String, check_for: bool, is_all: bool = false) -> bool:
     for pos in tile_positions:

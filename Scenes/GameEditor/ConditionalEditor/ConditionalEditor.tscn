@@ -128,13 +128,14 @@ grow_vertical = 2
 theme_override_colors/font_color = Color(0, 0, 0, 1)
 text = "Conditional Editor"
 
-[node name="StepsUI" type="HBoxContainer" parent="PanelContainer/MarginContainer/VBoxContainer2" unique_id=690913947 node_paths=PackedStringArray("move_back_button", "move_forward_button")]
+[node name="StepsUI" type="HBoxContainer" parent="PanelContainer/MarginContainer/VBoxContainer2" unique_id=690913947 node_paths=PackedStringArray("move_back_button", "move_forward_button", "duplicate_step_button")]
 layout_mode = 2
 theme_override_constants/separation = 8
 alignment = 1
 script = ExtResource("4_k14si")
 move_back_button = NodePath("MoveStepBackBtn")
 move_forward_button = NodePath("MoveStepForwardBtn")
+duplicate_step_button = NodePath("DuplicateStepButton")
 
 [node name="PrevStepButton" type="Button" parent="PanelContainer/MarginContainer/VBoxContainer2/StepsUI" unique_id=274209237]
 layout_mode = 2
@@ -179,11 +180,19 @@ layout_mode = 2
 [node name="AddStepButton" type="Button" parent="PanelContainer/MarginContainer/VBoxContainer2/StepsUI" unique_id=441413060]
 layout_mode = 2
 size_flags_vertical = 4
+theme_override_font_sizes/font_size = 14
 text = "Add Step"
+
+[node name="DuplicateStepButton" type="Button" parent="PanelContainer/MarginContainer/VBoxContainer2/StepsUI" unique_id=1413917851]
+layout_mode = 2
+size_flags_vertical = 4
+theme_override_font_sizes/font_size = 14
+text = "Duplicate Step"
 
 [node name="RemoveStepButton" type="Button" parent="PanelContainer/MarginContainer/VBoxContainer2/StepsUI" unique_id=1188796391]
 layout_mode = 2
 size_flags_vertical = 4
+theme_override_font_sizes/font_size = 14
 text = "Remove Step"
 
 [node name="VBoxContainer" type="VBoxContainer" parent="PanelContainer/MarginContainer/VBoxContainer2" unique_id=366886339]

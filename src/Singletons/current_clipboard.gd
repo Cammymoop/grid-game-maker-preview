@@ -93,8 +93,15 @@ func get_serialized_entity_instances() -> Array[Dictionary]:
 	return []
 
 
-func copy_sprite_config(sprite_config: Dictionary) -> void:
-	set_clipboard_stuff(sprite_config.duplicate_deep(), "sprite_config")
+func copy_sprite_config(entity_definition: Dictionary) -> void:
+	var sprite_conf_or_simple: Dictionary = entity_definition.get("sprite_config", {})
+	if not sprite_conf_or_simple:
+		sprite_conf_or_simple = {
+			"is_simple": true,
+			"texture": entity_definition['texture'],
+			"tex_index": entity_definition['tex_index'],
+		}
+	set_clipboard_stuff(sprite_conf_or_simple.duplicate_deep(), "sprite_config")
 
 func get_sprite_config() -> Dictionary:
 	if clipboard_type == "sprite_config":

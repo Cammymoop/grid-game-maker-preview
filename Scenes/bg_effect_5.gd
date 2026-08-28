@@ -200,8 +200,8 @@ func refresh_lines_style(level_bg_info: Dictionary) -> void:
     var lines_shader: ShaderMaterial = lines.material
     var lines_solid_shader: ShaderMaterial = lines_solid.material
     
-    lines_shader.set_shader_parameter("camera_displacement_scale", level_bg_info.get("lines_camera_scroll_factor", lines_camera_scroll_factor))
-    lines_solid_shader.set_shader_parameter("camera_displacement_scale", level_bg_info.get("lines_solid_camera_scroll_factor", lines_solid_camera_scroll_factor))
+    lines_shader.set_shader_parameter("camera_displacement_scale", 1 - level_bg_info.get("lines_camera_scroll_factor", lines_camera_scroll_factor))
+    lines_solid_shader.set_shader_parameter("camera_displacement_scale", 1 - level_bg_info.get("lines_solid_camera_scroll_factor", lines_solid_camera_scroll_factor))
     
     var scroll_speed: float = level_bg_info.get("lines_scroll_speed", lines_scroll_speed)
     var scroll_angle: float = level_bg_info.get("lines_scroll_angle", lines_scroll_angle)

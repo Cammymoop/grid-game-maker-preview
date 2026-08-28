@@ -33,14 +33,14 @@ const CONTEXT_MENU_COPY_ALL_TILES = 10
 const CONTEXT_MENU_COPY_ALL_ITEMS = 11
 const CONTEXT_MENU_COPY_ITEM_PROPERTIES = 12
 const CONTEXT_MENU_COPY_ENTITY_SPRITE = 13
-const CTX_COPY_END = 12
+const CTX_COPY_END = 13
 
 const CTX_PASTE_START = 18
 const CONTEXT_MENU_PASTE_ITEM = 18
 const CONTEXT_MENU_PASTE_ITEM_PROPERTIES = 19
 const CONTEXT_MENU_PASTE_ITEM_PROP_NO_OVERRIDE = 20
 const CONTEXT_MENU_PASTE_ENTITY_SPRITE = 21
-const CTX_PASTE_END = 20
+const CTX_PASTE_END = 21
 
 const CTX_REORDER_START = 51
 const CONTEXT_MENU_REORDER_BACK = 51
@@ -298,22 +298,28 @@ func handle_ctx_paste(context_menu_id: int, is_clicked_item: bool, clicked_is_en
 			return
 		var do_overwrite: = context_menu_id == CONTEXT_MENU_PASTE_ITEM_PROPERTIES
 		update_definition_properties(clicked_is_entity, clicked_item_id, CurrentClipboard.get_properties(), do_overwrite)
-		update_all_grids()
+		update_the_grid(not clicked_is_entity)
 	elif context_menu_id == CONTEXT_MENU_PASTE_ITEM:
 		var items: Dictionary = CurrentClipboard.get_items()
 		for pasted_entity_def in items.get("entities", []):
 			add_item_as_definition(true, pasted_entity_def)
 		for pasted_tile_def in items.get("tiles", []):
 			add_item_as_definition(false, pasted_tile_def)
-		update_all_grids()
+		update_the_grid(not clicked_is_entity)
 	elif context_menu_id == CONTEXT_MENU_PASTE_ENTITY_SPRITE:
 		if not is_clicked_item or not clicked_is_entity:
 			return
 		var sprite_config: Dictionary = CurrentClipboard.get_sprite_config()
 		var entity_def: Dictionary = get_existing_item_definition(true, clicked_item_id)
-		entity_def["sprite_config"] = sprite_config
+		if sprite_config.get("is_simple", false):
+			entity_def["sprite_config"] = {}
+			entity_def['texture'] = sprite_config['texture']
+			entity_def["tex_index"] = sprite_config['tex_index']
+		else:
+			entity_def["sprite_config"] = sprite_config
 		EntityManager.update_entity_definition(clicked_item_id, entity_def)
-		update_all_grids()
+		EntityManager.rerender_entity_sprite_preview(clicked_item_id)
+		update_the_grid(false)
 			
 func handle_ctx_copy(context_menu_id: int, is_clicked_item: bool, clicked_is_entity: bool, clicked_item_id: int) -> void:
 	if context_menu_id in [CONTEXT_MENU_COPY_ALL_ENTITIES, CONTEXT_MENU_COPY_ALL_TILES, CONTEXT_MENU_COPY_ALL_ITEMS]:
@@ -346,7 +352,7 @@ func handle_ctx_copy(context_menu_id: int, is_clicked_item: bool, clicked_is_ent
 		if not is_clicked_item or not clicked_is_entity:
 			return
 		var entity_def: Dictionary = get_existing_item_definition(true, clicked_item_id)
-		CurrentClipboard.copy_sprite_config(entity_def.get("sprite_config", {}))
+		CurrentClipboard.copy_sprite_config(entity_def)
 
 func handle_ctx_reorder(context_menu_id: int, is_clicked_item: bool, clicked_is_entity: bool, clicked_item_id: int) -> void:
 	if not is_clicked_item:

@@ -101,6 +101,7 @@ func _ready():
     steps_ui.add_step_after.connect(on_add_step_after)
     steps_ui.remove_step.connect(on_remove_step)
     steps_ui.request_move_step.connect(on_move_step)
+    steps_ui.duplicate_step.connect(on_duplicate_step)
     
     close_requested.connect(cancel)
     
@@ -413,6 +414,14 @@ func on_add_step_after(after_step_num: int) -> void:
     current_conditional.insert(after_step_num + 1, {"v": "3"})
     step_count = current_conditional.size()
     current_step = after_step_num + 1
+    steps_ui.set_step(step_count, current_step)
+    load_current_step()
+
+func on_duplicate_step(step_num: int) -> void:
+    update_current_step()
+    current_conditional.insert(step_num + 1, current_conditional[step_num].duplicate_deep())
+    step_count = current_conditional.size()
+    current_step = step_num + 1
     steps_ui.set_step(step_count, current_step)
     load_current_step()
 

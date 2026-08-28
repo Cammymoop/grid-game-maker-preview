@@ -4,6 +4,7 @@ signal step_changed(step_num: int)
 signal add_step_after(step_num: int)
 signal remove_step(step_num: int)
 signal request_move_step(direction: int)
+signal duplicate_step(step_num: int)
 
 @onready var prev_step_button = find_child("PrevStepButton")
 @onready var next_step_button = find_child("NextStepButton")
@@ -13,6 +14,8 @@ signal request_move_step(direction: int)
 
 @export var move_back_button: Button
 @export var move_forward_button: Button
+
+@export var duplicate_step_button: Button
 
 var step_count: int = 1
 var current_step: int = 0
@@ -27,6 +30,8 @@ func _ready():
 	
 	add_step_button.pressed.connect(add_step)
 	remove_step_button.pressed.connect(remove_current_step)
+	
+	duplicate_step_button.pressed.connect(duplicate_current_step)
 
 func set_step(new_step_count: int, new_current_step: int) -> void:
 	step_count = new_step_count
@@ -48,6 +53,9 @@ func notify_step_changed():
 
 func add_step():
 	add_step_after.emit(current_step)
+
+func duplicate_current_step():
+	duplicate_step.emit(current_step)
 
 func remove_current_step():
 	remove_step.emit(current_step)
