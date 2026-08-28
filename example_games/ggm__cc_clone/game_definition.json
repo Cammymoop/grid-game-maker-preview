@@ -3,8 +3,8 @@
   "game_settings": {
     "pixel_scale": 2.0,
     "camera_settings": {
-      "follow_entity": "player",
-      "follow_entity_by": "property"
+      "follow_entity": "InputController",
+      "follow_entity_by": "controller"
     },
     "title": "Chippy Challonge",
     "show_level_title": "At Level Start",
@@ -2986,7 +2986,7 @@
         {
           "type": "just_name",
           "name": "Cammymoop"
-        },
+        }
       ]
     }
   },
