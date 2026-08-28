@@ -147,10 +147,12 @@ func deserialize(data: Dictionary) -> void:
 		shape_mask = _deserialize_shape_mask(data.get("shape_mask", {}))
 	else:
 		set_default_mask()
-	if sprite:
-		update_sprite_pos_scale()
 	if "move_was_facing" in data:
 		_move_was_facing = int(data["move_was_facing"])
+	
+	#await EntityManager.post_deserialize
+	#if sprite:
+		#update_sprite_pos_scale()
 
 func is_at_multiple(check_positions: Array[Vector2i], include_moving_away: bool = false) -> bool:
 	var my_positions: = get_positions_at(tile_position)

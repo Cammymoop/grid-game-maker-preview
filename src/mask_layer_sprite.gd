@@ -323,6 +323,8 @@ func refresh_layers() -> void:
     
     if _lingering_particle_lifetimes.size() > 0:
         resort_lingering_particle_layers()
+    if large_auto_scale_enabled:
+        refresh_all_layers_base_scale()
 
 func clear() -> void:
     modifier_masks.clear()

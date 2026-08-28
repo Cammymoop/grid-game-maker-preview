@@ -2985,7 +2985,7 @@ func failed_group_move_start(parent_related_move: Dictionary, instance_ids: Arra
     _cur_related_move_node = parent_related_move
 
 func _failed_move_start(related_move_node: Dictionary) -> void:
-    prints("move failed, related moves:", related_move_node)
+    #prints("move failed, related moves:", related_move_node)
     _revert_related_move_node(related_move_node)
     if not is_same(_nested_related_moves, related_move_node):
         var parent_node: = _get_parent_move_node(related_move_node)

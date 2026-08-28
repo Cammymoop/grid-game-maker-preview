@@ -407,7 +407,8 @@
         "eats": true,
         "no-rotate": true,
         "box": true,
-        "blocking-clones": true
+        "blocking-clones": true,
+        "spawn-effect": "none"
       },
       "can_be_large": true,
       "default_size": [
