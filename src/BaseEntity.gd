@@ -352,6 +352,8 @@ func sprite_process(delta_time: float, is_frozen: bool = false) -> void:
 func entity_process_starting_actions() -> void:
 	if controller and controller.has_method("start_of_movement_phase"):
 		controller.start_of_movement_phase()
+	
+	# Process moves from controller
 	if not moving:
 		var max_intentions: int = get_max_move_intentions()
 		if max_intentions > 0:
@@ -387,7 +389,7 @@ func entity_process_starting_actions() -> void:
 					set_native_move_speed()
 					var was_allowed = start_move(intended_move_facing)
 					if first_attempt_v_facing == -1:
-						first_attempt_v_facing = facing
+						first_attempt_v_facing = intended_move_facing
 						first_attempt_move_facing = move_facing
 					if was_allowed:
 						if tailing:
@@ -396,7 +398,7 @@ func entity_process_starting_actions() -> void:
 			no_visual_turn_on_bonk = old_no_turn_on_bonk
 			
 			if not moving and first_attempt_v_facing > -1:
-				if is_square_aspect() and not no_visual_turn_on_bonk:
+				if is_square_aspect() and not no_visual_turn_on_bonk and visual_turn_on_move:
 					set_facing(first_attempt_v_facing)
 				set_move_facing(first_attempt_move_facing)
 				if _skip_blocked_result:

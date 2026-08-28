@@ -62,6 +62,13 @@
 			"border": [0, 0],
 			"separation": [0, 0]
 		},
+	"spinny_goal_parts.png":
+		{
+			"is_multiple_tiles": true,
+			"tile_size": [44, 44],
+			"border": [0, 0],
+			"separation": [0, 0]
+		},
 	"borders.png":
 		{
 			"is_multiple_tiles": true,

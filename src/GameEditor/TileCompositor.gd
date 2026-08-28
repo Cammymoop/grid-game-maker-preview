@@ -610,7 +610,7 @@ func flood_fill_paint_mode(dest_image: Image, start_pos: Vector2i) -> void:
 	outer_edges.append(start_pos)
 	visited_positions.append(start_pos)
 	
-	print("flood filling image, size:", dest_image.get_size(), "clip rect:", image_rect)
+	#print("flood filling image, size:", dest_image.get_size(), "clip rect:", image_rect)
 
 	var safety: = 100000
 	while outer_edges.size() > 0 and safety > 0:

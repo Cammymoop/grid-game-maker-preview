@@ -162,14 +162,14 @@ const SPECIAL_PROPS_DEFAULTS: Dictionary[String, Variant] = {
 static var SPECIAL_PROPS_HINT_TEXT: Dictionary[String, String] = {
 	"z-index": "Relative sorting offset, Entities or tiles with a higher sorting offset will be shown over others, can be negative.\nBy default entities are 5 higher than tiles.",
 	"move-turns": "If false, the entity will not automatically turn it's facing direction to match it's moving direction when it moves.",
-	"turn-when-blocked": "If false and move-turns is enabled, the entity will not turn to face attempted move direction if they are blocked from moving in that direction.",
+	"turn-when-blocked": "If false and move-turns is enabled, the entity will not turn to face attempted move direction if they are blocked from moving in that direction. Controller moves only.",
 	"inherit-properties": "[Experimental] If true, the entity will inherit properties it does not have from another entity type with this name.",
 	"auto-bond": "If true, this entity will automatically join a bond group with other entities of the same type when first created.\n" +
 		"If set to the name of a property, will instead automatically bond with any other entity type with that property set. see also auto-bond-adjacent.",
 	"auto-bond-adjacent": "If false, this entity will automatically bond with any entities based on auto-bond instead of only adjacent entities.",
 	"auto-tail": "If true, this entity will automatically start tailing an entity in front of it when first created (if there is one)",
 	"auto-scale": "[Experimental] if the entity is LARGE, this controls if it's sprite is automatically scaled up to cover the entire area taken up by the entity",
-	"die-when-blocked": "If true, when this entity tries to move and is blocked it will automatically be destroyed",
+	"die-when-blocked": "If true, when this entity tries to move and is blocked it will automatically be destroyed.",
 	"edit-place-multiple": "If true, placing this entity using the level editor will not remove other entities of the same type at that location",
 	"no-museum": "If true, this entity will not be included in the automatically generated museum",
 	"museum-active": "If this property exists, it will determine whether or not the entities of this type will start as active in the automatically generated museum",
