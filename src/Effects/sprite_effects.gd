@@ -139,7 +139,6 @@ const BUMP_EFFECTS: Dictionary[String, Dictionary] = {
             "particles_type": "sparkles",
             "receives_effects": false,
         }],
-        "expire_wait_particles": true,
     },
 }
 

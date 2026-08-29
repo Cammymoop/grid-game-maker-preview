@@ -40,5 +40,6 @@ emitter = NodePath("GPUParticles2D")
 amount = 10
 texture = ExtResource("1_lsqog")
 lifetime = 1.5
+preprocess = 1.4
 visibility_rect = Rect2(-20, -20, 40, 40)
 process_material = SubResource("ParticleProcessMaterial_l4yqj")

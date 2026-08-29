@@ -24,6 +24,12 @@ var down_held: = false
 var left_held: = false
 var right_held: = false
 
+var buffer_length_ticks: int = 24
+var buffered_move: = "none"
+var next_buffered_move: = "none"
+var buffer_ticks_left: int = 0
+var next_buffer_ticks_left: int = 0
+
 var cancelled: = false
 
 var most_recent_is_horizontal: = false
@@ -57,10 +63,11 @@ func on_level_state_loaded() -> void:
 	load_delay_left = level_load_delay_frames
 
 func get_max_move_intentions() -> int:
-	if idle_delays_left > 0:
-		return 0
-	if is_delay_locked and parent_entity.idle_ticks_elapsed + 1 < EntityManager.idle_delay_frames:
-		return 0
+	if is_delay_locked:
+		if idle_delays_left > 0:
+			return 0
+		#if parent_entity.idle_ticks_elapsed + 1 < EntityManager.idle_delay_frames:
+			#return 0
 	return 1
 
 func set_options(options: Dictionary) -> void:
@@ -90,6 +97,61 @@ func get_option_values() -> Dictionary:
 		"only_rcv_when_cam": only_receive_when_camera_target,
 	}
 
+func set_buffered_move(move: String) -> void:
+	if buffered_move != "none" and next_buffered_move != "none":
+		print("buffering move as 3rd (now 2nd):", move)
+		buffered_move = next_buffered_move
+		buffer_ticks_left = next_buffer_ticks_left
+		next_buffered_move = move
+		next_buffer_ticks_left = buffer_length_ticks
+	elif buffered_move != "none":
+		print("buffering move as 2nd:", move)
+		next_buffered_move = move
+		next_buffer_ticks_left = buffer_length_ticks
+	else:
+		print("buffering move as 1st:", move)
+		buffered_move = move
+		buffer_ticks_left = buffer_length_ticks
+		next_buffered_move = "none"
+		next_buffer_ticks_left = 0
+
+func tick_buffer() -> void:
+	if buffered_move == "none":
+		return
+	if buffer_ticks_left > 0:
+		buffer_ticks_left -= 1
+	
+	if buffer_ticks_left <= 0:
+		buffered_move = "none"
+		if next_buffered_move != "none" and next_buffer_ticks_left > 1:
+			print("buffer expired, 1 buffered move left")
+			buffered_move = next_buffered_move
+			buffer_ticks_left = next_buffer_ticks_left - 1
+		else:
+			print("buffer expired, no buffered moves left")
+		next_buffered_move = "none"
+		next_buffer_ticks_left = 0
+	elif next_buffered_move != "none" and next_buffer_ticks_left > 0:
+		next_buffer_ticks_left -= 1
+		if next_buffer_ticks_left <= 0:
+			next_buffered_move = "none"
+
+func consume_buffered_move() -> void:
+	_consume_buffered_move.call_deferred()
+
+func _consume_buffered_move() -> void:
+	if buffered_move == "none":
+		return
+	print("consuming buffered %s move" % buffered_move)
+	if next_buffered_move != "none" and next_buffer_ticks_left > 0:
+		buffered_move = next_buffered_move
+		buffer_ticks_left = next_buffer_ticks_left
+	else:
+		buffered_move = "none"
+		buffer_ticks_left = 0
+	next_buffered_move = "none"
+	next_buffer_ticks_left = 0
+
 func _physics_process(_delta):
 	if load_delay_left > 0:
 		if GameManager.get_is_half_tick_rate():
@@ -97,6 +159,7 @@ func _physics_process(_delta):
 		else:
 			load_delay_left -= 1
 		return
+	tick_buffer()
 	var is_pressed = false
 	
 	is_wait = false
@@ -105,6 +168,7 @@ func _physics_process(_delta):
 	if Input.is_action_just_pressed("move_up"):
 		is_pressed = true
 		most_recent_is_horizontal = false
+		set_buffered_move("up")
 	elif not Input.is_action_pressed("move_up"):
 		up_held = false
 	
@@ -112,6 +176,7 @@ func _physics_process(_delta):
 	if Input.is_action_just_pressed("move_down"):
 		is_pressed = true
 		most_recent_is_horizontal = false
+		set_buffered_move("down")
 	elif not Input.is_action_pressed("move_down"):
 		down_held = false
 	
@@ -119,6 +184,7 @@ func _physics_process(_delta):
 	if Input.is_action_just_pressed("move_left"):
 		is_pressed = true
 		most_recent_is_horizontal = true
+		set_buffered_move("left")
 	elif not Input.is_action_pressed("move_left"):
 		left_held = false
 	
@@ -127,6 +193,7 @@ func _physics_process(_delta):
 	if Input.is_action_just_pressed("move_right"):
 		is_pressed = true
 		most_recent_is_horizontal = true
+		set_buffered_move("right")
 	elif not Input.is_action_pressed("move_right"):
 		right_held = false
 	
@@ -137,7 +204,7 @@ func _physics_process(_delta):
 		if auto_req_turn:
 			var left_xor_right: = (left_held or right_held) and not (left_held and right_held)
 			var up_xor_down: = (up_held or down_held) and not (up_held and down_held)
-			if up_xor_down or left_xor_right or not is_repeat:
+			if up_xor_down or left_xor_right or not is_repeat or buffered_move != "none":
 				requested = true
 				EntityManager.request_move(parent_entity)
 
@@ -145,13 +212,21 @@ func _physics_process(_delta):
 			is_wait = true
 			EntityManager.request_move(parent_entity)
 
-func get_move(attempt_num: int = 0):
+func get_move(attempt_num: int = 0, soft_check: bool = false):
 	if not ignore_discrete_turns and not EntityManager.controller_frame:
 		return "none"
 	if is_wait or attempt_num > 0:
 		return "none"
 	if only_receive_when_camera_target and not GameManager.is_entity_followed_by_camera(parent_entity):
 		return "none"
+	
+	if buffered_move != "none":
+		if not soft_check:
+			consume_buffered_move()
+			is_repeat = true
+			cancelled = false
+		return buffered_move
+
 	var input_dir = "none"
 	var h_input_dir = "none"
 	
@@ -192,7 +267,7 @@ func on_start_move(_facing_dir) -> void:
 	if load_delay_left > 0:
 		load_delay_left = 0
 	cancelled = false
-	is_delay_locked = false
+	#is_delay_locked = false
 
 func on_idle() -> void:
 	if is_delay_locked and idle_delays_left > 0:

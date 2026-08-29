@@ -2385,6 +2385,20 @@ func cmd_entity_play_bump_effect(slots: Dictionary, chosen_slot: int, effect_inf
 	if slots[chosen_slot]:
 		slots[chosen_slot].do_named_bump_effect(effect_info)
 
+func desc_entity_play_bump_effect_with_direction_and_duration() -> String:
+	return "entity|The entity plays the short \"bump\" effect [effect_info:BumpEffectInput], with the direction: [eff_dir:DefaultableDirectionInput] for [duration:ComplexScalarInput:default=0.5,step=0.1] seconds"
+func cmd_entity_play_bump_effect_with_direction_and_duration(slots: Dictionary, chosen_slot: int, effect_info: Dictionary, eff_dir: Dictionary, duration: Dictionary) -> void:
+	if not Commands.slot_is_entity(chosen_slot) or not slots[chosen_slot]:
+		push_error("Invalid slot or empty slot to play bump effect: %s" % chosen_slot)
+		return
+	if not eff_dir["is_default"]:
+		effect_info["direction"] = resolve_complex_direction(eff_dir["direction"], slots)
+	var duration_val: float = resolve_complex_scalar(duration, slots)
+	if duration_val > 0.0:
+		effect_info["duration"] = duration_val
+	if slots[chosen_slot]:
+		slots[chosen_slot].do_named_bump_effect(effect_info)
+
 
 func desc_do_screen_shake() -> String:
 	return "none|Shake the screen! Intensity [intensity:ComplexScalarInput:default=2.0,step=0.1]" \

@@ -373,6 +373,7 @@ func entity_process_starting_actions() -> void:
 			# dont set visual facing for each bonk, will set it afterward for the first attempted direction
 			var old_no_turn_on_bonk: = no_visual_turn_on_bonk
 			no_visual_turn_on_bonk = true
+			#prints("about to check %d move intentions" % max_intentions)
 			for attempt in max_intentions:
 				# if a previous attempt failed, reset the visual move_facing and move move_facing
 				if attempt > 0:
@@ -383,7 +384,7 @@ func entity_process_starting_actions() -> void:
 				if pre_fetch_move_list.size() > 0:
 					intended_move_facing = pre_fetch_move_list[attempt]
 				else:
-					intended_move_facing = get_intended_move(attempt)
+					intended_move_facing = get_intended_move(attempt, false)
 
 				if intended_move_facing > -1:
 					set_native_move_speed()
@@ -520,12 +521,12 @@ func set_local_properties_dict(properties_dict: Dictionary) -> void:
 	refresh_every_tick_update()
 	_local_prop_changed()
 
-func get_intended_move(attempt_num: int = 0) -> int:
+func get_intended_move(attempt_num: int = 0, soft_check: bool = false) -> int:
 	if not controller:
 		return -1
 	
 	if controller.move_mode == "direction":
-		return Utility.direction_to_facing(controller.get_move(attempt_num))
+		return Utility.direction_to_facing(controller.get_move(attempt_num, soft_check))
 	elif controller.move_mode == "facing":
 		return controller.get_move(attempt_num)
 	elif controller.move_mode == "pre_fetch":
@@ -564,7 +565,7 @@ func soft_check_intended_move_facing() -> int:
 	if move_list.size() > 0:
 		max_intentions = move_list.size()
 	for i in max_intentions:
-		var intended_move_facing: int = move_list[i] if move_list else get_intended_move(i)
+		var intended_move_facing: int = move_list[i] if move_list else get_intended_move(i, true)
 		if intended_move_facing == -1:
 			continue
 		if i == max_intentions - 1 or can_i_move(intended_move_facing):
