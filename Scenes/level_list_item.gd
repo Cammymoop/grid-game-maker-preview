@@ -198,6 +198,8 @@ func on_edit_as_autosave_button_pressed() -> void:
     request_edit_level.emit(level_name, true)
 
 func focus_level_list_item() -> void:
+    prints("level list item grabbing focus")
+    print_stack()
     if start_level_button.is_visible_in_tree():
         start_level_button.button.grab_focus()
     elif edit_level_button.is_visible_in_tree():
@@ -206,7 +208,8 @@ func focus_level_list_item() -> void:
 func on_gui_focus_changed(new_focus_owner: Control) -> void:
     if new_focus_owner == self or is_ancestor_of(new_focus_owner):
         focus_panel.show()
-        focus_gotten.emit(self)
+        if not Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
+            focus_gotten.emit(self)
     else:
         focus_panel.hide()
 

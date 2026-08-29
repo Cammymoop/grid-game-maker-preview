@@ -122,8 +122,6 @@ func desc_select_all_positions_with_any_tile() -> String:
 func cmd_select_all_positions_with_any_tile(slots: Dictionary, chosen_slot: int) -> void:
 	if not Commands.slot_is_positions(chosen_slot):
 		return
-	if not slots[chosen_slot]:
-		return
 	slots[chosen_slot] = MapManager.get_used_positions_in_all_layers()
 
 func desc_filter_positions_with_any_tile() -> String:
@@ -1083,7 +1081,7 @@ func cmd_if_property_value(slots: Dictionary, chosen_slot: int, property_name: S
 	if Commands.slot_is_entity(chosen_slot):
 		result = EntityManager.get_entity_prop_is_truthy(slots[chosen_slot], property_name)
 	else:
-		result = MapManager.check_multiple_pos_for_property_bool(slots[chosen_slot], slots[Slot.RED], property_name, is_truthy)
+		result = MapManager.check_multiple_pos_for_property_bool(slots[chosen_slot], slots[Slot.RED], property_name, true)
 	#prints("if prop", property_name, "is", str(is_truthy), "prop val is: ", result)
 	return result if is_truthy else not result
 

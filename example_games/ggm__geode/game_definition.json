@@ -399,16 +399,16 @@
     }
   },
   "game_settings": {
-    "pixel_scale": 2.0,
+    "pixel_scale": 3.0,
     "camera_settings": {
       "follow_entity": "InputController",
       "enable_limits": true,
-      "extend_limits": 32.0
+      "extend_limits": 0.0
     },
     "default_move_interp": "stepped",
     "game_view_size": [
-      16.0,
-      12.0
+      13.0,
+      10.0
     ],
     "window_width": 16.0,
     "window_height": 12.0,

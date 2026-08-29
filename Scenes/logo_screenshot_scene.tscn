@@ -189,7 +189,7 @@ theme_override_font_sizes/font_size = 11
 text = "by Cammymoop Games"
 
 [node name="TextureRect" type="TextureRect" parent="MarginContainer/VBoxContainer/PanelContainer2/VBoxContainer/HBoxContainer" unique_id=1166370104]
-custom_minimum_size = Vector2(56, 56)
+custom_minimum_size = Vector2(128, 128)
 layout_mode = 2
 size_flags_horizontal = 4
 size_flags_vertical = 4
@@ -205,7 +205,7 @@ size_flags_vertical = 3
 size_flags_stretch_ratio = 8.0
 mouse_filter = 2
 
-[node name="MainMenu" type="PanelContainer" parent="MarginContainer" unique_id=1211793288 node_paths=PackedStringArray("quit_button", "game_selector", "bg_entity_effect", "play_game_button", "play_game_button_label", "play_game_progress_label", "edit_game_button", "profile_picker", "show_more_buttons_button", "more_buttons_container", "create_new_game_button", "settings_panel_layer", "user_settings_panel", "version_chooser_panel_layer", "version_chooser_panel", "version_switcher_panel")]
+[node name="MainMenu" type="PanelContainer" parent="MarginContainer" unique_id=1211793288 node_paths=PackedStringArray("quit_button", "game_selector", "bg_entity_effect", "play_game_button", "play_game_button_label", "play_game_progress_label", "edit_game_button", "show_more_buttons_button", "more_buttons_container", "create_new_game_button", "settings_panel_layer", "user_settings_panel", "version_chooser_panel_layer", "version_chooser_panel", "version_switcher_panel")]
 visible = false
 custom_minimum_size = Vector2(450, 160)
 layout_mode = 2
@@ -220,7 +220,6 @@ play_game_button = NodePath("MarginContainer/VBoxContainer/HBoxContainer/NewPlay
 play_game_button_label = NodePath("MarginContainer/VBoxContainer/HBoxContainer/NewPlayButton/VBoxContainer2/PlayLabel")
 play_game_progress_label = NodePath("MarginContainer/VBoxContainer/HBoxContainer/NewPlayButton/MarginContainer/VBoxContainer/CompletionLabel")
 edit_game_button = NodePath("MarginContainer/VBoxContainer/HBoxContainer/EditButton")
-profile_picker = NodePath("../../../../../../../../../../../../../../../../DockVSplitRightL/DockSlotRightUL/Inspector/@VBoxContainer@6869/@MarginContainer@7170/@EditorInspector@7181/@VBoxContainer@7173/@VBoxContainer@7180/@VBoxContainer@55818/@EditorPropertyNodePath@55872/@HBoxContainer@55860/@MenuButton@55870/@PopupMenu@55869/@PanelContainer@55862/@ScrollContainer@55865/@TextureRect@55863")
 show_more_buttons_button = NodePath("MarginContainer/VBoxContainer/VBoxContainer/ShowMoreButtonsButton")
 more_buttons_container = NodePath("MarginContainer/VBoxContainer/MoreMenuButtons")
 create_new_game_button = NodePath("MarginContainer/VBoxContainer/MoreMenuButtons/CreateNewGameButton")

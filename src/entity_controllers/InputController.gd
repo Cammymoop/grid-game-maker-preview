@@ -99,17 +99,14 @@ func get_option_values() -> Dictionary:
 
 func set_buffered_move(move: String) -> void:
 	if buffered_move != "none" and next_buffered_move != "none":
-		print("buffering move as 3rd (now 2nd):", move)
 		buffered_move = next_buffered_move
 		buffer_ticks_left = next_buffer_ticks_left
 		next_buffered_move = move
 		next_buffer_ticks_left = buffer_length_ticks
 	elif buffered_move != "none":
-		print("buffering move as 2nd:", move)
 		next_buffered_move = move
 		next_buffer_ticks_left = buffer_length_ticks
 	else:
-		print("buffering move as 1st:", move)
 		buffered_move = move
 		buffer_ticks_left = buffer_length_ticks
 		next_buffered_move = "none"
@@ -124,11 +121,8 @@ func tick_buffer() -> void:
 	if buffer_ticks_left <= 0:
 		buffered_move = "none"
 		if next_buffered_move != "none" and next_buffer_ticks_left > 1:
-			print("buffer expired, 1 buffered move left")
 			buffered_move = next_buffered_move
 			buffer_ticks_left = next_buffer_ticks_left - 1
-		else:
-			print("buffer expired, no buffered moves left")
 		next_buffered_move = "none"
 		next_buffer_ticks_left = 0
 	elif next_buffered_move != "none" and next_buffer_ticks_left > 0:
@@ -142,7 +136,6 @@ func consume_buffered_move() -> void:
 func _consume_buffered_move() -> void:
 	if buffered_move == "none":
 		return
-	print("consuming buffered %s move" % buffered_move)
 	if next_buffered_move != "none" and next_buffer_ticks_left > 0:
 		buffered_move = next_buffered_move
 		buffer_ticks_left = next_buffer_ticks_left

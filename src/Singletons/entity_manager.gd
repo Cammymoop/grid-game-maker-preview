@@ -1550,17 +1550,17 @@ func find_entity_with_truthy_property(prop_name: String, first: bool = true, ign
 func find_all_entities_with_truthy_property(prop_name: String, active_only: bool = false, ignore_list: Array = [], is_truthy: bool = true, invert: bool = false) -> Array[BaseEntity]:
     var found_entities: Array[BaseEntity] = []
     var check_for: = not is_truthy if invert else is_truthy
-    for i in entity_list:
-        if ignore_list and i.instance_id in ignore_list:
+    for e in entity_list:
+        if ignore_list and e.instance_id in ignore_list:
             continue
-        if active_only and not i.active:
+        if active_only and not e.active:
             continue
-        if not entity_has_property(i, prop_name):
+        if not entity_has_property(e, prop_name):
             if invert:
-                found_entities.append(i)
+                found_entities.append(e)
             continue
-        if Utility.truthy(get_entity_prop_with_default(i, prop_name, false)) != check_for:
-            found_entities.append(i)
+        if Utility.truthy(get_entity_prop_with_default(e, prop_name, false)) == check_for:
+            found_entities.append(e)
     return found_entities
 
 func find_entities_by_truthy_property_at_multiple(prop_name: String, tile_positions: Array, is_truthy: bool = true, invert: bool = false, ignore_list: Array = [], active_only: bool = true) -> Array[BaseEntity]:
