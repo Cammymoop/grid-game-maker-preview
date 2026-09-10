@@ -187,10 +187,27 @@ func cmd_select_number_of_positions(slots: Dictionary, chosen_slot: int, pos_slo
 	set_value_slot_as_number(slots, chosen_slot, slots[pos_slot].size())
 
 func desc_select_tiles_named() -> String:
-	return "pos|<= Select all positions where the tile [tile_name:TileNameInput] is found"
+	return "pos|<= Select all positions where a tile [tile_name:TileNameInput] is found"
 func cmd_select_tiles_named(slots: Dictionary, chosen_slot: Slot, tile_name: String) -> void:
+	if not MapManager.tile_name_exists(tile_name):
+		slots[chosen_slot] = []
+		return
 	var tindex = MapManager.get_tile_index(tile_name)
 	slots[chosen_slot] = MapManager.get_all_positions_of_tile(tindex)
+
+func desc_if_named_tile_is_at_position() -> String:
+	return "pos|If a [tile_name:TileNameInput] tile [invert:InvertInput:is,is not] found at [is_all:BoolChoice:false,all,any] of the positions in this slot"
+func cmd_if_named_tile_is_at_position(slots: Dictionary, chosen_slot: int, tile_name: String, invert: bool, is_all: bool) -> bool:
+	if not Commands.slot_is_positions(chosen_slot):
+		push_error("Invalid slot to check if tile is named: %s" % chosen_slot)
+		return false
+	if not MapManager.tile_name_exists(tile_name):
+		return invert
+	var t_id: = MapManager.get_tile_index(tile_name)
+	var positions: Array = slots[chosen_slot]
+	if positions.size() == 0:
+		return invert
+	return MapManager.is_tile_id_at_multiple(t_id, positions, is_all)
 
 func _get_prop_filtered_tile_positions(slots: Dictionary, property_name: String, truthy: bool, invert: bool, pos_filter_slot: int = -1) -> Array[Vector2i]:
 	var with_pos_filter: bool = pos_filter_slot >= 0
@@ -215,6 +232,25 @@ func cmd_select_tiles_with_property_at(slots: Dictionary, chosen_slot: int, prop
 		push_error("Invalid slot to select tiles with property: %s" % chosen_slot)
 		return
 	slots[chosen_slot] = _get_prop_filtered_tile_positions(slots, property_name, truthy, invert, pos_filter_slot)
+
+func desc_if_tiles_with_property_are_at() -> String:
+	return "pos|If a tile [inv_prop:InvertInput:with,without] a [truthy:BoolChoice:true,true or non-zero,false or zero] [property_name:PropertyInput] property\n" \
+	    + "[invert:InvertInput:is,is not] found at [is_all:BoolChoice:false,all,any] of the positions in this slot"
+func cmd_if_tiles_with_property_are_at(slots: Dictionary, chosen_slot: int, inv_prop: bool, property_name: String, truthy: bool, invert: bool, is_all: bool) -> bool:
+	if not Commands.slot_is_positions(chosen_slot):
+		push_error("Invalid slot to check if tiles with property are at: %s" % chosen_slot)
+		return false
+	var check_pos_count: = len(slots[chosen_slot])
+	if check_pos_count == 0:
+		return invert
+	var filtered_positions: = _get_prop_filtered_tile_positions(slots, property_name, truthy, inv_prop, chosen_slot)
+	var filtered_count: = filtered_positions.size()
+
+	if filtered_count < check_pos_count and filtered_count > 0:
+		return not is_all
+	else:
+		return (filtered_count == 0) == invert
+
 
 func desc_if_non_empty_tiles_at_positions() -> String:
 	return "pos|If there is a tile (not empty) at [is_all:BoolChoice:false,all,any] of the positions in this slot"

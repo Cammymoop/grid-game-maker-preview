@@ -16,7 +16,7 @@ signal tile_defs_removed
 
 var map_layer_template: = preload("res://Scenes/MapLayer.tscn")
 
-var layers: Array = []
+var layers: Array[MapLayer] = []
 var map_metadata: = {}
 
 var blocking_tiles: = []
@@ -987,6 +987,27 @@ func is_tile_index_at(tile_position, tile_index: int) -> bool:
         if l.get_cell_s(tile_position) == tile_index:
             return true
     return false
+
+func is_tile_id_at_multiple(tile_id: int, tile_positions: Array, is_all: bool = false, invert: bool = false) -> bool:
+    if layers.size() == 0:
+        return false
+    if layers.size() < 2:
+        for pos in tile_positions:
+            var positive_match: = (layers[0].get_cell_s(pos) == tile_id) == not invert
+            if positive_match != is_all:
+                return not is_all
+        return is_all
+    
+    for pos in tile_positions:
+        var positive_match: = invert
+        for l in layers:
+            if l.get_cell_s(pos) == tile_id:
+                positive_match = not invert
+                break
+        if positive_match != is_all:
+            return not is_all
+    return is_all
+    
 
 func is_empty_blocking_at(tile_position: Vector2i) -> bool:
     if not is_empty_blocking:
