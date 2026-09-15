@@ -1314,6 +1314,9 @@ func early_end_spawning_effect() -> void:
     _animation_timers[_spawning_with_animated_mod] = expire_time + 1.0
     process_animated_modifiers(0, false)
 
+func is_playing_spawning_effect() -> bool:
+    return _spawning_with_animated_mod != ""
+
 func set_alternate_texture_source(new_alternate_texture_source: Object) -> void:
     if not new_alternate_texture_source:
         _has_alternate_texture_source = false

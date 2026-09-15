@@ -43,6 +43,8 @@ var _pending_half_move_actions: Array[BaseEntity] = []
 var _entity_at_cache: Dictionary[Vector2i, Array] = {}
 var _entity_leaving_cache: Dictionary[Vector2i, Array] = {}
 
+var _just_created_entity: BaseEntity = null
+
 #var _next_to_include_diagonal: bool = false
 
 var initial_sprite_previews_created: bool = false
@@ -113,6 +115,8 @@ func pressed_any_to_start() -> bool:
 func entity_list_process(delta_time: float) -> void:
     if GameManager.cur_scene != "Play":
         return
+
+    _just_created_entity = null
     
     var any_press_started: bool = false
     if paused_at_start or level_spawn_effect_frames_left > 0:
@@ -503,9 +507,14 @@ func apply_level_start_entity_spawn_animation() -> void:
             max_dist_from_center = maxf(max_dist_from_center, abs_dot)
         delay_factor = (max_delay * 0.5) / max_dist_from_center
 
-    var def_spawn_effect: String = GameManager.get_game_setting("default_spawn_effect", "")
+    var def_spawn_effect: String = GameManager.get_game_setting("default_spawn_effect", "none")
+    if not def_spawn_effect in SpriteEffects.SPAWN_EFFECTS:
+        def_spawn_effect = "none"
+
     for e in entity_list:
         var instance_spawn_effect: String = get_entity_prop_with_default(e, "spawn-effect", def_spawn_effect)
+        if not instance_spawn_effect in SpriteEffects.SPAWN_EFFECTS:
+            instance_spawn_effect = "none"
         var effect_params: Dictionary = {
             "name": instance_spawn_effect,
             "direction": 2,
@@ -935,6 +944,9 @@ func create_entity(entity_index: int, tile_position: Vector2i, facing: int = 0, 
         entity = large_entity_template.instantiate()
     else: 
         entity = entity_template.instantiate()
+
+    if not from_editor:
+        _just_created_entity = entity
 
 
     entity.entity_index = entity_index
@@ -2022,7 +2034,7 @@ func get_static_entity_prop_with_default(entity: BaseEntity, property_name: Stri
         return default_value
     var prop: Property = get_entity_property(entity, property_name)
     if prop.is_conditional():
-        return false
+        return default_value
     else:
         return prop.get_value()
 
@@ -2329,6 +2341,27 @@ func clear_entity_special_effects(entity: BaseEntity) -> void:
         return
     for effect_name in special_effects:
         entity.remove_sprite_modifier(special_effects[effect_name])
+
+func last_created_entity_play_spawn_effect(effect_params: Dictionary) -> void:
+    if not _just_created_entity:
+        return
+    if effect_params.get("name", "").to_lower() == "none":
+        return
+    
+    _just_created_entity.do_named_or_default_spawn_effect(effect_params, false)
+
+func get_just_created_entity() -> BaseEntity:
+    return _just_created_entity
+
+func get_default_spawn_effect_name_for_entity(entity: BaseEntity) -> String:
+    if entity.has_local_property("spawn-effect"):
+        var local_val: Variant = get_static_entity_prop_with_default(entity, "spawn-effect", "")
+        if typeof(local_val) == TYPE_STRING and local_val:
+            if local_val not in SpriteEffects.SPAWN_EFFECTS:
+                local_val = "none"
+            return local_val
+    return get_default_spawn_effect_name_for_entity_id(entity.entity_index)
+    
 
 func get_camera_following_instances() -> Array:
     if not GameManager.get_cam_setting("follow_entity_by", "controller") != "instances":
@@ -2861,7 +2894,7 @@ func on_textures_remapped() -> void:
     build_sprite_previews()
 
 func get_default_spawn_effect_name_for_entity_id(entity_id: int) -> String:
-    var def_eff_name: String = GameManager.get_game_setting("default_spawn_effect", "")
+    var def_eff_name: String = GameManager.get_game_setting("default_spawn_effect", "none")
     if not entity_id in entity_defs:
         push_error("Entity id not found: %s" % entity_id)
         return def_eff_name

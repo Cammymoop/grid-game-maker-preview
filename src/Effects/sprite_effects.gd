@@ -368,7 +368,7 @@ static func set_spawn_effect_params(effect_name: String, effect_params: Dictiona
             if offset_effect and offset_effect.has("offset_from"):
                 offset_effect["offset_from"] = Utility.arr_vec_normal(offset_effect["offset_from"], amt)
     
-    if effect_params.has("direction"):
+    if effect_params.get("direction", -1) >= 0:
         var dir_int: int = int(effect_params["direction"])
         var dir_vec: Vector2 = Utility.facing_vector(dir_int)
         if effect_name in ["Fly In", "Fall In", "Slide In"]:

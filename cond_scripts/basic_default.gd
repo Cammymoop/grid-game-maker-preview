@@ -447,7 +447,7 @@ func cmd_select_positions_moved_by_x_y(slots: Dictionary, chosen_slot: int, x: D
 	slots[chosen_slot] = moved_positions
 
 func desc_select_next_tile_after() -> String:
-	return "pos|<= Select the [invert:InvertInput:next,previous] position in [in_positions_slot:SlotInput:pos] after the position of [after_pos_slot:SlotInput:pos,entity]"
+	return "pos|<= Select the [invert:InvertInput:next,previous] position (reading order) in [in_positions_slot:SlotInput:pos] after the position of [after_pos_slot:SlotInput:pos,entity]"
 func cmd_select_next_tile_after(slots: Dictionary, chosen_slot: int, in_positions_slot: int, after_pos_slot: int, invert: bool) -> void:
 	if not Commands.slot_is_positions(chosen_slot) or not Commands.slot_is_positions(in_positions_slot) or not Commands.slot_has_position(after_pos_slot):
 		push_error("Invalid slots to select next tile after: %s, %s, %s" % [chosen_slot, in_positions_slot, after_pos_slot])
@@ -456,7 +456,7 @@ func cmd_select_next_tile_after(slots: Dictionary, chosen_slot: int, in_position
 	if not in_positions:
 		in_positions = MapManager.get_used_positions_in_all_layers()
 	in_positions = Utility.get_reading_order_sorted_positions(in_positions)
-	if not _slot_has_single_tile_position(slots, in_positions_slot):
+	if not _slot_has_single_tile_position(slots, after_pos_slot):
 		slots[chosen_slot] = in_positions[-1 if invert else 0]
 	var after_pos: Vector2i = _single_tile_position_from_slot(slots, after_pos_slot)
 	slots[chosen_slot] = [Utility.next_prev_pos_reading_order(in_positions, after_pos, invert)]
@@ -539,7 +539,9 @@ func _select_first_last_teleport_in_direction(slots: Dictionary, chosen_slot: in
 
 
 func _slot_has_single_tile_position(slots: Dictionary, slot: int) -> bool:
-	if not slots[slot]:
+	if slot < 0:
+		return false
+	if not Commands.slot_has_position(slot) or not slots[slot]:
 		return false
 	return true
 
@@ -1499,7 +1501,7 @@ func _create_entity_at(e_id: int, pos: Vector2i, facing: int, is_moving: bool) -
 	return new_entity
 
 func desc_a_create_entity() -> String:
-	return "pos|Create a new [entity_name:EntityNameInput:1] entity here\n" \
+	return "pos|Create a new [entity_name:EntityNameInput:1] entity at these position(s)\n" \
 	     + "facing this way [direction:DirectionInput] which is [is_moving:BoolChoice:false,moving,stationary]"
 func cmd_a_create_entity(slots: Dictionary, chosen_slot: int, entity_name: Variant, direction: int, is_moving: bool) -> void:
 	var e_id: = get_id_of_str_or_complex_entity_name(entity_name, slots)
@@ -1511,7 +1513,7 @@ func cmd_a_create_entity(slots: Dictionary, chosen_slot: int, entity_name: Varia
 		_create_entity_at(e_id, pos, facing, is_moving)
 
 func desc_select_created_entity() -> String:
-	return "entity|<= Select a new [entity_name:EntityNameInput] entity created at [pos_slot:SlotInput:pos,entity]\n" \
+	return "entity|<= Select a new [entity_name:EntityNameInput] entity created at each position in [pos_slot:SlotInput:pos,entity]\n" \
 		+ "facing this way [compl_dir:DirectionInput:1] which is [is_moving:BoolChoice:false,moving,stationary]"
 func cmd_select_created_entity(slots: Dictionary, chosen_slot: int, entity_name: Dictionary, pos_slot: int, compl_dir: Dictionary, is_moving: bool) -> void:
 	if not Commands.slot_is_entity(chosen_slot) or not Commands.slot_has_position(pos_slot):
@@ -1527,6 +1529,42 @@ func cmd_select_created_entity(slots: Dictionary, chosen_slot: int, entity_name:
 	var created: = _create_entity_at(e_id, pos, facing, is_moving)
 	slots[chosen_slot] = created
 
+func desc_select_just_created_entity() -> String:
+	return "entity|<= Select the most recently created entity (this game tick only)"
+func cmd_select_just_created_entity(slots: Dictionary, chosen_slot: int) -> void:
+	if not Commands.slot_is_entity(chosen_slot):
+		push_error("Invalid slot to select just created entity into: %s" % chosen_slot)
+		return
+	slots[chosen_slot] = EntityManager.get_just_created_entity()
+
+func desc_created_entity_spawn_animation() -> String:
+	return "none|The most recently created entity (this game tick) plays the [anim_info:SpawnEffectInput] animation, with the direction: [anim_dir:DefaultableDirectionInput]" \
+		+ " for [duration:ComplexScalarInput:default=0.5,step=0.1] seconds"
+func cmd_created_entity_spawn_animation(slots: Dictionary, _slot: int, anim_info: Dictionary, anim_dir: Dictionary, duration: Dictionary) -> void:
+	if anim_info.get("name", "").to_lower() == "none":
+		return
+	var eff_duration_val: float = resolve_complex_scalar(duration, slots)
+	if eff_duration_val > 0:
+		anim_info["duration"] = eff_duration_val
+	if not anim_dir["is_default"]:
+		anim_info["direction"] = resolve_complex_direction(anim_dir["direction"], slots)
+	EntityManager.last_created_entity_play_spawn_effect(anim_info)
+
+func desc_play_spawn_animation() -> String:
+	return "entity|This entity plays the [anim_info:SpawnEffectInput] animation, with the direction: [anim_dir:DefaultableDirectionInput]" \
+		+ " for [duration:ComplexScalarInput:default=0.5,step=0.1] seconds"
+func cmd_play_spawn_animation(slots: Dictionary, chosen_slot: int, anim_info: Dictionary, anim_dir: Dictionary, duration: Dictionary) -> void:
+	if not Commands.slot_is_entity(chosen_slot):
+		push_error("Invalid slot to play spawn animation on: %s" % chosen_slot)
+		return
+	if not slots[chosen_slot] or anim_info.get("name", "").to_lower() == "none":
+		return
+	var eff_duration_val: float = resolve_complex_scalar(duration, slots)
+	if eff_duration_val > 0:
+		anim_info["duration"] = eff_duration_val
+	if not anim_dir["is_default"]:
+		anim_info["direction"] = resolve_complex_direction(anim_dir["direction"], slots)
+	slots[chosen_slot].do_named_or_default_spawn_effect(anim_info, false)
 
 func desc_a_turn() -> Dictionary:
 	return {

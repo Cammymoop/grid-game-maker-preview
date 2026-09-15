@@ -14,7 +14,7 @@ var allow_wait: = false
 var only_receive_when_camera_target: = false
 
 var is_wait: = false
-var is_repeat: = false
+#var is_repeat: = false
 
 var is_delay_locked: = false
 var idle_delays_left: int = 0
@@ -30,6 +30,7 @@ var next_buffered_move: = "none"
 var buffer_ticks_left: int = 0
 var next_buffer_ticks_left: int = 0
 
+# Set to true when movement gets blocked which prevents movement from held inputs and is held true until no input directions are held for at least one frame or a new direction is just pressed
 var cancelled: = false
 
 var most_recent_is_horizontal: = false
@@ -153,13 +154,13 @@ func _physics_process(_delta):
 			load_delay_left -= 1
 		return
 	tick_buffer()
-	var is_pressed = false
+	var any_pressed = false
 	
 	is_wait = false
 	
 	up_held = true
 	if Input.is_action_just_pressed("move_up"):
-		is_pressed = true
+		any_pressed = true
 		most_recent_is_horizontal = false
 		set_buffered_move("up")
 	elif not Input.is_action_pressed("move_up"):
@@ -167,7 +168,7 @@ func _physics_process(_delta):
 	
 	down_held = true
 	if Input.is_action_just_pressed("move_down"):
-		is_pressed = true
+		any_pressed = true
 		most_recent_is_horizontal = false
 		set_buffered_move("down")
 	elif not Input.is_action_pressed("move_down"):
@@ -175,7 +176,7 @@ func _physics_process(_delta):
 	
 	left_held = true
 	if Input.is_action_just_pressed("move_left"):
-		is_pressed = true
+		any_pressed = true
 		most_recent_is_horizontal = true
 		set_buffered_move("left")
 	elif not Input.is_action_pressed("move_left"):
@@ -184,20 +185,22 @@ func _physics_process(_delta):
 	
 	right_held = true
 	if Input.is_action_just_pressed("move_right"):
-		is_pressed = true
+		any_pressed = true
 		most_recent_is_horizontal = true
 		set_buffered_move("right")
 	elif not Input.is_action_pressed("move_right"):
 		right_held = false
 	
-	is_repeat = not is_pressed
+	#is_repeat = not any_pressed
+	if cancelled and any_pressed:
+		cancelled = false
 	
 	if not EntityManager.movements_enabled and parent_entity and not parent_entity.moving:
 		var requested: bool = false
 		if auto_req_turn:
 			var left_xor_right: = (left_held or right_held) and not (left_held and right_held)
 			var up_xor_down: = (up_held or down_held) and not (up_held and down_held)
-			if up_xor_down or left_xor_right or not is_repeat or buffered_move != "none":
+			if up_xor_down or left_xor_right or any_pressed or buffered_move != "none":
 				requested = true
 				EntityManager.request_move(parent_entity)
 
@@ -216,15 +219,11 @@ func get_move(attempt_num: int = 0, soft_check: bool = false):
 	if buffered_move != "none":
 		if not soft_check:
 			consume_buffered_move()
-			is_repeat = true
 			cancelled = false
 		return buffered_move
 
 	var input_dir = "none"
 	var h_input_dir = "none"
-	
-	if not is_repeat:
-		cancelled = false
 	
 	if up_held and not down_held and not cancelled:
 		input_dir = "up"
@@ -242,8 +241,8 @@ func get_move(attempt_num: int = 0, soft_check: bool = false):
 		if most_recent_is_horizontal:
 			input_dir = h_input_dir
 	
-	if input_dir == "none":
-		is_repeat = false
+	#if input_dir == "none":
+		#is_repeat = false
 
 	return input_dir
 

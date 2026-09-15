@@ -894,6 +894,16 @@ func do_named_bump_effect(effect_params: Dictionary, with_duration: float = -1) 
 	SpriteEffects.set_bump_effect_params(effect_name, effect_params, effect_info)
 	apply_sprite_effect(effect_info, with_duration)
 
+func do_named_or_default_spawn_effect(effect_params: Dictionary, as_unfreezable: bool, with_duration: float = -1, with_delay: float = 0.0) -> void:
+	var param_name: String = effect_params.get("name", "")
+	if param_name.to_lower() == "none":
+		effect_params["name"] = "none"
+	elif not param_name in SpriteEffects.SPAWN_EFFECTS:
+		effect_params["name"] = EntityManager.get_default_spawn_effect_name_for_entity(self)
+		if not effect_params.get("direction", -1) >= 0:
+			effect_params["direction"] = 2
+	do_named_spawn_effect(effect_params, as_unfreezable, with_duration, with_delay)
+
 func do_named_spawn_effect(effect_params: Dictionary, as_unfreezable: bool, with_duration: float = -1, with_delay: float = 0.0) -> void:
 	var effect_name: String = effect_params.get("name", "")
 	if not effect_name or effect_name.to_lower() == "none":
@@ -901,7 +911,12 @@ func do_named_spawn_effect(effect_params: Dictionary, as_unfreezable: bool, with
 	if not effect_name in SpriteEffects.SPAWN_EFFECTS:
 		push_warning("Unknown spawn effect: %s" % effect_name)
 		return
+	if sprite.is_playing_spawning_effect():
+		return
 	var effect_info: Dictionary = SpriteEffects.SPAWN_EFFECTS[effect_name].duplicate_deep()
+	# use duration from params if provided and not overridden by function param
+	if with_duration <= 0 and effect_params.get("duration", -1) > 0:
+		with_duration = effect_params["duration"]
 	SpriteEffects.set_spawn_effect_params(effect_name, effect_params, effect_info)
 	if as_unfreezable:
 		effect_info["unfreezable"] = true
@@ -912,7 +927,7 @@ func apply_sprite_effect(effect_info: Dictionary, with_duration: float = -1, wit
 	if not effect_info:
 		return
 	effect_info = effect_info.duplicate_deep()
-	if with_duration < 0:
+	if with_duration <= 0:
 		if effect_info.has("duration"):
 			with_duration = effect_info["duration"]
 		else:
