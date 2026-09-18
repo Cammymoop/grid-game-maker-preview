@@ -259,6 +259,7 @@ func on_start_move(_facing_dir) -> void:
 	if load_delay_left > 0:
 		load_delay_left = 0
 	cancelled = false
+	# why was commenting this out an improvement lol?
 	#is_delay_locked = false
 
 func on_idle() -> void:
