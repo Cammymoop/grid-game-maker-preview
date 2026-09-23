@@ -12,9 +12,13 @@ Going forward I intend for future versions of Grid Game Maker to be based on a c
 
 Grid Game Maker Preview requires Godot Engine 4.6.x
 
-Various text files are spread around this source in varying levels of outdatedness, don't believe their lies
+Various text files containing notes are spread around this source in varying levels of outdatedness, don't believe their lies
 
 # Info about this source and the License
+
+The source code of Grid Game Maker is provided for free under the MIT license (see the LICENSE.md file).
+This includes GDScript files, various godot resource files (.tres) and shader source files (.gdshader) and scene files (.tscn)
+Not all non-code assets contained here are necessarily included as part of this, see the following notes.
 
 ## Notes on asset files:
 Various sound effect audio files are included, some of these were created by me, but I have lost track of exaclty where some of these came from.
@@ -26,18 +30,20 @@ the .txt file next to each track lists creator and the CC0 license I downloaded 
 
 All of the image assets in the assets/img directory should be considered available under the MIT license along with the code, but in addition to that,
 all of the images which are used as "built-in textures" in GGM should also be considered to be available under CC0 in an as-permissive-as-possible manner.
-See the assets\builtin_texture_meta.json file for which files this specifically applies to.
+See the `assets\builtin_texture_meta.json` file for which files this specifically applies to.
 
-The cammy_birb_tiny.svg is a version of Cammymoop Games' logo, you may use it in conjunction with Grid Game Maker or anything created using it to
+The `cammy_birb_tiny.svg` is a version of Cammymoop Games' logo, you may use it in conjunction with Grid Game Maker or anything created using it to
 indicate that Grid Game Maker was created by Cammymoop Games.
 
-Some Noto Sans fonts are here which should be included under the (SIL Open Font License.)[https://openfontlicense.org/open-font-license-official-text/]
+Some Noto Sans fonts are here which should be included under the [SIL Open Font License.](https://openfontlicense.org/open-font-license-official-text/)
 
 There is also some PNGs of a minimal pixel font which is used on command card headers, this is a generic font created by me and should be available along
 with the rest of the source under it's MIT license.
 
 The other font files are just slightly modified exports from Godot's builtin theme fonts. I think these are only here from when this was
 a Godot 3.x project, these should not be considered covered by any particular license.
+
+All other vector or raster images present in this source but not mentioned above should be considered to be included under the source code's MIT License
 
 ## Notes on included games
 In addition to the three example games included in exported versions of Grid Game Maker there are more games in this source version,

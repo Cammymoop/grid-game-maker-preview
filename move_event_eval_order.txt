@@ -1,3 +1,4 @@
+[This is nearly up to date I believe (9/23/2026)]
 
 Rough event order evaluated during an entity's movement:
 
