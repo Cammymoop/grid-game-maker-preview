@@ -283,6 +283,8 @@ var intermission_advancable_timer: Timer
 var intermission_expire_timer: Timer
 
 func _ready():
+	FilesManager.init_folders()
+
 	intermission_advancable_timer = Timer.new()
 	intermission_advancable_timer.one_shot = true
 	add_child(intermission_advancable_timer)
@@ -315,7 +317,6 @@ func _ready():
 	# run _process even when the game is paused
 	process_mode = PROCESS_MODE_ALWAYS
 	cur_scene = get_tree().current_scene.name
-	FilesManager.init_folders()
 	
 	if OS.has_feature("web"):
 		adjust_web_pssfx_volume()

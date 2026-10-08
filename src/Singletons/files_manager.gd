@@ -50,6 +50,10 @@ func init_folders():
 	ensure_data_dir_exists(shared_assets_subdir, images_asset_subdir)
 
 	ensure_data_dir_exists(local_data_subdir)
+	
+	var is_first_run: = games_dir_created
+	if not is_first_run:
+		is_first_run = get_games_list().size() == 0
 
 	if auto_import_all_example_games_if_first_run and games_dir_created:
 		import_all_example_games()
@@ -696,7 +700,16 @@ func get_unique_game_name(base_name: String) -> String:
 
 func import_all_example_games() -> void:
 	for example_game_name: String in get_example_games_list():
-		import_example_game(example_game_name)
+		import_example_game(example_game_name, false)
+
+func res_dir_exists(dir_path: String) -> bool:
+	if not dir_path.begins_with("res://"):
+		push_warning("res_dir_exists: Directory path %s is not a res:// path" % [dir_path])
+		return smarter_dir_exists(dir_path)
+	if Utility.is_web_or_mobile():
+		return web_mobile_dir_exists(dir_path)
+	return DirAccess.dir_exists_absolute(dir_path)
+
 
 func import_example_game(example_game_name: String, ensure_unique: bool = true) -> Dictionary:
 	var example_game_dir_name: = get_game_dir_from_name(example_game_name)
@@ -706,7 +719,7 @@ func import_example_game(example_game_name: String, ensure_unique: bool = true) 
 	if ensure_unique:
 		target_game_name = get_unique_game_name(example_game_name)
 	var target_game_dir: = get_game_base_dir(target_game_name)
-	if not smarter_dir_exists(example_game_dir_path):
+	if not res_dir_exists(example_game_dir_path):
 		push_error("Example game directory %s does not exist" % [example_game_dir_path])
 		return {}
 	
@@ -741,15 +754,15 @@ func import_example_game_levels_and_assets(example_game_dir_path: String, target
 	
 	for subdir: String in [LEVELS, IMAGES, AUDIO]:
 		var from_dir: = example_game_dir_path.path_join(subdir)
-		if not smarter_dir_exists(from_dir):
+		if not res_dir_exists(from_dir):
 			continue
 		var to_dir: = target_game_dir.path_join(subdir)
 		for a_file: String in _iter_directory_flat_filtered(from_dir, [], true, false):
 			if a_file == "editor_autosave.json":
 				continue
-			var from_absolute_path: = smarter_globalize_res_path(from_dir.path_join(a_file))
-			if OS.has_feature("web"):
-				from_absolute_path = from_dir.path_join(a_file)
+			var from_absolute_path: = from_dir.path_join(a_file)
+			if OS.has_feature("editor"):
+				from_absolute_path = smarter_globalize_res_path(from_absolute_path)
 			var to_absolute_path: = ProjectSettings.globalize_path(to_dir.path_join(a_file))
 
 			if Utility.is_mobile():
