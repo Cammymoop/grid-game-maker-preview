@@ -20,9 +20,15 @@ signal request_back()
 
 @export var back_button: Button
 
+@export var build_number_label: Label
+
+var build_number_label_text: String = ""
+
 var confirm_dialog_open: bool = false
 
 func _ready() -> void:
+    build_number_label_text = build_number_label.text.strip_edges()
+
     visibility_changed.connect(on_visibility_changed)
 
     back_button.pressed.connect(request_back.emit)
@@ -57,6 +63,8 @@ func show_and_refresh() -> void:
     refresh_ui()
 
 func refresh_ui() -> void:
+    build_number_label.text = build_number_label_text + ' ' + str(ProjectSettings.get_setting("application/config/version"))
+
     var is_muted: bool = GameManager.player_profile.get_profile_setting("mute_all_audio", false)
     mute_audio_toggle.set_pressed_no_signal(is_muted)
     

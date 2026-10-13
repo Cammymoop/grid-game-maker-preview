@@ -57,13 +57,17 @@ func init_folders():
 	var is_first_run: = games_dir_created
 	if not is_first_run:
 		is_first_run = get_games_list().size() == 0
+	
+	var ex_files_version: = check_example_files_version()
+	var new_ex_files: = ex_files_version < EXAMPLE_FILES_VERSION
 
-	if auto_import_all_example_games_if_first_run and games_dir_created:
+	if (auto_import_all_example_games_if_first_run and is_first_run) or new_ex_files:
 		import_all_example_games()
 		var games_list: = get_games_list()
 		if games_list:
 			var new_default_game: String = "Basic" if "Basic" in games_list else games_list[0]
 			save_default_game(new_default_game)
+		save_example_files_version()
 
 func set_last_profile_id(profile_id: String) -> void:
 	var file_path: = _data_path(local_data_subdir, LAST_PROFILE_ID_FILE)
@@ -83,7 +87,7 @@ func get_last_profile_id() -> String:
 	return ""
 
 func check_example_files_version() -> int:
-	var file_path: = _data_path(local_data_subdir, EXAMPLE_FILES_VERSION_FILE)
+	var file_path: = _data_path(EXAMPLE_FILES_VERSION_FILE)
 	if not FileAccess.file_exists(file_path):
 		return 1
 	var f = FileAccess.open(file_path, FileAccess.READ)
@@ -96,6 +100,14 @@ func check_example_files_version() -> int:
 	else:
 		push_warning("Error reading example files version file")
 		return 0
+
+func save_example_files_version() -> void:
+	var file_path: = _data_path(EXAMPLE_FILES_VERSION_FILE)
+	var f = FileAccess.open(file_path, FileAccess.WRITE)
+	if f:
+		f.store_string(str(EXAMPLE_FILES_VERSION))
+	else:
+		push_error("Error saving example files version. file path: %s" % [file_path])
 
 func get_unbundled_level_info_path(game_name: String) -> String:
 	return get_game_gamedata_dir(game_name).path_join(UNBUNDLED_LEVEL_INFO_FILE)

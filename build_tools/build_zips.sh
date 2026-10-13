@@ -36,6 +36,23 @@ EXPORTED_SUBDIRS=()
 # Read export definitions from exports.txt via fd 3.
 exec 3<"${EXPORT_LIST}"
 
+
+echo "Incrementing build number"
+gawk -i inplace -F '"' -v OFS='"' '
+/^config\/version="[0-9]+"$/ { $2++; found=1 }
+{ print }
+END { exit !found }
+' "${PROJECT_FILE}"
+
+VERSION="$(
+  awk -F'"' '/^config\/version=/ { print $2; exit }' "${PROJECT_FILE}"
+)"
+
+if [[ -z "${VERSION}" ]]; then
+  echo "Error: could not read config/version (build number) from project.godot" >&2
+  exit 1
+fi
+
 while IFS='|' read -r PRESET_NAME OUT_SUBDIR OUT_FILE <&3; do
   if [[ -z "${PRESET_NAME// }" ]]; then
     continue
@@ -68,18 +85,6 @@ exec 3<&-
 
 if [[ "${#EXPORTED_SUBDIRS[@]}" -eq 0 ]]; then
   echo "Error: no exports were defined in ${EXPORT_LIST}" >&2
-  exit 1
-fi
-
-echo "Incrementing build number"
-awk '/^config\/version="[0-9]+"$/ { split($0,a,"\""); $0="config/version=\"" (a[2]+1) "\""; found=1 } { print } END { exit !found }' "${PROJECT_FILE}"
-
-VERSION="$(
-  awk -F'"' '/^config\/version=/ { print $2; exit }' "${PROJECT_FILE}"
-)"
-
-if [[ -z "${VERSION}" ]]; then
-  echo "Error: could not read config/version (build number) from project.godot" >&2
   exit 1
 fi
 
