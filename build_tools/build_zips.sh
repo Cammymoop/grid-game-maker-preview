@@ -31,15 +31,6 @@ echo "EXPORTING IN ${EXP_MODE} MODE"
 
 cd "${PROJECT_DIR}"
 
-VERSION="$(
-  awk -F'"' '/^config\/version=/ { print $2; exit }' "${PROJECT_FILE}"
-)"
-
-if [[ -z "${VERSION}" ]]; then
-  echo "Error: could not read config/version from project.godot" >&2
-  exit 1
-fi
-
 EXPORTED_SUBDIRS=()
 
 # Read export definitions from exports.txt via fd 3.
@@ -80,6 +71,18 @@ if [[ "${#EXPORTED_SUBDIRS[@]}" -eq 0 ]]; then
   exit 1
 fi
 
+echo "Incrementing build number"
+awk '/^config\/version="[0-9]+"$/ { split($0,a,"\""); $0="config/version=\"" (a[2]+1) "\""; found=1 } { print } END { exit !found }' "${PROJECT_FILE}"
+
+VERSION="$(
+  awk -F'"' '/^config\/version=/ { print $2; exit }' "${PROJECT_FILE}"
+)"
+
+if [[ -z "${VERSION}" ]]; then
+  echo "Error: could not read config/version (build number) from project.godot" >&2
+  exit 1
+fi
+
 for OUT_SUBDIR in "${EXPORTED_SUBDIRS[@]}"; do
   ZIP_NAME="ggm_preview_${OUT_SUBDIR}.zip"
   ZIP_PATH="${BUILD_DIR}/${ZIP_NAME}"
@@ -99,4 +102,4 @@ for OUT_SUBDIR in "${EXPORTED_SUBDIRS[@]}"; do
   )
 done
 
-echo "Exports and archives completed for version ${VERSION}"
+echo "Exports and archives completed for build number ${VERSION}"

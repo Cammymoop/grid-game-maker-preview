@@ -29,7 +29,7 @@ show_version_switcher_toggle = NodePath("MarginContainer/VBoxContainer/ScrollCon
 profile_name_label = NodePath("MarginContainer/VBoxContainer/VBoxContainer2/ProfileNameLabel")
 profile_identifier_input = NodePath("MarginContainer/VBoxContainer/ScrollContainer/MarginContainer/VBoxContainer/HBoxContainer/IdentifierInput")
 danger_zone_container = NodePath("MarginContainer/VBoxContainer/ScrollContainer/MarginContainer/VBoxContainer/DangerZoneContainer")
-back_button = NodePath("MarginContainer/VBoxContainer/BackButton")
+back_button = NodePath("MarginContainer/VBoxContainer/MarginContainer/BackButton")
 
 [node name="MarginContainer" type="MarginContainer" parent="." unique_id=660470230]
 layout_mode = 2
@@ -220,7 +220,17 @@ horizontal_alignment = 1
 [node name="Spacer3" type="Control" parent="MarginContainer/VBoxContainer" unique_id=372805043]
 layout_mode = 2
 
-[node name="BackButton" type="Button" parent="MarginContainer/VBoxContainer" unique_id=550993285]
+[node name="MarginContainer" type="MarginContainer" parent="MarginContainer/VBoxContainer" unique_id=677522711]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="MarginContainer/VBoxContainer/MarginContainer" unique_id=1951257915]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.6706895, 0.6706895, 0.6706895, 1)
+theme_override_font_sizes/font_size = 9
+text = "GGM Preview
+Build:"
+
+[node name="BackButton" type="Button" parent="MarginContainer/VBoxContainer/MarginContainer" unique_id=550993285]
 layout_mode = 2
 size_flags_horizontal = 4
 theme_override_fonts/font = ExtResource("3_ao4nr")

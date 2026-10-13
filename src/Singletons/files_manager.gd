@@ -3,6 +3,9 @@ extends Node
 var FORMAT_GAME_JSON: = true
 var SORT_JSON_KEYS: = false
 
+const EXAMPLE_FILES_VERSION: int = 2
+const EXAMPLE_FILES_VERSION_FILE: = "example_files_version.txt"
+
 var GAME_DEF_FILENAME: = "game_definition.json"
 
 var UNBUNDLED_LEVEL_INFO_FILE: = "unbundled_level_info.json"
@@ -78,6 +81,21 @@ func get_last_profile_id() -> String:
 	if f:
 		return Utility.sanitize_for_filename(f.get_as_text().strip_edges())
 	return ""
+
+func check_example_files_version() -> int:
+	var file_path: = _data_path(local_data_subdir, EXAMPLE_FILES_VERSION_FILE)
+	if not FileAccess.file_exists(file_path):
+		return 1
+	var f = FileAccess.open(file_path, FileAccess.READ)
+	if f:
+		var content: = f.get_as_text().strip_edges()
+		if not content.is_valid_int():
+			push_warning("Example files version file is not a number")
+			return 0
+		return int(content)
+	else:
+		push_warning("Error reading example files version file")
+		return 0
 
 func get_unbundled_level_info_path(game_name: String) -> String:
 	return get_game_gamedata_dir(game_name).path_join(UNBUNDLED_LEVEL_INFO_FILE)

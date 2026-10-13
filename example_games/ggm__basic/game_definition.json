@@ -59,7 +59,8 @@
       "pointy_particles_camera_scroll_factor": 1.0
     },
     "default_move_interp": "stepped",
-    "action_1_does_undo": true
+    "action_1_does_undo": true,
+    "title": "Basic (Working Title)"
   },
   "entity_definitions": {
     "1": {

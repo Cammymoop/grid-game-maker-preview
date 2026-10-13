@@ -283,7 +283,7 @@
         "lock_for_idle_delay_after_bonk": true,
         "auto_req_turn": true,
         "allow_wait": false,
-        "only_rcv_when_cam": false,
+        "only_rcv_when_cam": true,
         "idle_delay_multiplier": 2.0
       },
       "sprite_config": {
@@ -3120,11 +3120,31 @@
         },
         {
           "type": "just_name",
+          "name": "Josh Lee"
+        },
+        {
+          "type": "just_name",
           "name": "Ida R."
         },
         {
           "type": "just_name",
+          "name": "Dave Varberg"
+        },
+        {
+          "type": "just_name",
           "name": "J. B. Lewis"
+        },
+        {
+          "type": "just_name",
+          "name": "Rolf Redford"
+        },
+        {
+          "type": "just_name",
+          "name": "Andrew Menzies"
+        },
+        {
+          "type": "just_name",
+          "name": "Jeremy Christman"
         },
         {
           "type": "just_name",
@@ -3152,8 +3172,7 @@
         "Block Around the Clock",
         "Closed Circuit",
         "Pipe Dream",
-        "Work Ethic",
-        "Molecule"
+        "Work Ethic"
       ]
     },
     {
@@ -3176,7 +3195,9 @@
     },
     {
       "name": "Other",
-      "level_names": []
+      "level_names": [
+        "Molecule"
+      ]
     }
   ],
   "sfx_definitions": [
@@ -3372,5 +3393,15 @@
     "release_created_zone_offset": ""
   },
   "game_identifier": "GGM",
-  "intermissions": []
+  "intermissions": [
+    {
+      "id": "Mite Text",
+      "type": "intermission",
+      "content_items": [],
+      "bg_style": {
+
+      },
+      "show_continue": true
+    }
+  ]
 }

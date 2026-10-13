@@ -116,15 +116,6 @@
         "spawn-effect": "Spin In",
         "spawn-anim-delay": 1,
         "z-index": 1,
-        "do_action_3": {
-          "v": "3",
-          "conditions": [],
-          "when true": [
-            "basic_default.advance_to_next_level::[\"i:-1\",{\"args\":[\"s:type\",\"s:plain\",\"s:value\",\"f:0.5\"],\"type\":\"Dictionary\"},true,\"s:LevelComplete\"]"
-          ],
-          "when false": [],
-          "when always": []
-        },
         "start_smoking": {
           "v": "3",
           "conditions": [],
